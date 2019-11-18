@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"fmt"
+	"runtime"
 
 	"github.com/spf13/cobra"
 )
@@ -25,28 +26,15 @@ import (
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Show the RetroTxt version information",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("version called")
+		fmt.Printf("RetroTxt\thttps://%s\n", Www)
+		fmt.Printf("Version:\t%s (pre-alpha)\n", Ver)
+		fmt.Printf("Go version:\t%s\n", runtime.Version())
+		fmt.Printf("OS/Arch:\t%s/%s\n", runtime.GOOS, runtime.GOARCH)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// versionCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// versionCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
