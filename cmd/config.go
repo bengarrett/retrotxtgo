@@ -50,3 +50,41 @@ func init() {
 	// is called directly, e.g.:
 	// configCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
+
+/*
+
+possible options:
+
+font choice (family)
+font size
+font format
+> base64
+> woff2
+
+codepage?
+
+input (override for interal use)
+> ascii
+> ansi
+> etc
+
+output
+> stout
+> unique filename
+> same filename `index.html`
+
+css
+> embed
+> embed+minified
+> link
+> link+assets
+> none
+
+template (or css?)
+> basic (raw)
+> standard
+
+title
+quiet
+
+*/
