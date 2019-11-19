@@ -18,9 +18,21 @@ package cmd
 
 import (
 	"fmt"
+	"html/template"
+	"net/http"
 
 	"github.com/spf13/cobra"
 )
+
+type Todo struct {
+	Title string
+	Done  bool
+}
+
+type TodoPageData struct {
+	PageTitle string
+	Todos     []Todo
+}
 
 // serveCmd represents the serve command
 var serveCmd = &cobra.Command{
@@ -34,6 +46,23 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("serve called")
+
+		tmpl := template.Must(template.ParseFiles("layout.html"))
+		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			data := TodoPageData{
+				PageTitle: "My TODO list",
+				Todos: []Todo{
+					{Title: "Task 1", Done: false},
+					{Title: "Task 2", Done: true},
+					{Title: "Task 3", Done: true},
+				},
+			}
+			tmpl.Execute(w, data)
+		})
+		fs := http.FileServer(http.Dir("static/"))
+		http.Handle("/static/", http.StripPrefix("/static/", fs))
+		http.ListenAndServe(":80", nil)
+
 	},
 }
 
