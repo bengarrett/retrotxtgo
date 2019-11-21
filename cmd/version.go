@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"runtime"
 
 	"github.com/spf13/cobra"
@@ -32,6 +33,10 @@ var versionCmd = &cobra.Command{
 		fmt.Printf("Version:\t%s (pre-alpha)\n", Ver)
 		fmt.Printf("Go version:\t%s\n", runtime.Version())
 		fmt.Printf("OS/Arch:\t%s/%s\n", runtime.GOOS, runtime.GOARCH)
+		bin, err := os.Executable()
+		if err == nil {
+			fmt.Printf("Binary:\t\t%s\n", bin)
+		}
 	},
 }
 
