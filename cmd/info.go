@@ -17,12 +17,14 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
+	"crypto/md5"
 	"fmt"
+	"io"
 	"log"
 	"os"
 
+	"github.com/bengarrett/retrotxtgo/encoding"
 	"github.com/spf13/cobra"
-	"golang.org/x/net/html/charset"
 )
 
 // infoCmd represents the info command
@@ -37,21 +39,34 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("info called")
-		path := "textfiles/hix.txt"
+		//path := "textfiles/hi.txt"
+		path := "/Users/ben/Downloads/impure74/jp!xqtrd.asc"
 		stat, err := os.Stat(path)
 		if err != nil {
 			log.Fatal(err)
 		}
-		f, _ := os.Open(path)
-		b1 := make([]byte, 500)
-		n1, err := f.Read(b1)
-		f.Close()
-		c, name, certain := charset.DetermineEncoding(b1, "text/plain")
-		fmt.Printf("1: %v\t 2: %v\t 3: %v 4: %v\n", c, name, certain, n1)
-		//		DetermineEncoding(content []byte, contentType string) (e encoding.Encoding, name string, certain bool)
+		// Open file for reading
+		file, err := os.Open(path)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer file.Close()
+		// Create new hasher, which is a writer interface
+		hasher := md5.New()
+		_, err = io.Copy(hasher, file)
+		if err != nil {
+			log.Fatal(err)
+		}
+		// Hash and print. Pass nil since
+		// the data is not coming in as a slice argument
+		// but is coming through the writer interface
+		sum := hasher.Sum(nil)
+
 		fmt.Printf("Filename:\t\t%s\n", stat.Name())
 		fmt.Printf("Size:\t\t\t%v bytes\n", stat.Size())
 		fmt.Printf("Modified:\t\t%v\n", stat.ModTime())
+		fmt.Printf("UTF-8 encoded:\t\t%v\n", encoding.IsUTF8(path))
+		fmt.Printf("MD5 checksum:\t\t%x\n", sum)
 	},
 }
 
