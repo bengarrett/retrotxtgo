@@ -24,6 +24,7 @@ import (
 	"os"
 
 	"github.com/bengarrett/retrotxtgo/encoding"
+	"github.com/labstack/gommon/bytes"
 	"github.com/spf13/cobra"
 )
 
@@ -63,7 +64,11 @@ to quickly create a Cobra application.`,
 		sum := hasher.Sum(nil)
 
 		fmt.Printf("Filename:\t\t%s\n", stat.Name())
-		fmt.Printf("Size:\t\t\t%v bytes\n", stat.Size())
+		if stat.Size() < 1000 {
+			fmt.Printf("Size:\t\t\t%v bytes\n", stat.Size())
+		} else {
+			fmt.Printf("Size:\t\t\t%v (%v bytes)\n", bytes.Format(stat.Size()), stat.Size())
+		}
 		fmt.Printf("Modified:\t\t%v\n", stat.ModTime())
 		fmt.Printf("UTF-8 encoded:\t\t%v\n", encoding.IsUTF8(path))
 		fmt.Printf("MD5 checksum:\t\t%x\n", sum)
