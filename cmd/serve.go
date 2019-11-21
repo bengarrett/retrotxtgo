@@ -44,7 +44,7 @@ to quickly create a Cobra application.`,
 	//Args: cobra.ExactArgs(1), // uncomment for Args(1) - filepath
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("serve called")
-		tmpl := template.Must(template.ParseFiles("layout.html"))
+		tmpl := template.Must(template.ParseFiles("static/html/layout.html"))
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			data := PageData{
 				BodyText:  filesystem.Read("textfiles/hi.txt"),
