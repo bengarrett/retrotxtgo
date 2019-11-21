@@ -35,7 +35,7 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("create called")
-		filesystem.Read("textfiles/hi.txt") // fetched from filesystem/filesystem.go
+		fmt.Println(filesystem.Read("textfiles/hi.txt")) // fetched from filesystem/filesystem.go
 	},
 }
 
