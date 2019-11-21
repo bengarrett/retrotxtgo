@@ -13,8 +13,11 @@ func Read(path string) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	data := make([]byte, 100)
+	stat, _ := os.Stat(path)
+	fmt.Printf("opening: %s\twhich is %v", stat.Name(), stat.Size())
+	data := make([]byte, stat.Size())
 	count, err := file.Read(data)
+	file.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
