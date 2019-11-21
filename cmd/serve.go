@@ -21,17 +21,14 @@ import (
 	"html/template"
 	"net/http"
 
+	"github.com/bengarrett/retrotxtgo/filesystem"
 	"github.com/spf13/cobra"
 )
 
-type Todo struct {
-	Title string
-	Done  bool
-}
-
-type TodoPageData struct {
+//PageData contains template data used by layout.html
+type PageData struct {
 	PageTitle string
-	Todos     []Todo
+	BodyText  string
 }
 
 // serveCmd represents the serve command
@@ -44,18 +41,14 @@ and usage of using your command. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
+	//Args: cobra.ExactArgs(1), // uncomment for Args(1) - filepath
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("serve called")
-
 		tmpl := template.Must(template.ParseFiles("layout.html"))
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-			data := TodoPageData{
-				PageTitle: "My TODO list",
-				Todos: []Todo{
-					{Title: "Task 1", Done: false},
-					{Title: "Task 2", Done: true},
-					{Title: "Task 3", Done: true},
-				},
+			data := PageData{
+				BodyText:  filesystem.Read("textfiles/hi.txt"),
+				PageTitle: "Test layout",
 			}
 			tmpl.Execute(w, data)
 		})
@@ -68,14 +61,4 @@ to quickly create a Cobra application.`,
 
 func init() {
 	rootCmd.AddCommand(serveCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// serveCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// serveCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

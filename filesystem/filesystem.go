@@ -8,7 +8,7 @@ import (
 )
 
 //Read a text file and display its content
-func Read(path string) {
+func Read(path string) string {
 	file, err := os.Open(path)
 	if err != nil {
 		log.Fatal(err)
@@ -19,4 +19,5 @@ func Read(path string) {
 		log.Fatal(err)
 	}
 	fmt.Printf("read %d bytes: %q\n", count, data[:count])
+	return fmt.Sprintf("%s", data[:count])
 }
