@@ -1,6 +1,5 @@
 (() => {
-  console.log("Ok");
+  console.log("JS okay");
   const ph = document.getElementById(`placeHolder`);
-  console.log(ph);
-  ph.innerHTML = `Hello world.`;
+  ph.innerHTML = `JS inserted placeholder text.`;
 })();
