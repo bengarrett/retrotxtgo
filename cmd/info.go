@@ -46,8 +46,9 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("info called")
 		//path := "textfiles/hi.txt"
-		path := "/Users/ben/Downloads/impure74/jp!xqtrd.asc"
+		//path := "/Users/ben/Downloads/impure74/jp!xqtrd.asc"
 		//path := "/Users/ben/Downloads/impure74/impure74.ans"
+		path := "/Users/ben/Downloads/bbh/hx_joker2019.ans"
 		stat, err := os.Stat(path)
 		if err != nil {
 			log.Fatal(err)
@@ -102,6 +103,7 @@ to quickly create a Cobra application.`,
 		fmt.Printf("file size:\t%v\n", s.FileSize)
 		fmt.Printf("data type:\t%q\n", s.DataType)
 		fmt.Printf("file type:\t%q\n", s.FileType)
+		fmt.Printf("type info:\t%v\n", s.TypeInfo)
 	},
 }
 

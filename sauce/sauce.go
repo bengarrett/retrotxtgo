@@ -39,10 +39,10 @@ type Record struct {
 	FileSize uint8
 	DataType string
 	FileType string
+	TypeInfo string
 }
 
 var datatypes = make(map[uint8]string)
-var filetype0 [1]string
 
 //Get sauce
 func slice(b []byte) data {
@@ -60,7 +60,7 @@ func slice(b []byte) data {
 		tinfo1:   b[p+96 : p+98],
 		tinfo2:   b[p+98 : p+100],
 		tinfo3:   b[p+100 : p+102],
-		tinfo4:   b[p+102 : p+104],
+		tinfo4:   b[p+102 : p+104], // unused, should always be 0
 	}
 	return d
 }
@@ -74,6 +74,7 @@ func binconvert(b []byte) uint8 {
 	if err != nil {
 		if err != io.ErrUnexpectedEOF {
 			fmt.Println("convert binary.Read failed:", err)
+			return 0
 		}
 
 	}
@@ -120,8 +121,8 @@ func datatype(d data) string {
 	return fmt.Sprintf("%v", types[val])
 }
 func filetype(d data) string {
-	dt := binconvert(d.datatype)
-	ft := binconvert(d.filetype)
+	dt := binconvert(d.datatype) // todo move to d data
+	ft := binconvert(d.filetype) // move to d data
 	type filetypes struct {
 		data  uint8
 		types []string
@@ -139,6 +140,44 @@ func filetype(d data) string {
 	fts = filetypes{8, []string{"-"}}
 	fts.data = dt
 	return fmt.Sprintf("%v", fts.types[ft])
+}
+func typeinfo(d data) string {
+	dt := binconvert(d.datatype) // todo move to d data
+	ft := binconvert(d.filetype) // move to d data
+	t1 := binconvert(d.tinfo1)
+	t2 := binconvert(d.tinfo2)
+	switch dt {
+	case 0:
+	case 3:
+	case 5:
+	case 7:
+	case 8:
+		return ""
+	case 1:
+		return characterinfo(ft)
+	case 2:
+		return bitmapinfo(ft)
+	case 4:
+		return audioinfo(ft)
+	case 6:
+		return xbininfo(ft, t1, t2)
+	}
+	return ""
+}
+func characterinfo(i uint8) string {
+	return ""
+}
+func bitmapinfo(i uint8) string {
+	return ""
+}
+func audioinfo(i uint8) string {
+	return ""
+}
+func xbininfo(i uint8, t1 uint8, t2 uint8) string {
+	if t1 == 0 {
+		t1 = 80
+	}
+	return fmt.Sprintf("Width: %v Line height: %v", t1, t2)
 }
 
 //Scan blah blah
@@ -167,6 +206,7 @@ func Get(b []byte) Record {
 		FileSize: filesize(d),
 		DataType: datatype(d),
 		FileType: filetype(d),
+		TypeInfo: typeinfo(d),
 	}
 	return r
 }
