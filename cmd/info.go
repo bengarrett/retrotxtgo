@@ -26,6 +26,7 @@ import (
 
 	"github.com/aofei/mimesniffer"
 	"github.com/bengarrett/retrotxtgo/encoding"
+	"github.com/bengarrett/retrotxtgo/sauce"
 	"github.com/labstack/gommon/bytes"
 	"github.com/mattn/go-runewidth"
 	"github.com/mozillazg/go-slugify"
@@ -45,8 +46,8 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("info called")
 		//path := "textfiles/hi.txt"
-		//path := "/Users/ben/Downloads/impure74/jp!xqtrd.asc"
-		path := "/Users/ben/Downloads/impure74/impure74.ans"
+		path := "/Users/ben/Downloads/impure74/jp!xqtrd.asc"
+		//path := "/Users/ben/Downloads/impure74/impure74.ans"
 		stat, err := os.Stat(path)
 		if err != nil {
 			log.Fatal(err)
@@ -91,19 +92,18 @@ to quickly create a Cobra application.`,
 		fmt.Printf("Slug:\t\t\t%v\n", slugify.Slugify(stat.Name()))
 		fmt.Printf("Width:\t\t\t%v (not working)\n\n", runewidth.StringWidth(string(data)))
 		fmt.Printf("MIME type:\t\t%v\n", mimesniffer.Sniff(data)) // todo slice first 512bytes
+
+		fmt.Printf("SAUCE metadata:\t\t%v\n", sauce.Scan(data))
+
+		s := sauce.Get(data)
+
+		fmt.Printf("\nversion:\t\t%v\ntitle:\t\t%q\nauthor:\t\t%q\n", s.Version, s.Title, s.Author)
+		fmt.Printf("group:\t\t%q\ndate:\t\t%s\nlsd:\t\t%s\n", s.Group, s.Date, s.LSDate)
+		fmt.Printf("file size:\t%v\n", s.FileSize)
+		fmt.Printf("data type:\t%q\n", s.DataType)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(infoCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// infoCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// infoCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
