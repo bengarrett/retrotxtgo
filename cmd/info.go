@@ -20,11 +20,15 @@ import (
 	"crypto/md5"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 
+	"github.com/aofei/mimesniffer"
 	"github.com/bengarrett/retrotxtgo/encoding"
 	"github.com/labstack/gommon/bytes"
+	"github.com/mattn/go-runewidth"
+	"github.com/mozillazg/go-slugify"
 	"github.com/spf13/cobra"
 )
 
@@ -63,6 +67,17 @@ to quickly create a Cobra application.`,
 		// but is coming through the writer interface
 		sum := hasher.Sum(nil)
 
+		// Open file for reading
+		file, err = os.Open(path)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer file.Close()
+		data, err := ioutil.ReadAll(file)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		fmt.Printf("Filename:\t\t%s\n", stat.Name())
 		if stat.Size() < 1000 {
 			fmt.Printf("Size:\t\t\t%v bytes\n", stat.Size())
@@ -72,6 +87,9 @@ to quickly create a Cobra application.`,
 		fmt.Printf("Modified:\t\t%v\n", stat.ModTime())
 		fmt.Printf("UTF-8 encoded:\t\t%v\n", encoding.IsUTF8(path))
 		fmt.Printf("MD5 checksum:\t\t%x\n", sum)
+		fmt.Printf("Slug:\t\t\t%v\n", slugify.Slugify(stat.Name()))
+		fmt.Printf("Width:\t\t\t%v (not working)\n\n", runewidth.StringWidth(string(data)))
+		fmt.Printf("MIME type:\t\t%v\n", mimesniffer.Sniff(data)) // todo slice first 512bytes
 	},
 }
 
