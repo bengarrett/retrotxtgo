@@ -45,7 +45,8 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("info called")
 		//path := "textfiles/hi.txt"
-		path := "/Users/ben/Downloads/impure74/jp!xqtrd.asc"
+		//path := "/Users/ben/Downloads/impure74/jp!xqtrd.asc"
+		path := "/Users/ben/Downloads/impure74/impure74.ans"
 		stat, err := os.Stat(path)
 		if err != nil {
 			log.Fatal(err)
