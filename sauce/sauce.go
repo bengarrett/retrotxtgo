@@ -21,6 +21,10 @@ type data struct {
 	filesize []byte
 	datatype []byte
 	filetype []byte
+	tinfo1   []byte
+	tinfo2   []byte
+	tinfo3   []byte
+	tinfo4   []byte
 }
 
 //Record blah
@@ -32,31 +36,48 @@ type Record struct {
 	Group    string
 	Date     string
 	LSDate   string
-	FileSize int
+	FileSize uint8
 	DataType string
 	FileType string
 }
 
-var datatypes = make(map[float64]string)
-var filetypes = make(map[float64]string)
+var datatypes = make(map[uint8]string)
+var filetype0 [1]string
 
 //Get sauce
 func slice(b []byte) data {
 	p := Scan(b)
 	d := data{
-		id:      b[p : p+5],
-		version: b[p+5 : p+7],
-		title:   b[p+7 : p+42],
-		author:  b[p+42 : p+62],
-		group:   b[p+62 : p+82],
-		date:    b[p+82 : p+90],
-		// An unsigned binary value of 1 byte (0 to 255), 2 bytes (0 to 65535) or
-		// 4 bytes (0 to 4294967295) stored in intel little-endian format.
+		id:       b[p : p+5],
+		version:  b[p+5 : p+7],
+		title:    b[p+7 : p+42],
+		author:   b[p+42 : p+62],
+		group:    b[p+62 : p+82],
+		date:     b[p+82 : p+90],
 		filesize: b[p+90 : p+94],
 		datatype: b[p+94 : p+95],
 		filetype: b[p+95 : p+96],
+		tinfo1:   b[p+96 : p+98],
+		tinfo2:   b[p+98 : p+100],
+		tinfo3:   b[p+100 : p+102],
+		tinfo4:   b[p+102 : p+104],
 	}
 	return d
+}
+
+func binconvert(b []byte) uint8 {
+	// An unsigned binary value of 1 byte (0 to 255), 2 bytes (0 to 65535) or
+	// 4 bytes (0 to 4294967295) stored in intel little-endian format.
+	var f float64
+	buf := bytes.NewReader(b)
+	err := binary.Read(buf, binary.LittleEndian, &f)
+	if err != nil {
+		if err != io.ErrUnexpectedEOF {
+			fmt.Println("convert binary.Read failed:", err)
+		}
+
+	}
+	return uint8(f)
 }
 
 func id(d data) string {
@@ -89,49 +110,35 @@ func lsdate(d data) string {
 	year, month, day := t.Date()
 	return fmt.Sprintf("%v-%v-%v", year, month, day)
 }
-func filesize(d data) int {
-	var fs float64
-	buf := bytes.NewReader(d.filesize)
-	err := binary.Read(buf, binary.LittleEndian, &fs)
-	if err != nil {
-		if err != io.ErrUnexpectedEOF {
-			fmt.Println("filesize binary.Read failed:", err)
-		}
-
-	}
-	return int(fs)
+func filesize(d data) uint8 {
+	fs := binconvert(d.filesize)
+	return fs
 }
 func datatype(d data) string {
-	var val float64
-	buf := bytes.NewReader(d.datatype)
-	fmt.Print(buf)
-	err := binary.Read(buf, binary.LittleEndian, &val)
-	if err != nil {
-		if err != io.ErrUnexpectedEOF {
-			fmt.Println("datatype binary.Read failed:", err)
-		}
-
-	}
-	// move to func
-	datatypes[0] = "None"
-	datatypes[1] = "Character"
-	datatypes[2] = "Bitmap"
-	datatypes[3] = "Vector"
-	datatypes[4] = "Audio"
-	datatypes[5] = "Binary text"
-	datatypes[6] = "XBin"
-	datatypes[7] = "Archive"
-	datatypes[8] = "Executable"
-
-	return fmt.Sprintf("%v", datatypes[val])
+	types := [9]string{"None", "Character", "Graphics", "Vector", "Sound", "BinaryText", "XBin", "Archive", "Executable"}
+	val := binconvert(d.datatype)
+	return fmt.Sprintf("%v", types[val])
 }
 func filetype(d data) string {
-	var pi float64
-	buf := bytes.NewReader(d.datatype)
-	fmt.Print(buf)
-	binary.Read(buf, binary.LittleEndian, &pi)
-
-	return fmt.Sprintf("%v", filetypes[pi]) // todo create map and return data types
+	dt := binconvert(d.datatype)
+	ft := binconvert(d.filetype)
+	type filetypes struct {
+		data  uint8
+		types []string
+	}
+	// these values were copied from tehmaze/sauce
+	// https://github.com/tehmaze/sauce
+	var fts = filetypes{0, []string{"-"}}
+	fts = filetypes{1, []string{"ASCII", "ANSi", "ANSiMation", "RIP", "PCBoard", "Avatar", "HTML", "Source"}}
+	fts = filetypes{2, []string{"GIF", "PCX", "LBM/IFF", "TGA", "FLI", "FLC", "BMP", "GL", "DL", "WPG", "PNG", "JPG", "MPG", "AVI"}}
+	fts = filetypes{3, []string{"DX", "DWG", "WPG", "3DS"}}
+	fts = filetypes{4, []string{"MOD", "669", "STM", "S3M", "MTM", "FAR", "ULT", "AMF", "DMF", "OKT", "ROL", "CMF", "MIDI", "SADT", "VOC", "WAV", "SMP8", "SMP8S", "SMP16", "SMP16S", "PATCH8", "PATCH16", "XM", "HSC", "IT"}}
+	fts = filetypes{5, []string{"-"}}
+	fts = filetypes{6, []string{"-"}}
+	fts = filetypes{7, []string{"ZIP", "ARJ", "LZH", "ARC", "TAR", "ZOO", "RAR", "UC2", "PAK", "SQZ"}}
+	fts = filetypes{8, []string{"-"}}
+	fts.data = dt
+	return fmt.Sprintf("%v", fts.types[ft])
 }
 
 //Scan blah blah
@@ -159,6 +166,7 @@ func Get(b []byte) Record {
 		LSDate:   lsdate(d),
 		FileSize: filesize(d),
 		DataType: datatype(d),
+		FileType: filetype(d),
 	}
 	return r
 }

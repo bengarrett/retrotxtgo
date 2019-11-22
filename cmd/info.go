@@ -101,6 +101,7 @@ to quickly create a Cobra application.`,
 		fmt.Printf("group:\t\t%q\ndate:\t\t%s\nlsd:\t\t%s\n", s.Group, s.Date, s.LSDate)
 		fmt.Printf("file size:\t%v\n", s.FileSize)
 		fmt.Printf("data type:\t%q\n", s.DataType)
+		fmt.Printf("file type:\t%q\n", s.FileType)
 	},
 }
 
