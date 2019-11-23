@@ -39,11 +39,14 @@ var infoCmd = &cobra.Command{
 	Short: "Information on a text file",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("info called")
-		//path := "textfiles/hi.txt"
-		//path := "/Users/ben/Downloads/impure74/jp!xqtrd.asc"
-		//path := "/Users/ben/Downloads/impure74/impure74.ans"
-		//path := "/Users/ben/Downloads/bbh/hx_joker2019.ans"
-		path := "/Users/ben/Downloads/bbh/hx_jack.ans"
+		paths := [5]string{
+			"textfiles/hi.txt",
+			"/Users/ben/Downloads/impure74/jp!xqtrd.asc",
+			"/Users/ben/Downloads/impure74/impure74.ans",
+			"/Users/ben/Downloads/bbh/hx_joker2019.ans",
+			"/Users/ben/Downloads/bbh/hx_jack.ans",
+		}
+		path := paths[4]
 		stat, err := os.Stat(path)
 		if err != nil {
 			log.Fatal(err)
@@ -88,22 +91,9 @@ var infoCmd = &cobra.Command{
 		fmt.Printf("Slug:\t\t\t%v\n", slugify.Slugify(stat.Name()))
 		fmt.Printf("Width:\t\t\t%v (not working)\n\n", runewidth.StringWidth(string(data)))
 		fmt.Printf("MIME type:\t\t%v\n", mimesniffer.Sniff(data)) // todo slice first 512bytes
-		if sauce.Scan(data) == -1 {
-			fmt.Println(string(data))
-			return
+		if sauce.Scan(data) > -1 {
+			sauce.Print(data)
 		}
-		fmt.Printf("SAUCE metadata:\t\t%v\n", "Yes")
-		s := sauce.Get(data)
-		fmt.Printf("\nversion:\t\t%v\ntitle:\t\t%q\nauthor:\t\t%q\n", s.Version, s.Title, s.Author)
-		fmt.Printf("group:\t\t%q\ndate:\t\t%s\nlsd:\t\t%s\n", s.Group, s.Date, s.LSDate)
-		fmt.Printf("file size:\t%v\n", s.FileSize)
-		fmt.Printf("data type:\t%q\n", s.DataType)
-		fmt.Printf("file type:\t%q\n", s.FileType)
-		fmt.Printf("type info:\t%v\n", s.TypeInfo)
-		//fmt.Println((data))
-
-		se := sauce.Exists(path)
-		fmt.Printf("\n\nexists?:\t%v\n", se)
 	},
 }
 
