@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -44,6 +45,40 @@ type Record struct {
 
 var datatypes = make(map[uint8]string)
 
+//Exists ooof
+func Exists(filename string) bool {
+	file, _ := os.Open(filename)
+	defer file.Close()
+
+	buffer := make([]byte, 1024)
+
+	_, err := file.Seek(-128, 2)
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = file.Read(buffer)
+	if err != nil {
+		panic(err)
+	}
+
+	x := fmt.Sprintf("%X", buffer[90:94])
+	y, _ := strconv.ParseInt(x, 16, 64)
+	// fmt.Printf("%v", y)
+
+	v := y
+	v += y << 8
+	v += y << 16
+	v += (y << 24)
+
+	fmt.Printf("\n[[%v]]\n", v)
+
+	if string(buffer[0:7]) == "SAUCE00" {
+		return true
+	}
+	return false
+}
+
 //Get sauce
 func slice(b []byte) data {
 	p := Scan(b)
@@ -78,6 +113,7 @@ func binconvert(b []byte) uint8 {
 		}
 
 	}
+	fmt.Printf("\t%d - %g\t", b, f)
 	return uint8(f)
 }
 
@@ -113,6 +149,7 @@ func lsdate(d data) string {
 }
 func filesize(d data) uint8 {
 	fs := binconvert(d.filesize)
+	fmt.Println(d.filesize, fs)
 	return fs
 }
 func datatype(d data) string {
@@ -182,11 +219,19 @@ func xbininfo(i uint8, t1 uint8, t2 uint8) string {
 
 //Scan blah blah
 func Scan(b []byte) int {
-	s := bytes.Index(bytes.ToUpper(b), []byte("SAUCE00"))
-	if s > -1 {
-		if len(b)-s < 128 {
-			return -1
-		}
+	s := bytes.LastIndexAny(b, "SAUCE00")
+	if s < 0 {
+		return -1
+	}
+	//l := len(b) - 128
+	// if s > -1 {
+	// 	if len(b)-s < 128 {
+	// 		return -1
+	// 	}
+	// }
+	//fmt.Printf("\n>%v|%v=%v\t%v\n%q\n\n", l, s, s-l, 128-(s-l), b[len(b)-128:])
+	if bytes.Compare(b[s:s+7], []byte("SAUCE00")) != 0 {
+		s = s + 16 - 128
 	}
 	return s
 }
