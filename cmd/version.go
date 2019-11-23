@@ -29,17 +29,21 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Version information for RetroTxt",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("RetroTxt\thttps://%s\n", Www)
-		fmt.Printf("Version:\t%s (pre-alpha)\n", Ver)
-		fmt.Printf("Go version:\t%s\n", runtime.Version())
-		fmt.Printf("OS/Arch:\t%s/%s\n", runtime.GOOS, runtime.GOARCH)
-		bin, err := os.Executable()
-		if err == nil {
-			fmt.Printf("Binary:\t\t%s\n", bin)
-		}
+		print()
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
+}
+
+func print() {
+	fmt.Printf("RetroTxt\thttps://%s\n", Www)
+	fmt.Printf("Version:\t%s (pre-alpha)\n", Ver)
+	fmt.Printf("Go version:\t%s\n", runtime.Version())
+	fmt.Printf("OS/Arch:\t%s/%s\n", runtime.GOOS, runtime.GOARCH)
+	bin, err := os.Executable()
+	if err == nil {
+		fmt.Printf("Binary:\t\t%s\n", bin)
+	}
 }
