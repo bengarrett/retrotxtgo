@@ -257,6 +257,16 @@ func Get(b []byte) Record {
 }
 
 //Print sauce
-func Print(r Record) {
-	fmt.Println(r)
+func Print(b []byte) {
+	fmt.Printf("SAUCE metadata:\t\t%v\n", "Yes")
+	s := Get(b)
+	fmt.Printf("\nversion:\t\t%v\ntitle:\t\t%q\nauthor:\t\t%q\n", s.Version, s.Title, s.Author)
+	fmt.Printf("group:\t\t%q\ndate:\t\t%s\nlsd:\t\t%s\n", s.Group, s.Date, s.LSDate)
+	fmt.Printf("file size:\t%v\n", s.FileSize)
+	fmt.Printf("data type:\t%q\n", s.DataType)
+	fmt.Printf("file type:\t%q\n", s.FileType)
+	fmt.Printf("type info:\t%v\n", s.TypeInfo)
+
+	// se := sauce.Exists(path)
+	// fmt.Printf("\n\nexists?:\t%v\n", se)
 }
