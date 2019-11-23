@@ -27,7 +27,7 @@ import (
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Show the RetroTxt version information",
+	Short: "Version information for RetroTxt",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("RetroTxt\thttps://%s\n", Www)
 		fmt.Printf("Version:\t%s (pre-alpha)\n", Ver)

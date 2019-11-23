@@ -34,13 +34,7 @@ type PageData struct {
 // serveCmd represents the serve command
 var serveCmd = &cobra.Command{
 	Use:   "serve",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Serve a text file on the in-built web server",
 	//Args: cobra.ExactArgs(1), // uncomment for Args(1) - filepath
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("serve called")

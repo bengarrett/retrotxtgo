@@ -28,7 +28,7 @@ import (
 
 const (
 	// Ver is the application version
-	Ver string = "0.0.0"
+	Ver string = "0.0.1"
 	// Www is the website domain name
 	Www string = "retrotxt.com"
 )
@@ -38,13 +38,11 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "retrotxtgo",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "RetroTxt is the tool that turns ANSI, ASCII, NFO text into browser ready HTML",
+	Long: `Turn many pieces of ANSI text art and ASCII/NFO plain text into HTML5 text
+using RetroTxt. The operating system agnostic tool that takes retro text
+files and stylises them into a more pleasing, useful format to view and
+copy in a web browser.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },
