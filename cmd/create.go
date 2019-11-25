@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/bengarrett/retrotxtgo/filesystem"
 	"github.com/spf13/cobra"
@@ -29,7 +30,11 @@ var createCmd = &cobra.Command{
 	Short: "Create a HTML document from a text file",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("create called")
-		fmt.Println(filesystem.Read("textfiles/hi.txt")) // fetched from filesystem/filesystem.go
+		data, err := filesystem.ReadAllBytes("textfiles/hi.txt")
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("\n%v\n", string(data))
 	},
 }
 
