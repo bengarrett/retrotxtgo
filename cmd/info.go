@@ -23,11 +23,11 @@ import (
 	"log"
 	"os"
 
+	"github.com/bengarrett/retrotxtgo/encoding"
 	"github.com/bengarrett/retrotxtgo/filesystem"
+	"github.com/bengarrett/retrotxtgo/sauce"
 
 	"github.com/aofei/mimesniffer"
-	"github.com/bengarrett/retrotxtgo/encoding"
-	"github.com/bengarrett/retrotxtgo/sauce"
 	"github.com/labstack/gommon/bytes"
 	"github.com/mattn/go-runewidth"
 	"github.com/mozillazg/go-slugify"
@@ -47,7 +47,7 @@ var infoCmd = &cobra.Command{
 			"/Users/ben/Downloads/bbh/hx_joker2019.ans",
 			"/Users/ben/Downloads/bbh/hx_jack.ans",
 		}
-		path := paths[4]
+		path := paths[0]
 		stat, err := os.Stat(path)
 		if err != nil {
 			log.Fatal(err)
@@ -81,7 +81,7 @@ var infoCmd = &cobra.Command{
 			fmt.Printf("Size:\t\t\t%v (%v bytes)\n", bytes.Format(stat.Size()), stat.Size())
 		}
 		fmt.Printf("Modified:\t\t%v\n", stat.ModTime())
-		fmt.Printf("UTF-8 encoded:\t\t%v\n", encoding.IsUTF8(path))
+		fmt.Printf("UTF-8 encoded:\t\t%v\n", encoding.IsUTF8(data))
 		fmt.Printf("MD5 checksum:\t\t%x\n", sum)
 		fmt.Printf("Slug:\t\t\t%v\n", slugify.Slugify(stat.Name()))
 		fmt.Printf("Width:\t\t\t%v (not working)\n\n", runewidth.StringWidth(string(data)))

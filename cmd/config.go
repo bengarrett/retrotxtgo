@@ -63,7 +63,7 @@ font format
 
 codepage?
 
-input (override for interal use)
+input (override for internal use)
 > ascii
 > ansi
 > etc
