@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math"
 	"os"
 )
 
@@ -26,21 +27,30 @@ func Read(path string) string {
 	return fmt.Sprintf("%s", data[:count])
 }
 
-//SeekBytes xx
-func SeekBytes(name string, offset int64) ([]byte, error) {
+//TailBytes reads the name file from the offset position relative to the end of the file.
+func TailBytes(name string, offset int64) ([]byte, error) {
 	file, err := os.Open(name)
 	defer file.Close()
 	if err != nil {
 		return nil, err
 	}
-	buffer := make([]byte, 1024)
 
-	//offset=-128
-	_, err = file.Seek(offset, 2)
+	// file.Seek(whence)
+	// 0 means relative to the origin of the file
+	// 1 means relative to the current offset
+	// 2 means relative to the end
+	_, err = file.Seek(offset, 2) // todo: have offset deal with runes not bytes
 	if err != nil {
 		return nil, err
 	}
 
+	var size int64 = int64(math.Abs(float64(offset)))
+	stat, _ := os.Stat(name)
+	if stat.Size() < size {
+		return nil, fmt.Errorf("offset: value is %v too large for a %v byte file", offset, stat.Size())
+	}
+
+	buffer := make([]byte, size)
 	_, err = file.Read(buffer)
 	if err != nil {
 		return nil, err
@@ -49,10 +59,9 @@ func SeekBytes(name string, offset int64) ([]byte, error) {
 	return buffer, nil
 }
 
-//ReadAllBytes ooof
+//ReadAllBytes reads the named file and returns its content as a byte array.
 func ReadAllBytes(name string) ([]byte, error) {
 	file, err := os.Open(name)
-	fmt.Printf("%v", file)
 	defer file.Close()
 	if err != nil {
 		return nil, err
