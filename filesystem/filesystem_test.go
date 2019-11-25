@@ -5,15 +5,6 @@ import (
 	"testing"
 )
 
-// for delete?
-func ReadNoPath(t *testing.T) {
-	r := Read("")
-	var e = ""
-	if r != e {
-		t.Fatalf("Expected %s but got %s", r, e)
-	}
-}
-
 func TestReadAllBytesEmpty(t *testing.T) {
 	r, err := ReadAllBytes("")
 	var e = []byte("")
