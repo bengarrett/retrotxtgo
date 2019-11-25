@@ -19,6 +19,7 @@ package cmd
 import (
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 
 	"github.com/bengarrett/retrotxtgo/filesystem"
@@ -38,18 +39,25 @@ var serveCmd = &cobra.Command{
 	//Args: cobra.ExactArgs(1), // uncomment for Args(1) - filepath
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("serve called")
+
+		body, err := filesystem.ReadAllBytes("textfiles/hi.txt")
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		tmpl := template.Must(template.ParseFiles("static/html/layout.html"))
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			data := PageData{
-				BodyText:  filesystem.Read("textfiles/hi.txt"),
+				BodyText:  string(body),
 				PageTitle: "Test layout",
 			}
 			tmpl.Execute(w, data)
 		})
 		fs := http.FileServer(http.Dir("static/"))
 		http.Handle("/static/", http.StripPrefix("/static/", fs))
-		http.ListenAndServe(":80", nil)
 
+		fmt.Println("serving Test layout on http://localhost:8080\nCtrl-C to quit")
+		http.ListenAndServe(":8080", nil)
 	},
 }
 
