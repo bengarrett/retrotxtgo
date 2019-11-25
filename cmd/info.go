@@ -20,9 +20,10 @@ import (
 	"crypto/md5"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
+
+	"github.com/bengarrett/retrotxtgo/filesystem"
 
 	"github.com/aofei/mimesniffer"
 	"github.com/bengarrett/retrotxtgo/encoding"
@@ -68,13 +69,7 @@ var infoCmd = &cobra.Command{
 		// but is coming through the writer interface
 		sum := hasher.Sum(nil)
 
-		// Open file for reading
-		file, err = os.Open(path)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer file.Close()
-		data, err := ioutil.ReadAll(file)
+		data, err := filesystem.ReadAllBytes(path)
 		if err != nil {
 			log.Fatal(err)
 		}

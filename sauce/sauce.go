@@ -6,7 +6,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -44,40 +43,6 @@ type Record struct {
 }
 
 var datatypes = make(map[uint8]string)
-
-//Exists ooof
-func Exists(filename string) bool {
-	file, _ := os.Open(filename)
-	defer file.Close()
-
-	buffer := make([]byte, 1024)
-
-	_, err := file.Seek(-128, 2)
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = file.Read(buffer)
-	if err != nil {
-		panic(err)
-	}
-
-	x := fmt.Sprintf("%X", buffer[90:94])
-	y, _ := strconv.ParseInt(x, 16, 64)
-	// fmt.Printf("%v", y)
-
-	v := y
-	v += y << 8
-	v += y << 16
-	v += (y << 24)
-
-	fmt.Printf("\n[[%v]]\n", v)
-
-	if string(buffer[0:7]) == "SAUCE00" {
-		return true
-	}
-	return false
-}
 
 //Get sauce
 func slice(b []byte) data {

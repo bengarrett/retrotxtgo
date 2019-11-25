@@ -3,6 +3,7 @@ package filesystem
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 )
@@ -23,4 +24,39 @@ func Read(path string) string {
 	}
 	//fmt.Printf("read %d bytes: %q\n", count, data[:count])
 	return fmt.Sprintf("%s", data[:count])
+}
+
+//SeekBytes xx
+func SeekBytes(name string, offset int64) ([]byte, error) {
+	file, err := os.Open(name)
+	defer file.Close()
+	if err != nil {
+		return nil, err
+	}
+	buffer := make([]byte, 1024)
+
+	//offset=-128
+	_, err = file.Seek(offset, 2)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = file.Read(buffer)
+	if err != nil {
+		return nil, err
+	}
+
+	return buffer, nil
+}
+
+//ReadAllBytes ooof
+func ReadAllBytes(name string) ([]byte, error) {
+	file, err := os.Open(name)
+	fmt.Printf("%v", file)
+	defer file.Close()
+	if err != nil {
+		return nil, err
+	}
+	buffer, err := ioutil.ReadAll(file)
+	return buffer, nil
 }
