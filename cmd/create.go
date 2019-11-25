@@ -34,7 +34,11 @@ var createCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("\n%v\n", string(data))
+		tail, err := filesystem.TailBytes("textfiles/hi.txt", -10)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("\n%v\n\t\t%v\n", string(data), string(tail))
 	},
 }
 
