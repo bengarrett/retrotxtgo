@@ -18,20 +18,26 @@ package cmd
 
 import (
 	"crypto/md5"
+	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"os"
+	"strings"
+	"time"
 
+	"github.com/InVisionApp/tabular"
+	"github.com/aofei/mimesniffer"
 	"github.com/bengarrett/retrotxtgo/encoding"
 	"github.com/bengarrett/retrotxtgo/filesystem"
-	"github.com/bengarrett/retrotxtgo/sauce"
-
-	"github.com/aofei/mimesniffer"
 	"github.com/labstack/gommon/bytes"
 	"github.com/mattn/go-runewidth"
 	"github.com/mozillazg/go-slugify"
 	"github.com/spf13/cobra"
+)
+
+var (
+	//Output format flag
+	Output string
 )
 
 // infoCmd represents the info command
@@ -39,7 +45,6 @@ var infoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "Information on a text file",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("info called")
 		paths := [5]string{
 			"textfiles/hi.txt",
 			"/Users/ben/Downloads/impure74/jp!xqtrd.asc",
@@ -47,51 +52,104 @@ var infoCmd = &cobra.Command{
 			"/Users/ben/Downloads/bbh/hx_joker2019.ans",
 			"/Users/ben/Downloads/bbh/hx_jack.ans",
 		}
-		path := paths[0]
-		stat, err := os.Stat(path)
+		f, err := details(paths[0])
 		if err != nil {
 			log.Fatal(err)
 		}
-		// Open file for reading
-		file, err := os.Open(path)
-		if err != nil {
-			log.Fatal(err)
+		switch Output {
+		case "json":
+			jsonData, err := json.MarshalIndent(f, "", "    ")
+			if err != nil {
+				log.Println(err)
+			}
+			fmt.Println(string(jsonData))
+		case "json.min":
+			jsonData, err := json.Marshal(f)
+			if err != nil {
+				log.Println(err)
+			}
+			fmt.Println(string(jsonData))
+		case "table":
+		case "":
+			table(f)
 		}
-		defer file.Close()
-		// Create new hasher, which is a writer interface
-		hasher := md5.New()
-		_, err = io.Copy(hasher, file)
-		if err != nil {
-			log.Fatal(err)
-		}
-		// Hash and print. Pass nil since
-		// the data is not coming in as a slice argument
-		// but is coming through the writer interface
-		sum := hasher.Sum(nil)
-
-		data, err := filesystem.ReadAllBytes(path)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		fmt.Printf("Filename:\t\t%s\n", stat.Name())
-		if stat.Size() < 1000 {
-			fmt.Printf("Size:\t\t\t%v bytes\n", stat.Size())
-		} else {
-			fmt.Printf("Size:\t\t\t%v (%v bytes)\n", bytes.Format(stat.Size()), stat.Size())
-		}
-		fmt.Printf("Modified:\t\t%v\n", stat.ModTime())
-		fmt.Printf("UTF-8 encoded:\t\t%v\n", encoding.IsUTF8(data))
-		fmt.Printf("MD5 checksum:\t\t%x\n", sum)
-		fmt.Printf("Slug:\t\t\t%v\n", slugify.Slugify(stat.Name()))
-		fmt.Printf("Width:\t\t\t%v (not working)\n\n", runewidth.StringWidth(string(data)))
-		fmt.Printf("MIME type:\t\t%v\n", mimesniffer.Sniff(data)) // todo slice first 512bytes
-		if sauce.Scan(data) > -1 {
-			sauce.Print(data)
-		}
+		// for key, value := range f {
+		// 	fmt.Printf("%v:\t%v\n", key, value)
+		// }
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(infoCmd)
+	infoCmd.Flags().StringVarP(&Output, "output", "o", "", "output format (default is table)\noptions: json, json.min, table")
+}
+
+//Detail of a file
+type Detail struct {
+	Bytes     int64
+	CharCount int
+	Name      string
+	MD5       string
+	Mime      string
+	Modified  time.Time
+	Slug      string
+	Size      string
+	Utf8      bool
+}
+
+func details(name string) (Detail, error) {
+	d := Detail{}
+	// Get the file details
+	stat, err := os.Stat(name)
+	if err != nil {
+		return d, err
+	}
+	// Read file content
+	data, err := filesystem.ReadAllBytes(name)
+	if err != nil {
+		return d, err
+	}
+	checksum := md5.Sum(data)
+	mime := mimesniffer.Sniff(data)
+	// create a table of data
+	d.Bytes = stat.Size()
+	d.CharCount = runewidth.StringWidth(string(data))
+	d.Name = stat.Name()
+	d.MD5 = fmt.Sprintf("%x", checksum)
+	d.Modified = stat.ModTime()
+	d.Slug = slugify.Slugify(stat.Name())
+	d.Utf8 = encoding.IsUTF8(data)
+	if stat.Size() < 1000 {
+		d.Size = fmt.Sprintf("%v bytes", stat.Size())
+	} else {
+		d.Size = fmt.Sprintf("%v (%v bytes)", bytes.Format(stat.Size()), stat.Size())
+	}
+	if strings.Contains(mime, ";") {
+		d.Mime = strings.Split(mime, ";")[0]
+	} else {
+		d.Mime = mime
+	}
+	return d, nil
+}
+
+func table(d Detail) {
+	tab := tabular.New()
+	tab.Col("det", "Details", 14)
+	tab.Col("val", "", 10)
+	var data = []struct {
+		d, v string
+	}{
+		{d: "Filename", v: d.Name},
+		{d: "MIME type", v: d.Mime},
+		{d: "UTF-8", v: fmt.Sprintf("%v", d.Utf8)},
+		{d: "Characters", v: fmt.Sprintf("%v", d.CharCount)},
+		{d: "Size", v: d.Size},
+		{d: "Modified", v: fmt.Sprintf("%v", d.Modified)},
+		{d: "MD5 checksum", v: d.MD5},
+		{d: "Slug", v: d.Slug},
+	}
+	format := tab.Print("*")
+	for _, x := range data {
+		fmt.Printf(format, x.d, x.v)
+	}
 }
