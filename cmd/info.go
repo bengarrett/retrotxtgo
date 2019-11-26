@@ -19,6 +19,7 @@ package cmd
 import (
 	"crypto/md5"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"log"
 	"os"
@@ -71,6 +72,10 @@ var infoCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+		if Output == "" {
+			// todo load default from config file
+			Output = "table"
+		}
 		switch Output {
 		case "json":
 			jsonData, err := json.MarshalIndent(f, "", "    ")
@@ -85,9 +90,11 @@ var infoCmd = &cobra.Command{
 			}
 			fmt.Println(string(jsonData))
 		case "table":
-		case "":
-			table(f)
+			tableOutput(f)
+		case "xml":
+			xmlOutput(f)
 		default:
+			// todo make error
 			fmt.Printf("invalid flag, --output %s\noptions: json, json.min, table\n", Output)
 		}
 	},
@@ -133,7 +140,7 @@ func details(name string) (Detail, error) {
 	return d, nil
 }
 
-func table(d Detail) {
+func tableOutput(d Detail) {
 	tab := tabular.New()
 	tab.Col("det", "Details", 14)
 	tab.Col("val", "", 10)
@@ -153,4 +160,34 @@ func table(d Detail) {
 	for _, x := range data {
 		fmt.Printf(format, x.d, x.v)
 	}
+}
+
+func xmlOutput(f Detail) {
+	type xmldetail struct {
+		XMLName   xml.Name  `xml:"file"`
+		ID        string    `xml:"id,attr"`
+		Name      string    `xml:"name"`
+		Mime      string    `xml:"content>mime"`
+		Utf8      bool      `xml:"content>utf8"`
+		Bytes     int64     `xml:"size>bytes"`
+		Size      string    `xml:"size>value"`
+		CharCount int       `xml:"size>character-count"`
+		MD5       string    `xml:"md5"`
+		Modified  time.Time `xml:"modified"`
+	}
+	x := xmldetail{}
+	x.Bytes = f.Bytes
+	x.CharCount = f.CharCount
+	x.ID = f.Slug
+	x.MD5 = f.MD5
+	x.Mime = f.Mime
+	x.Modified = f.Modified
+	x.Name = f.Name
+	x.Size = f.Size
+	x.Utf8 = f.Utf8
+	xmlData, err := xml.MarshalIndent(x, "", "\t")
+	if err != nil {
+		log.Println(err)
+	}
+	fmt.Println(string(xmlData))
 }
