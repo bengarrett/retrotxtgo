@@ -42,7 +42,7 @@ var serveCmd = &cobra.Command{
 		tmpl := template.Must(template.ParseFiles("static/html/layout.html"))
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			data := PageData{
-				BodyText:  string(body),
+				PreText:   string(body),
 				PageTitle: "Test layout",
 			}
 			tmpl.Execute(w, data)

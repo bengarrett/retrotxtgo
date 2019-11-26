@@ -29,16 +29,17 @@ import (
 var createCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create a HTML document from a text file",
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		data, err := filesystem.ReadAllBytes("textfiles/hi.txt")
+		data, err := filesystem.ReadAllBytes(args[0])
 		if err != nil {
 			log.Fatal(err)
 		}
 		tmpl := template.Must(template.ParseFiles("static/html/layout.html"))
-		page := PageData{
-			BodyText:  string(data),
-			PageTitle: "Test layout",
-		}
+		page := LayoutDefault()
+		//		fmt.Printf("%v", page)
+		page.PreText = string(data)
+		page.PageTitle = ""
 		tmpl.Execute(os.Stdout, page)
 	},
 }

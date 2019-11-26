@@ -19,6 +19,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -35,9 +36,17 @@ const (
 
 //PageData contains template data used by layout.html
 type PageData struct {
-	PageTitle string
-	BodyText  string
+	BuildVersion string
+	BuildDate    time.Time
+	CacheRefresh string
+	PageAuthor   string
+	PageDesc     string
+	PageTitle    string
+	PreText      string
 }
+
+// Layout data
+var Layout PageData
 
 var cfgFile string
 
@@ -52,6 +61,19 @@ copy in a web browser.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },
+}
+
+//LayoutDefault xxx
+func LayoutDefault() PageData {
+	l := Layout
+	l.BuildVersion = Ver
+	l.BuildDate = time.Now()
+	l.CacheRefresh = fmt.Sprintf("?v=%v", Ver)
+	l.PageAuthor = "RetroTxt"
+	l.PageDesc = "Example RetroTxt template"
+	l.PageTitle = "RetroTxt | example"
+	l.PreText = "Hello world."
+	return l
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
