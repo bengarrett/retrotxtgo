@@ -17,8 +17,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
-	"fmt"
+	"html/template"
 	"log"
+	"os"
 
 	"github.com/bengarrett/retrotxtgo/filesystem"
 	"github.com/spf13/cobra"
@@ -29,16 +30,16 @@ var createCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create a HTML document from a text file",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("create called")
 		data, err := filesystem.ReadAllBytes("textfiles/hi.txt")
 		if err != nil {
 			log.Fatal(err)
 		}
-		tail, err := filesystem.TailBytes("textfiles/hi.txt", -10)
-		if err != nil {
-			log.Fatal(err)
+		tmpl := template.Must(template.ParseFiles("static/html/layout.html"))
+		page := PageData{
+			BodyText:  string(data),
+			PageTitle: "Test layout",
 		}
-		fmt.Printf("\n%v\n\t\t%v\n", string(data), string(tail))
+		tmpl.Execute(os.Stdout, page)
 	},
 }
 
