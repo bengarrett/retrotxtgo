@@ -117,9 +117,14 @@ func details(name string) (Detail, error) {
 	if err != nil {
 		return d, err
 	}
+	return parse(data, stat)
+}
+
+func parse(data []byte, stat os.FileInfo) (Detail, error) {
 	checksum := md5.Sum(data)
 	mime := mimesniffer.Sniff(data)
 	// create a table of data
+	d := Detail{}
 	d.Bytes = stat.Size()
 	d.CharCount = runewidth.StringWidth(string(data))
 	d.Name = stat.Name()
