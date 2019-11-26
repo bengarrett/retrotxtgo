@@ -33,6 +33,12 @@ const (
 	Www string = "retrotxt.com"
 )
 
+//PageData contains template data used by layout.html
+type PageData struct {
+	PageTitle string
+	BodyText  string
+}
+
 var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
