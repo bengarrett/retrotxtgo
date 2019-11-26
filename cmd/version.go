@@ -29,7 +29,7 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Version information for RetroTxt",
 	Run: func(cmd *cobra.Command, args []string) {
-		print()
+		printVer()
 	},
 }
 
@@ -37,7 +37,7 @@ func init() {
 	rootCmd.AddCommand(versionCmd)
 }
 
-func print() {
+func printVer() {
 	fmt.Printf("RetroTxt\thttps://%s\n", Www)
 	fmt.Printf("Version:\t%s (pre-alpha)\n", Ver)
 	fmt.Printf("Go version:\t%s\n", runtime.Version())
