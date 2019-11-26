@@ -26,12 +26,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//PageData contains template data used by layout.html
-type PageData struct {
-	PageTitle string
-	BodyText  string
-}
-
 // serveCmd represents the serve command
 var serveCmd = &cobra.Command{
 	Use:   "serve",
