@@ -35,24 +35,39 @@ import (
 	"github.com/spf13/cobra"
 )
 
+//Detail of a file
+type Detail struct {
+	Bytes     int64
+	CharCount int
+	Name      string
+	MD5       string
+	Mime      string
+	Modified  time.Time
+	Slug      string
+	Size      string
+	Utf8      bool
+}
+
 var (
 	//Output format flag
 	Output string
 )
 
+// paths := [5]string{
+// 	"textfiles/hi.txt",
+// 	"/Users/ben/Downloads/impure74/jp!xqtrd.asc",
+// 	"/Users/ben/Downloads/impure74/impure74.ans",
+// 	"/Users/ben/Downloads/bbh/hx_joker2019.ans",
+// 	"/Users/ben/Downloads/bbh/hx_jack.ans",
+// }
+
 // infoCmd represents the info command
 var infoCmd = &cobra.Command{
-	Use:   "info",
+	Use:   "info FILE",
 	Short: "Information on a text file",
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		paths := [5]string{
-			"textfiles/hi.txt",
-			"/Users/ben/Downloads/impure74/jp!xqtrd.asc",
-			"/Users/ben/Downloads/impure74/impure74.ans",
-			"/Users/ben/Downloads/bbh/hx_joker2019.ans",
-			"/Users/ben/Downloads/bbh/hx_jack.ans",
-		}
-		f, err := details(paths[0])
+		f, err := details(args[0])
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -72,29 +87,15 @@ var infoCmd = &cobra.Command{
 		case "table":
 		case "":
 			table(f)
+		default:
+			fmt.Printf("invalid flag, --output %s\noptions: json, json.min, table\n", Output)
 		}
-		// for key, value := range f {
-		// 	fmt.Printf("%v:\t%v\n", key, value)
-		// }
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(infoCmd)
 	infoCmd.Flags().StringVarP(&Output, "output", "o", "", "output format (default is table)\noptions: json, json.min, table")
-}
-
-//Detail of a file
-type Detail struct {
-	Bytes     int64
-	CharCount int
-	Name      string
-	MD5       string
-	Mime      string
-	Modified  time.Time
-	Slug      string
-	Size      string
-	Utf8      bool
 }
 
 func details(name string) (Detail, error) {
