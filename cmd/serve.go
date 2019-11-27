@@ -39,7 +39,7 @@ var serveCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		tmpl := template.Must(template.ParseFiles("static/html/layout.html"))
+		tmpl := template.Must(template.ParseFiles("static/html/standard.html"))
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			data := PageData{
 				PreText:   string(body),

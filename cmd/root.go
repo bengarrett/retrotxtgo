@@ -34,7 +34,7 @@ const (
 	Www string = "retrotxt.com"
 )
 
-//PageData contains template data used by layout.html
+//PageData contains template data used by standard.html
 type PageData struct {
 	BuildVersion string
 	BuildDate    time.Time
