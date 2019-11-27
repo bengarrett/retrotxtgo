@@ -25,13 +25,19 @@ func Test_read(t *testing.T) {
 	type args struct {
 		name string
 	}
+	args0 := args{""}
+	args1 := args{"somefile.txt"}
+	args2 := args{"../textfiles/hi.txt"}
+	want2 := []byte("Hello world ☺\n☺ ሰላም ልዑል")
 	tests := []struct {
 		name    string
 		args    args
 		want    []byte
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{"no arguments", args0, nil, true},
+		{"invalid file", args1, nil, true},
+		{"valid file", args2, want2, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
