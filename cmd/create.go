@@ -72,7 +72,7 @@ var createCmd = &cobra.Command{
 				os.Exit(1)
 			}
 		}
-		err = new(data, false)
+		err = toStdout(data, false)
 		if err != nil {
 			log.Fatal(err) //Todo: handle differently, ie no log
 			os.Exit(1)
@@ -164,9 +164,9 @@ func pagedata(data []byte) PageData {
 	return p
 }
 
-// new creates and displays a html template.
+// toStdout creates and sends the html template to stdout.
 // The argument test is used internally.
-func new(data []byte, test bool) error {
+func toStdout(data []byte, test bool) error {
 	fn, err := filename(test)
 	if err != nil {
 		return err
