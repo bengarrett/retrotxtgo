@@ -5,15 +5,24 @@
     <meta charset="utf-8" />
     {{- if .PageTitle}}
     <title>{{.PageTitle}}</title>
-    {{- end}} {{if .PageDesc}}
-    <meta name="description" content="{{.PageDesc}}" />
-    {{- end}} {{if .PageAuthor}}
-    <meta name="author" content="{{.PageAuthor}}" />
-    {{- end}}
+    {{- end}} {{if .MetaDesc}}
+    <meta name="description" content="{{.MetaDesc}}" />
+    {{- end}} {{if .MetaAuthor}}
+    <meta name="author" content="{{.MetaAuthor}}" />
+    {{- end}} {{if .MetaKeywords}}
+    <meta name="keywords" content="{{.MetaKeywords}}" />
+    {{- end}} {{if .MetaReferrer}}
+    <meta name="referrer" content="{{.MetaReferrer}}" />
+    {{- end}} {{if .MetaThemeColor}}
+    <meta name="theme-color" content="{{.MetaThemeColor}}" />
+    {{- end}} {{if .MetaColorScheme}}
+    <meta name="color-scheme" content="{{.MetaColorScheme}}" />
+    {{- end}} {{if .MetaGenerator}}
     <meta
       name="generator"
-      content="RetroTxt v{{.BuildVersion}} at {{.BuildDate}}"
+      content="RetroTxt v{{.BuildVersion}}; {{.BuildDate}}"
     />
+    {{- end}}
     <link rel="stylesheet" href="static/css/styles.css{{.CacheRefresh}}" />
     <script src="static/js/scripts.js{{.CacheRefresh}}" defer></script>
   </head>
