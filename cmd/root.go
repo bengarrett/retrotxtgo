@@ -36,13 +36,18 @@ const (
 
 //PageData contains template data used by standard.html
 type PageData struct {
-	BuildVersion string
-	BuildDate    time.Time
-	CacheRefresh string
-	PageAuthor   string
-	PageDesc     string
-	PageTitle    string
-	PreText      string
+	BuildVersion    string
+	BuildDate       time.Time
+	CacheRefresh    string
+	MetaAuthor      string
+	MetaColorScheme string
+	MetaDesc        string
+	MetaGenerator   bool
+	MetaKeywords    string
+	MetaReferrer    string
+	MetaThemeColor  string
+	PageTitle       string
+	PreText         string
 }
 
 // Layout data
@@ -69,8 +74,8 @@ func LayoutDefault() PageData {
 	l.BuildVersion = Ver
 	l.BuildDate = time.Now()
 	l.CacheRefresh = fmt.Sprintf("?v=%v", Ver)
-	l.PageAuthor = "RetroTxt"
-	l.PageDesc = "Example RetroTxt template"
+	l.MetaDesc = "A textfile example"
+	l.MetaGenerator = true
 	l.PageTitle = "RetroTxt | example"
 	l.PreText = "Hello world."
 	return l

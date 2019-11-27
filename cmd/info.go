@@ -102,7 +102,7 @@ var infoCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(infoCmd)
-	infoCmd.Flags().StringVarP(&Output, "output", "o", "", "output format (default is table)\noptions: json, json.min, table")
+	infoCmd.Flags().StringVarP(&Output, "output", "o", "table", "output format \noptions: json, json.min, table")
 }
 
 func details(name string) (Detail, error) {
