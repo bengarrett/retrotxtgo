@@ -21,10 +21,12 @@ import (
 	"fmt"
 	"html/template"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/bengarrett/retrotxtgo/filesystem"
 	"github.com/spf13/cobra"
+	"gopkg.in/gookit/color.v1"
 )
 
 //
@@ -51,25 +53,26 @@ var exampleCmd = func() string {
 	e := `  retrotxtgo create textfile.txt -t "Text file" -d "Some random text file"`
 	e += fmt.Sprintf("\n  retrotxtgo create ~%sDownloads%stextfile.txt --layout mini", s, s)
 	e += fmt.Sprintf("\n  retrotxtgo create textfile.txt -s .%shtml", s)
-	return e
+	return color.Info.Sprint(e)
 }
 
 // createCmd represents the create command
 var createCmd = &cobra.Command{
-	Use:     "create [FILE]",
-	Short:   "Create a HTML document from a text file",
+	Use:     "create FILE",
+	Short:   color.Primary.Sprint("Create a HTML document from a text file"),
 	Example: exampleCmd(),
 	Run: func(cmd *cobra.Command, args []string) {
 		var data []byte
 		var err error
-		// --body="blah" is a hidden flag to test without a [FILE]
+		// --body="blah" is a hidden flag to test without a FILE
 		b := cmd.Flags().Lookup("body")
-		if b.Changed == true {
+		switch b.Changed {
+		case true:
 			data = []byte(fmt.Sprintf("%s", b.Value))
-		} else {
+		default:
 			if len(args) == 0 {
 				err = errors.New("it must point to a textfile")
-				h := ErrorFmt{"missing argument", "[FILE]", err}
+				h := ErrorFmt{"missing argument", "FILE", err}
 				h.UsageErr(cmd)
 			}
 			data, err = read(args[0])
@@ -78,7 +81,15 @@ var createCmd = &cobra.Command{
 				h.GoErr()
 			}
 		}
-		err = toStdout(data, false)
+		// check for a --save flag to save to a file
+		// otherwise output is sent to stdout
+		s := cmd.Flags().Lookup("save")
+		switch s.Changed {
+		case true:
+			err = toFile(data, fmt.Sprintf("%s", s.Value), false)
+		default:
+			err = toStdout(data, false)
+		}
 		if err != nil {
 			h := ErrorFmt{"create error", "stdout", err}
 			h.GoErr()
@@ -204,15 +215,19 @@ func toStdout(data []byte, test bool) error {
 	return nil
 }
 
-func toFile(data []byte, test bool) error {
-	//https://stackoverflow.com/questions/32551811/read-file-as-template-execute-it-and-write-it-back
-	//todo create temp file
-	//check for existing and overwrite file
-	f, err := os.Create("test.html")
+func toFile(data []byte, name string, test bool) error {
+	p := name
+	s, err := os.Stat(name)
 	if err != nil {
 		return err
 	}
-
+	if s.IsDir() {
+		p = path.Join(p, "index.html")
+	}
+	f, err := os.Create(p)
+	if err != nil {
+		return err
+	}
 	fn, err := filename(test)
 	if err != nil {
 		return err
