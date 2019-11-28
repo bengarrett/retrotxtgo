@@ -29,11 +29,9 @@ import (
 	"gopkg.in/gookit/color.v1"
 )
 
-//
-
 type files map[string]string
 
-// command line flags
+// create command flag
 var (
 	htmlLayout      string
 	metaAuthor      string
@@ -48,7 +46,7 @@ var (
 	saveToFiles     string
 )
 
-//
+// createCmd makes create usage examples
 var exampleCmd = func() string {
 	s := string(os.PathSeparator)
 	e := `  retrotxtgo create textfile.txt -t "Text file" -d "Some random text file"`
@@ -87,9 +85,9 @@ var createCmd = &cobra.Command{
 		s := cmd.Flags().Lookup("save")
 		switch s.Changed {
 		case true:
-			err = toFile(data, fmt.Sprintf("%s", s.Value), false)
+			err = writeFile(data, fmt.Sprintf("%s", s.Value), false)
 		default:
-			err = toStdout(data, false)
+			err = writeStdout(data, false)
 		}
 		if err != nil {
 			var h ErrorFmt
@@ -104,7 +102,6 @@ var createCmd = &cobra.Command{
 	},
 }
 
-// docs: https://godoc.org/github.com/spf13/pflag
 func init() {
 	homedir := func() string {
 		s := "\n--save ~ saves to the home or user directory"
@@ -212,24 +209,9 @@ func pagedata(data []byte) PageData {
 	return p
 }
 
-// toStdout creates and sends the html template to stdout.
+// writeFile creates and saves the html template to the name file.
 // The argument test is used internally.
-func toStdout(data []byte, test bool) error {
-	fn, err := filename(test)
-	if err != nil {
-		return err
-	}
-	t := template.Must(template.ParseFiles(fn))
-	err = t.Execute(os.Stdout, pagedata(data))
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// toFile creates and saves the html template to the name file.
-// The argument test is used internally.
-func toFile(data []byte, name string, test bool) error {
+func writeFile(data []byte, name string, test bool) error {
 	p := name
 	s, err := os.Stat(name)
 	if err != nil {
@@ -248,6 +230,21 @@ func toFile(data []byte, name string, test bool) error {
 	}
 	t := template.Must(template.ParseFiles(fn))
 	err = t.Execute(f, pagedata(data))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// writeStdout creates and sends the html template to stdout.
+// The argument test is used internally.
+func writeStdout(data []byte, test bool) error {
+	fn, err := filename(test)
+	if err != nil {
+		return err
+	}
+	t := template.Must(template.ParseFiles(fn))
+	err = t.Execute(os.Stdout, pagedata(data))
 	if err != nil {
 		return err
 	}
