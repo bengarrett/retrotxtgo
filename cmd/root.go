@@ -30,7 +30,7 @@ import (
 
 const (
 	// Ver is the application version
-	Ver string = "0.0.1"
+	Ver string = "0.0.2"
 	// Www is the website domain name
 	Www string = "retrotxt.com"
 )
@@ -51,15 +51,23 @@ type PageData struct {
 	PreText         string
 }
 
-// Layout data
-var Layout PageData
+//ErrorFmt is
+type ErrorFmt struct {
+	Issue string
+	Arg   string
+	Msg   error
+}
 
-var cfgFile string
+var (
+	// Layout template data
+	Layout  PageData
+	cfgFile string
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "retrotxtgo",
-	Short: "RetroTxt is the tool that turns ANSI, ASCII, NFO text into browser ready HTML",
+	Short: color.Primary.Sprint("RetroTxt is the tool that turns ANSI, ASCII, NFO text into browser ready HTML"),
 	Long: `Turn many pieces of ANSI text art and ASCII/NFO plain text into HTML5 text
 using RetroTxt. The operating system agnostic tool that takes retro text
 files and stylises them into a more pleasing, useful format to view and
@@ -69,14 +77,7 @@ copy in a web browser.`,
 	//	Run: func(cmd *cobra.Command, args []string) { },
 }
 
-//ErrorFmt is
-type ErrorFmt struct {
-	Issue string
-	Arg   string
-	Msg   error
-}
-
-//ErrorPrint is
+// ErrorPrint is
 func (e *ErrorFmt) ErrorPrint() string {
 	r := color.Error.Sprint("ERROR:")
 	u := color.OpUnderscore.Sprintf("%s %s", e.Issue, e.Arg)
@@ -84,7 +85,7 @@ func (e *ErrorFmt) ErrorPrint() string {
 	return color.Sprintf("\n%s %s%s", r, u, f)
 }
 
-//UsageErr is
+// UsageErr is
 func (e *ErrorFmt) UsageErr(cmd *cobra.Command) {
 	println("Usage:\n" + "  retrotxtgo " + cmd.Use)
 	println("\nExamples:\n" + cmd.Example)
@@ -92,13 +93,13 @@ func (e *ErrorFmt) UsageErr(cmd *cobra.Command) {
 	os.Exit(1)
 }
 
-//GoErr is
+// GoErr is
 func (e *ErrorFmt) GoErr() {
 	println(e.ErrorPrint())
 	os.Exit(1)
 }
 
-//LayoutDefault xxx
+// LayoutDefault xxx
 func LayoutDefault() PageData {
 	l := Layout
 	l.BuildVersion = Ver

@@ -26,6 +26,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// TODO: move the create.go --> have --host 8080
+
 // serveCmd represents the serve command
 var serveCmd = &cobra.Command{
 	Use:   "serve",
