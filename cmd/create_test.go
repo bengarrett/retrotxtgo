@@ -23,22 +23,6 @@ import (
 	"testing"
 )
 
-func Test_layOpts(t *testing.T) {
-	tests := []struct {
-		name string
-		want string
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := layOpts(); got != tt.want {
-				t.Errorf("layOpts() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func Test_read(t *testing.T) {
 	type args struct {
 		name string
@@ -105,7 +89,7 @@ func Test_pagedata(t *testing.T) {
 		t.Errorf("pagedata().PageTitle = %v, want %v", got, w)
 	}
 	metaDesc = "page description"
-	w = metaDesc
+	w = ""
 	got = pagedata(d).MetaDesc
 	if got != w {
 		t.Errorf("pagedata().MetaDesc = %v, want %v", got, w)
@@ -137,6 +121,15 @@ func Test_writeFile(t *testing.T) {
 				t.Errorf("writeFile() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
+	}
+	// clean-up
+	wd, err := os.Getwd()
+	if err == nil {
+		p := path.Join(wd, "index.html")
+		if _, err = os.Stat(p); !os.IsNotExist(err) {
+			t.Log("Attempted to delete " + p)
+			os.Remove(p)
+		}
 	}
 }
 
