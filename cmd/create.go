@@ -33,18 +33,19 @@ import (
 
 type files map[string]string
 
+// command line flags
 var (
-	HTMLLayout      string
-	MetaAuthor      string
-	MetaColorScheme string
-	MetaDesc        string
-	MetaGenerator   bool
-	MetaKeywords    string
-	MetaReferrer    string
-	MetaThemeColor  string
-	PageTitle       string
-	PreText         string
-	SaveToFiles     string
+	htmlLayout      string
+	metaAuthor      string
+	metaColorScheme string
+	metaDesc        string
+	metaGenerator   bool
+	metaKeywords    string
+	metaReferrer    string
+	metaThemeColor  string
+	pageTitle       string
+	preText         string
+	saveToFiles     string
 )
 
 //
@@ -91,7 +92,13 @@ var createCmd = &cobra.Command{
 			err = toStdout(data, false)
 		}
 		if err != nil {
-			h := ErrorFmt{"create error", "stdout", err}
+			var h ErrorFmt
+			if err.Error() == errors.New("invalid-layout").Error() {
+				v := fmt.Errorf("valid options: %s", layOpts())
+				h = ErrorFmt{"invalid flag value", fmt.Sprintf("--layout %s", htmlLayout), v}
+			} else {
+				h = ErrorFmt{"create error", ">", err}
+			}
 			h.GoErr()
 		}
 	},
@@ -119,19 +126,19 @@ func init() {
 	d := LayoutDefault()
 	rootCmd.AddCommand(createCmd)
 	// main flags
-	createCmd.Flags().StringVarP(&HTMLLayout, "layout", "l", "standard", "output HTML layout\noptions: "+layOpts())
-	createCmd.Flags().StringVarP(&PageTitle, "title", "t", d.PageTitle, "defines the page title that is shown in a browser title bar or tab")
-	createCmd.Flags().StringVarP(&MetaDesc, "meta-description", "d", d.MetaDesc, "a short and accurate summary of the content of the page")
-	createCmd.Flags().StringVarP(&MetaAuthor, "meta-author", "a", d.MetaAuthor, "defines the name of the page authors")
+	createCmd.Flags().StringVarP(&htmlLayout, "layout", "l", "standard", "output HTML layout\noptions: "+layOpts())
+	createCmd.Flags().StringVarP(&pageTitle, "title", "t", d.PageTitle, "defines the page title that is shown in a browser title bar or tab")
+	createCmd.Flags().StringVarP(&metaDesc, "meta-description", "d", d.MetaDesc, "a short and accurate summary of the content of the page")
+	createCmd.Flags().StringVarP(&metaAuthor, "meta-author", "a", d.MetaAuthor, "defines the name of the page authors")
 	// minor flags
-	createCmd.Flags().BoolVarP(&MetaGenerator, "meta-generator", "g", d.MetaGenerator, "include the RetroTxt version and page generation date")
-	createCmd.Flags().StringVar(&MetaColorScheme, "meta-color-scheme", d.MetaColorScheme, "specifies one or more color schemes with which the page is compatible")
-	createCmd.Flags().StringVar(&MetaKeywords, "meta-keywords", d.MetaKeywords, "words relevant to the page content")
-	createCmd.Flags().StringVar(&MetaReferrer, "meta-referrer", d.MetaReferrer, "controls the Referer HTTP header attached to requests sent from the page")
-	createCmd.Flags().StringVar(&MetaThemeColor, "meta-theme-color", d.MetaThemeColor, "indicates a suggested color that user agents should use to customize the display of the page")
+	createCmd.Flags().BoolVarP(&metaGenerator, "meta-generator", "g", d.MetaGenerator, "include the RetroTxt version and page generation date")
+	createCmd.Flags().StringVar(&metaColorScheme, "meta-color-scheme", d.MetaColorScheme, "specifies one or more color schemes with which the page is compatible")
+	createCmd.Flags().StringVar(&metaKeywords, "meta-keywords", d.MetaKeywords, "words relevant to the page content")
+	createCmd.Flags().StringVar(&metaReferrer, "meta-referrer", d.MetaReferrer, "controls the Referer HTTP header attached to requests sent from the page")
+	createCmd.Flags().StringVar(&metaThemeColor, "meta-theme-color", d.MetaThemeColor, "indicates a suggested color that user agents should use to customize the display of the page")
 	// hidden flags
-	createCmd.Flags().StringVarP(&PreText, "body", "b", "", "override and inject string content into the body element")
-	createCmd.Flags().StringVarP(&SaveToFiles, "save", "s", "", "save HTML as files to store this directory"+homedir()+curdir())
+	createCmd.Flags().StringVarP(&preText, "body", "b", "", "override and inject string content into the body element")
+	createCmd.Flags().StringVarP(&saveToFiles, "save", "s", "", "save HTML as files to store this directory"+homedir()+curdir())
 	// flag options
 	createCmd.Flags().MarkHidden("body")
 	createCmd.Flags().SortFlags = false
@@ -175,9 +182,9 @@ func filename(test bool) (string, error) {
 	if test {
 		path = "../" + path
 	}
-	f := layTemplates()[HTMLLayout]
+	f := layTemplates()[htmlLayout]
 	if f == "" {
-		return "", fmt.Errorf("invalid flag value for --layout %s\nvalid options: %v", HTMLLayout, layOpts())
+		return "", errors.New("invalid-layout")
 	}
 	path += f + ".html"
 	return path, nil
@@ -187,12 +194,17 @@ func filename(test bool) (string, error) {
 // todo handle all arguments
 func pagedata(data []byte) PageData {
 	var p PageData
-	switch HTMLLayout {
+	switch htmlLayout {
 	case "full":
 	case "standard":
 		p = LayoutDefault()
-		p.MetaAuthor = MetaAuthor
-		p.MetaGenerator = MetaGenerator
+		p.MetaAuthor = metaAuthor
+		p.MetaColorScheme = metaColorScheme
+		p.MetaGenerator = metaGenerator
+		p.MetaKeywords = metaKeywords
+		p.MetaReferrer = metaReferrer
+		p.MetaThemeColor = metaThemeColor
+		p.PageTitle = pageTitle
 	case "mini":
 		p.MetaGenerator = false
 	}
@@ -215,6 +227,8 @@ func toStdout(data []byte, test bool) error {
 	return nil
 }
 
+// toFile creates and saves the html template to the name file.
+// The argument test is used internally.
 func toFile(data []byte, name string, test bool) error {
 	p := name
 	s, err := os.Stat(name)
