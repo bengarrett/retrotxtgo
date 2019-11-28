@@ -25,6 +25,7 @@ import (
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
+	"gopkg.in/gookit/color.v1"
 )
 
 const (
@@ -66,6 +67,35 @@ copy in a web browser.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },
+}
+
+//ErrorFmt is
+type ErrorFmt struct {
+	Issue string
+	Arg   string
+	Msg   error
+}
+
+//ErrorPrint is
+func (e *ErrorFmt) ErrorPrint() string {
+	r := color.Error.Sprint("ERROR:")
+	u := color.OpUnderscore.Sprintf("%s %s", e.Issue, e.Arg)
+	f := color.OpFuzzy.Sprintf(" %v", e.Msg)
+	return color.Sprintf("\n%s %s%s", r, u, f)
+}
+
+//UsageErr is
+func (e *ErrorFmt) UsageErr(cmd *cobra.Command) {
+	println("Usage:\n" + "  retrotxtgo " + cmd.Use)
+	println("\nExamples:\n" + cmd.Example)
+	println(e.ErrorPrint())
+	os.Exit(1)
+}
+
+//GoErr is
+func (e *ErrorFmt) GoErr() {
+	println(e.ErrorPrint())
+	os.Exit(1)
 }
 
 //LayoutDefault xxx
