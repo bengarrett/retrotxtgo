@@ -197,12 +197,14 @@ func pagedata(data []byte) PageData {
 		p = LayoutDefault()
 		p.MetaAuthor = metaAuthor
 		p.MetaColorScheme = metaColorScheme
+		p.MetaDesc = metaDesc
 		p.MetaGenerator = metaGenerator
 		p.MetaKeywords = metaKeywords
 		p.MetaReferrer = metaReferrer
 		p.MetaThemeColor = metaThemeColor
 		p.PageTitle = pageTitle
 	case "mini":
+		p.PageTitle = pageTitle
 		p.MetaGenerator = false
 	}
 	p.PreText = string(data)
