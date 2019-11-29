@@ -34,6 +34,7 @@ import (
 	"github.com/mattn/go-runewidth"
 	"github.com/mozillazg/go-slugify"
 	"github.com/spf13/cobra"
+	"gopkg.in/gookit/color.v1"
 )
 
 //Detail of a file
@@ -65,7 +66,7 @@ var (
 // infoCmd represents the info command
 var infoCmd = &cobra.Command{
 	Use:   "info FILE",
-	Short: "Information on a text file",
+	Short: color.Primary.Sprint("Information on a text file"),
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		f, err := details(args[0])

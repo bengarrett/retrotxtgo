@@ -20,12 +20,13 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"gopkg.in/gookit/color.v1"
 )
 
 // configCmd represents the config command
 var configCmd = &cobra.Command{
 	Use:   "config",
-	Short: "Configure RetroTxt defaults",
+	Short: color.Primary.Sprint("Configure RetroTxt defaults"),
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 

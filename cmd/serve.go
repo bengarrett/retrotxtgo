@@ -24,6 +24,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/filesystem"
 	"github.com/spf13/cobra"
+	"gopkg.in/gookit/color.v1"
 )
 
 // TODO: move the create.go --> have --host 8080
@@ -31,7 +32,7 @@ import (
 // serveCmd represents the serve command
 var serveCmd = &cobra.Command{
 	Use:   "serve",
-	Short: "Serve a text file on the in-built web server",
+	Short: color.Primary.Sprint("Serve a text file on the in-built web server"),
 	//Args: cobra.ExactArgs(1), // uncomment for Args(1) - filepath
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("serve called")
