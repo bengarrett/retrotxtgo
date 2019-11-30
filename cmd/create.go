@@ -64,20 +64,18 @@ var createCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var data []byte
 		var err error
-		// --body="blah" is a hidden flag to test without a FILE
+		// --body="" is a hidden flag to test without providing a FILE
 		b := cmd.Flags().Lookup("body")
 		switch b.Changed {
 		case true:
 			data = []byte(fmt.Sprintf("%s", b.Value))
 		default:
 			if len(args) == 0 {
-				err = errors.New("it must point to a textfile")
-				h := ErrorFmt{"missing argument", "FILE", err}
-				h.UsageErr(cmd)
+				FileMissingErr()
 			}
 			data, err = read(args[0])
 			if err != nil {
-				h := ErrorFmt{"invalid file", args[0], err}
+				h := ErrorFmt{"invalid FILE", args[0], err}
 				h.GoErr()
 			}
 		}
@@ -91,13 +89,11 @@ var createCmd = &cobra.Command{
 			err = writeStdout(data, false)
 		}
 		if err != nil {
-			var h ErrorFmt
 			if err.Error() == errors.New("invalid-layout").Error() {
-				v := fmt.Errorf("valid options: %s", layOpts())
-				h = ErrorFmt{"invalid flag value", fmt.Sprintf("--layout %s", htmlLayout), v}
-			} else {
-				h = ErrorFmt{"create error", ">", err}
+				h := ErrorFmt{"layout", fmt.Sprintf("%s", htmlLayout), fmt.Errorf(createLayouts())}
+				h.FlagErr()
 			}
+			h := ErrorFmt{"create error", ">", err}
 			h.GoErr()
 		}
 	},
@@ -124,7 +120,7 @@ func init() {
 	d := LayoutDefault()
 	rootCmd.AddCommand(createCmd)
 	// main flags
-	createCmd.Flags().StringVarP(&htmlLayout, "layout", "l", "standard", "output HTML layout\noptions: "+layOpts())
+	createCmd.Flags().StringVarP(&htmlLayout, "layout", "l", "standard", "output HTML layout\noptions: "+createLayouts())
 	createCmd.Flags().StringVarP(&pageTitle, "title", "t", d.PageTitle, "defines the page title that is shown in a browser title bar or tab")
 	createCmd.Flags().StringVarP(&metaDesc, "meta-description", "d", d.MetaDesc, "a short and accurate summary of the content of the page")
 	createCmd.Flags().StringVarP(&metaAuthor, "meta-author", "a", d.MetaAuthor, "defines the name of the page authors")
@@ -142,18 +138,17 @@ func init() {
 	createCmd.Flags().SortFlags = false
 }
 
-// layOpts lists the options permitted by the layout flag.
-func layOpts() string {
-	h := layTemplates()
+// createLayouts lists the options permitted by the layout flag.
+func createLayouts() string {
 	s := []string{}
-	for key := range h {
+	for key := range createTemplates() {
 		s = append(s, key)
 	}
 	return strings.Join(s, ", ")
 }
 
-// layTemplates creates a map of the template filenames used in conjunction with the layout flag.
-func layTemplates() files {
+// createTemplates creates a map of the template filenames used in conjunction with the layout flag.
+func createTemplates() files {
 	f := make(files)
 	f["body"] = "body-content"
 	f["full"] = "standard"
@@ -180,7 +175,7 @@ func filename(test bool) (string, error) {
 	if test {
 		path = "../" + path
 	}
-	f := layTemplates()[htmlLayout]
+	f := createTemplates()[htmlLayout]
 	if f == "" {
 		return "", errors.New("invalid-layout")
 	}
@@ -193,8 +188,7 @@ func filename(test bool) (string, error) {
 func pagedata(data []byte) PageData {
 	var p PageData
 	switch htmlLayout {
-	case "full":
-	case "standard":
+	case "full", "standard":
 		p = LayoutDefault()
 		p.MetaAuthor = metaAuthor
 		p.MetaColorScheme = metaColorScheme
@@ -232,8 +226,7 @@ func writeFile(data []byte, name string, test bool) error {
 		return err
 	}
 	t := template.Must(template.ParseFiles(fn))
-	err = t.Execute(f, pagedata(data))
-	if err != nil {
+	if err = t.Execute(f, pagedata(data)); err != nil {
 		return err
 	}
 	return nil
@@ -247,8 +240,7 @@ func writeStdout(data []byte, test bool) error {
 		return err
 	}
 	t := template.Must(template.ParseFiles(fn))
-	err = t.Execute(os.Stdout, pagedata(data))
-	if err != nil {
+	if err = t.Execute(os.Stdout, pagedata(data)); err != nil {
 		return err
 	}
 	return nil

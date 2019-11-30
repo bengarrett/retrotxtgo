@@ -155,3 +155,35 @@ func Test_writeStdout(t *testing.T) {
 		})
 	}
 }
+
+func Test_layOpts(t *testing.T) {
+	tests := []struct {
+		name string
+		want string
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := layOpts(); got != tt.want {
+				t.Errorf("layOpts() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_layTemplates(t *testing.T) {
+	tests := []struct {
+		name string
+		want files
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := layTemplates(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("layTemplates() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
