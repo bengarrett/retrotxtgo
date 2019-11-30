@@ -17,7 +17,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"runtime"
 
@@ -25,25 +27,96 @@ import (
 	"gopkg.in/gookit/color.v1"
 )
 
+type versionInfo map[string]string
+
+const formats string = "color, json, json.min, text"
+
+var (
+	format string
+)
+
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: color.Primary.Sprint("Version information for RetroTxt"),
+	Long: color.Primary.Sprint("Version information for Retrotxt") + `
+
+The shown RetroTxt URL is the weblink to the application Github page.
+
+Version number reflects [major].[minor].[patch].
+Major is a generational iteration that may break backwards compatibility.
+Minor changes are increased whenever new features are added.
+Patch reflect hot fixes or bug corrections.
+
+Go version reports the edition of Go used to build this application.
+OS/Arch reports both the operating system and CPU architecture.
+
+Binary should return the path name of this program. It maybe inaccurate
+if it is launched through an operating system symlink.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		version()
+		switch format {
+		case "color", "c", "":
+			fmtcolor()
+		case "json", "j":
+			fmtjson(true)
+		case "json.min", "jm":
+			fmtjson(false)
+		case "text", "t":
+			fmttext()
+		default:
+			e := ErrorFmt{"format", fmt.Sprintf("%s", format), fmt.Errorf(formats)}
+			e.FlagErr()
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
+	versionCmd.Flags().StringVarP(&format, "format", "f", "color", "output format \noptions: "+formats)
 }
 
-func version() {
-	color.Primary.Printf("RetroTxt\thttps://%s\n", Www)
-	color.Info.Printf("Version:\t%s (pre-alpha)\n", Ver)
-	fmt.Printf("Go version:\t%s\n", runtime.Version())
-	fmt.Printf("OS/Arch:\t%s/%s\n", runtime.GOOS, runtime.GOARCH)
-	color.Secondary.Printf("Binary:\t\t%s\n", binary())
+func fmtcolor() {
+	i := info()
+	color.Primary.Printf("RetroTxt\t%s\n", i["url"])
+	color.Info.Printf("Version:\t%s\n", i["app ver"])
+	fmt.Printf("Go version:\t%s\n", i["go ver"])
+	fmt.Printf("OS/Arch:\t%s", i["os"])
+	color.Secondary.Printf("\nBinary:\t\t%s\n", i["exe"])
+}
+
+func fmtjson(indent bool) {
+	var j []byte
+	var err error
+	switch indent {
+	case true:
+		j, err = json.MarshalIndent(info(), "", "    ")
+	default:
+		j, err = json.Marshal(info())
+	}
+	if err != nil {
+		log.Println(err)
+	}
+	fmt.Println(string(j)) // todo stdout?
+}
+
+func fmttext() {
+	i := info()
+	fmt.Printf("RetroTxt\t%s\n", i["url"])
+	fmt.Printf("Version:\t%s\n", i["app ver"])
+	fmt.Printf("Go version:\t%s\n", i["go ver"])
+	fmt.Printf("OS/Arch:\t%s", i["os"])
+	fmt.Printf("\nBinary:\t\t%s\n", i["exe"])
+}
+
+func arch(v string) string {
+	a := map[string]string{
+		"386":   "32-bit Intel/AMD",
+		"amd64": "64-bit Intel/AMD",
+		"arm":   "32-bit ARM",
+		"arm64": "64-bit ARM",
+		"ppc64": "64-bit PowerPC",
+	}
+	return a[v]
 }
 
 func binary() string {
@@ -52,4 +125,18 @@ func binary() string {
 		return fmt.Sprintf("%v", err)
 	}
 	return bin
+}
+
+func info() versionInfo {
+	v := versionInfo{
+		"app ver": fmt.Sprintf("%s (pre-alpha)", Ver),
+		"url":     fmt.Sprintf("https://%s/go", Www),
+		"go ver":  fmt.Sprintf("%s", runtime.Version()),
+		"os":      fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
+		"exe":     fmt.Sprintf("%s", binary()),
+	}
+	if a := arch(runtime.GOARCH); a != "" {
+		v["os"] += fmt.Sprintf(" [%s CPU]", a)
+	}
+	return v
 }
