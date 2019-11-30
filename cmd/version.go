@@ -19,7 +19,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"runtime"
 
@@ -94,9 +93,10 @@ func fmtjson(indent bool) {
 		j, err = json.Marshal(info())
 	}
 	if err != nil {
-		log.Println(err)
+		h := ErrorFmt{"could not create", "json", err}
+		h.GoErr()
 	}
-	fmt.Println(string(j)) // todo stdout?
+	fmt.Println(string(j))
 }
 
 func fmttext() {
