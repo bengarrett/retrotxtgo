@@ -85,16 +85,26 @@ func (e *ErrorFmt) ErrorPrint() string {
 	return color.Sprintf("\n%s %s%s", r, u, f)
 }
 
-// UsageErr exits with an invalid command argument.
-func (e *ErrorFmt) UsageErr(cmd *cobra.Command) {
-	println("Usage:\n" + "  retrotxtgo " + cmd.Use)
-	println("\nExamples:\n" + cmd.Example)
+// GoErr exits with a coloured error message.
+func (e *ErrorFmt) GoErr() {
 	println(e.ErrorPrint())
 	os.Exit(1)
 }
 
-// GoErr exits with a coloured error message.
-func (e *ErrorFmt) GoErr() {
+// FlagErr exits with an invalid command flag value.
+func (e *ErrorFmt) FlagErr() {
+	r := color.Error.Sprint("ERROR:")
+	u := color.OpUnderscore.Sprintf("invalid flag")
+	a := fmt.Sprintf("\"--%s %s\"", e.Issue, e.Arg)
+	f := color.OpFuzzy.Sprintf(" valid %s values: %v", e.Issue, e.Msg)
+	color.Printf("\n%s %s %s%s\n", r, u, a, f)
+	os.Exit(1)
+}
+
+// UsageErr exits with an invalid command argument.
+func (e *ErrorFmt) UsageErr(cmd *cobra.Command) {
+	println("Usage:\n" + "  retrotxtgo " + cmd.Use)
+	println("\nExamples:\n" + cmd.Example)
 	println(e.ErrorPrint())
 	os.Exit(1)
 }
