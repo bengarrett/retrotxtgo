@@ -80,7 +80,7 @@ copy in a web browser.`),
 // ErrorPrint returns a coloured error message.
 func (e *ErrorFmt) ErrorPrint() string {
 	r := color.Error.Sprint("ERROR:")
-	u := color.OpUnderscore.Sprintf("%s %s", e.Issue, e.Arg)
+	u := color.OpItalic.Sprintf("%s %s", e.Issue, e.Arg)
 	f := color.OpFuzzy.Sprintf(" %v", e.Msg)
 	return color.Sprintf("\n%s %s%s", r, u, f)
 }
