@@ -30,7 +30,7 @@ import (
 
 const (
 	// Ver is the application version
-	Ver string = "0.0.2"
+	Ver string = "0.0.3"
 	// Www is the application domain name
 	Www string = "retrotxt.com"
 )
@@ -77,12 +77,15 @@ copy in a web browser.`),
 	//	Run: func(cmd *cobra.Command, args []string) { },
 }
 
+var alert = func() string {
+	return color.Error.Sprint("ERROR:")
+}
+
 // ErrorPrint returns a coloured error message.
 func (e *ErrorFmt) ErrorPrint() string {
-	r := color.Error.Sprint("ERROR:")
-	u := color.OpItalic.Sprintf("%s %s", e.Issue, e.Arg)
-	f := color.OpFuzzy.Sprintf(" %v", e.Msg)
-	return color.Sprintf("\n%s %s%s", r, u, f)
+	ia := color.OpItalic.Sprintf("%s %s", e.Issue, e.Arg)
+	m := color.OpFuzzy.Sprintf(" %v", e.Msg)
+	return color.Sprintf("\n%s %s%s", alert(), ia, m)
 }
 
 // GoErr exits with a coloured error message.
@@ -93,11 +96,18 @@ func (e *ErrorFmt) GoErr() {
 
 // FlagErr exits with an invalid command flag value.
 func (e *ErrorFmt) FlagErr() {
-	r := color.Error.Sprint("ERROR:")
-	u := color.OpItalic.Sprintf("invalid flag")
+	i := color.OpItalic.Sprintf("invalid flag")
 	a := fmt.Sprintf("\"--%s %s\"", e.Issue, e.Arg)
-	f := color.OpFuzzy.Sprintf(" valid %s values: %v", e.Issue, e.Msg)
-	color.Printf("\n%s %s %s%s\n", r, u, a, f)
+	m := color.OpFuzzy.Sprintf(" valid %s values: %v", e.Issue, e.Msg)
+	color.Printf("\n%s %s %s%s\n", alert(), i, a, m)
+	os.Exit(1)
+}
+
+// FileMissingErr exits with a missing FILE error.
+func FileMissingErr() {
+	i := color.OpItalic.Sprintf("missing the FILE argument")
+	m := color.OpFuzzy.Sprintf("you need to provide a path to a text file")
+	color.Printf("\n%s %s %s\n", alert(), i, m)
 	os.Exit(1)
 }
 

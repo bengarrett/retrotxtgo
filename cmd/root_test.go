@@ -19,6 +19,8 @@ package cmd
 import (
 	"reflect"
 	"testing"
+
+	"github.com/spf13/cobra"
 )
 
 func TestLayoutDefault(t *testing.T) {
@@ -59,6 +61,82 @@ func Test_initConfig(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			initConfig()
+		})
+	}
+}
+
+func TestErrorFmt_ErrorPrint(t *testing.T) {
+	tests := []struct {
+		name string
+		e    *ErrorFmt
+		want string
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.e.ErrorPrint(); got != tt.want {
+				t.Errorf("ErrorFmt.ErrorPrint() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestErrorFmt_GoErr(t *testing.T) {
+	tests := []struct {
+		name string
+		e    *ErrorFmt
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.e.GoErr()
+		})
+	}
+}
+
+func TestErrorFmt_FlagErr(t *testing.T) {
+	tests := []struct {
+		name string
+		e    *ErrorFmt
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.e.FlagErr()
+		})
+	}
+}
+
+func TestErrorFmt_UsageErr(t *testing.T) {
+	type args struct {
+		cmd *cobra.Command
+	}
+	tests := []struct {
+		name string
+		e    *ErrorFmt
+		args args
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.e.UsageErr(tt.args.cmd)
+		})
+	}
+}
+
+func TestFileMissingErr(t *testing.T) {
+	tests := []struct {
+		name string
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			FileMissingErr()
 		})
 	}
 }
