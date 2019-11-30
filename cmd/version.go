@@ -28,11 +28,9 @@ import (
 
 type versionInfo map[string]string
 
-const formats string = "color, json, json.min, text"
+const versionFormats string = "color, json, json.min, text"
 
-var (
-	format string
-)
+var versionFmt string
 
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
@@ -53,17 +51,17 @@ OS/Arch reports both the operating system and CPU architecture.
 Binary should return the path name of this program. It maybe inaccurate
 if it is launched through an operating system symlink.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		switch format {
+		switch versionFmt {
 		case "color", "c", "":
-			fmtcolor()
+			versionText(true)
 		case "json", "j":
-			fmtjson(true)
+			versionJSON(true)
 		case "json.min", "jm":
-			fmtjson(false)
+			versionJSON(false)
 		case "text", "t":
-			fmttext()
+			versionText(false)
 		default:
-			e := ErrorFmt{"format", fmt.Sprintf("%s", format), fmt.Errorf(formats)}
+			e := ErrorFmt{"format", fmt.Sprintf("%s", versionFmt), fmt.Errorf(versionFormats)}
 			e.FlagErr()
 		}
 	},
@@ -71,19 +69,10 @@ if it is launched through an operating system symlink.`,
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
-	versionCmd.Flags().StringVarP(&format, "format", "f", "color", "output format \noptions: "+formats)
+	versionCmd.Flags().StringVarP(&versionFmt, "format", "f", "color", "output format \noptions: "+versionFormats)
 }
 
-func fmtcolor() {
-	i := info()
-	color.Primary.Printf("RetroTxt\t%s\n", i["url"])
-	color.Info.Printf("Version:\t%s\n", i["app ver"])
-	fmt.Printf("Go version:\t%s\n", i["go ver"])
-	fmt.Printf("OS/Arch:\t%s", i["os"])
-	color.Secondary.Printf("\nBinary:\t\t%s\n", i["exe"])
-}
-
-func fmtjson(indent bool) {
+func versionJSON(indent bool) {
 	var j []byte
 	var err error
 	switch indent {
@@ -99,13 +88,14 @@ func fmtjson(indent bool) {
 	fmt.Println(string(j))
 }
 
-func fmttext() {
+func versionText(c bool) {
+	color.Enable = c
 	i := info()
-	fmt.Printf("RetroTxt\t%s\n", i["url"])
-	fmt.Printf("Version:\t%s\n", i["app ver"])
+	color.Primary.Printf("RetroTxt\t%s\n", i["url"])
+	color.Info.Printf("Version:\t%s\n", i["app ver"])
 	fmt.Printf("Go version:\t%s\n", i["go ver"])
 	fmt.Printf("OS/Arch:\t%s", i["os"])
-	fmt.Printf("\nBinary:\t\t%s\n", i["exe"])
+	color.Secondary.Printf("\nBinary:\t\t%s\n", i["exe"])
 }
 
 func arch(v string) string {
