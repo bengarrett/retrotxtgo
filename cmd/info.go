@@ -37,6 +37,8 @@ import (
 	"gopkg.in/gookit/color.v1"
 )
 
+const infoFormats string = "color, json, json.min, text, xml"
+
 //Detail of a file
 type Detail struct {
 	Bytes     int64
@@ -50,10 +52,7 @@ type Detail struct {
 	Utf8      bool
 }
 
-var (
-	//Output format flag
-	Output string
-)
+var infoFmt string
 
 // paths := [5]string{
 // 	"textfiles/hi.txt",
@@ -67,43 +66,112 @@ var (
 var infoCmd = &cobra.Command{
 	Use:   "info FILE",
 	Short: color.Primary.Sprint("Information on a text file"),
-	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			FileMissingErr()
+		}
 		f, err := details(args[0])
 		if err != nil {
-			log.Fatal(err)
+			h := ErrorFmt{"invalid FILE", args[0], err}
+			h.GoErr()
 		}
-		if Output == "" {
+		if infoFmt == "" {
 			// todo load default from config file
-			Output = "table"
+			infoFmt = "color"
 		}
-		switch Output {
-		case "json":
-			jsonData, err := json.MarshalIndent(f, "", "    ")
-			if err != nil {
-				log.Println(err)
-			}
-			fmt.Println(string(jsonData))
-		case "json.min":
-			jsonData, err := json.Marshal(f)
-			if err != nil {
-				log.Println(err)
-			}
-			fmt.Println(string(jsonData))
-		case "table":
-			tableOutput(f)
-		case "xml":
-			xmlOutput(f)
+		switch infoFmt {
+		case "color", "c":
+			infoText(true, f)
+		case "json", "j":
+			infoJSON(true, f)
+		case "json.min", "jm":
+			infoJSON(false, f)
+		case "text":
+			infoText(false, f)
+		case "xml", "x":
+			infoXML(f)
 		default:
-			// todo make error
-			fmt.Printf("invalid flag, --output %s\noptions: json, json.min, table\n", Output)
+			e := ErrorFmt{"format", fmt.Sprintf("%s", infoFmt), fmt.Errorf(infoFormats)}
+			e.FlagErr()
 		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(infoCmd)
-	infoCmd.Flags().StringVarP(&Output, "output", "o", "table", "output format \noptions: json, json.min, table")
+	infoCmd.Flags().StringVarP(&infoFmt, "format", "f", "color", "output format \noptions: "+infoFormats)
+}
+
+func infoJSON(indent bool, f Detail) {
+	var j []byte
+	var err error
+	switch indent {
+	case true:
+		j, err = json.MarshalIndent(f, "", "    ")
+	default:
+		j, err = json.Marshal(f)
+	}
+	if err != nil {
+		h := ErrorFmt{"could not create", "json", err}
+		h.GoErr()
+	}
+	fmt.Println(string(j))
+}
+
+func infoText(c bool, d Detail) {
+	color.Enable = c
+	var col = func(t string) string {
+		return color.Info.Sprintf("%s\t", t)
+	}
+	tab := tabular.New()
+	tab.Col("det", color.Primary.Sprintf("Details"), 14)
+	tab.Col("val", "", 10)
+	var data = []struct {
+		d, v string
+	}{
+		{d: "Filename", v: col(d.Name)},
+		{d: "MIME type", v: col(d.Mime)},
+		{d: "UTF-8", v: col(fmt.Sprintf("%v", d.Utf8))},
+		{d: "Characters", v: col(fmt.Sprintf("%v", d.CharCount))},
+		{d: "Size", v: col(d.Size)},
+		{d: "Modified", v: col(fmt.Sprintf("%v", d.Modified))},
+		{d: "MD5 checksum", v: col(d.MD5)},
+		{d: "Slug", v: col(d.Slug)},
+	}
+	format := tab.Print("*")
+	for _, x := range data {
+		fmt.Printf(format, x.d, x.v)
+	}
+}
+
+func infoXML(f Detail) {
+	type xmldetail struct {
+		XMLName   xml.Name  `xml:"file"`
+		ID        string    `xml:"id,attr"`
+		Name      string    `xml:"name"`
+		Mime      string    `xml:"content>mime"`
+		Utf8      bool      `xml:"content>utf8"`
+		Bytes     int64     `xml:"size>bytes"`
+		Size      string    `xml:"size>value"`
+		CharCount int       `xml:"size>character-count"`
+		MD5       string    `xml:"md5"`
+		Modified  time.Time `xml:"modified"`
+	}
+	x := xmldetail{}
+	x.Bytes = f.Bytes
+	x.CharCount = f.CharCount
+	x.ID = f.Slug
+	x.MD5 = f.MD5
+	x.Mime = f.Mime
+	x.Modified = f.Modified
+	x.Name = f.Name
+	x.Size = f.Size
+	x.Utf8 = f.Utf8
+	xmlData, err := xml.MarshalIndent(x, "", "\t")
+	if err != nil {
+		log.Println(err)
+	}
+	fmt.Println(string(xmlData))
 }
 
 func details(name string) (Detail, error) {
@@ -144,56 +212,4 @@ func parse(data []byte, stat os.FileInfo) (Detail, error) {
 		d.Mime = mime
 	}
 	return d, nil
-}
-
-func tableOutput(d Detail) {
-	tab := tabular.New()
-	tab.Col("det", "Details", 14)
-	tab.Col("val", "", 10)
-	var data = []struct {
-		d, v string
-	}{
-		{d: "Filename", v: d.Name},
-		{d: "MIME type", v: d.Mime},
-		{d: "UTF-8", v: fmt.Sprintf("%v", d.Utf8)},
-		{d: "Characters", v: fmt.Sprintf("%v", d.CharCount)},
-		{d: "Size", v: d.Size},
-		{d: "Modified", v: fmt.Sprintf("%v", d.Modified)},
-		{d: "MD5 checksum", v: d.MD5},
-		{d: "Slug", v: d.Slug},
-	}
-	format := tab.Print("*")
-	for _, x := range data {
-		fmt.Printf(format, x.d, x.v)
-	}
-}
-
-func xmlOutput(f Detail) {
-	type xmldetail struct {
-		XMLName   xml.Name  `xml:"file"`
-		ID        string    `xml:"id,attr"`
-		Name      string    `xml:"name"`
-		Mime      string    `xml:"content>mime"`
-		Utf8      bool      `xml:"content>utf8"`
-		Bytes     int64     `xml:"size>bytes"`
-		Size      string    `xml:"size>value"`
-		CharCount int       `xml:"size>character-count"`
-		MD5       string    `xml:"md5"`
-		Modified  time.Time `xml:"modified"`
-	}
-	x := xmldetail{}
-	x.Bytes = f.Bytes
-	x.CharCount = f.CharCount
-	x.ID = f.Slug
-	x.MD5 = f.MD5
-	x.Mime = f.Mime
-	x.Modified = f.Modified
-	x.Name = f.Name
-	x.Size = f.Size
-	x.Utf8 = f.Utf8
-	xmlData, err := xml.MarshalIndent(x, "", "\t")
-	if err != nil {
-		log.Println(err)
-	}
-	fmt.Println(string(xmlData))
 }
