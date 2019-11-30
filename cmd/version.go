@@ -32,23 +32,31 @@ const versionFormats string = "color, json, json.min, text"
 
 var versionFmt string
 
+var cc = func(t string) string {
+	return color.Comment.Sprintf(t)
+}
+
+var ci = func(t string) string {
+	return color.OpItalic.Sprintf(t)
+}
+
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: color.Primary.Sprint("Version information for RetroTxt"),
 	Long: color.Primary.Sprint("Version information for Retrotxt") + `
 
-The shown RetroTxt URL is the weblink to the application Github page.
+The shown ` + cc("RetroTxt URL") + ` is the weblink to the application Github page.
 
-Version number reflects [major].[minor].[patch].
-Major is a generational iteration that may break backwards compatibility.
-Minor changes are increased whenever new features are added.
-Patch reflect hot fixes or bug corrections.
+` + cc("Version") + ` number reflects ` + ci("[major].[minor].[patch]") + `.
+* Major is a generational iteration that may break backwards compatibility.
+* Minor changes are increased whenever new features are added.
+* Patch reflect hot fixes or bug corrections.
 
-Go version reports the edition of Go used to build this application.
-OS/Arch reports both the operating system and CPU architecture.
+` + cc("Go version") + ` reports the edition of Go used to build this application.
+` + cc("OS/Arch") + ` reports both the operating system and CPU architecture.
 
-Binary should return the path name of this program. It maybe inaccurate
+` + cc("Binary") + ` should return the path name of this program. It maybe inaccurate
 if it is launched through an operating system symlink.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		switch versionFmt {
