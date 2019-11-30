@@ -94,7 +94,7 @@ func (e *ErrorFmt) GoErr() {
 // FlagErr exits with an invalid command flag value.
 func (e *ErrorFmt) FlagErr() {
 	r := color.Error.Sprint("ERROR:")
-	u := color.OpUnderscore.Sprintf("invalid flag")
+	u := color.OpItalic.Sprintf("invalid flag")
 	a := fmt.Sprintf("\"--%s %s\"", e.Issue, e.Arg)
 	f := color.OpFuzzy.Sprintf(" valid %s values: %v", e.Issue, e.Msg)
 	color.Printf("\n%s %s %s%s\n", r, u, a, f)
