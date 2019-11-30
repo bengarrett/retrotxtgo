@@ -108,3 +108,56 @@ func Test_xmlOutput(t *testing.T) {
 		})
 	}
 }
+
+func Test_infoJSON(t *testing.T) {
+	type args struct {
+		indent bool
+		f      Detail
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			infoJSON(tt.args.indent, tt.args.f)
+		})
+	}
+}
+
+func Test_infoText(t *testing.T) {
+	type args struct {
+		c bool
+		d Detail
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			infoText(tt.args.c, tt.args.d)
+		})
+	}
+}
+
+func Test_infoXML(t *testing.T) {
+	type args struct {
+		f Detail
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			infoXML(tt.args.f)
+		})
+	}
+}
