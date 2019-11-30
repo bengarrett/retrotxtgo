@@ -31,11 +31,11 @@ import (
 const (
 	// Ver is the application version
 	Ver string = "0.0.2"
-	// Www is the website domain name
+	// Www is the application domain name
 	Www string = "retrotxt.com"
 )
 
-//PageData contains template data used by standard.html
+// PageData holds template data used by the HTML layouts.
 type PageData struct {
 	BuildVersion    string
 	BuildDate       time.Time
@@ -51,7 +51,7 @@ type PageData struct {
 	PreText         string
 }
 
-//ErrorFmt is
+// ErrorFmt is an interface for error messages
 type ErrorFmt struct {
 	Issue string
 	Arg   string
@@ -77,7 +77,7 @@ copy in a web browser.`),
 	//	Run: func(cmd *cobra.Command, args []string) { },
 }
 
-// ErrorPrint is
+// ErrorPrint returns a coloured error message.
 func (e *ErrorFmt) ErrorPrint() string {
 	r := color.Error.Sprint("ERROR:")
 	u := color.OpUnderscore.Sprintf("%s %s", e.Issue, e.Arg)
@@ -85,7 +85,7 @@ func (e *ErrorFmt) ErrorPrint() string {
 	return color.Sprintf("\n%s %s%s", r, u, f)
 }
 
-// UsageErr is
+// UsageErr exits with an invalid command argument.
 func (e *ErrorFmt) UsageErr(cmd *cobra.Command) {
 	println("Usage:\n" + "  retrotxtgo " + cmd.Use)
 	println("\nExamples:\n" + cmd.Example)
@@ -93,13 +93,13 @@ func (e *ErrorFmt) UsageErr(cmd *cobra.Command) {
 	os.Exit(1)
 }
 
-// GoErr is
+// GoErr exits with a coloured error message.
 func (e *ErrorFmt) GoErr() {
 	println(e.ErrorPrint())
 	os.Exit(1)
 }
 
-// LayoutDefault xxx
+// LayoutDefault generates default data for the HTML layout template.
 func LayoutDefault() PageData {
 	l := Layout
 	l.BuildVersion = Ver
