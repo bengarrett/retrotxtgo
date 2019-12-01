@@ -8,6 +8,16 @@ import (
 	"os"
 )
 
+// Read opens and returns the content of the name file.
+func Read(name string) ([]byte, error) {
+	// check name is file not anything else
+	data, err := ReadAllBytes(name)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
 //TailBytes reads the name file from the offset position relative to the end of the file.
 func TailBytes(name string, offset int64) ([]byte, error) {
 	file, err := os.Open(name)
