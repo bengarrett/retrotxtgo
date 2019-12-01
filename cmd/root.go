@@ -33,6 +33,8 @@ const (
 	Ver string = "0.0.3"
 	// Www is the application domain name
 	Www string = "retrotxt.com"
+	// FileDate is a non-standard date format for file modifications
+	FileDate string = "2 Jan 15:04 2006"
 )
 
 // PageData holds template data used by the HTML layouts.

@@ -212,6 +212,8 @@ func pagedata(data []byte) PageData {
 	return p
 }
 
+// newTemplate creates and parses a new template file.
+// The argument test is used internally.
 func newTemplate(test bool) (*template.Template, error) {
 	fn, err := filename(test)
 	if err != nil {

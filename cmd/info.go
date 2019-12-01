@@ -134,7 +134,7 @@ func infoText(c bool, d Detail) {
 		{d: "UTF-8", v: col(fmt.Sprintf("%v", d.Utf8))},
 		{d: "Characters", v: col(fmt.Sprintf("%v", d.CharCount))},
 		{d: "Size", v: col(d.Size)},
-		{d: "Modified", v: col(fmt.Sprintf("%v", d.Modified))},
+		{d: "Modified", v: col(fmt.Sprintf("%v", d.Modified.Format(FileDate)))},
 		{d: "MD5 checksum", v: col(d.MD5)},
 		{d: "Slug", v: col(d.Slug)},
 	}
