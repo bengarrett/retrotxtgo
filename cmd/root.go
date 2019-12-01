@@ -119,6 +119,18 @@ func (e *ErrorFmt) UsageErr(cmd *cobra.Command) {
 	os.Exit(1)
 }
 
+var cc = func(t string) string {
+	return color.Comment.Sprintf(t)
+}
+
+var cf = func(t string) string {
+	return color.OpFuzzy.Sprint(t)
+}
+
+var ci = func(t string) string {
+	return color.OpItalic.Sprintf(t)
+}
+
 // LayoutDefault generates default data for the HTML layout template.
 func LayoutDefault() PageData {
 	l := Layout
@@ -148,7 +160,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file "+color.OpFuzzy.Sprint("(default is $HOME/.retrotxtgo.yaml)"))
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file "+cf("(default is $HOME/.retrotxtgo.yaml)"))
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.

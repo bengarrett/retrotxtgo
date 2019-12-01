@@ -32,14 +32,6 @@ const versionFormats string = "color, json, json.min, text"
 
 var versionFmt string
 
-var cc = func(t string) string {
-	return color.Comment.Sprintf(t)
-}
-
-var ci = func(t string) string {
-	return color.OpItalic.Sprintf(t)
-}
-
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
