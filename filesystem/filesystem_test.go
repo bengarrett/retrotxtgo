@@ -77,3 +77,27 @@ func TestTailBytesNegative(t *testing.T) {
 		t.Fatalf("Expected nil error, %q", err)
 	}
 }
+
+func TestRead(t *testing.T) {
+	type args struct {
+		name string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"empty", args{""}, true},
+		{"invalid", args{"/invalid-file"}, true},
+		{"valid", args{"../textfiles/hi.txt"}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := Read(tt.args.name)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Read() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+		})
+	}
+}
