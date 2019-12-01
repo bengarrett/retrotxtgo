@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"net/http"
 	"os"
 	"path"
 	"strings"
@@ -44,14 +45,16 @@ var (
 	pageTitle       string
 	preText         string
 	saveToFiles     string
+	serverFiles     bool
+	serverPort      int
 )
 
 // createCmd makes create usage examples
 var exampleCmd = func() string {
 	s := string(os.PathSeparator)
 	e := `  retrotxtgo create textfile.txt -t "Text file" -d "Some random text file"`
-	e += fmt.Sprintf("\n  retrotxtgo create ~%sDownloads%stextfile.txt --layout mini", s, s)
-	e += fmt.Sprintf("\n  retrotxtgo create textfile.txt -s .%shtml", s)
+	e += fmt.Sprintf("\n  retrotxtgo create ~%sDownloads%stextfile.txt --layout mini --save .%shtml", s, s, s)
+	//	e += fmt.Sprintf("\n  retrotxtgo create textfile.txt -s .%shtml", s)
 	return color.Info.Sprint(e)
 }
 
@@ -73,20 +76,22 @@ var createCmd = &cobra.Command{
 			if len(args) == 0 {
 				FileMissingErr()
 			}
-			data, err = read(args[0])
+			data, err = filesystem.Read(args[0])
 			if err != nil {
 				h := ErrorFmt{"invalid FILE", args[0], err}
 				h.GoErr()
 			}
 		}
-		// check for a --save flag to save to a file
+		// check for a --save flag to save to files
 		// otherwise output is sent to stdout
 		s := cmd.Flags().Lookup("save")
 		switch s.Changed {
 		case true:
 			err = writeFile(data, fmt.Sprintf("%s", s.Value), false)
 		default:
-			err = writeStdout(data, false)
+			if serverFiles == false {
+				err = writeStdout(data, false)
+			}
 		}
 		if err != nil {
 			if err.Error() == errors.New("invalid-layout").Error() {
@@ -96,25 +101,32 @@ var createCmd = &cobra.Command{
 			h := ErrorFmt{"create error", ">", err}
 			h.GoErr()
 		}
+		// check for a --server flag to serve the HTML
+		if serverFiles == true {
+			if err = serveFile(data, false); err == nil {
+				h := ErrorFmt{"server problem", ">", err}
+				h.GoErr()
+			}
+		}
 	},
 }
 
 func init() {
 	homedir := func() string {
-		s := "\n--save ~ saves to the home or user directory"
+		s := "\n" + ci("--save ~") + " saves to the home or user directory"
 		d, err := os.UserHomeDir()
 		if err != nil {
 			return s
 		}
-		return s + " at " + d
+		return s + " at " + cf(d)
 	}
 	curdir := func() string {
-		s := "\n--save . saves to the current working directory"
+		s := "\n" + ci("--save .") + " saves to the current working directory"
 		d, err := os.Getwd()
 		if err != nil {
 			return s
 		}
-		return s + " at " + d
+		return s + " at " + cf(d)
 	}
 
 	d := LayoutDefault()
@@ -130,9 +142,12 @@ func init() {
 	createCmd.Flags().StringVar(&metaKeywords, "meta-keywords", d.MetaKeywords, "words relevant to the page content")
 	createCmd.Flags().StringVar(&metaReferrer, "meta-referrer", d.MetaReferrer, "controls the Referer HTTP header attached to requests sent from the page")
 	createCmd.Flags().StringVar(&metaThemeColor, "meta-theme-color", d.MetaThemeColor, "indicates a suggested color that user agents should use to customize the display of the page")
+	// output flags
+	createCmd.Flags().StringVarP(&saveToFiles, "save", "s", "", "save HTML as files to store this directory"+homedir()+curdir())
+	createCmd.Flags().BoolVarP(&serverFiles, "server", "p", false, "serve HTML over an internal web server")
+	createCmd.Flags().IntVar(&serverPort, "port", 8080, "port which the internet web server will listen")
 	// hidden flags
 	createCmd.Flags().StringVarP(&preText, "body", "b", "", "override and inject string content into the body element")
-	createCmd.Flags().StringVarP(&saveToFiles, "save", "s", "", "save HTML as files to store this directory"+homedir()+curdir())
 	// flag options
 	createCmd.Flags().MarkHidden("body")
 	createCmd.Flags().SortFlags = false
@@ -156,16 +171,6 @@ func createTemplates() files {
 	f["pre"] = "pre-content"
 	f["standard"] = "standard"
 	return f
-}
-
-// read opens and returns the content of the name file.
-func read(name string) ([]byte, error) {
-	// check name is file not anything else
-	data, err := filesystem.ReadAllBytes(name)
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
 }
 
 // filename creates a filepath for the template filenames.
@@ -206,6 +211,35 @@ func pagedata(data []byte) PageData {
 	return p
 }
 
+func newTemplate(test bool) (*template.Template, error) {
+	fn, err := filename(test)
+	if err != nil {
+		return nil, err
+	}
+	t := template.Must(template.ParseFiles(fn))
+	return t, nil
+}
+
+// serveFile creates and serves the html template on a local HTTP web server.
+// The argument test is used internally.
+func serveFile(data []byte, test bool) error {
+	t, err := newTemplate(test)
+	if err != nil {
+		return err
+	}
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		t.Execute(w, pagedata(data))
+	})
+	fs := http.FileServer(http.Dir("static/"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
+	fmt.Printf("Web server is available at %s\n", color.Primary.Sprintf("http://localhost:%v", serverPort))
+	color.Info.Println("Press Ctrl+C to stop")
+	if err = http.ListenAndServe(fmt.Sprintf(":%v", serverPort), nil); err != nil {
+		return err
+	}
+	return nil
+}
+
 // writeFile creates and saves the html template to the name file.
 // The argument test is used internally.
 func writeFile(data []byte, name string, test bool) error {
@@ -221,11 +255,10 @@ func writeFile(data []byte, name string, test bool) error {
 	if err != nil {
 		return err
 	}
-	fn, err := filename(test)
+	t, err := newTemplate(test)
 	if err != nil {
 		return err
 	}
-	t := template.Must(template.ParseFiles(fn))
 	if err = t.Execute(f, pagedata(data)); err != nil {
 		return err
 	}
@@ -235,11 +268,10 @@ func writeFile(data []byte, name string, test bool) error {
 // writeStdout creates and sends the html template to stdout.
 // The argument test is used internally.
 func writeStdout(data []byte, test bool) error {
-	fn, err := filename(test)
+	t, err := newTemplate(test)
 	if err != nil {
 		return err
 	}
-	t := template.Must(template.ParseFiles(fn))
 	if err = t.Execute(os.Stdout, pagedata(data)); err != nil {
 		return err
 	}
