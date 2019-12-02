@@ -17,43 +17,12 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
+	"encoding/json"
+	"fmt"
 	"reflect"
+	"runtime"
 	"testing"
 )
-
-func Test_versionJSON(t *testing.T) {
-	type args struct {
-		indent bool
-	}
-	tests := []struct {
-		name string
-		args args
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			versionJSON(tt.args.indent)
-		})
-	}
-}
-
-func Test_versionText(t *testing.T) {
-	type args struct {
-		c bool
-	}
-	tests := []struct {
-		name string
-		args args
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			versionText(tt.args.c)
-		})
-	}
-}
 
 func Test_arch(t *testing.T) {
 	type args struct {
@@ -64,7 +33,10 @@ func Test_arch(t *testing.T) {
 		args args
 		want string
 	}{
-		// TODO: Add test cases.
+		{"empty", args{""}, ""},
+		{"invalid", args{"xxx"}, ""},
+		{"386", args{"386"}, "32-bit Intel/AMD"},
+		{"ppc64", args{"ppc64"}, "64-bit PowerPC"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -94,14 +66,35 @@ func Test_binary(t *testing.T) {
 func Test_info(t *testing.T) {
 	tests := []struct {
 		name string
-		want versionInfo
+		want string
 	}{
-		// TODO: Add test cases.
+		{"os and arch", fmt.Sprintf("%s/%s [%s CPU]", runtime.GOOS, runtime.GOARCH, arch(runtime.GOARCH))},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := info(); !reflect.DeepEqual(got, tt.want) {
+			if got := info()["os"]; !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("info() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_versionJSON(t *testing.T) {
+	type args struct {
+		indent bool
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{"no indent", args{false}, true},
+		{"indent", args{true}, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := json.Valid(versionJSON(tt.args.indent)); got != tt.want {
+				t.Errorf("versionJSON() = %v, want %v", got, tt.want)
 			}
 		})
 	}

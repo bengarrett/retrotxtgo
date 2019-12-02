@@ -56,9 +56,9 @@ if it is launched through an operating system symlink.`,
 		case "color", "c", "":
 			versionText(true)
 		case "json", "j":
-			versionJSON(true)
+			fmt.Printf("%s\n", versionJSON(true))
 		case "json.min", "jm":
-			versionJSON(false)
+			fmt.Printf("%s\n", versionJSON(false))
 		case "text", "t":
 			versionText(false)
 		default:
@@ -73,7 +73,7 @@ func init() {
 	versionCmd.Flags().StringVarP(&versionFmt, "format", "f", "color", "output format \noptions: "+versionFormats)
 }
 
-func versionJSON(indent bool) {
+func versionJSON(indent bool) []byte {
 	var j []byte
 	var err error
 	switch indent {
@@ -86,7 +86,7 @@ func versionJSON(indent bool) {
 		h := ErrorFmt{"could not create", "json", err}
 		h.GoErr()
 	}
-	fmt.Println(string(j))
+	return j
 }
 
 func versionText(c bool) {
