@@ -20,14 +20,17 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"gopkg.in/gookit/color.v1"
+)
+
+var (
+	fileOverwrite bool
 )
 
 // configCmd represents the config command
 var configCmd = &cobra.Command{
 	Use:     "config",
 	Aliases: []string{"cfg"},
-	Short:   color.Primary.Sprint("Configure RetroTxt defaults"),
+	Short:   cp("Configure RetroTxt defaults"),
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
@@ -38,9 +41,62 @@ to quickly create a Cobra application.`,
 		fmt.Println("config called")
 	},
 }
+var configCreateCmd = &cobra.Command{
+	Use:   "create",
+	Short: cp("create a new config file"),
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("create config file")
+	},
+}
+var configDeleteCmd = &cobra.Command{
+	Use:   "delete",
+	Short: cp("remove the default config file"),
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("delete config file")
+	},
+}
+var configEditCmd = &cobra.Command{
+	Use:   "edit",
+	Short: cp("edit the default config file"),
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("edit config file")
+	},
+}
+var configInfoCmd = &cobra.Command{
+	Use:   "info",
+	Short: cp("view settings configured by the config"),
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("into config file")
+	},
+}
+
+// todo detect Windows to
+// + replace terminal shell with command prompt
+// + automatically use powershell
+var configShellCmd = &cobra.Command{
+	Use:   "shell",
+	Short: cp("include retrotxt autocompletion to the terminal shell"),
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("shell config file")
+	},
+}
+var configSetCmd = &cobra.Command{
+	Use:   "set",
+	Short: cp("change a configuration"),
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("set config file")
+	},
+}
 
 func init() {
 	rootCmd.AddCommand(configCmd)
+	configCmd.AddCommand(configCreateCmd)
+	configCreateCmd.Flags().BoolVarP(&fileOverwrite, "overwrite", "y", false, "overwrite any existing config file")
+	configCmd.AddCommand(configDeleteCmd)
+	configCmd.AddCommand(configEditCmd)
+	configCmd.AddCommand(configInfoCmd)
+	configCmd.AddCommand(configShellCmd)
+	configCmd.AddCommand(configSetCmd)
 
 	// todo
 	// include text on how to use
@@ -60,6 +116,14 @@ func init() {
 	// configCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
+/*
+config create
+--overwrite=true/false
+config edit
+> look for EDITOR env var
+config show
+> output using viper.Sub("create.meta")
+*/
 /*
 
 possible options:
