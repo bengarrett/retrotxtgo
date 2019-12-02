@@ -1,5 +1,5 @@
-//Package encoding to handle the opening and reading of text files
-package encoding
+//Package codepage to handle the opening and reading of text files
+package codepage
 
 //https://stackoverflow.com/questions/36111777/golang-how-to-read-a-text-file
 
