@@ -20,36 +20,34 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"strings"
 	"testing"
 )
 
-func Test_read(t *testing.T) {
-	type args struct {
-		name string
+func Test_createLayouts(t *testing.T) {
+	l := strings.Split(createLayouts(), ",")
+	if got := len(l); got != 5 {
+		t.Errorf("createTemplates() = %v, want %v", got, 5)
 	}
-	args0 := args{""}
-	args1 := args{"somefile.txt"}
-	args2 := args{"../textfiles/hi.txt"}
-	want2 := []byte("Hello world ☺\n☺ ሰላም ልዑል")
+	if got := createTemplates()["body"]; got != "body-content" {
+		t.Errorf("createTemplates() = %v, want %v", got, "body-content")
+	}
+}
+
+func Test_createTemplates(t *testing.T) {
 	tests := []struct {
-		name    string
-		args    args
-		want    []byte
-		wantErr bool
+		name string
+		key  string
+		want string
 	}{
-		{"no arguments", args0, nil, true},
-		{"invalid file", args1, nil, true},
-		{"valid file", args2, want2, false},
+		{"empty", "", ""},
+		{"body", "body", "body-content"},
+		{"standard", "standard", "standard"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := read(tt.args.name)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("read() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("read() = %v, want %v", got, tt.want)
+			if got := createTemplates()[tt.key]; !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("createTemplates() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -93,6 +91,12 @@ func Test_pagedata(t *testing.T) {
 	got = pagedata(d).MetaDesc
 	if got != w {
 		t.Errorf("pagedata().MetaDesc = %v, want %v", got, w)
+	}
+	htmlLayout = "standard"
+	w = ""
+	got = pagedata(d).MetaAuthor
+	if got != w {
+		t.Errorf("pagedata().MetaAuthor = %v, want %v", got, w)
 	}
 }
 
@@ -151,38 +155,6 @@ func Test_writeStdout(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := writeStdout(tt.args.data, tt.args.test); (err != nil) != tt.wantErr {
 				t.Errorf("writeStdout() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func Test_layOpts(t *testing.T) {
-	tests := []struct {
-		name string
-		want string
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := layOpts(); got != tt.want {
-				t.Errorf("layOpts() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_layTemplates(t *testing.T) {
-	tests := []struct {
-		name string
-		want files
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := layTemplates(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("layTemplates() = %v, want %v", got, tt.want)
 			}
 		})
 	}

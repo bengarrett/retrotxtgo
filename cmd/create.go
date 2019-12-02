@@ -104,7 +104,7 @@ var createCmd = &cobra.Command{
 		}
 		// check for a --server flag to serve the HTML
 		if serverFiles == true {
-			if err = serveFile(data, false); err == nil {
+			if err = serveFile(data, serverPort, false); err == nil {
 				h := ErrorFmt{"server problem", ">", err}
 				h.GoErr()
 			}
@@ -225,7 +225,7 @@ func newTemplate(test bool) (*template.Template, error) {
 
 // serveFile creates and serves the html template on a local HTTP web server.
 // The argument test is used internally.
-func serveFile(data []byte, test bool) error {
+func serveFile(data []byte, port int, test bool) error {
 	t, err := newTemplate(test)
 	if err != nil {
 		return err
@@ -235,9 +235,9 @@ func serveFile(data []byte, test bool) error {
 	})
 	fs := http.FileServer(http.Dir("static/"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
-	fmt.Printf("Web server is available at %s\n", color.Primary.Sprintf("http://localhost:%v", serverPort))
+	fmt.Printf("Web server is available at %s\n", color.Primary.Sprintf("http://localhost:%v", port))
 	color.Info.Println("Press Ctrl+C to stop")
-	if err = http.ListenAndServe(fmt.Sprintf(":%v", serverPort), nil); err != nil {
+	if err = http.ListenAndServe(fmt.Sprintf(":%v", port), nil); err != nil {
 		return err
 	}
 	return nil
