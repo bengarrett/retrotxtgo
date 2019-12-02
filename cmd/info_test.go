@@ -17,38 +17,48 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
+	"encoding/json"
+	"fmt"
 	"os"
 	"reflect"
 	"testing"
 )
 
 func Test_details(t *testing.T) {
+	n := "../textfiles/hi.txt"
 	type args struct {
 		name string
 	}
-	tests := []struct {
-		name    string
-		args    args
-		want    Detail
-		wantErr bool
-	}{
-		// TODO: Add test cases.
+	got, err := details(n)
+	if err != nil {
+		t.Errorf("details() = %v, want %v", err, nil)
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := details(tt.args.name)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("details() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("details() = %v, want %v", got, tt.want)
-			}
-		})
+	if got.Bytes != 39 {
+		t.Errorf("details() = %v, want %v", got.Bytes, 39)
+	}
+	if got.Name != "hi.txt" {
+		t.Errorf("details() = %v, want %v", got.Name, "hi.txt")
+	}
+	if got.Slug != "hi-txt" {
+		t.Errorf("details() = %v, want %v", got.Slug, "hi-txt")
+	}
+	if got.Mime != "text/plain" {
+		t.Errorf("details() = %v, want %v", got.Mime, "text/plain")
+	}
+	if got.Utf8 != true {
+		t.Errorf("details() = %v, want %v", got.Utf8, true)
+	}
+	if got.MD5 != "a4098d2ae92f55f6aacc6865812a4291" {
+		t.Errorf("details() = %v, want %v", got.MD5, "a4098d2ae92f55f6aacc6865812a4291")
 	}
 }
 
 func Test_parse(t *testing.T) {
+	f, err := os.Stat("../textfiles/hi.txt")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 	type args struct {
 		data []byte
 		stat os.FileInfo
@@ -56,10 +66,12 @@ func Test_parse(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    Detail
+		want    int
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{"empty", args{[]byte(""), f}, 0, false},
+		{"string", args{[]byte("hello"), f}, 5, false},
+		{"string", args{[]byte("世界你好"), f}, 8, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -68,48 +80,15 @@ func Test_parse(t *testing.T) {
 				t.Errorf("parse() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("parse() = %v, want %v", got, tt.want)
+			if !reflect.DeepEqual(got.CharCount, tt.want) {
+				t.Errorf("parse() = %v, want %v", got.CharCount, tt.want)
 			}
 		})
 	}
 }
 
-func Test_tableOutput(t *testing.T) {
-	type args struct {
-		d Detail
-	}
-	tests := []struct {
-		name string
-		args args
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tableOutput(tt.args.d)
-		})
-	}
-}
-
-func Test_xmlOutput(t *testing.T) {
-	type args struct {
-		f Detail
-	}
-	tests := []struct {
-		name string
-		args args
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			xmlOutput(tt.args.f)
-		})
-	}
-}
-
 func Test_infoJSON(t *testing.T) {
+	var f Detail
 	type args struct {
 		indent bool
 		f      Detail
@@ -117,47 +96,28 @@ func Test_infoJSON(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
+		want bool
 	}{
-		// TODO: Add test cases.
+		{"no indent", args{false, f}, true},
+		{"indent", args{true, f}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			infoJSON(tt.args.indent, tt.args.f)
-		})
-	}
-}
-
-func Test_infoText(t *testing.T) {
-	type args struct {
-		c bool
-		d Detail
-	}
-	tests := []struct {
-		name string
-		args args
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			infoText(tt.args.c, tt.args.d)
+			if got := json.Valid(infoJSON(tt.args.indent, tt.args.f)); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("infoJSON() = %v, want %v", got, tt.want)
+			}
 		})
 	}
 }
 
 func Test_infoXML(t *testing.T) {
-	type args struct {
-		f Detail
+	n := "../textfiles/hi.txt"
+	f, err := details(n)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
-	tests := []struct {
-		name string
-		args args
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			infoXML(tt.args.f)
-		})
+	if got := len(infoXML(f)); got != 322 {
+		t.Errorf("infoXML() = %v, want %v", got, 322)
 	}
 }

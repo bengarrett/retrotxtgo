@@ -21,14 +21,13 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/InVisionApp/tabular"
 	"github.com/aofei/mimesniffer"
-	"github.com/bengarrett/retrotxtgo/encoding"
+	"github.com/bengarrett/retrotxtgo/codepage"
 	"github.com/bengarrett/retrotxtgo/filesystem"
 	"github.com/labstack/gommon/bytes"
 	"github.com/mattn/go-runewidth"
@@ -54,14 +53,6 @@ type Detail struct {
 
 var infoFmt string
 
-// paths := [5]string{
-// 	"textfiles/hi.txt",
-// 	"/Users/ben/Downloads/impure74/jp!xqtrd.asc",
-// 	"/Users/ben/Downloads/impure74/impure74.ans",
-// 	"/Users/ben/Downloads/bbh/hx_joker2019.ans",
-// 	"/Users/ben/Downloads/bbh/hx_jack.ans",
-// }
-
 // infoCmd represents the info command
 var infoCmd = &cobra.Command{
 	Use:   "info FILE",
@@ -83,13 +74,13 @@ var infoCmd = &cobra.Command{
 		case "color", "c":
 			infoText(true, f)
 		case "json", "j":
-			infoJSON(true, f)
+			fmt.Printf("%s\n", infoJSON(true, f))
 		case "json.min", "jm":
-			infoJSON(false, f)
+			fmt.Printf("%s\n", infoJSON(false, f))
 		case "text":
 			infoText(false, f)
 		case "xml", "x":
-			infoXML(f)
+			fmt.Printf("%s\n", infoXML(f))
 		default:
 			e := ErrorFmt{"format", fmt.Sprintf("%s", infoFmt), fmt.Errorf(infoFormats)}
 			e.FlagErr()
@@ -102,7 +93,7 @@ func init() {
 	infoCmd.Flags().StringVarP(&infoFmt, "format", "f", "color", "output format \noptions: "+infoFormats)
 }
 
-func infoJSON(indent bool, f Detail) {
+func infoJSON(indent bool, f Detail) []byte {
 	var j []byte
 	var err error
 	switch indent {
@@ -115,7 +106,7 @@ func infoJSON(indent bool, f Detail) {
 		h := ErrorFmt{"could not create", "json", err}
 		h.GoErr()
 	}
-	fmt.Println(string(j))
+	return j
 }
 
 func infoText(c bool, d Detail) {
@@ -144,7 +135,7 @@ func infoText(c bool, d Detail) {
 	}
 }
 
-func infoXML(f Detail) {
+func infoXML(f Detail) []byte {
 	type xmldetail struct {
 		XMLName   xml.Name  `xml:"file"`
 		ID        string    `xml:"id,attr"`
@@ -169,9 +160,10 @@ func infoXML(f Detail) {
 	x.Utf8 = f.Utf8
 	xmlData, err := xml.MarshalIndent(x, "", "\t")
 	if err != nil {
-		log.Println(err)
+		h := ErrorFmt{"could not create", "xml", err}
+		h.GoErr()
 	}
-	fmt.Println(string(xmlData))
+	return xmlData
 }
 
 func details(name string) (Detail, error) {
@@ -200,7 +192,7 @@ func parse(data []byte, stat os.FileInfo) (Detail, error) {
 	d.MD5 = fmt.Sprintf("%x", checksum)
 	d.Modified = stat.ModTime()
 	d.Slug = slugify.Slugify(stat.Name())
-	d.Utf8 = encoding.IsUTF8(data)
+	d.Utf8 = codepage.UTF8(data)
 	if stat.Size() < 1000 {
 		d.Size = fmt.Sprintf("%v bytes", stat.Size())
 	} else {
