@@ -23,6 +23,7 @@ import (
 	"runtime"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"gopkg.in/gookit/color.v1"
 )
 
@@ -52,7 +53,8 @@ The shown ` + cc("RetroTxt URL") + ` is the weblink to the application Github pa
 ` + cc("Binary") + ` should return the path name of this program. It maybe inaccurate
 if it is launched through an operating system symlink.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		switch versionFmt {
+		f := viper.GetString("version.format")
+		switch f {
 		case "color", "c", "":
 			versionText(true)
 		case "json", "j":
@@ -62,7 +64,7 @@ if it is launched through an operating system symlink.`,
 		case "text", "t":
 			versionText(false)
 		default:
-			e := ErrorFmt{"format", fmt.Sprintf("%s", versionFmt), fmt.Errorf(versionFormats)}
+			e := ErrorFmt{"format", fmt.Sprintf("%s", f), fmt.Errorf(versionFormats)}
 			e.FlagErr()
 		}
 	},
@@ -71,6 +73,7 @@ if it is launched through an operating system symlink.`,
 func init() {
 	rootCmd.AddCommand(versionCmd)
 	versionCmd.Flags().StringVarP(&versionFmt, "format", "f", "color", "output format \noptions: "+versionFormats)
+	viper.BindPFlag("version.format", versionCmd.Flags().Lookup("format"))
 }
 
 func versionJSON(indent bool) []byte {

@@ -74,9 +74,6 @@ var rootCmd = &cobra.Command{
 using RetroTxt. The operating system agnostic tool that takes retro text
 files and stylises them into a more pleasing, useful format to view and
 copy in a web browser.`),
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
 }
 
 var alert = func() string {

@@ -33,6 +33,7 @@ import (
 	"github.com/mattn/go-runewidth"
 	"github.com/mozillazg/go-slugify"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"gopkg.in/gookit/color.v1"
 )
 
@@ -66,11 +67,8 @@ var infoCmd = &cobra.Command{
 			h := ErrorFmt{"invalid FILE", args[0], err}
 			h.GoErr()
 		}
-		if infoFmt == "" {
-			// todo load default from config file
-			infoFmt = "color"
-		}
-		switch infoFmt {
+		i := viper.GetString("info.format")
+		switch i {
 		case "color", "c":
 			infoText(true, f)
 		case "json", "j":
@@ -91,6 +89,7 @@ var infoCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(infoCmd)
 	infoCmd.Flags().StringVarP(&infoFmt, "format", "f", "color", "output format \noptions: "+infoFormats)
+	viper.BindPFlag("info.format", infoCmd.Flags().Lookup("format"))
 }
 
 func infoJSON(indent bool, f Detail) []byte {

@@ -23,10 +23,12 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 
 	"github.com/bengarrett/retrotxtgo/filesystem"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"gopkg.in/gookit/color.v1"
 )
 
@@ -54,7 +56,6 @@ var exampleCmd = func() string {
 	s := string(os.PathSeparator)
 	e := `  retrotxtgo create textfile.txt -t "Text file" -d "Some random text file"`
 	e += fmt.Sprintf("\n  retrotxtgo create ~%sDownloads%stextfile.txt --layout mini --save .%shtml", s, s, s)
-	//	e += fmt.Sprintf("\n  retrotxtgo create textfile.txt -s .%shtml", s)
 	return color.Info.Sprint(e)
 }
 
@@ -66,6 +67,7 @@ var createCmd = &cobra.Command{
 	//Long: `` // used by help create
 	Example: exampleCmd(),
 	Run: func(cmd *cobra.Command, args []string) {
+		htmlLayout = viper.GetString("create.layout")
 		var data []byte
 		var err error
 		// --body="" is a hidden flag to test without providing a FILE
@@ -86,13 +88,13 @@ var createCmd = &cobra.Command{
 		// check for a --save flag to save to files
 		// otherwise output is sent to stdout
 		s := cmd.Flags().Lookup("save")
-		switch s.Changed {
-		case true:
+		switch {
+		case s.Changed == true:
 			err = writeFile(data, fmt.Sprintf("%s", s.Value), false)
-		default:
-			if serverFiles == false {
-				err = writeStdout(data, false)
-			}
+		case viper.GetString("create.save-directory") != "":
+			err = writeFile(data, fmt.Sprintf("%s", viper.GetString("create.save-directory")), false)
+		case serverFiles == false:
+			err = writeStdout(data, false)
 		}
 		if err != nil {
 			if err.Error() == errors.New("invalid-layout").Error() {
@@ -104,7 +106,12 @@ var createCmd = &cobra.Command{
 		}
 		// check for a --server flag to serve the HTML
 		if serverFiles == true {
-			if err = serveFile(data, serverPort, false); err == nil {
+			// viper.GetInt() doesn't work as expected
+			port, err := strconv.Atoi(viper.GetString("create.server-port"))
+			if err != nil {
+				port = serverPort
+			}
+			if err = serveFile(data, port, false); err == nil {
 				h := ErrorFmt{"server problem", ">", err}
 				h.GoErr()
 			}
@@ -134,19 +141,32 @@ func init() {
 	rootCmd.AddCommand(createCmd)
 	// main flags
 	createCmd.Flags().StringVarP(&htmlLayout, "layout", "l", "standard", "output HTML layout\noptions: "+createLayouts())
+	viper.BindPFlag("create.layout", createCmd.Flags().Lookup(("layout")))
 	createCmd.Flags().StringVarP(&pageTitle, "title", "t", d.PageTitle, "defines the page title that is shown in a browser title bar or tab")
+	viper.BindPFlag("create.title", createCmd.Flags().Lookup("title"))
 	createCmd.Flags().StringVarP(&metaDesc, "meta-description", "d", d.MetaDesc, "a short and accurate summary of the content of the page")
+	viper.BindPFlag("create.meta.description", createCmd.Flags().Lookup("meta-description"))
 	createCmd.Flags().StringVarP(&metaAuthor, "meta-author", "a", d.MetaAuthor, "defines the name of the page authors")
+	viper.BindPFlag("create.meta.title", createCmd.Flags().Lookup("meta-author"))
 	// minor flags
 	createCmd.Flags().BoolVarP(&metaGenerator, "meta-generator", "g", d.MetaGenerator, "include the RetroTxt version and page generation date")
+	viper.BindPFlag("create.meta.generator", createCmd.Flags().Lookup("meta-generator"))
 	createCmd.Flags().StringVar(&metaColorScheme, "meta-color-scheme", d.MetaColorScheme, "specifies one or more color schemes with which the page is compatible")
+	viper.BindPFlag("create.meta.color-scheme", createCmd.Flags().Lookup("meta-color-scheme"))
 	createCmd.Flags().StringVar(&metaKeywords, "meta-keywords", d.MetaKeywords, "words relevant to the page content")
+	viper.BindPFlag("create.meta.keywords", createCmd.Flags().Lookup("meta-keywords"))
 	createCmd.Flags().StringVar(&metaReferrer, "meta-referrer", d.MetaReferrer, "controls the Referer HTTP header attached to requests sent from the page")
+	viper.BindPFlag("create.meta.referrer", createCmd.Flags().Lookup("meta-referrer"))
 	createCmd.Flags().StringVar(&metaThemeColor, "meta-theme-color", d.MetaThemeColor, "indicates a suggested color that user agents should use to customize the display of the page")
+	viper.BindPFlag("create.meta.theme-color", createCmd.Flags().Lookup("meta-theme-color"))
 	// output flags
+	// todo: when using save-directory config setting, there is no way to stdout using flags
+	// instead add an output flag with print, file|save
 	createCmd.Flags().StringVarP(&saveToFiles, "save", "s", "", "save HTML as files to store this directory"+homedir()+curdir())
+	viper.BindPFlag("create.save-directory", createCmd.Flags().Lookup("save"))
 	createCmd.Flags().BoolVarP(&serverFiles, "server", "p", false, "serve HTML over an internal web server")
 	createCmd.Flags().IntVar(&serverPort, "port", 8080, "port which the internet web server will listen")
+	viper.BindPFlag("create.server-port", createCmd.Flags().Lookup("port"))
 	// hidden flags
 	createCmd.Flags().StringVarP(&preText, "body", "b", "", "override and inject string content into the body element")
 	// flag options
@@ -196,16 +216,16 @@ func pagedata(data []byte) PageData {
 	switch htmlLayout {
 	case "full", "standard":
 		p = LayoutDefault()
-		p.MetaAuthor = metaAuthor
-		p.MetaColorScheme = metaColorScheme
-		p.MetaDesc = metaDesc
-		p.MetaGenerator = metaGenerator
-		p.MetaKeywords = metaKeywords
-		p.MetaReferrer = metaReferrer
-		p.MetaThemeColor = metaThemeColor
-		p.PageTitle = pageTitle
+		p.MetaAuthor = viper.GetString("create.meta.author")
+		p.MetaColorScheme = viper.GetString("create.meta.color-scheme")
+		p.MetaDesc = viper.GetString("create.meta.description")
+		p.MetaGenerator = viper.GetBool("create.meta.generator")
+		p.MetaKeywords = viper.GetString("create.meta.keywords")
+		p.MetaReferrer = viper.GetString("create.meta.referrer")
+		p.MetaThemeColor = viper.GetString("create.meta.theme-color")
+		p.PageTitle = viper.GetString("create.title")
 	case "mini":
-		p.PageTitle = pageTitle
+		p.PageTitle = viper.GetString("create.title")
 		p.MetaGenerator = false
 	}
 	p.PreText = string(data)
