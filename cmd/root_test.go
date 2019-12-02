@@ -17,126 +17,36 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
-	"reflect"
+	"errors"
 	"testing"
-
-	"github.com/spf13/cobra"
 )
 
 func TestLayoutDefault(t *testing.T) {
-	tests := []struct {
-		name string
-		want PageData
-	}{
-		// TODO: Add test cases.
+	l := LayoutDefault()
+	if got := l.MetaGenerator; got != true {
+		t.Errorf("LayoutDefault() = %v, want %v", got, true)
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := LayoutDefault(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("LayoutDefault() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestExecute(t *testing.T) {
-	tests := []struct {
-		name string
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			Execute()
-		})
-	}
-}
-
-func Test_initConfig(t *testing.T) {
-	tests := []struct {
-		name string
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			initConfig()
-		})
+	if got := l.PreText; got != "Hello world." {
+		t.Errorf("LayoutDefault() = %v, want %v", got, "Hello world.")
 	}
 }
 
 func TestErrorFmt_ErrorPrint(t *testing.T) {
+	err := errors.New("err-text")
+	h := ErrorFmt{"error", "test", err}
+	//h.GoErr()
 	tests := []struct {
 		name string
 		e    *ErrorFmt
 		want string
 	}{
-		// TODO: Add test cases.
+		{"default", &h, "\nERROR: error test err-text"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.e.ErrorPrint(); got != tt.want {
 				t.Errorf("ErrorFmt.ErrorPrint() = %v, want %v", got, tt.want)
 			}
-		})
-	}
-}
-
-func TestErrorFmt_GoErr(t *testing.T) {
-	tests := []struct {
-		name string
-		e    *ErrorFmt
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.e.GoErr()
-		})
-	}
-}
-
-func TestErrorFmt_FlagErr(t *testing.T) {
-	tests := []struct {
-		name string
-		e    *ErrorFmt
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.e.FlagErr()
-		})
-	}
-}
-
-func TestErrorFmt_UsageErr(t *testing.T) {
-	type args struct {
-		cmd *cobra.Command
-	}
-	tests := []struct {
-		name string
-		e    *ErrorFmt
-		args args
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.e.UsageErr(tt.args.cmd)
-		})
-	}
-}
-
-func TestFileMissingErr(t *testing.T) {
-	tests := []struct {
-		name string
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			FileMissingErr()
 		})
 	}
 }

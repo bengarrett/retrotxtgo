@@ -113,14 +113,6 @@ func FileMissingErr() {
 	os.Exit(1)
 }
 
-// UsageErr exits with an invalid command argument.
-func (e *ErrorFmt) UsageErr(cmd *cobra.Command) {
-	println("Usage:\n" + "  retrotxtgo " + cmd.Use)
-	println("\nExamples:\n" + cmd.Example)
-	println(e.ErrorPrint())
-	os.Exit(1)
-}
-
 var cc = func(t string) string {
 	return color.Comment.Sprintf(t)
 }
