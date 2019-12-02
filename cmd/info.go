@@ -57,7 +57,7 @@ var infoFmt string
 // infoCmd represents the info command
 var infoCmd = &cobra.Command{
 	Use:   "info FILE",
-	Short: color.Primary.Sprint("Information on a text file"),
+	Short: cp("Information on a text file"),
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			FileMissingErr()

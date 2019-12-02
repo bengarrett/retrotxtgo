@@ -63,7 +63,7 @@ var exampleCmd = func() string {
 var createCmd = &cobra.Command{
 	Use:     "create FILE",
 	Aliases: []string{"new"},
-	Short:   color.Primary.Sprint("Create a HTML document from a text file"),
+	Short:   cp("Create a HTML document from a text file"),
 	//Long: `` // used by help create
 	Example: exampleCmd(),
 	Run: func(cmd *cobra.Command, args []string) {

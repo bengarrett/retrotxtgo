@@ -37,8 +37,8 @@ var versionFmt string
 var versionCmd = &cobra.Command{
 	Use:     "version",
 	Aliases: []string{"ver", "v"},
-	Short:   color.Primary.Sprint("Version information for RetroTxt"),
-	Long: color.Primary.Sprint("Version information for Retrotxt") + `
+	Short:   cp("Version information for RetroTxt"),
+	Long: cp("Version information for Retrotxt") + `
 
 The shown ` + cc("RetroTxt URL") + ` is the weblink to the application Github page.
 

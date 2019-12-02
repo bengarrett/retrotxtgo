@@ -69,15 +69,11 @@ var (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "retrotxtgo",
-	Short: color.Primary.Sprint("RetroTxt is the tool that turns ANSI, ASCII, NFO text into browser ready HTML"),
+	Short: cp("RetroTxt is the tool that turns ANSI, ASCII, NFO text into browser ready HTML"),
 	Long: color.Info.Sprint(`Turn many pieces of ANSI text art and ASCII/NFO plain text into HTML5 text
 using RetroTxt. The operating system agnostic tool that takes retro text
 files and stylises them into a more pleasing, useful format to view and
 copy in a web browser.`),
-}
-
-var alert = func() string {
-	return color.Error.Sprint("ERROR:")
 }
 
 // ErrorPrint returns a coloured error message.
@@ -95,32 +91,38 @@ func (e *ErrorFmt) GoErr() {
 
 // FlagErr exits with an invalid command flag value.
 func (e *ErrorFmt) FlagErr() {
-	i := color.OpItalic.Sprintf("invalid flag")
 	a := fmt.Sprintf("\"--%s %s\"", e.Issue, e.Arg)
 	m := color.OpFuzzy.Sprintf(" valid %s values: %v", e.Issue, e.Msg)
-	color.Printf("\n%s %s %s%s\n", alert(), i, a, m)
+	color.Printf("\n%s %s %s%s\n", alert(), ci("invalid flag"), a, m)
 	os.Exit(1)
 }
 
 // FileMissingErr exits with a missing FILE error.
 func FileMissingErr() {
-	i := color.OpItalic.Sprintf("missing the FILE argument")
-	m := color.OpFuzzy.Sprintf("you need to provide a path to a text file")
+	i := ci("missing the FILE argument")
+	m := cf("you need to provide a path to a text file")
 	color.Printf("\n%s %s %s\n", alert(), i, m)
 	os.Exit(1)
 }
 
-var cc = func(t string) string {
-	return color.Comment.Sprintf(t)
-}
-
-var cf = func(t string) string {
-	return color.OpFuzzy.Sprint(t)
-}
-
-var ci = func(t string) string {
-	return color.OpItalic.Sprintf(t)
-}
+// color aliases
+var (
+	alert = func() string {
+		return color.Error.Sprint("ERROR:")
+	}
+	cc = func(t string) string {
+		return color.Comment.Sprint(t)
+	}
+	cf = func(t string) string {
+		return color.OpFuzzy.Sprint(t)
+	}
+	ci = func(t string) string {
+		return color.OpItalic.Sprint(t)
+	}
+	cp = func(t string) string {
+		return color.Primary.Sprint(t)
+	}
+)
 
 // LayoutDefault generates default data for the HTML layout template.
 func LayoutDefault() PageData {
@@ -146,16 +148,7 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file "+cf("(default is $HOME/.retrotxtgo.yaml)"))
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -170,7 +163,6 @@ func initConfig() {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-
 		// Search config in home directory with name ".retrotxtgo" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigName(".retrotxtgo")
@@ -179,7 +171,8 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
+	// todo: toggle a flag to hide this when CREATE XML/JSON/TEXT as it won't be able to be piped
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		fmt.Println("Using config file:", cf(viper.ConfigFileUsed()))
 	}
 }
