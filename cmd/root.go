@@ -159,10 +159,7 @@ func FileMissingErr() {
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	Check(ErrorFmt{"execute", "cobra", rootCmd.Execute()})
 }
 
 func init() {
@@ -179,10 +176,7 @@ func initConfig() {
 	} else {
 		// Find home directory.
 		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		Check(ErrorFmt{"directory", "user home", err})
 		// Search config in home directory with name ".retrotxtgo" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigName(".retrotxtgo")
@@ -197,9 +191,9 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			// Config file not found; ignore error if desired
-			fmt.Printf("%s\n", err)
 		} else {
 			// Config file was found but another error was produced
+			Check(ErrorFmt{"config file", viper.ConfigFileUsed(), err})
 			fmt.Printf("%s\n", err)
 		}
 	} else if suppressCfg == false {
