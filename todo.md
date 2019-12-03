@@ -24,3 +24,5 @@ https://github.com/julienschmidt/httprouter
 
 Shrink binaries
 https://blog.filippo.io/shrink-your-go-binaries-with-this-one-weird-trick/
+
+[ ] - Handle Windows colour support
