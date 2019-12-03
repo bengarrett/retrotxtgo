@@ -18,24 +18,71 @@ package cmd
 
 import (
 	"errors"
+	"os"
+	"os/exec"
 	"testing"
+
+	"github.com/spf13/viper"
 )
 
-func TestErrorFmt_errorPrint(t *testing.T) {
-	err := errors.New("err-text")
-	h := ErrorFmt{"error", "test", err}
+func TestInitDefaults(t *testing.T) {
 	tests := []struct {
 		name string
-		e    *ErrorFmt
+		key  string
 		want string
 	}{
-		{"default", &h, "\nERROR: error test err-text"},
+		{"empty", "", ""},
+		{"layout", "create.layout", "standard"},
+		{"save dir", "create.save-directory", ""},
+	}
+	InitDefaults()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := viper.GetString(tt.key); got != tt.want {
+				t.Errorf("InitDefaults() %v = %v, want %v", tt.key, got, tt.want)
+			}
+		})
+	}
+}
+
+// func Test_initConfig(t *testing.T) {
+// 	cfgFile = ""
+// 	initConfig()
+// 	want := "%HOME/.retrotxtgo.yaml"
+// 	if got := viper.ConfigFileUsed(); got != want {
+// 		t.Errorf("initConfig() ConfigFileUsed() = %v, want %v", got, want)
+// 	}
+// }
+
+func TestCheckFlag(t *testing.T) {
+	type args struct {
+		e ErrorFmt
+	}
+	a := ErrorFmt{"", "", nil}
+	b := ErrorFmt{"x", "y", errors.New("z")}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"blank", args{}, false},
+		{"empty", args{a}, false},
+		{"xyz", args{b}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.e.errorPrint(); got != tt.want {
-				t.Errorf("ErrorFmt.errorPrint() = %v, want %v", got, tt.want)
+			// https://stackoverflow.com/questions/26225513/how-to-test-os-exit-scenarios-in-go
+			if os.Getenv("BE_CRASHER") == "1" {
+				CheckFlag(tt.args.e)
+				return
 			}
+			cmd := exec.Command(os.Args[0], "-test.run=TestCrasher")
+			cmd.Env = append(os.Environ(), "BE_CRASHER=1")
+			err := cmd.Run()
+			if e, ok := err.(*exec.ExitError); ok && !e.Success() {
+				return
+			}
+			t.Errorf("process ran with err %v, want exit status 1", err)
 		})
 	}
 }
