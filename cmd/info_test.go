@@ -110,6 +110,18 @@ func Test_infoJSON(t *testing.T) {
 	}
 }
 
+func Test_infoText(t *testing.T) {
+	n := "../textfiles/hi.txt"
+	d, err := details(n)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	if got := len(infoText(false, d)); got != 240 {
+		t.Errorf("infoText() = %v, want %v", got, 240)
+	}
+}
+
 func Test_infoXML(t *testing.T) {
 	n := "../textfiles/hi.txt"
 	f, err := details(n)

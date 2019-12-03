@@ -67,13 +67,13 @@ var infoCmd = &cobra.Command{
 		i := viper.GetString("info.format")
 		switch i {
 		case "color", "c":
-			infoText(true, f)
+			fmt.Printf("%s\n", infoText(true, f))
 		case "json", "j":
 			fmt.Printf("%s\n", infoJSON(true, f))
 		case "json.min", "jm":
 			fmt.Printf("%s\n", infoJSON(false, f))
 		case "text":
-			infoText(false, f)
+			fmt.Printf("%s\n", infoText(false, f))
 		case "xml", "x":
 			fmt.Printf("%s\n", infoXML(f))
 		default:
@@ -102,9 +102,9 @@ func infoJSON(indent bool, f Detail) []byte {
 	return j
 }
 
-func infoText(c bool, d Detail) {
+func infoText(c bool, f Detail) string {
 	color.Enable = c
-	var col = func(t string) string {
+	var info = func(t string) string {
 		return color.Info.Sprintf("%s\t", t)
 	}
 	tab := tabular.New()
@@ -113,19 +113,21 @@ func infoText(c bool, d Detail) {
 	var data = []struct {
 		d, v string
 	}{
-		{d: "Filename", v: col(d.Name)},
-		{d: "MIME type", v: col(d.Mime)},
-		{d: "UTF-8", v: col(fmt.Sprintf("%v", d.Utf8))},
-		{d: "Characters", v: col(fmt.Sprintf("%v", d.CharCount))},
-		{d: "Size", v: col(d.Size)},
-		{d: "Modified", v: col(fmt.Sprintf("%v", d.Modified.Format(FileDate)))},
-		{d: "MD5 checksum", v: col(d.MD5)},
-		{d: "Slug", v: col(d.Slug)},
+		{d: "Filename", v: f.Name},
+		{d: "MIME type", v: f.Mime},
+		{d: "UTF-8", v: fmt.Sprintf("%v", f.Utf8)},
+		{d: "Characters", v: fmt.Sprintf("%v", f.CharCount)},
+		{d: "Size", v: f.Size},
+		{d: "Modified", v: fmt.Sprintf("%v", f.Modified.Format(FileDate))},
+		{d: "MD5 checksum", v: f.MD5},
+		{d: "Slug", v: f.Slug},
 	}
 	format := tab.Print("*")
+	var t string
 	for _, x := range data {
-		fmt.Printf(format, x.d, x.v)
+		t = t + fmt.Sprintf(format, x.d, info(x.v))
 	}
+	return t
 }
 
 func infoXML(f Detail) []byte {
