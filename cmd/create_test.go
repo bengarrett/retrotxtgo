@@ -80,13 +80,11 @@ func Test_pagedata(t *testing.T) {
 		t.Errorf("pagedata().PreText = %v, want %v", got, w)
 	}
 	htmlLayout = "mini"
-	pageTitle = "page title"
-	w = pageTitle
+	w = "RetroTxt | example"
 	got = pagedata(d).PageTitle
 	if got != w {
 		t.Errorf("pagedata().PageTitle = %v, want %v", got, w)
 	}
-	metaDesc = "page description"
 	w = ""
 	got = pagedata(d).MetaDesc
 	if got != w {
