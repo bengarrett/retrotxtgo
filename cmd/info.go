@@ -87,8 +87,9 @@ var infoCmd = &cobra.Command{
 }
 
 func init() {
+	InitDefaults()
 	rootCmd.AddCommand(infoCmd)
-	infoCmd.Flags().StringVarP(&infoFmt, "format", "f", "color", "output format \noptions: "+infoFormats)
+	infoCmd.Flags().StringVarP(&infoFmt, "format", "f", viper.GetString("info.format"), "output format \noptions: "+infoFormats)
 	viper.BindPFlag("info.format", infoCmd.Flags().Lookup("format"))
 }
 

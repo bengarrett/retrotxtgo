@@ -120,6 +120,7 @@ var createCmd = &cobra.Command{
 }
 
 func init() {
+	InitDefaults()
 	homedir := func() string {
 		s := "\n" + ci("--save ~") + " saves to the home or user directory"
 		d, err := os.UserHomeDir()
@@ -136,36 +137,37 @@ func init() {
 		}
 		return s + " at " + cf(d)
 	}
-
-	d := LayoutDefault()
+	def := func(s string) string {
+		return viper.GetString(s)
+	}
 	rootCmd.AddCommand(createCmd)
 	// main flags
-	createCmd.Flags().StringVarP(&htmlLayout, "layout", "l", "standard", "output HTML layout\noptions: "+createLayouts())
+	createCmd.Flags().StringVarP(&htmlLayout, "layout", "l", def("create.layout"), "output HTML layout\noptions: "+ci(createLayouts()))
 	viper.BindPFlag("create.layout", createCmd.Flags().Lookup(("layout")))
-	createCmd.Flags().StringVarP(&pageTitle, "title", "t", d.PageTitle, "defines the page title that is shown in a browser title bar or tab")
+	createCmd.Flags().StringVarP(&pageTitle, "title", "t", def("create.title"), "defines the page title that is shown in a browser title bar or tab")
 	viper.BindPFlag("create.title", createCmd.Flags().Lookup("title"))
-	createCmd.Flags().StringVarP(&metaDesc, "meta-description", "d", d.MetaDesc, "a short and accurate summary of the content of the page")
+	createCmd.Flags().StringVarP(&metaDesc, "meta-description", "d", def("create.meta.description"), "a short and accurate summary of the content of the page")
 	viper.BindPFlag("create.meta.description", createCmd.Flags().Lookup("meta-description"))
-	createCmd.Flags().StringVarP(&metaAuthor, "meta-author", "a", d.MetaAuthor, "defines the name of the page authors")
-	viper.BindPFlag("create.meta.title", createCmd.Flags().Lookup("meta-author"))
+	createCmd.Flags().StringVarP(&metaAuthor, "meta-author", "a", def("create.meta.author"), "defines the name of the page authors")
+	viper.BindPFlag("create.meta.author", createCmd.Flags().Lookup("meta-author"))
 	// minor flags
-	createCmd.Flags().BoolVarP(&metaGenerator, "meta-generator", "g", d.MetaGenerator, "include the RetroTxt version and page generation date")
+	createCmd.Flags().BoolVarP(&metaGenerator, "meta-generator", "g", viper.GetBool("create.meta.generator"), "include the RetroTxt version and page generation date")
 	viper.BindPFlag("create.meta.generator", createCmd.Flags().Lookup("meta-generator"))
-	createCmd.Flags().StringVar(&metaColorScheme, "meta-color-scheme", d.MetaColorScheme, "specifies one or more color schemes with which the page is compatible")
+	createCmd.Flags().StringVar(&metaColorScheme, "meta-color-scheme", def("create.meta.color-scheme"), "specifies one or more color schemes with which the page is compatible")
 	viper.BindPFlag("create.meta.color-scheme", createCmd.Flags().Lookup("meta-color-scheme"))
-	createCmd.Flags().StringVar(&metaKeywords, "meta-keywords", d.MetaKeywords, "words relevant to the page content")
+	createCmd.Flags().StringVar(&metaKeywords, "meta-keywords", def("create.meta.keywords"), "words relevant to the page content")
 	viper.BindPFlag("create.meta.keywords", createCmd.Flags().Lookup("meta-keywords"))
-	createCmd.Flags().StringVar(&metaReferrer, "meta-referrer", d.MetaReferrer, "controls the Referer HTTP header attached to requests sent from the page")
+	createCmd.Flags().StringVar(&metaReferrer, "meta-referrer", def("create.meta.referrer"), "controls the Referer HTTP header attached to requests sent from the page")
 	viper.BindPFlag("create.meta.referrer", createCmd.Flags().Lookup("meta-referrer"))
-	createCmd.Flags().StringVar(&metaThemeColor, "meta-theme-color", d.MetaThemeColor, "indicates a suggested color that user agents should use to customize the display of the page")
+	createCmd.Flags().StringVar(&metaThemeColor, "meta-theme-color", def("create.meta.theme-color"), "indicates a suggested color that user agents should use to customize the display of the page")
 	viper.BindPFlag("create.meta.theme-color", createCmd.Flags().Lookup("meta-theme-color"))
 	// output flags
 	// todo: when using save-directory config setting, there is no way to stdout using flags
 	// instead add an output flag with print, file|save
-	createCmd.Flags().StringVarP(&saveToFiles, "save", "s", "", "save HTML as files to store this directory"+homedir()+curdir())
+	createCmd.Flags().StringVarP(&saveToFiles, "save", "s", def("create.save-directory"), "save HTML as files to store this directory"+homedir()+curdir())
 	viper.BindPFlag("create.save-directory", createCmd.Flags().Lookup("save"))
 	createCmd.Flags().BoolVarP(&serverFiles, "server", "p", false, "serve HTML over an internal web server")
-	createCmd.Flags().IntVar(&serverPort, "port", 8080, "port which the internet web server will listen")
+	createCmd.Flags().IntVar(&serverPort, "port", viper.GetInt("create.server-port"), "port which the internet web server will listen")
 	viper.BindPFlag("create.server-port", createCmd.Flags().Lookup("port"))
 	// hidden flags
 	createCmd.Flags().StringVarP(&preText, "body", "b", "", "override and inject string content into the body element")
@@ -215,7 +217,6 @@ func pagedata(data []byte) PageData {
 	var p PageData
 	switch htmlLayout {
 	case "full", "standard":
-		p = LayoutDefault()
 		p.MetaAuthor = viper.GetString("create.meta.author")
 		p.MetaColorScheme = viper.GetString("create.meta.color-scheme")
 		p.MetaDesc = viper.GetString("create.meta.description")

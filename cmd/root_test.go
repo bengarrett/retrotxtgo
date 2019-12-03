@@ -21,16 +21,6 @@ import (
 	"testing"
 )
 
-func TestLayoutDefault(t *testing.T) {
-	l := LayoutDefault()
-	if got := l.MetaGenerator; got != true {
-		t.Errorf("LayoutDefault() = %v, want %v", got, true)
-	}
-	if got := l.PreText; got != "Hello world." {
-		t.Errorf("LayoutDefault() = %v, want %v", got, "Hello world.")
-	}
-}
-
 func TestErrorFmt_ErrorPrint(t *testing.T) {
 	err := errors.New("err-text")
 	h := ErrorFmt{"error", "test", err}

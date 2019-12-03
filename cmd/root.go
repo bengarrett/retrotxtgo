@@ -64,16 +64,53 @@ var (
 	// Layout template data
 	Layout  PageData
 	cfgFile string
-)
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "retrotxtgo",
-	Short: cp("RetroTxt is the tool that turns ANSI, ASCII, NFO text into browser ready HTML"),
-	Long: color.Info.Sprint(`Turn many pieces of ANSI text art and ASCII/NFO plain text into HTML5 text
+	// rootCmd represents the base command when called without any subcommands
+	rootCmd = &cobra.Command{
+		Use:   "retrotxtgo",
+		Short: cp("RetroTxt is the tool that turns ANSI, ASCII, NFO text into browser ready HTML"),
+		Long: color.Info.Sprint(`Turn many pieces of ANSI text art and ASCII/NFO plain text into HTML5 text
 using RetroTxt. The operating system agnostic tool that takes retro text
 files and stylises them into a more pleasing, useful format to view and
 copy in a web browser.`),
+	}
+)
+
+// color aliases
+var (
+	alert = func() string {
+		return color.Error.Sprint("ERROR:")
+	}
+	cc = func(t string) string {
+		return color.Comment.Sprint(t)
+	}
+	cf = func(t string) string {
+		return color.OpFuzzy.Sprint(t)
+	}
+	ci = func(t string) string {
+		return color.OpItalic.Sprint(t)
+	}
+	cp = func(t string) string {
+		return color.Primary.Sprint(t)
+	}
+)
+
+// InitDefaults initialises flag and configuration defaults.
+func InitDefaults() {
+	println("InitDefaults")
+	viper.SetDefault("version.format", "color")
+	viper.SetDefault("info.format", "color")
+	viper.SetDefault("create.layout", "standard")
+	viper.SetDefault("create.title", "RetroTxt | example")
+	viper.SetDefault("create.meta.author", "")
+	viper.SetDefault("create.meta.color-scheme", "")
+	viper.SetDefault("create.meta.description", "An example")
+	viper.SetDefault("create.meta.generator", true)
+	viper.SetDefault("create.meta.keywords", "")
+	viper.SetDefault("create.meta.referrer", "")
+	viper.SetDefault("create.meta.theme-color", "")
+	viper.SetDefault("create.save-directory", "")
+	viper.SetDefault("create.server-port", 8080)
 }
 
 // ErrorPrint returns a coloured error message.
@@ -103,38 +140,6 @@ func FileMissingErr() {
 	m := cf("you need to provide a path to a text file")
 	color.Printf("\n%s %s %s\n", alert(), i, m)
 	os.Exit(1)
-}
-
-// color aliases
-var (
-	alert = func() string {
-		return color.Error.Sprint("ERROR:")
-	}
-	cc = func(t string) string {
-		return color.Comment.Sprint(t)
-	}
-	cf = func(t string) string {
-		return color.OpFuzzy.Sprint(t)
-	}
-	ci = func(t string) string {
-		return color.OpItalic.Sprint(t)
-	}
-	cp = func(t string) string {
-		return color.Primary.Sprint(t)
-	}
-)
-
-// LayoutDefault generates default data for the HTML layout template.
-func LayoutDefault() PageData {
-	l := Layout
-	l.BuildVersion = Ver
-	l.BuildDate = time.Now()
-	l.CacheRefresh = fmt.Sprintf("?v=%v", Ver)
-	l.MetaDesc = "A textfile example"
-	l.MetaGenerator = true
-	l.PageTitle = "RetroTxt | example"
-	l.PreText = "Hello world."
-	return l
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

@@ -71,8 +71,9 @@ if it is launched through an operating system symlink.`,
 }
 
 func init() {
+	InitDefaults()
 	rootCmd.AddCommand(versionCmd)
-	versionCmd.Flags().StringVarP(&versionFmt, "format", "f", "color", "output format \noptions: "+versionFormats)
+	versionCmd.Flags().StringVarP(&versionFmt, "format", "f", viper.GetString("version.format"), "output format \noptions: "+versionFormats)
 	viper.BindPFlag("version.format", versionCmd.Flags().Lookup("format"))
 }
 
