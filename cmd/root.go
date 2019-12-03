@@ -153,6 +153,7 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	viper.SetConfigType("yaml")
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
@@ -168,7 +169,9 @@ func initConfig() {
 		viper.SetConfigName(".retrotxtgo")
 	}
 
-	viper.AutomaticEnv() // read in environment variables that match
+	// Read in environment variables
+	viper.SetEnvPrefix("env")
+	viper.AutomaticEnv()
 
 	// If a config file is found, read it in.
 	// todo: toggle a flag to hide this when CREATE XML/JSON/TEXT as it won't be able to be piped
