@@ -80,10 +80,7 @@ var createCmd = &cobra.Command{
 				FileMissingErr()
 			}
 			data, err = filesystem.Read(args[0])
-			if err != nil {
-				h := ErrorFmt{"invalid FILE", args[0], err}
-				h.GoErr()
-			}
+			Check(ErrorFmt{"invalid FILE", args[0], err})
 		}
 		// check for a --save flag to save to files
 		// otherwise output is sent to stdout
@@ -98,11 +95,9 @@ var createCmd = &cobra.Command{
 		}
 		if err != nil {
 			if err.Error() == errors.New("invalid-layout").Error() {
-				h := ErrorFmt{"layout", fmt.Sprintf("%s", htmlLayout), fmt.Errorf(createLayouts())}
-				h.FlagErr()
+				CheckFlag(ErrorFmt{"layout", fmt.Sprintf("%s", htmlLayout), fmt.Errorf(createLayouts())})
 			}
-			h := ErrorFmt{"create error", ">", err}
-			h.GoErr()
+			Check(ErrorFmt{"create error", ">", err})
 		}
 		// check for a --server flag to serve the HTML
 		if serverFiles == true {
@@ -112,8 +107,7 @@ var createCmd = &cobra.Command{
 				port = serverPort
 			}
 			if err = serveFile(data, port, false); err == nil {
-				h := ErrorFmt{"server problem", ">", err}
-				h.GoErr()
+				Check(ErrorFmt{"server problem", "HTTP", err})
 			}
 		}
 	},

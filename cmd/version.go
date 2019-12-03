@@ -64,8 +64,7 @@ if it is launched through an operating system symlink.`,
 		case "text", "t":
 			versionText(false)
 		default:
-			e := ErrorFmt{"format", fmt.Sprintf("%s", f), fmt.Errorf(versionFormats)}
-			e.FlagErr()
+			CheckFlag(ErrorFmt{"format", fmt.Sprintf("%s", f), fmt.Errorf(versionFormats)})
 		}
 	},
 }
@@ -86,10 +85,7 @@ func versionJSON(indent bool) []byte {
 	default:
 		j, err = json.Marshal(info())
 	}
-	if err != nil {
-		h := ErrorFmt{"could not create", "json", err}
-		h.GoErr()
-	}
+	Check(ErrorFmt{"could not create", "json", err})
 	return j
 }
 

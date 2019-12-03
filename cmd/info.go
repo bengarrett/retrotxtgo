@@ -63,10 +63,7 @@ var infoCmd = &cobra.Command{
 			FileMissingErr()
 		}
 		f, err := details(args[0])
-		if err != nil {
-			h := ErrorFmt{"invalid FILE", args[0], err}
-			h.GoErr()
-		}
+		Check(ErrorFmt{"invalid FILE", args[0], err})
 		i := viper.GetString("info.format")
 		switch i {
 		case "color", "c":
@@ -80,8 +77,7 @@ var infoCmd = &cobra.Command{
 		case "xml", "x":
 			fmt.Printf("%s\n", infoXML(f))
 		default:
-			e := ErrorFmt{"format", fmt.Sprintf("%s", infoFmt), fmt.Errorf(infoFormats)}
-			e.FlagErr()
+			CheckFlag(ErrorFmt{"format", fmt.Sprintf("%s", infoFmt), fmt.Errorf(infoFormats)})
 		}
 	},
 }
@@ -102,10 +98,7 @@ func infoJSON(indent bool, f Detail) []byte {
 	default:
 		j, err = json.Marshal(f)
 	}
-	if err != nil {
-		h := ErrorFmt{"could not create", "json", err}
-		h.GoErr()
-	}
+	Check(ErrorFmt{"could not create", "json", err})
 	return j
 }
 
@@ -159,10 +152,7 @@ func infoXML(f Detail) []byte {
 	x.Size = f.Size
 	x.Utf8 = f.Utf8
 	xmlData, err := xml.MarshalIndent(x, "", "\t")
-	if err != nil {
-		h := ErrorFmt{"could not create", "xml", err}
-		h.GoErr()
-	}
+	Check(ErrorFmt{"could not create", "xml", err})
 	return xmlData
 }
 

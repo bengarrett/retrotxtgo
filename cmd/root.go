@@ -30,7 +30,7 @@ import (
 
 const (
 	// Ver is the application version
-	Ver string = "0.0.3"
+	Ver string = "0.0.4"
 	// Www is the application domain name
 	Www string = "retrotxt.com"
 	// FileDate is a non-standard date format for file modifications
@@ -62,8 +62,9 @@ type ErrorFmt struct {
 
 var (
 	// Layout template data
-	Layout  PageData
-	cfgFile string
+	Layout      PageData
+	cfgFile     string
+	suppressCfg bool = false
 
 	// rootCmd represents the base command when called without any subcommands
 	rootCmd = &cobra.Command{
@@ -113,25 +114,38 @@ func InitDefaults() {
 	viper.SetDefault("version.format", "color")
 }
 
-// ErrorPrint returns a coloured error message.
-func (e *ErrorFmt) ErrorPrint() string {
+// errorPrint returns a coloured error message.
+func (e *ErrorFmt) errorPrint() string {
 	ia := color.OpItalic.Sprintf("%s %s", e.Issue, e.Arg)
 	m := color.OpFuzzy.Sprintf(" %v", e.Msg)
 	return color.Sprintf("\n%s %s%s", alert(), ia, m)
 }
 
-// GoErr exits with a coloured error message.
-func (e *ErrorFmt) GoErr() {
-	println(e.ErrorPrint())
-	os.Exit(1)
+// Check parses the ErrorFmt and will exit with a message if an error is found.
+// The ErrorFmt interface comprises of three fields.
+// Issue is a summary of the problem.
+// Arg is the argument, flag or item that triggered the error.
+// Msg is the actual error generated.
+func Check(e ErrorFmt) {
+	if e.Msg != nil {
+		println(e.errorPrint())
+		os.Exit(1)
+	}
 }
 
-// FlagErr exits with an invalid command flag value.
-func (e *ErrorFmt) FlagErr() {
+// errorPrint returns a coloured invalid flag message.
+func (e *ErrorFmt) errorFlag() string {
 	a := fmt.Sprintf("\"--%s %s\"", e.Issue, e.Arg)
 	m := color.OpFuzzy.Sprintf(" valid %s values: %v", e.Issue, e.Msg)
-	color.Printf("\n%s %s %s%s\n", alert(), ci("invalid flag"), a, m)
-	os.Exit(1)
+	return color.Sprintf("\n%s %s %s%s\n", alert(), ci("invalid flag"), a, m)
+}
+
+// CheckFlag exits with an invalid command flag value.
+func CheckFlag(e ErrorFmt) {
+	if e.Msg != nil {
+		println(e.errorFlag())
+		os.Exit(1)
+	}
 }
 
 // FileMissingErr exits with a missing FILE error.
@@ -180,7 +194,15 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	// todo: toggle a flag to hide this when CREATE XML/JSON/TEXT as it won't be able to be piped
-	if err := viper.ReadInConfig(); err == nil {
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			// Config file not found; ignore error if desired
+			fmt.Printf("%s\n", err)
+		} else {
+			// Config file was found but another error was produced
+			fmt.Printf("%s\n", err)
+		}
+	} else if suppressCfg == false {
 		fmt.Println("Using config file:", cf(viper.ConfigFileUsed()))
 	}
 }

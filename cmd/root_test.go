@@ -21,10 +21,9 @@ import (
 	"testing"
 )
 
-func TestErrorFmt_ErrorPrint(t *testing.T) {
+func TestErrorFmt_errorPrint(t *testing.T) {
 	err := errors.New("err-text")
 	h := ErrorFmt{"error", "test", err}
-	//h.GoErr()
 	tests := []struct {
 		name string
 		e    *ErrorFmt
@@ -34,8 +33,8 @@ func TestErrorFmt_ErrorPrint(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.e.ErrorPrint(); got != tt.want {
-				t.Errorf("ErrorFmt.ErrorPrint() = %v, want %v", got, tt.want)
+			if got := tt.e.errorPrint(); got != tt.want {
+				t.Errorf("ErrorFmt.errorPrint() = %v, want %v", got, tt.want)
 			}
 		})
 	}
