@@ -39,35 +39,24 @@ var configCmd = &cobra.Command{
 	Use:     "config",
 	Aliases: []string{"cfg"},
 	Short:   cp("Configure RetroTxt defaults"),
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("config called")
-	},
 }
 var configCreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: cp("create a new config file"),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("create config file")
-		cfg := viper.ConfigFileUsed()
-		if cfg != "" {
-			println("A config file already exists at ", cfg)
-			os.Exit(1)
+		suppressCfg = true // todo: not working
+		if cfg := viper.ConfigFileUsed(); cfg != "" {
+			configExists(cmd.CommandPath(), "create")
 		}
-		c := viper.AllSettings()
-		bs, _ := yaml.Marshal(c)
-		d, _ := os.UserHomeDir()
-		err := ioutil.WriteFile(d+"/.retrotxtgo.yaml", bs, 0660)
-		if err != nil {
-			fmt.Printf("%s", err)
-		}
+		bs, err := yaml.Marshal(viper.AllSettings())
+		Check(ErrorFmt{"could not create", "settings", err})
+		d, err := os.UserHomeDir()
+		Check(ErrorFmt{"could not use", "user home directory", err})
+		err = ioutil.WriteFile(d+"/.retrotxtgo.yaml", bs, 0660)
+		Check(ErrorFmt{"could not write", "settings", err})
 	},
 }
+
 var configDeleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: cp("remove the default config file"),
@@ -81,10 +70,7 @@ var configDeleteCmd = &cobra.Command{
 		}
 		switch prompt("Confirm the file deletion", false) {
 		case true:
-			if err := os.Remove(cfg); err != nil {
-				e := ErrorFmt{"Could not remove", cfg, err}
-				e.GoErr()
-			}
+			Check(ErrorFmt{"Could not remove", cfg, os.Remove(cfg)})
 			fmt.Println("Deletion is done")
 		}
 	},
@@ -117,6 +103,14 @@ func configMissing(name string, suffix string) {
 	os.Exit(1)
 }
 
+func configExists(name string, suffix string) {
+	cmd := strings.TrimSuffix(name, suffix)
+	fmt.Printf("A config file already is in use at: %s\n", cf(viper.ConfigFileUsed()))
+	fmt.Printf("To edit it: %s\n", cp(cmd+"edit"))
+	fmt.Printf("To delete:  %s\n", cp(cmd+"delete"))
+	os.Exit(1)
+}
+
 var configEditCmd = &cobra.Command{
 	Use:   "edit",
 	Short: cp("edit the default config file"),
@@ -143,8 +137,7 @@ var configEditCmd = &cobra.Command{
 		} else {
 			edit = viper.GetString("editor")
 			if _, err := exec.LookPath(edit); err != nil {
-				e := ErrorFmt{edit, "command not found", exec.ErrNotFound}
-				e.GoErr()
+				Check(ErrorFmt{edit, "command not found", exec.ErrNotFound})
 			}
 		}
 		// credit: https://stackoverflow.com/questions/21513321/how-to-start-vim-from-go
