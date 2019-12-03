@@ -98,8 +98,6 @@ var (
 // InitDefaults initialises flag and configuration defaults.
 func InitDefaults() {
 	println("InitDefaults")
-	viper.SetDefault("version.format", "color")
-	viper.SetDefault("info.format", "color")
 	viper.SetDefault("create.layout", "standard")
 	viper.SetDefault("create.title", "RetroTxt | example")
 	viper.SetDefault("create.meta.author", "")
@@ -111,6 +109,8 @@ func InitDefaults() {
 	viper.SetDefault("create.meta.theme-color", "")
 	viper.SetDefault("create.save-directory", "")
 	viper.SetDefault("create.server-port", 8080)
+	viper.SetDefault("info.format", "color")
+	viper.SetDefault("version.format", "color")
 }
 
 // ErrorPrint returns a coloured error message.

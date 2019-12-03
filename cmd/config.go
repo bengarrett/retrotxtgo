@@ -18,11 +18,13 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
 
+	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
@@ -52,24 +54,76 @@ var configCreateCmd = &cobra.Command{
 	Short: cp("create a new config file"),
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("create config file")
+		cfg := viper.ConfigFileUsed()
+		if cfg != "" {
+			println("A config file already exists at ", cfg)
+			os.Exit(1)
+		}
+		c := viper.AllSettings()
+		bs, _ := yaml.Marshal(c)
+		d, _ := os.UserHomeDir()
+		err := ioutil.WriteFile(d+"/.retrotxtgo.yaml", bs, 0660)
+		if err != nil {
+			fmt.Printf("%s", err)
+		}
 	},
 }
 var configDeleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: cp("remove the default config file"),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("delete config file")
+		cfg := viper.ConfigFileUsed()
+		if cfg == "" {
+			configMissing(cmd.CommandPath(), "delete")
+		}
+		if _, err := os.Stat(cfg); os.IsNotExist(err) {
+			configMissing(cmd.CommandPath(), "delete")
+		}
+		switch prompt("Confirm the file deletion", false) {
+		case true:
+			if err := os.Remove(cfg); err != nil {
+				e := ErrorFmt{"Could not remove", cfg, err}
+				e.GoErr()
+			}
+			fmt.Println("Deletion is done")
+		}
 	},
 }
+
+func prompt(query string, yesDefault bool) bool {
+	var input string
+	y := "Y"
+	n := "n"
+	if yesDefault == false {
+		y = "y"
+		n = "N"
+	}
+	fmt.Printf("%s? [%s/%s] ", query, color.Success.Sprint(y), color.Danger.Sprint(n))
+	fmt.Scanln(&input)
+	switch input {
+	case "":
+		if yesDefault == true {
+			return true
+		}
+	case "yes", "y":
+		return true
+	}
+	return false
+}
+
+func configMissing(name string, suffix string) {
+	cmd := strings.TrimSuffix(name, suffix) + "create"
+	fmt.Printf("No config file is in use.\nTo create one run: %s\n", cp(cmd))
+	os.Exit(1)
+}
+
 var configEditCmd = &cobra.Command{
 	Use:   "edit",
 	Short: cp("edit the default config file"),
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg := viper.ConfigFileUsed()
 		if cfg == "" {
-			cmd := strings.TrimSuffix(cmd.CommandPath(), "edit") + "create"
-			fmt.Printf("No config file is in use.\nTo create one run: %s\n", cp(cmd))
-			os.Exit(1)
+			configMissing(cmd.CommandPath(), "edit")
 		}
 		var edit string
 		if err := viper.BindEnv("editor", "EDITOR"); err != nil {
@@ -107,7 +161,7 @@ var configInfoCmd = &cobra.Command{
 	Use:   "info",
 	Short: cp("view settings configured by the config"),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("into config file")
+		fmt.Println(cp("These are the default configurations used by the commands of RetroTxt when no flags are given.\n"))
 		c := viper.AllSettings()
 		bs, _ := yaml.Marshal(c)
 		fmt.Printf("%s\n", bs)
