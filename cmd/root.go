@@ -98,7 +98,6 @@ var (
 
 // InitDefaults initialises flag and configuration defaults.
 func InitDefaults() {
-	println("InitDefaults")
 	viper.SetDefault("create.layout", "standard")
 	viper.SetDefault("create.title", "RetroTxt | example")
 	viper.SetDefault("create.meta.author", "")
@@ -118,7 +117,7 @@ func InitDefaults() {
 func (e *ErrorFmt) errorPrint() string {
 	ia := color.OpItalic.Sprintf("%s %s", e.Issue, e.Arg)
 	m := color.OpFuzzy.Sprintf(" %v", e.Msg)
-	return color.Sprintf("\n%s %s%s", alert(), ia, m)
+	return color.Sprintf("%s %s%s", alert(), ia, m)
 }
 
 // Check parses the ErrorFmt and will exit with a message if an error is found.
