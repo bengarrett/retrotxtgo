@@ -18,8 +18,14 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
+	"runtime"
+	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -59,7 +65,42 @@ var configEditCmd = &cobra.Command{
 	Use:   "edit",
 	Short: cp("edit the default config file"),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("edit config file")
+		cfg := viper.ConfigFileUsed()
+		if cfg == "" {
+			cmd := strings.TrimSuffix(cmd.CommandPath(), "edit") + "create"
+			fmt.Printf("No config file is in use.\nTo create one run: %s\n", cp(cmd))
+			os.Exit(1)
+		}
+		var edit string
+		if err := viper.BindEnv("editor", "EDITOR"); err != nil {
+			editors := []string{"nano", "vim", "emacs"}
+			if runtime.GOOS == "windows" {
+				editors = append(editors, "notepad++.exe", "notepad.exe")
+			}
+			for _, editor := range editors {
+				if _, err := exec.LookPath(editor); err == nil {
+					edit = editor
+					break
+				}
+			}
+			if edit != "" {
+				fmt.Printf("There is no %s environment variable set so using: %s\n", ci("EDITOR"), cp(edit))
+			}
+		} else {
+			edit = viper.GetString("editor")
+			if _, err := exec.LookPath(edit); err != nil {
+				e := ErrorFmt{edit, "command not found", exec.ErrNotFound}
+				e.GoErr()
+			}
+		}
+		// credit: https://stackoverflow.com/questions/21513321/how-to-start-vim-from-go
+		exe := exec.Command(edit, cfg)
+		exe.Stdin = os.Stdin
+		exe.Stdout = os.Stdout
+		err := exe.Run()
+		if err != nil {
+			fmt.Printf("%s\n", err)
+		}
 	},
 }
 var configInfoCmd = &cobra.Command{
@@ -67,6 +108,9 @@ var configInfoCmd = &cobra.Command{
 	Short: cp("view settings configured by the config"),
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("into config file")
+		c := viper.AllSettings()
+		bs, _ := yaml.Marshal(c)
+		fmt.Printf("%s\n", bs)
 	},
 }
 
