@@ -32,6 +32,7 @@ import (
 
 var (
 	fileOverwrite bool
+	infoStyles    string
 )
 
 // configCmd represents the config command
@@ -46,7 +47,7 @@ var configCreateCmd = &cobra.Command{
 	Short: cp("create a new config file"),
 	Run: func(cmd *cobra.Command, args []string) {
 		suppressCfg = true // todo: not working
-		if cfg := viper.ConfigFileUsed(); cfg != "" {
+		if cfg := viper.ConfigFileUsed(); cfg != "" && fileOverwrite != true {
 			configExists(cmd.CommandPath(), "create")
 		}
 		bs, err := yaml.Marshal(viper.AllSettings())
@@ -124,7 +125,7 @@ var configInfoCmd = &cobra.Command{
 		fmt.Println(cp("These are the default configurations used by the commands of RetroTxt when no flags are given.\n"))
 		sets, err := yaml.Marshal(viper.AllSettings())
 		Check(ErrorFmt{"read configuration", "yaml", err})
-		quick.Highlight(os.Stdout, string(sets), "yaml", "terminal256", "monokai")
+		quick.Highlight(os.Stdout, string(sets), "yaml", "terminal256", infoStyles)
 		println()
 	},
 }
@@ -155,6 +156,7 @@ func init() {
 	configCmd.AddCommand(configDeleteCmd)
 	configCmd.AddCommand(configEditCmd)
 	configCmd.AddCommand(configInfoCmd)
+	configInfoCmd.Flags().StringVarP(&infoStyles, "syntax-style", "c", "monokai", "Config syntax highligher, use "+ci("none")+" to disable")
 	configCmd.AddCommand(configShellCmd)
 	configCmd.AddCommand(configSetCmd)
 
