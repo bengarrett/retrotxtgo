@@ -194,7 +194,6 @@ func initConfig() {
 			// Config file was found but another error was produced
 			Check(ErrorFmt{"config file", viper.ConfigFileUsed(), err})
 		}
-	} else if suppressCfg == false {
-		fmt.Println("Using config file:", cf(viper.ConfigFileUsed()))
 	}
+	//fmt.Println("Using config file:", cf(viper.ConfigFileUsed()))
 }
