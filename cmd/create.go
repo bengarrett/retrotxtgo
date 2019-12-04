@@ -17,6 +17,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"html/template"
@@ -26,6 +27,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/alecthomas/chroma/quick"
 	"github.com/bengarrett/retrotxtgo/filesystem"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -36,6 +38,8 @@ type files map[string]string
 
 // create command flag
 var (
+	createFileName  string
+	createStyles    string
 	htmlLayout      string
 	metaAuthor      string
 	metaColorScheme string
@@ -54,16 +58,16 @@ var (
 // createCmd makes create usage examples
 var exampleCmd = func() string {
 	s := string(os.PathSeparator)
-	e := `  retrotxtgo create textfile.txt -t "Text file" -d "Some random text file"`
-	e += fmt.Sprintf("\n  retrotxtgo create ~%sDownloads%stextfile.txt --layout mini --save .%shtml", s, s, s)
+	e := `  retrotxtgo create -n textfile.txt -t "Text file" -d "Some random text file"`
+	e += fmt.Sprintf("\n  retrotxtgo create --name ~%sDownloads%stextfile.txt --layout mini --save .%shtml", s, s, s)
 	return color.Info.Sprint(e)
 }
 
 // createCmd represents the create command
 var createCmd = &cobra.Command{
-	Use:     "create FILE",
-	Aliases: []string{"new"},
-	Short:   cp("Create a HTML document from a text file"),
+	Use: "create",
+	//Aliases: []string{"new"},
+	Short: cp("Create a HTML document from a text file"),
 	//Long: `` // used by help create
 	Example: exampleCmd(),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -76,11 +80,13 @@ var createCmd = &cobra.Command{
 		case true:
 			data = []byte(fmt.Sprintf("%s", b.Value))
 		default:
-			if len(args) == 0 {
-				FileMissingErr()
+			if createFileName == "" {
+				fmt.Printf("%s\n\n", cmd.Short)
+				cmd.Usage()
+				os.Exit(0)
 			}
-			data, err = filesystem.Read(args[0])
-			Check(ErrorFmt{"invalid FILE", args[0], err})
+			data, err = filesystem.Read(createFileName)
+			Check(ErrorFmt{"file is invalid", createFileName, err})
 		}
 		// check for a --save flag to save to files
 		// otherwise output is sent to stdout
@@ -135,9 +141,12 @@ func init() {
 		return viper.GetString(s)
 	}
 	rootCmd.AddCommand(createCmd)
+	// required flags
+	createCmd.Flags().StringVarP(&createFileName, "name", "n", "", cp("text file to parse")+" (required)\n")
 	// main flags
 	createCmd.Flags().StringVarP(&htmlLayout, "layout", "l", def("create.layout"), "output HTML layout\noptions: "+ci(createLayouts()))
 	viper.BindPFlag("create.layout", createCmd.Flags().Lookup(("layout")))
+	createCmd.Flags().StringVarP(&createStyles, "syntax-style", "c", "lovelace", "HTML syntax highligher, use "+ci("none")+" to disable")
 	createCmd.Flags().StringVarP(&pageTitle, "title", "t", def("create.title"), "defines the page title that is shown in a browser title bar or tab")
 	viper.BindPFlag("create.title", createCmd.Flags().Lookup("title"))
 	createCmd.Flags().StringVarP(&metaDesc, "meta-description", "d", def("create.meta.description"), "a short and accurate summary of the content of the page")
@@ -290,8 +299,17 @@ func writeStdout(data []byte, test bool) error {
 	if err != nil {
 		return err
 	}
-	if err = t.Execute(os.Stdout, pagedata(data)); err != nil {
+	var buf bytes.Buffer
+	if err = t.Execute(&buf, pagedata(data)); err != nil {
 		return err
+	}
+	switch createStyles {
+	case "", "none":
+		fmt.Printf(buf.String())
+	default:
+		if err = quick.Highlight(os.Stdout, buf.String(), "html", "terminal256", createStyles); err != nil {
+			return err
+		}
 	}
 	return nil
 }
