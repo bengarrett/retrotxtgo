@@ -96,7 +96,7 @@ func versionText(c bool) {
 	color.Info.Printf("Version:\t%s\n", i["app ver"])
 	fmt.Printf("Go version:\t%s\n", i["go ver"])
 	fmt.Printf("OS/Arch:\t%s", i["os"])
-	color.Secondary.Printf("\nBinary:\t\t%s\n", i["exe"])
+	fmt.Printf("\nBinary:\t\t%s\n", i["exe"])
 }
 
 func arch(v string) string {
