@@ -90,7 +90,7 @@ var infoCmd = &cobra.Command{
 func init() {
 	InitDefaults()
 	rootCmd.AddCommand(infoCmd)
-	infoCmd.Flags().StringVarP(&fileName, "name", "n", "", cp("text file to analyse")+" (required)")
+	infoCmd.Flags().StringVarP(&fileName, "name", "n", "", cp("text file to analyse")+" (required)\n")
 	infoCmd.Flags().StringVarP(&infoFmt, "format", "f", viper.GetString("info.format"), "output format \noptions: "+ci(infoFormats))
 	viper.BindPFlag("info.format", infoCmd.Flags().Lookup("format"))
 	infoCmd.MarkFlagFilename("file")
