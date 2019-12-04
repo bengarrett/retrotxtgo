@@ -52,18 +52,18 @@ type Detail struct {
 	Utf8      bool
 }
 
-var infoFmt string
+var (
+	infoFmt  string
+	fileName string
+)
 
 // infoCmd represents the info command
 var infoCmd = &cobra.Command{
-	Use:   "info FILE",
+	Use:   "info",
 	Short: cp("Information on a text file"),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			FileMissingErr()
-		}
-		f, err := details(args[0])
-		Check(ErrorFmt{"invalid FILE", args[0], err})
+		f, err := details(fileName)
+		Check(ErrorFmt{"invalid FILE", fileName, err})
 		i := viper.GetString("info.format")
 		switch i {
 		case "color", "c":
@@ -85,8 +85,12 @@ var infoCmd = &cobra.Command{
 func init() {
 	InitDefaults()
 	rootCmd.AddCommand(infoCmd)
-	infoCmd.Flags().StringVarP(&infoFmt, "format", "f", viper.GetString("info.format"), "output format \noptions: "+infoFormats)
+	infoCmd.Flags().StringVarP(&fileName, "name", "n", "", cp("text file to analyse")+" (required)")
+	infoCmd.Flags().StringVarP(&infoFmt, "format", "f", viper.GetString("info.format"), "output format \noptions: "+ci(infoFormats))
 	viper.BindPFlag("info.format", infoCmd.Flags().Lookup("format"))
+	infoCmd.MarkFlagFilename("file")
+	infoCmd.MarkFlagRequired("file")
+	infoCmd.Flags().SortFlags = false
 }
 
 func infoJSON(indent bool, f Detail) []byte {
