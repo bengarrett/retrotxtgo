@@ -62,8 +62,13 @@ var infoCmd = &cobra.Command{
 	Use:   "info",
 	Short: cp("Information on a text file"),
 	Run: func(cmd *cobra.Command, args []string) {
+		if fileName == "" {
+			fmt.Printf("%s\n\n", cmd.Short)
+			cmd.Usage()
+			os.Exit(0)
+		}
 		f, err := details(fileName)
-		Check(ErrorFmt{"invalid FILE", fileName, err})
+		Check(ErrorFmt{"file is invalid", fileName, err})
 		i := viper.GetString("info.format")
 		switch i {
 		case "color", "c":
