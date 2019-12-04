@@ -24,7 +24,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/gookit/color"
+	"github.com/alecthomas/chroma/quick"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
@@ -36,10 +36,11 @@ var (
 
 // configCmd represents the config command
 var configCmd = &cobra.Command{
-	Use:     "config",
-	Aliases: []string{"cfg"},
-	Short:   cp("Configure RetroTxt defaults"),
+	Use:   "config",
+	Short: cp("Configure RetroTxt defaults"),
+	// no Run: means the help will be display
 }
+
 var configCreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: cp("create a new config file"),
@@ -54,6 +55,7 @@ var configCreateCmd = &cobra.Command{
 		Check(ErrorFmt{"could not use", "user home directory", err})
 		err = ioutil.WriteFile(d+"/.retrotxtgo.yaml", bs, 0660)
 		Check(ErrorFmt{"could not write", "settings", err})
+		fmt.Println("Created a new config file at:", cf(d+"/.retrotxtgo.yaml"))
 	},
 }
 
@@ -71,44 +73,9 @@ var configDeleteCmd = &cobra.Command{
 		switch prompt("Confirm the file deletion", false) {
 		case true:
 			Check(ErrorFmt{"Could not remove", cfg, os.Remove(cfg)})
-			fmt.Println("Deletion is done")
+			fmt.Println("The file is deleted")
 		}
 	},
-}
-
-func prompt(query string, yesDefault bool) bool {
-	var input string
-	y := "Y"
-	n := "n"
-	if yesDefault == false {
-		y = "y"
-		n = "N"
-	}
-	fmt.Printf("%s? [%s/%s] ", query, color.Success.Sprint(y), color.Danger.Sprint(n))
-	fmt.Scanln(&input)
-	switch input {
-	case "":
-		if yesDefault == true {
-			return true
-		}
-	case "yes", "y":
-		return true
-	}
-	return false
-}
-
-func configMissing(name string, suffix string) {
-	cmd := strings.TrimSuffix(name, suffix) + "create"
-	fmt.Printf("No config file is in use.\nTo create one run: %s\n", cp(cmd))
-	os.Exit(1)
-}
-
-func configExists(name string, suffix string) {
-	cmd := strings.TrimSuffix(name, suffix)
-	fmt.Printf("A config file already is in use at: %s\n", cf(viper.ConfigFileUsed()))
-	fmt.Printf("To edit it: %s\n", cp(cmd+"edit"))
-	fmt.Printf("To delete:  %s\n", cp(cmd+"delete"))
-	os.Exit(1)
 }
 
 var configEditCmd = &cobra.Command{
@@ -144,20 +111,21 @@ var configEditCmd = &cobra.Command{
 		exe := exec.Command(edit, cfg)
 		exe.Stdin = os.Stdin
 		exe.Stdout = os.Stdout
-		err := exe.Run()
-		if err != nil {
+		if err := exe.Run(); err != nil {
 			fmt.Printf("%s\n", err)
 		}
 	},
 }
+
 var configInfoCmd = &cobra.Command{
 	Use:   "info",
 	Short: cp("view settings configured by the config"),
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(cp("These are the default configurations used by the commands of RetroTxt when no flags are given.\n"))
-		c := viper.AllSettings()
-		bs, _ := yaml.Marshal(c)
-		fmt.Printf("%s\n", bs)
+		sets, err := yaml.Marshal(viper.AllSettings())
+		Check(ErrorFmt{"read configuration", "yaml", err})
+		quick.Highlight(os.Stdout, string(sets), "yaml", "terminal256", "monokai")
+		println()
 	},
 }
 
@@ -171,6 +139,7 @@ var configShellCmd = &cobra.Command{
 		fmt.Println("shell config file")
 	},
 }
+
 var configSetCmd = &cobra.Command{
 	Use:   "set",
 	Short: cp("change a configuration"),
@@ -205,6 +174,41 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// configCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+func prompt(query string, yesDefault bool) bool {
+	var input string
+	y := "Y"
+	n := "n"
+	if yesDefault == false {
+		y = "y"
+		n = "N"
+	}
+	fmt.Printf("%s? [%s/%s] ", query, y, n)
+	fmt.Scanln(&input)
+	switch input {
+	case "":
+		if yesDefault == true {
+			return true
+		}
+	case "yes", "y":
+		return true
+	}
+	return false
+}
+
+func configMissing(name string, suffix string) {
+	cmd := strings.TrimSuffix(name, suffix) + "create"
+	fmt.Printf("No config file is in use.\nTo create one run: %s\n", cp(cmd))
+	os.Exit(1)
+}
+
+func configExists(name string, suffix string) {
+	cmd := strings.TrimSuffix(name, suffix)
+	fmt.Printf("A config file already is in use at: %s\n", cf(viper.ConfigFileUsed()))
+	fmt.Printf("To edit it: %s\n", cp(cmd+"edit"))
+	fmt.Printf("To delete:  %s\n", cp(cmd+"delete"))
+	os.Exit(1)
 }
 
 /*
