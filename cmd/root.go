@@ -30,7 +30,7 @@ import (
 
 const (
 	// Ver is the application version
-	Ver string = "0.0.5"
+	Ver string = "0.1"
 	// Www is the application domain name
 	Www string = "retrotxt.com"
 	// FileDate is a non-standard date format for file modifications
@@ -65,6 +65,12 @@ type ErrorFmt struct {
 }
 
 var (
+	// GoBuildDate build date and time created by date --utc +%H:%M:%S/%Y-%m-%d
+	GoBuildDate string
+	// GoBuildGitCommit git commit ID created by git rev-list --abbrev-commit -1 HEAD
+	GoBuildGitCommit string
+	// GoBuildGitCount git commit count created by git rev-list --count HEAD
+	GoBuildGitCount string
 	// Layout template data
 	Layout  PageData
 	cfgFile string
@@ -167,8 +173,13 @@ func FileMissingErr() {
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	switch err := rootCmd.Execute(); fmt.Sprintf("%v", err) {
-	case "subcommand is required":
+	err := rootCmd.Execute()
+	es := fmt.Sprintf("%s", err)
+	// fmt.Printf("\n%v\n%q\n", len("Error: flag needs an argument:"), es[:22])
+	switch {
+	// case es[:22] == "flag needs an argument":
+	// 	println("OOOOF")
+	case es == "ERROR: subcommand is required":
 		// ignored errors
 	default:
 		if err != nil {
