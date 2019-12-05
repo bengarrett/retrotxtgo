@@ -44,7 +44,6 @@ var (
 	shellPreview  bool
 )
 
-// configCmd represents the config command
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Configure RetroTxt defaults",
@@ -65,7 +64,7 @@ var configCreateCmd = &cobra.Command{
 
 var configDeleteCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "Remove the default config file",
+	Short: "Remove the config file",
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg := viper.ConfigFileUsed()
 		if cfg == "" {
@@ -74,7 +73,7 @@ var configDeleteCmd = &cobra.Command{
 		if _, err := os.Stat(cfg); os.IsNotExist(err) {
 			configMissing(cmd.CommandPath(), "delete")
 		}
-		switch prompt("Confirm the file deletion", false) {
+		switch promptYN("Confirm the file deletion", false) {
 		case true:
 			Check(ErrorFmt{"Could not remove", cfg, os.Remove(cfg)})
 			fmt.Println("The file is deleted")
@@ -84,7 +83,7 @@ var configDeleteCmd = &cobra.Command{
 
 var configEditCmd = &cobra.Command{
 	Use:   "edit",
-	Short: "Edit the default config file",
+	Short: "Edit the config file",
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg := viper.ConfigFileUsed()
 		if cfg == "" {
@@ -125,7 +124,7 @@ var configInfoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "View settings configured by the config",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(cp("These are the default configurations used by the commands of RetroTxt when no flags are given.\n"))
+		println(cp("These are the default configurations used by the commands of RetroTxt when no flags are given.\n"))
 		sets, err := yaml.Marshal(viper.AllSettings())
 		Check(ErrorFmt{"read configuration", "yaml", err})
 		quick.Highlight(os.Stdout, string(sets), "yaml", "terminal256", infoStyles)
@@ -166,8 +165,7 @@ var configSetCmd = &cobra.Command{
 		keys := viper.AllKeys()
 		sort.Strings(keys)
 		// sort.SearchStrings() - The slice must be sorted in ascending order.
-		var i = sort.SearchStrings(keys, name)
-		if i == len(keys) || keys[i] != name {
+		if i := sort.SearchStrings(keys, name); i == len(keys) || keys[i] != name {
 			err := fmt.Errorf("retrotxt config info")
 			CheckFlag(ErrorFmt{"name", name, err})
 		}
@@ -206,47 +204,36 @@ var configSetCmd = &cobra.Command{
 	},
 }
 
-func promptMeta(val string) {
-	s := strings.Split(configSetName, ".")
-	switch {
-	case len(s) != 3, s[0] != "create", s[1] != "meta":
-		return
-	}
-	elm := fmt.Sprintf("<meta name=\"%s\" value=\"%s\">", s[2], val)
-	var buf bytes.Buffer
-	err := quick.Highlight(&buf, elm, "html", "terminal256", "lovelace")
-	if err != nil {
-		fmt.Printf("\n%s\n", elm)
-	} else {
-		fmt.Printf("\n%v\n", buf.String())
-	}
-	fmt.Println(cf("About this element: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta#attr-name"))
+func init() {
+	rootCmd.AddCommand(configCmd)
+	configCmd.AddCommand(configCreateCmd)
+	configCreateCmd.Flags().BoolVarP(&fileOverwrite, "overwrite", "y", false, "overwrite any existing config file")
+	configCmd.AddCommand(configDeleteCmd)
+	configCmd.AddCommand(configEditCmd)
+	configCmd.AddCommand(configInfoCmd)
+	configInfoCmd.Flags().StringVarP(&infoStyles, "syntax-style", "c", "monokai", "config syntax highligher, use "+ci("none")+" to disable")
+	configCmd.AddCommand(configShellCmd)
+	configShellCmd.Flags().StringVarP(&configShell, "interpreter", "i", "", "user shell to receive retrotxtgo auto-completions\nchoices: "+ci(shells))
+	configShellCmd.MarkFlagRequired("interpreter")
+	configShellCmd.SilenceErrors = true
+	configCmd.AddCommand(configSetCmd)
+	configSetCmd.Flags().StringVarP(&configSetName, "name", "n", "", `the configuration path to edit in dot syntax (see examples)
+to see a list of names run: retrotxt config info`)
+	configSetCmd.MarkFlagRequired("name")
 }
 
-func promptString(keep string) {
-	// allow multiple word user input
-	scanner := bufio.NewScanner(os.Stdin)
-	var save string
-	for scanner.Scan() {
-		txt := scanner.Text()
-		switch txt {
-		case "":
-			os.Exit(0)
-		case "-":
-			save = ""
-		default:
-			save = txt
-		}
-		viper.Set(configSetName, save)
-		fmt.Printf("%s %s is now set to \"%v\"\n", cs("✓"), cp(configSetName), save)
-		writeConfig(true)
-		os.Exit(0)
-	}
-	if err := scanner.Err(); err != nil {
-		fmt.Fprintln(os.Stderr, "reading standard input:", err)
-		os.Exit(1)
-	}
+func configMissing(name string, suffix string) {
+	cmd := strings.TrimSuffix(name, suffix) + "create"
+	fmt.Printf("No config file is in use.\nTo create one run: %s\n", cp(cmd))
+	os.Exit(1)
+}
 
+func configExists(name string, suffix string) {
+	cmd := strings.TrimSuffix(name, suffix)
+	fmt.Printf("A config file already is in use at: %s\n", cf(viper.ConfigFileUsed()))
+	fmt.Printf("To edit it: %s\n", cp(cmd+"edit"))
+	fmt.Printf("To delete:  %s\n", cp(cmd+"delete"))
+	os.Exit(1)
 }
 
 func promptBool() {
@@ -272,6 +259,62 @@ func promptBool() {
 			promptCheck(cnt)
 			continue
 		}
+		writeConfig(true)
+		os.Exit(0)
+	}
+}
+
+func promptCheck(cnt int) {
+	switch {
+	case cnt == 2:
+		fmt.Println("Ctrl+C to keep the existing port")
+	case cnt >= 4:
+		os.Exit(1)
+	}
+}
+
+func promptMeta(val string) {
+	s := strings.Split(configSetName, ".")
+	switch {
+	case len(s) != 3, s[0] != "create", s[1] != "meta":
+		return
+	}
+	elm := fmt.Sprintf("<meta name=\"%s\" value=\"%s\">", s[2], val)
+	var buf bytes.Buffer
+	err := quick.Highlight(&buf, elm, "html", "terminal256", "lovelace")
+	if err != nil {
+		fmt.Printf("\n%s\n", elm)
+	} else {
+		fmt.Printf("\n%v\n", buf.String())
+	}
+	fmt.Println(cf("About this element: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta#attr-name"))
+}
+
+func promptPort() {
+	var input string
+	cnt := 0
+	for {
+		input = ""
+		cnt++
+		fmt.Scanln(&input)
+		if input == "" {
+			promptCheck(cnt)
+			continue
+		}
+		i, err := strconv.ParseInt(input, 10, 0)
+		if err != nil && input != "" {
+			fmt.Printf("%s %v\n", ce("✗"), input)
+			promptCheck(cnt)
+			continue
+		}
+		// check that the input a valid port
+		if v := validPort(int(i)); v == false {
+			fmt.Printf("%s %v, is out of range\n", ce("✗"), input)
+			promptCheck(cnt)
+			continue
+		}
+		viper.Set(configSetName, i)
+		fmt.Printf("%s %s is now set to \"%v\"\n", cs("✓"), cp(configSetName), i)
 		writeConfig(true)
 		os.Exit(0)
 	}
@@ -303,73 +346,33 @@ func promptSlice(s string) {
 	}
 }
 
-// ValidPort checks that p can be used as a network port value
-func ValidPort(p int) bool {
-	if p < portMin || p > portMax {
-		return false
-	}
-	return true
-}
-
-func promptCheck(cnt int) {
-	switch {
-	case cnt == 2:
-		fmt.Println("Ctrl+C to keep the existing port")
-	case cnt >= 4:
-		os.Exit(1)
-	}
-}
-
-func promptPort() {
-	var input string
-	cnt := 0
-	for {
-		input = ""
-		cnt++
-		fmt.Scanln(&input)
-		if input == "" {
-			promptCheck(cnt)
-			continue
+func promptString(keep string) {
+	// allow multiple word user input
+	scanner := bufio.NewScanner(os.Stdin)
+	var save string
+	for scanner.Scan() {
+		txt := scanner.Text()
+		switch txt {
+		case "":
+			os.Exit(0)
+		case "-":
+			save = ""
+		default:
+			save = txt
 		}
-		i, err := strconv.ParseInt(input, 10, 0)
-		if err != nil && input != "" {
-			fmt.Printf("%s %v\n", ce("✗"), input)
-			promptCheck(cnt)
-			continue
-		}
-		// check that the input a valid port
-		if v := ValidPort(int(i)); v == false {
-			fmt.Printf("%s %v, is out of range\n", ce("✗"), input)
-			promptCheck(cnt)
-			continue
-		}
-		viper.Set(configSetName, i)
-		fmt.Printf("%s %s is now set to \"%v\"\n", cs("✓"), cp(configSetName), i)
+		viper.Set(configSetName, save)
+		fmt.Printf("%s %s is now set to \"%v\"\n", cs("✓"), cp(configSetName), save)
 		writeConfig(true)
 		os.Exit(0)
 	}
+	if err := scanner.Err(); err != nil {
+		fmt.Fprintln(os.Stderr, "reading standard input:", err)
+		os.Exit(1)
+	}
+
 }
 
-func init() {
-	rootCmd.AddCommand(configCmd)
-	configCmd.AddCommand(configCreateCmd)
-	configCreateCmd.Flags().BoolVarP(&fileOverwrite, "overwrite", "y", false, "overwrite any existing config file")
-	configCmd.AddCommand(configDeleteCmd)
-	configCmd.AddCommand(configEditCmd)
-	configCmd.AddCommand(configInfoCmd)
-	configInfoCmd.Flags().StringVarP(&infoStyles, "syntax-style", "c", "monokai", "config syntax highligher, use "+ci("none")+" to disable")
-	configCmd.AddCommand(configShellCmd)
-	configShellCmd.Flags().StringVarP(&configShell, "interpreter", "i", "", "user shell to receive retrotxtgo auto-completions\nchoices: "+ci(shells))
-	//configShellCmd.Flags().BoolVar(&shellPreview, "preview", false, "prints the shell completion instead of applying it")
-	configShellCmd.MarkFlagRequired("interpreter")
-	configShellCmd.SilenceErrors = true
-	configCmd.AddCommand(configSetCmd)
-	configSetCmd.Flags().StringVarP(&configSetName, "name", "n", "", `the configuration path to edit in dot syntax (see examples)
-to see a list of names run: retrotxt config info`)
-	configSetCmd.MarkFlagRequired("name")
-}
-
-func prompt(query string, yesDefault bool) bool {
+func promptYN(query string, yesDefault bool) bool {
 	var input string
 	y := "Y"
 	n := "n"
@@ -390,20 +393,6 @@ func prompt(query string, yesDefault bool) bool {
 	return false
 }
 
-func configMissing(name string, suffix string) {
-	cmd := strings.TrimSuffix(name, suffix) + "create"
-	fmt.Printf("No config file is in use.\nTo create one run: %s\n", cp(cmd))
-	os.Exit(1)
-}
-
-func configExists(name string, suffix string) {
-	cmd := strings.TrimSuffix(name, suffix)
-	fmt.Printf("A config file already is in use at: %s\n", cf(viper.ConfigFileUsed()))
-	fmt.Printf("To edit it: %s\n", cp(cmd+"edit"))
-	fmt.Printf("To delete:  %s\n", cp(cmd+"delete"))
-	os.Exit(1)
-}
-
 func writeConfig(update bool) {
 	bs, err := yaml.Marshal(viper.AllSettings())
 	Check(ErrorFmt{"could not create", "settings", err})
@@ -418,48 +407,9 @@ func writeConfig(update bool) {
 	fmt.Println(s+" config file at:", cf(d+"/.retrotxtgo.yaml"))
 }
 
-/*
-config create
---overwrite=true/false
-config edit
-> look for EDITOR env var
-config show
-> output using viper.Sub("create.meta")
-*/
-/*
-
-possible options:
-
-font choice (family)
-font size
-font format
-> base64
-> woff2
-
-codepage?
-
-input (override for internal use)
-> ascii
-> ansi
-> etc
-
-output
-> stout
-> unique filename
-> same filename `index.html`
-
-css
-> embed
-> embed+minified
-> link
-> link+assets
-> none
-
-template (or css?)
-> basic (raw)
-> standard
-
-title
-quiet
-
-*/
+func validPort(p int) bool {
+	if p < portMin || p > portMax {
+		return false
+	}
+	return true
+}
