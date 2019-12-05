@@ -8,8 +8,6 @@
 
 ---
 
-[ ] - Add (C) and licences + credits
-
 [ ] - check for and handle cobra specific errors with flags etc.
 
 - execute cobra flag needs an argument: 'f' in -f # go run . version -f

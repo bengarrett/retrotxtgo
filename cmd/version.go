@@ -92,7 +92,7 @@ func versionJSON(indent bool) []byte {
 func versionText(c bool) {
 	color.Enable = c
 	i := info()
-	color.Primary.Printf("RetroTxt\t%s\n", i["url"])
+	color.Primary.Printf("RetroTxt\t%s [%s]\n", i["copyright"], i["url"])
 	color.Info.Printf("Version:\t%s\n", i["app ver"])
 	fmt.Printf("Go version:\t%s\n", i["go ver"])
 	fmt.Printf("\nBinary:\t\t%s\n", i["exe"])
@@ -122,13 +122,15 @@ func binary() string {
 
 func info() versionInfo {
 	v := versionInfo{
-		"app ver": fmt.Sprintf("%s", Ver),
-		"url":     fmt.Sprintf("https://%s/go", Www),
-		"go ver":  fmt.Sprintf("%s", runtime.Version()),
-		"os":      fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
-		"exe":     fmt.Sprintf("%s", binary()),
-		"date":    fmt.Sprintf("%s", GoBuildDate),
-		"git":     fmt.Sprintf("%s", GoBuildGitCommit),
+		"copyright": fmt.Sprintf("Copyright © 2019 Ben Garrett"),
+		"url":       fmt.Sprintf("https://%s/go", Www),
+		"app ver":   fmt.Sprintf("%s", Ver),
+		"go ver":    fmt.Sprintf("%s", runtime.Version()),
+		"os":        fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
+		"exe":       fmt.Sprintf("%s", binary()),
+		"date":      fmt.Sprintf("%s", GoBuildDate),
+		"git":       fmt.Sprintf("%s", GoBuildGitCommit),
+		"license":   fmt.Sprintf("LGPL-3.0 [https://www.gnu.org/licenses/lgpl-3.0.html]"),
 	}
 	if a := arch(runtime.GOARCH); a != "" {
 		v["os"] += fmt.Sprintf(" [%s CPU]", a)
