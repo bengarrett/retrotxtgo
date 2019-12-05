@@ -14,6 +14,8 @@ https://blog.filippo.io/shrink-your-go-binaries-with-this-one-weird-trick/
 
 ---
 
+[ ] - check for and handle cobra specific errors with flags etc.
+
 [ ] - handle Windows colour support
 
 [ ] - create a VIEW command to convert cp437 into UTF8 and display on screen.

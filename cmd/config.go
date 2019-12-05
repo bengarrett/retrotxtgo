@@ -54,7 +54,6 @@ var configCreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create a new config file",
 	Run: func(cmd *cobra.Command, args []string) {
-		suppressCfg = true // todo: not working
 		if cfg := viper.ConfigFileUsed(); cfg != "" && fileOverwrite != true {
 			configExists(cmd.CommandPath(), "create")
 		}

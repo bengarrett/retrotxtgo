@@ -30,7 +30,7 @@ import (
 
 const (
 	// Ver is the application version
-	Ver string = "0.0.4"
+	Ver string = "0.0.5"
 	// Www is the application domain name
 	Www string = "retrotxt.com"
 	// FileDate is a non-standard date format for file modifications
@@ -68,8 +68,6 @@ var (
 	// Layout template data
 	Layout  PageData
 	cfgFile string
-	//printColor  bool = true
-	suppressCfg bool = false
 
 	// rootCmd represents the base command when called without any subcommands
 	rootCmd = &cobra.Command{
@@ -182,7 +180,6 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file "+color.OpFuzzy.Sprint("(default is $HOME/.retrotxtgo.yaml)"))
-	//rootCmd.PersistentFlags().BoolVar(&printColor, "colors", true, "set to "+ci("false")+" to disable all printed colors")
 }
 
 // initConfig reads in config file and ENV variables if set.

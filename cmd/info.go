@@ -69,8 +69,7 @@ var infoCmd = &cobra.Command{
 		}
 		f, err := details(fileName)
 		Check(ErrorFmt{"file is invalid", fileName, err})
-		i := viper.GetString("info.format")
-		switch i {
+		switch viper.GetString("info.format") {
 		case "color", "c":
 			fmt.Printf("%s\n", infoText(true, f))
 		case "json", "j":
