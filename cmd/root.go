@@ -35,6 +35,10 @@ const (
 	Www string = "retrotxt.com"
 	// FileDate is a non-standard date format for file modifications
 	FileDate string = "2 Jan 15:04 2006"
+	// portMin is the lowest permitted network port
+	portMin int = 0
+	// portMax is the largest permitted network port
+	portMax int = 65535
 )
 
 // PageData holds template data used by the HTML layouts.
@@ -62,18 +66,19 @@ type ErrorFmt struct {
 
 var (
 	// Layout template data
-	Layout      PageData
-	cfgFile     string
+	Layout  PageData
+	cfgFile string
+	//printColor  bool = true
 	suppressCfg bool = false
 
 	// rootCmd represents the base command when called without any subcommands
 	rootCmd = &cobra.Command{
 		Use:   "retrotxtgo",
-		Short: cp("RetroTxt is the tool that turns ANSI, ASCII, NFO text into browser ready HTML"),
-		Long: color.Info.Sprint(`Turn many pieces of ANSI text art and ASCII/NFO plain text into HTML5 text
+		Short: "RetroTxt is the tool that turns ANSI, ASCII, NFO text into browser ready HTML",
+		Long: `Turn many pieces of ANSI text art and ASCII/NFO plain text into HTML5 text
 using RetroTxt. The operating system agnostic tool that takes retro text
 files and stylises them into a more pleasing, useful format to view and
-copy in a web browser.`),
+copy in a web browser.`,
 	}
 )
 
@@ -85,6 +90,9 @@ var (
 	cc = func(t string) string {
 		return color.Comment.Sprint(t)
 	}
+	ce = func(t string) string {
+		return color.Warn.Sprint(t)
+	}
 	cf = func(t string) string {
 		return color.OpFuzzy.Sprint(t)
 	}
@@ -93,6 +101,9 @@ var (
 	}
 	cp = func(t string) string {
 		return color.Primary.Sprint(t)
+	}
+	cs = func(t string) string {
+		return color.Success.Sprint(t)
 	}
 )
 
@@ -170,7 +181,8 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file "+cf("(default is $HOME/.retrotxtgo.yaml)"))
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file "+color.OpFuzzy.Sprint("(default is $HOME/.retrotxtgo.yaml)"))
+	//rootCmd.PersistentFlags().BoolVar(&printColor, "colors", true, "set to "+ci("false")+" to disable all printed colors")
 }
 
 // initConfig reads in config file and ENV variables if set.
