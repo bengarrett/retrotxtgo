@@ -95,8 +95,10 @@ func versionText(c bool) {
 	color.Primary.Printf("RetroTxt\t%s\n", i["url"])
 	color.Info.Printf("Version:\t%s\n", i["app ver"])
 	fmt.Printf("Go version:\t%s\n", i["go ver"])
-	fmt.Printf("OS/Arch:\t%s", i["os"])
 	fmt.Printf("\nBinary:\t\t%s\n", i["exe"])
+	fmt.Printf("OS/Arch:\t%s\n", i["os"])
+	fmt.Printf("Build commit:\t%s\n", i["git"])
+	fmt.Printf("Build date:\t%s\n", i["date"])
 }
 
 func arch(v string) string {
@@ -120,14 +122,30 @@ func binary() string {
 
 func info() versionInfo {
 	v := versionInfo{
-		"app ver": fmt.Sprintf("%s (pre-alpha)", Ver),
+		"app ver": fmt.Sprintf("%s", Ver),
 		"url":     fmt.Sprintf("https://%s/go", Www),
 		"go ver":  fmt.Sprintf("%s", runtime.Version()),
 		"os":      fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
 		"exe":     fmt.Sprintf("%s", binary()),
+		"date":    fmt.Sprintf("%s", GoBuildDate),
+		"git":     fmt.Sprintf("%s", GoBuildGitCommit),
 	}
 	if a := arch(runtime.GOARCH); a != "" {
 		v["os"] += fmt.Sprintf(" [%s CPU]", a)
+	}
+	if GoBuildGitCount != "" {
+		v["app ver"] += fmt.Sprintf(".%s", GoBuildGitCount)
+	} else {
+		v["app ver"] += ".?"
+	}
+	v["app ver"] += " (pre-alpha)"
+	if GoBuildDate == "" {
+		v["date"] = "n/a"
+	} else {
+		v["date"] += " UTC"
+	}
+	if GoBuildGitCommit == "" {
+		v["git"] = "n/a"
 	}
 	return v
 }
