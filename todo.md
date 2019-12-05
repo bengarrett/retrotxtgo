@@ -6,9 +6,6 @@
     println(createCmd.UseLine())     // retrotxt create FILE [flags]
 ```
 
-Shrink binaries
-https://blog.filippo.io/shrink-your-go-binaries-with-this-one-weird-trick/
-
 ---
 
 [ ] - Add (C) and licences + credits
@@ -54,3 +51,45 @@ https://blog.filippo.io/shrink-your-go-binaries-with-this-one-weird-trick/
 - - ascii, ansi, etc
 
 - quiet boolean
+
+---
+
+#### Target package managers
+
+Shrink binaries
+https://blog.filippo.io/shrink-your-go-binaries-with-this-one-weird-trick/
+
+Minimum requirements
+https://github.com/golang/go/wiki/MinimumRequirements
+
+Ubuntu/Mint APT .DEB (http://packaging.ubuntu.com/html/packaging-new-software.html)
+Maybe just include instructions for local install?
+
+Fedora, CentOS/ RHEL
+https://docs.fedoraproject.org/en-US/quick-docs/creating-rpm-packages/index.html
+https://rpm-packaging-guide.github.io/
+
+Windows
+scoop.sh
+https://github.com/lukesampson/scoop/wiki/App-Manifests
+
+Chocolatey
+https://chocolatey.org/docs/createpackages
+
+Homebrew (macOS/Linux) [requires compiling]
+https://docs.brew.sh/Formula-Cookbook
+
+Homebrew confusing terminology
+https://docs.brew.sh/Formula-Cookbook#homebrew-terminology
+
+- formula - Package definition
+- keg - installation prefix of a formula
+- cellar - location of kegs
+- tap - git repo of formulae or commands
+- bottle - prebuilt keg
+
+Homebrew Cask [allows binaries]
+https://github.com/Homebrew/homebrew-cask/blob/master/doc/cask_language_reference/readme.md
+https://github.com/Homebrew/homebrew-cask/blob/master/doc/cask_language_reference/all_stanzas.md
+
+Raspbian ?
