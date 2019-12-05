@@ -67,7 +67,7 @@ var exampleCmd = func() string {
 var createCmd = &cobra.Command{
 	Use: "create",
 	//Aliases: []string{"new"},
-	Short: cp("Create a HTML document from a text file"),
+	Short: "Create a HTML document from a text file",
 	//Long: `` // used by help create
 	Example: exampleCmd(),
 	Run: func(cmd *cobra.Command, args []string) {

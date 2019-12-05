@@ -60,7 +60,7 @@ var (
 // infoCmd represents the info command
 var infoCmd = &cobra.Command{
 	Use:   "info",
-	Short: cp("Information on a text file"),
+	Short: "Information on a text file",
 	Run: func(cmd *cobra.Command, args []string) {
 		if fileName == "" {
 			fmt.Printf("%s\n\n", cmd.Short)
