@@ -26,16 +26,15 @@ func TailBytes(name string, offset int64) ([]byte, error) {
 		return nil, err
 	}
 	var size int64 = int64(math.Abs(float64(offset)))
-	stat, err := os.Stat(name)
-	if err == nil && stat.Size() < size {
+	if stat, err := os.Stat(name); err == nil && stat.Size() < size {
 		return nil, fmt.Errorf("offset: value is %v too large for a %v byte file", offset, stat.Size())
 	}
 	// file.Seek(whence)
 	// 0 means relative to the origin of the file
 	// 1 means relative to the current offset
 	// 2 means relative to the end
-	_, err = file.Seek(offset, 2) // todo: have offset deal with runes not bytes
-	if err != nil {
+	if _, err = file.Seek(offset, 2); err != nil {
+		// todo: have offset deal with runes not bytes
 		return nil, err
 	}
 	buffer := make([]byte, size)
