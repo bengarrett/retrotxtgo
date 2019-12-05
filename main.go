@@ -21,13 +21,3 @@ import "github.com/bengarrett/retrotxtgo/cmd"
 func main() {
 	cmd.Execute()
 }
-
-/*
-
-phases:
-
-read source
-parse raw data
-convert data to html
-output html
-*/
