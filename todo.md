@@ -78,6 +78,20 @@ always print a decimal point for floats (%#f)...
 Fprint, Fprintln... `Fprintf(w io.Writer, format, ...inferface{})`
 Formats according to a format specifier and writes to w.
 
+`constant.BitLen(x Value) int`
+... BoolVal(x) Int64Val(x) Uint64Val(x)
+... StringVal(x) string
+
+`constant.Val(x) interface{}`
+
+```go
+b := constant.Make(false)
+fmt.Printf("%v\n", constant.Val(b))
+```
+
+`Shift(x Value, op, s uint)`
+op token list > https://golang.org/pkg/go/token/#Token
+
 ---
 
 ## Possible create options
