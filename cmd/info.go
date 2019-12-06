@@ -17,6 +17,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
+	"bytes"
 	"crypto/md5"
 	"crypto/sha256"
 	"encoding/json"
@@ -24,13 +25,13 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"text/tabwriter"
 	"time"
 
-	"github.com/InVisionApp/tabular"
 	"github.com/aofei/mimesniffer"
 	"github.com/bengarrett/retrotxtgo/codepage"
 	"github.com/bengarrett/retrotxtgo/filesystem"
-	"github.com/labstack/gommon/bytes"
+	humanize "github.com/labstack/gommon/bytes"
 	"github.com/mattn/go-runewidth"
 	"github.com/mozillazg/go-slugify"
 	"github.com/spf13/cobra"
@@ -73,13 +74,13 @@ var infoCmd = &cobra.Command{
 		Check(ErrorFmt{"file is invalid", fileName, err})
 		switch viper.GetString("info.format") {
 		case "color", "c":
-			fmt.Printf("%s\n", infoText(true, f))
+			fmt.Printf("%s", infoText(true, f))
 		case "json", "j":
 			fmt.Printf("%s\n", infoJSON(true, f))
 		case "json.min", "jm":
 			fmt.Printf("%s\n", infoJSON(false, f))
 		case "text":
-			fmt.Printf("%s\n", infoText(false, f))
+			fmt.Printf("%s", infoText(false, f))
 		case "xml", "x":
 			fmt.Printf("%s\n", infoXML(f))
 		default:
@@ -117,28 +118,32 @@ func infoText(c bool, f Detail) string {
 	var info = func(t string) string {
 		return color.Info.Sprintf("%s\t", t)
 	}
-	tab := tabular.New()
-	tab.Col("det", color.Primary.Sprintf("Details"), 14)
-	tab.Col("val", "", 10)
+	var hr = func() string {
+		return fmt.Sprintf("\t%s\n", cf(strings.Repeat("\u2015", 26)))
+	}
 	var data = []struct {
 		d, v string
 	}{
-		{d: "Filename", v: f.Name},
+		{d: "filename", v: f.Name},
 		{d: "UTF-8", v: fmt.Sprintf("%v", f.Utf8)},
-		{d: "Characters", v: fmt.Sprintf("%v", f.CharCount)},
-		{d: "Size", v: f.Size},
-		{d: "Modified", v: fmt.Sprintf("%v", f.Modified.Format(FileDate))},
-		{d: "MD5 check", v: f.MD5},
-		{d: "SHA256 check", v: f.SHA256},
+		{d: "characters", v: fmt.Sprintf("%v", f.CharCount)},
+		{d: "size", v: f.Size},
+		{d: "modified", v: fmt.Sprintf("%v", f.Modified.Format(FileDate))},
+		{d: "MD5 checksum", v: f.MD5},
+		{d: "SHA256 checksum", v: f.SHA256},
 		{d: "MIME type", v: f.Mime},
-		{d: "Slug", v: f.Slug},
+		{d: "slug", v: f.Slug},
 	}
-	format := tab.Print("*")
-	var t string
+	var buf bytes.Buffer
+	w := new(tabwriter.Writer)
+	w.Init(&buf, 0, 8, 0, '\t', 0)
+	fmt.Fprint(w, hr())
 	for _, x := range data {
-		t = t + fmt.Sprintf(format, x.d, info(x.v))
+		fmt.Fprintf(w, "\t %s\t  %s\n", x.d, info(x.v))
 	}
-	return t
+	fmt.Fprint(w, hr())
+	w.Flush()
+	return buf.String()
 }
 
 func infoXML(f Detail) []byte {
@@ -203,7 +208,7 @@ func parse(data []byte, stat os.FileInfo) (Detail, error) {
 	if stat.Size() < 1000 {
 		d.Size = fmt.Sprintf("%v bytes", stat.Size())
 	} else {
-		d.Size = fmt.Sprintf("%v (%v bytes)", bytes.Format(stat.Size()), stat.Size())
+		d.Size = fmt.Sprintf("%v (%v bytes)", humanize.Format(stat.Size()), stat.Size())
 	}
 	if strings.Contains(mime, ";") {
 		d.Mime = strings.Split(mime, ";")[0]
