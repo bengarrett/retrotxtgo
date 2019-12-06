@@ -47,7 +47,14 @@ var (
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Configure RetroTxt defaults",
-	// no Run: means the help will be display
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 && cmd.Flags().NFlag() == 0 {
+			cmd.Usage()
+			os.Exit(0)
+		}
+		cmd.Usage()
+		Check(ErrorFmt{"invalid command", args[0], fmt.Errorf("please use one of the available config commands")})
+	},
 }
 
 var configCreateCmd = &cobra.Command{
@@ -131,28 +138,6 @@ var configInfoCmd = &cobra.Command{
 	},
 }
 
-var configShellCmd = &cobra.Command{
-	Use:   "shell",
-	Short: "Include retrotxt autocompletion to the terminal shell",
-	Run: func(cmd *cobra.Command, args []string) {
-		var buf bytes.Buffer
-		var lexer string
-		switch configShell {
-		case "bash":
-			lexer = "bash"
-			cmd.GenBashCompletion(&buf)
-		case "powershell", "posh":
-			lexer = "powershell"
-			cmd.GenPowerShellCompletion(&buf)
-		case "zsh":
-			lexer = "bash"
-			cmd.GenZshCompletion(&buf)
-		default:
-		}
-		quick.Highlight(os.Stdout, buf.String(), lexer, "terminal256", "monokai")
-	},
-}
-
 var configSetCmd = &cobra.Command{
 	Use:   "set",
 	Short: "Change a configuration",
@@ -165,8 +150,8 @@ var configSetCmd = &cobra.Command{
 		sort.Strings(keys)
 		// sort.SearchStrings() - The slice must be sorted in ascending order.
 		if i := sort.SearchStrings(keys, name); i == len(keys) || keys[i] != name {
-			err := fmt.Errorf("retrotxt config info")
-			CheckFlag(ErrorFmt{"name", name, err})
+			err := fmt.Errorf("to see a list of usable settings, run: retrotxt config info")
+			Check(ErrorFmt{"invalid flag", fmt.Sprintf("--name %s", name), err})
 		}
 		s := viper.GetString(name)
 		switch s {
@@ -199,6 +184,31 @@ var configSetCmd = &cobra.Command{
 			promptMeta(s)
 			fmt.Printf("\nSet a new value, leave blank to keep as-is or use a dash [-] to disable: \n")
 			promptString(s)
+		}
+	},
+}
+
+var configShellCmd = &cobra.Command{
+	Use:   "shell",
+	Short: "Include retrotxt autocompletion to the terminal shell",
+	Run: func(cmd *cobra.Command, args []string) {
+		var buf bytes.Buffer
+		var lexer string
+		switch configShell {
+		case "bash", "b":
+			lexer = "bash"
+			cmd.GenBashCompletion(&buf)
+		case "powershell", "posh", "p":
+			lexer = "powershell"
+			cmd.GenPowerShellCompletion(&buf)
+		case "zsh", "z":
+			lexer = "bash"
+			cmd.GenZshCompletion(&buf)
+		default:
+			Check(ErrorFmt{"unknown interpreter", configShell, fmt.Errorf("available interpreters: %s", shells)})
+		}
+		if err := quick.Highlight(os.Stdout, buf.String(), lexer, "terminal256", "monokai"); err != nil {
+			fmt.Println(buf.String())
 		}
 	},
 }
