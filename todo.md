@@ -8,6 +8,22 @@
 
 ---
 
+Golang built-ins
+
+`slice = append(slice, more...)` `slice = append(slice, elm1, elm2)`
+`copy(dest, srcSlice) = int` # number of elms copied
+
+`cap(array) = int` `cap(slice) #max length`
+
+`len(array, string, slice) int` # length or bytes
+
+---
+
+[ ] - Add a build subcommand for raw text data outputs
+
+- --version, --build-date, --build-commit
+- --sha256 (self-hash)
+
 [ ] - check for and handle cobra specific errors with flags etc.
 
 - execute cobra flag needs an argument: 'f' in -f # go run . version -f
@@ -32,6 +48,35 @@
 - when successful tell user to `source xxx` or reload the terminal/command prompt
 
 [ ] - add a flag to export `create` to an tar/zip archive
+
+---
+
+## SAUCE debug?
+
+`fmt.Sprintf()`
+
+#### Integer
+
+%b base 2 (binary)
+%c unicode code point
+%d base 10
+%o base 8
+%0 base 8 with 0o prefix
+%x base 16 lower-case %X upper-case
+%U unicode format
+
+\+ always print a sign (%+q)
+\- pad with spaces to the right rather than the left
+\# alternate formats:
+add leading 0b for binary (%#b)
+add leading 0 for octal (%#o)
+add 0x or 0X for hex (%#x)
+suppress 0x for %p (%#p)
+always print a decimal point for floats (%#f)...
+0 pad with leading zeros rather than spaces (%0d)...
+
+Fprint, Fprintln... `Fprintf(w io.Writer, format, ...inferface{})`
+Formats according to a format specifier and writes to w.
 
 ---
 
