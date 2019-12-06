@@ -21,7 +21,7 @@ Golang built-ins
 ---
 
 [ ] - Writing Web Applications https://golang.org/doc/articles/wiki/
-A simple golang web server with basic logging, tracing, health check, graceful shutdown and zero dependencies
+A simple golang web server with basic logging, tracing, health check, graceful shut-down and zero dependencies
 https://gist.github.com/enricofoltran/10b4a980cd07cb02836f70a4ab3e72d7
 https://flaviocopes.com/golang-enable-cors/
 https://developpaper.com/golang-http-connection-reuse-method/
@@ -31,11 +31,6 @@ https://sysadmins.co.za/golang-building-a-basic-web-server-in-go/
 
 - --version, --build-date, --build-commit
 - --sha256 (self-hash)
-
-[ ] - check for and handle cobra specific errors with flags etc.
-
-- go run . info --format=color > no feedback
-- create -p # does nothing, expect -n / --name
 
 [ ] - handle Windows colour support
 

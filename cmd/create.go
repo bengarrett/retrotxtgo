@@ -31,7 +31,6 @@ import (
 	"github.com/bengarrett/retrotxtgo/filesystem"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gopkg.in/gookit/color.v1"
 )
 
 type files map[string]string
@@ -60,7 +59,7 @@ var exampleCmd = func() string {
 	s := string(os.PathSeparator)
 	e := `  retrotxtgo create -n textfile.txt -t "Text file" -d "Some random text file"`
 	e += fmt.Sprintf("\n  retrotxtgo create --name ~%sDownloads%stextfile.txt --layout mini --save .%shtml", s, s, s)
-	return color.Info.Sprint(e)
+	return cinf(e)
 }
 
 // createCmd represents the create command
@@ -264,8 +263,8 @@ func serveFile(data []byte, port int, test bool) error {
 	})
 	fs := http.FileServer(http.Dir("static/"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
-	fmt.Printf("Web server is available at %s\n", color.Primary.Sprintf("http://localhost:%v", port))
-	color.Info.Println("Press Ctrl+C to stop")
+	fmt.Printf("Web server is available at %s\n", cp(fmt.Sprintf("http://localhost:%v", port)))
+	println(cinf("Press Ctrl+C to stop"))
 	if err = http.ListenAndServe(fmt.Sprintf(":%v", port), nil); err != nil {
 		return err
 	}

@@ -90,7 +90,7 @@ copy in a web browser.`,
 // color aliases
 var (
 	alert = func() string {
-		return color.Error.Sprint("ERROR:")
+		return color.Error.Sprint("problem:")
 	}
 	cc = func(t string) string {
 		return color.Comment.Sprint(t)
@@ -103,6 +103,9 @@ var (
 	}
 	ci = func(t string) string {
 		return color.OpItalic.Sprint(t)
+	}
+	cinf = func(t string) string {
+		return color.Info.Sprint(t)
 	}
 	cp = func(t string) string {
 		return color.Primary.Sprint(t)
@@ -131,9 +134,9 @@ func InitDefaults() {
 
 // errorPrint returns a coloured error message.
 func (e *ErrorFmt) errorPrint() string {
-	ia := color.OpItalic.Sprintf("%s %s", e.Issue, e.Arg)
-	m := color.OpFuzzy.Sprintf(" %v", e.Msg)
-	return color.Sprintf("%s %s%s", alert(), ia, m)
+	ia := ci(fmt.Sprintf("%s %s", e.Issue, e.Arg))
+	m := cf(fmt.Sprintf(" %v", e.Msg))
+	return fmt.Sprintf("%s %s%s", alert(), ia, m)
 }
 
 // Check parses the ErrorFmt and will exit with a message if an error is found.
@@ -151,8 +154,8 @@ func Check(e ErrorFmt) {
 // errorPrint returns a coloured invalid flag message.
 func (e *ErrorFmt) errorFlag() string {
 	a := fmt.Sprintf("\"--%s %s\"", e.Issue, e.Arg)
-	m := color.OpFuzzy.Sprintf(" valid %s values: %v", e.Issue, e.Msg)
-	return color.Sprintf("\n%s %s %s%s\n", alert(), ci("invalid flag"), a, m)
+	m := cf(fmt.Sprintf(" valid %s values: %v", e.Issue, e.Msg))
+	return fmt.Sprintf("\n%s %s %s%s\n", alert(), ci("invalid flag"), a, m)
 }
 
 // CheckFlag exits with an invalid command flag value.
@@ -167,7 +170,7 @@ func CheckFlag(e ErrorFmt) {
 func FileMissingErr() {
 	i := ci("missing the --name flag")
 	m := cf("you need to provide a path to a text file")
-	color.Printf("\n%s %s %s\n", alert(), i, m)
+	fmt.Printf("\n%s %s %s\n", alert(), i, m)
 	os.Exit(1)
 }
 
@@ -199,7 +202,7 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file "+color.OpFuzzy.Sprint("(default is $HOME/.retrotxtgo.yaml)"))
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file "+cf(fmt.Sprint("(default is $HOME/.retrotxtgo.yaml)")))
 }
 
 // initConfig reads in config file and ENV variables if set.

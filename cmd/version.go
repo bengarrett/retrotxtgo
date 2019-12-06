@@ -92,8 +92,8 @@ func versionJSON(indent bool) []byte {
 func versionText(c bool) {
 	color.Enable = c
 	i := info()
-	color.Primary.Printf("RetroTxt\t%s [%s]\n", i["copyright"], i["url"])
-	color.Info.Printf("Version:\t%s\n", i["app ver"])
+	fmt.Printf(cp("RetroTxt\t%s [%s]\n"), i["copyright"], i["url"])
+	fmt.Printf(cinf("Version:\t%s\n"), i["app ver"])
 	fmt.Printf("Go version:\t%s\n", i["go ver"])
 	fmt.Printf("\nBinary:\t\t%s\n", i["exe"])
 	fmt.Printf("OS/Arch:\t%s\n", i["os"])

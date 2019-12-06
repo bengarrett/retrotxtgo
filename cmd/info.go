@@ -121,7 +121,7 @@ func infoJSON(indent bool, f Detail) []byte {
 func infoText(c bool, f Detail) string {
 	color.Enable = c
 	var info = func(t string) string {
-		return color.Info.Sprintf("%s\t", t)
+		return cinf(fmt.Sprintf("%s\t", t))
 	}
 	var hr = func() string {
 		return fmt.Sprintf("\t%s\n", cf(strings.Repeat("\u2015", 26)))
