@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"crypto/md5"
+	"crypto/sha256"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
@@ -47,6 +48,7 @@ type Detail struct {
 	MD5       string
 	Mime      string
 	Modified  time.Time
+	SHA256    string
 	Slug      string
 	Size      string
 	Utf8      bool
@@ -122,12 +124,13 @@ func infoText(c bool, f Detail) string {
 		d, v string
 	}{
 		{d: "Filename", v: f.Name},
-		{d: "MIME type", v: f.Mime},
 		{d: "UTF-8", v: fmt.Sprintf("%v", f.Utf8)},
 		{d: "Characters", v: fmt.Sprintf("%v", f.CharCount)},
 		{d: "Size", v: f.Size},
 		{d: "Modified", v: fmt.Sprintf("%v", f.Modified.Format(FileDate))},
-		{d: "MD5 checksum", v: f.MD5},
+		{d: "MD5 check", v: f.MD5},
+		{d: "SHA256 check", v: f.SHA256},
+		{d: "MIME type", v: f.Mime},
 		{d: "Slug", v: f.Slug},
 	}
 	format := tab.Print("*")
@@ -148,7 +151,8 @@ func infoXML(f Detail) []byte {
 		Bytes     int64     `xml:"size>bytes"`
 		Size      string    `xml:"size>value"`
 		CharCount int       `xml:"size>character-count"`
-		MD5       string    `xml:"md5"`
+		MD5       string    `xml:"checksum>md5"`
+		SHA256    string    `xml:"checksum>sha256"`
 		Modified  time.Time `xml:"modified"`
 	}
 	x := xmldetail{}
@@ -159,6 +163,7 @@ func infoXML(f Detail) []byte {
 	x.Mime = f.Mime
 	x.Modified = f.Modified
 	x.Name = f.Name
+	x.SHA256 = f.SHA256
 	x.Size = f.Size
 	x.Utf8 = f.Utf8
 	xmlData, err := xml.MarshalIndent(x, "", "\t")
@@ -182,16 +187,18 @@ func details(name string) (Detail, error) {
 }
 
 func parse(data []byte, stat os.FileInfo) (Detail, error) {
-	checksum := md5.Sum(data)
+	md5sum := md5.Sum(data)
+	sha256 := sha256.Sum256(data)
 	mime := mimesniffer.Sniff(data)
 	// create a table of data
 	d := Detail{}
 	d.Bytes = stat.Size()
 	d.CharCount = runewidth.StringWidth(string(data))
 	d.Name = stat.Name()
-	d.MD5 = fmt.Sprintf("%x", checksum)
+	d.MD5 = fmt.Sprintf("%x", md5sum)
 	d.Modified = stat.ModTime()
 	d.Slug = slugify.Slugify(stat.Name())
+	d.SHA256 = fmt.Sprintf("%x", sha256)
 	d.Utf8 = codepage.UTF8(data)
 	if stat.Size() < 1000 {
 		d.Size = fmt.Sprintf("%v bytes", stat.Size())
