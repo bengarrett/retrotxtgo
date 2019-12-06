@@ -65,10 +65,15 @@ var infoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "Information on a text file",
 	Run: func(cmd *cobra.Command, args []string) {
-		if fileName == "" {
+		// only show Usage() with no errors if no flags .NFlags() are set
+		if fileName == "" && cmd.Flags().NFlag() == 0 {
 			fmt.Printf("%s\n\n", cmd.Short)
 			cmd.Usage()
 			os.Exit(0)
+		}
+		if fileName == "" {
+			cmd.Usage()
+			FileMissingErr()
 		}
 		f, err := details(fileName)
 		Check(ErrorFmt{"file is invalid", fileName, err})

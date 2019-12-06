@@ -165,7 +165,7 @@ func CheckFlag(e ErrorFmt) {
 
 // FileMissingErr exits with a missing FILE error.
 func FileMissingErr() {
-	i := ci("missing the FILE argument")
+	i := ci("missing the --name flag")
 	m := cf("you need to provide a path to a text file")
 	color.Printf("\n%s %s %s\n", alert(), i, m)
 	os.Exit(1)
@@ -179,14 +179,17 @@ func Execute() {
 		return
 	}
 	msg := fmt.Sprintf("%s", err)
+	m := strings.Split(msg, " ")
 	switch {
 	case len(msg) > 22 && msg[:22] == "unknown shorthand flag",
 		len(msg) > 12 && msg[:12] == "unknown flag":
-		m := strings.Split(msg, " ")
 		Check(ErrorFmt{"invalid flag", m[len(m)-1], fmt.Errorf("is not a flag in use for this command")})
 	case len(msg) > 22 && msg[:22] == "flag needs an argument":
-		m := strings.Split(msg, " ")
 		Check(ErrorFmt{"invalid flag", m[len(m)-1], fmt.Errorf("cannot be empty and requires a value")})
+	case len(msg) > 17 && msg[:16] == "required flag(s)":
+		Check(ErrorFmt{"a required flag missing", m[2], err})
+	case len(msg) > 16 && msg[:15] == "unknown command":
+		Check(ErrorFmt{"invalid command", m[2], err})
 	case msg == "subcommand is required":
 		return // ignored errors
 	default:

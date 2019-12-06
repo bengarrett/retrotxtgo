@@ -80,10 +80,15 @@ var createCmd = &cobra.Command{
 		case true:
 			data = []byte(fmt.Sprintf("%s", b.Value))
 		default:
-			if createFileName == "" {
+			// only show Usage() with no errors if no flags .NFlags() are set
+			if createFileName == "" && cmd.Flags().NFlag() == 0 {
 				fmt.Printf("%s\n\n", cmd.Short)
 				cmd.Usage()
 				os.Exit(0)
+			}
+			if createFileName == "" {
+				cmd.Usage()
+				FileMissingErr()
 			}
 			data, err = filesystem.Read(createFileName)
 			Check(ErrorFmt{"file is invalid", createFileName, err})

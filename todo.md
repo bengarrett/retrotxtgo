@@ -3,6 +3,7 @@
 ```go
     println(createCmd.CommandPath()) // <-- retrotxtgo create!
     println(createCmd.Name())        // <- create
+    println(cmd.CalledAs())          // create
     println(createCmd.UseLine())     // retrotxt create FILE [flags]
 ```
 
