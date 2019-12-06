@@ -26,8 +26,6 @@ Golang built-ins
 
 [ ] - check for and handle cobra specific errors with flags etc.
 
-- execute cobra flag needs an argument: 'f' in -f # go run . version -f
-- execute cobra flag needs an argument: --format # version --format
 - go run . info --format=color > no feedback
 - create -p # does nothing, expect -n / --name
 

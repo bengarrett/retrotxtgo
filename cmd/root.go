@@ -19,6 +19,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -174,17 +175,22 @@ func FileMissingErr() {
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	err := rootCmd.Execute()
-	es := fmt.Sprintf("%s", err)
-	// fmt.Printf("\n%v\n%q\n", len("Error: flag needs an argument:"), es[:22])
+	if err == nil {
+		return
+	}
+	msg := fmt.Sprintf("%s", err)
 	switch {
-	// case es[:22] == "flag needs an argument":
-	// 	println("OOOOF")
-	case es == "ERROR: subcommand is required":
-		// ignored errors
+	case len(msg) > 22 && msg[:22] == "unknown shorthand flag",
+		len(msg) > 12 && msg[:12] == "unknown flag":
+		m := strings.Split(msg, " ")
+		Check(ErrorFmt{"invalid flag", m[len(m)-1], fmt.Errorf("is not a flag in use for this command")})
+	case len(msg) > 22 && msg[:22] == "flag needs an argument":
+		m := strings.Split(msg, " ")
+		Check(ErrorFmt{"invalid flag", m[len(m)-1], fmt.Errorf("cannot be empty and requires a value")})
+	case msg == "subcommand is required":
+		return // ignored errors
 	default:
-		if err != nil {
-			Check(ErrorFmt{"execute", "cobra", err})
-		}
+		Check(ErrorFmt{"command", "execute", err})
 	}
 }
 
