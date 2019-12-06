@@ -20,6 +20,13 @@ Golang built-ins
 
 ---
 
+[ ] - Writing Web Applications https://golang.org/doc/articles/wiki/
+A simple golang web server with basic logging, tracing, health check, graceful shutdown and zero dependencies
+https://gist.github.com/enricofoltran/10b4a980cd07cb02836f70a4ab3e72d7
+https://flaviocopes.com/golang-enable-cors/
+https://developpaper.com/golang-http-connection-reuse-method/
+https://sysadmins.co.za/golang-building-a-basic-web-server-in-go/
+
 [ ] - Add a build subcommand for raw text data outputs
 
 - --version, --build-date, --build-commit
