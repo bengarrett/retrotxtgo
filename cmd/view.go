@@ -36,7 +36,8 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		//		name := "textfiles/ZII-RTXT.ans"
-		name := "/home/ben/hx_back.ans"
+		//name := "/home/ben/hx_back.ans"
+		name := "textfiles/hi.txt"
 		fmt.Println("view called", name)
 
 		file, err := os.Open(name)
@@ -59,6 +60,9 @@ to quickly create a Cobra application.`,
 			out, _ := decode.Bytes(scanner.Bytes())
 			fmt.Printf("%s%s\n", string(out), "\033[0m")
 		}
+		// https://godoc.org/golang.org/x/text/encoding/charmap
+		fmt.Printf("%v", charmap.All)
+		//fmt.Printf("%v", charmap.Charmap())
 
 		// buf := make([]byte, 32*1024) //
 
