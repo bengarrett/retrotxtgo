@@ -89,22 +89,16 @@ func versionJSON(indent bool) []byte {
 	return j
 }
 
-var tt = func(x string) {
-	color.Tag("suc").Print(x)
-}
-
 func versionText(c bool) {
 	color.Enable = c
 	i := info()
-	ctp(fmt.Sprintf("RetroTxt\t%s [%s]\n", i["copyright"], i["url"]))
-	color.Printf(cp("RetroTxt\t%s [%s]\n"), i["copyright"], i["url"])
-	color.Printf(cinf("Version:\t%s\n"), i["app ver"])
+	fmt.Printf(cp("RetroTxt\t%s [%s]\n"), i["copyright"], i["url"])
+	fmt.Printf(cinf("Version:\t%s\n"), i["app ver"])
 	fmt.Printf("Go version:\t%s\n", i["go ver"])
 	fmt.Printf("\nBinary:\t\t%s\n", i["exe"])
 	fmt.Printf("OS/Arch:\t%s\n", i["os"])
 	fmt.Printf("Build commit:\t%s\n", i["git"])
 	fmt.Printf("Build date:\t%s\n", i["date"])
-	fmt.Println("Current env whether support color:", color.IsSupportColor(), c, color.Enable)
 }
 
 func arch(v string) string {
