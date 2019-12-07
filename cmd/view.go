@@ -20,8 +20,12 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/bengarrett/retrotxtgo/filesystem"
+
 	"github.com/spf13/cobra"
+	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
+	"golang.org/x/text/encoding/ianaindex"
 )
 
 // viewCmd represents the view command
@@ -60,8 +64,6 @@ to quickly create a Cobra application.`,
 			out, _ := decode.Bytes(scanner.Bytes())
 			fmt.Printf("%s%s\n", string(out), "\033[0m")
 		}
-		// https://godoc.org/golang.org/x/text/encoding/charmap
-		fmt.Printf("%v", charmap.All)
 		//fmt.Printf("%v", charmap.Charmap())
 
 		// buf := make([]byte, 32*1024) //
@@ -108,16 +110,64 @@ to quickly create a Cobra application.`,
 	},
 }
 
+func transform(e encoding.Encoding) {
+	name := "textfiles/cp-437-all-characters.txt"
+	data, err := filesystem.Read(name)
+	Check(ErrorFmt{"file open", name, err})
+	iana, err := ianaindex.IANA.Name(e)
+	if err != nil {
+		iana = "unknown"
+	}
+	utf8decode, err := e.NewDecoder().Bytes(data)
+	Check(ErrorFmt{"encoding transform", iana, err})
+
+	fmt.Printf("\n%s\n", utf8decode)
+}
+
+var viewCodePagesCmd = &cobra.Command{
+	Use:   "codepages",
+	Short: "List supported and available legacy codepages that can be converted into UTF-8",
+	Run: func(cmd *cobra.Command, args []string) {
+		// https://godoc.org/golang.org/x/text/encoding/charmap
+		// fmt.Printf("%v\n", charmap.All)
+
+		// fmt.Printf("%v\n", charmap.CodePage037))
+		// // for _, name := range charmap.All {
+		// // 	fmt.Println(name, charmap{name})
+		// // }
+		e, _ := ianaindex.IANA.Encoding("cp437")
+
+		transform(e)
+
+		fmt.Println(ianaindex.IANA.Name(e))
+
+		fmt.Println(ianaindex.MIME.Name(charmap.ISO8859_7))
+		fmt.Println(ianaindex.IANA.Name(charmap.ISO8859_7))
+		fmt.Println(ianaindex.MIB.Name(charmap.ISO8859_7))
+
+		fmt.Println(ianaindex.MIME.Encoding("437"))
+	},
+}
+
+const viewFormats string = "color, text"
+
+var (
+	viewCodePage string
+	viewFilename string
+	viewFormat   string
+	viewWidth    int
+)
+
 func init() {
 	rootCmd.AddCommand(viewCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// viewCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// viewCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	viewCmd.Flags().StringVarP(&viewFilename, "name", "n", "", cp("text file to display")+" (required)\n")
+	viewCmd.Flags().StringVarP(&viewCodePage, "codepage", "c", "cp437", "legacy character encoding used by the text file")
+	viewCmd.Flags().StringVarP(&viewFormat, "format", "f", "color", "output format, options: "+ci(viewFormats))
+	viewCmd.Flags().IntVarP(&viewWidth, "width", "w", 80, "document column character width")
+	// override ascii 0-F + 1-F || Control characters || IBM, ASCII, IBM+
+	// example flag showing CP437 table
+	viewCmd.MarkFlagFilename("name")
+	viewCmd.MarkFlagRequired("name")
+	viewCmd.Flags().SortFlags = false
+	viewCmd.AddCommand(viewCodePagesCmd)
 }

@@ -2,6 +2,7 @@
 package filesystem
 
 import (
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"math"
@@ -56,4 +57,22 @@ func ReadAllBytes(name string) ([]byte, error) {
 		return nil, err
 	}
 	return buffer, nil
+}
+
+func ReadChunk(name string, size int) ([]byte, error) {
+	file, err := os.Open(name)
+	defer file.Close()
+	if err != nil {
+		return nil, err
+	}
+	read := bufio.NewReaderSize(file, size)
+	buf := make([]byte, size)
+	for {
+		_, err := read.Read(buf)
+		if err != nil {
+			return nil, err
+		}
+		// do things
+		return buf, nil
+	}
 }
