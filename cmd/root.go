@@ -138,7 +138,7 @@ func InitDefaults() {
 
 // errorPrint returns a coloured error message.
 func (e *ErrorFmt) errorPrint() string {
-	ia := ci(fmt.Sprintf("%s %s", e.Issue, e.Arg))
+	ia := ci(fmt.Sprintf("%s%s", e.Issue, e.Arg))
 	m := cf(fmt.Sprintf(" %v", e.Msg))
 	return fmt.Sprintf("%s %s%s", alert(), ia, m)
 }
@@ -155,11 +155,20 @@ func Check(e ErrorFmt) {
 	}
 }
 
+func CheckCodePage(e ErrorFmt) {
+	if e.Msg != nil {
+		e.Issue = "unsupported "
+		println(e.errorPrint())
+		println("         to see a list of supported code pages and aliases run: " + color.Primary.Sprint("retrotxtgo view codepages"))
+		os.Exit(1)
+	}
+}
+
 // errorPrint returns a coloured invalid flag message.
 func (e *ErrorFmt) errorFlag() string {
 	a := fmt.Sprintf("\"--%s %s\"", e.Issue, e.Arg)
 	m := cf(fmt.Sprintf(" valid %s values: %v", e.Issue, e.Msg))
-	return fmt.Sprintf("\n%s %s %s%s\n", alert(), ci("invalid flag"), a, m)
+	return fmt.Sprintf("\n%s %s %s %s\n", alert(), ci("invalid flag"), a, m)
 }
 
 // CheckFlag exits with an invalid command flag value.

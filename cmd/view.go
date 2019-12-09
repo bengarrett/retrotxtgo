@@ -28,7 +28,6 @@ import (
 	"github.com/bengarrett/retrotxtgo/filesystem"
 
 	"github.com/spf13/cobra"
-	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/ianaindex"
 )
@@ -71,8 +70,7 @@ to quickly create a Cobra application.`,
 		}
 		// todo handle unchanged viewCodePage, where UTF8 encoding will be checked otherwise use
 		encoding, err := ianaindex.IANA.Encoding(viewCodePage)
-		// todo handle invalid encoding value, with notice on how to display the list
-		Check(ErrorFmt{"encoding transform", viewCodePage, err})
+		CheckCodePage(ErrorFmt{"", viewCodePage, err})
 		var d codepage.Set
 
 		data, err := filesystem.Read(viewFilename)
@@ -81,13 +79,8 @@ to quickly create a Cobra application.`,
 		d.Transform(data, encoding)
 		d.SwapAll(true)
 		fmt.Printf("\n%s\n", d.Data)
-
-		println(codepage.Table(""))
-
-		// fmt.Printf("\n%s\n", data)
-		// // todo: make an --example that auto generates a table bytes 0 - 255 | lf every 16 characters
-		// oof := []byte{48, 49, 50, 51, 52}
-		// fmt.Printf("\n%v\t%d\n", oof, oof)
+		// todo: make an --example that auto generates
+		// a table bytes 0 - 255 | lf every 16 characters
 	},
 }
 
@@ -96,6 +89,20 @@ var viewCodePagesCmd = &cobra.Command{
 	Short: "list available legacy codepages that RetroTxt can convert into UTF-8",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(codepages())
+	},
+}
+
+var viewTableCmd = &cobra.Command{
+	Use:   "table",
+	Short: "display a table showing the codepage and all its characters",
+	Run: func(cmd *cobra.Command, args []string) {
+		encoding, err := ianaindex.IANA.Encoding(viewCodePage)
+		CheckCodePage(ErrorFmt{"", viewCodePage, err})
+		cp, err := ianaindex.IANA.Name(encoding)
+		CheckCodePage(ErrorFmt{"", viewCodePage, err})
+		table, err := codepage.Table(cp)
+		Check(ErrorFmt{"table", cp, err})
+		println(table)
 	},
 }
 
@@ -111,6 +118,9 @@ func init() {
 	viewCmd.MarkFlagRequired("name")
 	viewCmd.Flags().SortFlags = false
 	viewCmd.AddCommand(viewCodePagesCmd)
+	viewCmd.AddCommand(viewTableCmd)
+	viewTableCmd.Flags().StringVarP(&viewCodePage, "codepage", "c", "cp437", "legacy character encoding table to display")
+	viewTableCmd.MarkFlagRequired("name")
 }
 
 // codepages returns a tabled list of supported IANA character set encodings
@@ -167,20 +177,4 @@ func codepages() string {
 	fmt.Fprint(w, "\n  Windows 1252 ("+cc("windows1252")+") is found in legacy English language Windows operating systems")
 	w.Flush()
 	return buf.String()
-}
-
-// transform opens a text file and converts it from the Encoding legacy character set into UTF-8.
-func transform(name string, e encoding.Encoding) codepage.Set {
-	var s codepage.Set
-	data, err := filesystem.Read(name)
-	Check(ErrorFmt{"file open", name, err})
-	iana, err := ianaindex.IANA.Name(e)
-	if err != nil {
-		iana = "unknown"
-	}
-	Check(ErrorFmt{"IANA index", iana, err})
-	decode, err := e.NewDecoder().Bytes(data)
-	Check(ErrorFmt{"encoding transform", iana, err})
-	s.Data = decode
-	return s
 }

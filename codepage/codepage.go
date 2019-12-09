@@ -55,8 +55,11 @@ func Center(text string, width int) string {
 	return text
 }
 
-func Table(codepage string) string {
-	e, _ := ianaindex.IANA.Encoding("cp437")
+func Table(codepage string) (string, error) {
+	cp, err := ianaindex.IANA.Encoding(codepage)
+	if err != nil {
+		return "", err
+	}
 
 	var buf bytes.Buffer
 	w := new(tabwriter.Writer)
@@ -64,7 +67,7 @@ func Table(codepage string) string {
 
 	units := MakeMap()
 	fmt.Fprintln(w, " "+color.OpFuzzy.Sprint(strings.Repeat("\u2015", 67)))
-	fmt.Fprintln(w, color.Primary.Sprint(Center(fmt.Sprintf("%s", e), 67)))
+	fmt.Fprintln(w, color.Primary.Sprint(Center(fmt.Sprintf("%s", cp), 67)))
 	//fmt.Fprint(w, "\n")
 
 	for i := 0; i < 16; i++ {
@@ -80,7 +83,7 @@ func Table(codepage string) string {
 	row := 0
 
 	for i, m := range units {
-		t, _ := Transform([]byte{m}, e)
+		t, _ := Transform([]byte{m}, cp)
 		t = SwapRecommended(t)
 		switch {
 		case i == 0:
@@ -96,7 +99,7 @@ func Table(codepage string) string {
 	}
 	fmt.Fprint(w, "\n")
 	w.Flush()
-	return buf.String()
+	return buf.String(), nil
 }
 
 // ToBOM adds a UTF-8 byte order mark if it doesn't already exist.
