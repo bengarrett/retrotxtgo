@@ -1,14 +1,12 @@
 APP=retrotxtgo
+VER=0.1
+
 COMMIT=$(shell git rev-list --abbrev-commit -1 HEAD)
 CMD=github.com/bengarrett/retrotxtgo/cmd
 DATE=$(shell date -u +%H:%M:%S/%Y-%m-%d)
 HEADCNT=$(shell git rev-list --count HEAD)
 FLAGS=-ldflags "-X ${CMD}.GoBuildGitCommit=${COMMIT} -X ${CMD}.GoBuildGitCount=${HEADCNT} -X ${CMD}.GoBuildDate=${DATE}"
-BLD=go build ${FLAGS} -v -o ${APP}
-
-.PHONY: build
-build: clean
-	go build -o ${APP} main.go
+BLD=go build ${FLAGS} -v -o artifacts/${APP}-v${VER}.${HEADCNT}
 
 .PHONY: run
 run:
@@ -16,7 +14,7 @@ run:
 
 .PHONY: clean
 clean:
-	rm -rf ${APP}*
+	rm -rf artifacts/${APP}*
 
 .PHONY: build-linux
 build-linux:
@@ -24,12 +22,28 @@ build-linux:
 
 .PHONY: build-mac
 build-mac:
-	GOOS=darwin GOARCH=amd64 ${BLD}-mac
+	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 ${BLD}-mac
 
 .PHONY: build-pi
 build-pi:
-	GOOS=linux GOARCH=arm GOARM=5 ${BLD}-arm5
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=5 ${BLD}-arm5
 
 .PHONY: build-windows
 build-windows:
-	GOOS=windows GOARCH=amd64 ${BLD}-win
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 ${BLD}-win
+
+.PHONY: test
+test:
+	go test ./...
+
+.PHONY: lint
+lint:
+	golangci-lint run
+
+# make release -j4 for 4 multiple threads
+.PHONY: release
+release: clean build-mac build-linux build-pi build-windows
+
+.PHONY: mod
+mod:
+	go mod tidy
