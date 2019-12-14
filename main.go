@@ -16,7 +16,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package main
 
-import "github.com/bengarrett/retrotxtgo/cmd"
+import "github.com/bengarrett/retrotxtgo/lib/cmd"
 
 func main() {
 	cmd.Execute()

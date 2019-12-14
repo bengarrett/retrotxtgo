@@ -21,11 +21,11 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/bengarrett/retrotxtgo/codepage"
+	"github.com/bengarrett/retrotxtgo/lib/codepage"
 
 	"golang.org/x/text/encoding/japanese"
 
-	"github.com/bengarrett/retrotxtgo/filesystem"
+	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/text/encoding/charmap"

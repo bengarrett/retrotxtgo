@@ -28,7 +28,7 @@ import (
 	"strings"
 
 	"github.com/alecthomas/chroma/quick"
-	"github.com/bengarrett/retrotxtgo/filesystem"
+	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

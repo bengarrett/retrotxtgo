@@ -29,8 +29,8 @@ import (
 	"time"
 
 	"github.com/aofei/mimesniffer"
-	"github.com/bengarrett/retrotxtgo/codepage"
-	"github.com/bengarrett/retrotxtgo/filesystem"
+	"github.com/bengarrett/retrotxtgo/lib/codepage"
+	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	humanize "github.com/labstack/gommon/bytes"
 	"github.com/mattn/go-runewidth"
 	"github.com/mozillazg/go-slugify"
