@@ -26,9 +26,6 @@ import (
 
 func Test_details(t *testing.T) {
 	n := "../textfiles/hi.txt"
-	type args struct {
-		name string
-	}
 	got, err := details(n)
 	if err != nil {
 		t.Errorf("details() = %v, want %v", err, nil)

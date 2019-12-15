@@ -73,11 +73,11 @@ func Table(codepage string) (string, error) {
 	for i := 0; i < 16; i++ {
 		switch {
 		case i == 0:
-			fmt.Fprint(w, color.OpFuzzy.Sprintf("     %X  ", i))
+			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf("     %X  ", i))
 		case i == 15:
-			fmt.Fprintf(w, color.OpFuzzy.Sprintf(" %X  \n", i))
+			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf(" %X  \n", i))
 		default:
-			fmt.Fprintf(w, color.OpFuzzy.Sprintf(" %X  ", i))
+			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf(" %X  ", i))
 		}
 	}
 	row := 0
@@ -105,7 +105,7 @@ func Table(codepage string) (string, error) {
 // ToBOM adds a UTF-8 byte order mark if it doesn't already exist.
 func ToBOM(b []byte) []byte {
 	if len(b) > 2 {
-		if t := b[:3]; bytes.Equal(t, BOM()) == true {
+		if t := b[:3]; bytes.Equal(t, BOM()) {
 			return b
 		}
 	}
@@ -115,10 +115,7 @@ func ToBOM(b []byte) []byte {
 // UTF8 determines if a document is encoded as UTF-8.
 func UTF8(b []byte) bool {
 	_, name, _ := charset.DetermineEncoding(b, "text/plain")
-	if name == "utf-8" {
-		return true
-	}
-	return false
+	return name == "utf-8" // bool
 }
 
 func SwapAll(b []byte) []byte {
@@ -166,7 +163,7 @@ func (s *Set) SwapNBSP() {
 func (s *Set) SwapControls(nl bool) {
 	// notes
 	for i, u := range append(asciiC0, asciiC1...) {
-		if nl == true {
+		if nl {
 			switch i {
 			case 10, 13:
 				continue

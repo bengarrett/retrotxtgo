@@ -77,16 +77,16 @@ var createCmd = &cobra.Command{
 		b := cmd.Flags().Lookup("body")
 		switch b.Changed {
 		case true:
-			data = []byte(fmt.Sprintf("%s", b.Value))
+			data = []byte(b.Value.String())
 		default:
 			// only show Usage() with no errors if no flags .NFlags() are set
 			if createFileName == "" && cmd.Flags().NFlag() == 0 {
 				fmt.Printf("%s\n\n", cmd.Short)
-				cmd.Usage()
+				_ = cmd.Usage()
 				os.Exit(0)
 			}
 			if createFileName == "" {
-				cmd.Usage()
+				_ = cmd.Usage()
 				FileMissingErr()
 			}
 			data, err = filesystem.Read(createFileName)
@@ -96,21 +96,21 @@ var createCmd = &cobra.Command{
 		// otherwise output is sent to stdout
 		s := cmd.Flags().Lookup("save")
 		switch {
-		case s.Changed == true:
-			err = writeFile(data, fmt.Sprintf("%s", s.Value), false)
+		case s.Changed:
+			err = writeFile(data, s.Value.String(), false)
 		case viper.GetString("create.save-directory") != "":
-			err = writeFile(data, fmt.Sprintf("%s", viper.GetString("create.save-directory")), false)
-		case serverFiles == false:
+			err = writeFile(data, viper.GetString("create.save-directory"), false)
+		case !serverFiles:
 			err = writeStdout(data, false)
 		}
 		if err != nil {
 			if err.Error() == errors.New("invalid-layout").Error() {
-				CheckFlag(ErrorFmt{"layout", fmt.Sprintf("%s", htmlLayout), fmt.Errorf(createLayouts())})
+				CheckFlag(ErrorFmt{"layout", htmlLayout, fmt.Errorf(createLayouts())})
 			}
 			Check(ErrorFmt{"create error", ">", err})
 		}
 		// check for a --server flag to serve the HTML
-		if serverFiles == true {
+		if serverFiles {
 			// viper.GetInt() doesn't work as expected
 			port, err := strconv.Atoi(viper.GetString("create.server-port"))
 			if err != nil {
@@ -149,37 +149,37 @@ func init() {
 	createCmd.Flags().StringVarP(&createFileName, "name", "n", "", cp("text file to parse")+" (required)\n")
 	// main flags
 	createCmd.Flags().StringVarP(&htmlLayout, "layout", "l", def("create.layout"), "output HTML layout\noptions: "+ci(createLayouts()))
-	viper.BindPFlag("create.layout", createCmd.Flags().Lookup(("layout")))
+	_ = viper.BindPFlag("create.layout", createCmd.Flags().Lookup(("layout")))
 	createCmd.Flags().StringVarP(&createStyles, "syntax-style", "c", "lovelace", "HTML syntax highligher, use "+ci("none")+" to disable")
 	createCmd.Flags().StringVarP(&pageTitle, "title", "t", def("create.title"), "defines the page title that is shown in a browser title bar or tab")
-	viper.BindPFlag("create.title", createCmd.Flags().Lookup("title"))
+	_ = viper.BindPFlag("create.title", createCmd.Flags().Lookup("title"))
 	createCmd.Flags().StringVarP(&metaDesc, "meta-description", "d", def("create.meta.description"), "a short and accurate summary of the content of the page")
-	viper.BindPFlag("create.meta.description", createCmd.Flags().Lookup("meta-description"))
+	_ = viper.BindPFlag("create.meta.description", createCmd.Flags().Lookup("meta-description"))
 	createCmd.Flags().StringVarP(&metaAuthor, "meta-author", "a", def("create.meta.author"), "defines the name of the page authors")
-	viper.BindPFlag("create.meta.author", createCmd.Flags().Lookup("meta-author"))
+	_ = viper.BindPFlag("create.meta.author", createCmd.Flags().Lookup("meta-author"))
 	// minor flags
 	createCmd.Flags().BoolVarP(&metaGenerator, "meta-generator", "g", viper.GetBool("create.meta.generator"), "include the RetroTxt version and page generation date")
-	viper.BindPFlag("create.meta.generator", createCmd.Flags().Lookup("meta-generator"))
+	_ = viper.BindPFlag("create.meta.generator", createCmd.Flags().Lookup("meta-generator"))
 	createCmd.Flags().StringVar(&metaColorScheme, "meta-color-scheme", def("create.meta.color-scheme"), "specifies one or more color schemes with which the page is compatible")
-	viper.BindPFlag("create.meta.color-scheme", createCmd.Flags().Lookup("meta-color-scheme"))
+	_ = viper.BindPFlag("create.meta.color-scheme", createCmd.Flags().Lookup("meta-color-scheme"))
 	createCmd.Flags().StringVar(&metaKeywords, "meta-keywords", def("create.meta.keywords"), "words relevant to the page content")
-	viper.BindPFlag("create.meta.keywords", createCmd.Flags().Lookup("meta-keywords"))
+	_ = viper.BindPFlag("create.meta.keywords", createCmd.Flags().Lookup("meta-keywords"))
 	createCmd.Flags().StringVar(&metaReferrer, "meta-referrer", def("create.meta.referrer"), "controls the Referer HTTP header attached to requests sent from the page")
-	viper.BindPFlag("create.meta.referrer", createCmd.Flags().Lookup("meta-referrer"))
+	_ = viper.BindPFlag("create.meta.referrer", createCmd.Flags().Lookup("meta-referrer"))
 	createCmd.Flags().StringVar(&metaThemeColor, "meta-theme-color", def("create.meta.theme-color"), "indicates a suggested color that user agents should use to customize the display of the page")
-	viper.BindPFlag("create.meta.theme-color", createCmd.Flags().Lookup("meta-theme-color"))
+	_ = viper.BindPFlag("create.meta.theme-color", createCmd.Flags().Lookup("meta-theme-color"))
 	// output flags
 	// todo: when using save-directory config setting, there is no way to stdout using flags
 	// instead add an output flag with print, file|save
 	createCmd.Flags().StringVarP(&saveToFiles, "save", "s", def("create.save-directory"), "save HTML as files to store this directory"+homedir()+curdir())
-	viper.BindPFlag("create.save-directory", createCmd.Flags().Lookup("save"))
+	_ = viper.BindPFlag("create.save-directory", createCmd.Flags().Lookup("save"))
 	createCmd.Flags().BoolVarP(&serverFiles, "server", "p", false, "serve HTML over an internal web server")
 	createCmd.Flags().IntVar(&serverPort, "port", viper.GetInt("create.server-port"), "port which the internet web server will listen")
-	viper.BindPFlag("create.server-port", createCmd.Flags().Lookup("port"))
+	_ = viper.BindPFlag("create.server-port", createCmd.Flags().Lookup("port"))
 	// hidden flags
 	createCmd.Flags().StringVarP(&preText, "body", "b", "", "override and inject string content into the body element")
 	// flag options
-	createCmd.Flags().MarkHidden("body")
+	_ = createCmd.Flags().MarkHidden("body")
 	createCmd.Flags().SortFlags = false
 }
 
@@ -259,7 +259,9 @@ func serveFile(data []byte, port int, test bool) error {
 		return err
 	}
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		t.Execute(w, pagedata(data))
+		if err = t.Execute(w, pagedata(data)); err != nil {
+			Check(ErrorFmt{"serveFile", "http", err})
+		}
 	})
 	fs := http.FileServer(http.Dir("static/"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
@@ -309,7 +311,7 @@ func writeStdout(data []byte, test bool) error {
 	}
 	switch createStyles {
 	case "", "none":
-		fmt.Printf(buf.String())
+		fmt.Printf("%s", buf.String())
 	default:
 		if err = quick.Highlight(os.Stdout, buf.String(), "html", "terminal256", createStyles); err != nil {
 			return err

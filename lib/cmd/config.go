@@ -41,7 +41,6 @@ var (
 	configSetName string
 	fileOverwrite bool
 	infoStyles    string
-	shellPreview  bool
 )
 
 var configCmd = &cobra.Command{
@@ -49,10 +48,10 @@ var configCmd = &cobra.Command{
 	Short: "Configure RetroTxt defaults",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 && cmd.Flags().NFlag() == 0 {
-			cmd.Usage()
+			_ = cmd.Usage()
 			os.Exit(0)
 		}
-		cmd.Usage()
+		_ = cmd.Usage()
 		Check(ErrorFmt{"invalid command", args[0], fmt.Errorf("please use one of the available config commands")})
 	},
 }
@@ -61,7 +60,7 @@ var configCreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create a new config file",
 	Run: func(cmd *cobra.Command, args []string) {
-		if cfg := viper.ConfigFileUsed(); cfg != "" && fileOverwrite != true {
+		if cfg := viper.ConfigFileUsed(); cfg != "" && !fileOverwrite {
 			configExists(cmd.CommandPath(), "create")
 		}
 		writeConfig(false)
@@ -133,7 +132,9 @@ var configInfoCmd = &cobra.Command{
 		println(cp("These are the default configurations used by the commands of RetroTxt when no flags are given.\n"))
 		sets, err := yaml.Marshal(viper.AllSettings())
 		Check(ErrorFmt{"read configuration", "yaml", err})
-		quick.Highlight(os.Stdout, string(sets), "yaml", "terminal256", infoStyles)
+		if err := quick.Highlight(os.Stdout, string(sets), "yaml", "terminal256", infoStyles); err != nil {
+			fmt.Println(string(sets))
+		}
 		println()
 	},
 }
@@ -197,13 +198,13 @@ var configShellCmd = &cobra.Command{
 		switch configShell {
 		case "bash", "b":
 			lexer = "bash"
-			cmd.GenBashCompletion(&buf)
+			_ = cmd.GenBashCompletion(&buf)
 		case "powershell", "posh", "p":
 			lexer = "powershell"
-			cmd.GenPowerShellCompletion(&buf)
+			_ = cmd.GenPowerShellCompletion(&buf)
 		case "zsh", "z":
 			lexer = "bash"
-			cmd.GenZshCompletion(&buf)
+			_ = cmd.GenZshCompletion(&buf)
 		default:
 			Check(ErrorFmt{"unknown interpreter", configShell, fmt.Errorf("available interpreters: %s", shells)})
 		}
@@ -223,12 +224,12 @@ func init() {
 	configInfoCmd.Flags().StringVarP(&infoStyles, "syntax-style", "c", "monokai", "config syntax highligher, use "+ci("none")+" to disable")
 	configCmd.AddCommand(configShellCmd)
 	configShellCmd.Flags().StringVarP(&configShell, "interpreter", "i", "", "user shell to receive retrotxtgo auto-completions\nchoices: "+ci(shells))
-	configShellCmd.MarkFlagRequired("interpreter")
+	_ = configShellCmd.MarkFlagRequired("interpreter")
 	configShellCmd.SilenceErrors = true
 	configCmd.AddCommand(configSetCmd)
 	configSetCmd.Flags().StringVarP(&configSetName, "name", "n", "", `the configuration path to edit in dot syntax (see examples)
 to see a list of names run: retrotxt config info`)
-	configSetCmd.MarkFlagRequired("name")
+	_ = configSetCmd.MarkFlagRequired("name")
 }
 
 func configMissing(name string, suffix string) {
@@ -317,7 +318,7 @@ func promptPort() {
 			continue
 		}
 		// check that the input a valid port
-		if v := validPort(int(i)); v == false {
+		if v := validPort(int(i)); !v {
 			fmt.Printf("%s %v, is out of range\n", ce("✗"), input)
 			promptCheck(cnt)
 			continue
@@ -385,7 +386,7 @@ func promptYN(query string, yesDefault bool) bool {
 	var input string
 	y := "Y"
 	n := "n"
-	if yesDefault == false {
+	if !yesDefault {
 		y = "y"
 		n = "N"
 	}
@@ -393,7 +394,7 @@ func promptYN(query string, yesDefault bool) bool {
 	fmt.Scanln(&input)
 	switch input {
 	case "":
-		if yesDefault == true {
+		if yesDefault {
 			return true
 		}
 	case "yes", "y":
@@ -410,7 +411,7 @@ func writeConfig(update bool) {
 	err = ioutil.WriteFile(d+"/.retrotxtgo.yaml", bs, 0660)
 	Check(ErrorFmt{"could not write", "settings", err})
 	s := "Created a new"
-	if update == true {
+	if update {
 		s = "Updated the"
 	}
 	fmt.Println(s+" config file at:", cf(d+"/.retrotxtgo.yaml"))

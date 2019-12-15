@@ -113,10 +113,6 @@ var (
 	cs = func(t string) string {
 		return color.Success.Sprint(t)
 	}
-
-	ctp = func(t string) {
-		color.Themes["primary"].Print(t)
-	}
 )
 
 // InitDefaults initialises flag and configuration defaults.

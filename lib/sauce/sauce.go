@@ -42,7 +42,7 @@ type Record struct {
 	TypeInfo string
 }
 
-var datatypes = make(map[uint8]string)
+//var datatypes = make(map[uint8]string)
 
 //Get sauce
 func slice(b []byte) data {
@@ -195,7 +195,8 @@ func Scan(b []byte) int {
 	// 	}
 	// }
 	//fmt.Printf("\n>%v|%v=%v\t%v\n%q\n\n", l, s, s-l, 128-(s-l), b[len(b)-128:])
-	if bytes.Compare(b[s:s+7], []byte("SAUCE00")) != 0 {
+
+	if !bytes.Equal(b[s:s+7], []byte("SAUCE00")) {
 		s = s + 16 - 128
 	}
 	return s

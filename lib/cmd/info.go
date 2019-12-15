@@ -68,11 +68,11 @@ var infoCmd = &cobra.Command{
 		// only show Usage() with no errors if no flags .NFlags() are set
 		if fileName == "" && cmd.Flags().NFlag() == 0 {
 			fmt.Printf("%s\n\n", cmd.Short)
-			cmd.Usage()
+			_ = cmd.Usage()
 			os.Exit(0)
 		}
 		if fileName == "" {
-			cmd.Usage()
+			_ = cmd.Usage()
 			FileMissingErr()
 		}
 		f, err := details(fileName)
@@ -89,7 +89,7 @@ var infoCmd = &cobra.Command{
 		case "xml", "x":
 			fmt.Printf("%s\n", infoXML(f))
 		default:
-			CheckFlag(ErrorFmt{"format", fmt.Sprintf("%s", infoFmt), fmt.Errorf(infoFormats)})
+			CheckFlag(ErrorFmt{"format", infoFmt, fmt.Errorf(infoFormats)})
 		}
 	},
 }
@@ -99,9 +99,9 @@ func init() {
 	rootCmd.AddCommand(infoCmd)
 	infoCmd.Flags().StringVarP(&fileName, "name", "n", "", cp("text file to analyse")+" (required)\n")
 	infoCmd.Flags().StringVarP(&infoFmt, "format", "f", viper.GetString("info.format"), "output format \noptions: "+ci(infoFormats))
-	viper.BindPFlag("info.format", infoCmd.Flags().Lookup("format"))
-	infoCmd.MarkFlagFilename("file")
-	infoCmd.MarkFlagRequired("file")
+	_ = viper.BindPFlag("info.format", infoCmd.Flags().Lookup("format"))
+	_ = infoCmd.MarkFlagFilename("file")
+	_ = infoCmd.MarkFlagRequired("file")
 	infoCmd.Flags().SortFlags = false
 }
 

@@ -76,7 +76,8 @@ to quickly create a Cobra application.`,
 		data, err := filesystem.Read(viewFilename)
 		Check(ErrorFmt{"file open", viewFilename, err})
 
-		d.Transform(data, encoding)
+		err = d.Transform(data, encoding)
+		Check(ErrorFmt{"Transform", "encoding", err})
 		d.SwapAll(true)
 		fmt.Printf("\n%s\n", d.Data)
 		// todo: make an --example that auto generates
@@ -114,13 +115,13 @@ func init() {
 	viewCmd.Flags().IntVarP(&viewWidth, "width", "w", 80, "document column character width")
 	// override ascii 0-F + 1-F || Control characters || IBM, ASCII, IBM+
 	// example flag showing CP437 table
-	viewCmd.MarkFlagFilename("name")
-	viewCmd.MarkFlagRequired("name")
+	_ = viewCmd.MarkFlagFilename("name")
+	_ = viewCmd.MarkFlagRequired("name")
 	viewCmd.Flags().SortFlags = false
 	viewCmd.AddCommand(viewCodePagesCmd)
 	viewCmd.AddCommand(viewTableCmd)
 	viewTableCmd.Flags().StringVarP(&viewCodePage, "codepage", "c", "cp437", "legacy character encoding table to display")
-	viewTableCmd.MarkFlagRequired("name")
+	_ = viewTableCmd.MarkFlagRequired("name")
 }
 
 // codepages returns a tabled list of supported IANA character set encodings
@@ -162,7 +163,7 @@ func codepages() string {
 		}
 		// only show MIME if it is different to the previous aliases
 		switch {
-		case strings.ToLower(strings.ReplaceAll(name, "-", " ")) == strings.ToLower(strings.ReplaceAll(ii.mime, "-", " ")):
+		case strings.EqualFold(strings.ReplaceAll(name, "-", " "), strings.ReplaceAll(ii.mime, "-", " ")):
 		case strings.ReplaceAll(name, "-", "") == strings.ReplaceAll(ii.mime, "-", ""):
 		case ii.mib == ii.mime:
 			fmt.Fprintf(w, "\t%s", cf(""))

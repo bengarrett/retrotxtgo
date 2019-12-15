@@ -64,7 +64,7 @@ if it is launched through an operating system symlink.`,
 		case "text", "t":
 			versionText(false)
 		default:
-			CheckFlag(ErrorFmt{"format", fmt.Sprintf("%s", f), fmt.Errorf(versionFormats)})
+			CheckFlag(ErrorFmt{"format", f, fmt.Errorf(versionFormats)})
 		}
 	},
 }
@@ -73,7 +73,7 @@ func init() {
 	InitDefaults()
 	rootCmd.AddCommand(versionCmd)
 	versionCmd.Flags().StringVarP(&versionFmt, "format", "f", viper.GetString("version.format"), "output format \noptions: "+versionFormats)
-	viper.BindPFlag("version.format", versionCmd.Flags().Lookup("format"))
+	_ = viper.BindPFlag("version.format", versionCmd.Flags().Lookup("format"))
 }
 
 func versionJSON(indent bool) []byte {
@@ -124,12 +124,12 @@ func info() versionInfo {
 	v := versionInfo{
 		"copyright": fmt.Sprintf("Copyright © 2019 Ben Garrett"),
 		"url":       fmt.Sprintf("https://%s/go", Www),
-		"app ver":   fmt.Sprintf("%s", GoBuildVer),
-		"go ver":    fmt.Sprintf("%s", runtime.Version()),
+		"app ver":   GoBuildVer,
+		"go ver":    runtime.Version(),
 		"os":        fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
-		"exe":       fmt.Sprintf("%s", binary()),
-		"date":      fmt.Sprintf("%s", GoBuildDate),
-		"git":       fmt.Sprintf("%s", GoBuildGitCommit),
+		"exe":       binary(),
+		"date":      GoBuildDate,
+		"git":       GoBuildGitCommit,
 		"license":   fmt.Sprintf("LGPL-3.0 [https://www.gnu.org/licenses/lgpl-3.0.html]"),
 	}
 	if a := arch(runtime.GOARCH); a != "" {
