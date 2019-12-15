@@ -1,16 +1,21 @@
 APP=retrotxtgo
-VER=0.1
+VERSION=$(shell cat ./VERSION)
 
 COMMIT=$(shell git rev-list --abbrev-commit -1 HEAD)
-CMD=github.com/bengarrett/retrotxtgo/cmd
+CMD=github.com/bengarrett/retrotxtgo/lib/cmd
 DATE=$(shell date -u +%H:%M:%S/%Y-%m-%d)
 HEADCNT=$(shell git rev-list --count HEAD)
-FLAGS=-ldflags "-X ${CMD}.GoBuildGitCommit=${COMMIT} -X ${CMD}.GoBuildGitCount=${HEADCNT} -X ${CMD}.GoBuildDate=${DATE}"
+FLAGS=-ldflags "-X ${CMD}.GoBuildVer=${VERSION} -X ${CMD}.GoBuildGitCommit=${COMMIT} -X ${CMD}.GoBuildGitCount=${HEADCNT} -X ${CMD}.GoBuildDate=${DATE}"
 BLD=go build ${FLAGS} -v -o artifacts/${APP}-v${VER}.${HEADCNT}
 
 .PHONY: run
 run:
 	go run -race ${FLAGS} main.go version 
+
+.PHONY: ver
+ver: 
+	${BLD}
+	artifacts/${APP}-v${VER}.${HEADCNT} version
 
 .PHONY: clean
 clean:

@@ -124,7 +124,7 @@ func info() versionInfo {
 	v := versionInfo{
 		"copyright": fmt.Sprintf("Copyright © 2019 Ben Garrett"),
 		"url":       fmt.Sprintf("https://%s/go", Www),
-		"app ver":   fmt.Sprintf("%s", Ver),
+		"app ver":   fmt.Sprintf("%s", GoBuildVer),
 		"go ver":    fmt.Sprintf("%s", runtime.Version()),
 		"os":        fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
 		"exe":       fmt.Sprintf("%s", binary()),

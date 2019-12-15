@@ -30,8 +30,6 @@ import (
 )
 
 const (
-	// Ver is the application version
-	Ver string = "0.1"
 	// Www is the application domain name
 	Www string = "retrotxt.com"
 	// FileDate is a non-standard date format for file modifications
@@ -72,6 +70,8 @@ var (
 	GoBuildGitCommit string
 	// GoBuildGitCount git commit count created by git rev-list --count HEAD
 	GoBuildGitCount string
+	// GoBuildVer is the application version read from VERSION
+	GoBuildVer string = "?.?"
 	// Layout template data
 	Layout  PageData
 	cfgFile string

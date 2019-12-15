@@ -174,7 +174,7 @@ var configSetCmd = &cobra.Command{
 			fmt.Printf("Set a new HTTP port, choices: %v-%v (recommended: 8080)\n", portMin, portMax)
 			promptPort()
 		case name == "create.meta.generator":
-			fmt.Printf("<meta name=\"generator\" content=\"RetroTxt v%s\">\nEnable this element? [y/n]\n", Ver)
+			fmt.Printf("<meta name=\"generator\" content=\"RetroTxt v%s\">\nEnable this element? [y/n]\n", GoBuildVer)
 			promptBool()
 		case s == "":
 			promptMeta(s)
