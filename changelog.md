@@ -1,0 +1,1 @@
+- Incorporated GoReleaser build automation.
