@@ -64,14 +64,14 @@ type ErrorFmt struct {
 }
 
 var (
-	// GoBuildDate build date and time created by date --utc +%H:%M:%S/%Y-%m-%d
-	GoBuildDate string
-	// GoBuildGitCommit git commit ID created by git rev-list --abbrev-commit -1 HEAD
-	GoBuildGitCommit string
+	// BuildDate build date in RFC3339
+	BuildDate string
+	// BuildCommit current git SHA
+	BuildCommit string
 	// GoBuildGitCount git commit count created by git rev-list --count HEAD
 	GoBuildGitCount string
-	// GoBuildVer is the application version read from VERSION
-	GoBuildVer string = "?.?"
+	// BuildVer retrotxt version
+	BuildVer string
 	// Layout template data
 	Layout  PageData
 	cfgFile string

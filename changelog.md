@@ -1,1 +1,5 @@
 - Incorporated GoReleaser build automation.
+- Automated the build download binaries.
+- Dropped `Makefile`.
+- Merged `todo.md` into `README.md`.
+- Incorporated GoReleaser ldflags into version. 

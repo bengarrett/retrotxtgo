@@ -122,32 +122,25 @@ func binary() string {
 
 func info() versionInfo {
 	v := versionInfo{
-		"copyright": fmt.Sprintf("Copyright © 2019 Ben Garrett"),
+		"copyright": fmt.Sprintf("Copyright © 2020 Ben Garrett"),
 		"url":       fmt.Sprintf("https://%s/go", Www),
-		"app ver":   GoBuildVer,
+		"app ver":   BuildVer,
 		"go ver":    runtime.Version(),
 		"os":        fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
 		"exe":       binary(),
-		"date":      GoBuildDate,
-		"git":       GoBuildGitCommit,
+		"date":      BuildDate,
+		"git":       BuildCommit,
 		"license":   fmt.Sprintf("LGPL-3.0 [https://www.gnu.org/licenses/lgpl-3.0.html]"),
 	}
 	if a := arch(runtime.GOARCH); a != "" {
 		v["os"] += fmt.Sprintf(" [%s CPU]", a)
 	}
 	if GoBuildGitCount != "" {
-		v["app ver"] += fmt.Sprintf(".%s", GoBuildGitCount)
-	} else {
-		v["app ver"] += ".?"
+		v["app ver"] += fmt.Sprintf(" %s", GoBuildGitCount)
 	}
 	v["app ver"] += " (pre-alpha)"
-	if GoBuildDate == "" {
-		v["date"] = "n/a"
-	} else {
+	if BuildDate != "n/a" {
 		v["date"] += " UTC"
-	}
-	if GoBuildGitCommit == "" {
-		v["git"] = "n/a"
 	}
 	return v
 }

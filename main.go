@@ -16,8 +16,20 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 package main
 
-import "github.com/bengarrett/retrotxtgo/lib/cmd"
+import (
+	"github.com/bengarrett/retrotxtgo/lib/cmd"
+)
+
+// GoReleaser ldflags flags
+var (
+	version = "0.0.0"
+	commit  = "n/a"
+	date    = "n/a"
+)
 
 func main() {
+	cmd.BuildVer = version
+	cmd.BuildCommit = commit
+	cmd.BuildDate = date
 	cmd.Execute()
 }
