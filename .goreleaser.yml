@@ -28,12 +28,16 @@ builds:
       - goos: freebsd
         goarch: arm
 archives:
-  - replacements:
+  - name_template: "RetroTxt_{{ if .Arm }}RaspberryPi{{ .Arm }}{{ else }}{{ .Os }}{{ end }}"
+    replacements:
       darwin: macOS
+      freebsd: FreeBSD
       linux: Linux
       windows: Windows
-      386:
-      amd64:
+      6: "-1" # VFPv1
+      7: "-2+" # VFPv3
+      386: ""
+      amd64: ""
     format_overrides:
       - goos: darwin
         format: zip
