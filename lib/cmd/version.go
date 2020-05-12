@@ -135,9 +135,6 @@ func info() versionInfo {
 	if a := arch(runtime.GOARCH); a != "" {
 		v["os"] += fmt.Sprintf(" [%s CPU]", a)
 	}
-	if GoBuildGitCount != "" {
-		v["app ver"] += fmt.Sprintf(" %s", GoBuildGitCount)
-	}
 	v["app ver"] += " (pre-alpha)"
 	if BuildDate != "n/a" {
 		v["date"] += " UTC"

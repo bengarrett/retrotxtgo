@@ -68,8 +68,6 @@ var (
 	BuildDate string
 	// BuildCommit current git SHA
 	BuildCommit string
-	// GoBuildGitCount git commit count created by git rev-list --count HEAD
-	GoBuildGitCount string
 	// BuildVer retrotxt version
 	BuildVer string
 	// Layout template data
