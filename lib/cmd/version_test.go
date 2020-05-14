@@ -1,19 +1,3 @@
-/*
-Copyright © 2019 Ben Garrett <code.by.ben@gmail.com>
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
 package cmd
 
 import (
@@ -22,25 +6,23 @@ import (
 	"reflect"
 	"runtime"
 	"testing"
+	"time"
 )
 
 func Test_arch(t *testing.T) {
-	type args struct {
-		v string
-	}
 	tests := []struct {
 		name string
-		args args
+		v    string
 		want string
 	}{
-		{"empty", args{""}, ""},
-		{"invalid", args{"xxx"}, ""},
-		{"386", args{"386"}, "32-bit Intel/AMD"},
-		{"ppc64", args{"ppc64"}, "64-bit PowerPC"},
+		{"empty", "", ""},
+		{"invalid", "xxx", ""},
+		{"386", "386", "32-bit Intel/AMD"},
+		{"ppc64", "ppc64", "64-bit PowerPC"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := arch(tt.args.v); got != tt.want {
+			if got := arch(tt.v); got != tt.want {
 				t.Errorf("arch() = %v, want %v", got, tt.want)
 			}
 		})
@@ -49,15 +31,15 @@ func Test_arch(t *testing.T) {
 
 func Test_binary(t *testing.T) {
 	tests := []struct {
-		name string
-		want string
+		name     string
+		dontWant string
 	}{
-		// TODO: Add test cases.
+		{"ok", "error"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := binary(); got != tt.want {
-				t.Errorf("binary() = %v, want %v", got, tt.want)
+			if got := binary(); got[:5] == tt.dontWant {
+				t.Errorf("binary() = %v, don't want %v", got, tt.dontWant)
 			}
 		})
 	}
@@ -74,6 +56,42 @@ func Test_info(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := info()["os"]; !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("info() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_locBuildDate(t *testing.T) {
+	d := time.Date(1980, 1, 31, 1, 34, 0, 0, time.UTC)
+	tests := []struct {
+		name string
+		date string
+		want string
+	}{
+		{"empty", "", ""},
+		{"invalid", "abcde", "abcd"},
+		{"ok", d.UTC().Format(time.RFC3339), "1980"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := locBuildDate(tt.date); len(got) > 4 && got[:4] != tt.want {
+				t.Errorf("locBuildDate() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_goVer(t *testing.T) {
+	tests := []struct {
+		name string
+		want string
+	}{
+		{"ok", "1."}, // 1.14.1
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := goVer(); len(got) > 2 && got[:2] != tt.want {
+				t.Errorf("goVer() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -100,19 +118,19 @@ func Test_versionJSON(t *testing.T) {
 	}
 }
 
-func Test_versionText(t *testing.T) {
-	type args struct {
-		c bool
-	}
-	tests := []struct {
-		name string
-		args args
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			versionText(tt.args.c)
-		})
-	}
+func ExampleversionText() {
+	fmt.Print(versionText(false)[:8])
+	// Output: RetroTxt
 }
+
+// func capVersionText(c bool) (output string) {
+// 	rescueStdout := os.Stdout
+// 	r, w, _ := os.Pipe()
+// 	os.Stdout = w
+// 	color.Enable = true
+// 	versionText(c)
+// 	w.Close()
+// 	bytes, _ := ioutil.ReadAll(r)
+// 	os.Stdout = rescueStdout
+// 	return strings.TrimSpace(string(bytes))
+// }
