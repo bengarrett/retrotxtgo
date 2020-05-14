@@ -43,8 +43,8 @@ var (
 // createCmd makes create usage examples
 var exampleCmd = func() string {
 	s := string(os.PathSeparator)
-	e := `  retrotxtgo create -n textfile.txt -t "Text file" -d "Some random text file"`
-	e += fmt.Sprintf("\n  retrotxtgo create --name ~%sDownloads%stextfile.txt --layout mini --save .%shtml", s, s, s)
+	e := `  retrotxtgo create -n textfile.txt -t "Text file" -d "Some random text file"` +
+		fmt.Sprintf("\n  retrotxtgo create --name ~%sDownloads%stextfile.txt --layout mini --save .%shtml", s, s, s)
 	return cinf(e)
 }
 
@@ -135,37 +135,49 @@ func init() {
 	createCmd.Flags().StringVarP(&createFileName, "name", "n", "", cp("text file to parse")+" (required)\n")
 	// main flags
 	createCmd.Flags().StringVarP(&htmlLayout, "layout", "l", def("create.layout"), "output HTML layout\noptions: "+ci(createLayouts()))
-	_ = viper.BindPFlag("create.layout", createCmd.Flags().Lookup(("layout")))
+	err := viper.BindPFlag("create.layout", createCmd.Flags().Lookup(("layout")))
+	CheckErr(err)
 	createCmd.Flags().StringVarP(&createStyles, "syntax-style", "c", "lovelace", "HTML syntax highligher, use "+ci("none")+" to disable")
 	createCmd.Flags().StringVarP(&pageTitle, "title", "t", def("create.title"), "defines the page title that is shown in a browser title bar or tab")
-	_ = viper.BindPFlag("create.title", createCmd.Flags().Lookup("title"))
+	err = viper.BindPFlag("create.title", createCmd.Flags().Lookup("title"))
+	CheckErr(err)
 	createCmd.Flags().StringVarP(&metaDesc, "meta-description", "d", def("create.meta.description"), "a short and accurate summary of the content of the page")
-	_ = viper.BindPFlag("create.meta.description", createCmd.Flags().Lookup("meta-description"))
+	err = viper.BindPFlag("create.meta.description", createCmd.Flags().Lookup("meta-description"))
+	CheckErr(err)
 	createCmd.Flags().StringVarP(&metaAuthor, "meta-author", "a", def("create.meta.author"), "defines the name of the page authors")
-	_ = viper.BindPFlag("create.meta.author", createCmd.Flags().Lookup("meta-author"))
+	err = viper.BindPFlag("create.meta.author", createCmd.Flags().Lookup("meta-author"))
+	CheckErr(err)
 	// minor flags
 	createCmd.Flags().BoolVarP(&metaGenerator, "meta-generator", "g", viper.GetBool("create.meta.generator"), "include the RetroTxt version and page generation date")
-	_ = viper.BindPFlag("create.meta.generator", createCmd.Flags().Lookup("meta-generator"))
+	err = viper.BindPFlag("create.meta.generator", createCmd.Flags().Lookup("meta-generator"))
+	CheckErr(err)
 	createCmd.Flags().StringVar(&metaColorScheme, "meta-color-scheme", def("create.meta.color-scheme"), "specifies one or more color schemes with which the page is compatible")
-	_ = viper.BindPFlag("create.meta.color-scheme", createCmd.Flags().Lookup("meta-color-scheme"))
+	err = viper.BindPFlag("create.meta.color-scheme", createCmd.Flags().Lookup("meta-color-scheme"))
+	CheckErr(err)
 	createCmd.Flags().StringVar(&metaKeywords, "meta-keywords", def("create.meta.keywords"), "words relevant to the page content")
-	_ = viper.BindPFlag("create.meta.keywords", createCmd.Flags().Lookup("meta-keywords"))
+	err = viper.BindPFlag("create.meta.keywords", createCmd.Flags().Lookup("meta-keywords"))
+	CheckErr(err)
 	createCmd.Flags().StringVar(&metaReferrer, "meta-referrer", def("create.meta.referrer"), "controls the Referer HTTP header attached to requests sent from the page")
-	_ = viper.BindPFlag("create.meta.referrer", createCmd.Flags().Lookup("meta-referrer"))
+	err = viper.BindPFlag("create.meta.referrer", createCmd.Flags().Lookup("meta-referrer"))
+	CheckErr(err)
 	createCmd.Flags().StringVar(&metaThemeColor, "meta-theme-color", def("create.meta.theme-color"), "indicates a suggested color that user agents should use to customize the display of the page")
-	_ = viper.BindPFlag("create.meta.theme-color", createCmd.Flags().Lookup("meta-theme-color"))
+	err = viper.BindPFlag("create.meta.theme-color", createCmd.Flags().Lookup("meta-theme-color"))
+	CheckErr(err)
 	// output flags
 	// todo: when using save-directory config setting, there is no way to stdout using flags
 	// instead add an output flag with print, file|save
 	createCmd.Flags().StringVarP(&saveToFiles, "save", "s", def("create.save-directory"), "save HTML as files to store this directory"+homedir()+curdir())
-	_ = viper.BindPFlag("create.save-directory", createCmd.Flags().Lookup("save"))
+	err = viper.BindPFlag("create.save-directory", createCmd.Flags().Lookup("save"))
+	CheckErr(err)
 	createCmd.Flags().BoolVarP(&serverFiles, "server", "p", false, "serve HTML over an internal web server")
 	createCmd.Flags().IntVar(&serverPort, "port", viper.GetInt("create.server-port"), "port which the internet web server will listen")
-	_ = viper.BindPFlag("create.server-port", createCmd.Flags().Lookup("port"))
+	err = viper.BindPFlag("create.server-port", createCmd.Flags().Lookup("port"))
+	CheckErr(err)
 	// hidden flags
 	createCmd.Flags().StringVarP(&preText, "body", "b", "", "override and inject string content into the body element")
 	// flag options
-	_ = createCmd.Flags().MarkHidden("body")
+	err = createCmd.Flags().MarkHidden("body")
+	CheckErr(err)
 	createCmd.Flags().SortFlags = false
 }
 
@@ -269,32 +281,31 @@ func serveFile(data []byte, port int, test bool) error {
 // writeFile creates and saves the html template to the name file.
 // The argument test is used internally.
 func writeFile(data []byte, name string, test bool) error {
-	p := name
-	if p == "~" {
-		// allow the use ~ as the home directory on Windows
+	if name == "~" {
+		// allow the use of ~ as the home directory on Windows
 		u, err := user.Current()
 		if err != nil {
 			return err
 		}
-		p = u.HomeDir
+		name = u.HomeDir
 	}
-	s, err := os.Stat(p)
+	stat, err := os.Stat(name)
 	if err != nil {
 		return err
 	}
-	if s.IsDir() {
-		p = path.Join(p, "index.html")
+	if stat.IsDir() {
+		name = path.Join(name, "index.html")
 	}
-	f, err := os.Create(p)
+	file, err := os.Create(name)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
-	t, err := newTemplate(test)
+	defer file.Close()
+	tmpl, err := newTemplate(test)
 	if err != nil {
 		return err
 	}
-	if err = t.Execute(f, pagedata(data)); err != nil {
+	if err = tmpl.Execute(file, pagedata(data)); err != nil {
 		return err
 	}
 	return nil
@@ -319,5 +330,5 @@ func writeStdout(data []byte, test bool) error {
 			return err
 		}
 	}
-	return nil
+	return err
 }
