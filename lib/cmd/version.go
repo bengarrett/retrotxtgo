@@ -38,19 +38,7 @@ The shown ` + cc("RetroTxt URL") + ` is the weblink to the application Github pa
 ` + cc("Binary") + ` should return the path name of this program. It maybe inaccurate
 if it is launched through an operating system symlink.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		f := viper.GetString("version.format")
-		switch f {
-		case "color", "c", "":
-			print(versionText(true))
-		case "json", "j":
-			fmt.Printf("%s\n", versionJSON(true))
-		case "json.min", "jm":
-			fmt.Printf("%s\n", versionJSON(false))
-		case "text", "t":
-			print(versionText(false))
-		default:
-			CheckFlag(ErrorFmt{"format", f, fmt.Errorf(versionFormats)})
-		}
+		CheckFlag(versionPrint(viper.GetString("version.format")))
 	},
 }
 
@@ -60,6 +48,22 @@ func init() {
 	versionCmd.Flags().StringVarP(&versionFmt, "format", "f",
 		viper.GetString("version.format"), "output format \noptions: "+versionFormats)
 	_ = viper.BindPFlag("version.format", versionCmd.Flags().Lookup("format"))
+}
+
+func versionPrint(format string) (err ErrorFmt) {
+	switch format {
+	case "color", "c", "":
+		print(versionText(true))
+	case "json", "j":
+		fmt.Printf("%s\n", versionJSON(true))
+	case "json.min", "jm":
+		fmt.Printf("%s\n", versionJSON(false))
+	case "text", "t":
+		print(versionText(false))
+	default:
+		return ErrorFmt{"format", format, fmt.Errorf(versionFormats)}
+	}
+	return err
 }
 
 func arch(v string) string {

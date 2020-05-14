@@ -9,6 +9,27 @@ import (
 	"time"
 )
 
+func Test_versionPrint(t *testing.T) {
+	tests := []struct {
+		name    string
+		format  string
+		wantErr bool
+	}{
+		{"empty", "", false},
+		{"invalid", "abcde", true},
+		{"j", "j", false},
+		{"jm", "jm", false},
+		{"t", "t", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotErr := versionPrint(tt.format); (gotErr.Msg != nil) != tt.wantErr {
+				t.Errorf("versionPrint() = %v, wantErr %v", gotErr, tt.wantErr)
+			}
+		})
+	}
+}
+
 func Test_arch(t *testing.T) {
 	tests := []struct {
 		name string
