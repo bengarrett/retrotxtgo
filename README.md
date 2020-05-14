@@ -68,6 +68,13 @@ https://sysadmins.co.za/golang-building-a-basic-web-server-in-go/
 
 ---
 
+- Change _Usage:_ from `retrotxtgo` to `retrotxt`.
+- Fix formatting: 
+`problem: a required flag missing"name" required flag(s) "name" not set`
+`problem: invalid command"codepages" unknown command "codepages" for "retrotxtgo"`
+
+---
+
 ## SAUCE debug?
 
 `fmt.Sprintf()`
