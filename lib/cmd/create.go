@@ -23,7 +23,9 @@ import (
 	"html/template"
 	"net/http"
 	"os"
+	"os/user"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -205,17 +207,17 @@ func createTemplates() files {
 
 // filename creates a filepath for the template filenames.
 // The argument test is used internally.
-func filename(test bool) (string, error) {
-	path := "static/html/"
+func filename(test bool) (path string, err error) {
+	base := "static/html/"
 	if test {
-		path = "../" + path
+		base = filepath.Join("../../", base)
 	}
 	f := createTemplates()[htmlLayout]
 	if f == "" {
-		return "", errors.New("invalid-layout")
+		return path, errors.New("filename: invalid-layout")
 	}
-	path += f + ".html"
-	return path, nil
+	path = filepath.Join(base, f+".html")
+	return path, err
 }
 
 // pagedata creates the meta and page template data.
@@ -247,6 +249,13 @@ func newTemplate(test bool) (*template.Template, error) {
 	if err != nil {
 		return nil, err
 	}
+	fn, err = filepath.Abs(fn)
+	if err != nil {
+		return nil, err
+	}
+	if _, err := os.Stat(fn); os.IsNotExist(err) {
+		return nil, fmt.Errorf("create newTemplate: %s", err)
+	}
 	t := template.Must(template.ParseFiles(fn))
 	return t, nil
 }
@@ -277,7 +286,15 @@ func serveFile(data []byte, port int, test bool) error {
 // The argument test is used internally.
 func writeFile(data []byte, name string, test bool) error {
 	p := name
-	s, err := os.Stat(name)
+	if p == "~" {
+		// allow the use ~ as the home directory on Windows
+		u, err := user.Current()
+		if err != nil {
+			return err
+		}
+		p = u.HomeDir
+	}
+	s, err := os.Stat(p)
 	if err != nil {
 		return err
 	}

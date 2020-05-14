@@ -1,37 +1,23 @@
-/*
-Copyright © 2019 Ben Garrett <code.by.ben@gmail.com>
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
 package cmd
 
 import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 )
 
+var hi = filepath.Clean("../../textfiles/hi.txt")
+
 func Test_details(t *testing.T) {
-	n := "../textfiles/hi.txt"
-	got, err := details(n)
+	got, err := details(hi)
 	if err != nil {
 		t.Errorf("details() = %v, want %v", err, nil)
 	}
-	if got.Bytes != 39 {
-		t.Errorf("details() = %v, want %v", got.Bytes, 39)
+	if got.Bytes != 40 {
+		t.Errorf("details() = %v, want %v", got.Bytes, 40)
 	}
 	if got.Name != "hi.txt" {
 		t.Errorf("details() = %v, want %v", got.Name, "hi.txt")
@@ -45,13 +31,14 @@ func Test_details(t *testing.T) {
 	if got.Utf8 != true {
 		t.Errorf("details() = %v, want %v", got.Utf8, true)
 	}
-	if got.MD5 != "a4098d2ae92f55f6aacc6865812a4291" {
-		t.Errorf("details() = %v, want %v", got.MD5, "a4098d2ae92f55f6aacc6865812a4291")
+	const want = "1b466b6448d7ff10e2f8f7160d936987"
+	if got.MD5 != want {
+		t.Errorf("details() = %v, want %v", got.MD5, want)
 	}
 }
 
 func Test_parse(t *testing.T) {
-	f, err := os.Stat("../textfiles/hi.txt")
+	f, err := os.Stat(hi)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -108,25 +95,25 @@ func Test_infoJSON(t *testing.T) {
 }
 
 func Test_infoText(t *testing.T) {
-	n := "../textfiles/hi.txt"
-	d, err := details(n)
+	d, err := details(hi)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	if got := len(infoText(false, d)); got != 240 {
-		t.Errorf("infoText() = %v, want %v", got, 240)
+	want := 491
+	if got := len(infoText(false, d)); got != want {
+		t.Errorf("infoText() = %v, want %v", got, want)
 	}
 }
 
 func Test_infoXML(t *testing.T) {
-	n := "../textfiles/hi.txt"
-	f, err := details(n)
+	f, err := details(hi)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	if got := len(infoXML(f)); got != 322 {
-		t.Errorf("infoXML() = %v, want %v", got, 322)
+	want := 430
+	if got := len(infoXML(f)); got != want {
+		t.Errorf("infoXML() = %v, want %v", got, want)
 	}
 }

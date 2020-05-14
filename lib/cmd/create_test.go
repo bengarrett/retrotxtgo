@@ -1,24 +1,9 @@
-/*
-Copyright © 2019 Ben Garrett <code.by.ben@gmail.com>
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
 package cmd
 
 import (
 	"os"
 	"path"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -54,12 +39,12 @@ func Test_createTemplates(t *testing.T) {
 }
 
 func Test_filename(t *testing.T) {
-	w := "../static/html/standard.html"
+	w := filepath.Clean("../../static/html/standard.html")
 	got, _ := filename(true)
 	if got != w {
 		t.Errorf("filename = %v, want %v", got, w)
 	}
-	w = "static/html/standard.html"
+	w = filepath.Clean("static/html/standard.html")
 	got, _ = filename(false)
 	if got != w {
 		t.Errorf("filename = %v, want %v", got, w)
@@ -113,7 +98,7 @@ func Test_writeFile(t *testing.T) {
 		{"no data or name", args{[]byte(""), "", true}, true},
 		{"invalid name", args{[]byte("abc"), "this-is-an-invalid-path", true}, true},
 		{"file as name", args{[]byte("abc"), tmpFile, true}, true},
-		//{"home as name", args{[]byte("abc"), "~", true}, false}, // fixme: this fails in tests but works on CLI
+		{"home as name", args{[]byte("abc"), "~", true}, false},
 		{"cwd as name", args{[]byte("abc"), ".", true}, false},
 		{"path as name", args{[]byte("abc"), os.TempDir(), true}, false},
 	}
