@@ -11,6 +11,30 @@ import (
 
 var hi = filepath.Clean("../../textfiles/hi.txt")
 
+func TestDetail_infoSwitch(t *testing.T) {
+	tests := []struct {
+		name    string
+		f       Detail
+		format  string
+		wantErr bool
+	}{
+		{"empty", Detail{}, "", true},
+		{"invalid", Detail{}, "invalid", true},
+		{"color", Detail{}, "color", false},
+		{"j", Detail{}, "j", false},
+		{"jm", Detail{}, "jm", false},
+		{"text", Detail{}, "text", false},
+		{"x", Detail{}, "x", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotErr := tt.f.infoSwitch(tt.format); (gotErr.Msg != nil) != tt.wantErr {
+				t.Errorf("parse() error = %v, wantErr %v", gotErr, tt.wantErr)
+			}
+		})
+	}
+}
+
 func Test_details(t *testing.T) {
 	got, err := details(hi)
 	if err != nil {

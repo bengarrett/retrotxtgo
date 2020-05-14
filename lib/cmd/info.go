@@ -23,9 +23,9 @@ import (
 	"gopkg.in/gookit/color.v1"
 )
 
-const infoFormats string = "color, json, json.min, text, xml"
+const infoFormats = "color, json, json.min, text, xml"
 
-//Detail of a file
+// Detail of a file
 type Detail struct {
 	Bytes     int64
 	CharCount int
@@ -50,31 +50,20 @@ var infoCmd = &cobra.Command{
 	Short: "Information on a text file",
 	Run: func(cmd *cobra.Command, args []string) {
 		// only show Usage() with no errors if no flags .NFlags() are set
-		if fileName == "" && cmd.Flags().NFlag() == 0 {
-			fmt.Printf("%s\n\n", cmd.Short)
-			_ = cmd.Usage()
-			os.Exit(0)
-		}
 		if fileName == "" {
-			_ = cmd.Usage()
+			if cmd.Flags().NFlag() == 0 {
+				fmt.Printf("%s\n\n", cmd.Short)
+				err := cmd.Usage()
+				CheckErr(err)
+				os.Exit(0)
+			}
+			err := cmd.Usage()
+			CheckErr(err)
 			FileMissingErr()
 		}
 		f, err := details(fileName)
 		Check(ErrorFmt{"file is invalid", fileName, err})
-		switch viper.GetString("info.format") {
-		case "color", "c":
-			fmt.Printf("%s", infoText(true, f))
-		case "json", "j":
-			fmt.Printf("%s\n", infoJSON(true, f))
-		case "json.min", "jm":
-			fmt.Printf("%s\n", infoJSON(false, f))
-		case "text":
-			fmt.Printf("%s", infoText(false, f))
-		case "xml", "x":
-			fmt.Printf("%s\n", infoXML(f))
-		default:
-			CheckFlag(ErrorFmt{"format", infoFmt, fmt.Errorf(infoFormats)})
-		}
+		CheckFlag(f.infoSwitch(viper.GetString("info.format")))
 	},
 }
 
@@ -83,23 +72,39 @@ func init() {
 	rootCmd.AddCommand(infoCmd)
 	infoCmd.Flags().StringVarP(&fileName, "name", "n", "", cp("text file to analyse")+" (required)\n")
 	infoCmd.Flags().StringVarP(&infoFmt, "format", "f", viper.GetString("info.format"), "output format \noptions: "+ci(infoFormats))
-	_ = viper.BindPFlag("info.format", infoCmd.Flags().Lookup("format"))
-	_ = infoCmd.MarkFlagFilename("file")
-	_ = infoCmd.MarkFlagRequired("file")
+	err := viper.BindPFlag("info.format", infoCmd.Flags().Lookup("format"))
+	CheckErr(err)
 	infoCmd.Flags().SortFlags = false
 }
 
-func infoJSON(indent bool, f Detail) []byte {
-	var j []byte
+func infoJSON(indent bool, f Detail) (js []byte) {
 	var err error
 	switch indent {
 	case true:
-		j, err = json.MarshalIndent(f, "", "    ")
+		js, err = json.MarshalIndent(f, "", "    ")
 	default:
-		j, err = json.Marshal(f)
+		js, err = json.Marshal(f)
 	}
 	Check(ErrorFmt{"could not create", "json", err})
-	return j
+	return js
+}
+
+func (f Detail) infoSwitch(format string) (err ErrorFmt) {
+	switch format {
+	case "color", "c":
+		fmt.Printf("%s", infoText(true, f))
+	case "json", "j":
+		fmt.Printf("%s\n", infoJSON(true, f))
+	case "json.min", "jm":
+		fmt.Printf("%s\n", infoJSON(false, f))
+	case "text":
+		fmt.Printf("%s", infoText(false, f))
+	case "xml", "x":
+		fmt.Printf("%s\n", infoXML(f))
+	default:
+		err = ErrorFmt{"format", infoFmt, fmt.Errorf(infoFormats)}
+	}
+	return err
 }
 
 func infoText(c bool, f Detail) string {
@@ -135,7 +140,7 @@ func infoText(c bool, f Detail) string {
 	return buf.String()
 }
 
-func infoXML(f Detail) []byte {
+func infoXML(d Detail) []byte {
 	type xmldetail struct {
 		XMLName   xml.Name  `xml:"file"`
 		ID        string    `xml:"id,attr"`
@@ -149,24 +154,24 @@ func infoXML(f Detail) []byte {
 		SHA256    string    `xml:"checksum>sha256"`
 		Modified  time.Time `xml:"modified"`
 	}
-	x := xmldetail{}
-	x.Bytes = f.Bytes
-	x.CharCount = f.CharCount
-	x.ID = f.Slug
-	x.MD5 = f.MD5
-	x.Mime = f.Mime
-	x.Modified = f.Modified
-	x.Name = f.Name
-	x.SHA256 = f.SHA256
-	x.Size = f.Size
-	x.Utf8 = f.Utf8
+	x := xmldetail{
+		Bytes:     d.Bytes,
+		CharCount: d.CharCount,
+		ID:        d.Slug,
+		MD5:       d.MD5,
+		Mime:      d.Mime,
+		Modified:  d.Modified,
+		Name:      d.Name,
+		SHA256:    d.SHA256,
+		Size:      d.Size,
+		Utf8:      d.Utf8,
+	}
 	xmlData, err := xml.MarshalIndent(x, "", "\t")
 	Check(ErrorFmt{"could not create", "xml", err})
 	return xmlData
 }
 
-func details(name string) (Detail, error) {
-	d := Detail{}
+func details(name string) (d Detail, err error) {
 	// Get the file details
 	stat, err := os.Stat(name)
 	if err != nil {
@@ -180,12 +185,11 @@ func details(name string) (Detail, error) {
 	return parse(data, stat)
 }
 
-func parse(data []byte, stat os.FileInfo) (Detail, error) {
+func parse(data []byte, stat os.FileInfo) (d Detail, err error) {
 	md5sum := md5.Sum(data)
 	sha256 := sha256.Sum256(data)
 	mime := mimesniffer.Sniff(data)
 	// create a table of data
-	d := Detail{}
 	d.Bytes = stat.Size()
 	d.CharCount = runewidth.StringWidth(string(data))
 	d.Name = stat.Name()
@@ -204,5 +208,5 @@ func parse(data []byte, stat os.FileInfo) (Detail, error) {
 	} else {
 		d.Mime = mime
 	}
-	return d, nil
+	return d, err
 }

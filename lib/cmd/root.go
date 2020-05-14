@@ -142,6 +142,14 @@ func CheckCodePage(e ErrorFmt) {
 	}
 }
 
+// CheckErr prints the error and exits.
+func CheckErr(err error) {
+	if err != nil {
+		fmt.Printf("error: %s", err)
+		os.Exit(1)
+	}
+}
+
 // errorPrint returns a coloured invalid flag message.
 func (e *ErrorFmt) errorFlag() string {
 	a := fmt.Sprintf("\"--%s %s\"", e.Issue, e.Arg)
