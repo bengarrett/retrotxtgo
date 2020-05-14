@@ -95,11 +95,11 @@ func Test_writeFile(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{"no data or name", args{[]byte(""), "", true}, true},
-		{"invalid name", args{[]byte("abc"), "this-is-an-invalid-path", true}, true},
-		{"file as name", args{[]byte("abc"), tmpFile, true}, true},
-		{"home as name", args{[]byte("abc"), "~", true}, false},
-		{"cwd as name", args{[]byte("abc"), ".", true}, false},
+		{"no data", args{[]byte(""), "", true}, true},
+		{"invalid", args{[]byte("abc"), "this-is-an-invalid-path", true}, true},
+		{"tempDir", args{[]byte("abc"), tmpFile, true}, true},
+		{"homeDir", args{[]byte("abc"), "~", true}, false},
+		{"currentDir", args{[]byte("abc"), ".", true}, false},
 		{"path as name", args{[]byte("abc"), os.TempDir(), true}, false},
 	}
 	for _, tt := range tests {
@@ -110,12 +110,10 @@ func Test_writeFile(t *testing.T) {
 		})
 	}
 	// clean-up
-	wd, err := os.Getwd()
-	if err == nil {
-		p := path.Join(wd, "index.html")
-		if _, err = os.Stat(p); !os.IsNotExist(err) {
-			t.Log("Attempted to delete " + p)
-			os.Remove(p)
+	if wd, err := os.Getwd(); err == nil {
+		p := filepath.Join(wd, "index.html")
+		if err := os.Remove(p); err != nil {
+			t.Error(err)
 		}
 	}
 }

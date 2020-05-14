@@ -305,6 +305,7 @@ func writeFile(data []byte, name string, test bool) error {
 	if err != nil {
 		return err
 	}
+	defer f.Close()
 	t, err := newTemplate(test)
 	if err != nil {
 		return err
