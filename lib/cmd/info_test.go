@@ -95,24 +95,20 @@ func Test_parse(t *testing.T) {
 	}
 }
 
-func Test_infoJSON(t *testing.T) {
-	var f Detail
-	type args struct {
-		indent bool
-		f      Detail
-	}
+func TestDetail_infoJSON(t *testing.T) {
 	tests := []struct {
-		name string
-		args args
-		want bool
+		name   string
+		d      Detail
+		indent bool
+		want   bool
 	}{
-		{"no indent", args{false, f}, true},
-		{"indent", args{true, f}, true},
+		{"no indent", Detail{}, false, true},
+		{"indent", Detail{}, true, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := json.Valid(infoJSON(tt.args.indent, tt.args.f)); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("infoJSON() = %v, want %v", got, tt.want)
+			if got := json.Valid(tt.d.infoJSON(tt.indent)); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Detail.infoJSON() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -125,19 +121,19 @@ func Test_infoText(t *testing.T) {
 		os.Exit(1)
 	}
 	want := 491
-	if got := len(infoText(false, d)); got != want {
+	if got := len(d.infoText(false)); got != want {
 		t.Errorf("infoText() = %v, want %v", got, want)
 	}
 }
 
 func Test_infoXML(t *testing.T) {
-	f, err := details(hi)
+	d, err := details(hi)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 	want := 430
-	if got := len(infoXML(f)); got != want {
+	if got := len(d.infoXML()); got != want {
 		t.Errorf("infoXML() = %v, want %v", got, want)
 	}
 }

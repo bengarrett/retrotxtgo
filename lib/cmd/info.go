@@ -77,37 +77,37 @@ func init() {
 	infoCmd.Flags().SortFlags = false
 }
 
-func infoJSON(indent bool, f Detail) (js []byte) {
+func (d Detail) infoJSON(indent bool) (js []byte) {
 	var err error
 	switch indent {
 	case true:
-		js, err = json.MarshalIndent(f, "", "    ")
+		js, err = json.MarshalIndent(d, "", "    ")
 	default:
-		js, err = json.Marshal(f)
+		js, err = json.Marshal(d)
 	}
 	Check(ErrorFmt{"could not create", "json", err})
 	return js
 }
 
-func (f Detail) infoSwitch(format string) (err ErrorFmt) {
+func (d Detail) infoSwitch(format string) (err ErrorFmt) {
 	switch format {
 	case "color", "c":
-		fmt.Printf("%s", infoText(true, f))
+		fmt.Printf("%s", d.infoText(true))
 	case "json", "j":
-		fmt.Printf("%s\n", infoJSON(true, f))
+		fmt.Printf("%s\n", d.infoJSON(true))
 	case "json.min", "jm":
-		fmt.Printf("%s\n", infoJSON(false, f))
+		fmt.Printf("%s\n", d.infoJSON(false))
 	case "text":
-		fmt.Printf("%s", infoText(false, f))
+		fmt.Printf("%s", d.infoText(false))
 	case "xml", "x":
-		fmt.Printf("%s\n", infoXML(f))
+		fmt.Printf("%s\n", d.infoXML())
 	default:
 		err = ErrorFmt{"format", infoFmt, fmt.Errorf(infoFormats)}
 	}
 	return err
 }
 
-func infoText(c bool, f Detail) string {
+func (d Detail) infoText(c bool) string {
 	color.Enable = c
 	var info = func(t string) string {
 		return cinf(fmt.Sprintf("%s\t", t))
@@ -116,31 +116,31 @@ func infoText(c bool, f Detail) string {
 		return fmt.Sprintf("\t%s\n", cf(strings.Repeat("\u2015", 26)))
 	}
 	var data = []struct {
-		d, v string
+		k, v string
 	}{
-		{d: "filename", v: f.Name},
-		{d: "UTF-8", v: fmt.Sprintf("%v", f.Utf8)},
-		{d: "characters", v: fmt.Sprintf("%v", f.CharCount)},
-		{d: "size", v: f.Size},
-		{d: "modified", v: fmt.Sprintf("%v", f.Modified.Format(FileDate))},
-		{d: "MD5 checksum", v: f.MD5},
-		{d: "SHA256 checksum", v: f.SHA256},
-		{d: "MIME type", v: f.Mime},
-		{d: "slug", v: f.Slug},
+		{k: "filename", v: d.Name},
+		{k: "UTF-8", v: fmt.Sprintf("%v", d.Utf8)},
+		{k: "characters", v: fmt.Sprintf("%v", d.CharCount)},
+		{k: "size", v: d.Size},
+		{k: "modified", v: fmt.Sprintf("%v", d.Modified.Format(FileDate))},
+		{k: "MD5 checksum", v: d.MD5},
+		{k: "SHA256 checksum", v: d.SHA256},
+		{k: "MIME type", v: d.Mime},
+		{k: "slug", v: d.Slug},
 	}
 	var buf bytes.Buffer
 	w := new(tabwriter.Writer)
 	w.Init(&buf, 0, 8, 0, '\t', 0)
 	fmt.Fprint(w, hr())
 	for _, x := range data {
-		fmt.Fprintf(w, "\t %s\t  %s\n", x.d, info(x.v))
+		fmt.Fprintf(w, "\t %s\t  %s\n", x.k, info(x.v))
 	}
 	fmt.Fprint(w, hr())
 	w.Flush()
 	return buf.String()
 }
 
-func infoXML(d Detail) []byte {
+func (d Detail) infoXML() []byte {
 	type xmldetail struct {
 		XMLName   xml.Name  `xml:"file"`
 		ID        string    `xml:"id,attr"`
