@@ -83,6 +83,27 @@ func Test_pagedata(t *testing.T) {
 	}
 }
 
+func Test_serveFile(t *testing.T) {
+	type args struct {
+		data []byte
+		port int
+		test bool
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		// do not test
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := serveFile(tt.args.data, tt.args.port, tt.args.test); (err != nil) != tt.wantErr {
+				t.Errorf("serveFile() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
 func Test_writeFile(t *testing.T) {
 	type args struct {
 		data []byte
