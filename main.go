@@ -1,5 +1,5 @@
 /*
-Copyright © 2019 Ben Garrett <code.by.ben@gmail.com>
+Copyright © 2020 Ben Garrett <code.by.ben@gmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -18,6 +18,7 @@ package main
 
 import (
 	"github.com/bengarrett/retrotxtgo/lib/cmd"
+	v "github.com/bengarrett/retrotxtgo/lib/version"
 )
 
 // GoReleaser ldflags flags
@@ -28,8 +29,8 @@ var (
 )
 
 func main() {
-	cmd.BuildVer = version
-	cmd.BuildCommit = commit
-	cmd.BuildDate = date
+	v.Inf.Version = version
+	v.Inf.Commit = commit
+	v.Inf.Date = date
 	cmd.Execute()
 }
