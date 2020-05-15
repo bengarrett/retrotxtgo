@@ -9,6 +9,26 @@ import (
 	"testing"
 )
 
+func Test_createSave(t *testing.T) {
+	type args struct {
+		data    []byte
+		value   string
+		changed bool
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		// {"empty", args{nil, "", false}},
+		// {"empty", args{nil, "", true}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			createSave(tt.args.data, tt.args.value, tt.args.changed)
+		})
+	}
+}
+
 func Test_createLayouts(t *testing.T) {
 	l := strings.Split(createLayouts(), ",")
 	if got := len(l); got != 5 {
@@ -94,7 +114,7 @@ func Test_serveFile(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		// do not test
+		// not tested as it requires operating system permissions
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

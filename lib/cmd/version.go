@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"time"
 
+	v "github.com/bengarrett/retrotxtgo/lib/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gopkg.in/gookit/color.v1"
@@ -89,12 +90,12 @@ func info() versionInfo {
 	v := versionInfo{
 		"copyright": fmt.Sprintf("Copyright © 2020 Ben Garrett"),
 		"url":       fmt.Sprintf("https://%s/go", Www),
-		"app ver":   BuildVer,
+		"app ver":   v.Inf.Version,
 		"go ver":    goVer(),
 		"os":        fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
 		"exe":       binary(),
-		"date":      locBuildDate(BuildDate),
-		"git":       BuildCommit,
+		"date":      locBuildDate(v.Inf.Date),
+		"git":       v.Inf.Commit,
 		"license":   fmt.Sprintf("LGPL-3.0 [https://www.gnu.org/licenses/lgpl-3.0.html]"),
 	}
 	if a := arch(runtime.GOARCH); a != "" {

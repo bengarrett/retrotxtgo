@@ -66,13 +66,14 @@ var createCmd = &cobra.Command{
 			data = []byte(b.Value.String())
 		default:
 			// only show Usage() with no errors if no flags .NFlags() are set
-			if createFileName == "" && cmd.Flags().NFlag() == 0 {
-				fmt.Printf("%s\n\n", cmd.Short)
-				_ = cmd.Usage()
-				os.Exit(0)
-			}
 			if createFileName == "" {
-				_ = cmd.Usage()
+				if cmd.Flags().NFlag() == 0 {
+					fmt.Printf("%s\n\n", cmd.Short)
+					_ = cmd.Usage()
+					os.Exit(0)
+				}
+				err = cmd.Usage()
+				CheckErr(err)
 				FileMissingErr()
 			}
 			data, err = filesystem.Read(createFileName)
@@ -81,30 +82,10 @@ var createCmd = &cobra.Command{
 		// check for a --save flag to save to files
 		// otherwise output is sent to stdout
 		s := cmd.Flags().Lookup("save")
-		switch {
-		case s.Changed:
-			err = writeFile(data, s.Value.String(), false)
-		case viper.GetString("create.save-directory") != "":
-			err = writeFile(data, viper.GetString("create.save-directory"), false)
-		case !serverFiles:
-			err = writeStdout(data, false)
-		}
-		if err != nil {
-			if err.Error() == errors.New("invalid-layout").Error() {
-				CheckFlag(ErrorFmt{"layout", htmlLayout, fmt.Errorf(createLayouts())})
-			}
-			Check(ErrorFmt{"create error", ">", err})
-		}
+		createSave(data, s.Value.String(), s.Changed)
 		// check for a --server flag to serve the HTML
 		if serverFiles {
-			// viper.GetInt() doesn't work as expected
-			port, err := strconv.Atoi(viper.GetString("create.server-port"))
-			if err != nil {
-				port = serverPort
-			}
-			if err = serveFile(data, port, false); err == nil {
-				Check(ErrorFmt{"server problem", "HTTP", err})
-			}
+			createServe(data)
 		}
 	},
 }
@@ -181,6 +162,35 @@ func init() {
 	createCmd.Flags().SortFlags = false
 }
 
+func createSave(data []byte, value string, changed bool) {
+	var err error
+	switch {
+	case changed:
+		err = writeFile(data, value, false)
+	case viper.GetString("create.save-directory") != "":
+		err = writeFile(data, viper.GetString("create.save-directory"), false)
+	case !serverFiles:
+		err = writeStdout(data, false)
+	}
+	if err != nil {
+		if err.Error() == errors.New("invalid-layout").Error() {
+			CheckFlag(ErrorFmt{"layout", htmlLayout, fmt.Errorf(createLayouts())})
+		}
+		Check(ErrorFmt{"create error", ">", err})
+	}
+}
+
+func createServe(data []byte) {
+	// viper.GetInt() doesn't work as expected
+	port, err := strconv.Atoi(viper.GetString("create.server-port"))
+	if err != nil {
+		port = serverPort
+	}
+	if err = serveFile(data, port, false); err == nil {
+		Check(ErrorFmt{"server problem", "HTTP", err})
+	}
+}
+
 // createLayouts lists the options permitted by the layout flag.
 func createLayouts() string {
 	s := []string{}
@@ -218,8 +228,7 @@ func filename(test bool) (path string, err error) {
 
 // pagedata creates the meta and page template data.
 // todo handle all arguments
-func pagedata(data []byte) PageData {
-	var p PageData
+func pagedata(data []byte) (p PageData) {
 	switch htmlLayout {
 	case "full", "standard":
 		p.MetaAuthor = viper.GetString("create.meta.author")
@@ -314,12 +323,12 @@ func writeFile(data []byte, name string, test bool) error {
 // writeStdout creates and sends the html template to stdout.
 // The argument test is used internally.
 func writeStdout(data []byte, test bool) error {
-	t, err := newTemplate(test)
+	tmpl, err := newTemplate(test)
 	if err != nil {
 		return err
 	}
 	var buf bytes.Buffer
-	if err = t.Execute(&buf, pagedata(data)); err != nil {
+	if err = tmpl.Execute(&buf, pagedata(data)); err != nil {
 		return err
 	}
 	switch createStyles {

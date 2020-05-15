@@ -18,10 +18,6 @@ const (
 	Www string = "retrotxt.com"
 	// FileDate is a non-standard date format for file modifications
 	FileDate string = "2 Jan 15:04 2006"
-	// portMin is the lowest permitted network port
-	portMin int = 0
-	// portMax is the largest permitted network port
-	portMax int = 65535
 )
 
 // PageData holds template data used by the HTML layouts.
@@ -48,12 +44,6 @@ type ErrorFmt struct {
 }
 
 var (
-	// BuildDate build date in RFC3339
-	BuildDate string
-	// BuildCommit current git SHA
-	BuildCommit string
-	// BuildVer retrotxt version
-	BuildVer string
 	// Layout template data
 	Layout  PageData
 	cfgFile string
