@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/alecthomas/chroma/quick"
 	"github.com/gookit/color"
@@ -72,13 +73,19 @@ var (
 
 // ChkArg returns instructions for invalid command arguments.
 func ChkArg(arg string, args []string) {
-	if len(args) != 0 {
-		fmt.Printf("%s %s %s\n",
-			color.Warn.Sprint("invalid command"),
-			color.Bold.Sprintf("\"%s %s\"", arg, args[0]),
-			color.Warn.Sprint("\nplease use one of the Available Commands shown above"))
-		os.Exit(10)
+	if len(args) == 0 {
+		return
 	}
+	fmt.Printf("%s invalid argument%s",
+		Alert(),
+		color.Bold.Sprintf(" %q", arg))
+	if len(args) > 1 {
+		fmt.Printf(" choices: %s\n%s",
+			color.Info.Sprintf("%s", strings.Join(args, ", ")),
+			color.Warn.Sprint("please use one of the argument choices shown above"))
+	}
+	fmt.Println()
+	os.Exit(10)
 }
 
 // ChkErr prints an error issue and message then exits the program.
