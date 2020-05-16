@@ -12,11 +12,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-const infoFormats = "color, json, json.min, text, xml"
-
 var (
-	infoFmt  string
-	fileName string
+	infoFormat   string
+	infoFilename string
 )
 
 // infoCmd represents the info command
@@ -24,7 +22,7 @@ var infoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "Information on a text file",
 	Run: func(cmd *cobra.Command, args []string) {
-		if fileName == "" {
+		if infoFilename == "" {
 			if cmd.Flags().NFlag() == 0 {
 				fmt.Printf("%s\n\n", cmd.Short)
 				err := cmd.Usage()
@@ -35,11 +33,11 @@ var infoCmd = &cobra.Command{
 			CheckErr(err)
 			FileMissingErr()
 		}
-		if err := infoPrint(fileName, infoFmt); err != nil {
+		if err := infoPrint(infoFilename, infoFormat); err != nil {
 			if fmt.Sprint(err) == "format:invalid" {
 				logs.ChkArg("format", config.Format.Info)
 			} else {
-				logs.ChkErr(fmt.Sprintf("--name=%s is invalid,", fileName), err)
+				logs.ChkErr(fmt.Sprintf("--name=%s is invalid,", infoFilename), err)
 			}
 		}
 	},
@@ -48,8 +46,10 @@ var infoCmd = &cobra.Command{
 func init() {
 	InitDefaults()
 	rootCmd.AddCommand(infoCmd)
-	infoCmd.Flags().StringVarP(&fileName, "name", "n", "", cp("text file to analyse")+" (required)\n")
-	infoCmd.Flags().StringVarP(&infoFmt, "format", "f", viper.GetString("info.format"), "output format \noptions: "+ci(infoFormats))
+	infoCmd.Flags().StringVarP(&infoFilename, "name", "n", "",
+		cp("text file to analyse")+" (required)\n")
+	infoCmd.Flags().StringVarP(&infoFormat, "format", "f", viper.GetString("info.format"),
+		"output format \noptions: "+ci(config.Format.String("info")))
 	err := viper.BindPFlag("info.format", infoCmd.Flags().Lookup("format"))
 	CheckErr(err)
 	infoCmd.Flags().SortFlags = false
