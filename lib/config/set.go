@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
-	"github.com/bengarrett/retrotxtgo/lib/version"
+	v "github.com/bengarrett/retrotxtgo/lib/version"
 	"github.com/spf13/viper"
 )
 
@@ -92,7 +92,7 @@ func setGenerator() {
 	var name = "create.meta.generator"
 	// v{{.BuildVersion}}; {{.BuildDate}}
 	elm := fmt.Sprintf("<head>\n  <meta name=\"generator\" content=\"RetroTxt v%s, %s\">",
-		version.Inf.Version, version.Inf.Date)
+		v.Inf.Version, v.Inf.Date)
 	logs.ColorHTML(elm)
 	viper.Set(name, logs.PromptYN("Enable this element", viper.GetBool(name)))
 }

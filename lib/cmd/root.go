@@ -14,8 +14,6 @@ import (
 )
 
 const (
-	// Www is the application domain name
-	Www string = "retrotxt.com"
 	// FileDate is a non-standard date format for file modifications
 	FileDate string = "2 Jan 15:04 2006"
 )
