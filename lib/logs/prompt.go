@@ -29,7 +29,7 @@ func PromptPort(validate bool) (port uint) {
 			continue
 		}
 		if validate {
-			if v := portValid(uint(i)); !v {
+			if v := PortValid(uint(i)); !v {
 				fmt.Printf("%s %v, is out of range\n", Ce("✗"), input)
 				promptCheck(cnt)
 				continue
@@ -38,7 +38,9 @@ func PromptPort(validate bool) (port uint) {
 		return uint(i)
 	}
 }
-func portValid(p uint) bool {
+
+// PortValid ...
+func PortValid(p uint) bool {
 	if p < PortMin || p > PortMax {
 		return false
 	}

@@ -1,4 +1,4 @@
-package cmd
+package create
 
 import (
 	"os"
@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func Test_createSave(t *testing.T) {
+func Test_Save(t *testing.T) {
 	type args struct {
 		data    []byte
 		value   string
@@ -24,13 +24,13 @@ func Test_createSave(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			createSave(tt.args.data, tt.args.value, tt.args.changed)
+			//Save(tt.args.data, tt.args.value, tt.args.changed)
 		})
 	}
 }
 
-func Test_createLayouts(t *testing.T) {
-	l := strings.Split(createLayouts(), ",")
+func Test_Layouts(t *testing.T) {
+	l := strings.Split(Layouts(), ",")
 	if got := len(l); got != 5 {
 		t.Errorf("createTemplates() = %v, want %v", got, 5)
 	}
@@ -59,54 +59,56 @@ func Test_createTemplates(t *testing.T) {
 }
 
 func Test_filename(t *testing.T) {
+	args := Args{HTMLLayout: "standard"}
 	w := filepath.Clean("../../static/html/standard.html")
-	got, _ := filename(true)
+	got, _ := args.filename(true)
 	if got != w {
 		t.Errorf("filename = %v, want %v", got, w)
 	}
 	w = filepath.Clean("static/html/standard.html")
-	got, _ = filename(false)
+	got, _ = args.filename(false)
 	if got != w {
 		t.Errorf("filename = %v, want %v", got, w)
 	}
-	htmlLayout = "error"
-	_, err := filename(false)
+	args.HTMLLayout = "error"
+	_, err := args.filename(false)
 	if (err != nil) != true {
 		t.Errorf("filename = %v, want %v", got, w)
 	}
 }
 
 func Test_pagedata(t *testing.T) {
-	// htmlLayout should be standard
+	args := Args{HTMLLayout: "standard"}
 	w := "hello"
 	d := []byte(w)
-	got := pagedata(d).PreText
+	got := args.pagedata(d).PreText
 	if got != w {
 		t.Errorf("pagedata().PreText = %v, want %v", got, w)
 	}
-	htmlLayout = "mini"
+	args.HTMLLayout = "mini"
 	w = "RetroTxt | example"
-	got = pagedata(d).PageTitle
+	got = args.pagedata(d).PageTitle
 	if got != w {
 		t.Errorf("pagedata().PageTitle = %v, want %v", got, w)
 	}
 	w = ""
-	got = pagedata(d).MetaDesc
+	got = args.pagedata(d).MetaDesc
 	if got != w {
 		t.Errorf("pagedata().MetaDesc = %v, want %v", got, w)
 	}
-	htmlLayout = "standard"
+	args.HTMLLayout = "standard"
 	w = ""
-	got = pagedata(d).MetaAuthor
+	got = args.pagedata(d).MetaAuthor
 	if got != w {
 		t.Errorf("pagedata().MetaAuthor = %v, want %v", got, w)
 	}
 }
 
 func Test_serveFile(t *testing.T) {
+	a := Args{HTMLLayout: "standard"}
 	type args struct {
 		data []byte
-		port int
+		port uint
 		test bool
 	}
 	tests := []struct {
@@ -118,13 +120,14 @@ func Test_serveFile(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := serveFile(tt.args.data, tt.args.port, tt.args.test); (err != nil) != tt.wantErr {
+			if err := a.serveFile(tt.args.data, tt.args.port, tt.args.test); (err != nil) != tt.wantErr {
 				t.Errorf("serveFile() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
 }
 func Test_writeFile(t *testing.T) {
+	a := Args{HTMLLayout: "standard"}
 	type args struct {
 		data []byte
 		name string
@@ -145,7 +148,7 @@ func Test_writeFile(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := writeFile(tt.args.data, tt.args.name, tt.args.test); (err != nil) != tt.wantErr {
+			if err := a.File(tt.args.data, tt.args.name, tt.args.test); (err != nil) != tt.wantErr {
 				t.Errorf("writeFile() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -175,9 +178,9 @@ func Test_writeStdout(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := writeStdout(tt.args.data, tt.args.test); (err != nil) != tt.wantErr {
-				t.Errorf("writeStdout() error = %v, wantErr %v", err, tt.wantErr)
-			}
+			// if err := Stdout(tt.args.data, tt.args.test); (err != nil) != tt.wantErr {
+			// 	t.Errorf("writeStdout() error = %v, wantErr %v", err, tt.wantErr)
+			// }
 		})
 	}
 }

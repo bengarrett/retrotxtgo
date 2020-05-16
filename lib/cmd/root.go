@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/spf13/cobra"
 
@@ -12,22 +11,6 @@ import (
 	"github.com/spf13/viper"
 	"gopkg.in/gookit/color.v1"
 )
-
-// PageData holds template data used by the HTML layouts.
-type PageData struct {
-	BuildVersion    string
-	BuildDate       time.Time
-	CacheRefresh    string
-	MetaAuthor      string
-	MetaColorScheme string
-	MetaDesc        string
-	MetaGenerator   bool
-	MetaKeywords    string
-	MetaReferrer    string
-	MetaThemeColor  string
-	PageTitle       string
-	PreText         string
-}
 
 // ErrorFmt is an interface for error messages
 type ErrorFmt struct {
@@ -37,8 +20,6 @@ type ErrorFmt struct {
 }
 
 var (
-	// Layout template data
-	Layout  PageData
 	cfgFile string
 
 	// rootCmd represents the base command when called without any subcommands
@@ -116,6 +97,7 @@ func Check(e ErrorFmt) {
 	}
 }
 
+// CheckCodePage ...
 func CheckCodePage(e ErrorFmt) {
 	if e.Msg != nil {
 		e.Issue = "unsupported "
