@@ -13,11 +13,6 @@ import (
 	"gopkg.in/gookit/color.v1"
 )
 
-const (
-	// FileDate is a non-standard date format for file modifications
-	FileDate string = "2 Jan 15:04 2006"
-)
-
 // PageData holds template data used by the HTML layouts.
 type PageData struct {
 	BuildVersion    string
