@@ -167,23 +167,23 @@ func Log(err error) {
 	}
 }
 
-// save an error to the log directory, an optional path is available for unit tests.
-func save(err error, path string) error {
+// save an error to the log directory, an optional named file is available for unit tests.
+func save(err error, name string) error {
 	if err == nil || fmt.Sprintf("%v", err) == "" {
 		return errors.New("logs save: err value is nil")
 	}
 	// use UTC date and times in the log file
 	log.SetFlags(log.Ldate | log.Ltime | log.LUTC)
-	if path == "" {
-		path = Filepath()
+	if name == "" {
+		name = Filepath()
 	}
-	p := filepath.Dir(path)
+	p := filepath.Dir(name)
 	if _, e := os.Stat(p); os.IsNotExist(e) {
 		if e := os.MkdirAll(p, permDir); e != nil {
 			return e
 		}
 	}
-	file, e := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, perm)
+	file, e := os.OpenFile(name, os.O_APPEND|os.O_CREATE|os.O_WRONLY, perm)
 	if e != nil {
 		return e
 	}
