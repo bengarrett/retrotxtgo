@@ -19,14 +19,17 @@ import (
 	"github.com/spf13/viper"
 )
 
+// func X( data []byte, options)
+
 type files map[string]string
 
-// Args ...
+// Args holds arguments and options.
 type Args struct {
 	HTMLLayout  string
 	ServerFiles bool
 	ServerPort  int
 	Styles      string
+	Test        bool
 }
 
 // PageData holds template data used by the HTML layouts.
@@ -45,9 +48,8 @@ type PageData struct {
 	PreText         string
 }
 
-// File creates and saves the html template to the name file.
-// The argument test is used internally.
-func (args Args) File(data []byte, name string, test bool) error {
+// File creates and saves the html template to the named file.
+func (args Args) File(data []byte, name string) error {
 	if name == "~" {
 		// allow the use of ~ as the home directory on Windows
 		u, err := user.Current()
@@ -68,7 +70,7 @@ func (args Args) File(data []byte, name string, test bool) error {
 		return err
 	}
 	defer file.Close()
-	tmpl, err := args.newTemplate(test)
+	tmpl, err := args.newTemplate(args.Test)
 	if err != nil {
 		return err
 	}
@@ -83,9 +85,9 @@ func (args Args) Save(data []byte, value string, changed bool) {
 	var err error
 	switch {
 	case changed:
-		err = args.File(data, value, false)
+		err = args.File(data, value)
 	case viper.GetString("create.save-directory") != "":
-		err = args.File(data, viper.GetString("create.save-directory"), false)
+		err = args.File(data, viper.GetString("create.save-directory"))
 	case !args.ServerFiles:
 		err = args.Stdout(data, false)
 	}
@@ -109,7 +111,7 @@ func (args Args) Serve(data []byte) {
 		p = uint(port)
 	}
 	if err := args.serveFile(data, p, false); err != nil {
-		logs.Check(logs.Err{"server problem", "HTTP", err})
+		logs.Check(logs.Err{Issue: "server problem", Arg: "HTTP", Msg: err})
 	}
 }
 
@@ -122,7 +124,7 @@ func (args Args) serveFile(data []byte, port uint, test bool) error {
 	}
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if err = t.Execute(w, args.pagedata(data)); err != nil {
-			logs.Check(logs.Err{"serveFile", "http", err})
+			logs.Check(logs.Err{Issue: "serveFile", Arg: "http", Msg: err})
 		}
 	})
 	fs := http.FileServer(http.Dir("static/"))
