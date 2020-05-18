@@ -20,6 +20,7 @@ func ReadAllBytes(name string) (data []byte, err error) {
 	if err != nil {
 		return nil, err
 	}
+	defer file.Close()
 	// bufio is the most performant
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
@@ -41,6 +42,7 @@ func ReadChunk(name string, chars int) (data []byte, err error) {
 	if err != nil {
 		return nil, err
 	}
+	defer file.Close()
 	// bufio is the most performant
 	scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanRunes)
@@ -73,10 +75,12 @@ func ReadTail(name string, offset int64) (data []byte, err error) {
 	if stat, err := os.Stat(name); err == nil && stat.Size() < size {
 		return data, fmt.Errorf("offset: value is %v too large for a %v byte file", offset, stat.Size())
 	}
+
 	// file.Seek(whence)
 	// 0 means relative to the origin of the file
 	// 1 means relative to the current offset
 	// 2 means relative to the end
+
 	if _, err = file.Seek(offset, 2); err != nil {
 		// todo: have offset deal with runes not bytes
 		return data, err
