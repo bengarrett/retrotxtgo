@@ -90,7 +90,6 @@ func ReadTail(name string, offset int) (data []byte, err error) {
 	if err = file.Close(); err != nil {
 		return data, err
 	}
-	err = scanner.Err()
 	return data, err
 }
 

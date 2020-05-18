@@ -25,8 +25,8 @@ type Build struct {
 
 type versionInfo map[string]string
 
-// Inf holds build and version information.
-var Inf = Build{
+// B holds build and version information.
+var B = Build{
 	Commit:  "",
 	Date:    "",
 	Domain:  "retrotxt.com",
@@ -94,13 +94,13 @@ func semantic() string {
 func information() versionInfo {
 	v := versionInfo{
 		"copyright": fmt.Sprintf("Copyright © 2020 Ben Garrett"),
-		"url":       fmt.Sprintf("https://%s/go", Inf.Domain),
-		"app ver":   Inf.Version,
+		"url":       fmt.Sprintf("https://%s/go", B.Domain),
+		"app ver":   B.Version,
 		"go ver":    semantic(),
 		"os":        fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
 		"exe":       binary(),
-		"date":      localBuild(Inf.Date),
-		"git":       Inf.Commit,
+		"date":      localBuild(B.Date),
+		"git":       B.Commit,
 		"license":   fmt.Sprintf("LGPL-3.0 [https://www.gnu.org/licenses/lgpl-3.0.html]"),
 	}
 	if a := arch(runtime.GOARCH); a != "" {

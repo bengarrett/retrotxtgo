@@ -21,7 +21,7 @@ const (
 	PortRec uint = 8080
 )
 
-// Err is an interface for error messages
+// Err is an interface for error colored messages
 type Err struct {
 	Issue string
 	Arg   string
@@ -29,9 +29,9 @@ type Err struct {
 }
 
 func (e Err) String() string {
-	ia := Ci(fmt.Sprintf("%s %s,", e.Issue, e.Arg))
-	m := Cf(fmt.Sprintf("%v", e.Msg))
-	return fmt.Sprintf("%s %s %s", Alert(), ia, m)
+	issue := Ci(fmt.Sprintf("%s %s,", e.Issue, e.Arg))
+	msg := Cf(fmt.Sprintf("%v", e.Msg))
+	return fmt.Sprintf("%s %s %s", Alert(), issue, msg)
 }
 
 // Filename is the default error log filename
@@ -76,50 +76,78 @@ var (
 )
 
 // ChkArg returns instructions for invalid command arguments.
+// Todo: CheckArg
 func ChkArg(arg string, args []string) {
 	if len(args) == 0 {
 		return
 	}
-	fmt.Printf("%s invalid argument%s",
-		Alert(),
+	Exit(checkArgument(arg, args))
+}
+
+func checkArgument(arg string, args []string) (msg string, code int) {
+	code = 10
+	msg += fmt.Sprintf("%s invalid argument%s", Alert(),
 		color.Bold.Sprintf(" %q", arg))
 	if len(args) > 1 {
-		fmt.Printf(" choices: %s\n%s",
+		msg += fmt.Sprintf(" choices: %s\n%s",
 			color.Info.Sprintf("%s", strings.Join(args, ", ")),
 			color.Warn.Sprint("please use one of the argument choices shown above"))
 	}
-	fmt.Println()
-	os.Exit(10)
+	msg += "\n"
+	return msg, code
 }
 
 // ChkErr prints an error issue and message then exits the program.
+// TODO: rename to Check
 func ChkErr(issue string, err error) {
 	if err != nil {
-		if issue == "" {
-			fmt.Printf("%s\n", err)
-		} else {
-			fmt.Printf("%s %s\n", issue, err)
-		}
-		os.Exit(1)
+		Exit(check(issue, err))
 	}
 }
 
+func check(issue string, err error) (msg string, code int) {
+	code = 1
+	if issue == "" {
+		msg = fmt.Sprintf("%s\n", err)
+	} else {
+		msg = fmt.Sprintf("%s %s\n", issue, err)
+	}
+	return msg, code
+}
+
 // Check prints an error message and exits the program.
+// TOOD: rename CheckErr
 func Check(e Err) {
 	if e.Msg != nil {
-		println(e.String())
-		os.Exit(1)
+		Exit(e.check())
 	}
+}
+
+func (e Err) check() (msg string, code int) {
+	code = 1
+	msg = e.String()
+	return msg, code
 }
 
 // ColorHTML prints colored syntax highlighting to HTML elements.
 func ColorHTML(elm string) {
+	fmt.Println(colorhtml(&elm))
+}
+
+func colorhtml(elm *string) string {
 	var buf bytes.Buffer
-	if err := quick.Highlight(&buf, elm, "html", "terminal256", "lovelace"); err != nil {
-		fmt.Printf("\n%s\n", elm)
-	} else {
-		fmt.Printf("\n%v\n", buf.String())
+	if err := quick.Highlight(&buf, *elm, "html", "terminal256", "lovelace"); err != nil {
+		return fmt.Sprintf("\n%s\n", *elm)
 	}
+	return fmt.Sprintf("\n%v\n", buf.String())
+}
+
+// Exit prints the message and causes the program to exit.
+func Exit(msg string, code int) {
+	if _, err := fmt.Println(msg); err != nil {
+		log.Fatalf("logs.exit println: %s", err)
+	}
+	os.Exit(code)
 }
 
 // Save logs any errors and exits to the operating system with error code 1.
@@ -149,10 +177,10 @@ func save(err error, path string) (ok bool) {
 	p := filepath.Dir(path)
 	if _, e := os.Stat(p); os.IsNotExist(e) {
 		e2 := os.MkdirAll(p, permDir)
-		check(e2)
+		checkSave(e2)
 	}
 	file, e := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, perm)
-	check(e)
+	checkSave(e)
 	defer file.Close()
 	log.SetOutput(file)
 	log.Print(err)
@@ -160,7 +188,7 @@ func save(err error, path string) (ok bool) {
 	return true
 }
 
-func check(e error) {
+func checkSave(e error) {
 	if e != nil {
 		log.Printf("%s %s", color.Danger.Sprint("!"), e)
 		os.Exit(19)
