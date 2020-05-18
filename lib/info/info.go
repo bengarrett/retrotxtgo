@@ -16,7 +16,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/codepage"
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
-	"github.com/gookit/color"
+	c "github.com/gookit/color"
 	"github.com/mattn/go-runewidth"
 	"github.com/mozillazg/go-slugify"
 
@@ -37,8 +37,8 @@ type Detail struct {
 	Utf8      bool
 }
 
-// XMLData ...
-type XMLData struct {
+// File data for XML encoding
+type File struct {
 	XMLName   xml.Name  `xml:"file"`
 	ID        string    `xml:"id,attr"`
 	Name      string    `xml:"name"`
@@ -55,8 +55,8 @@ type XMLData struct {
 // FileDate is a non-standard date format for file modifications
 const FileDate string = "2 Jan 15:04 2006"
 
-// File ...
-func File(name string) (d Detail, err error) {
+// Read opens and returns the details of a file.
+func Read(name string) (d Detail, err error) {
 	// Get the file details
 	stat, err := os.Stat(name)
 	if err != nil {
@@ -70,6 +70,7 @@ func File(name string) (d Detail, err error) {
 	return parse(data, stat)
 }
 
+// parse fileinfo and file content.
 func parse(data []byte, stat os.FileInfo) (d Detail, err error) {
 	md5sum := md5.Sum(data)
 	sha256 := sha256.Sum256(data)
@@ -96,7 +97,7 @@ func parse(data []byte, stat os.FileInfo) (d Detail, err error) {
 	return d, err
 }
 
-// JSON ...
+// JSON format and returns the details of a file.
 func (d Detail) JSON(indent bool) (js []byte) {
 	var err error
 	switch indent {
@@ -105,13 +106,13 @@ func (d Detail) JSON(indent bool) (js []byte) {
 	default:
 		js, err = json.Marshal(d)
 	}
-	logs.Check(logs.Err{"could not create", "json", err})
+	logs.Check(logs.Err{Issue: "could not create", Arg: "json", Msg: err})
 	return js
 }
 
-// Text ...
-func (d Detail) Text(c bool) string {
-	color.Enable = c
+// Text format and returns the details of a file.
+func (d Detail) Text(color bool) string {
+	c.Enable = color
 	var info = func(t string) string {
 		return logs.Cinf(fmt.Sprintf("%s\t", t))
 	}
@@ -143,9 +144,9 @@ func (d Detail) Text(c bool) string {
 	return buf.String()
 }
 
-// XML ...
+// XML formats and returns the details of a file.
 func (d Detail) XML() ([]byte, error) {
-	v := XMLData{
+	v := File{
 		Bytes:     d.Bytes,
 		CharCount: d.CharCount,
 		ID:        d.Slug,

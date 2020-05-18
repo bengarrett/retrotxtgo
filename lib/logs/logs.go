@@ -15,7 +15,11 @@ import (
 )
 
 // the lowest, largest and recommended network ports to serve HTTP.
-const PortMin, PortMax, PortRec uint = 0, 65535, 8080
+const (
+	PortMin uint = 0
+	PortMax uint = 65535
+	PortRec uint = 8080
+)
 
 // Err is an interface for error messages
 type Err struct {
@@ -108,7 +112,7 @@ func Check(e Err) {
 	}
 }
 
-// ColorHTML ..
+// ColorHTML prints colored syntax highlighting to HTML elements.
 func ColorHTML(elm string) {
 	var buf bytes.Buffer
 	if err := quick.Highlight(&buf, elm, "html", "terminal256", "lovelace"); err != nil {
@@ -132,8 +136,7 @@ func Save(err error) {
 	}
 }
 
-// save an error to the logs.
-// path is available for unit tests.
+// save an error to the logs, optional path is available for unit tests.
 func save(err error, path string) (ok bool) {
 	if err == nil || fmt.Sprintf("%v", err) == "" {
 		return false

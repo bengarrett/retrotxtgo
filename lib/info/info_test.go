@@ -14,28 +14,28 @@ import (
 var hi = filepath.Clean("../../textfiles/hi.txt")
 
 func Test_File(t *testing.T) {
-	got, err := File(hi)
+	got, err := Read(hi)
 	if err != nil {
-		t.Errorf("File() = %v, want %v", err, nil)
+		t.Errorf("Read() = %v, want %v", err, nil)
 	}
 	if got.Bytes != 40 {
-		t.Errorf("File() = %v, want %v", got.Bytes, 40)
+		t.Errorf("Read() = %v, want %v", got.Bytes, 40)
 	}
 	if got.Name != "hi.txt" {
-		t.Errorf("File() = %v, want %v", got.Name, "hi.txt")
+		t.Errorf("Read() = %v, want %v", got.Name, "hi.txt")
 	}
 	if got.Slug != "hi-txt" {
-		t.Errorf("File() = %v, want %v", got.Slug, "hi-txt")
+		t.Errorf("Read() = %v, want %v", got.Slug, "hi-txt")
 	}
 	if got.Mime != "text/plain" {
-		t.Errorf("File() = %v, want %v", got.Mime, "text/plain")
+		t.Errorf("Read() = %v, want %v", got.Mime, "text/plain")
 	}
 	if got.Utf8 != true {
-		t.Errorf("File() = %v, want %v", got.Utf8, true)
+		t.Errorf("Read() = %v, want %v", got.Utf8, true)
 	}
 	const want = "1b466b6448d7ff10e2f8f7160d936987"
 	if got.MD5 != want {
-		t.Errorf("File() = %v, want %v", got.MD5, want)
+		t.Errorf("Read() = %v, want %v", got.MD5, want)
 	}
 }
 
@@ -93,7 +93,7 @@ func Test_JSON(t *testing.T) {
 }
 
 func Test_Text(t *testing.T) {
-	d, err := File(hi)
+	d, err := Read(hi)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -105,7 +105,7 @@ func Test_Text(t *testing.T) {
 }
 
 func ExampleDetail_XML() {
-	file, _ := File(hi)
+	file, _ := Read(hi)
 	data, _ := file.XML()
 	fmt.Printf("%s", data)
 	// Output:

@@ -56,7 +56,7 @@ func init() {
 }
 
 func infoPrint(filename, format string) (err error) {
-	d, err := info.File(filename)
+	d, err := info.Read(filename)
 	if err != nil {
 		return err
 	}
