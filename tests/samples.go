@@ -4,12 +4,14 @@ import (
 	"bufio"
 	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+	"unicode/utf8"
 
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/unicode"
@@ -19,77 +21,75 @@ import (
 var perm os.FileMode = 0644
 
 const (
-	utf8nl = `☠	Skull and crossbones
+	cp437hex = "\xCD\xB9\xB2\xCC\xCD" // `═╣░╠═`
+	utf      = "═╣ ░ ╠═"
+	newlines = "a\nb\nc...\n"
+	symbols  = `[☠|☮|♺]`
+	tabs     = "☠\tSkull and crossbones\n\n☮\tPeace symbol\n\n♺\tRecycling"
+	escapes  = "bell:\a,back:\b,tab:\t,form:\f,vertical:\v,quote:\""
+	digits   = "\xb0\260\u0170\U00000170"
 
-☮	Peace symbol
-
-♺	Recycling`
-	utf8      = `[☠|☮|♺]`
-	toCP437   = "═╣ ░ ╠═"
-	fromCP437 = "\xCD\xB9\xB2\xCC\xCD" // `═╣░╠═`
+	base = "rt_sample-"
 
 	be   = unicode.BigEndian
 	le   = unicode.LittleEndian
 	bom  = unicode.UseBOM
 	_bom = unicode.IgnoreBOM
+
+	lf = "\x0a"
+	cr = "\x0d"
 )
 
 // helpful references: How to convert from an encoding to UTF-8 in Go?
 // https://stackoverflow.com/questions/32518432/how-to-convert-from-an-encoding-to-utf-8-in-go
 
-// BinaryIn ...
-func BinaryIn(binary []byte) (text string) {
-	return base64.StdEncoding.EncodeToString(binary)
+// CP437Decode decodes IBM Code Page 437 encoded text.
+func CP437Decode(s string) (result []byte, err error) {
+	return CPDecode(s, *charmap.CodePage437)
 }
 
-// BinaryOut ...
-func BinaryOut(encoded string) (result []byte, err error) {
-	return base64.StdEncoding.DecodeString(encoded)
+// CP437Encode encodes text into IBM Code Page 437.
+func CP437Encode(s string) (result []byte, err error) {
+	return CPEncode(s, *charmap.CodePage437)
 }
 
-// CP437Out ..
-func CP437Out(text string) (result []byte, err error) {
-	encoder := charmap.CodePage437.NewEncoder()
-	nr := transform.NewReader(strings.NewReader(text), encoder)
-	return ioutil.ReadAll(nr)
+// CPDecode decodes simple character encoding text.
+func CPDecode(s string, cp charmap.Charmap) (result []byte, err error) {
+	decoder := cp.NewDecoder()
+	reader := transform.NewReader(strings.NewReader(s), decoder)
+	return ioutil.ReadAll(reader)
 }
 
-// CP437In ..
-func CP437In(cp437 string) (result []byte, err error) {
-	decoder := charmap.CodePage437.NewDecoder()
-	nr := transform.NewReader(strings.NewReader(cp437), decoder)
-	return ioutil.ReadAll(nr)
+// CPEncode encodes text into a simple character encoding.
+func CPEncode(s string, cp charmap.Charmap) (result []byte, err error) {
+	if !utf8.Valid([]byte(s)) {
+		return result, errors.New("cpencode: string is not encoded as utf8")
+	}
+	encoder := cp.NewEncoder()
+	reader := transform.NewReader(strings.NewReader(s), encoder)
+	return ioutil.ReadAll(reader)
 }
 
-// HexOut ..
-func HexOut(text string) (result []byte) {
+// HexDecode ...
+func HexDecode(hexadecimal string) (result []byte, err error) {
+	src := []byte(hexadecimal)
+	println(len(src))
+	result = make([]byte, hex.DecodedLen(len(src)))
+	_, err = hex.Decode(result, src)
+	return result, err
+}
+
+// HexEncode ..
+func HexEncode(text string) (result []byte) {
 	src := []byte(text)
 	dst := make([]byte, hex.EncodedLen(len(src)))
 	hex.Encode(dst, src)
 	return dst
 }
 
-// EmbedText ...
-func EmbedText() (result string) {
-	abs, err := filepath.Abs("../textfiles/ZII-RTXT.ans")
-	if err != nil {
-		log.Fatal(err)
-	}
-	print("file:", abs)
-	d, err := ReadBinary(abs)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("length: %dB\n", len(d))
-	return BinaryIn(d)
-}
-
-// ReadBinary ..
-func ReadBinary(name string) (data []byte, err error) {
-	var path = name
-	if filepath.Base(name) == name {
-		path = filepath.Join(os.TempDir(), name)
-	}
+// ReadBytes reads a named file location or a named temporary file and returns its byte content.
+func ReadBytes(name string) (data []byte, err error) {
+	var path = tempFile(name)
 	file, err := os.OpenFile(path, os.O_RDONLY, perm)
 	if err != nil {
 		return data, err
@@ -109,12 +109,9 @@ func ReadBinary(name string) (data []byte, err error) {
 	return data, err
 }
 
-// ReadFile ..
-func ReadFile(name string) (text string, err error) {
-	var path = name
-	if filepath.Base(name) == name {
-		path = filepath.Join(os.TempDir(), name)
-	}
+// ReadLine reads a named file location or a named temporary file and returns its content.
+func ReadLine(name, newline string) (text string, err error) {
+	var path, nl = tempFile(name), nlChar(newline)
 	file, err := os.OpenFile(path, os.O_RDONLY, perm)
 	if err != nil {
 		return text, err
@@ -122,8 +119,7 @@ func ReadFile(name string) (text string, err error) {
 	// bufio is the most performant
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		text += scanner.Text()
-		//fmt.Printf("\n%v\n", text)
+		text += fmt.Sprintf("%s%s", scanner.Text(), nl)
 	}
 	if err = scanner.Err(); err != nil {
 		return text, err
@@ -135,43 +131,103 @@ func ReadFile(name string) (text string, err error) {
 	return text, err
 }
 
-// SaveFile ..
-func SaveFile(b []byte, name string) (path string, len int, err error) {
-	if filepath.Base(name) == name {
-		path = filepath.Join(os.TempDir(), name)
+// ReadText reads a named file location or a named temporary file and returns its content.
+func ReadText(name string) (text string, err error) {
+	return ReadLine(name, "")
+}
+
+// nlChar returns a platform's newline character.
+// TODO: make idomatic
+func nlChar(platform string) (chars string) {
+	switch platform {
+	case "dos", "windows":
+		chars = cr + lf
+	case "c64", "darwin", "mac":
+		chars = cr
+	case "amiga", "linux", "unix":
+		chars = lf
+	default: // use operating system default
+		chars = "\n"
 	}
+	return chars
+}
+
+// Save bytes to a named file location or a named temporary file.
+func Save(b []byte, name string) (path string, err error) {
+	path = tempFile(name)
 	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, perm)
 	if err != nil {
-		return path, len, err
+		return path, err
 	}
 	// bufio is the most performant
 	writer := bufio.NewWriter(file)
-	for len, c := range b {
+	for _, c := range b {
 		if err = writer.WriteByte(c); err != nil {
-			return path, len, err
+			return path, err
 		}
 	}
 	if err = writer.Flush(); err != nil {
-		return path, len, err
+		return path, err
 	}
 	if err = file.Close(); err != nil {
-		return path, len, err
+		return path, err
 	}
-	path, err = filepath.Abs(file.Name())
-	return path, len, err
+	return filepath.Abs(file.Name())
 }
 
-// UTF8 ...
-func UTF8(text string) (result []byte, len int, err error) {
-	return transform.Bytes(unicode.UTF8.NewEncoder(), []byte(text))
+func asciiFile() (path string) {
+	var abs, err = filepath.Abs("ZII-RTXT.asc")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return abs
 }
 
-// UTF16LE ..
-func UTF16LE(text string) (result []byte, len int, err error) {
-	return transform.Bytes(unicode.UTF16(le, bom).NewEncoder(), []byte(text))
+func ansiFile() (path string) {
+	var abs, err = filepath.Abs("ZII-RTXT.ans")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return abs
 }
 
-// UTF16BE ...
-func UTF16BE(text string) (result []byte, len int, err error) {
-	return transform.Bytes(unicode.UTF16(be, bom).NewEncoder(), []byte(text))
+func tempFile(name string) (path string) {
+	path = name
+	if filepath.Base(name) == name {
+		path = filepath.Join(os.TempDir(), name)
+	}
+	return path
+}
+
+func cleanFile(path string) {
+	if err := os.RemoveAll(path); err != nil {
+		fmt.Fprintln(os.Stderr, "removing path:", err)
+	}
+}
+
+// these are reminders of how to implement the encoders
+
+// Base64Decode decodes a base64 string.
+func Base64Decode(s string) (result []byte, err error) {
+	return base64.StdEncoding.DecodeString(s)
+}
+
+// Base64Encode encodes a string to base64.
+func Base64Encode(s string) (result string) {
+	return base64.StdEncoding.EncodeToString([]byte(s))
+}
+
+// UTF8 transforms string to UTF8 encoding.
+func UTF8(s string) (result []byte, length int, err error) {
+	return transform.Bytes(unicode.UTF8.NewEncoder(), []byte(s))
+}
+
+// UTF16BE transforms string to UTF16 big-endian encoding.
+func UTF16BE(s string) (result []byte, length int, err error) {
+	return transform.Bytes(unicode.UTF16(be, bom).NewEncoder(), []byte(s))
+}
+
+// UTF16LE transforms string to UTF16 little-endian encoding.
+func UTF16LE(s string) (result []byte, length int, err error) {
+	return transform.Bytes(unicode.UTF16(le, bom).NewEncoder(), []byte(s))
 }
