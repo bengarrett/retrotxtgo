@@ -1,7 +1,6 @@
 package filesystem
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -80,7 +79,7 @@ func TestReadAllBytes(t *testing.T) {
 				return
 			}
 			if !reflect.DeepEqual(gotData, tt.wantData) {
-				t.Errorf("ReadAllBytes() = %v, want %v", string(gotData), string(tt.wantData))
+				t.Errorf("ReadAllBytes() = %q, want %q", string(gotData), string(tt.wantData))
 			}
 		})
 	}
@@ -135,13 +134,13 @@ func TestReadChunk(t *testing.T) {
 }
 
 func TestReadTail(t *testing.T) {
+	f1 := exampleSave(samples.Newlines, 1)
 	f2 := exampleSave(samples.Symbols, 2)
 	f3 := exampleSave(samples.Tabs, 3)
 	f4 := exampleSave(samples.Escapes, 4)
-	f5 := exampleSave(samples.Digits, 5)
 	type args struct {
 		name   string
-		offset int64
+		offset int
 	}
 	tests := []struct {
 		name     string
@@ -153,10 +152,9 @@ func TestReadTail(t *testing.T) {
 		{"invalid", args{"/invalid-file", 0}, nil, true},
 		{"dir", args{os.TempDir(), 0}, nil, true},
 		{"range", args{"", 10}, nil, true},
-		{"utf8", args{f2, 1}, []byte(samples.Symbols), false},
-		{"tabs", args{f3, 1}, []byte(samples.Tabs), false},
-		{"escs", args{f4, 1}, []byte(samples.Escapes), false},
-		{"digs", args{f5, 1}, []byte(samples.Digits), false},
+		{"utf8", args{f2, 4}, []byte("☮|♺]"), false},
+		{"tabs", args{f3, 11}, []byte("♺\tRecycling"), false},
+		{"escs", args{f4, 9}, []byte("\v,quote:\""), false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -166,63 +164,12 @@ func TestReadTail(t *testing.T) {
 				return
 			}
 			if !reflect.DeepEqual(gotData, tt.wantData) {
-				t.Errorf("ReadTail() = %v, want %v", gotData, tt.wantData)
+				t.Errorf("ReadTail() = %q, want %q", string(gotData), string(tt.wantData))
 			}
 		})
 	}
+	samples.Clean(f1)
 	samples.Clean(f2)
 	samples.Clean(f3)
 	samples.Clean(f4)
-	samples.Clean(f5)
-}
-
-func TestTailBytesEmpty(t *testing.T) {
-	r, err := ReadTail("", 0)
-	var e = []byte("")
-	if bytes.Equal(r, e) == false {
-		t.Fatalf("Expected %s but got %s", e, r)
-	}
-	if err == nil {
-		t.Fatalf("Expected err but got nil")
-	}
-}
-
-func TestTailBytes0(t *testing.T) {
-	r, err := ReadTail("../textfiles/hi.txt", 0)
-	var e = []byte("")
-	if bytes.Equal(r, e) == false {
-		t.Fatalf("Expected %q but got %q", e, r)
-	}
-	if err != nil {
-		t.Fatalf("Expected nil error, %q", err)
-	}
-}
-
-func TestTailBytesPositive(t *testing.T) {
-	r, err := ReadTail("../textfiles/hi.txt", 10)
-	var e = []byte("")
-	if bytes.Equal(r, e) == false {
-		t.Fatalf("Expected %q but got %q", e, r)
-	}
-	if err == nil {
-		t.Fatalf("Expected an error, EOF")
-	}
-}
-
-func TestTailBytesRange(t *testing.T) {
-	_, err := ReadTail("../textfiles/hi.txt", -999999999)
-	if err == nil {
-		t.Fatalf("Expected an error, offset: value is too large")
-	}
-}
-
-func TestTailBytesNegative(t *testing.T) {
-	r, err := ReadTail("../textfiles/hi.txt", -9)
-	var e = []byte("ልዑል")
-	if bytes.Equal(r, e) == false {
-		t.Fatalf("Expected %q but got %q", e, r)
-	}
-	if err != nil {
-		t.Fatalf("Expected nil error, %q", err)
-	}
 }
