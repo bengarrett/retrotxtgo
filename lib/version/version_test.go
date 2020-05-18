@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"runtime"
+	"strings"
 	"testing"
 	"time"
 )
@@ -102,7 +103,7 @@ func Test_info(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := info()["os"]; !reflect.DeepEqual(got, tt.want) {
+			if got := information()["os"]; !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("info() = %v, want %v", got, tt.want)
 			}
 		})
@@ -122,24 +123,24 @@ func Test_locBuildDate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := locBuildDate(tt.date); len(got) > 4 && got[:4] != tt.want {
+			if got := localBuild(tt.date); len(got) > 4 && got[:4] != tt.want {
 				t.Errorf("locBuildDate() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_goVer(t *testing.T) {
+func Test_semantic(t *testing.T) {
 	tests := []struct {
 		name string
 		want string
 	}{
-		{"ok", "1."}, // 1.14.1
+		{"ok", "1"}, // 1.14.1
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := goVer(); len(got) > 2 && got[:2] != tt.want {
-				t.Errorf("goVer() = %v, want %v", got, tt.want)
+			if got := semantic(); len(got) > 2 && strings.Split(got, ".")[0] != tt.want {
+				t.Errorf("semantic() = %v, want %v", got, tt.want)
 			}
 		})
 	}

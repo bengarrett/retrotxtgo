@@ -5,7 +5,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
-	v "github.com/bengarrett/retrotxtgo/lib/version"
+	ver "github.com/bengarrett/retrotxtgo/lib/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -51,13 +51,13 @@ func init() {
 func versionPrint(format string) (ok bool) {
 	switch format {
 	case "color", "c", "":
-		print(v.Sprint(true))
+		print(ver.Sprint(true))
 	case "json", "j":
-		fmt.Printf("%s\n", v.JSON(true))
+		fmt.Printf("%s\n", ver.JSON(true))
 	case "json.min", "jm":
-		fmt.Printf("%s\n", v.JSON(false))
+		fmt.Printf("%s\n", ver.JSON(false))
 	case "text", "t":
-		print(v.Sprint(false))
+		print(ver.Sprint(false))
 	default:
 		return false
 	}

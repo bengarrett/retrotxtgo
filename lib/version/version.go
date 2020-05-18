@@ -11,7 +11,7 @@ import (
 	c "github.com/gookit/color"
 )
 
-// Build ..
+// Build and version information
 type Build struct {
 	// Commit git SHA
 	Commit string
@@ -25,7 +25,7 @@ type Build struct {
 
 type versionInfo map[string]string
 
-// Inf ...
+// Inf holds build and version information.
 var Inf = Build{
 	Commit:  "",
 	Date:    "",
@@ -33,23 +33,23 @@ var Inf = Build{
 	Version: "",
 }
 
-// JSON ..
+// JSON formats the RetroTxt version and binary compile infomation.
 func JSON(indent bool) (data []byte) {
 	var err error
 	switch indent {
 	case true:
-		data, err = json.MarshalIndent(info(), "", "    ")
+		data, err = json.MarshalIndent(information(), "", "    ")
 	default:
-		data, err = json.Marshal(info())
+		data, err = json.Marshal(information())
 	}
-	logs.Check(logs.Err{"could not create", "json", err})
+	logs.Check(logs.Err{Issue: "could not create", Arg: "json", Msg: err})
 	return data
 }
 
 // Sprint formats the RetroTxt version and binary compile infomation.
 func Sprint(color bool) (text string) {
 	c.Enable = color
-	i := info()
+	i := information()
 	text = fmt.Sprintf(logs.Cp("RetroTxt\t%s [%s]\n"), i["copyright"], i["url"]) +
 		fmt.Sprintf(logs.Cinf("Version:\t%s\n"), i["app ver"]) +
 		fmt.Sprintf("Go version:\t%s\n", i["go ver"]) +
@@ -60,7 +60,8 @@ func Sprint(color bool) (text string) {
 	return text
 }
 
-func arch(v string) string {
+// arch humanises some common Go architecture targets.
+func arch(goarch string) string {
 	a := map[string]string{
 		"386":   "32-bit Intel/AMD",
 		"amd64": "64-bit Intel/AMD",
@@ -68,9 +69,10 @@ func arch(v string) string {
 		"arm64": "64-bit ARM",
 		"ppc64": "64-bit PowerPC",
 	}
-	return a[v]
+	return a[goarch]
 }
 
+// binary is the location of this program executable.
 func binary() string {
 	bin, err := os.Executable()
 	if err != nil {
@@ -79,7 +81,8 @@ func binary() string {
 	return bin
 }
 
-func goVer() string {
+// semantic go version.
+func semantic() string {
 	ver := runtime.Version()
 	if len(ver) > 2 && ver[:2] == "go" {
 		return ver[2:]
@@ -87,15 +90,16 @@ func goVer() string {
 	return ver
 }
 
-func info() versionInfo {
+// information and version details of retrotxt.
+func information() versionInfo {
 	v := versionInfo{
 		"copyright": fmt.Sprintf("Copyright © 2020 Ben Garrett"),
 		"url":       fmt.Sprintf("https://%s/go", Inf.Domain),
 		"app ver":   Inf.Version,
-		"go ver":    goVer(),
+		"go ver":    semantic(),
 		"os":        fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
 		"exe":       binary(),
-		"date":      locBuildDate(Inf.Date),
+		"date":      localBuild(Inf.Date),
 		"git":       Inf.Commit,
 		"license":   fmt.Sprintf("LGPL-3.0 [https://www.gnu.org/licenses/lgpl-3.0.html]"),
 	}
@@ -106,7 +110,8 @@ func info() versionInfo {
 	return v
 }
 
-func locBuildDate(date string) string {
+// localBuild date of this binary executable.
+func localBuild(date string) string {
 	t, err := time.Parse(time.RFC3339, date)
 	if err != nil {
 		return date
