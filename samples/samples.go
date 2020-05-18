@@ -1,4 +1,4 @@
-package tests
+package samples
 
 import (
 	"bufio"
@@ -23,11 +23,11 @@ var perm os.FileMode = 0644
 const (
 	cp437hex = "\xCD\xB9\xB2\xCC\xCD" // `═╣░╠═`
 	utf      = "═╣ ░ ╠═"
-	newlines = "a\nb\nc...\n"
-	symbols  = `[☠|☮|♺]`
-	tabs     = "☠\tSkull and crossbones\n\n☮\tPeace symbol\n\n♺\tRecycling"
-	escapes  = "bell:\a,back:\b,tab:\t,form:\f,vertical:\v,quote:\""
-	digits   = "\xb0\260\u0170\U00000170"
+	Newlines = "a\nb\nc...\n"
+	Symbols  = `[☠|☮|♺]`
+	Tabs     = "☠\tSkull and crossbones\n\n☮\tPeace symbol\n\n♺\tRecycling"
+	Escapes  = "bell:\a,back:\b,tab:\t,form:\f,vertical:\v,quote:\""
+	Digits   = "\xb0\260\u0170\U00000170"
 
 	base = "rt_sample-"
 
@@ -42,6 +42,13 @@ const (
 
 // helpful references: How to convert from an encoding to UTF-8 in Go?
 // https://stackoverflow.com/questions/32518432/how-to-convert-from-an-encoding-to-utf-8-in-go
+
+// Clean removes the named file or directory.
+func Clean(name string) {
+	if err := os.RemoveAll(name); err != nil {
+		fmt.Fprintln(os.Stderr, "removing path:", err)
+	}
+}
 
 // CP437Decode decodes IBM Code Page 437 encoded text.
 func CP437Decode(s string) (result []byte, err error) {
@@ -197,12 +204,6 @@ func tempFile(name string) (path string) {
 		path = filepath.Join(os.TempDir(), name)
 	}
 	return path
-}
-
-func cleanFile(path string) {
-	if err := os.RemoveAll(path); err != nil {
-		fmt.Fprintln(os.Stderr, "removing path:", err)
-	}
 }
 
 // these are reminders of how to implement the encoders

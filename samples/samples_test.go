@@ -1,4 +1,4 @@
-package tests
+package samples
 
 import (
 	"fmt"
@@ -33,7 +33,7 @@ func ExampleCP437Encode() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	cleanFile(name)
+	Clean(name)
 	fmt.Print(len(t))
 	// Output: 8
 }
@@ -82,7 +82,7 @@ func ExampleSave() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	cleanFile(path)
+	Clean(path)
 	// Output:
 }
 
@@ -103,7 +103,7 @@ func ExampleBase64Decode() {
 
 func ExampleBase64Encode() {
 	const name = base + "newlines.txt"
-	b := Base64Encode(newlines)
+	b := Base64Encode(Newlines)
 	r, err := Base64Decode(b)
 	if err != nil {
 		log.Fatal(err)
@@ -114,7 +114,7 @@ func ExampleBase64Encode() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	cleanFile(name)
+	Clean(name)
 	fmt.Printf("\nread:\t%q", t) //string(d))
 	// Output: source:	YQpiCmMuLi4K
 	// result:	"a\nb\nc...\n"
@@ -123,7 +123,7 @@ func ExampleBase64Encode() {
 
 func ExampleUTF8() {
 	const name = base + "utf8.txt"
-	result, _, err := UTF8(symbols)
+	result, _, err := UTF8(Symbols)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -132,14 +132,14 @@ func ExampleUTF8() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	cleanFile(name)
+	Clean(name)
 	fmt.Printf("%dB %s", len(t), t)
 	// Output: 14B [☠|☮|♺]
 }
 
 func ExampleUTF16BE() {
 	const name = base + "utf16be.txt"
-	result, _, err := UTF16BE(symbols)
+	result, _, err := UTF16BE(Symbols)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -148,14 +148,14 @@ func ExampleUTF16BE() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	cleanFile(name)
+	Clean(name)
 	fmt.Print(len(t))
 	// Output: 17
 }
 
 func ExampleUTF16LE() {
 	const name = base + "utf16le.txt"
-	result, _, err := UTF16LE(symbols)
+	result, _, err := UTF16LE(Symbols)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -164,7 +164,7 @@ func ExampleUTF16LE() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	cleanFile(name)
+	Clean(name)
 	fmt.Print(len(t))
 	// Output: 17
 }
@@ -212,10 +212,10 @@ func TestCP437Decode(t *testing.T) {
 	}{
 		{"empty", "", "", false},
 		{"hex", cp437hex, "═╣▓╠═", false},
-		{"nl", newlines, newlines, false},
-		{"utf", symbols, "[Γÿá|Γÿ«|ΓÖ║]", false},
-		{"escapes", escapes, `bell:,back:,tab:	,form:,vertical:,quote:"`, false},
-		{"digits", digits, "░░┼░┼░", false},
+		{"nl", Newlines, Newlines, false},
+		{"utf", Symbols, "[Γÿá|Γÿ«|ΓÖ║]", false},
+		{"escapes", Escapes, `bell:,back:,tab:	,form:,vertical:,quote:"`, false},
+		{"digits", Digits, "░░┼░┼░", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -242,7 +242,7 @@ func TestBase64Decode(t *testing.T) {
 		log.Fatal(err)
 	}
 	Save([]byte(EncodeANSI()), name)
-	cleanFile(name)
+	Clean(name)
 	match := (string(ansi) == raw)
 	if !match {
 		t.Errorf("Base64Decode() = %v, want %v", match, true)
