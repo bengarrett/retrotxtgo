@@ -35,22 +35,31 @@ func ReadAllBytes(name string) (data []byte, err error) {
 	return data, err
 }
 
-// ReadChunk reads a section of the named file and returns the result.
-// TODO: finish
-func ReadChunk(name string, size int) (data []byte, err error) {
+// ReadChunk reads and returns the start of the named file.
+func ReadChunk(name string, chars int) (data []byte, err error) {
 	file, err := os.Open(name)
 	if err != nil {
+		return nil, err
+	}
+	// bufio is the most performant
+	scanner := bufio.NewScanner(file)
+	scanner.Split(bufio.ScanRunes)
+	count := 0
+	for scanner.Scan() {
+		count++
+		if count > chars {
+			break
+		}
+		data = append(data, scanner.Bytes()...)
+	}
+	if err = scanner.Err(); err != nil {
 		return data, err
 	}
-	defer file.Close()
-	read := bufio.NewReaderSize(file, size)
-	buf := make([]byte, size)
-	_, err = read.Read(buf)
-	if err != nil {
+	if err = file.Close(); err != nil {
 		return data, err
 	}
-	//seek logic goes here
-	return buf, err
+	err = scanner.Err()
+	return data, err
 }
 
 // ReadTail reads the named file from the offset position relative to the end of the file.
