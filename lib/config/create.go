@@ -20,7 +20,7 @@ func Create(ow bool) {
 		if _, err := os.Stat(p); os.IsNotExist(err) {
 			fmt.Println(p)
 			if err := os.MkdirAll(p, permDir); err != nil {
-				logs.ChkErr("", err)
+				logs.Check("", err)
 				os.Exit(exit + 2)
 			}
 		}

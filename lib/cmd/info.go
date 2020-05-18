@@ -35,9 +35,9 @@ var infoCmd = &cobra.Command{
 		}
 		if err := infoPrint(infoFilename, infoFormat); err != nil {
 			if fmt.Sprint(err) == "format:invalid" {
-				logs.ChkArg("format", config.Format.Info)
+				logs.CheckArg("format", config.Format.Info)
 			} else {
-				logs.ChkErr(fmt.Sprintf("--name=%s is invalid,", infoFilename), err)
+				logs.Check(fmt.Sprintf("--name=%s is invalid,", infoFilename), err)
 			}
 		}
 	},

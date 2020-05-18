@@ -106,7 +106,7 @@ func (d Detail) JSON(indent bool) (js []byte) {
 	default:
 		js, err = json.Marshal(d)
 	}
-	logs.Check(logs.Err{Issue: "could not create", Arg: "json", Msg: err})
+	logs.ChkErr(logs.Err{Issue: "could not create", Arg: "json", Msg: err})
 	return js
 }
 

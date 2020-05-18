@@ -18,7 +18,7 @@ package main
 
 import (
 	"github.com/bengarrett/retrotxtgo/lib/cmd"
-	v "github.com/bengarrett/retrotxtgo/lib/version"
+	ver "github.com/bengarrett/retrotxtgo/lib/version"
 )
 
 // GoReleaser ldflags flags
@@ -29,8 +29,8 @@ var (
 )
 
 func main() {
-	v.Inf.Version = version
-	v.Inf.Commit = commit
-	v.Inf.Date = date
+	ver.B.Version = version
+	ver.B.Commit = commit
+	ver.B.Date = date
 	cmd.Execute()
 }

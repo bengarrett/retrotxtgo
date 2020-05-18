@@ -106,12 +106,12 @@ func (args Args) Serve(data []byte) {
 		// viper.GetInt() doesn't work as expected
 		port, err := strconv.Atoi(viper.GetString("create.server-port"))
 		if err != nil {
-			logs.ChkErr("create serve port:", err)
+			logs.Check("create serve port:", err)
 		}
 		p = uint(port)
 	}
 	if err := args.serveFile(data, p, false); err != nil {
-		logs.Check(logs.Err{Issue: "server problem", Arg: "HTTP", Msg: err})
+		logs.ChkErr(logs.Err{Issue: "server problem", Arg: "HTTP", Msg: err})
 	}
 }
 
@@ -124,7 +124,7 @@ func (args Args) serveFile(data []byte, port uint, test bool) error {
 	}
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if err = t.Execute(w, args.pagedata(data)); err != nil {
-			logs.Check(logs.Err{Issue: "serveFile", Arg: "http", Msg: err})
+			logs.ChkErr(logs.Err{Issue: "serveFile", Arg: "http", Msg: err})
 		}
 	})
 	fs := http.FileServer(http.Dir("static/"))

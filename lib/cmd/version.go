@@ -33,7 +33,7 @@ The shown ` + logs.Cc("RetroTxt URL") + ` is the weblink to the application Gith
 if it is launched through an operating system symlink.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if ok := versionPrint(viper.GetString("version.format")); !ok {
-			logs.ChkArg(fmt.Sprintf("--format=%s", versionFmt), config.Format.Version)
+			logs.CheckArg(fmt.Sprintf("--format=%s", versionFmt), config.Format.Version)
 		}
 	},
 }
@@ -45,7 +45,7 @@ func init() {
 		viper.GetString("version.format"),
 		"output format \noptions: "+config.Format.String("version"))
 	err := viper.BindPFlag("version.format", versionCmd.Flags().Lookup("format"))
-	logs.ChkErr("version.format", err)
+	logs.Check("version.format", err)
 }
 
 func versionPrint(format string) (ok bool) {

@@ -18,7 +18,7 @@ func Set(name string) {
 	// var i must be sorted in ascending order.
 	if i := sort.SearchStrings(keys, name); i == len(keys) || keys[i] != name {
 		err := fmt.Errorf("to see a list of usable settings, run: retrotxt config info")
-		logs.Check(logs.Err{Issue: "invalid flag", Arg: fmt.Sprintf("--name %s", name), Msg: err})
+		logs.ChkErr(logs.Err{Issue: "invalid flag", Arg: fmt.Sprintf("--name %s", name), Msg: err})
 	}
 	value := viper.GetString(name)
 	switch value {
@@ -92,7 +92,7 @@ func setGenerator() {
 	var name = "create.meta.generator"
 	// v{{.BuildVersion}}; {{.BuildDate}}
 	elm := fmt.Sprintf("<head>\n  <meta name=\"generator\" content=\"RetroTxt v%s, %s\">",
-		v.Inf.Version, v.Inf.Date)
+		v.B.Version, v.B.Date)
 	logs.ColorHTML(elm)
 	viper.Set(name, logs.PromptYN("Enable this element", viper.GetBool(name)))
 }

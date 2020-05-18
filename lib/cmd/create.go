@@ -55,7 +55,7 @@ var createCmd = &cobra.Command{
 				if cmd.Flags().NFlag() == 0 {
 					fmt.Printf("%s\n\n", cmd.Short)
 					err = cmd.Usage()
-					logs.ChkErr("create usage", err)
+					logs.Check("create usage", err)
 					os.Exit(0)
 				}
 				err = cmd.Usage()

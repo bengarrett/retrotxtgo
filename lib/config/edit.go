@@ -38,7 +38,7 @@ func Edit() {
 	} else {
 		edit = viper.GetString("editor")
 		if _, err := exec.LookPath(edit); err != nil {
-			logs.ChkErr("edit command not found", exec.ErrNotFound)
+			logs.Check("edit command not found", exec.ErrNotFound)
 			os.Exit(exit + 4)
 		} else {
 			editNotFound()

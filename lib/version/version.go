@@ -42,7 +42,7 @@ func JSON(indent bool) (data []byte) {
 	default:
 		data, err = json.Marshal(information())
 	}
-	logs.Check(logs.Err{Issue: "could not create", Arg: "json", Msg: err})
+	logs.ChkErr(logs.Err{Issue: "could not create", Arg: "json", Msg: err})
 	return data
 }
 

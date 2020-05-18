@@ -26,9 +26,9 @@ var configCmd = &cobra.Command{
 	Short: "Configure the settings for RetroTxt",
 	Run: func(cmd *cobra.Command, args []string) {
 		err := cmd.Usage()
-		logs.ChkErr("config usage:", err)
+		logs.Check("config usage:", err)
 		if len(args) != 0 || cmd.Flags().NFlag() != 0 {
-			logs.ChkArg("config", args)
+			logs.CheckArg("config", args)
 		}
 	},
 }
@@ -88,17 +88,17 @@ var configShellCmd = &cobra.Command{
 		case "bash", "bsh", "b":
 			lexer = "bash"
 			err = cmd.GenBashCompletion(&buf)
-			logs.ChkErr("shell bash", err)
+			logs.Check("shell bash", err)
 		case "powershell", "posh", "ps", "p":
 			lexer = "powershell"
 			err = cmd.GenPowerShellCompletion(&buf)
-			logs.ChkErr("shell powershell", err)
+			logs.Check("shell powershell", err)
 		case "zsh", "z":
 			lexer = "bash"
 			err = cmd.GenZshCompletion(&buf)
-			logs.ChkErr("shell zsh", err)
+			logs.Check("shell zsh", err)
 		default:
-			logs.Check(logs.Err{Issue: "the interpreter is not supported:",
+			logs.ChkErr(logs.Err{Issue: "the interpreter is not supported:",
 				Arg: configArgs.shell,
 				Msg: fmt.Errorf("options: %s", config.Format.String("shell"))})
 		}
@@ -128,12 +128,12 @@ func init() {
 		`the configuration path to edit in dot syntax (see examples)
 to see a list of names run: retrotxt config info`)
 	err = configSetCmd.MarkFlagRequired("name")
-	logs.ChkErr("name flag", err)
+	logs.Check("name flag", err)
 	// shell
 	configShellCmd.Flags().StringVarP(&configArgs.shell, "interpreter", "i", "",
 		"user shell to receive retrotxtgo auto-completions\nchoices: "+
 			logs.Ci(strings.Join(config.Format.Shell, ", ")))
 	err = configShellCmd.MarkFlagRequired("interpreter")
-	logs.ChkErr("interpreter flag", err)
+	logs.Check("interpreter flag", err)
 	configShellCmd.SilenceErrors = true
 }

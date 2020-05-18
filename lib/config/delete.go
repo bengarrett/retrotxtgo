@@ -20,7 +20,7 @@ func Delete() {
 	switch logs.PromptYN("Confirm the file deletion", false) {
 	case true:
 		if err := os.Remove(cfg); err != nil {
-			logs.Save(fmt.Errorf("config delete: could not remove %v %v", cfg, err))
+			logs.Log(fmt.Errorf("config delete: could not remove %v %v", cfg, err))
 		}
 		fmt.Println("The config is gone")
 	}

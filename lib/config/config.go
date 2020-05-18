@@ -94,9 +94,9 @@ func configExit(name string, suffix string) {
 // todo: writefile requires settings such as creating parent dirs
 func writeConfig(update bool) {
 	out, err := yaml.Marshal(viper.AllSettings())
-	logs.ChkErr("could not create: settings", err)
+	logs.Check("could not create: settings", err)
 	err = ioutil.WriteFile(Filepath(), out, perm)
-	logs.ChkErr("could not write: settings", err)
+	logs.Check("could not write: settings", err)
 	s := "Created a new"
 	if update {
 		s = "Updated the"

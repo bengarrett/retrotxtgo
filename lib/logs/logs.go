@@ -75,9 +75,25 @@ var (
 	}
 )
 
-// ChkArg returns instructions for invalid command arguments.
-// Todo: CheckArg
-func ChkArg(arg string, args []string) {
+// Check prints an error issue and message then exits the program.
+func Check(issue string, err error) {
+	if err != nil {
+		Exit(check(issue, err))
+	}
+}
+
+func check(issue string, err error) (msg string, code int) {
+	code = 1
+	if issue == "" {
+		msg = fmt.Sprintf("%s\n", err)
+	} else {
+		msg = fmt.Sprintf("%s %s\n", issue, err)
+	}
+	return msg, code
+}
+
+// CheckArg returns instructions for invalid command arguments.
+func CheckArg(arg string, args []string) {
 	if len(args) == 0 {
 		return
 	}
@@ -97,27 +113,8 @@ func checkArgument(arg string, args []string) (msg string, code int) {
 	return msg, code
 }
 
-// ChkErr prints an error issue and message then exits the program.
-// TODO: rename to Check
-func ChkErr(issue string, err error) {
-	if err != nil {
-		Exit(check(issue, err))
-	}
-}
-
-func check(issue string, err error) (msg string, code int) {
-	code = 1
-	if issue == "" {
-		msg = fmt.Sprintf("%s\n", err)
-	} else {
-		msg = fmt.Sprintf("%s %s\n", issue, err)
-	}
-	return msg, code
-}
-
-// Check prints an error message and exits the program.
-// TOOD: rename CheckErr
-func Check(e Err) {
+// ChkErr prints an error message and exits the program.
+func ChkErr(e Err) {
 	if e.Msg != nil {
 		Exit(e.check())
 	}
@@ -144,14 +141,15 @@ func colorhtml(elm *string) string {
 
 // Exit prints the message and causes the program to exit.
 func Exit(msg string, code int) {
-	if _, err := fmt.Println(msg); err != nil {
-		log.Fatalf("logs.exit println: %s", err)
+	i, err := fmt.Println(msg)
+	if err != nil {
+		log.Fatalf("logs.exit println at %dB: %s", i, err)
 	}
 	os.Exit(code)
 }
 
-// Save logs any errors and exits to the operating system with error code 1.
-func Save(err error) {
+// Log the error and exit to the operating system with the error code 1.
+func Log(err error) {
 	if err != nil {
 		save(err, "")
 		switch Panic {
@@ -164,7 +162,7 @@ func Save(err error) {
 	}
 }
 
-// save an error to the logs, optional path is available for unit tests.
+// save an error to the log directory, an optional path is available for unit tests.
 func save(err error, path string) (ok bool) {
 	if err == nil || fmt.Sprintf("%v", err) == "" {
 		return false
