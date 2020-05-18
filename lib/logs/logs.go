@@ -2,6 +2,7 @@ package logs
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -151,7 +152,11 @@ func Exit(msg string, code int) {
 // Log the error and exit to the operating system with the error code 1.
 func Log(err error) {
 	if err != nil {
-		save(err, "")
+		// save error to log file
+		if err := save(err, ""); err != nil {
+			log.Fatalf("%s %s", color.Danger.Sprint("!"), err)
+		}
+		// print error
 		switch Panic {
 		case true:
 			log.Println(fmt.Sprintf("error type: %T\tmsg: %v", err, err))
@@ -163,9 +168,9 @@ func Log(err error) {
 }
 
 // save an error to the log directory, an optional path is available for unit tests.
-func save(err error, path string) (ok bool) {
+func save(err error, path string) error {
 	if err == nil || fmt.Sprintf("%v", err) == "" {
-		return false
+		return errors.New("logs save: err value is nil")
 	}
 	// use UTC date and times in the log file
 	log.SetFlags(log.Ldate | log.Ltime | log.LUTC)
@@ -174,23 +179,19 @@ func save(err error, path string) (ok bool) {
 	}
 	p := filepath.Dir(path)
 	if _, e := os.Stat(p); os.IsNotExist(e) {
-		e2 := os.MkdirAll(p, permDir)
-		checkSave(e2)
+		if e := os.MkdirAll(p, permDir); e != nil {
+			return e
+		}
 	}
 	file, e := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, perm)
-	checkSave(e)
+	if e != nil {
+		return e
+	}
 	defer file.Close()
 	log.SetOutput(file)
 	log.Print(err)
 	log.SetOutput(os.Stderr)
-	return true
-}
-
-func checkSave(e error) {
-	if e != nil {
-		log.Printf("%s %s", color.Danger.Sprint("!"), e)
-		os.Exit(19)
-	}
+	return nil
 }
 
 // Filepath is the absolute path and filename of the error log file.
