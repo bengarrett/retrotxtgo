@@ -1,8 +1,10 @@
 package cmd
 
 import (
-	"path/filepath"
+	"log"
 	"testing"
+
+	"github.com/bengarrett/retrotxtgo/samples"
 )
 
 // move to cli
@@ -30,11 +32,16 @@ import (
 // 	}
 // }
 
-// Todo: move this to a test library that generates this file in a temp directory.
-// temp file will hardcode os.stat info and also remove itself after use.
-var hi = filepath.Clean("../../textfiles/hi.txt")
+var sampleFile = func() string {
+	path, err := samples.Save([]byte(samples.Tabs), "info_test.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return path
+}
 
 func Test_infoPrint(t *testing.T) {
+	tmp := sampleFile()
 	type args struct {
 		filename string
 		format   string
@@ -46,12 +53,12 @@ func Test_infoPrint(t *testing.T) {
 	}{
 		{"empty", args{"", ""}, true},
 		{"file not exist", args{"notexistingfile", "json"}, true},
-		{"invalid fmt", args{hi, "yaml"}, true},
-		{"color", args{hi, ""}, false},
-		{"json", args{hi, "json"}, false},
-		{"json.min", args{hi, "jm"}, false},
-		{"text", args{hi, "t"}, false},
-		{"xml", args{hi, "xml"}, false},
+		{"invalid fmt", args{tmp, "yaml"}, true},
+		{"color", args{tmp, ""}, false},
+		{"json", args{tmp, "json"}, false},
+		{"json.min", args{tmp, "jm"}, false},
+		{"text", args{tmp, "t"}, false},
+		{"xml", args{tmp, "xml"}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -60,4 +67,5 @@ func Test_infoPrint(t *testing.T) {
 			}
 		})
 	}
+	samples.Clean(tmp)
 }
