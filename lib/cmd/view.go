@@ -56,14 +56,14 @@ to quickly create a Cobra application.`,
 		}
 		// todo handle unchanged viewCodePage, where UTF8 encoding will be checked otherwise use
 		encoding, err := ianaindex.IANA.Encoding(viewCodePage)
-		CheckCodePage(ErrorFmt{"", viewCodePage, err})
+		//CheckCodePage(ErrorFmt{"", viewCodePage, err})
 		var d codepage.Set
 
 		data, err := filesystem.Read(viewFilename)
-		Check(ErrorFmt{"file open", viewFilename, err})
+		logs.ChkErr(logs.Err{"file open", viewFilename, err})
 
 		err = d.Transform(data, encoding)
-		Check(ErrorFmt{"Transform", "encoding", err})
+		logs.ChkErr(logs.Err{"Transform", "encoding", err})
 		d.SwapAll(true)
 		fmt.Printf("\n%s\n", d.Data)
 		// todo: make an --example that auto generates
@@ -84,11 +84,11 @@ var viewTableCmd = &cobra.Command{
 	Short: "display a table showing the codepage and all its characters",
 	Run: func(cmd *cobra.Command, args []string) {
 		encoding, err := ianaindex.IANA.Encoding(viewCodePage)
-		CheckCodePage(ErrorFmt{"", viewCodePage, err})
+		//CheckCodePage(ErrorFmt{"", viewCodePage, err})
 		cp, err := ianaindex.IANA.Name(encoding)
-		CheckCodePage(ErrorFmt{"", viewCodePage, err})
+		//CheckCodePage(ErrorFmt{"", viewCodePage, err})
 		table, err := codepage.Table(cp)
-		Check(ErrorFmt{"table", cp, err})
+		logs.ChkErr(logs.Err{"table", cp, err})
 		println(table)
 	},
 }

@@ -63,7 +63,7 @@ var createCmd = &cobra.Command{
 				FileMissingErr()
 			}
 			data, err = filesystem.Read(createFileName)
-			Check(ErrorFmt{"file is invalid", createFileName, err})
+			logs.ChkErr(logs.Err{"file is invalid", createFileName, err})
 		}
 		// check for a --save flag to save to files
 		// otherwise output is sent to stdout
