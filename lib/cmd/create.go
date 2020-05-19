@@ -33,7 +33,7 @@ var exampleCmd = func() string {
 	s := string(os.PathSeparator)
 	e := `  retrotxt create -n textfile.txt -t "Text file" -d "Some random text file"` +
 		fmt.Sprintf("\n  retrotxt create --name ~%sDownloads%stextfile.txt --layout mini --save .%shtml", s, s, s)
-	return cinf(e)
+	return logs.Cinf(e)
 }
 
 // createCmd represents the create command
@@ -84,7 +84,7 @@ func init() {
 		logs.Cp("text file to parse")+" (required)\n")
 	// main flags
 	createCmd.Flags().StringVarP(&createArgs.HTMLLayout, "layout", "l", def("create.layout"),
-		"output HTML layout\noptions: "+ci(create.Layouts()))
+		"output HTML layout\noptions: "+logs.Ci(create.Layouts()))
 	err := viper.BindPFlag("create.layout", createCmd.Flags().Lookup(("layout")))
 	CheckErr(err)
 	createCmd.Flags().StringVarP(&createArgs.Styles, "syntax-style", "c", "lovelace",

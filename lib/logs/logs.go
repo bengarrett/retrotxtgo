@@ -121,6 +121,19 @@ func checkArgument(arg string, args []string) (msg string, code int) {
 	return msg, code
 }
 
+// CheckNilArg returns instructions for empty command arguments.
+func CheckNilArg(arg string, args []string) {
+	if len(args) != 0 {
+		return
+	}
+	Exit(checkNilArgument(arg, args))
+}
+
+func checkNilArgument(arg string, args []string) (msg string, code int) {
+	msg += fmt.Sprintf("%s required argument%s cannot be empty and requires a value\n", Alert(), color.Bold.Sprintf(" %q", arg))
+	return msg, code
+}
+
 // ChkErr prints an error message and exits the program.
 func ChkErr(e Err) {
 	if e.Msg != nil {

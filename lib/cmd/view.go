@@ -7,6 +7,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/bengarrett/retrotxtgo/lib/codepage"
+	"github.com/bengarrett/retrotxtgo/lib/logs"
 
 	"golang.org/x/text/encoding/japanese"
 
@@ -94,9 +95,9 @@ var viewTableCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(viewCmd)
-	viewCmd.Flags().StringVarP(&viewFilename, "name", "n", "", cp("text file to display")+" (required)\n")
+	viewCmd.Flags().StringVarP(&viewFilename, "name", "n", "", logs.Cp("text file to display")+" (required)\n")
 	viewCmd.Flags().StringVarP(&viewCodePage, "codepage", "c", "cp437", "legacy character encoding used by the text file")
-	viewCmd.Flags().StringVarP(&viewFormat, "format", "f", "color", "output format, options: "+ci(viewFormats))
+	viewCmd.Flags().StringVarP(&viewFormat, "format", "f", "color", "output format, options: "+logs.Ci(viewFormats))
 	viewCmd.Flags().IntVarP(&viewWidth, "width", "w", 80, "document column character width")
 	// override ascii 0-F + 1-F || Control characters || IBM, ASCII, IBM+
 	// example flag showing CP437 table
@@ -118,8 +119,8 @@ func codepages() string {
 
 	var ii iana
 	var err error
-	fmt.Fprintln(w, cp("\nSupported legacy codepages and encodings"))
-	fmt.Fprintln(w, cf(strings.Repeat("\u2015", 40)))
+	fmt.Fprintln(w, logs.Cp("\nSupported legacy codepages and encodings"))
+	fmt.Fprintln(w, logs.Cf(strings.Repeat("\u2015", 40)))
 	fmt.Fprintf(w, "\ttitle\talias(s)\n")
 	c := append(charmap.All, japanese.All...)
 	for _, n := range c {
@@ -135,7 +136,7 @@ func codepages() string {
 		ii.mib, _ = ianaindex.MIB.Name(n)
 		ii.s = strings.Split(name, " ")
 		// display encoding name and alias
-		fmt.Fprintf(w, "\t%s\t%s", name, ci(ii.mib))
+		fmt.Fprintf(w, "\t%s\t%s", name, logs.Ci(ii.mib))
 		// create common use CP aliases
 		switch {
 		case ii.s[0] == "IBM":
@@ -151,16 +152,16 @@ func codepages() string {
 		case strings.EqualFold(strings.ReplaceAll(name, "-", " "), strings.ReplaceAll(ii.mime, "-", " ")):
 		case strings.ReplaceAll(name, "-", "") == strings.ReplaceAll(ii.mime, "-", ""):
 		case ii.mib == ii.mime:
-			fmt.Fprintf(w, "\t%s", cf(""))
+			fmt.Fprintf(w, "\t%s", logs.Cf(""))
 		default:
-			fmt.Fprintf(w, "\t%s", cf(ii.mime))
+			fmt.Fprintf(w, "\t%s", logs.Cf(ii.mime))
 		}
 		fmt.Fprint(w, "\n")
 	}
 	fmt.Fprint(w, "\ttitle\talias(s)\n")
-	fmt.Fprint(w, "\n"+cinf("*")+" Code Page 437 ("+cc("CP437")+") is commonly used by MS-DOS English text and ANSI art")
-	fmt.Fprint(w, "\n  ISO 8859-1 ("+cc("ISOLatin1")+") is found in legacy Internet, Unix and Amiga documents")
-	fmt.Fprint(w, "\n  Windows 1252 ("+cc("windows1252")+") is found in legacy English language Windows operating systems")
+	fmt.Fprint(w, "\n"+logs.Cinf("*")+" Code Page 437 ("+logs.Cc("CP437")+") is commonly used by MS-DOS English text and ANSI art")
+	fmt.Fprint(w, "\n  ISO 8859-1 ("+logs.Cc("ISOLatin1")+") is found in legacy Internet, Unix and Amiga documents")
+	fmt.Fprint(w, "\n  Windows 1252 ("+logs.Cc("windows1252")+") is found in legacy English language Windows operating systems")
 	w.Flush()
 	return buf.String()
 }

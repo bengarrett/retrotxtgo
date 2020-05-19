@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/spf13/cobra"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -24,40 +25,12 @@ var (
 
 	// rootCmd represents the base command when called without any subcommands
 	rootCmd = &cobra.Command{
-		Use:   "retrotxtgo",
+		Use:   "retrotxt",
 		Short: "RetroTxt is the tool that turns ANSI, ASCII, NFO text into browser ready HTML",
 		Long: `Turn many pieces of ANSI text art and ASCII/NFO plain text into HTML5 text
 using RetroTxt. The operating system agnostic tool that takes retro text
 files and stylises them into a more pleasing, useful format to view and
 copy in a web browser.`,
-	}
-)
-
-// color aliases
-var (
-	alert = func() string {
-		return color.Error.Sprint("problem:")
-	}
-	cc = func(t string) string {
-		return color.Comment.Sprint(t)
-	}
-	ce = func(t string) string {
-		return color.Warn.Sprint(t)
-	}
-	cf = func(t string) string {
-		return color.OpFuzzy.Sprint(t)
-	}
-	ci = func(t string) string {
-		return color.OpItalic.Sprint(t)
-	}
-	cinf = func(t string) string {
-		return color.Info.Sprint(t)
-	}
-	cp = func(t string) string {
-		return color.Primary.Sprint(t)
-	}
-	cs = func(t string) string {
-		return color.Success.Sprint(t)
 	}
 )
 
@@ -80,9 +53,9 @@ func InitDefaults() {
 
 // errorPrint returns a coloured error message.
 func (e *ErrorFmt) errorPrint() string {
-	ia := ci(fmt.Sprintf("%s%s", e.Issue, e.Arg))
-	m := cf(fmt.Sprintf(" %v", e.Msg))
-	return fmt.Sprintf("%s %s%s", alert(), ia, m)
+	ia := logs.Ci(fmt.Sprintf("%s%s", e.Issue, e.Arg))
+	m := logs.Cf(fmt.Sprintf(" %v", e.Msg))
+	return fmt.Sprintf("%s %s%s", logs.Alert(), ia, m)
 }
 
 // Check parses the ErrorFmt and will exit with a message if an error is found.
@@ -115,26 +88,11 @@ func CheckErr(err error) {
 	}
 }
 
-// errorPrint returns a coloured invalid flag message.
-func (e *ErrorFmt) errorFlag() string {
-	a := fmt.Sprintf("\"--%s %s\"", e.Issue, e.Arg)
-	m := cf(fmt.Sprintf(" valid %s values: %v", e.Issue, e.Msg))
-	return fmt.Sprintf("\n%s %s %s %s\n", alert(), ci("invalid flag"), a, m)
-}
-
-// CheckFlag exits with an invalid command flag value.
-func CheckFlag(e ErrorFmt) {
-	if e.Msg != nil {
-		println(e.errorFlag())
-		os.Exit(1)
-	}
-}
-
 // FileMissingErr exits with a missing FILE error.
 func FileMissingErr() {
-	i := ci("missing the --name flag")
-	m := cf("you need to provide a path to a text file")
-	fmt.Printf("\n%s %s %s\n", alert(), i, m)
+	i := logs.Ci("missing the --name flag")
+	m := logs.Cf("you need to provide a path to a text file")
+	fmt.Printf("\n%s %s %s\n", logs.Alert(), i, m)
 	os.Exit(1)
 }
 
@@ -166,7 +124,7 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file "+cf(fmt.Sprint("(default is $HOME/.retrotxtgo.yaml)")))
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file "+logs.Cf(fmt.Sprint("(default is $HOME/.retrotxtgo.yaml)")))
 }
 
 // initConfig reads in config file and ENV variables if set.

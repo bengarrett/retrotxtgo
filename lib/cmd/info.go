@@ -47,9 +47,9 @@ func init() {
 	InitDefaults()
 	rootCmd.AddCommand(infoCmd)
 	infoCmd.Flags().StringVarP(&infoFilename, "name", "n", "",
-		cp("text file to analyse")+" (required)\n")
+		logs.Cp("text file to analyse")+" (required)\n")
 	infoCmd.Flags().StringVarP(&infoFormat, "format", "f", viper.GetString("info.format"),
-		"output format \noptions: "+ci(config.Format.String("info")))
+		"output format \noptions: "+logs.Ci(config.Format.String("info")))
 	err := viper.BindPFlag("info.format", infoCmd.Flags().Lookup("format"))
 	CheckErr(err)
 	infoCmd.Flags().SortFlags = false

@@ -76,8 +76,9 @@ var configSetCmd = &cobra.Command{
 }
 
 var configShellCmd = &cobra.Command{
-	Use:   "shell",
-	Short: "Apply autocompletion a terminal shell",
+	Use:     "shell",
+	Short:   "Apply autocompletion a terminal shell",
+	Example: "  retrotxt config shell --interpreter string [flags]",
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
 			buf   bytes.Buffer
@@ -122,7 +123,7 @@ func init() {
 		"overwrite any existing config file")
 	// info
 	configInfoCmd.Flags().StringVarP(&configArgs.style, "syntax-style", "c", "monokai",
-		"config syntax highligher, use "+ci("none")+" to disable")
+		"config syntax highligher, use "+logs.Ci("none")+" to disable")
 	// set
 	configSetCmd.Flags().StringVarP(&configArgs.name, "name", "n", "",
 		`the configuration path to edit in dot syntax (see examples)
