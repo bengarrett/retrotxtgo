@@ -24,13 +24,15 @@ func promptCheck(prompts int) {
 
 // PromptPort asks for and returns a HTTP port value.
 func PromptPort(validate bool) (port uint) {
+	return pport(os.Stdin, validate)
+}
+
+func pport(r io.Reader, validate bool) (port uint) {
 	input, prompts := "", 0
-	for {
-		input = ""
+	scanner := bufio.NewScanner(r)
+	for scanner.Scan() {
 		prompts++
-		if i, err := fmt.Scanln(&input); err != nil {
-			log.Fatalf("logs.promptport scanln at %d: %s", i, err)
-		}
+		input = scanner.Text()
 		if input == "" {
 			promptCheck(prompts)
 			continue
@@ -51,6 +53,7 @@ func PromptPort(validate bool) (port uint) {
 		}
 		return port
 	}
+	return 0
 }
 
 // PortValid checks if the network port is within range to serve HTTP.
