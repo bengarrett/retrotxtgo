@@ -117,7 +117,7 @@ func setString(name string) {
 }
 
 func setStrings(name string, data []string) {
-	save(name, logs.PromptStrings(data))
+	save(name, logs.PromptStrings(&data))
 }
 
 func save(name string, value interface{}) {
