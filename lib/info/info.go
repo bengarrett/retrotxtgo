@@ -55,7 +55,7 @@ type File struct {
 // FileDate is a non-standard date format for file modifications
 const FileDate string = "2 Jan 15:04 2006"
 
-// Read opens and returns the details of a file.
+// Read returns the operating system and meta detail of a named file.
 func (d *Detail) Read(name string) (err error) {
 	// Get the file details
 	stat, err := os.Stat(name)
@@ -80,7 +80,7 @@ func (d *Detail) parse(data []byte, stat os.FileInfo) (err error) {
 	d.CharCount = runewidth.StringWidth(string(data))
 	d.Name = stat.Name()
 	d.MD5 = fmt.Sprintf("%x", md5sum)
-	d.Modified = stat.ModTime()
+	d.Modified = stat.ModTime().UTC()
 	d.Slug = slugify.Slugify(stat.Name())
 	d.SHA256 = fmt.Sprintf("%x", sha256)
 	d.Utf8 = codepage.UTF8(data)
@@ -126,7 +126,7 @@ func (d Detail) Text(color bool) string {
 		{k: "UTF-8", v: fmt.Sprintf("%v", d.Utf8)},
 		{k: "characters", v: fmt.Sprintf("%v", d.CharCount)},
 		{k: "size", v: d.Size},
-		{k: "modified", v: fmt.Sprintf("%v", d.Modified.Format(FileDate))},
+		{k: "modified", v: fmt.Sprintf("%v", d.Modified.UTC().Format(FileDate))},
 		{k: "MD5 checksum", v: d.MD5},
 		{k: "SHA256 checksum", v: d.SHA256},
 		{k: "MIME type", v: d.Mime},

@@ -3,30 +3,39 @@ package info
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
-	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
+	"time"
+
+	"github.com/bengarrett/retrotxtgo/samples"
 )
 
-// Todo: move this to a test library that generates this file in a temp directory.
-// temp file will hardcode os.stat info and also remove itself after use.
-var hi = filepath.Clean("../../textfiles/hi.txt")
+var sampleFile = func() string {
+	path, err := samples.Save([]byte(samples.Tabs), "info_test.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return path
+}
 
 func Test_File(t *testing.T) {
+	tmp := sampleFile()
 	var got Detail
-	err := got.Read(hi)
+	err := got.Read(tmp)
 	if err != nil {
 		t.Errorf("Read() = %v, want %v", err, nil)
 	}
-	if got.Bytes != 40 {
-		t.Errorf("Read() = %v, want %v", got.Bytes, 40)
+	if got.Bytes != 57 {
+		t.Errorf("Read() = %v, want %v", got.Bytes, 57)
 	}
-	if got.Name != "hi.txt" {
-		t.Errorf("Read() = %v, want %v", got.Name, "hi.txt")
+	if got.Name != "info_test.txt" {
+		t.Errorf("Read() = %v, want %v", got.Name, "info_test.txt")
 	}
-	if got.Slug != "hi-txt" {
-		t.Errorf("Read() = %v, want %v", got.Slug, "hi-txt")
+	if got.Slug != "info-test-txt" {
+		t.Errorf("Read() = %v, want %v", got.Slug, "info-test-txt")
 	}
 	if got.Mime != "text/plain" {
 		t.Errorf("Read() = %v, want %v", got.Mime, "text/plain")
@@ -34,14 +43,16 @@ func Test_File(t *testing.T) {
 	if got.Utf8 != true {
 		t.Errorf("Read() = %v, want %v", got.Utf8, true)
 	}
-	const want = "1b466b6448d7ff10e2f8f7160d936987"
+	const want = "de7254885365bfd7f44291706d844a56"
 	if got.MD5 != want {
 		t.Errorf("Read() = %v, want %v", got.MD5, want)
 	}
+	samples.Clean(tmp)
 }
 
 func Test_parse(t *testing.T) {
-	f, err := os.Stat(hi)
+	tmp := sampleFile()
+	f, err := os.Stat(tmp)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -73,6 +84,7 @@ func Test_parse(t *testing.T) {
 			}
 		})
 	}
+	samples.Clean(tmp)
 }
 
 func Test_JSON(t *testing.T) {
@@ -95,39 +107,35 @@ func Test_JSON(t *testing.T) {
 }
 
 func Test_Text(t *testing.T) {
+	tmp := sampleFile()
 	var d Detail
-	err := d.Read(hi)
+	err := d.Read(tmp)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	want := 491
+	want := 506
 	if got := len(d.Text(false)); got != want {
 		t.Errorf("Text() = %v, want %v", got, want)
+	}
+	samples.Clean(tmp)
+}
+
+func millennia(name string) {
+	mtime := time.Date(2000, time.January, 1, 0, 0, 0, 0, time.UTC)
+	if err := os.Chtimes(name, mtime, mtime); err != nil {
+		log.Fatal(err)
 	}
 }
 
 func ExampleDetail_XML() {
+	tmp := sampleFile()
+	millennia(tmp)
 	var file Detail
-	file.Read(hi)
+	file.Read(tmp)
 	data, _ := file.XML()
-	fmt.Printf("%s", data)
-	// Output:
-	// <file id="hi-txt">
-	// 	<name>hi.txt</name>
-	// 	<content>
-	// 		<mime>text/plain</mime>
-	// 		<utf8>true</utf8>
-	// 	</content>
-	// 	<size>
-	// 		<bytes>40</bytes>
-	// 		<value>40 bytes</value>
-	// 		<character-count>22</character-count>
-	// 	</size>
-	// 	<checksum>
-	// 		<md5>1b466b6448d7ff10e2f8f7160d936987</md5>
-	// 		<sha256>3ec92fce657848240c9f9eb6887dbf49a6331ac071759440c41396248ca501fb</sha256>
-	// 	</checksum>
-	// 	<modified>2019-12-03T23:04:45.1715585+11:00</modified>
-	// </file>
+	samples.Clean(tmp)
+	s := strings.ReplaceAll(string(data), "\t", "")
+	fmt.Printf("%q", strings.ReplaceAll(s, "\n", ""))
+	// Output:"<file id=\"info-test-txt\"><name>info_test.txt</name><content><mime>text/plain</mime><utf8>true</utf8></content><size><bytes>57</bytes><value>57 bytes</value><character-count>44</character-count></size><checksum><md5>de7254885365bfd7f44291706d844a56</md5><sha256>31d202a7e7c6dcc7743970d65d525d32bc9298f1236ef8e4d4abe058ae4d1c51</sha256></checksum><modified>2000-01-01T00:00:00Z</modified></file>"
 }
