@@ -63,7 +63,11 @@ func PortValid(port uint) (ok bool) {
 
 // PromptString asks for and returns a multi-word string.
 func PromptString() (words string) {
-	scanner := bufio.NewScanner(os.Stdin)
+	return pstring(os.Stdin)
+}
+
+func pstring(r io.Reader) (words string) {
+	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		words := scanner.Text()
 		switch words {
@@ -79,27 +83,40 @@ func PromptString() (words string) {
 	return words
 }
 
-// PromptStrings asks for and returns a single choice from a collection of keys.
-func PromptStrings(keys []string) (key string) {
+type keys []string
+
+// PromptStrings asks for and returns a single choice from a string of keys.
+func PromptStrings(options *[]string) (key string) {
+	var k keys = *options
+	return k.prompt(os.Stdin)
+}
+
+func (k keys) validate(key string) (ok bool) {
+	if key == "" {
+		return false
+	}
+	sort.Strings(k)
+	var i = sort.SearchStrings(k, key)
+	if i >= len(k) || k[i] != key {
+		fmt.Printf("%s %v\n", Ce("✗"), key)
+		return false
+	}
+	return true
+}
+
+func (k keys) prompt(r io.Reader) (key string) {
 	prompts := 0
-	for {
-		key = ""
+	scanner := bufio.NewScanner(r)
+	for scanner.Scan() {
 		prompts++
-		if i, err := fmt.Scanln(&key); err != nil {
-			log.Fatalf("logs.promptstrings scanln at %d: %s", i, err)
-		}
-		if key == "" {
-			promptCheck(prompts)
-			continue
-		}
-		var i = sort.SearchStrings(keys, key)
-		if i >= len(keys) || keys[i] != key {
-			fmt.Printf("%s %v\n", Ce("✗"), key)
+		key = scanner.Text()
+		if !k.validate(key) {
 			promptCheck(prompts)
 			continue
 		}
 		return key
 	}
+	return ""
 }
 
 // PromptYN asks for a yes or no input.
