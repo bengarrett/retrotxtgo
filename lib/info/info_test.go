@@ -14,7 +14,8 @@ import (
 var hi = filepath.Clean("../../textfiles/hi.txt")
 
 func Test_File(t *testing.T) {
-	got, err := Read(hi)
+	var got Detail
+	err := got.Read(hi)
 	if err != nil {
 		t.Errorf("Read() = %v, want %v", err, nil)
 	}
@@ -61,7 +62,8 @@ func Test_parse(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := parse(tt.args.data, tt.args.stat)
+			var got Detail
+			err := got.parse(tt.args.data, tt.args.stat)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parse() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -93,7 +95,8 @@ func Test_JSON(t *testing.T) {
 }
 
 func Test_Text(t *testing.T) {
-	d, err := Read(hi)
+	var d Detail
+	err := d.Read(hi)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -105,7 +108,8 @@ func Test_Text(t *testing.T) {
 }
 
 func ExampleDetail_XML() {
-	file, _ := Read(hi)
+	var file Detail
+	file.Read(hi)
 	data, _ := file.XML()
 	fmt.Printf("%s", data)
 	// Output:

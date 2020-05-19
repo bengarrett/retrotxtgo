@@ -56,8 +56,8 @@ func init() {
 }
 
 func infoPrint(filename, format string) (err error) {
-	d, err := info.Read(filename)
-	if err != nil {
+	var d info.Detail
+	if err := d.Read(filename); err != nil {
 		return err
 	}
 	switch format {

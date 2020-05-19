@@ -56,22 +56,22 @@ type File struct {
 const FileDate string = "2 Jan 15:04 2006"
 
 // Read opens and returns the details of a file.
-func Read(name string) (d Detail, err error) {
+func (d *Detail) Read(name string) (err error) {
 	// Get the file details
 	stat, err := os.Stat(name)
 	if err != nil {
-		return d, err
+		return err
 	}
 	// Read file content
 	data, err := filesystem.ReadAllBytes(name)
 	if err != nil {
-		return d, err
+		return err
 	}
-	return parse(data, stat)
+	return d.parse(data, stat)
 }
 
 // parse fileinfo and file content.
-func parse(data []byte, stat os.FileInfo) (d Detail, err error) {
+func (d *Detail) parse(data []byte, stat os.FileInfo) (err error) {
 	md5sum := md5.Sum(data)
 	sha256 := sha256.Sum256(data)
 	mime := mimesniffer.Sniff(data)
@@ -94,7 +94,7 @@ func parse(data []byte, stat os.FileInfo) (d Detail, err error) {
 	} else {
 		d.Mime = mime
 	}
-	return d, err
+	return err
 }
 
 // JSON format and returns the details of a file.
