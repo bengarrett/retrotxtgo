@@ -127,11 +127,10 @@ func Test_serveFile(t *testing.T) {
 	}
 }
 func Test_writeFile(t *testing.T) {
-	a := Args{HTMLLayout: "standard"}
+	a := Args{HTMLLayout: "standard", Test: true}
 	type args struct {
 		data []byte
 		name string
-		test bool
 	}
 	tmpFile := path.Join(os.TempDir(), "retrotxtgo_create_test.txt")
 	tests := []struct {
@@ -139,16 +138,16 @@ func Test_writeFile(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{"no data", args{[]byte(""), "", true}, true},
-		{"invalid", args{[]byte("abc"), "this-is-an-invalid-path", true}, true},
-		{"tempDir", args{[]byte("abc"), tmpFile, true}, true},
-		{"homeDir", args{[]byte("abc"), "~", true}, false},
-		{"currentDir", args{[]byte("abc"), ".", true}, false},
-		{"path as name", args{[]byte("abc"), os.TempDir(), true}, false},
+		{"no data", args{[]byte(""), ""}, true},
+		{"invalid", args{[]byte("abc"), "this-is-an-invalid-path"}, true},
+		{"tempDir", args{[]byte("abc"), tmpFile}, true},
+		{"homeDir", args{[]byte("abc"), "~"}, false},
+		{"currentDir", args{[]byte("abc"), "."}, false},
+		{"path as name", args{[]byte("abc"), os.TempDir()}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := a.File(tt.args.data, tt.args.name, tt.args.test); (err != nil) != tt.wantErr {
+			if err := a.File(tt.args.data, tt.args.name); (err != nil) != tt.wantErr {
 				t.Errorf("writeFile() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
