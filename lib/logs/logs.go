@@ -30,6 +30,9 @@ type Err struct {
 }
 
 func (e Err) String() string {
+	if e.Msg == nil {
+		return ""
+	}
 	issue := Ci(fmt.Sprintf("%s %s,", e.Issue, e.Arg))
 	msg := Cf(fmt.Sprintf("%v", e.Msg))
 	return fmt.Sprintf("%s %s %s", Alert(), issue, msg)
@@ -77,14 +80,18 @@ var (
 )
 
 // Check prints an error issue and message then exits the program.
-func Check(issue string, err error) {
+func Check(issue string, err error) (ok bool) {
 	if err != nil {
 		Exit(check(issue, err))
 	}
+	return true
 }
 
 func check(issue string, err error) (msg string, code int) {
 	code = 1
+	if err == nil {
+		err = errors.New("")
+	}
 	if issue == "" {
 		msg = fmt.Sprintf("%s\n", err)
 	} else {
@@ -136,6 +143,9 @@ func colorhtml(elm *string) string {
 	var buf bytes.Buffer
 	if err := quick.Highlight(&buf, *elm, "html", "terminal256", "lovelace"); err != nil {
 		return fmt.Sprintf("\n%s\n", *elm)
+	}
+	if len(buf.String()) == 0 {
+		return ""
 	}
 	return fmt.Sprintf("\n%v\n", buf.String())
 }
