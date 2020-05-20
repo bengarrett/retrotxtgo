@@ -60,6 +60,7 @@ var configDeleteCmd = &cobra.Command{
 var configEditCmd = &cobra.Command{
 	Use:   "edit",
 	Short: "Edit the config file",
+	// TODO: add information on configuring an editor
 	Run: func(cmd *cobra.Command, args []string) {
 		if e := config.Edit(); e.Err != nil {
 			e.Exit(1)
