@@ -18,8 +18,10 @@ func Create(name string, ow bool) (err error) {
 	}
 	if _, err := os.Stat(name); !os.IsNotExist(err) && !ow {
 		configDoesExist(cmdPath, "create")
+	} else if os.IsNotExist(err) {
+		// a missing named file is okay
 	} else if err != nil {
-		return fmt.Errorf("config create: %s", err)
+		return err
 	}
 	// create a new config file
 	path, err := filesystem.Touch(name)
