@@ -103,7 +103,7 @@ func (args Args) Serve(data []byte) {
 		// viper.GetInt() doesn't work as expected
 		port, err := strconv.Atoi(viper.GetString("create.server-port"))
 		if err != nil {
-			logs.Check("create serve port:", err)
+			logs.Check("create serve port", err)
 		}
 		p = uint(port)
 	}

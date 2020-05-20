@@ -28,7 +28,7 @@ func Execute() {
 	rootCmd.SilenceErrors = true // set to false to debug
 	if err := rootCmd.Execute(); err != nil {
 		if len(os.Args) <= 2 {
-			logs.Check("rootcmd usage:",
+			logs.Check("rootcmd usage",
 				rootCmd.Usage())
 		}
 		rootErr := logs.CmdErr{Args: os.Args[1:], Err: err}

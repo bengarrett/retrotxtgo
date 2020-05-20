@@ -16,6 +16,8 @@ func Delete() {
 	}
 	if _, err := os.Stat(cfg); os.IsNotExist(err) {
 		configMissing(cmdPath, "delete")
+	} else if err != nil {
+		logs.Check("config delete", err)
 	}
 	PrintLocation()
 	switch logs.PromptYN("Confirm the file deletion", false) {
