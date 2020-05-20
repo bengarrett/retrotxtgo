@@ -86,3 +86,6 @@ func (e ConfigErr) String() string {
 		Arg:   e.FileUsed,
 		Msg:   e.Err}).String()
 }
+
+type HelpErr struct {
+}

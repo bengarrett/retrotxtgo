@@ -109,8 +109,21 @@ func Runes(name string) (count int, err error) {
 	return count, err
 }
 
+func dir(name string) (path string, err error) {
+	path = filepath.Dir(name)
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		err = os.MkdirAll(path, 0700)
+	}
+	return path, err
+}
+
 // Save bytes to a named file location.
 func Save(b []byte, name string) (path string, err error) {
+	path, err = dir(name)
+	if err != nil {
+		return path, err
+	}
+	path = name
 	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600) // TODO: make var
 	if err != nil {
 		return path, err

@@ -86,8 +86,8 @@ func Filepath() (dir string) {
 
 // configExit prints an error notice and exits.
 func configExit(name string, suffix string) {
-	cmd := strings.TrimSuffix(name, suffix) + "create"
-	fmt.Printf("No config file is in use.\nTo create run: %s\n", logs.Cp(cmd))
+	cmd := strings.TrimSuffix(name, suffix) + " create"
+	fmt.Printf("No config file is in use.\nto create: %s\n", logs.Cp(cmd))
 	os.Exit(exit + 1)
 }
 

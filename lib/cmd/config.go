@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -38,7 +39,9 @@ var configCreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create a new config file",
 	Run: func(cmd *cobra.Command, args []string) {
-		config.Create(viper.ConfigFileUsed(), configArgs.ow) // TODO: test this supports --config
+		if err := config.Create(viper.ConfigFileUsed(), configArgs.ow); err != nil {
+			log.Fatalln(err) // TODO: colorize
+		}
 	},
 }
 

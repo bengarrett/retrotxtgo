@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/spf13/viper"
@@ -29,10 +30,11 @@ func InitDefaults() {
 // SetConfig reads and loads a configuration file.
 func SetConfig(configFlag string) {
 	viper.SetConfigType("yaml")
-	if configFlag == "" {
-		configFlag = Filepath()
+	var configPath = Filepath()
+	if configFlag != "" {
+		configPath = configFlag
 	}
-	viper.SetConfigFile(configFlag)
+	viper.SetConfigFile(configPath)
 	if err := viper.ReadInConfig(); err != nil {
 		var e = logs.ConfigErr{
 			FileUsed: viper.ConfigFileUsed(),
@@ -44,7 +46,11 @@ func SetConfig(configFlag string) {
 				e.Err = errors.New("does not exist\n\t use the command: retrotxt config create --config=" + configFlag)
 				fmt.Println(e.String())
 				os.Exit(1)
-			} else {
+			} else if len(os.Args) > 2 {
+				switch strings.Join(os.Args[1:3], ".") {
+				case "config.create", "config.delete":
+					return
+				}
 				// auto-generate a new, default config file
 				Create(viper.ConfigFileUsed(), false)
 			}

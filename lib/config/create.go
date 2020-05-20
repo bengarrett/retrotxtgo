@@ -24,8 +24,7 @@ func Create(name string, ow bool) (err error) {
 	if err != nil {
 		return err
 	}
-	err = UpdateConfig(path, true)
-	return err
+	return UpdateConfig(path, true)
 }
 
 func configExist(name string, suffix string) {
