@@ -172,6 +172,7 @@ func colorhtml(elm *string) string {
 }
 
 // Exit prints the message and causes the program to exit.
+// TODO: make into an error method
 func Exit(msg string, code int) {
 	i, err := fmt.Println(msg)
 	if err != nil {

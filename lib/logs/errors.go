@@ -3,6 +3,7 @@ package logs
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -88,4 +89,26 @@ func (e ConfigErr) String() string {
 }
 
 type HelpErr struct {
+}
+
+// IssueErr is a generic problem structure.
+type IssueErr struct {
+	Issue string
+	Err   error
+}
+
+func (i IssueErr) String() string {
+	if i.Err == nil {
+		return ""
+	}
+	if i.Issue == "" {
+		return fmt.Sprintf("%s", i.Err)
+	}
+	return fmt.Sprintf("%s %s\n         %s", Alert(), Ci(i.Issue), Cf(fmt.Sprint(i.Err)))
+}
+
+// Exit prints the IssueErr and causes the program to exit with the given status code.
+func (i IssueErr) Exit(code int) {
+	fmt.Println(i.String())
+	os.Exit(code)
 }

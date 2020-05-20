@@ -1,8 +1,8 @@
 package config
 
 import (
+	"errors"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"runtime"
@@ -12,48 +12,54 @@ import (
 )
 
 // Edit a configuration file.
-func Edit() {
-	cfg := viper.ConfigFileUsed()
-	if cfg == "" {
+func Edit() (err logs.IssueErr) {
+	var nf = logs.IssueErr{
+		Issue: "no suitable editor could be found",
+		Err:   errors.New("set one by creating an $EDITOR environment variable in your shell configuration"),
+	}
+	PrintLocation()
+	file := viper.ConfigFileUsed()
+	if file == "" {
 		configMissing(cmdPath, "edit")
 	}
 	var edit string
 	if err := viper.BindEnv("editor", "EDITOR"); err != nil {
-		editors := []string{"nano", "vim", "emacs"}
-		if runtime.GOOS == "windows" {
-			editors = append(editors, "notepad++.exe", "notepad.exe")
-		}
-		for _, editor := range editors {
-			if _, err := exec.LookPath(editor); err == nil {
-				edit = editor
-				break
-			}
-		}
-		if edit != "" {
-			fmt.Printf("There is no %s environment variable set so using: %s\n",
-				logs.Ci("EDITOR"), logs.Cp(edit))
-		} else {
-			editNotFound()
+		edit = lookEdit()
+		if edit == "" {
+			return nf
 		}
 	} else {
 		edit = viper.GetString("editor")
 		if _, err := exec.LookPath(edit); err != nil {
-			logs.Check("edit command not found", exec.ErrNotFound)
-			os.Exit(exit + 4)
-		} else {
-			editNotFound()
+			return logs.IssueErr{
+				Issue: "editor command failed",
+				Err:   err,
+			}
 		}
 	}
 	// credit: https://stackoverflow.com/questions/21513321/how-to-start-vim-from-go
-	exe := exec.Command(edit, cfg)
+	exe := exec.Command(edit, file)
 	exe.Stdin = os.Stdin
 	exe.Stdout = os.Stdout
 	if err := exe.Run(); err != nil {
-		fmt.Printf("%s\n", err)
+		return logs.IssueErr{
+			Issue: "failed to run editor" + fmt.Sprintf(" %q", edit),
+			Err:   err,
+		}
 	}
+	return logs.IssueErr{}
 }
 
-func editNotFound() {
-	log.Println("no suitable editor could be found\nplease set one by creating a $EDITOR environment variable in your shell configuration")
-	os.Exit(exit + 3)
+func lookEdit() (edit string) {
+	editors := []string{"nano", "micro", "vim", "emacs"}
+	if runtime.GOOS == "windows" {
+		editors = append(editors, "notepad++.exe", "notepad.exe")
+	}
+	for _, editor := range editors {
+		if _, err := exec.LookPath(editor); err == nil {
+			edit = editor
+			break
+		}
+	}
+	return edit
 }
