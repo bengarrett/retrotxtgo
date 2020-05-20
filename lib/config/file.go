@@ -33,7 +33,6 @@ func SetConfig(configFlag string) {
 		configFlag = Filepath()
 	}
 	viper.SetConfigFile(configFlag)
-
 	if err := viper.ReadInConfig(); err != nil {
 		var e = logs.ConfigErr{
 			FileUsed: viper.ConfigFileUsed(),
@@ -42,7 +41,7 @@ func SetConfig(configFlag string) {
 		if errors.Is(err, os.ErrNotExist) {
 			if configFlag != "" {
 				// require manual generation for custom config files
-				e.Err = errors.New("does not exist\n\t use the command: retrotxt config create --config")
+				e.Err = errors.New("does not exist\n\t use the command: retrotxt config create --config=" + configFlag)
 				fmt.Println(e.String())
 				os.Exit(1)
 			} else {
@@ -55,6 +54,8 @@ func SetConfig(configFlag string) {
 			os.Exit(1)
 		}
 	} else if configFlag != "" {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		fmt.Println(
+			logs.Cb(fmt.Sprintf("Config file: %s",
+				viper.ConfigFileUsed())))
 	}
 }

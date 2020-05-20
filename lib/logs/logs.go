@@ -40,6 +40,9 @@ var (
 	Alert = func() string {
 		return color.Error.Sprint("problem:")
 	}
+	Cb = func(t string) string {
+		return color.Secondary.Sprint(t)
+	}
 	Cc = func(t string) string {
 		return color.Comment.Sprint(t)
 	}
@@ -114,11 +117,12 @@ func checkArgument(arg string, args []string) (msg string, code int) {
 	msg += fmt.Sprintf("%s invalid argument%s", Alert(),
 		color.Bold.Sprintf(" %q", arg))
 	if len(args) > 1 {
-		msg += fmt.Sprintf(" choices: %s\n%s",
+		msg += fmt.Sprintf(", choices: %s\n%s",
 			color.Info.Sprintf("%s", strings.Join(args, ", ")),
-			color.Warn.Sprint("please use one of the argument choices shown above"))
+			color.Warn.Sprint("please use one of the ")+
+				color.Info.Sprint("argument choices")+
+				color.Warn.Sprint(" shown above"))
 	}
-	msg += "\n"
 	return msg, code
 }
 

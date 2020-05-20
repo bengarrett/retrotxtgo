@@ -26,28 +26,14 @@ func Create(name string, ow bool) (err error) {
 	}
 	err = UpdateConfig(path, true)
 	return err
-	//dir := filepath.Dir(name)
-	// if cfg := viper.ConfigFileUsed(); cfg != "" && !ow {
-	// 	if _, err := os.Stat(cfg); !os.IsNotExist(err) {
-	// 		configExist(cmdPath, "create")
-	// 	}
-	// 	p := filepath.Dir(cfg)
-	// 	if _, err := os.Stat(p); os.IsNotExist(err) {
-	// 		fmt.Println(p)
-	// 		if err := os.MkdirAll(p, permDir); err != nil {
-	// 			logs.Check("", err)
-	// 			os.Exit(exit + 2)
-	// 		}
-	// 	}
-	// }
-	//writeConfig(false) // TODO: return err?
 }
 
 func configExist(name string, suffix string) {
 	cmd := strings.TrimSuffix(name, suffix)
-	fmt.Printf("A config file already is in use: %s\n",
+	fmt.Printf("A config file exists: %s\n",
 		logs.Cf(viper.ConfigFileUsed()))
-	fmt.Printf("To edit it: %s\n", logs.Cp(cmd+"edit"))
-	fmt.Printf("To delete:  %s\n", logs.Cp(cmd+"delete"))
+	fmt.Printf("to edit it:\t%s\n", logs.Cp(cmd+" edit"))
+	fmt.Printf("   delete:\t%s\n", logs.Cp(cmd+" delete"))
+	fmt.Printf("   reset:\t%s\n", logs.Cp(cmd+" create --overwrite"))
 	os.Exit(exit + 1)
 }

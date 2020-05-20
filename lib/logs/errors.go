@@ -29,12 +29,20 @@ type CmdErr struct {
 }
 
 func (e CmdErr) Error() Err {
+	quote := func(s string) string {
+		return fmt.Sprintf("%q", s)
+	}
 	s := strings.Split(e.String(), " ")
+	l := len(s)
 	a := fmt.Sprintf("%q", e.Args[0])
 	switch strings.Join(s[0:2], " ") {
+	case "bad flag":
+		return Err{Issue: "flag syntax",
+			Arg: quote(s[l-1]),
+			Msg: errors.New("flags can only be in -s (short) or --long (long) form")}
 	case "flag needs":
 		return Err{Issue: "invalid flag",
-			Arg: a,
+			Arg: quote(s[l-1]),
 			Msg: errors.New("cannot be empty and requires a value")}
 	case "invalid argument":
 		m := strings.Split(fmt.Sprint(e.Err), ":")
