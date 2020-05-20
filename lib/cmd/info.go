@@ -37,8 +37,11 @@ var infoCmd = &cobra.Command{
 			if fmt.Sprint(err) == "format:invalid" {
 				logs.CheckArg("format", config.Format.Info)
 			} else {
-				logs.Check(fmt.Sprintf("--name=%s is invalid,", infoFilename), err)
+				//logs.CheckCmd(err)
 			}
+			// else {
+			// 	logs.Check(fmt.Sprintf("--name=%s is invalid,", infoFilename), err)
+			// }
 		}
 	},
 }

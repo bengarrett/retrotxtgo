@@ -48,13 +48,6 @@ func InitDefaults() {
 	viper.SetDefault("version.format", "color")
 }
 
-// errorPrint returns a coloured error message.
-func (e *ErrorFmt) errorPrint() string {
-	ia := logs.Ci(fmt.Sprintf("%s%s", e.Issue, e.Arg))
-	m := logs.Cf(fmt.Sprintf(" %v", e.Msg))
-	return fmt.Sprintf("%s %s%s", logs.Alert(), ia, m)
-}
-
 // CheckErr prints the error and exits.
 func CheckErr(err error) {
 	if err != nil {
@@ -74,8 +67,11 @@ func FileMissingErr() {
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
+	rootCmd.SilenceErrors = true
 	if err := rootCmd.Execute(); err != nil {
-		logs.CheckCmd(err)
+		rootCmd.Usage()
+		rootErr := logs.CmdErr{Args: os.Args[1:], Err: err}
+		fmt.Println(rootErr.Error().String())
 	}
 }
 
