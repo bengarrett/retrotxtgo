@@ -84,10 +84,11 @@ func Filepath() (dir string) {
 	return dir
 }
 
-// configExit prints an error notice and exits.
-func configExit(name string, suffix string) {
+// configMissing prints an error notice and exits.
+func configMissing(name string, suffix string) {
 	cmd := strings.TrimSuffix(name, suffix) + " create"
-	fmt.Printf("No config file is in use.\nto create: %s\n", logs.Cp(cmd))
+	fmt.Printf("%s no config file is in use\n create it: %s\n",
+		logs.Info(), logs.Cp(cmd))
 	os.Exit(exit + 1)
 }
 

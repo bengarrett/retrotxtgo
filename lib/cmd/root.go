@@ -25,9 +25,12 @@ copy in a web browser.`,
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	rootCmd.SilenceErrors = false // set to false to debug
+	rootCmd.SilenceErrors = true // set to false to debug
 	if err := rootCmd.Execute(); err != nil {
-		//rootCmd.Usage()
+		if len(os.Args) <= 2 {
+			logs.Check("rootcmd usage:",
+				rootCmd.Usage())
+		}
 		rootErr := logs.CmdErr{Args: os.Args[1:], Err: err}
 		fmt.Println(rootErr.Error().String())
 	}
@@ -37,7 +40,6 @@ func init() {
 	// OnInitialize will not run if no command is provided.
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVar(&configFlag, "config", "", "optional config file location")
-	//+			logs.Cf(fmt.Sprintf("(default is %s)", defaultConfig())))
 }
 
 func defaultConfig() string {

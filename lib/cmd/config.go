@@ -1,9 +1,13 @@
 package cmd
 
+/*
+fixes:
+1:  config create --config=honk.yml
+*/
+
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
@@ -15,8 +19,8 @@ import (
 )
 
 type configFlags struct {
-	name  string
 	ow    bool
+	set   string
 	shell string
 	style string
 }
@@ -25,7 +29,7 @@ var configArgs configFlags
 
 var configCmd = &cobra.Command{
 	Use:   "config",
-	Short: "Configure the settings for RetroTxt",
+	Short: "Configure and save settings for RetroTxt",
 	Run: func(cmd *cobra.Command, args []string) {
 		err := cmd.Usage()
 		logs.Check("config usage:", err)
@@ -37,10 +41,10 @@ var configCmd = &cobra.Command{
 
 var configCreateCmd = &cobra.Command{
 	Use:   "create",
-	Short: "Create a new config file",
+	Short: "Create a new or reset the config file",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := config.Create(viper.ConfigFileUsed(), configArgs.ow); err != nil {
-			log.Fatalln(err) // TODO: colorize
+			logs.Check("config create", err)
 		}
 	},
 }
@@ -75,7 +79,7 @@ var configSetCmd = &cobra.Command{
 	Example: `  --name create.meta.description # to change the meta description setting
   --name version.format          # to set the version command output format`,
 	Run: func(cmd *cobra.Command, args []string) {
-		config.Set(configArgs.name)
+		config.Set(configArgs.set)
 	},
 }
 
@@ -124,12 +128,12 @@ func init() {
 	configCmd.AddCommand(configSetCmd)
 	// create
 	configCreateCmd.Flags().BoolVarP(&configArgs.ow, "overwrite", "y", false,
-		"overwrite any existing config file")
+		"overwrite and reset the existing config file")
 	// info
 	configInfoCmd.Flags().StringVarP(&configArgs.style, "syntax-style", "c", "monokai",
 		"config syntax highligher, use "+logs.Ci("none")+" to disable")
 	// set
-	configSetCmd.Flags().StringVarP(&configArgs.name, "name", "n", "",
+	configSetCmd.Flags().StringVarP(&configArgs.set, "name", "n", "",
 		`the configuration path to edit in dot syntax (see examples)
 to see a list of names run: retrotxt config info`)
 	err = configSetCmd.MarkFlagRequired("name")

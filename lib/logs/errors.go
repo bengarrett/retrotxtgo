@@ -50,9 +50,9 @@ func (e CmdErr) Error() Err {
 			Arg: a,
 			Msg: errors.New(m[0])}
 	case "required flag(s)":
-		return Err{Issue: "a required flag missing",
-			Arg: a,
-			Msg: e.Err} // TODO: test
+		return Err{Issue: "a required flag is missing",
+			Arg: s[2],
+			Msg: errors.New("you must include this flag in your command")}
 	case "subcommand is":
 		fmt.Printf("SUBCMD DEBUG: %+v", e.Err)
 		return Err{} // ignore error

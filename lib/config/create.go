@@ -17,9 +17,11 @@ func Create(name string, ow bool) (err error) {
 		return errors.New("config create: name value cannot be empty")
 	}
 	if _, err := os.Stat(name); !os.IsNotExist(err) && !ow {
-		configExist(cmdPath, "create")
-		//return errors.New("config create: named file exists but overwrite (ow) is false")
+		configDoesExist(cmdPath, "create")
+	} else if err != nil {
+		return fmt.Errorf("config create: %s", err)
 	}
+	// create a new config file
 	path, err := filesystem.Touch(name)
 	if err != nil {
 		return err
@@ -27,12 +29,12 @@ func Create(name string, ow bool) (err error) {
 	return UpdateConfig(path, true)
 }
 
-func configExist(name string, suffix string) {
+func configDoesExist(name string, suffix string) {
 	cmd := strings.TrimSuffix(name, suffix)
-	fmt.Printf("A config file exists: %s\n",
-		logs.Cf(viper.ConfigFileUsed()))
-	fmt.Printf("to edit it:\t%s\n", logs.Cp(cmd+" edit"))
-	fmt.Printf("   delete:\t%s\n", logs.Cp(cmd+" delete"))
-	fmt.Printf("   reset:\t%s\n", logs.Cp(cmd+" create --overwrite"))
+	fmt.Printf("%s a config file exists: %s\n",
+		logs.Info(), logs.Cf(viper.ConfigFileUsed()))
+	fmt.Printf(" edit it: %s\n", logs.Cp(cmd+" edit"))
+	fmt.Printf("  delete: %s\n", logs.Cp(cmd+" delete"))
+	fmt.Printf("   reset: %s\n", logs.Cp(cmd+" create --overwrite"))
 	os.Exit(exit + 1)
 }

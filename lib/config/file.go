@@ -60,8 +60,13 @@ func SetConfig(configFlag string) {
 			os.Exit(1)
 		}
 	} else if configFlag != "" {
-		fmt.Println(
-			logs.Cb(fmt.Sprintf("Config file: %s",
-				viper.ConfigFileUsed())))
+		PrintLocation()
 	}
+}
+
+// PrintLocation prints the location of the current configuration file.
+func PrintLocation() {
+	fmt.Println(
+		logs.Cb(fmt.Sprintf("Config file: %s",
+			viper.ConfigFileUsed())))
 }

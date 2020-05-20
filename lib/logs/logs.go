@@ -40,6 +40,9 @@ var (
 	Alert = func() string {
 		return color.Error.Sprint("problem:")
 	}
+	Info = func() string {
+		return color.Info.Sprint("info:")
+	}
 	Cb = func(t string) string {
 		return color.Secondary.Sprint(t)
 	}
