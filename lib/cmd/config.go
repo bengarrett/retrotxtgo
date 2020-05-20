@@ -57,10 +57,21 @@ var configDeleteCmd = &cobra.Command{
 	},
 }
 
+var configEditor = func() string {
+	e := config.Editor()
+	if e == "" {
+		return ""
+	}
+	return fmt.Sprintf(" using %s", e)
+}
+
 var configEditCmd = &cobra.Command{
 	Use:   "edit",
-	Short: "Edit the config file",
-	// TODO: add information on configuring an editor
+	Short: fmt.Sprintf("Edit the config file%s", configEditor()),
+	Long: fmt.Sprintf("Edit the config file%s", configEditor()) +
+		"\n\nTo switch editors either:" +
+		"\n  Set one by creating or changing the $EDITOR environment variable in your shell configuration." +
+		"\n  Set an editor in the configuration file, retrotxt config set --name=editor",
 	Run: func(cmd *cobra.Command, args []string) {
 		if e := config.Edit(); e.Err != nil {
 			e.Exit(1)
