@@ -11,12 +11,18 @@ import (
 )
 
 // Info prints the content of a configuration file.
-func Info() {
-	println(logs.Cp("These are the default configurations used by the commands of RetroTxt when no flags are given.\n"))
-	sets, err := yaml.Marshal(viper.AllSettings())
-	logs.Check("read configuration yaml", err)
+func Info() (err logs.IssueErr) {
+	fmt.Println(logs.Cp("RetroTxt default configurations when no flags are given."))
+	PrintLocation()
+	sets, e := yaml.Marshal(viper.AllSettings())
+	if e != nil {
+		return logs.IssueErr{
+			Issue: "failed to read configuration in yaml syntax",
+			Err:   e,
+		}
+	}
 	if err := quick.Highlight(os.Stdout, string(sets), "yaml", "terminal256", infoStyles); err != nil {
 		fmt.Println(string(sets))
 	}
-	println()
+	return logs.IssueErr{}
 }

@@ -83,7 +83,9 @@ var configInfoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "View settings configured by the config",
 	Run: func(cmd *cobra.Command, args []string) {
-		config.Info()
+		if e := config.Info(); e.Err != nil {
+			e.Exit(1)
+		}
 	},
 }
 
