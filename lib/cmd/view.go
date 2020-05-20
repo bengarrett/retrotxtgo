@@ -56,14 +56,16 @@ to quickly create a Cobra application.`,
 		}
 		// todo handle unchanged viewCodePage, where UTF8 encoding will be checked otherwise use
 		encoding, err := ianaindex.IANA.Encoding(viewCodePage)
+		// TODO: check errors
 		//CheckCodePage(ErrorFmt{"", viewCodePage, err})
 		var d codepage.Set
 
 		data, err := filesystem.Read(viewFilename)
-		logs.ChkErr(logs.Err{"file open", viewFilename, err})
+		//logs.ChkErr(logs.Err{"file open", viewFilename, err})
 
 		err = d.Transform(data, encoding)
-		logs.ChkErr(logs.Err{"Transform", "encoding", err})
+		logs.Check("codepage", err) // TODO: replace
+		//logs.ChkErr(logs.Err{"Transform", "encoding", err})
 		d.SwapAll(true)
 		fmt.Printf("\n%s\n", d.Data)
 		// todo: make an --example that auto generates

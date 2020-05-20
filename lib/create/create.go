@@ -92,10 +92,7 @@ func (args Args) Save(data []byte, value string, changed bool) {
 		err = args.Stdout(data, false)
 	}
 	if err != nil {
-		// if err.Error() == errors.New("invalid-layout").Error() {
-		// 	CheckFlag(ErrorFmt{"layout", htmlLayout, fmt.Errorf(createLayouts())})
-		// }
-		// Check(ErrorFmt{"create error", ">", err})
+		// TODO: handle errors
 	}
 }
 

@@ -91,15 +91,21 @@ func configExit(name string, suffix string) {
 	os.Exit(exit + 1)
 }
 
-// todo: writefile requires settings such as creating parent dirs
-func writeConfig(update bool) {
+// UpdateConfig saves all viper settings to the named file.
+func UpdateConfig(name string, new bool) (err error) {
 	out, err := yaml.Marshal(viper.AllSettings())
-	logs.Check("could not create: settings", err)
-	err = ioutil.WriteFile(Filepath(), out, perm)
-	logs.Check("could not write: settings", err)
-	s := "Created a new"
-	if update {
-		s = "Updated the"
+	if err != nil {
+		return err
 	}
-	fmt.Printf("%s config file at: %s\n", s, logs.Cf(Filepath()))
+	err = ioutil.WriteFile(name, out, perm)
+	if err != nil {
+		return err
+	}
+	pre := "Created a new"
+	if !new {
+		pre = "Updated the"
+	}
+	path, _ := filepath.Abs(name)
+	fmt.Printf("%s config file at: %s\n", pre, logs.Cf(path))
+	return err
 }

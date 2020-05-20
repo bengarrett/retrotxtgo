@@ -4,6 +4,7 @@ package filesystem
 import (
 	"bufio"
 	"os"
+	"path/filepath"
 )
 
 // Read opens and returns the content of the named file.
@@ -106,4 +107,31 @@ func Runes(name string) (count int, err error) {
 		count++
 	}
 	return count, err
+}
+
+// Save bytes to a named file location.
+func Save(b []byte, name string) (path string, err error) {
+	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600) // TODO: make var
+	if err != nil {
+		return path, err
+	}
+	// bufio is the most performant
+	writer := bufio.NewWriter(file)
+	for _, c := range b {
+		if err = writer.WriteByte(c); err != nil {
+			return path, err
+		}
+	}
+	if err = writer.Flush(); err != nil {
+		return path, err
+	}
+	if err = file.Close(); err != nil {
+		return path, err
+	}
+	return filepath.Abs(file.Name())
+}
+
+// Touch creates an empty file at the named location.
+func Touch(name string) (path string, err error) {
+	return Save(nil, name)
 }

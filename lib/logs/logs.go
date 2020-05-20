@@ -63,6 +63,23 @@ var (
 	}
 )
 
+// FileMissingErr exits with a missing FILE error.
+// TODO: probably needs replacing
+func FileMissingErr() {
+	i := Ci("missing the --name flag")
+	m := Cf("you need to provide a path to a text file")
+	fmt.Printf("\n%s %s %s\n", Alert(), i, m)
+	os.Exit(1)
+}
+
+// ReCheck is a temp function used by cmd functions that will be replaced.
+func ReCheck(err error) {
+	if err != nil {
+		fmt.Printf("error: %s", err)
+		os.Exit(1)
+	}
+}
+
 // Check prints an error issue and message then exits the program.
 func Check(issue string, err error) (ok bool) {
 	if err != nil {

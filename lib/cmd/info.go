@@ -26,12 +26,12 @@ var infoCmd = &cobra.Command{
 			if cmd.Flags().NFlag() == 0 {
 				fmt.Printf("%s\n\n", cmd.Short)
 				err := cmd.Usage()
-				CheckErr(err)
+				logs.ReCheck(err)
 				os.Exit(0)
 			}
 			err := cmd.Usage()
-			CheckErr(err)
-			FileMissingErr()
+			logs.ReCheck(err)
+			logs.FileMissingErr()
 		}
 		if err := infoPrint(infoFilename, infoFormat); err != nil {
 			if fmt.Sprint(err) == "format:invalid" {
@@ -47,14 +47,14 @@ var infoCmd = &cobra.Command{
 }
 
 func init() {
-	InitDefaults()
+	logs.InitDefaults()
 	rootCmd.AddCommand(infoCmd)
 	infoCmd.Flags().StringVarP(&infoFilename, "name", "n", "",
 		logs.Cp("text file to analyse")+" (required)\n")
 	infoCmd.Flags().StringVarP(&infoFormat, "format", "f", viper.GetString("info.format"),
 		"output format \noptions: "+logs.Ci(config.Format.String("info")))
 	err := viper.BindPFlag("info.format", infoCmd.Flags().Lookup("format"))
-	CheckErr(err)
+	logs.ReCheck(err)
 	infoCmd.Flags().SortFlags = false
 }
 

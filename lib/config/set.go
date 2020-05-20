@@ -123,6 +123,6 @@ func setStrings(name string, data []string) {
 func save(name string, value interface{}) {
 	viper.Set(name, value)
 	fmt.Printf("%s %s is now set to \"%v\"\n", logs.Cs("✓"), logs.Cp(name), value)
-	writeConfig(true)
+	UpdateConfig(name, false)
 	os.Exit(0)
 }

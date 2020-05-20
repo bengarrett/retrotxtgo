@@ -65,3 +65,16 @@ func (e CmdErr) Error() Err {
 func (e CmdErr) String() string {
 	return fmt.Sprintf("%s", e.Err)
 }
+
+// ConfigErr ...
+type ConfigErr struct {
+	FileUsed string
+	Err      error
+}
+
+func (e ConfigErr) String() string {
+	return (Err{
+		Issue: "config file",
+		Arg:   e.FileUsed,
+		Msg:   e.Err}).String()
+}

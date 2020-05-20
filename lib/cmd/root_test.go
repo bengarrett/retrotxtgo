@@ -16,11 +16,11 @@ func TestInitDefaults(t *testing.T) {
 		{"layout", "create.layout", "standard"},
 		{"save dir", "create.save-directory", ""},
 	}
-	InitDefaults()
+	logs.InitDefaults()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := viper.GetString(tt.key); got != tt.want {
-				t.Errorf("InitDefaults() %v = %v, want %v", tt.key, got, tt.want)
+				t.Errorf("logs.InitDefaults() %v = %v, want %v", tt.key, got, tt.want)
 			}
 		})
 	}

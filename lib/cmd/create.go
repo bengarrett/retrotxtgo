@@ -59,8 +59,8 @@ var createCmd = &cobra.Command{
 					os.Exit(0)
 				}
 				err = cmd.Usage()
-				CheckErr(err)
-				FileMissingErr()
+				logs.ReCheck(err)
+				logs.FileMissingErr()
 			}
 			data, err = filesystem.Read(createFileName)
 			logs.ChkErr(logs.Err{"file is invalid", createFileName, err})
@@ -77,7 +77,7 @@ var createCmd = &cobra.Command{
 }
 
 func init() {
-	InitDefaults()
+	logs.InitDefaults()
 	rootCmd.AddCommand(createCmd)
 	// required flags
 	createCmd.Flags().StringVarP(&createFileName, "name", "n", "",
@@ -86,61 +86,61 @@ func init() {
 	createCmd.Flags().StringVarP(&createArgs.HTMLLayout, "layout", "l", def("create.layout"),
 		"output HTML layout\noptions: "+logs.Ci(create.Layouts()))
 	err := viper.BindPFlag("create.layout", createCmd.Flags().Lookup(("layout")))
-	CheckErr(err)
+	logs.ReCheck(err)
 	createCmd.Flags().StringVarP(&createArgs.Styles, "syntax-style", "c", "lovelace",
 		"HTML syntax highligher, use "+logs.Ci("none")+" to disable")
 	createCmd.Flags().StringVarP(&pageTitle, "title", "t", def("create.title"),
 		"defines the page title that is shown in a browser title bar or tab")
 	err = viper.BindPFlag("create.title", createCmd.Flags().Lookup("title"))
-	CheckErr(err)
+	logs.ReCheck(err)
 	createCmd.Flags().StringVarP(&metaDesc, "meta-description", "d", def("create.meta.description"),
 		"a short and accurate summary of the content of the page")
 	err = viper.BindPFlag("create.meta.description", createCmd.Flags().Lookup("meta-description"))
-	CheckErr(err)
+	logs.ReCheck(err)
 	createCmd.Flags().StringVarP(&metaAuthor, "meta-author", "a", def("create.meta.author"),
 		"defines the name of the page authors")
 	err = viper.BindPFlag("create.meta.author", createCmd.Flags().Lookup("meta-author"))
-	CheckErr(err)
+	logs.ReCheck(err)
 	// minor flags
 	createCmd.Flags().BoolVarP(&metaGenerator, "meta-generator", "g", viper.GetBool("create.meta.generator"),
 		"include the RetroTxt version and page generation date")
 	err = viper.BindPFlag("create.meta.generator", createCmd.Flags().Lookup("meta-generator"))
-	CheckErr(err)
+	logs.ReCheck(err)
 	createCmd.Flags().StringVar(&metaColorScheme, "meta-color-scheme", def("create.meta.color-scheme"),
 		"specifies one or more color schemes with which the page is compatible")
 	err = viper.BindPFlag("create.meta.color-scheme", createCmd.Flags().Lookup("meta-color-scheme"))
-	CheckErr(err)
+	logs.ReCheck(err)
 	createCmd.Flags().StringVar(&metaKeywords, "meta-keywords", def("create.meta.keywords"),
 		"words relevant to the page content")
 	err = viper.BindPFlag("create.meta.keywords", createCmd.Flags().Lookup("meta-keywords"))
-	CheckErr(err)
+	logs.ReCheck(err)
 	createCmd.Flags().StringVar(&metaReferrer, "meta-referrer", def("create.meta.referrer"),
 		"controls the Referer HTTP header attached to requests sent from the page")
 	err = viper.BindPFlag("create.meta.referrer", createCmd.Flags().Lookup("meta-referrer"))
-	CheckErr(err)
+	logs.ReCheck(err)
 	createCmd.Flags().StringVar(&metaThemeColor, "meta-theme-color", def("create.meta.theme-color"),
 		"indicates a suggested color that user agents should use to customize the display of the page")
 	err = viper.BindPFlag("create.meta.theme-color", createCmd.Flags().Lookup("meta-theme-color"))
-	CheckErr(err)
+	logs.ReCheck(err)
 	// output flags
 	// todo: when using save-directory config setting, there is no way to stdout using flags
 	// instead add an output flag with print, file|save
 	createCmd.Flags().StringVarP(&saveToFiles, "save", "s", def("create.save-directory"),
 		"save HTML as files to store this directory"+homeDir()+workingDir())
 	err = viper.BindPFlag("create.save-directory", createCmd.Flags().Lookup("save"))
-	CheckErr(err)
+	logs.ReCheck(err)
 	createCmd.Flags().BoolVarP(&createArgs.ServerFiles, "server", "p", false,
 		"serve HTML over an internal web server")
 	createCmd.Flags().IntVar(&createArgs.ServerPort, "port", viper.GetInt("create.server-port"),
 		"port which the internet web server will listen")
 	err = viper.BindPFlag("create.server-port", createCmd.Flags().Lookup("port"))
-	CheckErr(err)
+	logs.ReCheck(err)
 	// hidden flags
 	createCmd.Flags().StringVarP(&preText, "body", "b", "",
 		"override and inject string content into the body element")
 	// flag options
 	err = createCmd.Flags().MarkHidden("body")
-	CheckErr(err)
+	logs.ReCheck(err)
 	createCmd.Flags().SortFlags = false
 }
 

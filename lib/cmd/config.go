@@ -10,6 +10,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 type configFlags struct {
@@ -37,7 +38,7 @@ var configCreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create a new config file",
 	Run: func(cmd *cobra.Command, args []string) {
-		config.Create(configArgs.ow)
+		config.Create(viper.ConfigFileUsed(), configArgs.ow) // TODO: test this supports --config
 	},
 }
 
