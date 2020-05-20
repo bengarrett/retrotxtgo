@@ -102,11 +102,9 @@ func UpdateConfig(name string, new bool) (err error) {
 	if err != nil {
 		return err
 	}
-	pre := "Created a new"
+	PrintLocation()
 	if !new {
-		pre = "Updated the"
+		fmt.Println("The config is saved")
 	}
-	path, _ := filepath.Abs(name)
-	fmt.Printf("%s config file at: %s\n", pre, logs.Cf(path))
 	return err
 }
