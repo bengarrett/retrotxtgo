@@ -23,6 +23,19 @@ func (e Err) String() string {
 		Cf(fmt.Sprintf("%v", e.Msg)))              // error message
 }
 
+// Hint is a generic error type used to apply color to errors and offer a hint
+type Hint struct {
+	Issue string // Issue is a summary of the problem
+	Arg   string // Arg is the argument, flag or item that triggered the error
+	Msg   error  // Msg is the actual error generated
+	Hint  string // Hint is an optional solution such as a retrotxt command
+}
+
+func (h Hint) String() string {
+	e := Err{Issue: h.Issue, Arg: h.Arg, Msg: h.Msg}
+	return e.String() + fmt.Sprintf("\n         run %s", Example("retrotxt "+h.Hint))
+}
+
 // CmdErr is a root command error type to handle command arguments and flags
 type CmdErr struct {
 	Args []string // Command line arguments

@@ -1,61 +1,22 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
+	"text/tabwriter"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	v "github.com/bengarrett/retrotxtgo/lib/version"
 	"github.com/spf13/viper"
 )
 
-// Set edits and saves a setting within a configuration file.
-func Set(name string) {
-	keys := viper.AllKeys()
-	sort.Strings(keys)
-	// var i must be sorted in ascending order.
-	if i := sort.SearchStrings(keys, name); i == len(keys) || keys[i] != name {
-		err := fmt.Errorf("to see a list of usable settings, run: retrotxt config info")
-		logs.ChkErr(logs.Err{Issue: "invalid flag", Arg: fmt.Sprintf("--name %s", name), Msg: err})
-	}
-	value := viper.GetString(name)
-	switch value {
-	case "":
-		fmt.Printf("\n%s is currently disabled\n", logs.Cp(name))
-	default:
-		fmt.Printf("\n%s is currently set to %q\n", logs.Cp(name), value)
-	}
-	switch name {
-	case "create.layout":
-		fmt.Printf("Set a new value, choice: %s\n",
-			logs.Ci(createTemplates().String()))
-		setStrings(name, createTemplates().Strings())
-	case "info.format":
-		fmt.Printf("Set a new value, choice: %s\n",
-			logs.Ci(Format.String("info")))
-		setStrings(name, Format.Info)
-	case "version.format":
-		fmt.Printf("Set a new value, choice: %s\n",
-			logs.Ci(Format.String("version")))
-		setStrings(name, Format.Version)
-	case "create.server-port":
-		fmt.Printf("Set a new HTTP port, choices: %d-%d (recommended: %d)\n",
-			port.min, port.max, port.rec)
-		setPort(name)
-	case "create.meta.generator":
-		setGenerator()
-	default:
-		q := "Set a new value or leave blank to keep it disabled:"
-		setMeta(name, value)
-		if value != "" {
-			q = "Set a new value, leave blank to keep as-is or use a dash [-] to disable:"
-		}
-		fmt.Printf("\n%s \n", q)
-		setString(value)
-	}
-}
+type hints map[string]string
+
+type files map[string]string
 
 // createTemplates creates a map of the template filenames used in conjunction with the layout flag.
 func createTemplates() files {
@@ -86,6 +47,103 @@ func (f files) Strings() []string {
 	}
 	sort.Strings(s)
 	return s
+}
+
+// TODO: improve descriptions and use them for create --flag hints
+func list() hints {
+	pm, px, pr := strconv.Itoa(int(port.min)), strconv.Itoa(int(port.max)), strconv.Itoa(int(port.rec))
+	ports := logs.Cp(pm) + "-" + logs.Cp(px) + fmt.Sprintf(" (recommend: %s)", logs.Cp(pr))
+	return hints{
+		"create.layout": "HTML output layout, choices: " +
+			logs.Cp(createTemplates().String()),
+		"create.meta.author":       "defines the name of the page authors",
+		"create.meta.color-scheme": "specifies one or more color schemes with which the page is compatible",
+		"create.meta.description":  "a short and accurate summary of the content of the page",
+		"create.meta.generator":    "include the RetroTxt version and page generation date?",
+		"create.meta.keywords":     "words relevant to the page content",
+		"create.meta.referrer":     "controls the Referer HTTP header attached to requests sent from the page",
+		"create.meta.theme-color":  "indicates a suggested color that user agents should use to customize the display of the page",
+		"create.save-directory":    "directory that all HTML files get saved to",
+		"create.server-port":       "serve HTML over an internal web server, choices: " + ports,
+		"create.title":             "page title that is shown in a browser title bar or tab",
+		"editor":                   "set an text editor to launch when using " + logs.Example("config edit"),
+		"style.html":               "syntax highlighter for html previews",
+		"style.yaml":               "syntax highlighter for info and version commands",
+		// "info.style":               "",
+		// "version.style":            "",
+	}
+}
+
+// List all the available configurations that can be passed to the --name flag.
+func List() (err error) {
+	hints := list()
+	keys := viper.AllKeys()
+	sort.Strings(keys)
+	w := tabwriter.NewWriter(os.Stdout, 2, 2, 0, ' ', 0)
+	fmt.Fprintf(w, "\t\tname value\t\thint\n")
+	for i, key := range keys {
+		fmt.Fprintf(w, "%d\t\t%s\t\t%s\n", i, key, hints[key])
+	}
+	return w.Flush()
+}
+
+// Set edits and saves a setting within a configuration file.
+func Set(name string) {
+	keys := viper.AllKeys()
+	sort.Strings(keys)
+	// var i must be sorted in ascending order.
+	if i := sort.SearchStrings(keys, name); i == len(keys) || keys[i] != name {
+		h := logs.Hint{
+			Issue: "invalid value",
+			Arg:   fmt.Sprintf("%q for --name", name),
+			Msg:   errors.New(("to see a list of usable settings")),
+			Hint:  "config info",
+		}
+		fmt.Println(h.String())
+		return
+	}
+	//
+	PrintLocation()
+	value := viper.GetString(name)
+	switch value {
+	case "":
+		fmt.Printf("\n%s is currently disabled\n", logs.Cp(name))
+	default:
+		fmt.Printf("\n%s is currently set to %q\n", logs.Cp(name), value)
+	}
+	hints := list()
+	switch name {
+	case "create.layout":
+		fmt.Println("Choose a new " + hints[name])
+		setStrings(name, createTemplates().Strings())
+	case "create.meta.generator":
+		setGenerator()
+	case "create.save-directory":
+		fmt.Println("Choose a new " + hints[name])
+		setString(value) // TODO: setDirectory? check exist
+	case "create.server-port":
+		fmt.Println("Set a new HTTP port to " + hints[name])
+		setPort(name)
+	case "create.title":
+		fmt.Println("Choose a new value " + hints[name])
+		setString(value)
+	case "info.format":
+		fmt.Printf("Choose a new value, choice: %s\n",
+			logs.Ci(Format.String("info")))
+		setStrings(name, Format.Info)
+	case "version.format":
+		fmt.Printf("Set a new value, choice: %s\n",
+			logs.Ci(Format.String("version")))
+		setStrings(name, Format.Version)
+	default:
+		q := "Set a new value or leave blank to keep it disabled:"
+		setMeta(name, value)
+		if value != "" {
+			q = "Set a new value, leave blank to keep as-is or use a dash [-] to disable:"
+		}
+		fmt.Printf("\n%s \n", q)
+		setString(value)
+	}
 }
 
 func setGenerator() {

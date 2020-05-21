@@ -19,11 +19,12 @@ import (
 )
 
 type configFlags struct {
-	ow    bool
-	list  bool
-	set   string
-	shell string
-	style string
+	configs bool
+	list    bool
+	ow      bool
+	set     string
+	shell   string
+	style   string
 }
 
 var configArgs configFlags
@@ -91,7 +92,9 @@ var configInfoCmd = &cobra.Command{
 	Example: logs.Example("  retrotxt config info --syntax-style=\"\"") +
 		" # disable the syntax highligher",
 	Run: func(cmd *cobra.Command, args []string) {
-		if configArgs.list {
+		if configArgs.configs {
+			config.List()
+		} else if configArgs.list {
 			logs.YamlStyles("retrotxt info --style")
 		} else if e := config.Info(configArgs.style); e.Err != nil {
 			e.Exit(1)
@@ -162,6 +165,8 @@ func init() {
 	configCreateCmd.Flags().BoolVarP(&configArgs.ow, "overwrite", "y", false,
 		"overwrite and reset the existing config file")
 	// info
+	configInfoCmd.Flags().BoolVarP(&configArgs.configs, "configs", "c", false,
+		"list all the available configuration settings")
 	configInfoCmd.Flags().StringVarP(&configArgs.style, "style", "s", "monokai",
 		"choose a syntax highligher")
 	configInfoCmd.Flags().BoolVarP(&configArgs.list, "list", "l", false,

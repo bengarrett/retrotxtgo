@@ -13,8 +13,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type files map[string]string
-
 type ports struct {
 	max uint
 	min uint
