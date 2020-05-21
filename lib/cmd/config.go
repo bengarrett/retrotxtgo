@@ -20,6 +20,7 @@ import (
 
 type configFlags struct {
 	ow    bool
+	list  bool
 	set   string
 	shell string
 	style string
@@ -90,7 +91,9 @@ var configInfoCmd = &cobra.Command{
 	Example: logs.Example("  retrotxt config info --syntax-style=\"\"") +
 		" # disable the syntax highligher",
 	Run: func(cmd *cobra.Command, args []string) {
-		if e := config.Info(configArgs.style); e.Err != nil {
+		if configArgs.list {
+			logs.YamlStyles("retrotxt info --style")
+		} else if e := config.Info(configArgs.style); e.Err != nil {
 			e.Exit(1)
 		}
 	},
@@ -159,8 +162,10 @@ func init() {
 	configCreateCmd.Flags().BoolVarP(&configArgs.ow, "overwrite", "y", false,
 		"overwrite and reset the existing config file")
 	// info
-	configInfoCmd.Flags().StringVarP(&configArgs.style, "syntax-style", "c", "monokai",
+	configInfoCmd.Flags().StringVarP(&configArgs.style, "style", "s", "monokai",
 		"choose a syntax highligher")
+	configInfoCmd.Flags().BoolVarP(&configArgs.list, "list", "l", false,
+		"list and preview the available syntax highlighers")
 	// set
 	configSetCmd.Flags().StringVarP(&configArgs.set, "name", "n", "",
 		fmt.Sprintf("the setting name in dot syntax%s", logs.Required())+
