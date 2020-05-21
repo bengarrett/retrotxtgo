@@ -35,40 +35,6 @@ var (
 	Panic = false
 )
 
-// color aliases
-var (
-	Alert = func() string {
-		return color.Error.Sprint("problem:")
-	}
-	Info = func() string {
-		return color.Info.Sprint("info:")
-	}
-	Cb = func(t string) string {
-		return color.Secondary.Sprint(t)
-	}
-	Cc = func(t string) string {
-		return color.Comment.Sprint(t)
-	}
-	Ce = func(t string) string {
-		return color.Warn.Sprint(t)
-	}
-	Cf = func(t string) string {
-		return color.OpFuzzy.Sprint(t)
-	}
-	Ci = func(t string) string {
-		return color.OpItalic.Sprint(t)
-	}
-	Cinf = func(t string) string {
-		return color.Info.Sprint(t)
-	}
-	Cp = func(t string) string {
-		return color.Primary.Sprint(t)
-	}
-	Cs = func(t string) string {
-		return color.Success.Sprint(t)
-	}
-)
-
 // FileMissingErr exits with a missing FILE error.
 // TODO: probably needs replacing
 func FileMissingErr() {

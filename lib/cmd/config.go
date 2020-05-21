@@ -53,7 +53,9 @@ var configDeleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Remove the config file",
 	Run: func(cmd *cobra.Command, args []string) {
-		config.Delete()
+		if e := config.Delete(); e.Err != nil {
+			e.Exit(1)
+		}
 	},
 }
 
@@ -70,8 +72,11 @@ var configEditCmd = &cobra.Command{
 	Short: fmt.Sprintf("Edit the config file%s", configEditor()),
 	Long: fmt.Sprintf("Edit the config file%s", configEditor()) +
 		"\n\nTo switch editors either:" +
-		"\n  Set one by creating or changing the $EDITOR environment variable in your shell configuration." +
-		"\n  Set an editor in the configuration file, retrotxt config set --name=editor",
+		"\n  Set one by creating or changing the " +
+		logs.Example("$EDITOR") +
+		" environment variable in your shell configuration." +
+		"\n  Set an editor in the configuration file, " +
+		logs.Example("retrotxt config set --name=editor"),
 	Run: func(cmd *cobra.Command, args []string) {
 		if e := config.Edit(); e.Err != nil {
 			e.Exit(1)
@@ -89,11 +94,17 @@ var configInfoCmd = &cobra.Command{
 	},
 }
 
+var configSetExample = func() string {
+	return logs.Example("  retrotxt config set --name create.meta.description") +
+		" # to change the meta description setting\n" +
+		logs.Example("  retrotxt config set --name version.format") +
+		"          # to set the version command output format"
+}
+
 var configSetCmd = &cobra.Command{
-	Use:   "set",
-	Short: "Change a configuration",
-	Example: `  --name create.meta.description # to change the meta description setting
-  --name version.format          # to set the version command output format`,
+	Use:     "set",
+	Short:   "Change a Retrotxt setting",
+	Example: configSetExample(),
 	Run: func(cmd *cobra.Command, args []string) {
 		config.Set(configArgs.set)
 	},
@@ -102,7 +113,7 @@ var configSetCmd = &cobra.Command{
 var configShellCmd = &cobra.Command{
 	Use:     "shell",
 	Short:   "Apply autocompletion a terminal shell",
-	Example: "  retrotxt config shell --interpreter string [flags]",
+	Example: logs.Example("  retrotxt config shell --interpreter string [flags]"),
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
 			buf   bytes.Buffer
@@ -150,8 +161,9 @@ func init() {
 		"config syntax highligher, use "+logs.Ci("none")+" to disable")
 	// set
 	configSetCmd.Flags().StringVarP(&configArgs.set, "name", "n", "",
-		`the configuration path to edit in dot syntax (see examples)
-to see a list of names run: retrotxt config info`)
+		fmt.Sprintf("the setting name in dot syntax%s", logs.Required())+
+			fmt.Sprintf("\nrun %s", logs.Example("retrotxt config info"))+
+			" to see a list of names")
 	err = configSetCmd.MarkFlagRequired("name")
 	logs.Check("name flag", err)
 	// shell
