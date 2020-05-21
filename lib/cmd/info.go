@@ -51,9 +51,9 @@ func init() {
 	rootCmd.AddCommand(infoCmd)
 	infoCmd.Flags().StringVarP(&infoFilename, "name", "n", "",
 		logs.Cp("text file to analyse")+" (required)\n")
-	infoCmd.Flags().StringVarP(&infoFormat, "format", "f", viper.GetString("info.format"),
+	infoCmd.Flags().StringVarP(&infoFormat, "format", "f", viper.GetString("style.yaml"),
 		"output format \noptions: "+logs.Ci(config.Format.String("info")))
-	err := viper.BindPFlag("info.format", infoCmd.Flags().Lookup("format"))
+	err := viper.BindPFlag("style.yaml", infoCmd.Flags().Lookup("format"))
 	logs.ReCheck(err)
 	infoCmd.Flags().SortFlags = false
 }

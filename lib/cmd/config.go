@@ -105,7 +105,7 @@ var configInfoCmd = &cobra.Command{
 var configSetExample = func() string {
 	return logs.Example("  retrotxt config set --name create.meta.description") +
 		" # to change the meta description setting\n" +
-		logs.Example("  retrotxt config set --name version.format") +
+		logs.Example("  retrotxt config set --name style.yaml") +
 		"          # to set the version command output format"
 }
 

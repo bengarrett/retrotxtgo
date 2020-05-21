@@ -33,7 +33,7 @@ The shown ` + logs.Cc("RetroTxt URL") + ` is the weblink to the application Gith
 ` + logs.Cc("Binary") + ` should return the path name of this program. It maybe inaccurate
 if it is launched through an operating system symlink.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if ok := versionPrint(viper.GetString("version.format")); !ok {
+		if ok := versionPrint(viper.GetString("style.yaml")); !ok {
 			logs.CheckArg(fmt.Sprintf("--format=%s", versionFmt), config.Format.Version)
 		}
 	},
@@ -43,10 +43,10 @@ func init() {
 	config.InitDefaults()
 	rootCmd.AddCommand(versionCmd)
 	versionCmd.Flags().StringVarP(&versionFmt, "format", "f",
-		viper.GetString("version.format"),
+		viper.GetString("style.yaml"),
 		"output format \noptions: "+config.Format.String("version"))
-	err := viper.BindPFlag("version.format", versionCmd.Flags().Lookup("format"))
-	logs.Check("version.format", err)
+	err := viper.BindPFlag("style.yaml", versionCmd.Flags().Lookup("format"))
+	logs.Check("style.yaml", err)
 }
 
 func versionPrint(format string) (ok bool) {

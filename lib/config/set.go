@@ -69,8 +69,6 @@ func list() hints {
 		"editor":                   "set an text editor to launch when using " + logs.Example("config edit"),
 		"style.html":               "syntax highlighter for html previews",
 		"style.yaml":               "syntax highlighter for info and version commands",
-		// "info.style":               "",
-		// "version.style":            "",
 	}
 }
 
@@ -127,13 +125,15 @@ func Set(name string) {
 	case "create.title":
 		fmt.Println("Choose a new value " + hints[name])
 		setString(value)
-	case "info.format":
+	case "style.html":
 		fmt.Printf("Choose a new value, choice: %s\n",
 			logs.Ci(Format.String("info")))
+		// TODO sample HTML
 		setStrings(name, Format.Info)
-	case "version.format":
+	case "style.yaml":
 		fmt.Printf("Set a new value, choice: %s\n",
 			logs.Ci(Format.String("version")))
+		// logs.Ci(Format.String("info")))
 		setStrings(name, Format.Version)
 	default:
 		q := "Set a new value or leave blank to keep it disabled:"
