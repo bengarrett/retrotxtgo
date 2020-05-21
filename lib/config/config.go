@@ -64,8 +64,7 @@ const perm, permDir os.FileMode = 0660, 0700
 const exit = 20
 
 var (
-	scope      = gap.NewScope(gap.User, "retrotxt")
-	infoStyles string
+	scope = gap.NewScope(gap.User, "retrotxt")
 )
 
 var cfgNameFlag string // TO IMPLEMENT?

@@ -86,9 +86,11 @@ var configEditCmd = &cobra.Command{
 
 var configInfoCmd = &cobra.Command{
 	Use:   "info",
-	Short: "View settings configured by the config",
+	Short: "View all the settings configured in the config file",
+	Example: logs.Example("  retrotxt config info --syntax-style=\"\"") +
+		" # disable the syntax highligher",
 	Run: func(cmd *cobra.Command, args []string) {
-		if e := config.Info(); e.Err != nil {
+		if e := config.Info(configArgs.style); e.Err != nil {
 			e.Exit(1)
 		}
 	},
@@ -158,7 +160,7 @@ func init() {
 		"overwrite and reset the existing config file")
 	// info
 	configInfoCmd.Flags().StringVarP(&configArgs.style, "syntax-style", "c", "monokai",
-		"config syntax highligher, use "+logs.Ci("none")+" to disable")
+		"choose a syntax highligher")
 	// set
 	configSetCmd.Flags().StringVarP(&configArgs.set, "name", "n", "",
 		fmt.Sprintf("the setting name in dot syntax%s", logs.Required())+

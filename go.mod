@@ -8,7 +8,6 @@ require (
 	github.com/gookit/color v1.2.5
 	github.com/labstack/gommon v0.3.0
 	github.com/mattn/go-runewidth v0.0.9
-	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mozillazg/go-slugify v0.2.0
 	github.com/mozillazg/go-unidecode v0.1.1 // indirect
 	github.com/muesli/go-app-paths v0.2.1
@@ -18,6 +17,6 @@ require (
 	golang.org/x/net v0.0.0-20200513185701-a91f0712d120
 	golang.org/x/text v0.3.2
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
-	gopkg.in/gookit/color.v1 v1.1.6
 	gopkg.in/yaml.v2 v2.3.0
+	gopkg.in/yaml.v3 v3.0.0-20200506231410-2ff61e1afc86
 )
