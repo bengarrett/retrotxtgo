@@ -87,10 +87,7 @@ func List() (err error) {
 
 // Set edits and saves a setting within a configuration file.
 func Set(name string) {
-	keys := viper.AllKeys()
-	sort.Strings(keys)
-	// var i must be sorted in ascending order.
-	if i := sort.SearchStrings(keys, name); i == len(keys) || keys[i] != name {
+	if !Validate(name) {
 		h := logs.Hint{
 			Issue: "invalid value",
 			Arg:   fmt.Sprintf("%q for --name", name),
@@ -117,13 +114,16 @@ func Set(name string) {
 		setGenerator()
 	case "create.save-directory":
 		fmt.Println("Choose a new " + hints[name])
-		setString(value) // TODO: setDirectory? check exist
+		setString(name) // TODO: setDirectory? check exist
 	case "create.server-port":
 		fmt.Println("Set a new HTTP port to " + hints[name])
 		setPort(name)
 	case "create.title":
-		fmt.Println("Choose a new value " + hints[name])
-		setString(value)
+		fmt.Println("Choose a new " + hints[name])
+		setString(name)
+	case "editor":
+		fmt.Println(hints[name])
+		setString(name) // TODO: setEditor() .. do a scan of binary in path
 	case "style.html":
 		fmt.Printf("Choose a new value, choice: %s\n",
 			logs.Ci(Format.String("info")))
@@ -140,15 +140,30 @@ func Set(name string) {
 	}
 }
 
+// Validate the existence of a setting key name.
+func Validate(key string) (ok bool) {
+	ok = false
+	keys := viper.AllKeys()
+	sort.Strings(keys)
+	// var i must be sorted in ascending order.
+	if i := sort.SearchStrings(keys, key); i == len(keys) || keys[i] != key {
+		return ok
+	}
+	return true
+}
+
 func save(name string, value interface{}) {
 	if name == "" {
 		logs.Log(errors.New("save name string is empty"))
 	}
+	if !Validate(name) {
+		logs.Log(errors.New("save name is an unknown setting: " + name))
+	}
 	viper.Set(name, value)
-	fmt.Printf("%s %s is now set to \"%v\"\n", logs.Cs("✓"), logs.Cp(name), value)
 	if err := UpdateConfig("", false); err != nil {
 		logs.Log(err)
 	}
+	fmt.Printf("%s %s is set to \"%v\"\n", logs.Cs("✓"), logs.Cs(name), value)
 	os.Exit(0)
 }
 
@@ -168,6 +183,9 @@ func setGenerator() {
 func setMeta(name, value string) {
 	if name == "" {
 		logs.Log(errors.New("setmeta name string is empty"))
+	}
+	if !Validate(name) {
+		logs.Log(errors.New("setmeta name is an unknown setting: " + name))
 	}
 	s := strings.Split(name, ".")
 	switch {
