@@ -61,18 +61,14 @@ var configDeleteCmd = &cobra.Command{
 	},
 }
 
-var configEditor = func() string {
-	e := config.Editor()
-	if e == "" {
-		return ""
-	}
-	return fmt.Sprintf(" using %s", e)
-}
-
+// note: Previously I inserted the results of config.Editor() into
+// the Short and Long fields. This will cause a logic error because
+// viper.GetString("editor") is not yet set and the EDITOR env value
+// will instead always be used.
 var configEditCmd = &cobra.Command{
 	Use:   "edit",
-	Short: fmt.Sprintf("Edit the config file%s", configEditor()),
-	Long: fmt.Sprintf("Edit the config file%s", configEditor()) +
+	Short: fmt.Sprintf("Edit the config file"),
+	Long: fmt.Sprintf("Edit the config file") +
 		"\n\nTo switch editors either:" +
 		"\n  Set one by creating or changing the " +
 		logs.Example("$EDITOR") +

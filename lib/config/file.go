@@ -34,7 +34,6 @@ func InitDefaults() {
 
 // SetConfig reads and loads a configuration file.
 func SetConfig(configFlag string) {
-	fmt.Println("--> loading cfg")
 	viper.SetConfigType("yaml")
 	var configPath = Filepath()
 	if configFlag != "" {
@@ -68,8 +67,6 @@ func SetConfig(configFlag string) {
 	} else if configFlag != "" {
 		PrintLocation()
 	}
-	fmt.Println("==>", viper.GetString("editor"))
-	fmt.Println("<-- loading cfg")
 }
 
 // PrintLocation prints the location of the current configuration file.

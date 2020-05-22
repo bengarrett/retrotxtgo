@@ -40,18 +40,25 @@ func Edit() (err logs.IssueErr) {
 
 // Editor returns the path of a configured or discovered text editor.
 func Editor() (edit string) {
-	if err := viper.BindEnv("editor", "EDITOR"); err != nil {
-		return lookEdit()
-	}
 	edit = viper.GetString("editor")
-	if _, err := exec.LookPath(edit); err != nil {
-		return ""
+	_, err := exec.LookPath(edit)
+	if err != nil {
+		if edit != "" {
+			fmt.Printf("%s\nwill attempt to use the $EDITOR environment variable\n", err)
+		}
+		if err := viper.BindEnv("editor", "EDITOR"); err != nil {
+			return lookEdit()
+		}
+		edit = viper.GetString("editor")
+		if _, err := exec.LookPath(edit); err != nil {
+			return lookEdit()
+		}
 	}
 	return edit
 }
 
 func lookEdit() (edit string) {
-	editors := []string{"nano", "micro", "vim", "emacs"}
+	editors := []string{"nano", "vim", "emacs"}
 	if runtime.GOOS == "windows" {
 		editors = append(editors, "notepad++.exe", "notepad.exe")
 	}
