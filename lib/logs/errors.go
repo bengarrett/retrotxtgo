@@ -89,9 +89,13 @@ func (e CmdErr) Error() Err {
 		return Err{Issue: "invalid command",
 			Arg: a,
 			Msg: errors.New("choose a command from the list available")}
-	case "unknown flag:", "unknown shorthand":
+	case "unknown flag:":
 		return Err{Issue: "unknown flag",
-			Arg: a,
+			Arg: s[2],
+			Msg: errors.New("use a flag from the list of flags")}
+	case "unknown shorthand":
+		return Err{Issue: "unknown shorthand flag",
+			Arg: s[5],
 			Msg: errors.New("use a flag from the list of flags")}
 	}
 	fmt.Printf("DEBUG: %+v\n", e.Err)
