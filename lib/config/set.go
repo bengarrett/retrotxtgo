@@ -27,6 +27,12 @@ func (n names) String() string {
 	return strings.Join(n, ", ")
 }
 
+type ports struct {
+	max uint
+	min uint
+	rec uint
+}
+
 // createTemplates creates a map of the template filenames used in conjunction with the layout flag.
 func createTemplates() files {
 	f := make(files)
@@ -59,6 +65,11 @@ func (f files) Strings() []string {
 }
 
 func list() hints {
+	var port = ports{
+		max: logs.PortMax,
+		min: logs.PortMin,
+		rec: logs.PortRec,
+	}
 	pm, px, pr := strconv.Itoa(int(port.min)), strconv.Itoa(int(port.max)), strconv.Itoa(int(port.rec))
 	ports := logs.Cp(pm) + "-" + logs.Cp(px) + fmt.Sprintf(" (recommend: %s)", logs.Cp(pr))
 	return hints{

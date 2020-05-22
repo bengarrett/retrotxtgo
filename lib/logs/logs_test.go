@@ -179,9 +179,9 @@ func Test_save(t *testing.T) {
 	samples.Clean(file)
 }
 
-func TestFilepath(t *testing.T) {
-	if got := Filepath(); !filepath.IsAbs(got) {
-		t.Errorf("Filepath() is empty or not an absolute path, it should return a directory")
+func TestPath(t *testing.T) {
+	if got := Path(); !filepath.IsAbs(got) {
+		t.Errorf("Path() is empty or not an absolute path, it should return a directory")
 	}
 }
 

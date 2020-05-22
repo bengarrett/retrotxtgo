@@ -45,7 +45,7 @@ func init() {
 func defaultConfig() string {
 	named := viper.GetViper().ConfigFileUsed()
 	if named == "" {
-		named = config.Filepath()
+		named = config.Path()
 	}
 	return named
 }

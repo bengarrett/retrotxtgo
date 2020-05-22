@@ -161,7 +161,7 @@ func save(err error, name string) error {
 	// use UTC date and times in the log file
 	log.SetFlags(log.Ldate | log.Ltime | log.LUTC)
 	if name == "" {
-		name = Filepath()
+		name = Path()
 	}
 	p := filepath.Dir(name)
 	if _, e := os.Stat(p); os.IsNotExist(e) {
@@ -180,8 +180,8 @@ func save(err error, name string) error {
 	return nil
 }
 
-// Filepath is the absolute path and filename of the error log file.
-func Filepath() string {
+// Path is the absolute path and filename of the error log file.
+func Path() string {
 	fp, err := scope.LogPath(Filename)
 	if err != nil {
 		h, _ := os.UserHomeDir()

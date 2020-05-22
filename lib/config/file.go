@@ -47,7 +47,7 @@ func InitDefaults() {
 // SetConfig reads and loads a configuration file.
 func SetConfig(configFlag string) {
 	viper.SetConfigType("yaml")
-	var configPath = Filepath()
+	var configPath = Path()
 	if configFlag != "" {
 		configPath = configFlag
 	}

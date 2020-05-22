@@ -13,26 +13,24 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type ports struct {
-	max uint
-	min uint
-	rec uint
-}
+const (
+	// PermF is posix permission bits for files
+	PermF os.FileMode = 0660
+	// PermD is posix permission bits for directories
+	PermD os.FileMode = 0700
 
-var port = ports{
-	max: logs.PortMax,
-	min: logs.PortMin,
-	rec: logs.PortRec,
-}
+	cmdPath   = "retrotxt config"
+	namedFile = "config.yaml"
+)
 
-// Formats blah
+// Formats choices for flags
 type Formats struct {
 	Info    []string
 	Shell   []string
 	Version []string
 }
 
-// Format ...
+// Format flag choices for info, shell and version commands.
 var Format = Formats{
 	Info:    []string{"color", "json", "json.min", "text", "xml"},
 	Shell:   []string{"bash", "powershell", "zsh"},
@@ -51,13 +49,6 @@ func (f Formats) String(field string) string {
 	return ""
 }
 
-// ConfigName is the default configuration filename.
-const ConfigName string = "config.yaml"
-const cmdPath = "retrotxt config"
-
-// posix permissions for the configuration file and directory.
-const perm, permDir os.FileMode = 0660, 0700
-
 // operating system exit code.
 const exit = 20
 
@@ -71,12 +62,12 @@ var configSetName string
 // BuildVer retrotxt version
 var BuildVer string // remove?
 
-// Filepath is the absolute path and filename of the configuration file.
-func Filepath() (dir string) {
-	dir, err := scope.ConfigPath(ConfigName)
+// Path is the absolute path and filename of the configuration file.
+func Path() (dir string) {
+	dir, err := scope.ConfigPath(namedFile)
 	if err != nil {
 		h, _ := os.UserHomeDir()
-		return filepath.Join(h, ConfigName)
+		return filepath.Join(h, namedFile)
 	}
 	return dir
 }
@@ -98,7 +89,7 @@ func UpdateConfig(name string, print bool) (err error) {
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(name, out, perm)
+	err = ioutil.WriteFile(name, out, PermF)
 	if err != nil {
 		return err
 	}
