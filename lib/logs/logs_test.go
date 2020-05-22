@@ -77,34 +77,6 @@ func Test_check(t *testing.T) {
 	}
 }
 
-func Test_checkArgument(t *testing.T) {
-	type args struct {
-		arg  string
-		args []string
-	}
-	tests := []struct {
-		name     string
-		args     args
-		wantMsg  string
-		wantCode int
-	}{
-		{"empty", args{}, "problem: invalid argument \"\"\n", 10},
-		{"ok", args{"???", []string{"json", "text", "xml"}},
-			"problem: invalid argument \"???\" choices: json, text, xml\nplease use one of the argument choices shown above\n", 10},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotMsg, gotCode := checkArgument(tt.args.arg, tt.args.args)
-			if gotMsg != tt.wantMsg {
-				t.Errorf("checkArgument() gotMsg = %v, want %v", gotMsg, tt.wantMsg)
-			}
-			if gotCode != tt.wantCode {
-				t.Errorf("checkArgument() gotCode = %v, want %v", gotCode, tt.wantCode)
-			}
-		})
-	}
-}
-
 func TestErr_check(t *testing.T) {
 	var e Err
 	tests := []struct {

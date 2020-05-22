@@ -90,7 +90,7 @@ var viewTableCmd = &cobra.Command{
 		cp, err := ianaindex.IANA.Name(encoding)
 		//CheckCodePage(ErrorFmt{"", viewCodePage, err})
 		table, err := codepage.Table(cp)
-		logs.ChkErr(logs.Err{"table", cp, err})
+		logs.ChkErr(logs.Err{Issue: "table", Arg: cp, Msg: err})
 		println(table)
 	},
 }
