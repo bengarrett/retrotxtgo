@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
@@ -10,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"text/tabwriter"
+	"text/template"
 
 	"github.com/alecthomas/chroma/styles"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
@@ -47,13 +49,27 @@ func createTemplates() files {
 }
 
 // String method returns the files keys as a comma separated list.
-func (f files) String() string {
-	s := []string{}
+func (f files) String() (s string) {
+	k := []string{}
 	for key := range createTemplates() {
-		s = append(s, key)
+		k = append(k, key)
 	}
-	sort.Strings(s)
-	return strings.Join(s, ", ")
+	sort.Strings(k)
+	// apply an ANSI underline to the first letter of each key
+	t, err := template.New("underline").Parse("{{define \"TEXT\"}}\033[0m\033[4m{{.}}\033[0m{{end}}")
+	if err != nil {
+		logs.LogCont(err)
+		return strings.Join(k, ", ")
+	}
+	for i, key := range k {
+		if len(k) > 1 {
+			var b bytes.Buffer
+			err := t.ExecuteTemplate(&b, "TEXT", string(key[0]))
+			logs.LogCont(err)
+			k[i] = fmt.Sprintf("%s%s", b.String(), key[1:])
+		}
+	}
+	return strings.Join(k, ", ")
 }
 
 // Strings method returns the files keys as a sorted slice.
@@ -76,7 +92,7 @@ func list() hints {
 	ports := logs.Cp(pm) + "-" + logs.Cp(px) + fmt.Sprintf(" (recommend: %s)", logs.Cp(pr))
 	return hints{
 		"create.layout": "HTML output layout, choices: " +
-			logs.Cp(createTemplates().String()),
+			logs.Cp(createTemplates().String()) + fmt.Sprintf(" (recommend: %s)", logs.Cp("standard")),
 		"create.meta.author":       "defines the name of the page authors",
 		"create.meta.color-scheme": "specifies one or more color schemes with which the page is compatible",
 		"create.meta.description":  "a short and accurate summary of the content of the page",
