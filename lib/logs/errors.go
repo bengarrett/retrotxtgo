@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/gookit/color"
 )
 
 // Err is a generic error type used to apply color to errors
@@ -48,6 +50,11 @@ func (e CmdErr) Error() Err {
 	}
 	s := strings.Split(e.String(), " ")
 	l := len(s)
+	if l < 3 {
+		Log(errors.New("cmderr.args: word count is < 3"))
+	} else if len(e.Args) < 1 {
+		Log(errors.New("cmderr.err: value is empty"))
+	}
 	a := fmt.Sprintf("%q", e.Args[0])
 	switch strings.Join(s[0:2], " ") {
 	case "bad flag":
@@ -63,6 +70,14 @@ func (e CmdErr) Error() Err {
 		return Err{Issue: "flag value",
 			Arg: a,
 			Msg: errors.New(m[0])}
+	case "invalid slice":
+		return Err{Issue: "flag value",
+			Arg: quote(s[l-1]),
+			Msg: errors.New("is not a valid choice for --" + s[l-2])}
+	case "invalid command":
+		return Err{Issue: "invalid command",
+			Arg: quote(s[l-1]),
+			Msg: errors.New("choose another command from the available commands")}
 	case "required flag(s)":
 		return Err{Issue: "a required flag is missing",
 			Arg: s[2],
@@ -79,13 +94,18 @@ func (e CmdErr) Error() Err {
 			Arg: a,
 			Msg: errors.New("use a flag from the list of flags")}
 	}
-
 	fmt.Printf("DEBUG: %+v\n", e.Err)
 	return Err{Issue: "command", Arg: "execute", Msg: e.Err}
 }
 
 func (e CmdErr) String() string {
 	return fmt.Sprintf("%s", e.Err)
+}
+
+// Exit prints the CmdErr and causes the program to exit with the given status code.
+func (e CmdErr) Exit(code int) {
+	fmt.Println(e.Error())
+	os.Exit(code)
 }
 
 // ConfigErr ...
@@ -99,9 +119,6 @@ func (e ConfigErr) String() string {
 		Issue: "config file",
 		Arg:   e.FileUsed,
 		Msg:   e.Err}).String()
-}
-
-type HelpErr struct {
 }
 
 // IssueErr is a generic problem structure.
@@ -124,4 +141,32 @@ func (i IssueErr) String() string {
 func (i IssueErr) Exit(code int) {
 	fmt.Println(i.String())
 	os.Exit(code)
+}
+
+// CheckCmd returns instructions for invalid command arguments.
+func CheckCmd(args []string) {
+	err := CmdErr{Args: args,
+		Err: errors.New("invalid command " + args[0])}
+	err.Exit(1)
+}
+
+func CheckFlag(name, value string, args []string) {
+	err := CmdErr{Args: args,
+		Err: fmt.Errorf("invalid slice %s %s", name, value)}
+	fmt.Printf("         choices: %s\n", strings.Join(args, ", "))
+	err.Exit(1)
+}
+
+func checkCmd(arg string, args []string) (msg string, code int) {
+	code = 10
+	msg += fmt.Sprintf("%s invalid argument!%s", Alert(),
+		color.Bold.Sprintf(" %q", arg))
+	if len(args) > 1 {
+		msg += fmt.Sprintf(", choices: %s\n%s",
+			color.Info.Sprintf("%s", strings.Join(args, ", ")),
+			color.Warn.Sprint("please use one of the ")+
+				color.Info.Sprint("argument choices")+
+				color.Warn.Sprint(" shown above"))
+	}
+	return msg, code
 }

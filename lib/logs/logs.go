@@ -8,7 +8,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"strings"
 
 	"github.com/gookit/color"
 	gap "github.com/muesli/go-app-paths"
@@ -69,28 +68,6 @@ func check(issue string, err error) (msg string, code int) {
 		msg = fmt.Sprintf("%s\n", err)
 	} else {
 		msg = fmt.Sprintf("%s %s\n", issue, err)
-	}
-	return msg, code
-}
-
-// CheckArg returns instructions for invalid command arguments.
-func CheckArg(arg string, args []string) {
-	if len(args) == 0 {
-		return
-	}
-	Exit(checkArgument(arg, args))
-}
-
-func checkArgument(arg string, args []string) (msg string, code int) {
-	code = 10
-	msg += fmt.Sprintf("%s invalid argument%s", Alert(),
-		color.Bold.Sprintf(" %q", arg))
-	if len(args) > 1 {
-		msg += fmt.Sprintf(", choices: %s\n%s",
-			color.Info.Sprintf("%s", strings.Join(args, ", ")),
-			color.Warn.Sprint("please use one of the ")+
-				color.Info.Sprint("argument choices")+
-				color.Warn.Sprint(" shown above"))
 	}
 	return msg, code
 }

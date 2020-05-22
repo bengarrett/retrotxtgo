@@ -36,7 +36,7 @@ var configCmd = &cobra.Command{
 		err := cmd.Usage()
 		logs.Check("config usage:", err)
 		if len(args) != 0 || cmd.Flags().NFlag() != 0 {
-			logs.CheckArg("config", args)
+			logs.CheckCmd(args)
 		}
 	},
 }

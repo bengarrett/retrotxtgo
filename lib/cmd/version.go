@@ -34,7 +34,7 @@ The shown ` + logs.Cc("RetroTxt URL") + ` is the weblink to the application Gith
 if it is launched through an operating system symlink.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if ok := versionPrint(viper.GetString("style.yaml")); !ok {
-			logs.CheckArg(fmt.Sprintf("--format=%s", versionFmt), config.Format.Version)
+			logs.CheckFlag("format", versionFmt, config.Format.Version)
 		}
 	},
 }
@@ -49,6 +49,7 @@ func init() {
 	logs.Check("style.yaml", err)
 }
 
+// TODO: apply Highlight() to json,j
 func versionPrint(format string) (ok bool) {
 	switch format {
 	case "color", "c", "":
