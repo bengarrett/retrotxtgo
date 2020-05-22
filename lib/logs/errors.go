@@ -112,19 +112,6 @@ func (e CmdErr) Exit(code int) {
 	os.Exit(code)
 }
 
-// ConfigErr ...
-type ConfigErr struct {
-	FileUsed string
-	Err      error
-}
-
-func (e ConfigErr) String() string {
-	return (Err{
-		Issue: "config file",
-		Arg:   e.FileUsed,
-		Msg:   e.Err}).String()
-}
-
 // IssueErr is a generic problem structure.
 type IssueErr struct {
 	Issue string

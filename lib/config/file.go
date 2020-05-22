@@ -10,11 +10,23 @@ import (
 	"github.com/spf13/viper"
 )
 
+type configErr struct {
+	FileUsed string
+	Err      error
+}
+
+func (e configErr) String() string {
+	return (logs.Err{
+		Issue: "config file",
+		Arg:   e.FileUsed,
+		Msg:   e.Err}).String()
+}
+
 // InitDefaults initialises flag and configuration defaults.
 func InitDefaults() {
 	home, err := os.UserHomeDir()
 	if err != nil {
-		fmt.Print(err) // TODO: replace with logs.func without exit
+		logs.LogCont(err)
 	}
 	viper.SetDefault("create.layout", "standard")
 	viper.SetDefault("create.meta.author", "")
@@ -41,7 +53,7 @@ func SetConfig(configFlag string) {
 	}
 	viper.SetConfigFile(configPath)
 	if err := viper.ReadInConfig(); err != nil {
-		var e = logs.ConfigErr{
+		var e = configErr{
 			FileUsed: viper.ConfigFileUsed(),
 			Err:      err,
 		}

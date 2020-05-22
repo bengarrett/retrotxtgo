@@ -143,6 +143,16 @@ func Log(err error) {
 	}
 }
 
+// LogCont logs the error and continues the program.
+func LogCont(err error) {
+	if err != nil {
+		// save error to log file
+		if err := save(err, ""); err != nil {
+			log.Fatalf("%s %s", color.Danger.Sprint("!"), err)
+		}
+	}
+}
+
 // save an error to the log directory, an optional named file is available for unit tests.
 func save(err error, name string) error {
 	if err == nil || fmt.Sprintf("%v", err) == "" {
