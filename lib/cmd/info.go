@@ -47,7 +47,7 @@ var infoCmd = &cobra.Command{
 }
 
 func init() {
-	config.InitDefaults()
+	//config.InitDefaults()
 	rootCmd.AddCommand(infoCmd)
 	infoCmd.Flags().StringVarP(&infoFilename, "name", "n", "",
 		logs.Cp("text file to analyse")+" (required)\n")

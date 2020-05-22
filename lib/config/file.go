@@ -17,7 +17,6 @@ func InitDefaults() {
 		fmt.Print(err) // TODO: replace with logs.func without exit
 	}
 	viper.SetDefault("create.layout", "standard")
-	viper.SetDefault("create.title", "RetroTxt | example")
 	viper.SetDefault("create.meta.author", "")
 	viper.SetDefault("create.meta.color-scheme", "")
 	viper.SetDefault("create.meta.description", "An example")
@@ -27,12 +26,15 @@ func InitDefaults() {
 	viper.SetDefault("create.meta.theme-color", "")
 	viper.SetDefault("create.save-directory", home)
 	viper.SetDefault("create.server-port", 8080)
+	viper.SetDefault("create.title", "RetroTxt | example")
+	viper.SetDefault("editor", "")
 	viper.SetDefault("style.html", "lovelace")
 	viper.SetDefault("style.yaml", "monokai")
 }
 
 // SetConfig reads and loads a configuration file.
 func SetConfig(configFlag string) {
+	fmt.Println("--> loading cfg")
 	viper.SetConfigType("yaml")
 	var configPath = Filepath()
 	if configFlag != "" {
@@ -66,6 +68,8 @@ func SetConfig(configFlag string) {
 	} else if configFlag != "" {
 		PrintLocation()
 	}
+	fmt.Println("==>", viper.GetString("editor"))
+	fmt.Println("<-- loading cfg")
 }
 
 // PrintLocation prints the location of the current configuration file.

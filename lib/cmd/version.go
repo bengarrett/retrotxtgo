@@ -40,7 +40,7 @@ if it is launched through an operating system symlink.`,
 }
 
 func init() {
-	config.InitDefaults()
+	//config.InitDefaults()
 	rootCmd.AddCommand(versionCmd)
 	versionCmd.Flags().StringVarP(&versionFmt, "format", "f",
 		viper.GetString("style.yaml"),

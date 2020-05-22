@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/create"
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
@@ -78,7 +77,7 @@ var createCmd = &cobra.Command{
 }
 
 func init() {
-	config.InitDefaults()
+	//config.InitDefaults()
 	rootCmd.AddCommand(createCmd)
 	// required flags
 	createCmd.Flags().StringVarP(&createFileName, "name", "n", "",

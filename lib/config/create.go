@@ -28,6 +28,7 @@ func Create(name string, ow bool) (err error) {
 	if err != nil {
 		return err
 	}
+	InitDefaults()
 	return UpdateConfig(path, false)
 }
 
