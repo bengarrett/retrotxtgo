@@ -10,7 +10,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	gap "github.com/muesli/go-app-paths"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 const (
