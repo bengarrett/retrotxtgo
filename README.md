@@ -174,3 +174,13 @@ https://github.com/Homebrew/homebrew-cask/blob/master/doc/cask_language_referenc
 https://github.com/Homebrew/homebrew-cask/blob/master/doc/cask_language_reference/all_stanzas.md
 
 Raspbian ?
+
+-----
+
+### Why Go?
+
+- native UTF8 support
+- self-contained binary with no dependencies
+- wide OS and CPU support
+- fast and quick to compile
+- i know it!
