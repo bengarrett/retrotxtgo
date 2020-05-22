@@ -13,6 +13,7 @@ import (
 	"github.com/alecthomas/chroma/formatters"
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -154,6 +155,9 @@ var configShellCmd = &cobra.Command{
 }
 
 func init() {
+	if logs.Term() == "none" {
+		color.Enable = false
+	}
 	var err error
 	rootCmd.AddCommand(configCmd)
 	configCmd.AddCommand(configCreateCmd)
