@@ -152,7 +152,7 @@ func Set(name string) {
 	switch name {
 	case "create.layout":
 		fmt.Println("Choose a new " + hints[name])
-		setStrings(name, createTemplates().Strings())
+		setShortStrings(name, createTemplates().Strings())
 	case "create.meta.generator":
 		setGenerator()
 	case "create.save-directory":
@@ -307,6 +307,13 @@ func setPort(name string) {
 		logs.Log(errors.New("setport name string is empty"))
 	}
 	save(name, logs.PromptPort(true))
+}
+
+func setShortStrings(name string, data []string) {
+	if name == "" {
+		logs.Log(errors.New("setstrings name string is empty"))
+	}
+	save(name, logs.PromptShortStrings(&data))
 }
 
 func setString(name string) {

@@ -89,6 +89,52 @@ func pstring(r io.Reader) (words string) {
 
 type keys []string
 
+// PromptShortStrings asks for and returns a single choice from a string of keys.
+// Either the first letter or the full name of the key are accepted.
+func PromptShortStrings(options *[]string) (key string) {
+	var k keys = *options
+	return k.shortPrompt(os.Stdin)
+}
+
+func (k keys) shortPrompt(r io.Reader) (key string) {
+	prompts := 0
+	scanner := bufio.NewScanner(r)
+	for scanner.Scan() {
+		prompts++
+		key = scanner.Text()
+		if long := k.shortValidate(key); long != "" {
+			return long
+		}
+		if !k.validate(key) {
+			promptCheck(prompts)
+			continue
+		}
+		return key
+	}
+	return ""
+}
+
+// shortValidate validates that the key exists in keys.
+// Both the first letter of the key and the full name of the key are accepted as valid.
+// When the key is valid its full name will be returned otherwise an empty string
+// signifies a false result.
+func (k keys) shortValidate(key string) string {
+	if key == "" || len(key) > 1 {
+		return ""
+	}
+	var letters []string
+	sort.Strings(k)
+	for _, key := range k {
+		letters = append(letters, string(key[0]))
+	}
+	sort.Strings(letters)
+	var i = sort.SearchStrings(letters, key)
+	if i >= len(letters) || letters[i] != key {
+		return ""
+	}
+	return k[i]
+}
+
 // PromptStrings asks for and returns a single choice from a string of keys.
 func PromptStrings(options *[]string) (key string) {
 	var k keys = *options
