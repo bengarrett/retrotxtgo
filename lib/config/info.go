@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	"fmt"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
@@ -19,6 +20,7 @@ func Info(style string) (err logs.IssueErr) {
 			Err:   e,
 		}
 	}
+	out = bytes.ReplaceAll(out, []byte("    "), []byte("  "))
 	switch style {
 	case "none", "":
 		fmt.Println(string(out))
