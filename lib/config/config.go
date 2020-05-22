@@ -23,6 +23,8 @@ const (
 	namedFile = "config.yaml"
 )
 
+var scope = gap.NewScope(gap.User, "retrotxt")
+
 // Formats choices for flags
 type Formats struct {
 	Info    []string
@@ -49,19 +51,6 @@ func (f Formats) String(field string) string {
 	return ""
 }
 
-// operating system exit code.
-const exit = 20
-
-var (
-	scope = gap.NewScope(gap.User, "retrotxt")
-)
-
-var cfgNameFlag string // TO IMPLEMENT?
-var configSetName string
-
-// BuildVer retrotxt version
-var BuildVer string // remove?
-
 // Path is the absolute path and filename of the configuration file.
 func Path() (dir string) {
 	dir, err := scope.ConfigPath(namedFile)
@@ -77,7 +66,7 @@ func configMissing(name string, suffix string) {
 	cmd := strings.TrimSuffix(name, suffix) + " create"
 	fmt.Printf("%s no config file is in use\n create it: %s\n",
 		logs.Info(), logs.Cp(cmd))
-	os.Exit(exit + 1)
+	os.Exit(21)
 }
 
 // UpdateConfig saves all viper settings to the named file.

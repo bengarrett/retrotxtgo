@@ -39,5 +39,5 @@ func configDoesExist(name string, suffix string) {
 	fmt.Printf(" edit it: %s\n", logs.Cp(cmd+" edit"))
 	fmt.Printf("  delete: %s\n", logs.Cp(cmd+" delete"))
 	fmt.Printf("   reset: %s\n", logs.Cp(cmd+" create --overwrite"))
-	os.Exit(exit + 1)
+	os.Exit(20)
 }
