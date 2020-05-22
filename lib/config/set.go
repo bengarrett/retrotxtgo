@@ -23,6 +23,8 @@ type files map[string]string
 
 type names []string
 
+var setupMode = false
+
 func (n names) String() string {
 	return strings.Join(n, ", ")
 }
@@ -163,6 +165,19 @@ func Set(name string) {
 	}
 }
 
+// Setup walks through all the settings within a configuration file.
+func Setup() {
+	setupMode = true
+	keys := viper.AllKeys()
+	sort.Strings(keys)
+	for i, key := range keys {
+		h := fmt.Sprintf("%d/%d. RetroTxt Setup\n", i+1, len(keys)+1)
+		fmt.Println(h)
+		Set(key)
+		fmt.Println(strings.Repeat("-", len(h)))
+	}
+}
+
 // Validate the existence of a setting key name.
 func Validate(key string) (ok bool) {
 	ok = false
@@ -204,7 +219,9 @@ func save(name string, value interface{}) {
 		logs.Log(err)
 	}
 	fmt.Printf("%s %s is set to \"%v\"\n", logs.Cs("✓"), logs.Cs(name), value)
-	os.Exit(0)
+	if !setupMode {
+		os.Exit(0)
+	}
 }
 
 func setDirectory(name string) {

@@ -113,6 +113,14 @@ var configSetCmd = &cobra.Command{
 	},
 }
 
+var configSetupCmd = &cobra.Command{
+	Use:   "setup",
+	Short: "Setup all the available Retrotxt settings",
+	Run: func(cmd *cobra.Command, args []string) {
+		config.Setup()
+	},
+}
+
 var configShellCmd = &cobra.Command{
 	Use:   "shell",
 	Short: "Apply autocompletion a terminal shell",
@@ -160,8 +168,9 @@ func init() {
 	configCmd.AddCommand(configDeleteCmd)
 	configCmd.AddCommand(configEditCmd)
 	configCmd.AddCommand(configInfoCmd)
-	configCmd.AddCommand(configShellCmd)
 	configCmd.AddCommand(configSetCmd)
+	configCmd.AddCommand(configSetupCmd)
+	configCmd.AddCommand(configShellCmd)
 	// create
 	configCreateCmd.Flags().BoolVarP(&configArgs.ow, "overwrite", "y", false,
 		"overwrite and reset the existing config file")
