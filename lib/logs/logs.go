@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/alecthomas/chroma/quick"
 	"github.com/gookit/color"
 	gap "github.com/muesli/go-app-paths"
+	"github.com/spf13/viper"
 )
 
 // the lowest, largest and recommended network ports to serve HTTP.
@@ -128,7 +128,8 @@ func ColorHTML(elm string) {
 
 func colorhtml(elm *string) string {
 	var buf bytes.Buffer
-	if err := quick.Highlight(&buf, *elm, "html", "terminal256", "lovelace"); err != nil {
+	style := viper.GetString("style.html")
+	if err := HighlightWriter(&buf, *elm, "html", style); err != nil {
 		return fmt.Sprintf("\n%s\n", *elm)
 	}
 	if len(buf.String()) == 0 {

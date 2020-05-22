@@ -2,9 +2,7 @@ package config
 
 import (
 	"fmt"
-	"os"
 
-	"github.com/alecthomas/chroma/quick"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
@@ -25,9 +23,7 @@ func Info(style string) (err logs.IssueErr) {
 	case "none", "":
 		fmt.Println(string(out))
 	default:
-		if err := quick.Highlight(os.Stdout, string(out), "yaml", "terminal256", style); err != nil {
-			fmt.Println(string(out))
-		}
+		logs.Highlight(string(out), "yaml", style)
 	}
 	return logs.IssueErr{}
 }

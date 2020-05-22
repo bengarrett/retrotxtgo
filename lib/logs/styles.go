@@ -2,6 +2,7 @@ package logs
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -23,7 +24,7 @@ type YamlExample struct {
 func (s YamlExample) String(flag string) {
 	fmt.Println()
 	out, _ := yaml.Marshal(s)
-	quick.Highlight(os.Stdout, string(out), "yaml", "terminal256", s.Style.Name)
+	Highlight(string(out), "yaml", s.Style.Name)
 	if flag != "" {
 		fmt.Println(color.Secondary.Sprintf("%s=%q", flag, s.Style.Name))
 	}
@@ -42,8 +43,13 @@ func YamlStyles(cmd string) {
 	}
 }
 
-// Highlight the syntax of the source string except when piped to stdout.
+// Highlight and print the syntax of the source string except when piped to stdout.
 func Highlight(source, lexer, style string) (err error) {
+	return HighlightWriter(os.Stdout, source, lexer, style)
+}
+
+// HighlightWriter writes the highlight syntax of the source string except when piped to stdout.
+func HighlightWriter(w io.Writer, source, lexer, style string) (err error) {
 	var term = Term()
 	// detect piping for text output or ansi for printing
 	// source: https://stackoverflow.com/questions/43947363/detect-if-a-command-is-piped-or-not
@@ -56,7 +62,7 @@ func Highlight(source, lexer, style string) (err error) {
 		fmt.Println(source)
 	} else if (fi.Mode() & os.ModeCharDevice) == 0 {
 		fmt.Println(source)
-	} else if err := quick.Highlight(os.Stdout, source, lexer, term, style); err != nil {
+	} else if err := quick.Highlight(w, source, lexer, term, style); err != nil {
 		fmt.Println(source)
 	}
 	return nil

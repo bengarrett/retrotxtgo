@@ -14,7 +14,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/alecthomas/chroma/quick"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/spf13/viper"
 )
@@ -150,7 +149,7 @@ func (args Args) Stdout(data []byte, test bool) error {
 	case "", "none":
 		fmt.Printf("%s", buf.String())
 	default:
-		if err = quick.Highlight(os.Stdout, buf.String(), "html", "terminal256", args.Styles); err != nil {
+		if err = logs.Highlight(buf.String(), "html", args.Styles); err != nil {
 			return err
 		}
 	}
