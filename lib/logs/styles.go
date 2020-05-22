@@ -53,14 +53,14 @@ func HighlightWriter(w io.Writer, source, lexer, style string) (err error) {
 	var term = Term()
 	// detect piping for text output or ansi for printing
 	// source: https://stackoverflow.com/questions/43947363/detect-if-a-command-is-piped-or-not
-	fi, err := os.Stdout.Stat()
+	fo, err := os.Stdout.Stat()
 	if err != nil {
 		return err
 	}
 	// html json noop svg terminal terminal16m terminal256 tokens
 	if term == "none" {
 		fmt.Println(source)
-	} else if (fi.Mode() & os.ModeCharDevice) == 0 {
+	} else if (fo.Mode() & os.ModeCharDevice) == 0 {
 		fmt.Println(source)
 	} else if err := quick.Highlight(w, source, lexer, term, style); err != nil {
 		fmt.Println(source)

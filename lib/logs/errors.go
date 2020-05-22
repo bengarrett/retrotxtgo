@@ -98,7 +98,7 @@ func (e CmdErr) Error() Err {
 			Arg: s[5],
 			Msg: errors.New("use a flag from the list of flags")}
 	}
-	fmt.Printf("DEBUG: %+v\n", e.Err)
+	//fmt.Printf("DEBUG: %+v\n", e.Err)
 	return Err{Issue: "command", Arg: "execute", Msg: e.Err}
 }
 

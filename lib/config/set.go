@@ -100,7 +100,6 @@ func Set(name string) {
 		fmt.Println(h.String())
 		return
 	}
-	//
 	PrintLocation()
 	value := viper.GetString(name)
 	switch value {
@@ -136,14 +135,21 @@ func Set(name string) {
 		// logs.Ci(Format.String("info")))
 		setStrings(name, Format.Version)
 	default:
-		q := "Set a new value or leave blank to keep it disabled:"
 		setMeta(name, value)
-		if value != "" {
-			q = "Set a new value, leave blank to keep as-is or use a dash [-] to disable:"
-		}
-		fmt.Printf("\n%s \n", q)
-		setString(value)
+		setString(name)
 	}
+}
+
+func save(name string, value interface{}) {
+	if name == "" {
+		logs.Log(errors.New("save name string is empty"))
+	}
+	viper.Set(name, value)
+	fmt.Printf("%s %s is now set to \"%v\"\n", logs.Cs("✓"), logs.Cp(name), value)
+	if err := UpdateConfig("", false); err != nil {
+		logs.Log(err)
+	}
+	os.Exit(0)
 }
 
 func setGenerator() {
@@ -152,10 +158,17 @@ func setGenerator() {
 	elm := fmt.Sprintf("<head>\n  <meta name=\"generator\" content=\"RetroTxt v%s, %s\">",
 		v.B.Version, v.B.Date)
 	logs.ColorHTML(elm)
-	viper.Set(name, logs.PromptYN("Enable this element", viper.GetBool(name)))
+	prmt := logs.PromptYN("Enable this element!", viper.GetBool(name))
+	viper.Set(name, prmt)
+	if err := UpdateConfig("", false); err != nil {
+		logs.Log(err)
+	}
 }
 
 func setMeta(name, value string) {
+	if name == "" {
+		logs.Log(errors.New("setmeta name string is empty"))
+	}
 	s := strings.Split(name, ".")
 	switch {
 	case len(s) != 3, s[0] != "create", s[1] != "meta":
@@ -164,23 +177,30 @@ func setMeta(name, value string) {
 	elm := fmt.Sprintf("<head>\n  <meta name=\"%s\" value=\"%s\">", s[2], value)
 	logs.ColorHTML(elm)
 	fmt.Println(logs.Cf("About this element: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta#attr-name"))
+	q := "Set a new value or leave blank to keep it disabled:"
+	if value != "" {
+		q = "Set a new value, leave blank to keep as-is or use a dash [-] to disable:"
+	}
+	fmt.Printf("\n%s \n", q)
 }
 
 func setPort(name string) {
+	if name == "" {
+		logs.Log(errors.New("setport name string is empty"))
+	}
 	save(name, logs.PromptPort(true))
 }
 
 func setString(name string) {
+	if name == "" {
+		logs.Log(errors.New("setstring name string is empty"))
+	}
 	save(name, logs.PromptString())
 }
 
 func setStrings(name string, data []string) {
+	if name == "" {
+		logs.Log(errors.New("setstrings name string is empty"))
+	}
 	save(name, logs.PromptStrings(&data))
-}
-
-func save(name string, value interface{}) {
-	viper.Set(name, value)
-	fmt.Printf("%s %s is now set to \"%v\"\n", logs.Cs("✓"), logs.Cp(name), value)
-	UpdateConfig(name, false)
-	os.Exit(0)
 }

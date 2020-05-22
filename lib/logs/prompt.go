@@ -79,6 +79,7 @@ func pstring(r io.Reader) (words string) {
 		case "-":
 			words = ""
 		}
+		return words
 	}
 	if err := scanner.Err(); err != nil {
 		log.Fatalf("reading standard input: %s", err)

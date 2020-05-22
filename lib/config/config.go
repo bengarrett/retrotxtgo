@@ -91,6 +91,9 @@ func configMissing(name string, suffix string) {
 
 // UpdateConfig saves all viper settings to the named file.
 func UpdateConfig(name string, new bool) (err error) {
+	if name == "" {
+		name = viper.ConfigFileUsed()
+	}
 	out, err := yaml.Marshal(viper.AllSettings())
 	if err != nil {
 		return err
@@ -99,9 +102,8 @@ func UpdateConfig(name string, new bool) (err error) {
 	if err != nil {
 		return err
 	}
-	PrintLocation()
 	if !new {
-		fmt.Println("The config is saved")
+		fmt.Println("The change is saved")
 	}
 	return err
 }
