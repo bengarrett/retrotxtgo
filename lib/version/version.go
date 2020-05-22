@@ -46,6 +46,23 @@ func JSON(indent bool) (data []byte) {
 	return data
 }
 
+// Print formats and prints the RetroTxt version and binary compile infomation.
+func Print(format string) (ok bool) {
+	switch format {
+	case "color", "c", "":
+		print(Sprint(true))
+	case "json", "j":
+		fmt.Printf("%s\n", JSON(true))
+	case "json.min", "jm":
+		fmt.Printf("%s\n", JSON(false))
+	case "text", "t":
+		print(Sprint(false))
+	default:
+		return false
+	}
+	return true
+}
+
 // Sprint formats the RetroTxt version and binary compile infomation.
 func Sprint(color bool) (text string) {
 	c.Enable = color

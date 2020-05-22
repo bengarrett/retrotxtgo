@@ -1,11 +1,9 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
-	ver "github.com/bengarrett/retrotxtgo/lib/version"
+	"github.com/bengarrett/retrotxtgo/lib/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -33,35 +31,17 @@ The shown ` + logs.Cc("RetroTxt URL") + ` is the weblink to the application Gith
 ` + logs.Cc("Binary") + ` should return the path name of this program. It maybe inaccurate
 if it is launched through an operating system symlink.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if ok := versionPrint(viper.GetString("style.yaml")); !ok {
+		if ok := version.Print(viper.GetString("style.yaml")); !ok {
 			logs.CheckFlag("format", versionFmt, config.Format.Version)
 		}
 	},
 }
 
 func init() {
-	//config.InitDefaults()
 	rootCmd.AddCommand(versionCmd)
 	versionCmd.Flags().StringVarP(&versionFmt, "format", "f",
 		viper.GetString("style.yaml"),
 		"output format \noptions: "+config.Format.String("version"))
 	err := viper.BindPFlag("style.yaml", versionCmd.Flags().Lookup("format"))
 	logs.Check("style.yaml", err)
-}
-
-// TODO: apply Highlight() to json,j
-func versionPrint(format string) (ok bool) {
-	switch format {
-	case "color", "c", "":
-		print(ver.Sprint(true))
-	case "json", "j":
-		fmt.Printf("%s\n", ver.JSON(true))
-	case "json.min", "jm":
-		fmt.Printf("%s\n", ver.JSON(false))
-	case "text", "t":
-		print(ver.Sprint(false))
-	default:
-		return false
-	}
-	return true
 }

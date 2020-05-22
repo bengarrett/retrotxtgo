@@ -36,6 +36,27 @@ func Test_JSON(t *testing.T) {
 	}
 }
 
+func Test_Print(t *testing.T) {
+	tests := []struct {
+		name   string
+		format string
+		wantOk bool
+	}{
+		{"empty", "", true},
+		{"invalid", "abcde", false},
+		{"j", "j", true},
+		{"jm", "jm", true},
+		{"t", "t", true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotOk := Print(tt.format); gotOk != tt.wantOk {
+				t.Errorf("Print() = %v, want %v", gotOk, tt.wantOk)
+			}
+		})
+	}
+}
+
 func ExampleSprint() {
 	fmt.Print(Sprint(false))
 }
