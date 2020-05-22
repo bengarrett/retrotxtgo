@@ -175,7 +175,7 @@ func init() {
 	// set
 	configSetCmd.Flags().StringVarP(&configArgs.set, "name", "n", "",
 		fmt.Sprintf("the setting name in dot syntax%s", logs.Required())+
-			fmt.Sprintf("\nrun %s", logs.Example("retrotxt config info"))+
+			fmt.Sprintf("\nrun %s", logs.Example("retrotxt config info -c"))+
 			" to see a list of names")
 	err = configSetCmd.MarkFlagRequired("name")
 	logs.Check("name flag", err)

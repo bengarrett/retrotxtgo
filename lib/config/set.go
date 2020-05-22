@@ -4,11 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 	"text/tabwriter"
 
+	"github.com/alecthomas/chroma/styles"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	v "github.com/bengarrett/retrotxtgo/lib/version"
 	"github.com/spf13/viper"
@@ -17,6 +20,12 @@ import (
 type hints map[string]string
 
 type files map[string]string
+
+type names []string
+
+func (n names) String() string {
+	return strings.Join(n, ", ")
+}
 
 // createTemplates creates a map of the template filenames used in conjunction with the layout flag.
 func createTemplates() files {
@@ -49,7 +58,6 @@ func (f files) Strings() []string {
 	return s
 }
 
-// TODO: improve descriptions and use them for create --flag hints
 func list() hints {
 	pm, px, pr := strconv.Itoa(int(port.min)), strconv.Itoa(int(port.max)), strconv.Itoa(int(port.rec))
 	ports := logs.Cp(pm) + "-" + logs.Cp(px) + fmt.Sprintf(" (recommend: %s)", logs.Cp(pr))
@@ -85,6 +93,12 @@ func List() (err error) {
 	return w.Flush()
 }
 
+// Names lists the names of chroma styles.
+func Names() string {
+	var s names = styles.Names()
+	return s.String()
+}
+
 // Set edits and saves a setting within a configuration file.
 func Set(name string) {
 	if !Validate(name) {
@@ -92,7 +106,7 @@ func Set(name string) {
 			Issue: "invalid value",
 			Arg:   fmt.Sprintf("%q for --name", name),
 			Msg:   errors.New(("to see a list of usable settings")),
-			Hint:  "config info",
+			Hint:  "config info -c",
 		}
 		fmt.Println(h.String())
 		return
@@ -101,9 +115,9 @@ func Set(name string) {
 	value := viper.GetString(name)
 	switch value {
 	case "":
-		fmt.Printf("\n%s is currently disabled\n", logs.Cp(name))
+		fmt.Printf("\n%s is currently disabled\n", logs.Cf(name))
 	default:
-		fmt.Printf("\n%s is currently set to %q\n", logs.Cp(name), value)
+		fmt.Printf("\n%s is currently set to %q\n", logs.Cf(name), value)
 	}
 	hints := list()
 	switch name {
@@ -114,7 +128,7 @@ func Set(name string) {
 		setGenerator()
 	case "create.save-directory":
 		fmt.Println("Choose a new " + hints[name])
-		setString(name) // TODO: setDirectory? check exist
+		setDirectory(name)
 	case "create.server-port":
 		fmt.Println("Set a new HTTP port to " + hints[name])
 		setPort(name)
@@ -123,17 +137,15 @@ func Set(name string) {
 		setString(name)
 	case "editor":
 		fmt.Println(hints[name])
-		setString(name) // TODO: setEditor() .. do a scan of binary in path
+		setEditor(name)
 	case "style.html":
-		fmt.Printf("Choose a new value, choice: %s\n",
-			logs.Ci(Format.String("info")))
-		// TODO sample HTML
-		setStrings(name, Format.Info)
+		fmt.Printf("Set a new HTML syntax style, choices:\n%s\n",
+			logs.Ci(Names()))
+		setStrings(name, styles.Names())
 	case "style.yaml":
-		fmt.Printf("Set a new value, choice: %s\n",
-			logs.Ci(Format.String("version")))
-		// logs.Ci(Format.String("info")))
-		setStrings(name, Format.Version)
+		fmt.Printf("Set a new YAML syntax style, choices:\n%s\n",
+			logs.Ci(Names()))
+		setStrings(name, styles.Names())
 	default:
 		setMeta(name, value)
 		setString(name)
@@ -152,6 +164,23 @@ func Validate(key string) (ok bool) {
 	return true
 }
 
+func dirAliases(name string) (dir string) {
+	var err error
+	switch name {
+	case "~":
+		dir, err = os.UserHomeDir()
+	case "..":
+		dir, err = os.Getwd()
+		dir = filepath.Dir(dir)
+	case ".":
+		dir, err = os.Getwd()
+	}
+	if err != nil {
+		logs.Log(err)
+	}
+	return dir
+}
+
 func save(name string, value interface{}) {
 	if name == "" {
 		logs.Log(errors.New("save name string is empty"))
@@ -167,13 +196,40 @@ func save(name string, value interface{}) {
 	os.Exit(0)
 }
 
+func setDirectory(name string) {
+	if name == "" {
+		logs.Log(errors.New("setdirectory name string is empty"))
+	}
+	dir := dirAliases(logs.PromptString())
+	if _, err := os.Stat(dir); err != nil {
+		es := fmt.Sprint(err)
+		e := strings.Split(es, ":")
+		if len(e) > 1 {
+			es = fmt.Sprintf("%s", strings.TrimSpace(strings.Join(e[1:], "")))
+		}
+		fmt.Printf("%s this directory returned the following error: %s\n", logs.Info(), es)
+	}
+	save(name, dir)
+}
+
+func setEditor(name string) {
+	if name == "" {
+		logs.Log(errors.New("setstring name string is empty"))
+	}
+	editor := logs.PromptString()
+	if _, err := exec.LookPath(editor); err != nil {
+		fmt.Printf("%s this editor choice is not accessible: %s\n", logs.Info(), err)
+	}
+	save(name, editor)
+}
+
 func setGenerator() {
 	var name = "create.meta.generator"
 	// v{{.BuildVersion}}; {{.BuildDate}}
 	elm := fmt.Sprintf("<head>\n  <meta name=\"generator\" content=\"RetroTxt v%s, %s\">",
 		v.B.Version, v.B.Date)
 	logs.ColorHTML(elm)
-	prmt := logs.PromptYN("Enable this element!", viper.GetBool(name))
+	prmt := logs.PromptYN("Enable this element", viper.GetBool(name))
 	viper.Set(name, prmt)
 	if err := UpdateConfig("", false); err != nil {
 		logs.Log(err)
@@ -194,7 +250,7 @@ func setMeta(name, value string) {
 	}
 	elm := fmt.Sprintf("<head>\n  <meta name=\"%s\" value=\"%s\">", s[2], value)
 	logs.ColorHTML(elm)
-	fmt.Println(logs.Cf("About this element: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta#attr-name"))
+	fmt.Println(logs.Cf("About this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name"))
 	q := "Set a new value or leave blank to keep it disabled:"
 	if value != "" {
 		q = "Set a new value, leave blank to keep as-is or use a dash [-] to disable:"
