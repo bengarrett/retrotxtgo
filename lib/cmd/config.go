@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/alecthomas/chroma/formatters"
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/gookit/color"
@@ -115,9 +114,11 @@ var configSetCmd = &cobra.Command{
 }
 
 var configShellCmd = &cobra.Command{
-	Use:     "shell",
-	Short:   "Apply autocompletion a terminal shell",
-	Example: logs.Example("  retrotxt config shell --interpreter string [flags]"),
+	Use:   "shell",
+	Short: "Apply autocompletion a terminal shell",
+	Example: logs.Example("  retrotxt config shell --interpreter string [flags]") +
+		logs.Example("\n  retrotxt config shell -i=bash >> ~/.bash_profile") +
+		logs.Example("\n  retrotxt config shell -i=zsh >> ~/.zshrc"),
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
 			buf   bytes.Buffer
@@ -146,7 +147,6 @@ var configShellCmd = &cobra.Command{
 		if err := logs.Highlight(buf.String(), lexer, style); err != nil {
 			logs.Check("config shell", err)
 		}
-		fmt.Printf("-->%s\n", formatters.Names())
 	},
 }
 
