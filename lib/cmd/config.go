@@ -8,10 +8,9 @@ fixes:
 import (
 	"bytes"
 	"fmt"
-	"os"
 	"strings"
 
-	"github.com/alecthomas/chroma/quick"
+	"github.com/alecthomas/chroma/formatters"
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/spf13/cobra"
@@ -127,6 +126,7 @@ var configShellCmd = &cobra.Command{
 			buf   bytes.Buffer
 			err   error
 			lexer string
+			style string = viper.GetString("style.html")
 		)
 		switch configArgs.shell {
 		case "bash", "bsh", "b":
@@ -146,9 +146,10 @@ var configShellCmd = &cobra.Command{
 				Arg: configArgs.shell,
 				Msg: fmt.Errorf("options: %s", config.Format.String("shell"))})
 		}
-		if err := quick.Highlight(os.Stdout, buf.String(), lexer, "terminal256", "monokai"); err != nil {
-			fmt.Println(buf.String())
+		if err := logs.Highlight(buf.String(), lexer, style); err != nil {
+			logs.Check("config shell", err)
 		}
+		fmt.Printf("-->%s\n", formatters.Names())
 	},
 }
 
@@ -180,8 +181,8 @@ func init() {
 	logs.Check("name flag", err)
 	// shell
 	configShellCmd.Flags().StringVarP(&configArgs.shell, "interpreter", "i", "",
-		"user shell to receive retrotxtgo auto-completions\nchoices: "+
-			logs.Ci(strings.Join(config.Format.Shell, ", ")))
+		"user shell to receive retrotxt auto-completions"+logs.Required()+
+			"\nchoices: "+logs.Ci(strings.Join(config.Format.Shell, ", ")))
 	err = configShellCmd.MarkFlagRequired("interpreter")
 	logs.Check("interpreter flag", err)
 	configShellCmd.SilenceErrors = true
