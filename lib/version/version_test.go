@@ -5,14 +5,63 @@ import (
 	"fmt"
 	"reflect"
 	"runtime"
-	"strings"
 	"testing"
 	"time"
 )
 
+// func capVersionText(c bool) (output string) {
+// 	rescueStdout := os.Stdout
+// 	r, w, _ := os.Pipe()
+// 	os.Stdout = w
+// 	color.Enable = true
+// 	versionText(c)
+// 	w.Close()
+// 	bytes, _ := ioutil.ReadAll(r)
+// 	os.Stdout = rescueStdout
+// 	return strings.TrimSpace(string(bytes))
+// }
+
+func ExampleBorder() {
+	fmt.Printf("%s", Border("hi"))
+	// Output: ┌────┐
+	// │ hi │
+	// └────┘
+}
+
+func ExampleDigits() {
+	fmt.Println(Digits("v1.0 (init release)"))
+	// Output: 1.0
+}
+
 func ExampleJSON() {
-	fmt.Printf("%s", JSON(true))
-	fmt.Printf("%s", JSON(false))
+	fmt.Print(json.Valid(JSON(true)), json.Valid(JSON(false)))
+	// Output: true true
+}
+
+func ExampleSprint() {
+	fmt.Print(Sprint(false)[:8])
+	// Output: RetroTxt
+}
+
+func TestDigits(t *testing.T) {
+	tests := []struct {
+		name string
+		s    string
+		want string
+	}{
+		{"empty", "", ""},
+		{"digits", "01234567890", "01234567890"},
+		{"symbols", "~!@#$%^&*()_+", ""},
+		{"mixed", "A0B1C2D3E4F5G6H7I8J9K0L", "01234567890"},
+		{"semantic", "v1.0.0 (FINAL)", "1.0.0"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Digits(tt.s); got != tt.want {
+				t.Errorf("Digits() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
 
 func Test_JSON(t *testing.T) {
@@ -57,8 +106,32 @@ func Test_Print(t *testing.T) {
 	}
 }
 
-func ExampleSprint() {
-	fmt.Print(Sprint(false))
+func TestSemantic(t *testing.T) {
+	tests := []struct {
+		name        string
+		ver         string
+		wantOk      bool
+		wantVersion Version
+	}{
+		{"empty", "", false, Version{0, 0, 0}},
+		{"text", "hello world", false, Version{0, 0, 0}},
+		{"zero", "0.0.0", true, Version{0, 0, 0}},
+		{"vzero", "v0.0.0", true, Version{0, 0, 0}},
+		{"ver str", "v1.2.3 (super-release)", true, Version{1, 2, 3}},
+		{"short", "V1", true, Version{1, 0, 0}},
+		{"short.", "V1.1", true, Version{1, 1, 0}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotOk, gotVersion := Semantic(tt.ver)
+			if gotOk != tt.wantOk {
+				t.Errorf("Semantic() gotOk = %v, want %v", gotOk, tt.wantOk)
+			}
+			if !reflect.DeepEqual(gotVersion, tt.wantVersion) {
+				t.Errorf("Semantic() gotVersion = %v, want %v", gotVersion, tt.wantVersion)
+			}
+		})
+	}
 }
 
 func TestSprint(t *testing.T) {
@@ -115,6 +188,36 @@ func Test_binary(t *testing.T) {
 	}
 }
 
+func Test_compare(t *testing.T) {
+	type args struct {
+		current string
+		fetched string
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{"empty", args{"", ""}, false},
+		{"v1", args{"v1", ""}, false},
+		{"v1.0", args{"v1.0", ""}, false},
+		{"v1.0.0", args{"v1.0.0", ""}, false},
+		{"v1.0.0", args{"v1.0.0", "v1.0.0"}, false},
+		{"v1.0.0", args{"v1.0.1", "v1.0.0"}, false},
+		{"v1.0.1", args{"v1.0.0", "v1.0.1"}, true},
+		{"v1.1.1", args{"v1.0.0", "v1.1.1"}, true},
+		{"v2.0.1", args{"v1.0.0", "v2.0.1"}, true},
+		{"v2", args{"v1", "v2.0.1"}, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := compare(tt.args.current, tt.args.fetched); got != tt.want {
+				t.Errorf("compare() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func Test_info(t *testing.T) {
 	tests := []struct {
 		name string
@@ -131,7 +234,7 @@ func Test_info(t *testing.T) {
 	}
 }
 
-func Test_locBuildDate(t *testing.T) {
+func Test_locBuild(t *testing.T) {
 	d := time.Date(1980, 1, 31, 1, 34, 0, 0, time.UTC)
 	tests := []struct {
 		name string
@@ -145,36 +248,8 @@ func Test_locBuildDate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := localBuild(tt.date); len(got) > 4 && got[:4] != tt.want {
-				t.Errorf("locBuildDate() = %v, want %v", got, tt.want)
+				t.Errorf("localBuild() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
-
-func Test_semantic(t *testing.T) {
-	tests := []struct {
-		name string
-		want string
-	}{
-		{"ok", "1"}, // 1.14.1
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := semantic(); len(got) > 2 && strings.Split(got, ".")[0] != tt.want {
-				t.Errorf("semantic() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-// func capVersionText(c bool) (output string) {
-// 	rescueStdout := os.Stdout
-// 	r, w, _ := os.Pipe()
-// 	os.Stdout = w
-// 	color.Enable = true
-// 	versionText(c)
-// 	w.Close()
-// 	bytes, _ := ioutil.ReadAll(r)
-// 	os.Stdout = rescueStdout
-// 	return strings.TrimSpace(string(bytes))
-// }

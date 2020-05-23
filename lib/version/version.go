@@ -2,15 +2,19 @@ package version
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
+	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/online"
 	c "github.com/gookit/color"
 )
 
@@ -26,6 +30,13 @@ type Build struct {
 	Version string
 }
 
+// Version details in semantic syntax
+type Version struct {
+	Major int
+	Minor int
+	Patch int
+}
+
 type versionInfo map[string]string
 
 // B holds build and version information.
@@ -34,6 +45,45 @@ var B = Build{
 	Date:    "",
 	Domain:  "retrotxt.com",
 	Version: "",
+}
+
+// Border wraps text around a single line border.
+func Border(text string) *bytes.Buffer {
+	maxLen := 0
+	scanner := bufio.NewScanner(strings.NewReader(text))
+	scanner.Split(bufio.ScanLines)
+	for scanner.Scan() {
+		l := utf8.RuneCountInString(scanner.Text())
+		if l > maxLen {
+			maxLen = l
+		}
+	}
+	maxLen = maxLen + 2
+	scanner = bufio.NewScanner(strings.NewReader(text))
+	scanner.Split(bufio.ScanLines)
+	var b bytes.Buffer
+	fmt.Fprintln(&b, ("┌" + strings.Repeat("─", maxLen) + "┐"))
+	for scanner.Scan() {
+		l := utf8.RuneCountInString(scanner.Text())
+		lp := ((maxLen - l) / 2)
+		rp := lp
+		// if lp/rp are X.5 decimal values, add 1 right padd to account for the uneven split
+		if float32((maxLen-l)/2) != float32(float32(maxLen-l)/2) {
+			rp = rp + 1
+		}
+		fmt.Fprintf(&b, "│%s%s%s│\n", strings.Repeat(" ", lp), scanner.Text(), strings.Repeat(" ", rp))
+	}
+	fmt.Fprintln(&b, "└"+strings.Repeat("─", maxLen)+"┘")
+	return &b
+}
+
+// Digits returns only the digits and decimal point values from a string.
+func Digits(s string) string {
+	reg, err := regexp.Compile("[^0-9/.]+")
+	if err != nil {
+		return ""
+	}
+	return reg.ReplaceAllString(s, "")
 }
 
 // JSON formats the RetroTxt version and binary compile infomation.
@@ -47,6 +97,24 @@ func JSON(indent bool) (data []byte) {
 	}
 	logs.ChkErr(logs.Err{Issue: "could not create", Arg: "json", Msg: err})
 	return data
+}
+
+// NewRelease checks to see if the active executable matches the version hosted on GitHub.
+// The ver value contains the result returned from the GitHub releases/latest API.
+func NewRelease() (ok bool, ver string) {
+	g, err := online.Endpoint(online.ReleaseAPI)
+	if err != nil {
+		logs.LogCont(err)
+		return false, ver
+	}
+	ver = fmt.Sprint(g["tag_name"])
+	if ver == "" {
+		return false, ver
+	}
+	if c := compare(B.Version, ver); c {
+		return true, ver
+	}
+	return false, ver
 }
 
 // Print formats and prints the RetroTxt version and binary compile infomation.
@@ -66,55 +134,49 @@ func Print(format string) (ok bool) {
 	return true
 }
 
-// New ??
-func New(color bool) (text string) {
-	c.Enable = color
-	s := "A newer edition of RetroTxt is available!\n" +
-		"Learn more at https://github.com/bengarrett/retrotxtgo"
-	Print(border(s))
-	return text
-}
-
-func border(text string) string {
-	maxLen := 0
-	scanner := bufio.NewScanner(strings.NewReader(text))
-	scanner.Split(bufio.ScanLines)
-	for scanner.Scan() {
-		l := utf8.RuneCountInString(scanner.Text())
-		if l > maxLen {
-			maxLen = l
-		}
+// Semantic breaks down a semantic version string into major, minor and patch integers.
+func Semantic(ver string) (ok bool, version Version) {
+	if ver == "" {
+		return false, version
 	}
-	maxLen = maxLen + 2
-	scanner = bufio.NewScanner(strings.NewReader(text))
-	scanner.Split(bufio.ScanLines)
-	fmt.Println("┌" + strings.Repeat("─", maxLen) + "┐")
-	for scanner.Scan() {
-		l := utf8.RuneCountInString(scanner.Text())
-		lp := ((maxLen - l) / 2)
-		rp := lp
-		// if lp/rp are X.5 decimal values, add 1 right padd to account for the uneven split
-		if float32((maxLen-l)/2) != float32(float32(maxLen-l)/2) {
-			rp = rp + 1
+	vers := strings.Split(ver, ".")
+	var nums [3]int
+	for i, v := range vers {
+		if v == "" {
+			v = "0"
 		}
-		fmt.Printf("│%s%s%s│\n", strings.Repeat(" ", lp), scanner.Text(), strings.Repeat(" ", rp))
+		num, err := strconv.Atoi(Digits(v))
+		if err != nil {
+			return false, version
+		}
+		nums[i] = num
 	}
-	fmt.Println("└" + strings.Repeat("─", maxLen) + "┘")
-	return text
+	version.Major = nums[0]
+	version.Minor = nums[1]
+	version.Patch = nums[2]
+	return true, version
 }
 
 // Sprint formats the RetroTxt version and binary compile infomation.
 func Sprint(color bool) (text string) {
 	c.Enable = color
 	i := information()
-	text = fmt.Sprintf(logs.Cp("RetroTxt\t%s [%s]\n"), i["copyright"], i["url"]) +
-		fmt.Sprintf(logs.Cinf("Version:\t%s\n"), i["app ver"]) +
-		fmt.Sprintf("Go version:\t%s\n", i["go ver"]) +
-		fmt.Sprintf("\nBinary:\t\t%s\n", i["exe"]) +
-		fmt.Sprintf("OS/Arch:\t%s\n", i["os"]) +
-		fmt.Sprintf("Build commit:\t%s\n", i["git"]) +
-		fmt.Sprintf("Build date:\t%s\n", i["date"])
-	return text + New(true)
+	new, ver := NewRelease()
+	var b bytes.Buffer
+	fmt.Fprintf(&b, logs.Cp("RetroTxt\t%s [%s]\n"), i["copyright"], i["url"])
+	fmt.Fprintf(&b, logs.Cinf("Version:\t%s"), i["app ver"])
+	if new {
+		fmt.Fprintf(&b, logs.Cinf("  current: %s"), ver)
+	}
+	fmt.Fprintf(&b, "\nGo version:\t%s\n", i["go ver"])
+	fmt.Fprintf(&b, "\nBinary:\t\t%s\n", i["exe"])
+	fmt.Fprintf(&b, "OS/Arch:\t%s\n", i["os"])
+	fmt.Fprintf(&b, "Build commit:\t%s\n", i["git"])
+	fmt.Fprintf(&b, "Build date:\t%s\n", i["date"])
+	if new {
+		fmt.Fprint(&b, newRelease())
+	}
+	return b.String()
 }
 
 // arch humanises some common Go architecture targets.
@@ -138,13 +200,25 @@ func binary() string {
 	return bin
 }
 
-// semantic go version.
-func semantic() string {
-	ver := runtime.Version()
-	if len(ver) > 2 && ver[:2] == "go" {
-		return ver[2:]
+func compare(current, fetched string) bool {
+	ok, c := Semantic(current)
+	if !ok {
+		return false
 	}
-	return ver
+	ok, f := Semantic(fetched)
+	if !ok {
+		return false
+	}
+	if c.Major < f.Major {
+		return true
+	}
+	if c.Minor < f.Minor {
+		return true
+	}
+	if c.Patch < f.Patch {
+		return true
+	}
+	return false
 }
 
 // information and version details of retrotxt.
@@ -153,7 +227,7 @@ func information() versionInfo {
 		"copyright": fmt.Sprintf("Copyright © 2020 Ben Garrett"),
 		"url":       fmt.Sprintf("https://%s/go", B.Domain),
 		"app ver":   B.Version,
-		"go ver":    semantic(),
+		"go ver":    semanticGo(),
 		"os":        fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
 		"exe":       binary(),
 		"date":      localBuild(B.Date),
@@ -174,4 +248,19 @@ func localBuild(date string) string {
 		return date
 	}
 	return t.Local().Format("2006 Jan 2, 15:04 MST")
+}
+
+func newRelease() *bytes.Buffer {
+	s := "A newer edition of RetroTxt is available!\n" +
+		"Learn more at https://github.com/bengarrett/retrotxtgo"
+	return Border(s)
+}
+
+// semantic go version.
+func semanticGo() string {
+	ver := runtime.Version()
+	if len(ver) > 2 && ver[:2] == "go" {
+		return ver[2:]
+	}
+	return ver
 }
