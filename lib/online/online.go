@@ -1,6 +1,8 @@
 package online
 
 import (
+	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -9,9 +11,25 @@ import (
 const userAgent = "retrotxtgo ping"
 const httpTimeout = time.Second * 3
 
+// API blah
+type API map[string]interface{}
+
 // ReleaseAPI GitHub API v3 releases endpoint
 // See: https://developer.github.com/v3/repos/releases/
-const ReleaseAPI = "https://api.github.com/repos/bengarrett/RetroTxt/releases"
+const ReleaseAPI = "https://api.github.com/repos/bengarrett/RetroTxt/releases/latest"
+
+// Endpoint ..
+func Endpoint(url string) (data API, err error) {
+	b, err := Get(url)
+	if err != nil {
+		return data, err
+	}
+	if ok := json.Valid(b); !ok {
+		return data, errors.New("the response from is not in json syntax: " + url)
+	}
+	err = json.Unmarshal(b, &data)
+	return data, nil
+}
 
 // Get ...
 func Get(url string) (body []byte, err error) {
