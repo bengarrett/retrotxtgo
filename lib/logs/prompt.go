@@ -12,7 +12,7 @@ import (
 )
 
 // SetupMode changes the behavor of prompts to exit on empty inputs.
-var SetupMode = true
+var SetupMode = false
 
 func promptCheck(prompts int) {
 	switch {
