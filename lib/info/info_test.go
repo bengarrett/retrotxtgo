@@ -21,6 +21,36 @@ var sampleFile = func() string {
 	return path
 }
 
+func Test_Print(t *testing.T) {
+	tmp := sampleFile()
+	type args struct {
+		filename string
+		format   string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"empty", args{"", ""}, true},
+		{"file not exist", args{"notexistingfile", "json"}, true},
+		{"invalid fmt", args{tmp, "yaml"}, true},
+		{"color", args{tmp, ""}, false},
+		{"json", args{tmp, "json"}, false},
+		{"json.min", args{tmp, "jm"}, false},
+		{"text", args{tmp, "t"}, false},
+		{"xml", args{tmp, "xml"}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := Print(tt.args.filename, tt.args.format); (err != nil) != tt.wantErr {
+				t.Errorf("Print() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+	samples.Clean(tmp)
+}
+
 func Test_File(t *testing.T) {
 	tmp := sampleFile()
 	var got Detail

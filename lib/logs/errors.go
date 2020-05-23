@@ -48,7 +48,7 @@ func (e CmdErr) Error() Err {
 	quote := func(s string) string {
 		return fmt.Sprintf("%q", s)
 	}
-	s := strings.Split(e.String(), " ")
+	s := e.Strings()
 	l := len(s)
 	if l < 3 {
 		Log(errors.New("cmderr.args: word count is < 3"))
@@ -102,8 +102,12 @@ func (e CmdErr) Error() Err {
 	return Err{Issue: "command", Arg: "execute", Msg: e.Err}
 }
 
-func (e CmdErr) String() string {
-	return fmt.Sprintf("%s", e.Err)
+func (e CmdErr) String() {
+	fmt.Println(e.Error())
+}
+
+func (e CmdErr) Strings() []string {
+	return strings.Split(fmt.Sprintf("%s", e.Err), " ")
 }
 
 // Exit prints the CmdErr and causes the program to exit with the given status code.
@@ -144,8 +148,9 @@ func CheckCmd(args []string) {
 func CheckFlag(name, value string, args []string) {
 	err := CmdErr{Args: args,
 		Err: fmt.Errorf("invalid slice %s %s", name, value)}
+	err.String()
 	fmt.Printf("         choices: %s\n", strings.Join(args, ", "))
-	err.Exit(1)
+	os.Exit(1)
 }
 
 func checkCmd(arg string, args []string) (msg string, code int) {

@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -54,6 +55,47 @@ type File struct {
 
 // FileDate is a non-standard date format for file modifications
 const FileDate string = "2 Jan 15:04 2006"
+
+// Info parses the named file and prints out its details in a specific syntax.
+func Info(name, format string) (err logs.Err) {
+	if name == "" {
+		return logs.Err{Issue: "info", Arg: "name", Msg: errors.New("value cannot be empty")}
+	}
+	if s, err := os.Stat(name); os.IsNotExist(err) {
+		return logs.Err{Issue: "info name", Arg: name, Msg: errors.New("no such file")}
+	} else if err != nil {
+		return logs.Err{Issue: "info name", Arg: name, Msg: err}
+	} else if s.IsDir() {
+		return logs.Err{Issue: "info name", Arg: name, Msg: errors.New("directories are not usable with this command")}
+	} else if e := Print(name, format); e != nil {
+		return logs.Err{Issue: "info format", Arg: format, Msg: e}
+	}
+	return err
+}
+
+// Print the meta and operating system details of a file.
+func Print(filename, format string) (err error) {
+	var d Detail
+	if err := d.Read(filename); err != nil {
+		return err
+	}
+	switch format {
+	case "color", "c", "":
+		fmt.Printf("%s", d.Text(true))
+	case "json", "j":
+		fmt.Printf("%s\n", d.JSON(true))
+	case "json.min", "jm":
+		fmt.Printf("%s\n", d.JSON(false))
+	case "text", "t":
+		fmt.Printf("%s", d.Text(false))
+	case "xml", "x":
+		data, _ := d.XML()
+		fmt.Printf("%s\n", data)
+	default:
+		return errors.New("format:invalid")
+	}
+	return err
+}
 
 // Read returns the operating system and meta detail of a named file.
 func (d *Detail) Read(name string) (err error) {
