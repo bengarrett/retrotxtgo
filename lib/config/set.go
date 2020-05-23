@@ -33,13 +33,13 @@ func (n names) String(theme bool) string {
 	var s []string
 	for _, name := range n {
 		var b bytes.Buffer
-		logs.HighlightWriter(&b, fmt.Sprintf("%s=%q", name, name), "yaml", name)
+		logs.HighlightWriter(&b, fmt.Sprintf("  %s=%q", name, name), "yaml", name)
 		s = append(s, b.String())
 	}
-	return strings.Join(s, ", ")
+	return strings.Join(s, "\n")
 }
 
-var setupMode = true
+var setupMode = false
 
 type ports struct {
 	max uint
