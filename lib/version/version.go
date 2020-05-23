@@ -1,11 +1,14 @@
 package version
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"os"
 	"runtime"
+	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	c "github.com/gookit/color"
@@ -63,6 +66,43 @@ func Print(format string) (ok bool) {
 	return true
 }
 
+// New ??
+func New(color bool) (text string) {
+	c.Enable = color
+	s := "A newer edition of RetroTxt is available!\n" +
+		"Learn more at https://github.com/bengarrett/retrotxtgo"
+	Print(border(s))
+	return text
+}
+
+func border(text string) string {
+	maxLen := 0
+	scanner := bufio.NewScanner(strings.NewReader(text))
+	scanner.Split(bufio.ScanLines)
+	for scanner.Scan() {
+		l := utf8.RuneCountInString(scanner.Text())
+		if l > maxLen {
+			maxLen = l
+		}
+	}
+	maxLen = maxLen + 2
+	scanner = bufio.NewScanner(strings.NewReader(text))
+	scanner.Split(bufio.ScanLines)
+	fmt.Println("┌" + strings.Repeat("─", maxLen) + "┐")
+	for scanner.Scan() {
+		l := utf8.RuneCountInString(scanner.Text())
+		lp := ((maxLen - l) / 2)
+		rp := lp
+		// if lp/rp are X.5 decimal values, add 1 right padd to account for the uneven split
+		if float32((maxLen-l)/2) != float32(float32(maxLen-l)/2) {
+			rp = rp + 1
+		}
+		fmt.Printf("│%s%s%s│\n", strings.Repeat(" ", lp), scanner.Text(), strings.Repeat(" ", rp))
+	}
+	fmt.Println("└" + strings.Repeat("─", maxLen) + "┘")
+	return text
+}
+
 // Sprint formats the RetroTxt version and binary compile infomation.
 func Sprint(color bool) (text string) {
 	c.Enable = color
@@ -74,7 +114,7 @@ func Sprint(color bool) (text string) {
 		fmt.Sprintf("OS/Arch:\t%s\n", i["os"]) +
 		fmt.Sprintf("Build commit:\t%s\n", i["git"]) +
 		fmt.Sprintf("Build date:\t%s\n", i["date"])
-	return text
+	return text + New(true)
 }
 
 // arch humanises some common Go architecture targets.
