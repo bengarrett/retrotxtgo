@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -25,7 +26,7 @@ type files map[string]string
 
 type names []string
 
-var setupMode = false
+var setupMode = true
 
 func (n names) String() string {
 	return strings.Join(n, ", ")
@@ -100,10 +101,10 @@ func list() hints {
 		"create.meta.keywords":     "words relevant to the page content",
 		"create.meta.referrer":     "controls the Referer HTTP header attached to requests sent from the page",
 		"create.meta.theme-color":  "indicates a suggested color that user agents should use to customize the display of the page",
-		"create.save-directory":    "directory that all HTML files get saved to",
+		"create.save-directory":    "directory to store RetroTxt created HTML files",
 		"create.server-port":       "serve HTML over an internal web server, choices: " + ports,
 		"create.title":             "page title that is shown in a browser title bar or tab",
-		"editor":                   "set an text editor to launch when using " + logs.Example("config edit"),
+		"editor":                   "text editor to launch when using " + logs.Example("config edit"),
 		"style.html":               "syntax highlighter for html previews",
 		"style.yaml":               "syntax highlighter for info and version commands",
 	}
@@ -156,16 +157,16 @@ func Set(name string) {
 	case "create.meta.generator":
 		setGenerator()
 	case "create.save-directory":
-		fmt.Println("Choose a new " + hints[name])
+		fmt.Println("Choose a new " + hints[name] + ":")
 		setDirectory(name)
 	case "create.server-port":
 		fmt.Println("Set a new HTTP port to " + hints[name])
 		setPort(name)
 	case "create.title":
-		fmt.Println("Choose a new " + hints[name])
+		fmt.Println("Choose a new " + hints[name] + ":")
 		setString(name)
 	case "editor":
-		fmt.Println(hints[name])
+		fmt.Println("Set a " + hints[name] + ":")
 		setEditor(name)
 	case "style.html":
 		fmt.Printf("Set a new HTML syntax style, choices:\n%s\n",
@@ -184,13 +185,19 @@ func Set(name string) {
 // Setup walks through all the settings within a configuration file.
 func Setup() {
 	setupMode = true
+	logs.SetupMode = true
 	keys := viper.AllKeys()
 	sort.Strings(keys)
+	if runtime.GOOS == "darwin" {
+		fmt.Println("Press ↩ return to skip the question or ⌃ control-c to quit")
+	} else {
+		fmt.Println("Press ⏎ enter to skip the question or Ctrl-c to quit")
+	}
 	for i, key := range keys {
-		h := fmt.Sprintf("%d/%d. RetroTxt Setup\n", i+1, len(keys)+1)
+		h := fmt.Sprintf("%d/%d. RetroTxt Setup\n", i+1, len(keys))
 		fmt.Println(h)
 		Set(key)
-		fmt.Println(strings.Repeat("-", len(h)))
+		fmt.Println(strings.Repeat("-", len(h)-1))
 	}
 }
 
@@ -230,6 +237,17 @@ func save(name string, value interface{}) {
 	if !Validate(name) {
 		logs.Log(errors.New("save name is an unknown setting: " + name))
 	}
+	if setupMode && fmt.Sprint(value) == "" {
+		return
+	}
+	// don't save unchanged input values
+	if viper.GetString(name) == fmt.Sprint(value) {
+		if setupMode {
+			return
+		}
+		os.Exit(0)
+	}
+	// save named value
 	viper.Set(name, value)
 	if err := UpdateConfig("", false); err != nil {
 		logs.Log(err)
@@ -245,6 +263,9 @@ func setDirectory(name string) {
 		logs.Log(errors.New("setdirectory name string is empty"))
 	}
 	dir := dirAliases(logs.PromptString())
+	if setupMode && dir == "" {
+		return
+	}
 	if _, err := os.Stat(dir); err != nil {
 		es := fmt.Sprint(err)
 		e := strings.Split(es, ":")
@@ -261,6 +282,9 @@ func setEditor(name string) {
 		logs.Log(errors.New("setstring name string is empty"))
 	}
 	editor := logs.PromptString()
+	if setupMode && editor == "" {
+		return
+	}
 	if _, err := exec.LookPath(editor); err != nil {
 		fmt.Printf("%s this editor choice is not accessible: %s\n", logs.Info(), err)
 	}
@@ -306,7 +330,11 @@ func setPort(name string) {
 	if name == "" {
 		logs.Log(errors.New("setport name string is empty"))
 	}
-	save(name, logs.PromptPort(true))
+	p := logs.PromptPort(true)
+	if setupMode && p == 0 {
+		return
+	}
+	save(name, p)
 }
 
 func setShortStrings(name string, data []string) {

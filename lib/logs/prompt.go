@@ -11,6 +11,9 @@ import (
 	"strings"
 )
 
+// SetupMode changes the behavor of prompts to exit on empty inputs.
+var SetupMode = true
+
 func promptCheck(prompts int) {
 	switch {
 	case prompts == 2:
@@ -33,6 +36,9 @@ func pport(r io.Reader, validate bool) (port uint) {
 	for scanner.Scan() {
 		prompts++
 		input = scanner.Text()
+		if SetupMode && input == "" {
+			break
+		}
 		if input == "" {
 			promptCheck(prompts)
 			continue
@@ -73,6 +79,9 @@ func pstring(r io.Reader) (words string) {
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		words := scanner.Text()
+		if SetupMode && words == "" {
+			return words
+		}
 		switch words {
 		case "":
 			os.Exit(0)
@@ -102,6 +111,9 @@ func (k keys) shortPrompt(r io.Reader) (key string) {
 	for scanner.Scan() {
 		prompts++
 		key = scanner.Text()
+		if SetupMode && key == "" {
+			return key
+		}
 		if long := k.shortValidate(key); long != "" {
 			return long
 		}
@@ -160,6 +172,9 @@ func (k keys) prompt(r io.Reader) (key string) {
 	for scanner.Scan() {
 		prompts++
 		key = scanner.Text()
+		if SetupMode && key == "" {
+			return key
+		}
 		if !k.validate(key) {
 			promptCheck(prompts)
 			continue
