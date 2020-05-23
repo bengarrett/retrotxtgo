@@ -26,11 +26,20 @@ type files map[string]string
 
 type names []string
 
-var setupMode = true
-
-func (n names) String() string {
-	return strings.Join(n, ", ")
+func (n names) String(theme bool) string {
+	if !theme {
+		return strings.Join(n, ", ")
+	}
+	var s []string
+	for _, name := range n {
+		var b bytes.Buffer
+		logs.HighlightWriter(&b, fmt.Sprintf("%s=%q", name, name), "yaml", name)
+		s = append(s, b.String())
+	}
+	return strings.Join(s, ", ")
 }
+
+var setupMode = true
 
 type ports struct {
 	max uint
@@ -126,7 +135,7 @@ func List() (err error) {
 // Names lists the names of chroma styles.
 func Names() string {
 	var s names = styles.Names()
-	return s.String()
+	return s.String(true)
 }
 
 // Set edits and saves a setting within a configuration file.
