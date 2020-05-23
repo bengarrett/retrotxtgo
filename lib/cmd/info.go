@@ -36,7 +36,7 @@ var infoCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(infoCmd)
 	infoCmd.Flags().StringVarP(&infoArgs.filename, "name", "n", "",
-		logs.Cp("text file to analyse")+" (required)\n")
+		logs.Required("text file to analyse")+"\n")
 	infoCmd.Flags().StringVarP(&infoArgs.format, "format", "f", "color",
 		"output format \noptions: "+logs.Ci(config.Format.String("info")))
 	err := infoCmd.MarkFlagRequired("name")

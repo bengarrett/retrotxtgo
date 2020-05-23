@@ -97,7 +97,8 @@ var viewTableCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(viewCmd)
-	viewCmd.Flags().StringVarP(&viewFilename, "name", "n", "", logs.Cp("text file to display")+" (required)\n")
+	viewCmd.Flags().StringVarP(&viewFilename, "name", "n", "",
+		logs.Required("text file to display")+"\n")
 	viewCmd.Flags().StringVarP(&viewCodePage, "codepage", "c", "cp437", "legacy character encoding used by the text file")
 	viewCmd.Flags().StringVarP(&viewFormat, "format", "f", "color", "output format, options: "+logs.Ci(viewFormats))
 	viewCmd.Flags().IntVarP(&viewWidth, "width", "w", 80, "document column character width")

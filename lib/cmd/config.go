@@ -183,14 +183,14 @@ func init() {
 		"list and preview the available syntax highlighers")
 	// set
 	configSetCmd.Flags().StringVarP(&configArgs.set, "name", "n", "",
-		fmt.Sprintf("the setting name in dot syntax%s", logs.Required())+
+		logs.Required("the setting name in dot syntax")+
 			fmt.Sprintf("\nrun %s", logs.Example("retrotxt config info -c"))+
 			" to see a list of names")
 	err = configSetCmd.MarkFlagRequired("name")
 	logs.Check("name flag", err)
 	// shell
 	configShellCmd.Flags().StringVarP(&configArgs.shell, "interpreter", "i", "",
-		"user shell to receive retrotxt auto-completions"+logs.Required()+
+		logs.Required("user shell to receive retrotxt auto-completions")+
 			"\nchoices: "+logs.Ci(strings.Join(config.Format.Shell, ", ")))
 	err = configShellCmd.MarkFlagRequired("interpreter")
 	logs.Check("interpreter flag", err)

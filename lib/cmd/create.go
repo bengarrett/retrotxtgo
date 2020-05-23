@@ -81,7 +81,7 @@ func init() {
 	rootCmd.AddCommand(createCmd)
 	// required flags
 	createCmd.Flags().StringVarP(&createFileName, "name", "n", "",
-		logs.Cp("text file to parse")+" (required)\n")
+		logs.Required("text file to parse")+"\n")
 	// main flags
 	createCmd.Flags().StringVarP(&createArgs.HTMLLayout, "layout", "l", def("create.layout"),
 		"output HTML layout\noptions: "+logs.Ci(create.Layouts()))

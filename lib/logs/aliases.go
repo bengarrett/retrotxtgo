@@ -1,6 +1,10 @@
 package logs
 
-import "github.com/gookit/color"
+import (
+	"fmt"
+
+	"github.com/gookit/color"
+)
 
 // Alert prints "problem:" in Error color.
 var Alert = func() string {
@@ -10,11 +14,6 @@ var Alert = func() string {
 // Info prints "info:" in Info color.
 var Info = func() string {
 	return color.Info.Sprint("info:")
-}
-
-// Required prints " (required)" in Primary color.
-var Required = func() string {
-	return color.Primary.Sprint(" (required)")
 }
 
 // Example is intended for the cobra.Command Example fields.
@@ -49,3 +48,8 @@ var (
 		return color.Success.Sprint(t)
 	}
 )
+
+// Required appends (required) to string.
+func Required(s string) (out string) {
+	return fmt.Sprintf("%s (required)", color.Primary.Sprint(s))
+}
