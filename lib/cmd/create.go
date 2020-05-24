@@ -84,7 +84,7 @@ func init() {
 		logs.Required("text file to parse")+"\n")
 	// main flags
 	createCmd.Flags().StringVarP(&createArgs.HTMLLayout, "layout", "l", def("create.layout"),
-		"output HTML layout\noptions: "+logs.Ci(create.Layouts()))
+		logs.Options("output HTML layout", create.Options(), true))
 	err := viper.BindPFlag("create.layout", createCmd.Flags().Lookup(("layout")))
 	logs.ReCheck(err)
 	createCmd.Flags().StringVarP(&createArgs.Styles, "syntax-style", "c", "lovelace",

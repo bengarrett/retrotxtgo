@@ -2,6 +2,8 @@ package logs
 
 import (
 	"fmt"
+	"sort"
+	"strings"
 
 	"github.com/gookit/color"
 )
@@ -49,7 +51,22 @@ var (
 	}
 )
 
-// Required appends (required) to string.
-func Required(s string) (out string) {
+// Options appends options: ... to the usage string.
+func Options(s string, opts []string, shorthand bool) (usage string) {
+	var keys string
+	if len(opts) == 0 {
+		return s
+	}
+	sort.Strings(opts)
+	if shorthand {
+		keys = UnderlineKeys(opts)
+	} else {
+		keys = strings.Join(opts, ", ")
+	}
+	return fmt.Sprintf("%s\noptions: %s", s, color.Info.Sprint(keys))
+}
+
+// Required appends (required) to the usage string.
+func Required(s string) (usage string) {
 	return fmt.Sprintf("%s (required)", color.Primary.Sprint(s))
 }

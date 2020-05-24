@@ -41,7 +41,7 @@ func init() {
 	rootCmd.AddCommand(versionCmd)
 	versionCmd.Flags().StringVarP(&versionFmt, "format", "f",
 		viper.GetString("format.version"),
-		"output format \noptions: "+config.Format.String("version"))
+		logs.Options("output format", config.Format.Version, true))
 	err := viper.BindPFlag("format.version", versionCmd.Flags().Lookup("format"))
 	logs.Check("format.version", err)
 }

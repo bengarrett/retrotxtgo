@@ -38,7 +38,7 @@ func init() {
 	infoCmd.Flags().StringVarP(&infoArgs.filename, "name", "n", "",
 		logs.Required("text file to analyse")+"\n")
 	infoCmd.Flags().StringVarP(&infoArgs.format, "format", "f", "color",
-		"output format \noptions: "+logs.Ci(config.Format.String("info")))
+		logs.Options("output format", config.Format.Info, true))
 	err := infoCmd.MarkFlagRequired("name")
 	logs.Check("name flag", err)
 	infoCmd.Flags().SortFlags = false

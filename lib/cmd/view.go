@@ -18,8 +18,6 @@ import (
 	"golang.org/x/text/encoding/ianaindex"
 )
 
-const viewFormats string = "color, text"
-
 type iana struct {
 	mime  string
 	index string
@@ -30,6 +28,7 @@ type iana struct {
 var (
 	viewCodePage string = "ibm437"
 	viewFilename string
+	viewFormats  = []string{"color", "text"}
 	viewFormat   string
 	viewWidth    int
 )
@@ -100,7 +99,8 @@ func init() {
 	viewCmd.Flags().StringVarP(&viewFilename, "name", "n", "",
 		logs.Required("text file to display")+"\n")
 	viewCmd.Flags().StringVarP(&viewCodePage, "codepage", "c", "cp437", "legacy character encoding used by the text file")
-	viewCmd.Flags().StringVarP(&viewFormat, "format", "f", "color", "output format, options: "+logs.Ci(viewFormats))
+	viewCmd.Flags().StringVarP(&viewFormat, "format", "f", "color",
+		logs.Options("output format", viewFormats, true))
 	viewCmd.Flags().IntVarP(&viewWidth, "width", "w", 80, "document column character width")
 	// override ascii 0-F + 1-F || Control characters || IBM, ASCII, IBM+
 	// example flag showing CP437 table

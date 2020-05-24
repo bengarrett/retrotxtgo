@@ -8,7 +8,6 @@ fixes:
 import (
 	"bytes"
 	"fmt"
-	"strings"
 
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
@@ -191,7 +190,7 @@ func init() {
 	// shell
 	configShellCmd.Flags().StringVarP(&configArgs.shell, "interpreter", "i", "",
 		logs.Required("user shell to receive retrotxt auto-completions")+
-			"\nchoices: "+logs.Ci(strings.Join(config.Format.Shell, ", ")))
+			logs.Options("", config.Format.Shell, true))
 	err = configShellCmd.MarkFlagRequired("interpreter")
 	logs.Check("interpreter flag", err)
 	configShellCmd.SilenceErrors = true

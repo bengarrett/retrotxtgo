@@ -11,7 +11,6 @@ import (
 	"path"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
@@ -156,13 +155,12 @@ func (args Args) Stdout(data []byte, test bool) error {
 	return err
 }
 
-// Layouts lists the options permitted by the layout flag.
-func Layouts() string {
-	s := []string{}
+// Options returns the options permitted by the layout flag.
+func Options() (s []string) {
 	for key := range createTemplates() {
 		s = append(s, key)
 	}
-	return strings.Join(s, ", ")
+	return s
 }
 
 // createTemplates creates a map of the template filenames used in conjunction with the layout flag.
