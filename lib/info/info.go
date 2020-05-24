@@ -28,6 +28,7 @@ import (
 type Detail struct {
 	Bytes     int64
 	CharCount int
+	Lines     int
 	Name      string
 	MD5       string
 	Mime      string
@@ -36,6 +37,8 @@ type Detail struct {
 	Slug      string
 	Size      string
 	Utf8      bool
+	Width     int
+	WordCount int
 }
 
 // File data for XML encoding
@@ -47,7 +50,10 @@ type File struct {
 	Utf8      bool      `xml:"content>utf8"`
 	Bytes     int64     `xml:"size>bytes"`
 	Size      string    `xml:"size>value"`
+	Lines     int       `xml:"size>lines"`
+	Width     int       `xml:"size>width"`
 	CharCount int       `xml:"size>character-count"`
+	WordCount int       `xml:"size>word-count"`
 	MD5       string    `xml:"checksum>md5"`
 	SHA256    string    `xml:"checksum>sha256"`
 	Modified  time.Time `xml:"modified"`
@@ -77,6 +83,15 @@ func Info(name, format string) (err logs.Err) {
 func Print(filename, format string) (err error) {
 	var d Detail
 	if err := d.Read(filename); err != nil {
+		return err
+	}
+	if d.Lines, err = filesystem.Lines(filename); err != nil {
+		return err
+	}
+	if d.Width, err = filesystem.Columns(filename); err != nil {
+		return err
+	}
+	if d.WordCount, err = filesystem.Words(filename); err != nil {
 		return err
 	}
 	switch format {
@@ -109,17 +124,21 @@ func (d *Detail) Read(name string) (err error) {
 	if err != nil {
 		return err
 	}
-	return d.parse(data, stat)
+	return d.parse(data, stat, name)
 }
 
 // parse fileinfo and file content.
-func (d *Detail) parse(data []byte, stat os.FileInfo) (err error) {
+func (d *Detail) parse(data []byte, stat os.FileInfo, name string) (err error) {
 	md5sum := md5.Sum(data)
 	sha256 := sha256.Sum256(data)
 	mime := mimesniffer.Sniff(data)
 	// create a table of data
 	d.Bytes = stat.Size()
 	d.CharCount = runewidth.StringWidth(string(data))
+	// words, _, err := bufio.ScanWords(data, true)
+	// if err == nil {
+	// 	d.WordCount = words
+	// }
 	d.Name = stat.Name()
 	d.MD5 = fmt.Sprintf("%x", md5sum)
 	d.Modified = stat.ModTime().UTC()
@@ -165,9 +184,12 @@ func (d Detail) Text(color bool) string {
 		k, v string
 	}{
 		{k: "filename", v: d.Name},
-		{k: "UTF-8", v: fmt.Sprintf("%v", d.Utf8)},
-		{k: "characters", v: fmt.Sprintf("%v", d.CharCount)},
+		{k: "UTF-8", v: logs.Bool(d.Utf8)},
+		{k: "characters", v: fmt.Sprint(d.CharCount)},
+		{k: "words", v: fmt.Sprint(d.WordCount)},
 		{k: "size", v: d.Size},
+		{k: "lines", v: fmt.Sprint(d.Lines)},
+		{k: "width", v: fmt.Sprint(d.Width)},
 		{k: "modified", v: fmt.Sprintf("%v", d.Modified.UTC().Format(FileDate))},
 		{k: "MD5 checksum", v: d.MD5},
 		{k: "SHA256 checksum", v: d.SHA256},
@@ -192,6 +214,7 @@ func (d Detail) XML() ([]byte, error) {
 		Bytes:     d.Bytes,
 		CharCount: d.CharCount,
 		ID:        d.Slug,
+		Lines:     d.Lines,
 		MD5:       d.MD5,
 		Mime:      d.Mime,
 		Modified:  d.Modified,
@@ -199,6 +222,8 @@ func (d Detail) XML() ([]byte, error) {
 		SHA256:    d.SHA256,
 		Size:      d.Size,
 		Utf8:      d.Utf8,
+		Width:     d.Width,
+		WordCount: d.WordCount,
 	}
 	return xml.MarshalIndent(v, "", "\t")
 }

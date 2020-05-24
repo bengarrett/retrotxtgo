@@ -18,11 +18,6 @@ var Info = func() string {
 	return color.Info.Sprint("info:")
 }
 
-// Example is intended for the cobra.Command Example fields.
-var Example = func(t string) string {
-	return color.Info.Sprint(t)
-}
-
 // color aliases
 var (
 	Cb = func(t string) string {
@@ -50,6 +45,21 @@ var (
 		return color.Success.Sprint(t)
 	}
 )
+
+// Bool returns a ✓ or ✗.
+func Bool(b bool) string {
+	switch b {
+	case true:
+		return color.Success.Sprint("✓")
+	default:
+		return color.Error.Sprint("✗")
+	}
+}
+
+// Example is intended for the cobra.Command Example fields.
+func Example(s string) string {
+	return color.Info.Sprint(s)
+}
 
 // Options appends options: ... to the usage string.
 func Options(s string, opts []string, shorthand bool) (usage string) {

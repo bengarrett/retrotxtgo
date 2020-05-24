@@ -173,3 +173,31 @@ func TestReadTail(t *testing.T) {
 	samples.Clean(f3)
 	samples.Clean(f4)
 }
+
+func TestIsWord(t *testing.T) {
+	type args struct {
+		s string
+	}
+	tests := []struct {
+		name string
+		s    string
+		want bool
+	}{
+		{"empty", "", false},
+		{"1", "something", true},
+		{"2", "some things", true},
+		{"!@#", "!@#", true},
+		{"1234.5", "1234.5", true},
+		{"你好世界", "你好世界", true},
+		{"😀", "😀", false},
+		{"😀smiley", "😀smiley", false},
+		{"▃▃▃▃▃", "▃▃▃▃▃", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := IsWord(tt.s); got != tt.want {
+				t.Errorf("IsWord() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

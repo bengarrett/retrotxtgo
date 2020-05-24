@@ -3,9 +3,142 @@ package filesystem
 
 import (
 	"bufio"
+	"bytes"
+	"io"
 	"os"
 	"path/filepath"
+	"unicode"
+	"unicode/utf8"
 )
+
+// Columns counts the number of characters used per line in the named file.
+func Columns(name string) (count int, err error) {
+	file, err := os.Open(name)
+	if err != nil {
+		return -1, err
+	}
+	defer file.Close()
+	count, err = columnsCounter(file)
+	return count, err
+}
+
+func columnsCounter(r io.Reader) (width int, err error) {
+	const lineBreak = '\n'
+	buf := make([]byte, bufio.MaxScanTokenSize)
+	for {
+		size, err := r.Read(buf)
+		if err != nil && err != io.EOF {
+			return 0, err
+		}
+		var pos int
+		for {
+			i := bytes.IndexByte(buf[pos:], lineBreak)
+			if i == -1 || size == pos {
+				break
+			}
+			pos += i + 1
+			if i > width {
+				width = i
+			}
+		}
+		if err == io.EOF {
+			break
+		}
+	}
+	return width, nil
+}
+
+// Lines counts the number of lines in the named file.
+func Lines(name string) (count int, err error) {
+	file, err := os.Open(name)
+	if err != nil {
+		return -1, err
+	}
+	defer file.Close()
+	count, err = lineCounter(file)
+	return count, err
+}
+
+func lineCounter(r io.Reader) (count int, err error) {
+	const lineBreak = '\n'
+	buf := make([]byte, bufio.MaxScanTokenSize)
+	for {
+		size, err := r.Read(buf)
+		if err != nil && err != io.EOF {
+			return 0, err
+		}
+		var pos int
+		for {
+			i := bytes.IndexByte(buf[pos:], lineBreak)
+			if i == -1 || size == pos {
+				break
+			}
+			pos += i + 1
+			count++
+		}
+		if err == io.EOF {
+			break
+		}
+	}
+	return count, nil
+}
+
+// Words counts the number of spaced words in the named file.
+func Words(name string) (count int, err error) {
+	file, err := os.Open(name)
+	if err != nil {
+		return -1, err
+	}
+	defer file.Close()
+	count, err = wordCounter(file)
+	return count, err
+}
+
+func wordCounter(r io.Reader) (count int, err error) {
+	scanner := bufio.NewScanner(r)
+	scanner.Split(bufio.ScanWords)
+	for scanner.Scan() {
+		var t = scanner.Text()
+		r, _ := utf8.DecodeRuneInString(t)
+		if r >= 65533 {
+			continue
+		}
+		// scan single chars
+		if len(t) == 1 {
+			if unicode.IsDigit(r) || unicode.IsLetter(r) {
+				count++
+			}
+			continue
+		}
+		// scan chars within each word
+		if IsWord(t) {
+			count++
+		}
+	}
+	if err = scanner.Err(); err != nil {
+		return -1, err
+	}
+	return count, err
+}
+
+// IsWord scans the characters of a work for non-standard characters.
+// If a space is detected the scan will end.
+func IsWord(s string) bool {
+	if len(s) == 0 {
+		return false
+	}
+	for len(s) > 0 {
+		r, size := utf8.DecodeRuneInString(s)
+		if unicode.IsSpace(r) {
+			break
+		}
+		if !unicode.IsDigit(r) && !unicode.IsLetter(r) && !unicode.IsPunct(r) {
+			return false
+		}
+		s = s[size:]
+	}
+	return true
+}
 
 // Read opens and returns the content of the named file.
 func Read(name string) (data []byte, err error) {

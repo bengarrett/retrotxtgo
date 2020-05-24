@@ -13,6 +13,18 @@ import (
 	"github.com/bengarrett/retrotxtgo/samples"
 )
 
+func ExampleDetail_XML() {
+	tmp := sampleFile()
+	millennia(tmp)
+	var file Detail
+	file.Read(tmp)
+	data, _ := file.XML()
+	samples.Clean(tmp)
+	s := strings.ReplaceAll(string(data), "\t", "")
+	fmt.Printf("%q", strings.ReplaceAll(s, "\n", ""))
+	// Output:"<file id=\"info-test-txt\"><name>info_test.txt</name><content><mime>text/plain</mime><utf8>true</utf8></content><size><bytes>57</bytes><value>57 bytes</value><character-count>44</character-count><word-count>4</word-count></size><checksum><md5>de7254885365bfd7f44291706d844a56</md5><sha256>31d202a7e7c6dcc7743970d65d525d32bc9298f1236ef8e4d4abe058ae4d1c51</sha256></checksum><modified>2000-01-01T00:00:00Z</modified></file>"
+}
+
 var sampleFile = func() string {
 	path, err := samples.Save([]byte(samples.Tabs), "info_test.txt")
 	if err != nil {
@@ -104,7 +116,7 @@ func Test_parse(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var got Detail
-			err := got.parse(tt.args.data, tt.args.stat)
+			err := got.parse(tt.args.data, tt.args.stat, "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parse() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -156,16 +168,4 @@ func millennia(name string) {
 	if err := os.Chtimes(name, mtime, mtime); err != nil {
 		log.Fatal(err)
 	}
-}
-
-func ExampleDetail_XML() {
-	tmp := sampleFile()
-	millennia(tmp)
-	var file Detail
-	file.Read(tmp)
-	data, _ := file.XML()
-	samples.Clean(tmp)
-	s := strings.ReplaceAll(string(data), "\t", "")
-	fmt.Printf("%q", strings.ReplaceAll(s, "\n", ""))
-	// Output:"<file id=\"info-test-txt\"><name>info_test.txt</name><content><mime>text/plain</mime><utf8>true</utf8></content><size><bytes>57</bytes><value>57 bytes</value><character-count>44</character-count></size><checksum><md5>de7254885365bfd7f44291706d844a56</md5><sha256>31d202a7e7c6dcc7743970d65d525d32bc9298f1236ef8e4d4abe058ae4d1c51</sha256></checksum><modified>2000-01-01T00:00:00Z</modified></file>"
 }
