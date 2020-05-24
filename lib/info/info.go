@@ -62,11 +62,11 @@ func Info(name, format string) (err logs.Err) {
 		return logs.Err{Issue: "info", Arg: "name", Msg: errors.New("value cannot be empty")}
 	}
 	if s, err := os.Stat(name); os.IsNotExist(err) {
-		return logs.Err{Issue: "info name", Arg: name, Msg: errors.New("no such file")}
+		return logs.Err{Issue: "info --name", Arg: name, Msg: errors.New("file does not exist")}
 	} else if err != nil {
-		return logs.Err{Issue: "info name", Arg: name, Msg: err}
+		return logs.Err{Issue: "info --name", Arg: name, Msg: err}
 	} else if s.IsDir() {
-		return logs.Err{Issue: "info name", Arg: name, Msg: errors.New("directories are not usable with this command")}
+		return logs.Err{Issue: "info --name", Arg: name, Msg: errors.New("directories are not usable with this command")}
 	} else if e := Print(name, format); e != nil {
 		return logs.Err{Issue: "info format", Arg: format, Msg: e}
 	}
