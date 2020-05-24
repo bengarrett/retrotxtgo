@@ -74,7 +74,7 @@ func Info(name, format string) (err logs.Err) {
 	} else if s.IsDir() {
 		return logs.Err{Issue: "info --name", Arg: name, Msg: errors.New("directories are not usable with this command")}
 	} else if e := Print(name, format); e != nil {
-		return logs.Err{Issue: "info format", Arg: format, Msg: e}
+		return logs.Err{Issue: "info print", Arg: format, Msg: e}
 	}
 	return err
 }
@@ -85,14 +85,16 @@ func Print(filename, format string) (err error) {
 	if err := d.Read(filename); err != nil {
 		return err
 	}
-	if d.Lines, err = filesystem.Lines(filename); err != nil {
-		return err
-	}
-	if d.Width, err = filesystem.Columns(filename); err != nil {
-		return err
-	}
-	if d.WordCount, err = filesystem.Words(filename); err != nil {
-		return err
+	if d.Mime == "text/plain" {
+		if d.Lines, err = filesystem.Lines(filename); err != nil {
+			return err
+		}
+		if d.Width, err = filesystem.Columns(filename); err != nil {
+			return err
+		}
+		if d.WordCount, err = filesystem.Words(filename); err != nil {
+			return err
+		}
 	}
 	switch format {
 	case "color", "c", "":
@@ -132,13 +134,16 @@ func (d *Detail) parse(data []byte, stat os.FileInfo, name string) (err error) {
 	md5sum := md5.Sum(data)
 	sha256 := sha256.Sum256(data)
 	mime := mimesniffer.Sniff(data)
+	if strings.Contains(mime, ";") {
+		d.Mime = strings.Split(mime, ";")[0]
+	} else {
+		d.Mime = mime
+	}
+	if d.Mime == "text/plain" {
+		d.CharCount = runewidth.StringWidth(string(data))
+	}
 	// create a table of data
 	d.Bytes = stat.Size()
-	d.CharCount = runewidth.StringWidth(string(data))
-	// words, _, err := bufio.ScanWords(data, true)
-	// if err == nil {
-	// 	d.WordCount = words
-	// }
 	d.Name = stat.Name()
 	d.MD5 = fmt.Sprintf("%x", md5sum)
 	d.Modified = stat.ModTime().UTC()
@@ -150,11 +155,7 @@ func (d *Detail) parse(data []byte, stat os.FileInfo, name string) (err error) {
 	} else {
 		d.Size = fmt.Sprintf("%v (%v bytes)", humanize.Format(stat.Size()), stat.Size())
 	}
-	if strings.Contains(mime, ";") {
-		d.Mime = strings.Split(mime, ";")[0]
-	} else {
-		d.Mime = mime
-	}
+
 	return err
 }
 
