@@ -19,16 +19,14 @@ var infoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "Information on a text file",
 	Run: func(cmd *cobra.Command, args []string) {
-		if infoArgs.filename != "" {
-			if err := info.Info(infoArgs.filename, infoArgs.format); err.Msg != nil {
-				if fmt.Sprint(err.Msg) == "format:invalid" {
-					err := cmd.Usage()
-					fmt.Println()
-					logs.Check("info usage:", err)
-					logs.CheckFlag("format", infoArgs.format, config.Format.Info)
-				}
-				logs.ChkErr(err)
+		if err := info.Info(infoArgs.filename, infoArgs.format); err.Msg != nil {
+			if fmt.Sprint(err.Msg) == "format:invalid" {
+				err := cmd.Usage()
+				logs.Check("info usage:", err)
+				fmt.Println()
+				logs.CheckFlag("format", infoArgs.format, config.Format.Info)
 			}
+			logs.ChkErr(err)
 		}
 	},
 }
