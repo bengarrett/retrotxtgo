@@ -121,15 +121,16 @@ func wordCounter(r io.Reader) (count int, err error) {
 	return count, err
 }
 
-// IsWord scans the characters of a work for non-standard characters.
-// If a space is detected the scan will end.
+// IsWord scans the content of a word for characters that are not digits,
+// letters or punctuation and if discovered returns false.
+// If a space or newline is encountered the scan will end.
 func IsWord(s string) bool {
 	if len(s) == 0 {
 		return false
 	}
 	for len(s) > 0 {
 		r, size := utf8.DecodeRuneInString(s)
-		if unicode.IsSpace(r) {
+		if unicode.IsSpace(r) || s == "\n" {
 			break
 		}
 		if !unicode.IsDigit(r) && !unicode.IsLetter(r) && !unicode.IsPunct(r) {
@@ -148,13 +149,23 @@ func Read(name string) (data []byte, err error) {
 
 // ReadAllBytes reads the named file and returns the content as a byte array.
 func ReadAllBytes(name string) (data []byte, err error) {
+	// In-depth introduction to bufio.Scanner 👍
+	// https://medium.com/golangspec/in-depth-introduction-to-bufio-scanner-in-golang-55483bb689b4
 	file, err := os.Open(name)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
+	// determine the size of the file
+	stat, err := os.Stat(name)
+	if err != nil {
+		return nil, err
+	}
 	// bufio is the most performant
 	scanner := bufio.NewScanner(file)
+	// bufio has a has a default limit of 64k
+	// this increases the buffer limit to the file size
+	scanner.Buffer(data, int(stat.Size()))
 	for scanner.Scan() {
 		data = append(data, scanner.Bytes()...)
 	}

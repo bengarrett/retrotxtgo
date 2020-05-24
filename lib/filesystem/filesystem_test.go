@@ -192,6 +192,9 @@ func TestIsWord(t *testing.T) {
 		{"😀", "😀", false},
 		{"😀smiley", "😀smiley", false},
 		{"▃▃▃▃▃", "▃▃▃▃▃", false},
+		{"nl", "hello\nworld", true},
+		{"nl😀", "hello\n😀", true},
+		{"😀nl", "😀\nsmiley", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
