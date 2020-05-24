@@ -1,10 +1,16 @@
 package logs
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
+	"html/template"
 	"io"
 	"os"
+	"path/filepath"
+	"sort"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/alecthomas/chroma/quick"
 	"github.com/alecthomas/chroma/styles"
@@ -104,4 +110,55 @@ func Term() (term string) {
 	}
 	// anything else defaults to 256 colors
 	return term
+}
+
+// UnderlineKeys uses ANSI to underline the first letter of each key.
+func UnderlineKeys(keys []string) string {
+	if len(keys) == 0 {
+		return ""
+	}
+	sort.Strings(keys)
+	for i, key := range keys {
+		if utf8.RuneCountInString(key) > 1 {
+			r, _ := utf8.DecodeRuneInString(key)
+			c, err := underlineChar(string(r))
+			if err != nil {
+				keys[i] = key
+			}
+			keys[i] = fmt.Sprintf("%s%s", c, key[utf8.RuneLen(r):])
+			if filepath.Ext(key) == ".min" {
+				s := strings.Split(keys[i], ".")
+				base := strings.Join(s[0:len(s)-1], ".")
+				m, _ := underlineChar("m")
+				keys[i] = fmt.Sprintf("%s.%sin", base, m)
+			}
+		} else {
+			c, err := underlineChar(key)
+			if err != nil {
+				keys[i] = key
+			} else {
+				keys[i] = c
+			}
+		}
+	}
+	return strings.Join(keys, ", ")
+}
+
+func underlineChar(c string) (s string, err error) {
+	if c == "" {
+		return s, err
+	}
+	if !utf8.ValidString(c) {
+		return s, errors.New("underlinechar: invalid utf-8 encoded rune")
+	}
+	var buf bytes.Buffer
+	r, _ := utf8.DecodeRuneInString(c)
+	t, err := template.New("underline").Parse("{{define \"TEXT\"}}\033[0m\033[4m{{.}}\033[0m{{end}}")
+	if err != nil {
+		return s, err
+	}
+	if err = t.ExecuteTemplate(&buf, "TEXT", string(r)); err != nil {
+		return s, err
+	}
+	return buf.String(), nil
 }
