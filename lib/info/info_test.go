@@ -33,6 +33,27 @@ var sampleFile = func() string {
 	return path
 }
 
+func TestIsText(t *testing.T) {
+	tests := []struct {
+		name        string
+		contentType string
+		want        bool
+	}{
+		{"empty", "", false},
+		{"image", "image/jpeg", false},
+		{"stream", "application/octet-stream", true},
+		{"text", "text/plain", true},
+		{"js", "text/javascript", true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := IsText(tt.contentType); got != tt.want {
+				t.Errorf("IsText() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func Test_Print(t *testing.T) {
 	tmp := sampleFile()
 	type args struct {

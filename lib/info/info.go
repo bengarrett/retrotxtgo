@@ -79,13 +79,29 @@ func Info(name, format string) (err logs.Err) {
 	return err
 }
 
+// IsText checks the MIME content-type value for valid text files.
+func IsText(contentType string) bool {
+	s := strings.Split(contentType, "/")
+	if len(s) != 2 {
+		return false
+	}
+	if s[0] == "text" {
+		return true
+	}
+	if contentType == "application/octet-stream" {
+		// TODO: test for ANSI escape codes in content
+		return true
+	}
+	return false
+}
+
 // Print the meta and operating system details of a file.
 func Print(filename, format string) (err error) {
 	var d Detail
 	if err := d.Read(filename); err != nil {
 		return err
 	}
-	if d.Mime == "text/plain" {
+	if IsText(d.Mime) {
 		if d.Lines, err = filesystem.Lines(filename); err != nil {
 			return err
 		}
@@ -133,13 +149,13 @@ func (d *Detail) Read(name string) (err error) {
 func (d *Detail) parse(data []byte, stat os.FileInfo, name string) (err error) {
 	md5sum := md5.Sum(data)
 	sha256 := sha256.Sum256(data)
-	mime := mimesniffer.Sniff(data)
-	if strings.Contains(mime, ";") {
-		d.Mime = strings.Split(mime, ";")[0]
+	ms := mimesniffer.Sniff(data)
+	if strings.Contains(ms, ";") {
+		d.Mime = strings.Split(ms, ";")[0]
 	} else {
-		d.Mime = mime
+		d.Mime = ms
 	}
-	if d.Mime == "text/plain" {
+	if IsText(d.Mime) {
 		d.CharCount = runewidth.StringWidth(string(data))
 	}
 	// create a table of data
@@ -202,6 +218,12 @@ func (d Detail) Text(color bool) string {
 	w.Init(&buf, 0, 8, 0, '\t', 0)
 	fmt.Fprint(w, hr())
 	for _, x := range data {
+		if !IsText(d.Mime) {
+			switch x.k {
+			case "UTF-8", "characters", "words", "lines", "width":
+				continue
+			}
+		}
 		fmt.Fprintf(w, "\t %s\t  %s\n", x.k, info(x.v))
 	}
 	fmt.Fprint(w, hr())
