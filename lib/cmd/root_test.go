@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"os"
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/lib/config"
@@ -8,6 +9,7 @@ import (
 )
 
 func TestInitDefaults(t *testing.T) {
+	home, _ := os.UserHomeDir()
 	tests := []struct {
 		name string
 		key  string
@@ -15,7 +17,7 @@ func TestInitDefaults(t *testing.T) {
 	}{
 		{"empty", "", ""},
 		{"layout", "create.layout", "standard"},
-		{"save dir", "create.save-directory", ""},
+		{"save dir", "create.save-directory", home},
 	}
 	config.InitDefaults()
 	for _, tt := range tests {

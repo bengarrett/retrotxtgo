@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"github.com/spf13/viper"
 )
 
 func Test_Save(t *testing.T) {
@@ -77,6 +79,8 @@ func Test_filename(t *testing.T) {
 }
 
 func Test_pagedata(t *testing.T) {
+	viper.SetDefault("create.title", "RetroTxt | example")
+
 	args := Args{HTMLLayout: "standard"}
 	w := "hello"
 	d := []byte(w)
