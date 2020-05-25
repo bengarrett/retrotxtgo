@@ -69,8 +69,12 @@ type File struct {
 // 4. LANGUAGE=""
 // 4. US
 
-// Language ...
-var Language = "de"
+// Language tag used for numeric syntax formatting
+var Language = language.English
+
+// DTFormat is the datetime format
+// DMY12, YMD12, MDY12, DMY24, YMD24, MDY24
+var DTFormat = "DMY24"
 
 // Info parses the named file and prints out its details in a specific syntax.
 func Info(name, format string) (err logs.Err) {
@@ -157,9 +161,7 @@ func (d *Detail) Read(name string) (err error) {
 
 // parse fileinfo and file content.
 func (d *Detail) parse(data []byte, stat os.FileInfo, name string) (err error) {
-	t := language.German
-	p := message.NewPrinter(t)
-
+	p := message.NewPrinter(Language)
 	md5sum := md5.Sum(data)
 	sha256 := sha256.Sum256(data)
 	ms := mimesniffer.Sniff(data)
@@ -182,7 +184,7 @@ func (d *Detail) parse(data []byte, stat os.FileInfo, name string) (err error) {
 	if stat.Size() < 1000 {
 		d.Size = p.Sprintf("%v bytes", p.Sprint(stat.Size()))
 	} else {
-		d.Size = p.Sprintf("%v (%v bytes)", humanize.Bytes(stat.Size(), t), p.Sprint(stat.Size()))
+		d.Size = p.Sprintf("%v (%v bytes)", humanize.Bytes(stat.Size(), Language), p.Sprint(stat.Size()))
 	}
 	return err
 }
@@ -202,7 +204,7 @@ func (d Detail) JSON(indent bool) (js []byte) {
 
 // Text format and returns the details of a file.
 func (d Detail) Text(color bool) string {
-	p := message.NewPrinter(language.English)
+	p := message.NewPrinter(Language)
 	c.Enable = color
 	var info = func(t string) string {
 		return logs.Cinf(fmt.Sprintf("%s\t", t))
@@ -220,7 +222,7 @@ func (d Detail) Text(color bool) string {
 		{k: "size", v: d.Size},
 		{k: "lines", v: p.Sprint(d.Lines)},
 		{k: "width", v: p.Sprint(d.Width)},
-		{k: "modified", v: humanize.Datetime("DMY24", d.Modified.UTC())},
+		{k: "modified", v: humanize.Datetime(DTFormat, d.Modified.UTC())},
 		{k: "MD5 checksum", v: d.MD5},
 		{k: "SHA256 checksum", v: d.SHA256},
 		{k: "MIME type", v: d.Mime},
