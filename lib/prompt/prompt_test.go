@@ -1,4 +1,4 @@
-package logs
+package prompt
 
 import (
 	"bytes"
@@ -154,7 +154,7 @@ func Test_promptRead(t *testing.T) {
 	}
 }
 
-func Test_parseyn(t *testing.T) {
+func Test_parseYN(t *testing.T) {
 	type args struct {
 		input      string
 		yesDefault bool
@@ -173,8 +173,8 @@ func Test_parseyn(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := parseyn(tt.args.input, tt.args.yesDefault); got != tt.want {
-				t.Errorf("parseyn() = %v, want %v", got, tt.want)
+			if got := parseYN(tt.args.input, tt.args.yesDefault); got != tt.want {
+				t.Errorf("parseYN() = %v, want %v", got, tt.want)
 			}
 		})
 	}

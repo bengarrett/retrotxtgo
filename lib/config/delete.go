@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/prompt"
 	"github.com/spf13/viper"
 )
 
@@ -23,7 +24,7 @@ func Delete() (err logs.IssueErr) {
 		}
 	}
 	PrintLocation()
-	switch logs.PromptYN("Confirm the configuration file deletion", false) {
+	switch prompt.YesNo("Confirm the configuration file deletion", false) {
 	case true:
 		if err := os.Remove(cfg); err != nil {
 			return logs.IssueErr{

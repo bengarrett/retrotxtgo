@@ -17,6 +17,7 @@ import (
 	"github.com/alecthomas/chroma/styles"
 	"github.com/bengarrett/retrotxtgo/lib/create"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/prompt"
 	v "github.com/bengarrett/retrotxtgo/lib/version"
 	"github.com/spf13/viper"
 )
@@ -112,9 +113,9 @@ func (f files) Strings() []string {
 
 func portInfo() string {
 	var port = ports{
-		max: logs.PortMax,
-		min: logs.PortMin,
-		rec: logs.PortRec,
+		max: prompt.PortMax,
+		min: prompt.PortMin,
+		rec: prompt.PortRec,
 	}
 	pm, px, pr := strconv.Itoa(int(port.min)), strconv.Itoa(int(port.max)), strconv.Itoa(int(port.rec))
 	return logs.Cp(pm) + "-" + logs.Cp(px) + fmt.Sprintf(" (recommend: %s)", logs.Cp(pr))
@@ -202,7 +203,7 @@ func Set(name string) {
 // Setup walks through all the settings within a configuration file.
 func Setup() {
 	setupMode = true
-	logs.SetupMode = true
+	prompt.SetupMode = true
 	keys := viper.AllKeys()
 	sort.Strings(keys)
 	for i, key := range keys {
@@ -291,7 +292,7 @@ func setDirectory(name string) {
 	if name == "" {
 		logs.Log(errors.New("setdirectory name string is empty"))
 	}
-	dir := dirAliases(logs.PromptString())
+	dir := dirAliases(prompt.String())
 	if setupMode && dir == "" {
 		return
 	}
@@ -310,7 +311,7 @@ func setEditor(name string) {
 	if name == "" {
 		logs.Log(errors.New("setstring name string is empty"))
 	}
-	editor := logs.PromptString()
+	editor := prompt.String()
 	if setupMode && editor == "" {
 		return
 	}
@@ -326,7 +327,7 @@ func setGenerator() {
 	elm := fmt.Sprintf("<head>\n  <meta name=\"generator\" content=\"RetroTxt v%s, %s\">",
 		v.B.Version, v.B.Date)
 	fmt.Print(logs.ColorHTML(elm))
-	prmt := logs.PromptYN("Enable this element", viper.GetBool(name))
+	prmt := prompt.YesNo("Enable this element", viper.GetBool(name))
 	viper.Set(name, prmt)
 	if err := UpdateConfig("", false); err != nil {
 		logs.Log(err)
@@ -359,7 +360,7 @@ func setPort(name string) {
 	if name == "" {
 		logs.Log(errors.New("setport name string is empty"))
 	}
-	p := logs.PromptPort(true)
+	p := prompt.Port(true)
 	if setupMode && p == 0 {
 		return
 	}
@@ -370,19 +371,19 @@ func setShortStrings(name string, data []string) {
 	if name == "" {
 		logs.Log(errors.New("setstrings name string is empty"))
 	}
-	save(name, logs.PromptShortStrings(&data))
+	save(name, prompt.ShortStrings(&data))
 }
 
 func setString(name string) {
 	if name == "" {
 		logs.Log(errors.New("setstring name string is empty"))
 	}
-	save(name, logs.PromptString())
+	save(name, prompt.String())
 }
 
 func setStrings(name string, data []string) {
 	if name == "" {
 		logs.Log(errors.New("setstrings name string is empty"))
 	}
-	save(name, logs.PromptStrings(&data))
+	save(name, prompt.Strings(&data))
 }

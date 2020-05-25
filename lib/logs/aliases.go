@@ -52,7 +52,7 @@ func Bool(b bool) string {
 	case true:
 		return color.Success.Sprint("✓")
 	default:
-		return color.Error.Sprint("✗")
+		return color.Warn.Sprint("✗")
 	}
 }
 

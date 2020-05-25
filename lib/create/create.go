@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/prompt"
 	"github.com/spf13/viper"
 )
 
@@ -97,7 +98,7 @@ func (args Args) Save(data []byte, value string, changed bool) {
 // Serve ...
 func (args Args) Serve(data []byte) {
 	p := uint(args.ServerPort)
-	if !logs.PortValid(p) {
+	if !prompt.PortValid(p) {
 		// viper.GetInt() doesn't work as expected
 		port, err := strconv.Atoi(viper.GetString("create.server-port"))
 		if err != nil {

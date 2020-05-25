@@ -1,4 +1,4 @@
-package logs
+package prompt
 
 import (
 	"bufio"
@@ -9,24 +9,33 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/bengarrett/retrotxtgo/lib/logs"
+)
+
+// the lowest, largest and recommended network ports to serve HTTP.
+const (
+	PortMin uint = 0
+	PortMax uint = 65535
+	PortRec uint = 8080
 )
 
 // SetupMode changes the behavor of prompts to exit on empty inputs.
 var SetupMode = false
 
-func promptCheck(prompts int) {
+func check(prompts int) {
 	switch {
 	case prompts == 2:
 		if i, err := fmt.Println("Ctrl+C to keep the existing value"); err != nil {
-			log.Fatalf("logs.promptCheck println at %dB: %s", i, err)
+			log.Fatalf("logs.check println at %dB: %s", i, err)
 		}
 	case prompts >= 4:
 		os.Exit(1)
 	}
 }
 
-// PromptPort asks for and returns a HTTP port value.
-func PromptPort(validate bool) (port uint) {
+// Port asks for and returns a HTTP port value.
+func Port(validate bool) (port uint) {
 	return pport(os.Stdin, validate)
 }
 
@@ -40,20 +49,20 @@ func pport(r io.Reader, validate bool) (port uint) {
 			break
 		}
 		if input == "" {
-			promptCheck(prompts)
+			check(prompts)
 			continue
 		}
 		value, err := strconv.ParseInt(input, 10, 0)
 		if err != nil {
-			fmt.Printf("%s %v\n", Ce("✗"), input)
-			promptCheck(prompts)
+			fmt.Printf("%s %v\n", logs.Bool(false), input)
+			check(prompts)
 			continue
 		}
 		port = uint(value)
 		if validate {
 			if v := PortValid(port); !v {
-				fmt.Printf("%s %v, is out of range\n", Ce("✗"), input)
-				promptCheck(prompts)
+				fmt.Printf("%s %v, is out of range\n", logs.Bool(false), input)
+				check(prompts)
 				continue
 			}
 		}
@@ -70,8 +79,8 @@ func PortValid(port uint) (ok bool) {
 	return true
 }
 
-// PromptString asks for and returns a multi-word string.
-func PromptString() (words string) {
+// String asks for and returns a multi-word string.
+func String() (words string) {
 	return pstring(os.Stdin)
 }
 
@@ -98,9 +107,9 @@ func pstring(r io.Reader) (words string) {
 
 type keys []string
 
-// PromptShortStrings asks for and returns a single choice from a string of keys.
+// ShortStrings asks for and returns a single choice from a string of keys.
 // Either the first letter or the full name of the key are accepted.
-func PromptShortStrings(options *[]string) (key string) {
+func ShortStrings(options *[]string) (key string) {
 	var k keys = *options
 	return k.shortPrompt(os.Stdin)
 }
@@ -118,7 +127,7 @@ func (k keys) shortPrompt(r io.Reader) (key string) {
 			return long
 		}
 		if !k.validate(key) {
-			promptCheck(prompts)
+			check(prompts)
 			continue
 		}
 		return key
@@ -147,8 +156,8 @@ func (k keys) shortValidate(key string) string {
 	return k[i]
 }
 
-// PromptStrings asks for and returns a single choice from a string of keys.
-func PromptStrings(options *[]string) (key string) {
+// Strings asks for and returns a single choice from a string of keys.
+func Strings(options *[]string) (key string) {
 	var k keys = *options
 	return k.prompt(os.Stdin)
 }
@@ -160,7 +169,7 @@ func (k keys) validate(key string) (ok bool) {
 	sort.Strings(k)
 	var i = sort.SearchStrings(k, key)
 	if i >= len(k) || k[i] != key {
-		fmt.Printf("%s %v\n", Ce("✗"), key)
+		fmt.Printf("%s %v\n", logs.Bool(false), key)
 		return false
 	}
 	return true
@@ -176,7 +185,7 @@ func (k keys) prompt(r io.Reader) (key string) {
 			return key
 		}
 		if !k.validate(key) {
-			promptCheck(prompts)
+			check(prompts)
 			continue
 		}
 		return key
@@ -184,16 +193,16 @@ func (k keys) prompt(r io.Reader) (key string) {
 	return ""
 }
 
-// PromptYN asks for a yes or no input.
-func PromptYN(ask string, yesDefault bool) bool {
+// YesNo asks for a yes or no input.
+func YesNo(ask string, yesDefault bool) bool {
 	y, n := "Y", "n"
 	if !yesDefault {
 		y, n = "y", "N"
 	}
 	fmt.Printf("%s? [%s/%s] ", ask, y, n)
 	input, err := promptRead(os.Stdin)
-	Log(err)
-	return parseyn(input, yesDefault)
+	logs.Log(err)
+	return parseYN(input, yesDefault)
 }
 
 func promptRead(stdin io.Reader) (input string, err error) {
@@ -206,7 +215,7 @@ func promptRead(stdin io.Reader) (input string, err error) {
 	return input, nil
 }
 
-func parseyn(input string, yesDefault bool) bool {
+func parseYN(input string, yesDefault bool) bool {
 	switch input {
 	case "":
 		if yesDefault {
