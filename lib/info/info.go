@@ -16,12 +16,13 @@ import (
 	"github.com/aofei/mimesniffer"
 	"github.com/bengarrett/retrotxtgo/lib/codepage"
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
+	"github.com/bengarrett/retrotxtgo/lib/humanize"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	c "github.com/gookit/color"
 	"github.com/mattn/go-runewidth"
 	"github.com/mozillazg/go-slugify"
-
-	humanize "github.com/labstack/gommon/bytes"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 // Detail of a file
@@ -59,8 +60,17 @@ type File struct {
 	Modified  time.Time `xml:"modified"`
 }
 
-// FileDate is a non-standard date format for file modifications
-const FileDate string = "2 Jan 15:04 2006"
+// TODO: env
+// Indicates which language, character set, and sort order to use for messages, datatype conversions, and datetime formats.
+// 1. LC_NUMERIC="en_GB.UTF-8"
+// 1. LC_TIME="en_GB.UTF-8"
+// 2. LC_ALL=""
+// 3. LANG=""
+// 4. LANGUAGE=""
+// 4. US
+
+// Language ...
+var Language = "de"
 
 // Info parses the named file and prints out its details in a specific syntax.
 func Info(name, format string) (err logs.Err) {
@@ -147,6 +157,9 @@ func (d *Detail) Read(name string) (err error) {
 
 // parse fileinfo and file content.
 func (d *Detail) parse(data []byte, stat os.FileInfo, name string) (err error) {
+	t := language.German
+	p := message.NewPrinter(t)
+
 	md5sum := md5.Sum(data)
 	sha256 := sha256.Sum256(data)
 	ms := mimesniffer.Sniff(data)
@@ -167,11 +180,10 @@ func (d *Detail) parse(data []byte, stat os.FileInfo, name string) (err error) {
 	d.SHA256 = fmt.Sprintf("%x", sha256)
 	d.Utf8 = codepage.UTF8(data)
 	if stat.Size() < 1000 {
-		d.Size = fmt.Sprintf("%v bytes", stat.Size())
+		d.Size = p.Sprintf("%v bytes", p.Sprint(stat.Size()))
 	} else {
-		d.Size = fmt.Sprintf("%v (%v bytes)", humanize.Format(stat.Size()), stat.Size())
+		d.Size = p.Sprintf("%v (%v bytes)", humanize.Bytes(stat.Size(), t), p.Sprint(stat.Size()))
 	}
-
 	return err
 }
 
@@ -190,6 +202,7 @@ func (d Detail) JSON(indent bool) (js []byte) {
 
 // Text format and returns the details of a file.
 func (d Detail) Text(color bool) string {
+	p := message.NewPrinter(language.English)
 	c.Enable = color
 	var info = func(t string) string {
 		return logs.Cinf(fmt.Sprintf("%s\t", t))
@@ -202,12 +215,12 @@ func (d Detail) Text(color bool) string {
 	}{
 		{k: "filename", v: d.Name},
 		{k: "UTF-8", v: logs.Bool(d.Utf8)},
-		{k: "characters", v: fmt.Sprint(d.CharCount)},
-		{k: "words", v: fmt.Sprint(d.WordCount)},
+		{k: "characters", v: p.Sprint(d.CharCount)},
+		{k: "words", v: p.Sprint(d.WordCount)},
 		{k: "size", v: d.Size},
-		{k: "lines", v: fmt.Sprint(d.Lines)},
-		{k: "width", v: fmt.Sprint(d.Width)},
-		{k: "modified", v: fmt.Sprintf("%v", d.Modified.UTC().Format(FileDate))},
+		{k: "lines", v: p.Sprint(d.Lines)},
+		{k: "width", v: p.Sprint(d.Width)},
+		{k: "modified", v: humanize.Datetime("DMY24", d.Modified.UTC())},
 		{k: "MD5 checksum", v: d.MD5},
 		{k: "SHA256 checksum", v: d.SHA256},
 		{k: "MIME type", v: d.Mime},

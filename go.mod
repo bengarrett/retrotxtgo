@@ -6,7 +6,6 @@ require (
 	github.com/alecthomas/chroma v0.7.3
 	github.com/aofei/mimesniffer v1.1.4
 	github.com/gookit/color v1.2.5
-	github.com/labstack/gommon v0.3.0
 	github.com/mattn/go-runewidth v0.0.9
 	github.com/mozillazg/go-slugify v0.2.0
 	github.com/mozillazg/go-unidecode v0.1.1 // indirect
