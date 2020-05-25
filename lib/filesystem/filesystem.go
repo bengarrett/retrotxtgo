@@ -143,29 +143,25 @@ func IsWord(s string) bool {
 
 // Read opens and returns the content of the named file.
 func Read(name string) (data []byte, err error) {
-	// check name is file not anything else
 	return ReadAllBytes(name)
 }
 
 // ReadAllBytes reads the named file and returns the content as a byte array.
+// Create a word and random character generator to make files larger than 64k.
 func ReadAllBytes(name string) (data []byte, err error) {
-	// In-depth introduction to bufio.Scanner 👍
-	// https://medium.com/golangspec/in-depth-introduction-to-bufio-scanner-in-golang-55483bb689b4
 	file, err := os.Open(name)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
-	// determine the size of the file
-	stat, err := os.Stat(name)
-	if err != nil {
-		return nil, err
-	}
-	// bufio is the most performant
+	// bufio is the most performant way to scan streamed data
 	scanner := bufio.NewScanner(file)
-	// bufio has a has a default limit of 64k
-	// this increases the buffer limit to the file size
-	scanner.Buffer(data, int(stat.Size()))
+	// optional adjustment to the token size
+	// Go by default will scan 64 * 1024 bytes (64KB) per iteration
+	scanner.Buffer(data, 64*1024)
+	// required, split scan into Buffer(data, x) sized byte chuncks
+	// otherwise scanner will panic on files larger than 64 * 1024 bytes
+	scanner.Split(bufio.ScanBytes)
 	for scanner.Scan() {
 		data = append(data, scanner.Bytes()...)
 	}
@@ -186,7 +182,6 @@ func ReadChunk(name string, chars int) (data []byte, err error) {
 		return nil, err
 	}
 	defer file.Close()
-	// bufio is the most performant
 	scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanRunes)
 	count := 0

@@ -3,6 +3,8 @@ package filesystem
 import (
 	"fmt"
 	"log"
+	"math"
+	"math/rand"
 	"os"
 	"reflect"
 	"testing"
@@ -10,7 +12,8 @@ import (
 	"github.com/bengarrett/retrotxtgo/samples"
 )
 
-func exampleSave(s string, i int) string {
+// fileExample saves `hello world` or a provided string to a text file.
+func fileExample(s string, i int) (path string) {
 	var name = fmt.Sprintf("rt_fs_save%d.txt", i)
 	if s == "" {
 		s = "hello world"
@@ -22,8 +25,89 @@ func exampleSave(s string, i int) string {
 	return path
 }
 
+// largeExample generates and saves a 800k file of random us-ascii text.
+func largeExample() (path string) {
+	const name = "rs_mega_example_save.txt"
+	_, s := filler(0.8)
+	path, err := samples.Save([]byte(s), name)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return path
+}
+
+// megaExample generates and saves a 1.5MB file of random us-ascii text.
+func megaExample() (path string) {
+	const name = "rs_giga_mega_save.txt"
+	_, s := filler(1.5)
+	path, err := samples.Save([]byte(s), name)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return path
+}
+
+// filler generates random us-ascii text.
+func filler(sizeMB float64) (length int, random string) {
+	if sizeMB <= 0 {
+		return length, random
+	}
+	// make characters to randomize
+	const (
+		// ascii code points (rune codes)
+		start    = 33  // "!"
+		end      = 122 // "z"
+		charsLen = end - start + 1
+	)
+	chars := make([]rune, charsLen)
+	for c, i := 0, start; i <= end; i++ {
+		chars[c] = rune(i)
+		c++
+	}
+	// initialize rune slice
+	f := (math.Pow(1000, 2) * sizeMB)
+	s := make([]rune, int(f))
+	// generate random string
+	for i := range s {
+		s[i] = chars[rand.Intn(charsLen)]
+	}
+	return len(s), string(s)
+}
+
+func BenchmarkReadMega(b *testing.B) {
+	large := largeExample()
+	Read(large)
+	samples.Clean(large)
+}
+
+func BenchmarkReadGiga(b *testing.B) {
+	giga := megaExample()
+	Read(giga)
+	samples.Clean(giga)
+}
+
+func Test_filler(t *testing.T) {
+	tests := []struct {
+		name       string
+		sizeMB     float64
+		wantLength int
+	}{
+		{"0", 0, 0},
+		{"0.1", 0.1, 100001},
+		{"1.5", 1.5, 1500000},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotLength, _ := filler(tt.sizeMB); gotLength != tt.wantLength {
+				t.Errorf("filler() = %v, want %v", gotLength, tt.wantLength)
+			}
+		})
+	}
+}
+
 func TestRead(t *testing.T) {
-	f := exampleSave("", 0)
+	f := fileExample("", 0)
+	large := largeExample()
 	type args struct {
 		name string
 	}
@@ -36,24 +120,26 @@ func TestRead(t *testing.T) {
 		{"invalid", args{"/invalid-file"}, true},
 		{"dir", args{os.TempDir()}, true},
 		{"valid", args{f}, false},
+		{"1.5MB", args{large}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			_, err := Read(tt.args.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Read() error = %v, wantErr %v", err, tt.wantErr)
-				//return
 			}
 		})
 	}
 	samples.Clean(f)
+	samples.Clean(large)
 }
 
 func TestReadAllBytes(t *testing.T) {
-	f2 := exampleSave(samples.Symbols, 2)
-	f3 := exampleSave(samples.Tabs, 3)
-	f4 := exampleSave(samples.Escapes, 4)
-	f5 := exampleSave(samples.Digits, 5)
+	f2 := fileExample(samples.Symbols, 2)
+	f3 := fileExample(samples.Tabs, 3)
+	f4 := fileExample(samples.Escapes, 4)
+	f5 := fileExample(samples.Digits, 5)
+	large := largeExample()
 	type args struct {
 		name string
 	}
@@ -70,6 +156,7 @@ func TestReadAllBytes(t *testing.T) {
 		{"tabs", args{f3}, []byte(samples.Tabs), false},
 		{"escs", args{f4}, []byte(samples.Escapes), false},
 		{"digs", args{f5}, []byte(samples.Digits), false},
+		{"1.5MB", args{large}, nil, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -78,7 +165,7 @@ func TestReadAllBytes(t *testing.T) {
 				t.Errorf("ReadAllBytes() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(gotData, tt.wantData) {
+			if tt.wantData != nil && !reflect.DeepEqual(gotData, tt.wantData) {
 				t.Errorf("ReadAllBytes() = %q, want %q", string(gotData), string(tt.wantData))
 			}
 		})
@@ -87,13 +174,15 @@ func TestReadAllBytes(t *testing.T) {
 	samples.Clean(f3)
 	samples.Clean(f4)
 	samples.Clean(f5)
+	samples.Clean(large)
 }
 
 func TestReadChunk(t *testing.T) {
-	f1 := exampleSave(samples.Newlines, 1)
-	f2 := exampleSave(samples.Symbols, 2)
-	f3 := exampleSave(samples.Tabs, 3)
-	f4 := exampleSave(samples.Escapes, 4)
+	f1 := fileExample(samples.Newlines, 1)
+	f2 := fileExample(samples.Symbols, 2)
+	f3 := fileExample(samples.Tabs, 3)
+	f4 := fileExample(samples.Escapes, 4)
+	large := largeExample()
 	type args struct {
 		name string
 		size int
@@ -114,6 +203,7 @@ func TestReadChunk(t *testing.T) {
 		{"utf8", args{f2, 4}, []byte("[☠|☮"), false},
 		{"tabs", args{f3, 7}, []byte("☠\tSkull"), false},
 		{"escs", args{f4, 13}, []byte("bell:\a,back:\b"), false},
+		{"large", args{large, 100}, nil, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -122,7 +212,10 @@ func TestReadChunk(t *testing.T) {
 				t.Errorf("ReadChunk() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(gotData, tt.wantData) {
+			if tt.name == "large" && len(gotData) != 100 {
+				t.Errorf("ReadChunk() length = %v, want %v", len(gotData), 100)
+			}
+			if tt.name != "large" && !reflect.DeepEqual(gotData, tt.wantData) {
 				t.Errorf("ReadChunk() = %v, want %v", gotData, tt.wantData)
 			}
 		})
@@ -131,13 +224,15 @@ func TestReadChunk(t *testing.T) {
 	samples.Clean(f2)
 	samples.Clean(f3)
 	samples.Clean(f4)
+	samples.Clean(large)
 }
 
 func TestReadTail(t *testing.T) {
-	f1 := exampleSave(samples.Newlines, 1)
-	f2 := exampleSave(samples.Symbols, 2)
-	f3 := exampleSave(samples.Tabs, 3)
-	f4 := exampleSave(samples.Escapes, 4)
+	f1 := fileExample(samples.Newlines, 1)
+	f2 := fileExample(samples.Symbols, 2)
+	f3 := fileExample(samples.Tabs, 3)
+	f4 := fileExample(samples.Escapes, 4)
+	large := largeExample()
 	type args struct {
 		name   string
 		offset int
@@ -155,6 +250,7 @@ func TestReadTail(t *testing.T) {
 		{"utf8", args{f2, 4}, []byte("☮|♺]"), false},
 		{"tabs", args{f3, 11}, []byte("♺\tRecycling"), false},
 		{"escs", args{f4, 9}, []byte("\v,quote:\""), false},
+		{"large", args{large, 100}, nil, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -163,7 +259,10 @@ func TestReadTail(t *testing.T) {
 				t.Errorf("ReadTail() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(gotData, tt.wantData) {
+			if tt.name == "large" && len(gotData) != 100 {
+				t.Errorf("ReadChunk() length = %v, want %v", len(gotData), 100)
+			}
+			if tt.name != "large" && !reflect.DeepEqual(gotData, tt.wantData) {
 				t.Errorf("ReadTail() = %q, want %q", string(gotData), string(tt.wantData))
 			}
 		})
@@ -172,6 +271,7 @@ func TestReadTail(t *testing.T) {
 	samples.Clean(f2)
 	samples.Clean(f3)
 	samples.Clean(f4)
+	samples.Clean(large)
 }
 
 func TestIsWord(t *testing.T) {
