@@ -1,6 +1,7 @@
 package str
 
 import (
+	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
@@ -47,6 +48,36 @@ func YamlStyles(cmd string) {
 		}
 		styles.String(cmd)
 	}
+}
+
+// Border wraps text around a single line border.
+func Border(text string) *bytes.Buffer {
+	maxLen := 0
+	scanner := bufio.NewScanner(strings.NewReader(text))
+	scanner.Split(bufio.ScanLines)
+	for scanner.Scan() {
+		l := utf8.RuneCountInString(scanner.Text())
+		if l > maxLen {
+			maxLen = l
+		}
+	}
+	maxLen = maxLen + 2
+	scanner = bufio.NewScanner(strings.NewReader(text))
+	scanner.Split(bufio.ScanLines)
+	var b bytes.Buffer
+	fmt.Fprintln(&b, ("┌" + strings.Repeat("─", maxLen) + "┐"))
+	for scanner.Scan() {
+		l := utf8.RuneCountInString(scanner.Text())
+		lp := ((maxLen - l) / 2)
+		rp := lp
+		// if lp/rp are X.5 decimal values, add 1 right padd to account for the uneven split
+		if float32((maxLen-l)/2) != float32(float32(maxLen-l)/2) {
+			rp = rp + 1
+		}
+		fmt.Fprintf(&b, "│%s%s%s│\n", strings.Repeat(" ", lp), scanner.Text(), strings.Repeat(" ", rp))
+	}
+	fmt.Fprintln(&b, "└"+strings.Repeat("─", maxLen)+"┘")
+	return &b
 }
 
 // Highlight and print the syntax of the source string except when piped to stdout.

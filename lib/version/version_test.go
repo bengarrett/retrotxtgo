@@ -21,13 +21,6 @@ import (
 // 	return strings.TrimSpace(string(bytes))
 // }
 
-func ExampleBorder() {
-	fmt.Printf("%s", Border("hi"))
-	// Output: ┌────┐
-	// │ hi │
-	// └────┘
-}
-
 func ExampleDigits() {
 	fmt.Println(Digits("v1.0 (init release)"))
 	// Output: 1.0

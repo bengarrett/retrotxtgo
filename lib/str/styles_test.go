@@ -1,10 +1,17 @@
 package str
 
 import (
+	"fmt"
 	"os"
 	"testing"
 )
 
+func ExampleBorder() {
+	fmt.Printf("%s", Border("hi"))
+	// Output: ┌────┐
+	// │ hi │
+	// └────┘
+}
 func TestTerm(t *testing.T) {
 	tests := []struct {
 		name     string

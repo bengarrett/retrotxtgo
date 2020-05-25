@@ -1,7 +1,6 @@
 package version
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -11,7 +10,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"unicode/utf8"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/online"
@@ -46,36 +44,6 @@ var B = Build{
 	Date:    "",
 	Domain:  "retrotxt.com",
 	Version: "",
-}
-
-// Border wraps text around a single line border.
-func Border(text string) *bytes.Buffer {
-	maxLen := 0
-	scanner := bufio.NewScanner(strings.NewReader(text))
-	scanner.Split(bufio.ScanLines)
-	for scanner.Scan() {
-		l := utf8.RuneCountInString(scanner.Text())
-		if l > maxLen {
-			maxLen = l
-		}
-	}
-	maxLen = maxLen + 2
-	scanner = bufio.NewScanner(strings.NewReader(text))
-	scanner.Split(bufio.ScanLines)
-	var b bytes.Buffer
-	fmt.Fprintln(&b, ("┌" + strings.Repeat("─", maxLen) + "┐"))
-	for scanner.Scan() {
-		l := utf8.RuneCountInString(scanner.Text())
-		lp := ((maxLen - l) / 2)
-		rp := lp
-		// if lp/rp are X.5 decimal values, add 1 right padd to account for the uneven split
-		if float32((maxLen-l)/2) != float32(float32(maxLen-l)/2) {
-			rp = rp + 1
-		}
-		fmt.Fprintf(&b, "│%s%s%s│\n", strings.Repeat(" ", lp), scanner.Text(), strings.Repeat(" ", rp))
-	}
-	fmt.Fprintln(&b, "└"+strings.Repeat("─", maxLen)+"┘")
-	return &b
 }
 
 // Digits returns only the digits and decimal point values from a string.
@@ -254,7 +222,7 @@ func localBuild(date string) string {
 func newRelease() *bytes.Buffer {
 	s := "A newer edition of RetroTxt is available!\n" +
 		"Learn more at https://github.com/bengarrett/retrotxtgo"
-	return Border(s)
+	return str.Border(s)
 }
 
 // semantic go version.
