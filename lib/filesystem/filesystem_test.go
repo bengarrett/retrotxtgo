@@ -74,16 +74,16 @@ func filler(sizeMB float64) (length int, random string) {
 	return len(s), string(s)
 }
 
-func BenchmarkReadMega(b *testing.B) {
+func BenchmarkReadLarge(b *testing.B) {
 	large := largeExample()
 	Read(large)
 	samples.Clean(large)
 }
 
-func BenchmarkReadGiga(b *testing.B) {
-	giga := megaExample()
-	Read(giga)
-	samples.Clean(giga)
+func BenchmarkReadMega(b *testing.B) {
+	mega := megaExample()
+	Read(mega)
+	samples.Clean(mega)
 }
 
 func Test_filler(t *testing.T) {
@@ -93,7 +93,7 @@ func Test_filler(t *testing.T) {
 		wantLength int
 	}{
 		{"0", 0, 0},
-		{"0.1", 0.1, 100001},
+		{"0.1", 0.1, 100000},
 		{"1.5", 1.5, 1500000},
 	}
 	for _, tt := range tests {
