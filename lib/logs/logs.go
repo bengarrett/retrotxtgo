@@ -99,8 +99,8 @@ func (e Err) check() (msg string, code int) {
 }
 
 // ColorHTML prints colored syntax highlighting to HTML elements.
-func ColorHTML(elm string) {
-	fmt.Println(colorhtml(&elm))
+func ColorHTML(elm string) string {
+	return colorhtml(&elm)
 }
 
 func colorhtml(elm *string) string {

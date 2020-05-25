@@ -157,7 +157,9 @@ func Set(name string) {
 		fmt.Println(h.String())
 		return
 	}
-	PrintLocation()
+	if !setupMode {
+		PrintLocation()
+	}
 	value := viper.GetString(name)
 	switch value {
 	case "":
@@ -203,17 +205,29 @@ func Setup() {
 	logs.SetupMode = true
 	keys := viper.AllKeys()
 	sort.Strings(keys)
-	if runtime.GOOS == "darwin" {
-		fmt.Println("Press ↩ return to skip the question or ⌃ control-c to quit")
-	} else {
-		fmt.Println("Press ⏎ enter to skip the question or Ctrl-c to quit")
-	}
 	for i, key := range keys {
-		h := fmt.Sprintf("%d/%d. RetroTxt Setup\n", i+1, len(keys))
+		h := fmt.Sprintf("  %d/%d. RetroTxt Setup", i+1, len(keys))
+		if i == 0 {
+			fmt.Println(hr(&h))
+		}
 		fmt.Println(h)
+		if i == 0 {
+			fmt.Printf("\n%s\n", logs.Cb(enterKey()))
+		}
 		Set(key)
-		fmt.Println(strings.Repeat("-", len(h)-1))
+		fmt.Println(hr(&h))
 	}
+}
+
+func enterKey() string {
+	if runtime.GOOS == "darwin" {
+		return "Press ↩ return to skip the question or ⌃ control-c to quit"
+	}
+	return "Press ⏎ enter to skip the question or Ctrl-c to quit"
+}
+
+func hr(h *string) string {
+	return logs.Cb(strings.Repeat("-", (len(*h)-1)*2))
 }
 
 // Validate the existence of a setting key name.
@@ -311,7 +325,7 @@ func setGenerator() {
 	// v{{.BuildVersion}}; {{.BuildDate}}
 	elm := fmt.Sprintf("<head>\n  <meta name=\"generator\" content=\"RetroTxt v%s, %s\">",
 		v.B.Version, v.B.Date)
-	logs.ColorHTML(elm)
+	fmt.Print(logs.ColorHTML(elm))
 	prmt := logs.PromptYN("Enable this element", viper.GetBool(name))
 	viper.Set(name, prmt)
 	if err := UpdateConfig("", false); err != nil {
@@ -332,8 +346,8 @@ func setMeta(name, value string) {
 		return
 	}
 	elm := fmt.Sprintf("<head>\n  <meta name=\"%s\" value=\"%s\">", s[2], value)
-	logs.ColorHTML(elm)
-	fmt.Println(logs.Cf("About this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name"))
+	fmt.Print(logs.ColorHTML(elm))
+	fmt.Println(logs.Cf("\nAbout this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name"))
 	q := "Set a new value or leave blank to keep it disabled:"
 	if value != "" {
 		q = "Set a new value, leave blank to keep as-is or use a dash [-] to disable:"
