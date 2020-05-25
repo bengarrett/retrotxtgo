@@ -21,8 +21,9 @@ func ExampleDetail_XML() {
 	data, _ := file.XML()
 	samples.Clean(tmp)
 	s := strings.ReplaceAll(string(data), "\t", "")
-	fmt.Printf("%q", strings.ReplaceAll(s, "\n", ""))
-	// Output:"<file id=\"info-test-txt\"><name>info_test.txt</name><content><mime>text/plain</mime><utf8>true</utf8></content><size><bytes>57</bytes><value>57 bytes</value><character-count>44</character-count><word-count>4</word-count></size><checksum><md5>de7254885365bfd7f44291706d844a56</md5><sha256>31d202a7e7c6dcc7743970d65d525d32bc9298f1236ef8e4d4abe058ae4d1c51</sha256></checksum><modified>2000-01-01T00:00:00Z</modified></file>"
+	ln := strings.Split(s, "\n")
+	fmt.Println(ln[0])
+	// Output: <file id="info-test-txt">
 }
 
 var sampleFile = func() string {
@@ -106,7 +107,7 @@ func Test_File(t *testing.T) {
 	if got.Utf8 != true {
 		t.Errorf("Read() = %v, want %v", got.Utf8, true)
 	}
-	const want = "de7254885365bfd7f44291706d844a56"
+	const want = "883643f5e9ed278732c92d9b6f834b96"
 	if got.MD5 != want {
 		t.Errorf("Read() = %v, want %v", got.MD5, want)
 	}
@@ -177,7 +178,7 @@ func Test_Text(t *testing.T) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	want := 506
+	want := 604
 	if got := len(d.Text(false)); got != want {
 		t.Errorf("Text() = %v, want %v", got, want)
 	}
