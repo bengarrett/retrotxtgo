@@ -11,6 +11,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -69,10 +70,10 @@ var configEditCmd = &cobra.Command{
 	Long: fmt.Sprintf("Edit the config file") +
 		"\n\nTo switch editors either:" +
 		"\n  Set one by creating or changing the " +
-		logs.Example("$EDITOR") +
+		str.Example("$EDITOR") +
 		" environment variable in your shell configuration." +
 		"\n  Set an editor in the configuration file, " +
-		logs.Example("retrotxt config set --name=editor"),
+		str.Example("retrotxt config set --name=editor"),
 	Run: func(cmd *cobra.Command, args []string) {
 		if e := config.Edit(); e.Err != nil {
 			e.Exit(1)
@@ -83,13 +84,13 @@ var configEditCmd = &cobra.Command{
 var configInfoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "View all the settings configured in the config file",
-	Example: logs.Example("  retrotxt config info --syntax-style=\"\"") +
+	Example: str.Example("  retrotxt config info --syntax-style=\"\"") +
 		" # disable the syntax highligher",
 	Run: func(cmd *cobra.Command, args []string) {
 		if configArgs.configs {
 			config.List()
 		} else if configArgs.list {
-			logs.YamlStyles("retrotxt info --style")
+			str.YamlStyles("retrotxt info --style")
 		} else if e := config.Info(configArgs.style); e.Err != nil {
 			e.Exit(1)
 		}
@@ -97,9 +98,9 @@ var configInfoCmd = &cobra.Command{
 }
 
 var configSetExample = func() string {
-	return logs.Example("  retrotxt config set --name create.meta.description") +
+	return str.Example("  retrotxt config set --name create.meta.description") +
 		" # to change the meta description setting\n" +
-		logs.Example("  retrotxt config set --name style.yaml") +
+		str.Example("  retrotxt config set --name style.yaml") +
 		"          # to set the version command output format"
 }
 
@@ -123,9 +124,9 @@ var configSetupCmd = &cobra.Command{
 var configShellCmd = &cobra.Command{
 	Use:   "shell",
 	Short: "Apply autocompletion a terminal shell",
-	Example: logs.Example("  retrotxt config shell --interpreter string [flags]") +
-		logs.Example("\n  retrotxt config shell -i=bash >> ~/.bash_profile") +
-		logs.Example("\n  retrotxt config shell -i=zsh >> ~/.zshrc"),
+	Example: str.Example("  retrotxt config shell --interpreter string [flags]") +
+		str.Example("\n  retrotxt config shell -i=bash >> ~/.bash_profile") +
+		str.Example("\n  retrotxt config shell -i=zsh >> ~/.zshrc"),
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
 			buf   bytes.Buffer
@@ -151,14 +152,14 @@ var configShellCmd = &cobra.Command{
 				Arg: configArgs.shell,
 				Msg: fmt.Errorf("options: %s", config.Format.String("shell"))})
 		}
-		if err := logs.Highlight(buf.String(), lexer, style); err != nil {
+		if err := str.Highlight(buf.String(), lexer, style); err != nil {
 			logs.Check("config shell", err)
 		}
 	},
 }
 
 func init() {
-	if logs.Term() == "none" {
+	if str.Term() == "none" {
 		color.Enable = false
 	}
 	var err error
@@ -182,15 +183,15 @@ func init() {
 		"list and preview the available syntax highlighers")
 	// set
 	configSetCmd.Flags().StringVarP(&configArgs.set, "name", "n", "",
-		logs.Required("the setting name in dot syntax")+
-			fmt.Sprintf("\nrun %s", logs.Example("retrotxt config info -c"))+
+		str.Required("the setting name in dot syntax")+
+			fmt.Sprintf("\nrun %s", str.Example("retrotxt config info -c"))+
 			" to see a list of names")
 	err = configSetCmd.MarkFlagRequired("name")
 	logs.Check("name flag", err)
 	// shell
 	configShellCmd.Flags().StringVarP(&configArgs.shell, "interpreter", "i", "",
-		logs.Required("user shell to receive retrotxt auto-completions")+
-			logs.Options("", config.Format.Shell, true))
+		str.Required("user shell to receive retrotxt auto-completions")+
+			str.Options("", config.Format.Shell, true))
 	err = configShellCmd.MarkFlagRequired("interpreter")
 	logs.Check("interpreter flag", err)
 	configShellCmd.SilenceErrors = true

@@ -5,13 +5,14 @@ import (
 	"fmt"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 )
 
 // Info prints the content of a configuration file.
 func Info(style string) (err logs.IssueErr) {
-	fmt.Println(logs.Cp("RetroTxt default configurations when no flags are given."))
+	fmt.Println(str.Cp("RetroTxt default configurations when no flags are given."))
 	PrintLocation()
 	out, e := yaml.Marshal(viper.AllSettings())
 	if e != nil {
@@ -25,7 +26,7 @@ func Info(style string) (err logs.IssueErr) {
 	case "none", "":
 		fmt.Println(string(out))
 	default:
-		logs.Highlight(string(out), "yaml", style)
+		str.Highlight(string(out), "yaml", style)
 	}
 	return logs.IssueErr{}
 }

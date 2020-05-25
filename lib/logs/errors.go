@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/gookit/color"
 )
 
@@ -20,9 +21,9 @@ func (e Err) String() string {
 	if e.Msg == nil {
 		return ""
 	}
-	return fmt.Sprintf("%s %s %s", Alert(),
-		Ci(fmt.Sprintf("%s %s,", e.Issue, e.Arg)), // issue & argument
-		Cf(fmt.Sprintf("%v", e.Msg)))              // error message
+	return fmt.Sprintf("%s %s %s", str.Alert(),
+		str.Ci(fmt.Sprintf("%s %s,", e.Issue, e.Arg)), // issue & argument
+		str.Cf(fmt.Sprintf("%v", e.Msg)))              // error message
 }
 
 // Hint is a generic error type used to apply color to errors and offer a hint
@@ -35,7 +36,7 @@ type Hint struct {
 
 func (h Hint) String() string {
 	e := Err{Issue: h.Issue, Arg: h.Arg, Msg: h.Msg}
-	return e.String() + fmt.Sprintf("\n         run %s", Example("retrotxt "+h.Hint))
+	return e.String() + fmt.Sprintf("\n         run %s", str.Example("retrotxt "+h.Hint))
 }
 
 // CmdErr is a root command error type to handle command arguments and flags
@@ -129,7 +130,7 @@ func (i IssueErr) String() string {
 	if i.Issue == "" {
 		return fmt.Sprintf("%s", i.Err)
 	}
-	return fmt.Sprintf("%s %s\n         %s", Alert(), Ci(i.Issue), Cf(fmt.Sprint(i.Err)))
+	return fmt.Sprintf("%s %s\n         %s", str.Alert(), str.Ci(i.Issue), str.Cf(fmt.Sprint(i.Err)))
 }
 
 // Exit prints the IssueErr and causes the program to exit with the given status code.
@@ -155,7 +156,7 @@ func CheckFlag(name, value string, args []string) {
 
 func checkCmd(arg string, args []string) (msg string, code int) {
 	code = 10
-	msg += fmt.Sprintf("%s invalid argument!%s", Alert(),
+	msg += fmt.Sprintf("%s invalid argument!%s", str.Alert(),
 		color.Bold.Sprintf(" %q", arg))
 	if len(args) > 1 {
 		msg += fmt.Sprintf(", choices: %s\n%s",

@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 )
 
 // the lowest, largest and recommended network ports to serve HTTP.
@@ -27,7 +28,7 @@ func check(prompts int) {
 	switch {
 	case prompts == 2:
 		if i, err := fmt.Println("Ctrl+C to keep the existing value"); err != nil {
-			log.Fatalf("logs.check println at %dB: %s", i, err)
+			log.Fatalf("prompt check println at %dB: %s", i, err)
 		}
 	case prompts >= 4:
 		os.Exit(1)
@@ -54,14 +55,14 @@ func pport(r io.Reader, validate bool) (port uint) {
 		}
 		value, err := strconv.ParseInt(input, 10, 0)
 		if err != nil {
-			fmt.Printf("%s %v\n", logs.Bool(false), input)
+			fmt.Printf("%s %v\n", str.Bool(false), input)
 			check(prompts)
 			continue
 		}
 		port = uint(value)
 		if validate {
 			if v := PortValid(port); !v {
-				fmt.Printf("%s %v, is out of range\n", logs.Bool(false), input)
+				fmt.Printf("%s %v, is out of range\n", str.Bool(false), input)
 				check(prompts)
 				continue
 			}
@@ -169,7 +170,7 @@ func (k keys) validate(key string) (ok bool) {
 	sort.Strings(k)
 	var i = sort.SearchStrings(k, key)
 	if i >= len(k) || k[i] != key {
-		fmt.Printf("%s %v\n", logs.Bool(false), key)
+		fmt.Printf("%s %v\n", str.Bool(false), key)
 		return false
 	}
 	return true

@@ -6,6 +6,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/info"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/spf13/cobra"
 )
 
@@ -34,9 +35,9 @@ var infoCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(infoCmd)
 	infoCmd.Flags().StringVarP(&infoArgs.filename, "name", "n", "",
-		logs.Required("text file to analyse")+"\n")
+		str.Required("text file to analyse")+"\n")
 	infoCmd.Flags().StringVarP(&infoArgs.format, "format", "f", "color",
-		logs.Options("output format", config.Format.Info, true))
+		str.Options("output format", config.Format.Info, true))
 	err := infoCmd.MarkFlagRequired("name")
 	logs.Check("name flag", err)
 	infoCmd.Flags().SortFlags = false

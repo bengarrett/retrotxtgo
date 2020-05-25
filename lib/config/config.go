@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	gap "github.com/muesli/go-app-paths"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
@@ -65,7 +65,7 @@ func Path() (dir string) {
 func configMissing(name string, suffix string) {
 	cmd := strings.TrimSuffix(name, suffix) + " create"
 	fmt.Printf("%s no config file is in use\n create it: %s\n",
-		logs.Info(), logs.Cp(cmd))
+		str.Info(), str.Cp(cmd))
 	os.Exit(21)
 }
 

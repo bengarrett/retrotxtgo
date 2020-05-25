@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
-	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/spf13/viper"
 )
 
@@ -35,9 +35,9 @@ func Create(name string, ow bool) (err error) {
 func configDoesExist(name string, suffix string) {
 	cmd := strings.TrimSuffix(name, suffix)
 	fmt.Printf("%s a config file exists: %s\n",
-		logs.Info(), logs.Cf(viper.ConfigFileUsed()))
-	fmt.Printf(" edit it: %s\n", logs.Cp(cmd+" edit"))
-	fmt.Printf("  delete: %s\n", logs.Cp(cmd+" delete"))
-	fmt.Printf("   reset: %s\n", logs.Cp(cmd+" create --overwrite"))
+		str.Info(), str.Cf(viper.ConfigFileUsed()))
+	fmt.Printf(" edit it: %s\n", str.Cp(cmd+" edit"))
+	fmt.Printf("  delete: %s\n", str.Cp(cmd+" delete"))
+	fmt.Printf("   reset: %s\n", str.Cp(cmd+" create --overwrite"))
 	os.Exit(20)
 }

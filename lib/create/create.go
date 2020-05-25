@@ -15,6 +15,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/prompt"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/spf13/viper"
 )
 
@@ -126,8 +127,8 @@ func (args Args) serveFile(data []byte, port uint, test bool) error {
 	fs := http.FileServer(http.Dir("static/"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	fmt.Printf("Web server is available at %s\n",
-		logs.Cp(fmt.Sprintf("http://localhost:%v", port)))
-	println(logs.Cinf("Press Ctrl+C to stop"))
+		str.Cp(fmt.Sprintf("http://localhost:%v", port)))
+	println(str.Cinf("Press Ctrl+C to stop"))
 	if err = http.ListenAndServe(fmt.Sprintf(":%v", port), nil); err != nil {
 		return err
 	}
@@ -149,7 +150,7 @@ func (args Args) Stdout(data []byte, test bool) error {
 	case "", "none":
 		fmt.Printf("%s", buf.String())
 	default:
-		if err = logs.Highlight(buf.String(), "html", args.Styles); err != nil {
+		if err = str.Highlight(buf.String(), "html", args.Styles); err != nil {
 			return err
 		}
 	}

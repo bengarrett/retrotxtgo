@@ -9,6 +9,7 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/gookit/color"
 	gap "github.com/muesli/go-app-paths"
 	"github.com/spf13/viper"
@@ -37,9 +38,9 @@ var (
 // FileMissingErr exits with a missing FILE error.
 // TODO: probably needs replacing
 func FileMissingErr() {
-	i := Ci("missing the --name flag")
-	m := Cf("you need to provide a path to a text file")
-	fmt.Printf("\n%s %s %s\n", Alert(), i, m)
+	i := str.Ci("missing the --name flag")
+	m := str.Cf("you need to provide a path to a text file")
+	fmt.Printf("\n%s %s %s\n", str.Alert(), i, m)
 	os.Exit(1)
 }
 
@@ -81,7 +82,7 @@ func CheckNilArg(arg string, args []string) {
 }
 
 func checkNilArgument(arg string, args []string) (msg string, code int) {
-	msg += fmt.Sprintf("%s required argument%s cannot be empty and requires a value\n", Alert(), color.Bold.Sprintf(" %q", arg))
+	msg += fmt.Sprintf("%s required argument%s cannot be empty and requires a value\n", str.Alert(), color.Bold.Sprintf(" %q", arg))
 	return msg, code
 }
 
@@ -106,7 +107,7 @@ func ColorHTML(elm string) string {
 func colorhtml(elm *string) string {
 	var buf bytes.Buffer
 	style := viper.GetString("style.html")
-	if err := HighlightWriter(&buf, *elm, "html", style); err != nil {
+	if err := str.HighlightWriter(&buf, *elm, "html", style); err != nil {
 		return fmt.Sprintf("\n%s\n", *elm)
 	}
 	if len(buf.String()) == 0 {

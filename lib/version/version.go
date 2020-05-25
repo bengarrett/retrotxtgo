@@ -15,6 +15,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/online"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	c "github.com/gookit/color"
 )
 
@@ -163,10 +164,10 @@ func Sprint(color bool) (text string) {
 	i := information()
 	new, ver := NewRelease()
 	var b bytes.Buffer
-	fmt.Fprintf(&b, logs.Cp("RetroTxt\t%s [%s]\n"), i["copyright"], i["url"])
-	fmt.Fprintf(&b, logs.Cinf("Version:\t%s"), i["app ver"])
+	fmt.Fprintf(&b, str.Cp("RetroTxt\t%s [%s]\n"), i["copyright"], i["url"])
+	fmt.Fprintf(&b, str.Cinf("Version:\t%s"), i["app ver"])
 	if new {
-		fmt.Fprintf(&b, logs.Cinf("  current: %s"), ver)
+		fmt.Fprintf(&b, str.Cinf("  current: %s"), ver)
 	}
 	fmt.Fprintf(&b, "\nGo version:\t%s\n", i["go ver"])
 	fmt.Fprintf(&b, "\nBinary:\t\t%s\n", i["exe"])

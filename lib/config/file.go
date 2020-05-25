@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/spf13/viper"
 )
 
@@ -84,6 +85,6 @@ func SetConfig(configFlag string) {
 // PrintLocation prints the location of the current configuration file.
 func PrintLocation() {
 	fmt.Println(
-		logs.Cb(fmt.Sprintf("Config file: %s",
+		str.Cb(fmt.Sprintf("Config file: %s",
 			viper.ConfigFileUsed())))
 }

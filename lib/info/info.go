@@ -18,6 +18,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/humanize"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	c "github.com/gookit/color"
 	"github.com/mattn/go-runewidth"
 	"github.com/mozillazg/go-slugify"
@@ -207,16 +208,16 @@ func (d Detail) Text(color bool) string {
 	p := message.NewPrinter(Language)
 	c.Enable = color
 	var info = func(t string) string {
-		return logs.Cinf(fmt.Sprintf("%s\t", t))
+		return str.Cinf(fmt.Sprintf("%s\t", t))
 	}
 	var hr = func(l int) string {
-		return fmt.Sprintf("\t%s\n", logs.Cb(strings.Repeat("\u2500", l)))
+		return fmt.Sprintf("\t%s\n", str.Cb(strings.Repeat("\u2500", l)))
 	}
 	var data = []struct {
 		k, v string
 	}{
 		{k: "filename", v: d.Name},
-		{k: "UTF-8", v: logs.Bool(d.Utf8)},
+		{k: "UTF-8", v: str.Bool(d.Utf8)},
 		{k: "characters", v: p.Sprint(d.CharCount)},
 		{k: "words", v: p.Sprint(d.WordCount)},
 		{k: "size", v: d.Size},

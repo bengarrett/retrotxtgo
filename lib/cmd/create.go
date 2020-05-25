@@ -10,6 +10,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/create"
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -37,7 +38,7 @@ var exampleCmd = func() string {
 	s := string(os.PathSeparator)
 	fmt.Fprint(&b, `  retrotxt create -n textfile.txt -t "Text file" -d "Some random text file"`)
 	fmt.Fprintf(&b, "\n  retrotxt create --name ~%sDownloads%stextfile.txt --layout mini --save .%shtml", s, s, s)
-	return logs.Cinf(b.String())
+	return str.Cinf(b.String())
 }
 
 // createCmd represents the create command
@@ -82,7 +83,7 @@ var createCmd = &cobra.Command{
 
 type metaFlag struct {
 	key   string   // configuration name
-	str   *string  // StringVarP(p) argument value
+	strg  *string  // StringVarP(p) argument value
 	boo   *bool    // BoolVarP(p) argument value
 	i     *int     // IntVar(p) argument value
 	name  string   // flag long name
@@ -125,7 +126,7 @@ func init() {
 	sort.Ints(keys)
 	// required flags
 	createCmd.Flags().StringVarP(&createFileName, "name", "n", "",
-		logs.Required("text file to parse")+"\n")
+		str.Required("text file to parse")+"\n")
 	// generate flags
 	for i := range keys {
 		c := metaCfg[i]
@@ -136,13 +137,13 @@ func init() {
 		case len(c.opts) == 0:
 			fmt.Fprint(&buf, config.Hints[c.key])
 		default:
-			fmt.Fprint(&buf, logs.Options(config.Hints[c.key], c.opts, true))
+			fmt.Fprint(&buf, str.Options(config.Hints[c.key], c.opts, true))
 		}
 		switch {
 		case c.key == "create.server":
 			createCmd.Flags().BoolVarP(c.boo, c.name, c.short, false, "serve HTML over an internal web server")
-		case c.str != nil:
-			createCmd.Flags().StringVarP(c.str, c.name, c.short, viper.GetString(c.key), buf.String())
+		case c.strg != nil:
+			createCmd.Flags().StringVarP(c.strg, c.name, c.short, viper.GetString(c.key), buf.String())
 		case c.boo != nil:
 			createCmd.Flags().BoolVarP(c.boo, c.name, c.short, viper.GetBool(c.key), buf.String())
 		case c.i != nil:

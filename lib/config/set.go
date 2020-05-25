@@ -18,6 +18,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/create"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/prompt"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	v "github.com/bengarrett/retrotxtgo/lib/version"
 	"github.com/spf13/viper"
 )
@@ -33,7 +34,7 @@ func (n names) String(theme bool) string {
 	var s []string
 	for _, name := range n {
 		var b bytes.Buffer
-		logs.HighlightWriter(&b, fmt.Sprintf("  %s=%q", name, name), "yaml", name)
+		str.HighlightWriter(&b, fmt.Sprintf("  %s=%q", name, name), "yaml", name)
 		s = append(s, b.String())
 	}
 	return strings.Join(s, "\n")
@@ -53,7 +54,7 @@ var Hints = map[string]string{
 	"create.server":            "serve HTML over an internal web server",
 	"create.server-port":       "port which the internet web server will listen",
 	"create.title":             "page title that is shown in a browser title bar or tab",
-	"editor":                   "text editor to launch when using " + logs.Example("config edit"),
+	"editor":                   "text editor to launch when using " + str.Example("config edit"),
 	"style.html":               "syntax highlighter for html previews",
 	"style.yaml":               "syntax highlighter for info and version commands",
 }
@@ -118,7 +119,7 @@ func portInfo() string {
 		rec: prompt.PortRec,
 	}
 	pm, px, pr := strconv.Itoa(int(port.min)), strconv.Itoa(int(port.max)), strconv.Itoa(int(port.rec))
-	return logs.Cp(pm) + "-" + logs.Cp(px) + fmt.Sprintf(" (recommend: %s)", logs.Cp(pr))
+	return str.Cp(pm) + "-" + str.Cp(px) + fmt.Sprintf(" (recommend: %s)", str.Cp(pr))
 }
 
 // List all the available configurations that can be passed to the --name flag.
@@ -131,7 +132,7 @@ func List() (err error) {
 		fmt.Fprintf(w, "%d\t\t%s\t\t%s", i, key, Hints[key])
 		switch key {
 		case "create.layout":
-			fmt.Fprintf(w, ", choices: %s (recommend: %s)", logs.Cp(createTemplates().String()), logs.Cp("standard"))
+			fmt.Fprintf(w, ", choices: %s (recommend: %s)", str.Cp(createTemplates().String()), str.Cp("standard"))
 		case "create.server-port":
 			fmt.Fprintf(w, ", choices: %s", portInfo())
 		}
@@ -164,13 +165,13 @@ func Set(name string) {
 	value := viper.GetString(name)
 	switch value {
 	case "":
-		fmt.Printf("\n%s is currently disabled\n", logs.Cf(name))
+		fmt.Printf("\n%s is currently disabled\n", str.Cf(name))
 	default:
-		fmt.Printf("\n%s is currently set to %q\n", logs.Cf(name), value)
+		fmt.Printf("\n%s is currently set to %q\n", str.Cf(name), value)
 	}
 	switch name {
 	case "create.layout":
-		fmt.Println("Choose a new " + logs.Options(Hints[name], create.Options(), true))
+		fmt.Println("Choose a new " + str.Options(Hints[name], create.Options(), true))
 		setShortStrings(name, createTemplates().Strings())
 	case "create.meta.generator":
 		setGenerator()
@@ -188,11 +189,11 @@ func Set(name string) {
 		setEditor(name)
 	case "style.html":
 		fmt.Printf("Set a new HTML syntax style, choices:\n%s\n",
-			logs.Ci(Names()))
+			str.Ci(Names()))
 		setStrings(name, styles.Names())
 	case "style.yaml":
 		fmt.Printf("Set a new YAML syntax style, choices:\n%s\n",
-			logs.Ci(Names()))
+			str.Ci(Names()))
 		setStrings(name, styles.Names())
 	default:
 		setMeta(name, value)
@@ -213,7 +214,7 @@ func Setup() {
 		}
 		fmt.Println(h)
 		if i == 0 {
-			fmt.Printf("\n%s\n", logs.Cb(enterKey()))
+			fmt.Printf("\n%s\n", str.Cb(enterKey()))
 		}
 		Set(key)
 		fmt.Println(hr(&h))
@@ -228,7 +229,7 @@ func enterKey() string {
 }
 
 func hr(h *string) string {
-	return logs.Cb(strings.Repeat("-", (len(*h)-1)*2))
+	return str.Cb(strings.Repeat("-", (len(*h)-1)*2))
 }
 
 // Validate the existence of a setting key name.
@@ -282,7 +283,7 @@ func save(name string, value interface{}) {
 	if err := UpdateConfig("", false); err != nil {
 		logs.Log(err)
 	}
-	fmt.Printf("%s %s is set to \"%v\"\n", logs.Cs("✓"), logs.Cs(name), value)
+	fmt.Printf("%s %s is set to \"%v\"\n", str.Cs("✓"), str.Cs(name), value)
 	if !setupMode {
 		os.Exit(0)
 	}
@@ -302,7 +303,7 @@ func setDirectory(name string) {
 		if len(e) > 1 {
 			es = fmt.Sprintf("%s", strings.TrimSpace(strings.Join(e[1:], "")))
 		}
-		fmt.Printf("%s this directory returned the following error: %s\n", logs.Info(), es)
+		fmt.Printf("%s this directory returned the following error: %s\n", str.Info(), es)
 	}
 	save(name, dir)
 }
@@ -316,7 +317,7 @@ func setEditor(name string) {
 		return
 	}
 	if _, err := exec.LookPath(editor); err != nil {
-		fmt.Printf("%s this editor choice is not accessible: %s\n", logs.Info(), err)
+		fmt.Printf("%s this editor choice is not accessible: %s\n", str.Info(), err)
 	}
 	save(name, editor)
 }
@@ -348,7 +349,7 @@ func setMeta(name, value string) {
 	}
 	elm := fmt.Sprintf("<head>\n  <meta name=\"%s\" value=\"%s\">", s[2], value)
 	fmt.Print(logs.ColorHTML(elm))
-	fmt.Println(logs.Cf("\nAbout this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name"))
+	fmt.Println(str.Cf("\nAbout this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name"))
 	q := "Set a new value or leave blank to keep it disabled:"
 	if value != "" {
 		q = "Set a new value, leave blank to keep as-is or use a dash [-] to disable:"
