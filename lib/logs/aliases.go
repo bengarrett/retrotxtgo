@@ -56,6 +56,11 @@ func Bool(b bool) string {
 	}
 }
 
+// Default appends (default ...) to the usage string.
+func Default(s, def string) string {
+	return fmt.Sprintf("%s (default \"%s\")", s, def)
+}
+
 // Example is intended for the cobra.Command Example fields.
 func Example(s string) string {
 	return color.Info.Sprint(s)

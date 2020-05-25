@@ -20,8 +20,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-type hints map[string]string
-
 type files map[string]string
 
 type names []string
@@ -37,6 +35,25 @@ func (n names) String(theme bool) string {
 		s = append(s, b.String())
 	}
 	return strings.Join(s, "\n")
+}
+
+// Hints provide brief help on the config file configurations.
+var Hints = map[string]string{
+	"create.layout":            "HTML output layout",
+	"create.meta.author":       "defines the name of the page authors",
+	"create.meta.color-scheme": "specifies one or more color schemes with which the page is compatible",
+	"create.meta.description":  "a short and accurate summary of the content of the page",
+	"create.meta.generator":    "include the RetroTxt version and page generation date?",
+	"create.meta.keywords":     "words relevant to the page content",
+	"create.meta.referrer":     "controls the Referer HTTP header attached to requests sent from the page",
+	"create.meta.theme-color":  "indicates a suggested color that user agents should use to customize the display of the page",
+	"create.save-directory":    "directory to store RetroTxt created HTML files",
+	"create.server":            "serve HTML over an internal web server",
+	"create.server-port":       "port which the internet web server will listen",
+	"create.title":             "page title that is shown in a browser title bar or tab",
+	"editor":                   "text editor to launch when using " + logs.Example("config edit"),
+	"style.html":               "syntax highlighter for html previews",
+	"style.yaml":               "syntax highlighter for info and version commands",
 }
 
 var setupMode = false
@@ -92,42 +109,31 @@ func (f files) Strings() []string {
 	return s
 }
 
-func list() hints {
+func portInfo() string {
 	var port = ports{
 		max: logs.PortMax,
 		min: logs.PortMin,
 		rec: logs.PortRec,
 	}
 	pm, px, pr := strconv.Itoa(int(port.min)), strconv.Itoa(int(port.max)), strconv.Itoa(int(port.rec))
-	ports := logs.Cp(pm) + "-" + logs.Cp(px) + fmt.Sprintf(" (recommend: %s)", logs.Cp(pr))
-	return hints{
-		"create.layout": "HTML output layout, choices: " +
-			logs.Cp(createTemplates().String()) + fmt.Sprintf(" (recommend: %s)", logs.Cp("standard")),
-		"create.meta.author":       "defines the name of the page authors",
-		"create.meta.color-scheme": "specifies one or more color schemes with which the page is compatible",
-		"create.meta.description":  "a short and accurate summary of the content of the page",
-		"create.meta.generator":    "include the RetroTxt version and page generation date?",
-		"create.meta.keywords":     "words relevant to the page content",
-		"create.meta.referrer":     "controls the Referer HTTP header attached to requests sent from the page",
-		"create.meta.theme-color":  "indicates a suggested color that user agents should use to customize the display of the page",
-		"create.save-directory":    "directory to store RetroTxt created HTML files",
-		"create.server-port":       "serve HTML over an internal web server, choices: " + ports,
-		"create.title":             "page title that is shown in a browser title bar or tab",
-		"editor":                   "text editor to launch when using " + logs.Example("config edit"),
-		"style.html":               "syntax highlighter for html previews",
-		"style.yaml":               "syntax highlighter for info and version commands",
-	}
+	return logs.Cp(pm) + "-" + logs.Cp(px) + fmt.Sprintf(" (recommend: %s)", logs.Cp(pr))
 }
 
 // List all the available configurations that can be passed to the --name flag.
 func List() (err error) {
-	hints := list()
 	keys := viper.AllKeys()
 	sort.Strings(keys)
 	w := tabwriter.NewWriter(os.Stdout, 2, 2, 0, ' ', 0)
 	fmt.Fprintf(w, "\t\tname value\t\thint\n")
 	for i, key := range keys {
-		fmt.Fprintf(w, "%d\t\t%s\t\t%s\n", i, key, hints[key])
+		fmt.Fprintf(w, "%d\t\t%s\t\t%s", i, key, Hints[key])
+		switch key {
+		case "create.layout":
+			fmt.Fprintf(w, ", choices: %s (recommend: %s)", logs.Cp(createTemplates().String()), logs.Cp("standard"))
+		case "create.server-port":
+			fmt.Fprintf(w, ", choices: %s", portInfo())
+		}
+		fmt.Fprint(w, "\n")
 	}
 	return w.Flush()
 }
@@ -158,24 +164,23 @@ func Set(name string) {
 	default:
 		fmt.Printf("\n%s is currently set to %q\n", logs.Cf(name), value)
 	}
-	hints := list()
 	switch name {
 	case "create.layout":
-		fmt.Println("Choose a new " + hints[name])
+		fmt.Println("Choose a new " + Hints[name])
 		setShortStrings(name, createTemplates().Strings())
 	case "create.meta.generator":
 		setGenerator()
 	case "create.save-directory":
-		fmt.Println("Choose a new " + hints[name] + ":")
+		fmt.Println("Choose a new " + Hints[name] + ":")
 		setDirectory(name)
 	case "create.server-port":
-		fmt.Println("Set a new HTTP port to " + hints[name])
+		fmt.Println("Set a new HTTP port to " + Hints[name])
 		setPort(name)
 	case "create.title":
-		fmt.Println("Choose a new " + hints[name] + ":")
+		fmt.Println("Choose a new " + Hints[name] + ":")
 		setString(name)
 	case "editor":
-		fmt.Println("Set a " + hints[name] + ":")
+		fmt.Println("Set a " + Hints[name] + ":")
 		setEditor(name)
 	case "style.html":
 		fmt.Printf("Set a new HTML syntax style, choices:\n%s\n",

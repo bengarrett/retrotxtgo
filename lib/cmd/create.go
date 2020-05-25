@@ -1,12 +1,15 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"os"
+	"sort"
 
+	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/create"
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
-	"github.com/bengarrett/retrotxtgo/lib/logs"
+	l "github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -33,7 +36,7 @@ var exampleCmd = func() string {
 	s := string(os.PathSeparator)
 	e := `  retrotxt create -n textfile.txt -t "Text file" -d "Some random text file"` +
 		fmt.Sprintf("\n  retrotxt create --name ~%sDownloads%stextfile.txt --layout mini --save .%shtml", s, s, s)
-	return logs.Cinf(e)
+	return l.Cinf(e)
 }
 
 // createCmd represents the create command
@@ -55,15 +58,15 @@ var createCmd = &cobra.Command{
 				if cmd.Flags().NFlag() == 0 {
 					fmt.Printf("%s\n\n", cmd.Short)
 					err = cmd.Usage()
-					logs.Check("create usage", err)
+					l.Check("create usage", err)
 					os.Exit(0)
 				}
 				err = cmd.Usage()
-				logs.ReCheck(err)
-				logs.FileMissingErr()
+				l.ReCheck(err)
+				l.FileMissingErr()
 			}
 			data, err = filesystem.Read(createFileName)
-			logs.ChkErr(logs.Err{Issue: "file is invalid", Arg: createFileName, Msg: err})
+			l.ChkErr(l.Err{Issue: "file is invalid", Arg: createFileName, Msg: err})
 		}
 		// check for a --save flag to save to files
 		// otherwise output is sent to stdout
@@ -76,92 +79,75 @@ var createCmd = &cobra.Command{
 	},
 }
 
+type metaFlag struct {
+	key   string   // configuration name
+	str   *string  // StringVarP(p) argument value
+	boo   *bool    // BoolVarP(p) argument value
+	i     *int     // IntVar(p) argument value
+	name  string   // flag long name
+	short string   // flag short name
+	opts  []string // flag choices for display in the usage string
+}
+
 func init() {
-	//config.InitDefaults()
+	var err error
 	rootCmd.AddCommand(createCmd)
+	// config must be initialized before getting saved default values
+	initConfig()
+	// init flags and their usage
+	var metaCfg = map[int]metaFlag{
+		// main flags
+		0: {"create.layout", &createArgs.HTMLLayout, nil, nil, "layout", "l", create.Options()},
+		1: {"style.html", &createArgs.Styles, nil, nil, "syntax-style", "c", nil},
+		2: {"create.title", &pageTitle, nil, nil, "title", "t", nil},
+		3: {"create.meta.description", &metaDesc, nil, nil, "meta-description", "d", nil},
+		4: {"create.meta.author", &metaDesc, nil, nil, "meta-author", "a", nil},
+		// minor flags
+		5: {"create.meta.generator", nil, &metaGenerator, nil, "meta-generator", "g", nil},
+		6: {"create.meta.color-scheme", &metaColorScheme, nil, nil, "meta-color-scheme", "", nil},
+		7: {"create.meta.keywords", &metaKeywords, nil, nil, "meta-keywords", "", nil},
+		8: {"create.meta.referrer", &metaReferrer, nil, nil, "meta-referrer", "", nil},
+		9: {"create.meta.theme-color", &metaThemeColor, nil, nil, "meta-theme-color", "", nil},
+		// output
+		10: {"create.save-directory", &saveToFiles, nil, nil, "save", "s", nil},
+		11: {"create.server", nil, &createArgs.ServerFiles, nil, "server", "p", nil},
+		12: {"create.server-port", nil, nil, &createArgs.ServerPort, "port", "", nil},
+		// hidden flags
+		13: {"create.body", &preText, nil, nil, "body", "b", nil},
+	}
+	// create an ordered index for the flags
+	var keys []int
+	for k := range metaCfg {
+		keys = append(keys, k)
+	}
+	sort.Ints(keys)
 	// required flags
 	createCmd.Flags().StringVarP(&createFileName, "name", "n", "",
-		logs.Required("text file to parse")+"\n")
-	// main flags
-	createCmd.Flags().StringVarP(&createArgs.HTMLLayout, "layout", "l", def("create.layout"),
-		logs.Options("output HTML layout", create.Options(), true))
-	err := viper.BindPFlag("create.layout", createCmd.Flags().Lookup(("layout")))
-	logs.ReCheck(err)
-	createCmd.Flags().StringVarP(&createArgs.Styles, "syntax-style", "c", "lovelace",
-		"HTML syntax highligher, use "+logs.Ci("none")+" to disable")
-	createCmd.Flags().StringVarP(&pageTitle, "title", "t", def("create.title"),
-		"defines the page title that is shown in a browser title bar or tab")
-	err = viper.BindPFlag("create.title", createCmd.Flags().Lookup("title"))
-	logs.ReCheck(err)
-	createCmd.Flags().StringVarP(&metaDesc, "meta-description", "d", def("create.meta.description"),
-		"a short and accurate summary of the content of the page")
-	err = viper.BindPFlag("create.meta.description", createCmd.Flags().Lookup("meta-description"))
-	logs.ReCheck(err)
-	createCmd.Flags().StringVarP(&metaAuthor, "meta-author", "a", def("create.meta.author"),
-		"defines the name of the page authors")
-	err = viper.BindPFlag("create.meta.author", createCmd.Flags().Lookup("meta-author"))
-	logs.ReCheck(err)
-	// minor flags
-	createCmd.Flags().BoolVarP(&metaGenerator, "meta-generator", "g", viper.GetBool("create.meta.generator"),
-		"include the RetroTxt version and page generation date")
-	err = viper.BindPFlag("create.meta.generator", createCmd.Flags().Lookup("meta-generator"))
-	logs.ReCheck(err)
-	createCmd.Flags().StringVar(&metaColorScheme, "meta-color-scheme", def("create.meta.color-scheme"),
-		"specifies one or more color schemes with which the page is compatible")
-	err = viper.BindPFlag("create.meta.color-scheme", createCmd.Flags().Lookup("meta-color-scheme"))
-	logs.ReCheck(err)
-	createCmd.Flags().StringVar(&metaKeywords, "meta-keywords", def("create.meta.keywords"),
-		"words relevant to the page content")
-	err = viper.BindPFlag("create.meta.keywords", createCmd.Flags().Lookup("meta-keywords"))
-	logs.ReCheck(err)
-	createCmd.Flags().StringVar(&metaReferrer, "meta-referrer", def("create.meta.referrer"),
-		"controls the Referer HTTP header attached to requests sent from the page")
-	err = viper.BindPFlag("create.meta.referrer", createCmd.Flags().Lookup("meta-referrer"))
-	logs.ReCheck(err)
-	createCmd.Flags().StringVar(&metaThemeColor, "meta-theme-color", def("create.meta.theme-color"),
-		"indicates a suggested color that user agents should use to customize the display of the page")
-	err = viper.BindPFlag("create.meta.theme-color", createCmd.Flags().Lookup("meta-theme-color"))
-	logs.ReCheck(err)
-	// output flags
-	// todo: when using save-directory config setting, there is no way to stdout using flags
-	// instead add an output flag with print, file|save
-	createCmd.Flags().StringVarP(&saveToFiles, "save", "s", def("create.save-directory"),
-		"save HTML as files to store this directory"+homeDir()+workingDir())
-	err = viper.BindPFlag("create.save-directory", createCmd.Flags().Lookup("save"))
-	logs.ReCheck(err)
-	createCmd.Flags().BoolVarP(&createArgs.ServerFiles, "server", "p", false,
-		"serve HTML over an internal web server")
-	createCmd.Flags().IntVar(&createArgs.ServerPort, "port", viper.GetInt("create.server-port"),
-		"port which the internet web server will listen")
-	err = viper.BindPFlag("create.server-port", createCmd.Flags().Lookup("port"))
-	logs.ReCheck(err)
-	// hidden flags
-	createCmd.Flags().StringVarP(&preText, "body", "b", "",
-		"override and inject string content into the body element")
-	// flag options
+		l.Required("text file to parse")+"\n")
+	// generate flags
+	for i := range keys {
+		c := metaCfg[i]
+		var buf bytes.Buffer
+		switch {
+		case c.key == "create.body":
+			fmt.Fprint(&buf, "override and inject a string into the HTML body element")
+		case len(c.opts) == 0:
+			fmt.Fprint(&buf, config.Hints[c.key])
+		default:
+			fmt.Fprint(&buf, l.Options(config.Hints[c.key], c.opts, true))
+		}
+		switch {
+		case c.key == "create.server":
+			createCmd.Flags().BoolVarP(c.boo, c.name, c.short, false, "serve HTML over an internal web server")
+		case c.str != nil:
+			createCmd.Flags().StringVarP(c.str, c.name, c.short, viper.GetString(c.key), buf.String())
+		case c.boo != nil:
+			createCmd.Flags().BoolVarP(c.boo, c.name, c.short, viper.GetBool(c.key), buf.String())
+		case c.i != nil:
+			createCmd.Flags().IntVar(c.i, c.name, viper.GetInt(c.key), buf.String())
+		}
+	}
 	err = createCmd.Flags().MarkHidden("body")
-	logs.ReCheck(err)
+	l.ReCheck(err)
 	createCmd.Flags().SortFlags = false
-}
-
-func def(key string) string {
-	return viper.GetString(key)
-}
-
-func homeDir() string {
-	s := "\n" + logs.Ci("--save ~") + " saves to the home or user directory"
-	d, err := os.UserHomeDir()
-	if err != nil {
-		return s
-	}
-	return s + " at " + logs.Cf(d)
-}
-
-func workingDir() string {
-	s := "\n" + logs.Ci("--save .") + " saves to the current working directory"
-	d, err := os.Getwd()
-	if err != nil {
-		return s
-	}
-	return s + " at " + logs.Cf(d)
 }
