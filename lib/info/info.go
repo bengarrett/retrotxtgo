@@ -207,8 +207,8 @@ func (d Detail) Text(color bool) string {
 	var info = func(t string) string {
 		return logs.Cinf(fmt.Sprintf("%s\t", t))
 	}
-	var hr = func() string {
-		return fmt.Sprintf("\t%s\n", logs.Cf(strings.Repeat("\u2015", 26)))
+	var hr = func(l int) string {
+		return fmt.Sprintf("\t%s\n", logs.Cb(strings.Repeat("\u2500", l)))
 	}
 	var data = []struct {
 		k, v string
@@ -229,7 +229,8 @@ func (d Detail) Text(color bool) string {
 	var buf bytes.Buffer
 	w := new(tabwriter.Writer)
 	w.Init(&buf, 0, 8, 0, '\t', 0)
-	fmt.Fprint(w, hr())
+	l := len(fmt.Sprintf(" filename%s%s", strings.Repeat(" ", 10), data[0].v))
+	fmt.Fprint(w, hr(l))
 	for _, x := range data {
 		if !IsText(d.Mime) {
 			switch x.k {
@@ -239,7 +240,7 @@ func (d Detail) Text(color bool) string {
 		}
 		fmt.Fprintf(w, "\t %s\t  %s\n", x.k, info(x.v))
 	}
-	fmt.Fprint(w, hr())
+	fmt.Fprint(w, hr(l))
 	w.Flush()
 	return buf.String()
 }
