@@ -5,7 +5,6 @@ import (
 	"path"
 	"path/filepath"
 	"reflect"
-	"strings"
 	"testing"
 )
 
@@ -30,7 +29,7 @@ func Test_Save(t *testing.T) {
 }
 
 func Test_Layouts(t *testing.T) {
-	l := strings.Split(Layouts(), ",")
+	l := Options()
 	if got := len(l); got != 5 {
 		t.Errorf("createTemplates() = %v, want %v", got, 5)
 	}
