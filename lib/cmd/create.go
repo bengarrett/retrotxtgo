@@ -9,7 +9,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/create"
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
-	l "github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -33,10 +33,11 @@ var createArgs = create.Args{}
 
 // createCmd makes create usage examples
 var exampleCmd = func() string {
+	var b bytes.Buffer
 	s := string(os.PathSeparator)
-	e := `  retrotxt create -n textfile.txt -t "Text file" -d "Some random text file"` +
-		fmt.Sprintf("\n  retrotxt create --name ~%sDownloads%stextfile.txt --layout mini --save .%shtml", s, s, s)
-	return l.Cinf(e)
+	fmt.Fprint(&b, `  retrotxt create -n textfile.txt -t "Text file" -d "Some random text file"`)
+	fmt.Fprintf(&b, "\n  retrotxt create --name ~%sDownloads%stextfile.txt --layout mini --save .%shtml", s, s, s)
+	return logs.Cinf(b.String())
 }
 
 // createCmd represents the create command
@@ -58,15 +59,15 @@ var createCmd = &cobra.Command{
 				if cmd.Flags().NFlag() == 0 {
 					fmt.Printf("%s\n\n", cmd.Short)
 					err = cmd.Usage()
-					l.Check("create usage", err)
+					logs.Check("create usage", err)
 					os.Exit(0)
 				}
 				err = cmd.Usage()
-				l.ReCheck(err)
-				l.FileMissingErr()
+				logs.ReCheck(err)
+				logs.FileMissingErr()
 			}
 			data, err = filesystem.Read(createFileName)
-			l.ChkErr(l.Err{Issue: "file is invalid", Arg: createFileName, Msg: err})
+			logs.ChkErr(logs.Err{Issue: "file is invalid", Arg: createFileName, Msg: err})
 		}
 		// check for a --save flag to save to files
 		// otherwise output is sent to stdout
@@ -114,6 +115,7 @@ func init() {
 		12: {"create.server-port", nil, nil, &createArgs.ServerPort, "port", "", nil},
 		// hidden flags
 		13: {"create.body", &preText, nil, nil, "body", "b", nil},
+		// TODO: add sample flag to generate the RetroTxt ANSI/ascii logo as HTML?
 	}
 	// create an ordered index for the flags
 	var keys []int
@@ -123,7 +125,7 @@ func init() {
 	sort.Ints(keys)
 	// required flags
 	createCmd.Flags().StringVarP(&createFileName, "name", "n", "",
-		l.Required("text file to parse")+"\n")
+		logs.Required("text file to parse")+"\n")
 	// generate flags
 	for i := range keys {
 		c := metaCfg[i]
@@ -134,7 +136,7 @@ func init() {
 		case len(c.opts) == 0:
 			fmt.Fprint(&buf, config.Hints[c.key])
 		default:
-			fmt.Fprint(&buf, l.Options(config.Hints[c.key], c.opts, true))
+			fmt.Fprint(&buf, logs.Options(config.Hints[c.key], c.opts, true))
 		}
 		switch {
 		case c.key == "create.server":
@@ -148,6 +150,6 @@ func init() {
 		}
 	}
 	err = createCmd.Flags().MarkHidden("body")
-	l.ReCheck(err)
+	logs.ReCheck(err)
 	createCmd.Flags().SortFlags = false
 }
