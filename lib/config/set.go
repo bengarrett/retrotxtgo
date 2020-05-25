@@ -15,6 +15,7 @@ import (
 	"text/template"
 
 	"github.com/alecthomas/chroma/styles"
+	"github.com/bengarrett/retrotxtgo/lib/create"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	v "github.com/bengarrett/retrotxtgo/lib/version"
 	"github.com/spf13/viper"
@@ -166,7 +167,7 @@ func Set(name string) {
 	}
 	switch name {
 	case "create.layout":
-		fmt.Println("Choose a new " + Hints[name])
+		fmt.Println("Choose a new " + logs.Options(Hints[name], create.Options(), true))
 		setShortStrings(name, createTemplates().Strings())
 	case "create.meta.generator":
 		setGenerator()
