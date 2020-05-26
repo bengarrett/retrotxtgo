@@ -38,13 +38,16 @@ func (n names) String(theme bool) string {
 		return strings.Join(n, ", ")
 	}
 	var s []string
+	split := (len(n) / 2)
 	for i, name := range n {
 		var t string
-		if i%2 == 0 {
-			pad := maxWidth - len(fmt.Sprintf("%s=%q", name, name))
-			t = fmt.Sprintf(" %2d) %s=%q%s", i, name, name, strings.Repeat(" ", pad+2))
+		pad := maxWidth - len(fmt.Sprintf("%s=%q", name, name))
+		// prints a sequential list of styles
+		t = fmt.Sprintf(" %2d) %s=%q%s", i, name, name, strings.Repeat(" ", pad+2))
+		if split+i < len(n) {
+			t += fmt.Sprintf("%2d) %s=%q\n", split+i, n[split+i], n[split+i])
 		} else {
-			t = fmt.Sprintf("%2d) %s=%q\n", i, name, name)
+			break
 		}
 		var b bytes.Buffer
 		str.HighlightWriter(&b, t, "yaml", name)
@@ -201,10 +204,10 @@ func Set(name string) {
 		fmt.Println("Set a " + Hints[name] + ":")
 		setEditor(name)
 	case "style.html":
-		fmt.Printf("Set a new HTML syntax style, choices:\n%s\n", str.Ci(Names()))
+		fmt.Printf("Set a new HTML syntax style:\n%s\n", str.Ci(Names()))
 		setStrings(name, styles.Names())
 	case "style.yaml":
-		fmt.Printf("Set a new YAML syntax style, choices:\n%s\n", str.Ci(Names()))
+		fmt.Printf("Set a new YAML syntax style:\n%s\n", str.Ci(Names()))
 		setStrings(name, styles.Names())
 	default:
 		setMeta(name, value)
@@ -218,6 +221,7 @@ func Setup() {
 	prompt.SetupMode = true
 	keys := viper.AllKeys()
 	sort.Strings(keys)
+	PrintLocation()
 	for i, key := range keys {
 		h := fmt.Sprintf("  %d/%d. RetroTxt Setup", i+1, len(keys))
 		if i == 0 {
