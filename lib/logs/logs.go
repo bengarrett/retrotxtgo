@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path"
@@ -101,19 +102,20 @@ func (e Err) check() (msg string, code int) {
 
 // ColorHTML prints colored syntax highlighting to HTML elements.
 func ColorHTML(elm string) string {
-	return colorhtml(&elm)
+	style := viper.GetString("style.html")
+	return colorhtml(elm, style)
 }
 
-func colorhtml(elm *string) string {
-	var buf bytes.Buffer
-	style := viper.GetString("style.html")
-	if err := str.HighlightWriter(&buf, *elm, "html", style); err != nil {
-		return fmt.Sprintf("\n%s\n", *elm)
-	}
-	if len(buf.String()) == 0 {
+func colorhtml(elm string, style string) string {
+	if elm == "" {
 		return ""
 	}
-	return fmt.Sprintf("\n%v\n", buf.String())
+	var b bytes.Buffer
+	_ = io.Writer(&b)
+	if err := str.HighlightWriter(&b, elm, "html", style); err != nil {
+		Check("logs.colorhtml", err)
+	}
+	return fmt.Sprintf("\n%s\n", b.String())
 }
 
 // Exit prints the message and causes the program to exit.

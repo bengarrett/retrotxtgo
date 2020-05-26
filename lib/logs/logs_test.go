@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/samples"
 )
 
@@ -39,7 +40,8 @@ func TestCheck(t *testing.T) {
 	}{
 		{"empty", args{"", nil}, true},
 		{"ok", args{"some issue", nil}, true},
-		{"err", args{"some issue", errors.New("some error")}, false},
+		// this will cause the test to exit to the os
+		//{"err", args{"some issue", errors.New("some error")}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -101,6 +103,8 @@ func TestErr_check(t *testing.T) {
 }
 
 func Test_colorhtml(t *testing.T) {
+	// set test mode for str.HighlightWriter()
+	str.TestMode = true
 	type args struct {
 		elm string
 	}
@@ -111,11 +115,11 @@ func Test_colorhtml(t *testing.T) {
 	}{
 		{"empty", "", ""},
 		{"str", "hello", "\nhello\n"},
-		{"basic", "<h1>hello</h1>", "\n[38;5;102m<[0m[38;5;25mh1[0m[38;5;102m>[0mhello[38;5;102m</[0m[38;5;25mh1[0m[38;5;102m>[0m\n"},
+		{"basic", "<h1>hello</h1>", "\n<\x1b[1mh1\x1b[0m>hello</\x1b[1mh1\x1b[0m>\n"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := colorhtml(&tt.elm); got != tt.want {
+			if got := colorhtml(tt.elm, "bw"); got != tt.want {
 				t.Errorf("colorhtml() = %v, want %v", got, tt.want)
 			}
 		})

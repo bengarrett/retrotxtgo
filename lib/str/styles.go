@@ -19,6 +19,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// TestMode disables piping detection which conflicts with go test
+var TestMode = false
+
 // YamlExample is a YAML example
 type YamlExample struct {
 	Style struct {
@@ -94,13 +97,14 @@ func HighlightWriter(w io.Writer, source, lexer, style string) (err error) {
 	if err != nil {
 		return err
 	}
-	// html json noop svg terminal terminal16m terminal256 tokens
 	if term == "none" {
-		fmt.Println(source)
-	} else if (fo.Mode() & os.ModeCharDevice) == 0 {
-		fmt.Println(source)
+		// user disabled color output, but it doesn't disable ANSI output
+		fmt.Fprintln(w, source)
+	} else if !TestMode && (fo.Mode()&os.ModeCharDevice) == 0 {
+		// disable colour when piping, this will also trigger with go test
+		fmt.Fprintln(w, source)
 	} else if err := quick.Highlight(w, source, lexer, term, style); err != nil {
-		fmt.Println(source)
+		return err
 	}
 	return nil
 }
