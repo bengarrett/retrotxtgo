@@ -27,4 +27,5 @@ func ExampleRequest() {
 	fmt.Println("valid json api?", json.Valid(d))
 	fmt.Println("valid github api?", json.Valid(g))
 	// Output: valid json api? true
+	// valid github api? true
 }
