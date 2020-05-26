@@ -327,7 +327,7 @@ func setGenerator() {
 	// v{{.BuildVersion}}; {{.BuildDate}}
 	elm := fmt.Sprintf("<head>\n  <meta name=\"generator\" content=\"RetroTxt v%s, %s\">",
 		v.B.Version, v.B.Date)
-	fmt.Print(logs.ColorHTML(elm))
+	fmt.Println(logs.ColorHTML(elm))
 	prmt := prompt.YesNo("Enable this element", viper.GetBool(name))
 	viper.Set(name, prmt)
 	if err := UpdateConfig("", false); err != nil {
