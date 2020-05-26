@@ -176,6 +176,22 @@ func (k keys) validate(key string) (ok bool) {
 	return true
 }
 
+// numeric checks input string for a valid int value and returns a matching slice.
+func (k keys) numeric(input string) (key string) {
+	if input == "" {
+		return key
+	}
+	i, err := strconv.Atoi(input)
+	if err != nil {
+		return key
+	}
+	if i >= len(k) || i < 0 {
+		return key
+	}
+	sort.Strings(k)
+	return k[i]
+}
+
 func (k keys) prompt(r io.Reader) (key string) {
 	prompts := 0
 	scanner := bufio.NewScanner(r)
@@ -184,6 +200,9 @@ func (k keys) prompt(r io.Reader) (key string) {
 		key = scanner.Text()
 		if SetupMode && key == "" {
 			return key
+		}
+		if n := k.numeric(key); n != "" {
+			return n
 		}
 		if !k.validate(key) {
 			check(prompts)
