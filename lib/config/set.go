@@ -28,16 +28,29 @@ type files map[string]string
 type names []string
 
 func (n names) String(theme bool) string {
+	maxWidth := 0
+	for _, s := range n {
+		if l := len(fmt.Sprintf("%s=%q", s, s)); l > maxWidth {
+			maxWidth = l
+		}
+	}
 	if !theme {
 		return strings.Join(n, ", ")
 	}
 	var s []string
-	for _, name := range n {
+	for i, name := range n {
+		var t string
+		if i%2 == 0 {
+			pad := maxWidth - len(fmt.Sprintf("%s=%q", name, name))
+			t = fmt.Sprintf(" %2d) %s=%q%s", i, name, name, strings.Repeat(" ", pad+2))
+		} else {
+			t = fmt.Sprintf("%2d) %s=%q\n", i, name, name)
+		}
 		var b bytes.Buffer
-		str.HighlightWriter(&b, fmt.Sprintf("  %s=%q", name, name), "yaml", name)
+		str.HighlightWriter(&b, t, "yaml", name)
 		s = append(s, b.String())
 	}
-	return strings.Join(s, "\n")
+	return strings.Join(s, "")
 }
 
 // Hints provide brief help on the config file configurations.
@@ -188,12 +201,10 @@ func Set(name string) {
 		fmt.Println("Set a " + Hints[name] + ":")
 		setEditor(name)
 	case "style.html":
-		fmt.Printf("Set a new HTML syntax style, choices:\n%s\n",
-			str.Ci(Names()))
+		fmt.Printf("Set a new HTML syntax style, choices:\n%s\n", str.Ci(Names()))
 		setStrings(name, styles.Names())
 	case "style.yaml":
-		fmt.Printf("Set a new YAML syntax style, choices:\n%s\n",
-			str.Ci(Names()))
+		fmt.Printf("Set a new YAML syntax style, choices:\n%s\n", str.Ci(Names()))
 		setStrings(name, styles.Names())
 	default:
 		setMeta(name, value)
