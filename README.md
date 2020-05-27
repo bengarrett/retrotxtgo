@@ -1,6 +1,8 @@
+![Go](https://github.com/bengarrett/retrotxtgo/workflows/Go/badge.svg)
+
 # RetroTxtGo
 
-RetroTxt for the command line 
+[RetroTxt](https://github.com/bengarrett/retrotxt) for the command line 
 
 ### *α* work-in-progress, feature incomplete & is not in a usable state
 
