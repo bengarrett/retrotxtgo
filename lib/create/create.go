@@ -12,11 +12,13 @@ import (
 	"path/filepath"
 	"strconv"
 	"time"
+	"unicode/utf8"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/prompt"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/spf13/viper"
+	"golang.org/x/text/encoding/charmap"
 )
 
 // func X( data []byte, options)
@@ -74,7 +76,11 @@ func (args Args) File(data []byte, name string) error {
 	if err != nil {
 		return err
 	}
-	if err = tmpl.Execute(file, args.pagedata(data)); err != nil {
+	d, err := args.pagedata(data)
+	if err != nil {
+		return err
+	}
+	if err = tmpl.Execute(file, d); err != nil {
 		return err
 	}
 	return nil
@@ -120,8 +126,12 @@ func (args Args) serveFile(data []byte, port uint, test bool) error {
 		return err
 	}
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if err = t.Execute(w, args.pagedata(data)); err != nil {
-			logs.ChkErr(logs.Err{Issue: "serveFile", Arg: "http", Msg: err})
+		d, err := args.pagedata(data)
+		if err != nil {
+			logs.ChkErr(logs.Err{Issue: "servefile encoding", Arg: "http", Msg: err})
+		}
+		if err = t.Execute(w, d); err != nil {
+			logs.ChkErr(logs.Err{Issue: "servefile", Arg: "http", Msg: err})
 		}
 	})
 	fs := http.FileServer(http.Dir("static/"))
@@ -142,8 +152,12 @@ func (args Args) Stdout(data []byte, test bool) error {
 	if err != nil {
 		return err
 	}
+	d, err := args.pagedata(data)
+	if err != nil {
+		return err
+	}
 	var buf bytes.Buffer
-	if err = tmpl.Execute(&buf, args.pagedata(data)); err != nil {
+	if err = tmpl.Execute(&buf, d); err != nil {
 		return err
 	}
 	switch args.Styles {
@@ -211,7 +225,7 @@ func (args Args) newTemplate(test bool) (*template.Template, error) {
 
 // pagedata creates the meta and page template data.
 // todo handle all arguments
-func (args Args) pagedata(data []byte) (p PageData) {
+func (args Args) pagedata(data []byte) (p PageData, err error) {
 	switch args.HTMLLayout {
 	case "full", "standard":
 		p.MetaAuthor = viper.GetString("create.meta.author")
@@ -226,6 +240,64 @@ func (args Args) pagedata(data []byte) (p PageData) {
 		p.PageTitle = viper.GetString("create.title")
 		p.MetaGenerator = false
 	}
-	p.PreText = string(data)
-	return p
+	// convert to utf8
+	_, encoded, err := transform(nil, data)
+	if err != nil {
+		return p, err
+	}
+	p.PreText = string(encoded)
+	return p, nil
 }
+
+func transform(m *charmap.Charmap, p []byte) (runes int, encoded []byte, err error) {
+	if len(p) == 0 {
+		return 0, encoded, nil
+	}
+	// if no charmap provided the text is left as-is
+	if m == nil {
+		return utf8.RuneCount(p), p, nil
+	}
+	// confirm encoding is not utf8
+	if utf8.Valid(p) {
+		return utf8.RuneCount(p), p, nil
+	}
+	// convert to utf8
+	if encoded, err = m.NewDecoder().Bytes(p); err != nil {
+		return 0, encoded, err
+	}
+	return utf8.RuneCount(encoded), encoded, nil
+}
+
+/*
+var encodings = []struct {
+	name        string
+	mib         string
+	comment     string
+	varName     string
+	replacement byte
+	mapping     string
+}{
+		"IBM Code Page 437",
+		"PC8CodePage437",
+		"",
+		"CodePage437",
+		encoding.ASCIISub,
+		"http://source.icu-project.org/repos/icu/data/trunk/charset/data/ucm/glibc-IBM437-2.1.2.ucm",
+	},
+	{
+		"Windows 1254",
+		"Windows1254",
+		"",
+		"Windows1254",
+		encoding.ASCIISub,
+		"http://encoding.spec.whatwg.org/index-windows-1254.txt",
+	},	{
+		"Macintosh",
+		"Macintosh",
+		"",
+		"Macintosh",
+		encoding.ASCIISub,
+		"http://encoding.spec.whatwg.org/index-macintosh.txt",
+	},
+
+*/

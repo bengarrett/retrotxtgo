@@ -1,6 +1,7 @@
 package create
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -8,7 +9,18 @@ import (
 	"testing"
 
 	"github.com/spf13/viper"
+	"golang.org/x/text/encoding/charmap"
 )
+
+func ExampleHonk() {
+	for i, c := range charmap.All {
+		fmt.Println(i, c)
+	}
+	fmt.Printf("\n%v\n", charmap.All)
+	fmt.Printf("\n%+v \n", charmap.CodePage437)
+	fmt.Println(charmap.CodePage037.ID())
+	// Output: ?
+}
 
 func Test_Save(t *testing.T) {
 	type args struct {
@@ -84,25 +96,25 @@ func Test_pagedata(t *testing.T) {
 	args := Args{HTMLLayout: "standard"}
 	w := "hello"
 	d := []byte(w)
-	got := args.pagedata(d).PreText
-	if got != w {
+	got, _ := args.pagedata(d)
+	if got.PreText != w {
 		t.Errorf("pagedata().PreText = %v, want %v", got, w)
 	}
 	args.HTMLLayout = "mini"
 	w = "RetroTxt | example"
-	got = args.pagedata(d).PageTitle
-	if got != w {
+	got, _ = args.pagedata(d)
+	if got.PageTitle != w {
 		t.Errorf("pagedata().PageTitle = %v, want %v", got, w)
 	}
 	w = ""
-	got = args.pagedata(d).MetaDesc
-	if got != w {
+	got, _ = args.pagedata(d)
+	if got.MetaDesc != w {
 		t.Errorf("pagedata().MetaDesc = %v, want %v", got, w)
 	}
 	args.HTMLLayout = "standard"
 	w = ""
-	got = args.pagedata(d).MetaAuthor
-	if got != w {
+	got, _ = args.pagedata(d)
+	if got.MetaAuthor != w {
 		t.Errorf("pagedata().MetaAuthor = %v, want %v", got, w)
 	}
 }
