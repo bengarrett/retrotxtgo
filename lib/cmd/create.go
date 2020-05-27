@@ -11,6 +11,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/bengarrett/retrotxtgo/samples"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -56,7 +57,11 @@ var createCmd = &cobra.Command{
 		case true:
 			data = []byte(b.Value.String())
 		default:
-			if createFileName == "" {
+			switch createFileName {
+			case "ascii":
+				data, err = samples.Base64Decode(samples.LogoASCII)
+				logs.ChkErr(logs.Err{Issue: "logoascii is invalid", Arg: createFileName, Msg: err})
+			case "":
 				if cmd.Flags().NFlag() == 0 {
 					fmt.Printf("%s\n\n", cmd.Short)
 					err = cmd.Usage()
@@ -66,9 +71,10 @@ var createCmd = &cobra.Command{
 				err = cmd.Usage()
 				logs.ReCheck(err)
 				logs.FileMissingErr()
+			default:
+				data, err = filesystem.Read(createFileName)
+				logs.ChkErr(logs.Err{Issue: "file is invalid", Arg: createFileName, Msg: err})
 			}
-			data, err = filesystem.Read(createFileName)
-			logs.ChkErr(logs.Err{Issue: "file is invalid", Arg: createFileName, Msg: err})
 		}
 		// check for a --save flag to save to files
 		// otherwise output is sent to stdout
@@ -98,25 +104,24 @@ func init() {
 	initConfig()
 	// init flags and their usage
 	var metaCfg = map[int]metaFlag{
-		// main flags
-		0: {"create.layout", &createArgs.HTMLLayout, nil, nil, "layout", "l", create.Options()},
-		1: {"style.html", &createArgs.Styles, nil, nil, "syntax-style", "c", nil},
-		2: {"create.title", &pageTitle, nil, nil, "title", "t", nil},
-		3: {"create.meta.description", &metaDesc, nil, nil, "meta-description", "d", nil},
-		4: {"create.meta.author", &metaDesc, nil, nil, "meta-author", "a", nil},
-		// minor flags
-		5: {"create.meta.generator", nil, &metaGenerator, nil, "meta-generator", "g", nil},
-		6: {"create.meta.color-scheme", &metaColorScheme, nil, nil, "meta-color-scheme", "", nil},
-		7: {"create.meta.keywords", &metaKeywords, nil, nil, "meta-keywords", "", nil},
-		8: {"create.meta.referrer", &metaReferrer, nil, nil, "meta-referrer", "", nil},
-		9: {"create.meta.theme-color", &metaThemeColor, nil, nil, "meta-theme-color", "", nil},
 		// output
-		10: {"create.save-directory", &saveToFiles, nil, nil, "save", "s", nil},
-		11: {"create.server", nil, &createArgs.ServerFiles, nil, "server", "p", nil},
-		12: {"create.server-port", nil, nil, &createArgs.ServerPort, "port", "", nil},
+		0: {"create.save-directory", &saveToFiles, nil, nil, "save", "s", nil},
+		1: {"create.server-port", nil, nil, &createArgs.ServerPort, "port", "", nil},
+		2: {"create.server", nil, &createArgs.ServerFiles, nil, "server", "p", nil},
+		// main tag flags
+		3: {"create.layout", &createArgs.HTMLLayout, nil, nil, "layout", "l", create.Options()},
+		4: {"style.html", &createArgs.Styles, nil, nil, "syntax-style", "c", nil},
+		5: {"create.title", &pageTitle, nil, nil, "title", "t", nil},
+		6: {"create.meta.description", &metaDesc, nil, nil, "meta-description", "d", nil},
+		7: {"create.meta.author", &metaDesc, nil, nil, "meta-author", "a", nil},
+		// minor tag flags
+		8:  {"create.meta.generator", nil, &metaGenerator, nil, "meta-generator", "g", nil},
+		9:  {"create.meta.color-scheme", &metaColorScheme, nil, nil, "meta-color-scheme", "", nil},
+		10: {"create.meta.keywords", &metaKeywords, nil, nil, "meta-keywords", "", nil},
+		11: {"create.meta.referrer", &metaReferrer, nil, nil, "meta-referrer", "", nil},
+		12: {"create.meta.theme-color", &metaThemeColor, nil, nil, "meta-theme-color", "", nil},
 		// hidden flags
 		13: {"create.body", &preText, nil, nil, "body", "b", nil},
-		// TODO: add sample flag to generate the RetroTxt ANSI/ascii logo as HTML?
 	}
 	// create an ordered index for the flags
 	var keys []int
@@ -126,7 +131,7 @@ func init() {
 	sort.Ints(keys)
 	// required flags
 	createCmd.Flags().StringVarP(&createFileName, "name", "n", "",
-		str.Required("text file to parse")+"\n")
+		str.Required("text file to parse")+"\nrun a built-in example "+str.Example("retrotxt create ascii")+"\n")
 	// generate flags
 	for i := range keys {
 		c := metaCfg[i]
@@ -141,7 +146,7 @@ func init() {
 		}
 		switch {
 		case c.key == "create.server":
-			createCmd.Flags().BoolVarP(c.boo, c.name, c.short, false, "serve HTML over an internal web server")
+			createCmd.Flags().BoolVarP(c.boo, c.name, c.short, false, "serve HTML over an internal web server\n")
 		case c.strg != nil:
 			createCmd.Flags().StringVarP(c.strg, c.name, c.short, viper.GetString(c.key), buf.String())
 		case c.boo != nil:

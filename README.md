@@ -137,7 +137,6 @@ upx --best retrotxtgo # (slow) 17MB --> 6.45MB file (not worth the saving)
 upx --brute retrotxtgo # (very slow) 17MB --> 4.8MB file
 ```
 
-
 ---
 
 ### Why Go?
@@ -280,6 +279,8 @@ Use HTTP e-tags cache and save the values to reduce the bandwidth usage.
 - [ ] config shell should have a `--append/source/or` flag to save shell auto-completion?
 - [ ] scan for supported but current shell configuration.
 - [ ] when using `create` detect any out of range or unsafe unicode encoding and assume cp437.
+- [ ] in `create` HTML insert a header comment with source file, command flags.
+- [ ] generator meta tag should have a working date.
 
 ---
 

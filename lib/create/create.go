@@ -253,13 +253,14 @@ func transform(m *charmap.Charmap, p []byte) (runes int, encoded []byte, err err
 	if len(p) == 0 {
 		return 0, encoded, nil
 	}
-	// if no charmap provided the text is left as-is
-	if m == nil {
-		return utf8.RuneCount(p), p, nil
-	}
 	// confirm encoding is not utf8
 	if utf8.Valid(p) {
 		return utf8.RuneCount(p), p, nil
+	}
+	// use cp437 by default if text is not utf8
+	// TODO: add default-unknown.encoding setting
+	if m == nil {
+		m = charmap.CodePage437
 	}
 	// convert to utf8
 	if encoded, err = m.NewDecoder().Bytes(p); err != nil {

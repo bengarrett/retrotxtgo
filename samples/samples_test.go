@@ -7,6 +7,11 @@ import (
 	"testing"
 )
 
+// func ExampleBase64Encodex() {
+// 	fmt.Print(EncodeASCII())
+// 	// Output: X
+// }
+
 func ExampleCP437Decode() {
 	const name = base + "cp437In.txt"
 	result, err := CP437Decode(cp437hex)

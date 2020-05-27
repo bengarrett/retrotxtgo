@@ -183,7 +183,7 @@ func Save(b []byte, name string) (path string, err error) {
 }
 
 func asciiFile() (path string) {
-	var abs, err = filepath.Abs("ZII-RTXT.asc")
+	var abs, err = filepath.Abs("ascii-logos.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
