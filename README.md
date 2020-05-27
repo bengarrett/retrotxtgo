@@ -20,7 +20,7 @@ cat samples/ascii-logos.txt
 ```
 
 ```sh
-retrotxt samples/ascii-logos.txt # creates an index.html file in the home directory
+retrotxt create samples/ascii-logos.txt # creates an index.html file in the home directory
 ```
 
 ```html
@@ -82,7 +82,7 @@ cd ~
 git clone https://github.com/bengarrett/retrotxtgo.git
 # go install -o retrotxt.exe . # on Windows
 go install -o retrotxt .
-retrotxt --version
+retrotxt version
 ```
 
 The binary will be installed either at `$GOPATH/bin` or `$HOME/go/bin`
