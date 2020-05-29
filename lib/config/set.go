@@ -187,7 +187,7 @@ func Set(name string) {
 	}
 	switch name {
 	case "create.layout":
-		fmt.Println("Choose a new " + str.Options(Hints[name], create.Options(), true))
+		fmt.Println("Choose a new " + str.Options(Hints[name], create.Layouts(), true))
 		setShortStrings(name, createTemplates().Strings())
 	case "create.meta.generator":
 		setGenerator()

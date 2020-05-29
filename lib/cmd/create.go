@@ -95,7 +95,7 @@ func init() {
 		1: {"create.server", nil, &htmlArgs.HTTP, nil, "server", "p", nil},
 		2: {"create.server-port", nil, nil, &htmlArgs.Port, "port", "", nil},
 		// main tag flags
-		3: {"create.layout", &htmlArgs.Layout, nil, nil, "layout", "l", create.Options()},
+		3: {"create.layout", &htmlArgs.Layout, nil, nil, "layout", "l", create.Layouts()},
 		4: {"style.html", &htmlArgs.Syntax, nil, nil, "syntax-style", "c", nil},
 		5: {"create.title", &htmlArgs.Title, nil, nil, "title", "t", nil},
 		6: {"create.meta.description", &htmlArgs.Desc, nil, nil, "meta-description", "d", nil},

@@ -44,7 +44,7 @@ func Test_Save(t *testing.T) {
 }
 
 func Test_Layouts(t *testing.T) {
-	l := Options()
+	l := Layouts()
 	if got := len(l); got != 5 {
 		t.Errorf("createTemplates() = %v, want %v", got, 5)
 	}

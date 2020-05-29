@@ -191,8 +191,8 @@ func (args Args) Stdout(data *[]byte) error {
 	return err
 }
 
-// Options returns the options permitted by the layout flag.
-func Options() (s []string) {
+// Layouts returns the options permitted by the layout flag.
+func Layouts() (s []string) {
 	for key := range createTemplates() {
 		s = append(s, key)
 	}
