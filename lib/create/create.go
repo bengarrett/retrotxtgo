@@ -103,10 +103,10 @@ func (args *Args) Cmd(data []byte, value string) {
 		if args.Dest, err = Dest(dir); err != nil {
 			log.Fatal(err)
 		}
-		err = args.Save(data)
+		err = args.Save(&data)
 	case !args.HTTP:
 		// print to terminal
-		err = args.Stdout(data, false)
+		err = args.Stdout(&data, false)
 	}
 	if err != nil {
 		log.Fatal(err)
@@ -135,7 +135,7 @@ func Dest(args []string) (path string, err error) {
 }
 
 // Save creates and saves the html template to the named file.
-func (args Args) Save(data []byte) error {
+func (args Args) Save(data *[]byte) error {
 	name := args.Dest
 	stat, err := os.Stat(name)
 	if err != nil {
@@ -169,7 +169,7 @@ func (args Args) Save(data []byte) error {
 }
 
 // Serve ...
-func (args Args) Serve(data []byte) {
+func (args Args) Serve(data *[]byte) {
 	p := uint(args.Port)
 	if !prompt.PortValid(p) {
 		// viper.GetInt() doesn't work as expected
@@ -186,7 +186,7 @@ func (args Args) Serve(data []byte) {
 
 // serveFile creates and serves the html template on a local HTTP web server.
 // The argument test is used internally.
-func (args Args) serveFile(data []byte, port uint, test bool) error {
+func (args Args) serveFile(data *[]byte, port uint, test bool) error {
 	t, err := args.newTemplate(test)
 	if err != nil {
 		return err
@@ -213,7 +213,7 @@ func (args Args) serveFile(data []byte, port uint, test bool) error {
 
 // Stdout creates and sends the html template to stdout.
 // The argument test is used internally.
-func (args Args) Stdout(data []byte, test bool) error {
+func (args Args) Stdout(data *[]byte, test bool) error {
 	tmpl, err := args.newTemplate(test)
 	if err != nil {
 		return err
@@ -291,7 +291,7 @@ func (args Args) newTemplate(test bool) (*template.Template, error) {
 
 // pagedata creates the meta and page template data.
 // todo handle all arguments
-func (args Args) pagedata(data []byte) (p PageData, err error) {
+func (args Args) pagedata(data *[]byte) (p PageData, err error) {
 	switch args.Layout {
 	case "full", "standard":
 		p.MetaAuthor = viper.GetString("create.meta.author")
@@ -315,7 +315,8 @@ func (args Args) pagedata(data []byte) (p PageData, err error) {
 	return p, nil
 }
 
-func transform(m *charmap.Charmap, p []byte) (runes int, encoded []byte, err error) {
+func transform(m *charmap.Charmap, px *[]byte) (runes int, encoded []byte, err error) {
+	p := *px
 	if len(p) == 0 {
 		return 0, encoded, nil
 	}

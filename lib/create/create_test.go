@@ -97,24 +97,24 @@ func Test_pagedata(t *testing.T) {
 	args := Args{Layout: "standard"}
 	w := "hello"
 	d := []byte(w)
-	got, _ := args.pagedata(d)
+	got, _ := args.pagedata(&d)
 	if got.PreText != w {
 		t.Errorf("pagedata().PreText = %v, want %v", got, w)
 	}
 	args.Layout = "mini"
 	w = "RetroTxt | example"
-	got, _ = args.pagedata(d)
+	got, _ = args.pagedata(&d)
 	if got.PageTitle != w {
 		t.Errorf("pagedata().PageTitle = %v, want %v", got, w)
 	}
 	w = ""
-	got, _ = args.pagedata(d)
+	got, _ = args.pagedata(&d)
 	if got.MetaDesc != w {
 		t.Errorf("pagedata().MetaDesc = %v, want %v", got, w)
 	}
 	args.Layout = "standard"
 	w = ""
-	got, _ = args.pagedata(d)
+	got, _ = args.pagedata(&d)
 	if got.MetaAuthor != w {
 		t.Errorf("pagedata().MetaAuthor = %v, want %v", got, w)
 	}
@@ -123,7 +123,7 @@ func Test_pagedata(t *testing.T) {
 func Test_serveFile(t *testing.T) {
 	a := Args{Layout: "standard"}
 	type args struct {
-		data []byte
+		data *[]byte
 		port uint
 		test bool
 	}
@@ -163,7 +163,7 @@ func Test_writeFile(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := a.File(tt.args.data, tt.args.name); (err != nil) != tt.wantErr {
+			if err := a.Save(&tt.args.data); (err != nil) != tt.wantErr {
 				t.Errorf("writeFile() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

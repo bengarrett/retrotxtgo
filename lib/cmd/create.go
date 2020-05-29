@@ -68,7 +68,7 @@ var createCmd = &cobra.Command{
 		htmlArgs.Cmd(data, "") // value should = arguments
 		// check for a --server flag to serve the HTML
 		if htmlArgs.HTTP {
-			htmlArgs.Serve(data)
+			htmlArgs.Serve(&data)
 		}
 	},
 }
