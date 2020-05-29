@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -95,12 +94,16 @@ func dirs(dir string) (path string, err error) {
 }
 
 // Cmd handles the command arguments.
-func (args Args) Cmd(data []byte, value string) {
+func (args *Args) Cmd(data []byte, value string) {
 	var err error
 	switch {
 	case args.SaveToFile:
 		// use config save directory
-		err = args.Save(data, viper.GetString("create.save-directory"))
+		dir := []string{viper.GetString("create.save-directory")}
+		if args.Dest, err = Dest(dir); err != nil {
+			log.Fatal(err)
+		}
+		err = args.Save(data)
 	case !args.HTTP:
 		// print to terminal
 		err = args.Stdout(data, false)
@@ -110,7 +113,7 @@ func (args Args) Cmd(data []byte, value string) {
 	}
 }
 
-// Dest determines if the user arguments are a valid file or directory destination
+// Dest determines if user supplied arguments are a valid file or directory destination.
 func Dest(args []string) (path string, err error) {
 	if len(args) == 0 {
 		return path, err
@@ -132,16 +135,20 @@ func Dest(args []string) (path string, err error) {
 }
 
 // Save creates and saves the html template to the named file.
-func (args Args) Save(data []byte, name string) error {
-	name, err := Dest([]string{name})
+func (args Args) Save(data []byte) error {
+	name := args.Dest
 	stat, err := os.Stat(name)
 	if err != nil {
 		return err
 	}
 	if stat.IsDir() {
-		name = path.Join(name, "index.html")
+		name = filepath.Join(name, "index.html")
 	}
 	color.OpFuzzy.Printf("Saving to %s\n", name)
+	if !args.OW && !os.IsNotExist(err) {
+		e := logs.Err{Issue: "html file exists", Arg: name, Msg: errors.New("include an -o flag to overwrite")}
+		logs.ChkErr(e)
+	}
 	file, err := os.Create(name)
 	if err != nil {
 		return err
