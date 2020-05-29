@@ -5,33 +5,62 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"os"
-	"os/user"
 	"path"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 	"unicode/utf8"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/prompt"
 	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/gookit/color"
 	"github.com/spf13/viper"
 	"golang.org/x/text/encoding/charmap"
 )
 
-// func X( data []byte, options)
-
 type files map[string]string
 
-// Args holds arguments and options.
+// Args holds arguments and options sourced from user flags or the config file.
 type Args struct {
-	HTMLLayout  string
-	ServerFiles bool
-	ServerPort  int
-	Styles      string
-	Test        bool
+	// Src source input text file
+	Src string
+	// Dest HTML destination either a directory or file
+	Dest string
+	// Author of the page metadata
+	Author string
+	// Scheme color metadata
+	Scheme string
+	// Desc description metadata
+	Desc string
+	// Generator shows retrotxt version and page generated at time
+	Generator bool
+	// Keys are keyword metadata
+	Keys string
+	// Referrer metadata
+	Ref string
+	// Title for the page and browser tab
+	Title string
+	// Body text content
+	Body string
+	// Layout of the HTML
+	Layout string
+	// Syntax and color theming printing HTML
+	Syntax string
+	// HTTP server
+	HTTP bool
+	// Port for HTTP server
+	Port int
+	// Test mode
+	Test bool
+	// SaveToFile save to a file or print to stdout
+	SaveToFile bool
+	// OW overwrite any existing files when saving
+	OW bool
 }
 
 // PageData holds template data used by the HTML layouts.
@@ -50,16 +79,61 @@ type PageData struct {
 	PreText         string
 }
 
-// File creates and saves the html template to the named file.
-func (args Args) File(data []byte, name string) error {
-	if name == "~" {
-		// allow the use of ~ as the home directory on Windows
-		u, err := user.Current()
-		if err != nil {
-			return err
-		}
-		name = u.HomeDir
+func dirs(dir string) (path string, err error) {
+	switch dir {
+	case "~":
+		path, err = os.UserHomeDir()
+	case ".":
+		path, err = os.Getwd()
+	case "\\", "/":
+		path, err = filepath.Abs(dir)
 	}
+	if err != nil {
+		return "", err
+	}
+	return path, err
+}
+
+// Cmd handles the command arguments.
+func (args Args) Cmd(data []byte, value string) {
+	var err error
+	switch {
+	case args.SaveToFile:
+		// use config save directory
+		err = args.Save(data, viper.GetString("create.save-directory"))
+	case !args.HTTP:
+		// print to terminal
+		err = args.Stdout(data, false)
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+// Dest determines if the user arguments are a valid file or directory destination
+func Dest(args []string) (path string, err error) {
+	if len(args) == 0 {
+		return path, err
+	}
+	dir := strings.Join(args, " ")
+	dir = filepath.Clean(dir)
+	if len(dir) == 1 {
+		return dirs(dir)
+	}
+	part := strings.Split(dir, string(os.PathSeparator))
+	if len(part) > 1 {
+		part[0], err = dirs(part[0])
+		if err != nil {
+			return path, err
+		}
+	}
+	path = strings.Join(part, string(os.PathSeparator))
+	return path, err
+}
+
+// Save creates and saves the html template to the named file.
+func (args Args) Save(data []byte, name string) error {
+	name, err := Dest([]string{name})
 	stat, err := os.Stat(name)
 	if err != nil {
 		return err
@@ -67,6 +141,7 @@ func (args Args) File(data []byte, name string) error {
 	if stat.IsDir() {
 		name = path.Join(name, "index.html")
 	}
+	color.OpFuzzy.Printf("Saving to %s\n", name)
 	file, err := os.Create(name)
 	if err != nil {
 		return err
@@ -86,25 +161,9 @@ func (args Args) File(data []byte, name string) error {
 	return nil
 }
 
-// Save ...
-func (args Args) Save(data []byte, value string, changed bool) {
-	var err error
-	switch {
-	case changed:
-		err = args.File(data, value)
-	case viper.GetString("create.save-directory") != "":
-		err = args.File(data, viper.GetString("create.save-directory"))
-	case !args.ServerFiles:
-		err = args.Stdout(data, false)
-	}
-	if err != nil {
-		// TODO: handle errors
-	}
-}
-
 // Serve ...
 func (args Args) Serve(data []byte) {
-	p := uint(args.ServerPort)
+	p := uint(args.Port)
 	if !prompt.PortValid(p) {
 		// viper.GetInt() doesn't work as expected
 		port, err := strconv.Atoi(viper.GetString("create.server-port"))
@@ -160,11 +219,11 @@ func (args Args) Stdout(data []byte, test bool) error {
 	if err = tmpl.Execute(&buf, d); err != nil {
 		return err
 	}
-	switch args.Styles {
+	switch args.Syntax {
 	case "", "none":
 		fmt.Printf("%s", buf.String())
 	default:
-		if err = str.Highlight(buf.String(), "html", args.Styles); err != nil {
+		if err = str.Highlight(buf.String(), "html", args.Syntax); err != nil {
 			return err
 		}
 	}
@@ -197,7 +256,7 @@ func (args Args) filename(test bool) (path string, err error) {
 	if test {
 		base = filepath.Join("../../", base)
 	}
-	f := createTemplates()[args.HTMLLayout]
+	f := createTemplates()[args.Layout]
 	if f == "" {
 		return path, errors.New("filename: invalid-layout")
 	}
@@ -226,7 +285,7 @@ func (args Args) newTemplate(test bool) (*template.Template, error) {
 // pagedata creates the meta and page template data.
 // todo handle all arguments
 func (args Args) pagedata(data []byte) (p PageData, err error) {
-	switch args.HTMLLayout {
+	switch args.Layout {
 	case "full", "standard":
 		p.MetaAuthor = viper.GetString("create.meta.author")
 		p.MetaColorScheme = viper.GetString("create.meta.color-scheme")

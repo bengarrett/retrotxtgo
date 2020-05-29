@@ -16,29 +16,15 @@ import (
 	"github.com/spf13/viper"
 )
 
-// create command flag
-var (
-	createFileName  string
-	metaAuthor      string
-	metaColorScheme string
-	metaDesc        string
-	metaGenerator   bool
-	metaKeywords    string
-	metaReferrer    string
-	metaThemeColor  string
-	pageTitle       string
-	preText         string
-	saveToFiles     string
-)
-
-var createArgs = create.Args{}
+var htmlArgs create.Args
 
 // createCmd makes create usage examples
 var exampleCmd = func() string {
 	var b bytes.Buffer
 	s := string(os.PathSeparator)
-	fmt.Fprint(&b, `  retrotxt create -n textfile.txt -t "Text file" -d "Some random text file"`)
-	fmt.Fprintf(&b, "\n  retrotxt create --name ~%sDownloads%stextfile.txt --layout mini --save .%shtml", s, s, s)
+	fmt.Fprint(&b, "  retrotxt create -n=ascii\n")
+	fmt.Fprint(&b, `  retrotxt create -n=file.txt -t "Textfile" -d "Some text"`)
+	fmt.Fprintf(&b, "\n  retrotxt create --name ~%sDownloads%stextfile.txt --save", s, s)
 	return str.Cinf(b.String())
 }
 
@@ -48,41 +34,41 @@ var createCmd = &cobra.Command{
 	Short:   "Create a HTML document from a text file",
 	Example: exampleCmd(),
 	Run: func(cmd *cobra.Command, args []string) {
-		createArgs.HTMLLayout = viper.GetString("create.layout")
-		var data []byte
-		var err error
-		// --body is a hidden flag to test this cmd without providing a file
-		b := cmd.Flags().Lookup("body")
-		switch b.Changed {
-		case true:
-			data = []byte(b.Value.String())
+		var (
+			data []byte
+			err  error
+			body = cmd.Flags().Lookup("body")
+		)
+		switch body.Changed {
+		case true: // handle hidden --body flag
+			data = []byte(body.Value.String())
 		default:
-			switch createFileName {
+			switch htmlArgs.Src {
 			case "ascii":
+				// internal example
 				data, err = samples.Base64Decode(samples.LogoASCII)
-				logs.ChkErr(logs.Err{Issue: "logoascii is invalid", Arg: createFileName, Msg: err})
+				logs.ChkErr(logs.Err{Issue: "logoascii is invalid", Arg: htmlArgs.Src, Msg: err})
 			case "":
+				// no input (show help & exit)
 				if cmd.Flags().NFlag() == 0 {
 					fmt.Printf("%s\n\n", cmd.Short)
 					err = cmd.Usage()
 					logs.Check("create usage", err)
 					os.Exit(0)
 				}
+				// show help and exit with no input otherwise a blank template will be shown
 				err = cmd.Usage()
 				logs.ReCheck(err)
 				logs.FileMissingErr()
 			default:
-				data, err = filesystem.Read(createFileName)
-				logs.ChkErr(logs.Err{Issue: "file is invalid", Arg: createFileName, Msg: err})
+				data, err = filesystem.Read(htmlArgs.Src)
+				logs.ChkErr(logs.Err{Issue: "file is invalid", Arg: htmlArgs.Src, Msg: err})
 			}
 		}
-		// check for a --save flag to save to files
-		// otherwise output is sent to stdout
-		s := cmd.Flags().Lookup("save")
-		createArgs.Save(data, s.Value.String(), s.Changed)
+		htmlArgs.Cmd(data, "") // value should = arguments
 		// check for a --server flag to serve the HTML
-		if createArgs.ServerFiles {
-			createArgs.Serve(data)
+		if htmlArgs.HTTP {
+			htmlArgs.Serve(data)
 		}
 	},
 }
@@ -105,23 +91,22 @@ func init() {
 	// init flags and their usage
 	var metaCfg = map[int]metaFlag{
 		// output
-		0: {"create.save-directory", &saveToFiles, nil, nil, "save", "s", nil},
-		1: {"create.server-port", nil, nil, &createArgs.ServerPort, "port", "", nil},
-		2: {"create.server", nil, &createArgs.ServerFiles, nil, "server", "p", nil},
+		1: {"create.server", nil, &htmlArgs.HTTP, nil, "server", "p", nil},
+		2: {"create.server-port", nil, nil, &htmlArgs.Port, "port", "", nil},
 		// main tag flags
-		3: {"create.layout", &createArgs.HTMLLayout, nil, nil, "layout", "l", create.Options()},
-		4: {"style.html", &createArgs.Styles, nil, nil, "syntax-style", "c", nil},
-		5: {"create.title", &pageTitle, nil, nil, "title", "t", nil},
-		6: {"create.meta.description", &metaDesc, nil, nil, "meta-description", "d", nil},
-		7: {"create.meta.author", &metaDesc, nil, nil, "meta-author", "a", nil},
+		3: {"create.layout", &htmlArgs.Layout, nil, nil, "layout", "l", create.Options()},
+		4: {"style.html", &htmlArgs.Syntax, nil, nil, "syntax-style", "c", nil},
+		5: {"create.title", &htmlArgs.Title, nil, nil, "title", "t", nil},
+		6: {"create.meta.description", &htmlArgs.Desc, nil, nil, "meta-description", "d", nil},
+		7: {"create.meta.author", &htmlArgs.Author, nil, nil, "meta-author", "a", nil},
 		// minor tag flags
-		8:  {"create.meta.generator", nil, &metaGenerator, nil, "meta-generator", "g", nil},
-		9:  {"create.meta.color-scheme", &metaColorScheme, nil, nil, "meta-color-scheme", "", nil},
-		10: {"create.meta.keywords", &metaKeywords, nil, nil, "meta-keywords", "", nil},
-		11: {"create.meta.referrer", &metaReferrer, nil, nil, "meta-referrer", "", nil},
-		12: {"create.meta.theme-color", &metaThemeColor, nil, nil, "meta-theme-color", "", nil},
+		8:  {"create.meta.generator", nil, &htmlArgs.Generator, nil, "meta-generator", "g", nil},
+		9:  {"create.meta.color-scheme", &htmlArgs.Author, nil, nil, "meta-color-scheme", "", nil},
+		10: {"create.meta.keywords", &htmlArgs.Keys, nil, nil, "meta-keywords", "", nil},
+		11: {"create.meta.referrer", &htmlArgs.Ref, nil, nil, "meta-referrer", "", nil},
+		12: {"create.meta.theme-color", &htmlArgs.Scheme, nil, nil, "meta-theme-color", "", nil},
 		// hidden flags
-		13: {"create.body", &preText, nil, nil, "body", "b", nil},
+		0: {"create.body", &htmlArgs.Body, nil, nil, "body", "b", nil},
 	}
 	// create an ordered index for the flags
 	var keys []int
@@ -130,8 +115,10 @@ func init() {
 	}
 	sort.Ints(keys)
 	// required flags
-	createCmd.Flags().StringVarP(&createFileName, "name", "n", "",
-		str.Required("text file to parse")+"\nrun a built-in example "+str.Example("retrotxt create ascii")+"\n")
+	createCmd.Flags().StringVarP(&htmlArgs.Src, "name", "n", "",
+		str.Required("text file to parse")+"\n  run a built-in example "+str.Example("retrotxt create ascii")+"\n")
+	createCmd.Flags().BoolVarP(&htmlArgs.SaveToFile, "save", "s", false, "save HTML to a file or ignore to print output")
+	createCmd.Flags().BoolVarP(&htmlArgs.OW, "overwrite", "o", false, "overwrite any existing files when saving\n")
 	// generate flags
 	for i := range keys {
 		c := metaCfg[i]
@@ -146,7 +133,7 @@ func init() {
 		}
 		switch {
 		case c.key == "create.server":
-			createCmd.Flags().BoolVarP(c.boo, c.name, c.short, false, "serve HTML over an internal web server\n")
+			createCmd.Flags().BoolVarP(c.boo, c.name, c.short, false, "serve HTML over an internal web server")
 		case c.strg != nil:
 			createCmd.Flags().StringVarP(c.strg, c.name, c.short, viper.GetString(c.key), buf.String())
 		case c.boo != nil:

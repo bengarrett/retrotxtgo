@@ -6,6 +6,7 @@ import (
 	"path"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"testing"
 
 	"github.com/spf13/viper"
@@ -72,7 +73,7 @@ func Test_createTemplates(t *testing.T) {
 }
 
 func Test_filename(t *testing.T) {
-	args := Args{HTMLLayout: "standard"}
+	args := Args{Layout: "standard"}
 	w := filepath.Clean("../../static/html/standard.html")
 	got, _ := args.filename(true)
 	if got != w {
@@ -83,7 +84,7 @@ func Test_filename(t *testing.T) {
 	if got != w {
 		t.Errorf("filename = %v, want %v", got, w)
 	}
-	args.HTMLLayout = "error"
+	args.Layout = "error"
 	_, err := args.filename(false)
 	if (err != nil) != true {
 		t.Errorf("filename = %v, want %v", got, w)
@@ -93,14 +94,14 @@ func Test_filename(t *testing.T) {
 func Test_pagedata(t *testing.T) {
 	viper.SetDefault("create.title", "RetroTxt | example")
 
-	args := Args{HTMLLayout: "standard"}
+	args := Args{Layout: "standard"}
 	w := "hello"
 	d := []byte(w)
 	got, _ := args.pagedata(d)
 	if got.PreText != w {
 		t.Errorf("pagedata().PreText = %v, want %v", got, w)
 	}
-	args.HTMLLayout = "mini"
+	args.Layout = "mini"
 	w = "RetroTxt | example"
 	got, _ = args.pagedata(d)
 	if got.PageTitle != w {
@@ -111,7 +112,7 @@ func Test_pagedata(t *testing.T) {
 	if got.MetaDesc != w {
 		t.Errorf("pagedata().MetaDesc = %v, want %v", got, w)
 	}
-	args.HTMLLayout = "standard"
+	args.Layout = "standard"
 	w = ""
 	got, _ = args.pagedata(d)
 	if got.MetaAuthor != w {
@@ -120,7 +121,7 @@ func Test_pagedata(t *testing.T) {
 }
 
 func Test_serveFile(t *testing.T) {
-	a := Args{HTMLLayout: "standard"}
+	a := Args{Layout: "standard"}
 	type args struct {
 		data []byte
 		port uint
@@ -142,7 +143,7 @@ func Test_serveFile(t *testing.T) {
 	}
 }
 func Test_writeFile(t *testing.T) {
-	a := Args{HTMLLayout: "standard", Test: true}
+	a := Args{Layout: "standard", Test: true}
 	type args struct {
 		data []byte
 		name string
@@ -195,6 +196,47 @@ func Test_writeStdout(t *testing.T) {
 			// if err := Stdout(tt.args.data, tt.args.test); (err != nil) != tt.wantErr {
 			// 	t.Errorf("writeStdout() error = %v, wantErr %v", err, tt.wantErr)
 			// }
+		})
+	}
+}
+
+func TestDest(t *testing.T) {
+	saved := viper.GetString("create.save-directory")
+	wd, _ := os.Getwd()
+	home, _ := os.UserHomeDir()
+	spaces := filepath.Join(home, "some directory", "some file.html")
+	root, _ := filepath.Abs("/")
+	sub := filepath.Clean(filepath.Join(home, "/html/example.htm"))
+	winI, winO := "/", "/"
+	if runtime.GOOS == "windows" {
+		winI = "c:\\"
+		winO = "\\"
+	}
+	tests := []struct {
+		name     string
+		args     []string
+		wantPath string
+		wantErr  bool
+	}{
+		{"empty", []string{}, saved, false},
+		{"cwd", []string{"."}, wd, false},
+		{"home", []string{"~"}, home, false},
+		{"root", []string{"/"}, root, false},
+		{"file", []string{"./example.html"}, "example.html", false},
+		{"subdir", []string{"~/html/example.htm"}, sub, false},
+		{"spaces", []string{"~/some directory/some file.html"}, spaces, false},
+		{"windows", []string{winI}, winO, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotPath, err := Dest(tt.args)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Dest() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotPath != tt.wantPath {
+				t.Errorf("Dest() = %v, want %v", gotPath, tt.wantPath)
+			}
 		})
 	}
 }
