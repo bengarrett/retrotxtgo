@@ -6,17 +6,15 @@ import (
 	"fmt"
 	"html/template"
 	"log"
-	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
-	"github.com/bengarrett/retrotxtgo/lib/prompt"
 	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/bengarrett/retrotxtgo/lib/version"
 	"github.com/gookit/color"
 	"github.com/spf13/viper"
 	"golang.org/x/text/encoding/charmap"
@@ -53,7 +51,7 @@ type Args struct {
 	// HTTP server
 	HTTP bool
 	// Port for HTTP server
-	Port int
+	Port uint
 	// Test mode
 	Test bool
 	// SaveToFile save to a file or print to stdout
@@ -62,10 +60,10 @@ type Args struct {
 	OW bool
 }
 
-// PageData holds template data used by the HTML layouts.
+// PageData temporarily holds template data used for the HTML layout.
 type PageData struct {
 	BuildVersion    string
-	BuildDate       time.Time
+	BuildDate       string
 	CacheRefresh    string
 	MetaAuthor      string
 	MetaColorScheme string
@@ -93,7 +91,7 @@ func dirs(dir string) (path string, err error) {
 	return path, err
 }
 
-// Cmd handles the command arguments.
+// Cmd handles the target output command arguments.
 func (args *Args) Cmd(data []byte, value string) {
 	var err error
 	switch {
@@ -106,7 +104,7 @@ func (args *Args) Cmd(data []byte, value string) {
 		err = args.Save(&data)
 	case !args.HTTP:
 		// print to terminal
-		err = args.Stdout(&data, false)
+		err = args.Stdout(&data)
 	}
 	if err != nil {
 		log.Fatal(err)
@@ -154,7 +152,7 @@ func (args Args) Save(data *[]byte) error {
 		return err
 	}
 	defer file.Close()
-	tmpl, err := args.newTemplate(args.Test)
+	tmpl, err := args.newTemplate()
 	if err != nil {
 		return err
 	}
@@ -168,53 +166,9 @@ func (args Args) Save(data *[]byte) error {
 	return nil
 }
 
-// Serve ...
-func (args Args) Serve(data *[]byte) {
-	p := uint(args.Port)
-	if !prompt.PortValid(p) {
-		// viper.GetInt() doesn't work as expected
-		port, err := strconv.Atoi(viper.GetString("create.server-port"))
-		if err != nil {
-			logs.Check("create serve port", err)
-		}
-		p = uint(port)
-	}
-	if err := args.serveFile(data, p, false); err != nil {
-		logs.ChkErr(logs.Err{Issue: "server problem", Arg: "HTTP", Msg: err})
-	}
-}
-
-// serveFile creates and serves the html template on a local HTTP web server.
-// The argument test is used internally.
-func (args Args) serveFile(data *[]byte, port uint, test bool) error {
-	t, err := args.newTemplate(test)
-	if err != nil {
-		return err
-	}
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		d, err := args.pagedata(data)
-		if err != nil {
-			logs.ChkErr(logs.Err{Issue: "servefile encoding", Arg: "http", Msg: err})
-		}
-		if err = t.Execute(w, d); err != nil {
-			logs.ChkErr(logs.Err{Issue: "servefile", Arg: "http", Msg: err})
-		}
-	})
-	fs := http.FileServer(http.Dir("static/"))
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
-	fmt.Printf("Web server is available at %s\n",
-		str.Cp(fmt.Sprintf("http://localhost:%v", port)))
-	println(str.Cinf("Press Ctrl+C to stop"))
-	if err = http.ListenAndServe(fmt.Sprintf(":%v", port), nil); err != nil {
-		return err
-	}
-	return nil
-}
-
 // Stdout creates and sends the html template to stdout.
-// The argument test is used internally.
-func (args Args) Stdout(data *[]byte, test bool) error {
-	tmpl, err := args.newTemplate(test)
+func (args Args) Stdout(data *[]byte) error {
+	tmpl, err := args.newTemplate()
 	if err != nil {
 		return err
 	}
@@ -257,10 +211,9 @@ func createTemplates() files {
 }
 
 // filename creates a filepath for the template filenames.
-// The argument test is used internally.
-func (args Args) filename(test bool) (path string, err error) {
+func (args Args) filename() (path string, err error) {
 	base := "static/html/"
-	if test {
+	if args.Test {
 		base = filepath.Join("../../", base)
 	}
 	f := createTemplates()[args.Layout]
@@ -273,8 +226,8 @@ func (args Args) filename(test bool) (path string, err error) {
 
 // newTemplate creates and parses a new template file.
 // The argument test is used internally.
-func (args Args) newTemplate(test bool) (*template.Template, error) {
-	fn, err := args.filename(test)
+func (args Args) newTemplate() (*template.Template, error) {
+	fn, err := args.filename()
 	if err != nil {
 		return nil, err
 	}
@@ -290,8 +243,9 @@ func (args Args) newTemplate(test bool) (*template.Template, error) {
 }
 
 // pagedata creates the meta and page template data.
-// todo handle all arguments
+// TODO: handle all arguments
 func (args Args) pagedata(data *[]byte) (p PageData, err error) {
+	// templates are found in the dir static/html/*.html
 	switch args.Layout {
 	case "full", "standard":
 		p.MetaAuthor = viper.GetString("create.meta.author")
@@ -302,6 +256,17 @@ func (args Args) pagedata(data *[]byte) (p PageData, err error) {
 		p.MetaReferrer = viper.GetString("create.meta.referrer")
 		p.MetaThemeColor = viper.GetString("create.meta.theme-color")
 		p.PageTitle = viper.GetString("create.title")
+		/*
+			https://webmasters.googleblog.com/2007/12/answering-more-popular-picks-meta-tags.html
+			<meta name="google" value="notranslate">
+			<span class="notranslate">
+			<meta name="robots" content="…, …">
+			viewport ?
+		*/
+		// generate data
+		t := time.Now().UTC()
+		p.BuildDate = t.Format(time.RFC3339)
+		p.BuildVersion = version.B.Version
 	case "mini":
 		p.PageTitle = viper.GetString("create.title")
 		p.MetaGenerator = false

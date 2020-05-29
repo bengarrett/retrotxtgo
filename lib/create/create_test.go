@@ -75,17 +75,17 @@ func Test_createTemplates(t *testing.T) {
 func Test_filename(t *testing.T) {
 	args := Args{Layout: "standard"}
 	w := filepath.Clean("../../static/html/standard.html")
-	got, _ := args.filename(true)
+	got, _ := args.filename()
 	if got != w {
 		t.Errorf("filename = %v, want %v", got, w)
 	}
 	w = filepath.Clean("static/html/standard.html")
-	got, _ = args.filename(false)
+	got, _ = args.filename()
 	if got != w {
 		t.Errorf("filename = %v, want %v", got, w)
 	}
 	args.Layout = "error"
-	_, err := args.filename(false)
+	_, err := args.filename()
 	if (err != nil) != true {
 		t.Errorf("filename = %v, want %v", got, w)
 	}
@@ -124,8 +124,6 @@ func Test_serveFile(t *testing.T) {
 	a := Args{Layout: "standard"}
 	type args struct {
 		data *[]byte
-		port uint
-		test bool
 	}
 	tests := []struct {
 		name    string
@@ -136,7 +134,7 @@ func Test_serveFile(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := a.serveFile(tt.args.data, tt.args.port, tt.args.test); (err != nil) != tt.wantErr {
+			if err := a.serveFile(tt.args.data); (err != nil) != tt.wantErr {
 				t.Errorf("serveFile() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

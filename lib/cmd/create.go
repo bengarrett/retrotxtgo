@@ -12,6 +12,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/samples"
+	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -77,7 +78,7 @@ type metaFlag struct {
 	key   string   // configuration name
 	strg  *string  // StringVarP(p) argument value
 	boo   *bool    // BoolVarP(p) argument value
-	i     *int     // IntVar(p) argument value
+	i     *uint    // UintVar(p) argument value
 	name  string   // flag long name
 	short string   // flag short name
 	opts  []string // flag choices for display in the usage string
@@ -116,7 +117,7 @@ func init() {
 	sort.Ints(keys)
 	// required flags
 	createCmd.Flags().StringVarP(&htmlArgs.Src, "name", "n", "",
-		str.Required("text file to parse")+"\n  run a built-in example "+str.Example("retrotxt create ascii")+"\n")
+		str.Required("text file to parse")+"\nrun a built-in example "+str.Example("retrotxt create ascii")+"\n")
 	createCmd.Flags().BoolVarP(&htmlArgs.SaveToFile, "save", "s", false, "save HTML to a file or ignore to print output")
 	createCmd.Flags().BoolVarP(&htmlArgs.OW, "overwrite", "o", false, "overwrite any existing files when saving\n")
 	// generate flags
@@ -133,13 +134,13 @@ func init() {
 		}
 		switch {
 		case c.key == "create.server":
-			createCmd.Flags().BoolVarP(c.boo, c.name, c.short, false, "serve HTML over an internal web server")
+			createCmd.Flags().BoolVarP(c.boo, c.name, c.short, false, "serve HTML over an insecure local web server\n"+color.Warn.Sprint("please do not use on a production environment"))
 		case c.strg != nil:
 			createCmd.Flags().StringVarP(c.strg, c.name, c.short, viper.GetString(c.key), buf.String())
 		case c.boo != nil:
 			createCmd.Flags().BoolVarP(c.boo, c.name, c.short, viper.GetBool(c.key), buf.String())
 		case c.i != nil:
-			createCmd.Flags().IntVar(c.i, c.name, viper.GetInt(c.key), buf.String())
+			createCmd.Flags().UintVar(c.i, c.name, viper.GetUint(c.key), buf.String())
 		}
 	}
 	err = createCmd.Flags().MarkHidden("body")

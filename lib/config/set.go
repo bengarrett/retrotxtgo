@@ -68,7 +68,7 @@ var Hints = map[string]string{
 	"create.meta.theme-color":  "indicates a suggested color that user agents should use to customize the display of the page",
 	"create.save-directory":    "directory to store RetroTxt created HTML files",
 	"create.server":            "serve HTML over an internal web server",
-	"create.server-port":       "port which the internet web server will listen",
+	"create.server-port":       "port which the internal web server will use",
 	"create.title":             "page title that is shown in a browser title bar or tab",
 	"editor":                   "text editor to launch when using " + str.Example("config edit"),
 	"style.html":               "syntax highlighter for html previews",
