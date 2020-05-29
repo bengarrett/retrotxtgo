@@ -206,7 +206,7 @@ func information() versionInfo {
 	if a := arch(runtime.GOARCH); a != "" {
 		v["os"] += fmt.Sprintf(" [%s CPU]", a)
 	}
-	v["app ver"] += " (pre-alpha)"
+	v["app ver"] = fmt.Sprintf("α%s", v["app ver"])
 	return v
 }
 
