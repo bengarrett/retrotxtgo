@@ -195,6 +195,10 @@ func Set(name string) {
 		setMeta(name, value)
 		fmt.Println(strings.Join(create.Referrer, ", "))
 		setShortStrings(name, create.Referrer)
+	case "create.meta.color-scheme":
+		setMeta(name, value)
+		fmt.Println(strings.Join(create.ColorScheme, ", "))
+		setShortStrings(name, create.ColorScheme)
 	case "create.save-directory":
 		fmt.Println("Choose a new " + Hints[name] + ":")
 		setDirectory(name)
