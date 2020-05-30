@@ -191,6 +191,10 @@ func Set(name string) {
 		setShortStrings(name, createTemplates().Strings())
 	case "create.meta.generator":
 		setGenerator()
+	case "create.meta.referrer":
+		setMeta(name, value)
+		fmt.Println(strings.Join(create.Referrer, ", "))
+		setShortStrings(name, create.Referrer)
 	case "create.save-directory":
 		fmt.Println("Choose a new " + Hints[name] + ":")
 		setDirectory(name)
@@ -364,6 +368,8 @@ func setMeta(name, value string) {
 	}
 	elm := fmt.Sprintf("<head>\n  <meta name=\"%s\" value=\"%s\">", s[2], value)
 	fmt.Print(logs.ColorHTML(elm))
+	h := strings.Split(Hints[name], " ")
+	fmt.Printf("\n%s %s.", strings.Title(h[0]), strings.Join(h[1:], " "))
 	fmt.Println(str.Cf("\nAbout this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name"))
 	q := "Set a new value or leave blank to keep it disabled:"
 	if value != "" {

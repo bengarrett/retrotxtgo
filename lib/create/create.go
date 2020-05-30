@@ -76,6 +76,16 @@ type PageData struct {
 	PreText         string
 }
 
+// ColorScheme values for the content attribute of <meta name="color-scheme">
+var ColorScheme = []string{"normal", "dark light", "only light"}
+
+// Referrer values for the content attribute of <meta name="referrer">
+var Referrer = []string{"no-referrer", "origin", "no-referrer-when-downgrade",
+	"origin-when-cross-origin", "same-origin", "strict-origin", "strict-origin-when-cross-origin", "unsafe-URL"}
+
+// Robots values for the content attribute of <meta name="robots">
+var Robots = []string{"index", "noindex", "follow", "nofollow", "none", "noarchive", "nosnippet", "noimageindex", "nocache"}
+
 func dirs(dir string) (path string, err error) {
 	switch dir {
 	case "~":
