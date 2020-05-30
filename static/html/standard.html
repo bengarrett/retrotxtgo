@@ -20,6 +20,8 @@
   <meta name="theme-color" content="{{.MetaThemeColor}}" />
   {{- end}} {{if .MetaColorScheme}}
   <meta name="color-scheme" content="{{.MetaColorScheme}}" />
+  {{- end}} {{if .MetaNoTranslate}}
+  <meta name="google" content="notranslate" />
   {{- end}} {{if .MetaGenerator}}
   <meta name="generator" content="RetroTxt v{{.BuildVersion}}; {{.BuildDate}}" />
   {{- end}}

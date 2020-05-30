@@ -35,6 +35,7 @@ func InitDefaults() {
 	viper.SetDefault("create.meta.description", "An example")
 	viper.SetDefault("create.meta.generator", true)
 	viper.SetDefault("create.meta.keywords", "")
+	viper.SetDefault("create.meta.notranslate", false)
 	viper.SetDefault("create.meta.referrer", "")
 	viper.SetDefault("create.meta.robots", "index")
 	viper.SetDefault("create.meta.theme-color", "")

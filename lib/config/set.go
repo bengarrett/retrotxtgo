@@ -64,6 +64,7 @@ var Hints = map[string]string{
 	"create.meta.description":  "a short and accurate summary of the content of the page",
 	"create.meta.generator":    "include the RetroTxt version and page generation date?",
 	"create.meta.keywords":     "words relevant to the page content",
+	"create.meta.notranslate":  "used to declare that the page should not be translated by Google Translate",
 	"create.meta.referrer":     "controls the Referer HTTP header attached to requests sent from the page",
 	"create.meta.robots":       "behaviour that crawlers from Google, Bing and other engines should use with the page",
 	"create.meta.theme-color":  "indicates a suggested color that user agents should use to customize the display of the page",
@@ -352,7 +353,6 @@ func setEditor(name string) {
 
 func setGenerator() {
 	var name = "create.meta.generator"
-	// v{{.BuildVersion}}; {{.BuildDate}}
 	elm := fmt.Sprintf("<head>\n  <meta name=\"generator\" content=\"RetroTxt v%s, %s\">",
 		v.B.Version, v.B.Date)
 	fmt.Println(logs.ColorHTML(elm))

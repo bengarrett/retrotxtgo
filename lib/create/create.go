@@ -38,6 +38,8 @@ type Args struct {
 	Generator bool
 	// Keys are keyword metadata
 	Keys string
+	// Google notranslate
+	NoTranslate bool
 	// Referrer metadata
 	Ref string
 	// Robots metadata
@@ -72,6 +74,7 @@ type PageData struct {
 	MetaDesc        string
 	MetaGenerator   bool
 	MetaKeywords    string
+	MetaNoTranslate bool
 	MetaReferrer    string
 	MetaRobots      string
 	MetaThemeColor  string
@@ -266,17 +269,11 @@ func (args Args) pagedata(data *[]byte) (p PageData, err error) {
 		p.MetaDesc = viper.GetString("create.meta.description")
 		p.MetaGenerator = viper.GetBool("create.meta.generator")
 		p.MetaKeywords = viper.GetString("create.meta.keywords")
+		p.MetaNoTranslate = viper.GetBool("create.meta.notranslate")
 		p.MetaReferrer = viper.GetString("create.meta.referrer")
 		p.MetaRobots = viper.GetString("create.meta.robots")
 		p.MetaThemeColor = viper.GetString("create.meta.theme-color")
 		p.PageTitle = viper.GetString("create.title")
-		/*
-			https://webmasters.googleblog.com/2007/12/answering-more-popular-picks-meta-tags.html
-			<meta name="google" value="notranslate">
-			<span class="notranslate">
-			<meta name="robots" content="…, …">
-			viewport ?
-		*/
 		// generate data
 		t := time.Now().UTC()
 		p.BuildDate = t.Format(time.RFC3339)
