@@ -65,6 +65,7 @@ var Hints = map[string]string{
 	"create.meta.generator":    "include the RetroTxt version and page generation date?",
 	"create.meta.keywords":     "words relevant to the page content",
 	"create.meta.referrer":     "controls the Referer HTTP header attached to requests sent from the page",
+	"create.meta.robots":       "behaviour that crawlers from Google, Bing and other engines should use with the page",
 	"create.meta.theme-color":  "indicates a suggested color that user agents should use to customize the display of the page",
 	"create.save-directory":    "directory to store RetroTxt created HTML files",
 	"create.server":            "serve HTML over an internal web server",
@@ -195,6 +196,10 @@ func Set(name string) {
 		setMeta(name, value)
 		fmt.Println(strings.Join(create.Referrer, ", "))
 		setShortStrings(name, create.Referrer)
+	case "create.meta.robots":
+		setMeta(name, value)
+		fmt.Println(strings.Join(create.Robots, ", "))
+		setString(name)
 	case "create.meta.color-scheme":
 		setMeta(name, value)
 		fmt.Println(strings.Join(create.ColorScheme, ", "))

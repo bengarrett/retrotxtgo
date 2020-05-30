@@ -105,7 +105,8 @@ func init() {
 		9:  {"create.meta.color-scheme", &htmlArgs.Author, nil, nil, "meta-color-scheme", "", nil},
 		10: {"create.meta.keywords", &htmlArgs.Keys, nil, nil, "meta-keywords", "", nil},
 		11: {"create.meta.referrer", &htmlArgs.Ref, nil, nil, "meta-referrer", "", nil},
-		12: {"create.meta.theme-color", &htmlArgs.Scheme, nil, nil, "meta-theme-color", "", nil},
+		12: {"create.meta.robots", &htmlArgs.Robots, nil, nil, "meta-robots", "", nil},
+		13: {"create.meta.theme-color", &htmlArgs.Scheme, nil, nil, "meta-theme-color", "", nil},
 		// hidden flags
 		0: {"create.body", &htmlArgs.Body, nil, nil, "body", "b", nil},
 	}

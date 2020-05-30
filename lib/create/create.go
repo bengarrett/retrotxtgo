@@ -40,6 +40,8 @@ type Args struct {
 	Keys string
 	// Referrer metadata
 	Ref string
+	// Robots metadata
+	Robots string
 	// Title for the page and browser tab
 	Title string
 	// Body text content
@@ -71,6 +73,7 @@ type PageData struct {
 	MetaGenerator   bool
 	MetaKeywords    string
 	MetaReferrer    string
+	MetaRobots      string
 	MetaThemeColor  string
 	PageTitle       string
 	PreText         string
@@ -264,6 +267,7 @@ func (args Args) pagedata(data *[]byte) (p PageData, err error) {
 		p.MetaGenerator = viper.GetBool("create.meta.generator")
 		p.MetaKeywords = viper.GetString("create.meta.keywords")
 		p.MetaReferrer = viper.GetString("create.meta.referrer")
+		p.MetaRobots = viper.GetString("create.meta.robots")
 		p.MetaThemeColor = viper.GetString("create.meta.theme-color")
 		p.PageTitle = viper.GetString("create.title")
 		/*
