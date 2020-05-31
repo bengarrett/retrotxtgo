@@ -1,30 +1,17 @@
 package cmd
 
 import (
-	"bytes"
 	"fmt"
-	"strings"
-	"text/tabwriter"
 
-	"github.com/bengarrett/retrotxtgo/lib/codepage"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
-
-	"golang.org/x/text/encoding/japanese"
+	"github.com/bengarrett/retrotxtgo/lib/transform"
 
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 
 	"github.com/spf13/cobra"
-	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/ianaindex"
 )
-
-type iana struct {
-	mime  string
-	index string
-	mib   string
-	s     []string
-}
 
 var (
 	viewCodePage string = "ibm437"
@@ -58,7 +45,7 @@ to quickly create a Cobra application.`,
 		encoding, err := ianaindex.IANA.Encoding(viewCodePage)
 		// TODO: check errors
 		//CheckCodePage(ErrorFmt{"", viewCodePage, err})
-		var d codepage.Set
+		var d transform.Set
 
 		data, err := filesystem.Read(viewFilename)
 		//logs.ChkErr(logs.Err{"file open", viewFilename, err})
@@ -77,7 +64,7 @@ var viewCodePagesCmd = &cobra.Command{
 	Use:   "codepages",
 	Short: "list available legacy codepages that RetroTxt can convert into UTF-8",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(codepages())
+		fmt.Println(transform.List())
 	},
 }
 
@@ -89,7 +76,7 @@ var viewTableCmd = &cobra.Command{
 		//CheckCodePage(ErrorFmt{"", viewCodePage, err})
 		cp, err := ianaindex.IANA.Name(encoding)
 		//CheckCodePage(ErrorFmt{"", viewCodePage, err})
-		table, err := codepage.Table(cp)
+		table, err := transform.Table(cp)
 		logs.ChkErr(logs.Err{Issue: "table", Arg: cp, Msg: err})
 		println(table)
 	},
@@ -112,60 +99,4 @@ func init() {
 	viewCmd.AddCommand(viewTableCmd)
 	viewTableCmd.Flags().StringVarP(&viewCodePage, "codepage", "c", "cp437", "legacy character encoding table to display")
 	_ = viewTableCmd.MarkFlagRequired("name")
-}
-
-// codepages returns a tabled list of supported IANA character set encodings
-func codepages() string {
-	// create a buffer and writer for tab formatting
-	var buf bytes.Buffer
-	w := new(tabwriter.Writer)
-	w.Init(&buf, 0, 8, 0, '\t', 0)
-
-	var ii iana
-	var err error
-	fmt.Fprintln(w, str.Cp("\nSupported legacy codepages and encodings"))
-	fmt.Fprintln(w, str.Cf(strings.Repeat("\u2015", 40)))
-	fmt.Fprintf(w, "\ttitle\talias(s)\n")
-	c := append(charmap.All, japanese.All...)
-	for _, n := range c {
-		name := fmt.Sprint(n)
-		if name == "X-User-Defined" {
-			continue
-		}
-		ii.mime, err = ianaindex.MIME.Name(n)
-		if err != nil {
-			continue
-		}
-		ii.index, _ = ianaindex.IANA.Name(n)
-		ii.mib, _ = ianaindex.MIB.Name(n)
-		ii.s = strings.Split(name, " ")
-		// display encoding name and alias
-		fmt.Fprintf(w, "\t%s\t%s", name, str.Ci(ii.mib))
-		// create common use CP aliases
-		switch {
-		case ii.s[0] == "IBM":
-		case ii.s[0] == "Windows" && ii.s[1] == "Code":
-			fmt.Fprintf(w, "\tCP%s", ii.s[3])
-		case ii.s[0] == "Windows":
-			fmt.Fprintf(w, "\tCP%s", ii.s[1])
-		default:
-			fmt.Fprintf(w, "\t")
-		}
-		// only show MIME if it is different to the previous aliases
-		switch {
-		case strings.EqualFold(strings.ReplaceAll(name, "-", " "), strings.ReplaceAll(ii.mime, "-", " ")):
-		case strings.ReplaceAll(name, "-", "") == strings.ReplaceAll(ii.mime, "-", ""):
-		case ii.mib == ii.mime:
-			fmt.Fprintf(w, "\t%s", str.Cf(""))
-		default:
-			fmt.Fprintf(w, "\t%s", str.Cf(ii.mime))
-		}
-		fmt.Fprint(w, "\n")
-	}
-	fmt.Fprint(w, "\ttitle\talias(s)\n")
-	fmt.Fprint(w, "\n"+str.Cinf("*")+" Code Page 437 ("+str.Cc("CP437")+") is commonly used by MS-DOS English text and ANSI art")
-	fmt.Fprint(w, "\n  ISO 8859-1 ("+str.Cc("ISOLatin1")+") is found in legacy Internet, Unix and Amiga documents")
-	fmt.Fprint(w, "\n  Windows 1252 ("+str.Cc("windows1252")+") is found in legacy English language Windows operating systems")
-	w.Flush()
-	return buf.String()
 }

@@ -119,7 +119,8 @@ func init() {
 	sort.Ints(keys)
 	// required flags
 	createCmd.Flags().StringVarP(&htmlArgs.Src, "name", "n", "",
-		str.Required("text file to parse")+"\nrun a built-in example "+str.Example("retrotxt create ascii")+"\n")
+		str.Required("text file to parse")+"\nrun a built-in example "+str.Example("retrotxt create ascii"))
+	createCmd.Flags().StringVarP(&htmlArgs.Enc, "encode", "e", "", "text encoding of the named text file\n")
 	createCmd.Flags().BoolVarP(&htmlArgs.SaveToFile, "save", "s", false, "save HTML to a file or ignore to print output")
 	createCmd.Flags().BoolVarP(&htmlArgs.OW, "overwrite", "o", false, "overwrite any existing files when saving\n")
 	// generate flags

@@ -10,14 +10,13 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-	"unicode/utf8"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/bengarrett/retrotxtgo/lib/transform"
 	"github.com/bengarrett/retrotxtgo/lib/version"
 	"github.com/gookit/color"
 	"github.com/spf13/viper"
-	"golang.org/x/text/encoding/charmap"
 )
 
 type files map[string]string
@@ -28,6 +27,8 @@ type Args struct {
 	Src string
 	// Dest HTML destination either a directory or file
 	Dest string
+	// Enc text encoding of the source input
+	Enc string
 	// Author of the page metadata
 	Author string
 	// Scheme color metadata
@@ -259,7 +260,6 @@ func (args Args) newTemplate() (*template.Template, error) {
 }
 
 // pagedata creates the meta and page template data.
-// TODO: handle all arguments
 func (args Args) pagedata(data *[]byte) (p PageData, err error) {
 	// templates are found in the dir static/html/*.html
 	switch args.Layout {
@@ -283,33 +283,12 @@ func (args Args) pagedata(data *[]byte) (p PageData, err error) {
 		p.MetaGenerator = false
 	}
 	// convert to utf8
-	_, encoded, err := transform(nil, data)
+	_, encoded, err := transform.Transform(nil, data)
 	if err != nil {
 		return p, err
 	}
 	p.PreText = string(encoded)
 	return p, nil
-}
-
-func transform(m *charmap.Charmap, px *[]byte) (runes int, encoded []byte, err error) {
-	p := *px
-	if len(p) == 0 {
-		return 0, encoded, nil
-	}
-	// confirm encoding is not utf8
-	if utf8.Valid(p) {
-		return utf8.RuneCount(p), p, nil
-	}
-	// use cp437 by default if text is not utf8
-	// TODO: add default-unknown.encoding setting
-	if m == nil {
-		m = charmap.CodePage437
-	}
-	// convert to utf8
-	if encoded, err = m.NewDecoder().Bytes(p); err != nil {
-		return 0, encoded, err
-	}
-	return utf8.RuneCount(encoded), encoded, nil
 }
 
 /*
