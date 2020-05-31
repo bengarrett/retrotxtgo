@@ -5,31 +5,6 @@ import (
 	"testing"
 )
 
-func TestUTF8(t *testing.T) {
-	type args struct {
-		b []byte
-	}
-	bom := append(BOM(), []byte("hello world")...)
-	tests := []struct {
-		name string
-		args args
-		want bool
-	}{
-		{"empty string", args{}, false},
-		{"ascii string", args{[]byte("hello world")}, false},
-		{"arabic text", args{[]byte("مرحبا بالعالم")}, true},
-		{"cyrillic text", args{[]byte("Привіт, народ")}, true},
-		{"bom string", args{bom}, true},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := UTF8(tt.args.b); got != tt.want {
-				t.Errorf("IsUTF8() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestToBOM(t *testing.T) {
 	type args struct {
 		b []byte

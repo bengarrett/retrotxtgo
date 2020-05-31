@@ -8,7 +8,6 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"golang.org/x/net/html/charset"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/ianaindex"
@@ -111,10 +110,11 @@ func ToBOM(b []byte) []byte {
 	return append(BOM(), b...)
 }
 
-// UTF8 determines if a document is encoded as UTF-8.
-func UTF8(b []byte) bool {
-	_, name, _ := charset.DetermineEncoding(b, "text/plain")
-	return name == "utf-8" // bool
+// CutEOF cut text at the first DOS end-of-file marker.
+func (s *Set) CutEOF() {
+	if cut := bytes.IndexByte(s.Data, 26); cut > 0 {
+		s.Data = s.Data[:cut]
+	}
 }
 
 func SwapAll(b []byte) []byte {
@@ -122,20 +122,6 @@ func SwapAll(b []byte) []byte {
 	s.Data = b
 	s.SwapAll(true)
 	return s.Data
-}
-
-func SwapRecommended(b []byte) []byte {
-	var s Set
-	s.Data = b
-	s.SwapAll(false)
-	return s.Data
-}
-
-// CutEOF cut text at the first DOS end-of-file marker.
-func (s *Set) CutEOF() {
-	if cut := bytes.IndexByte(s.Data, 26); cut > 0 {
-		s.Data = s.Data[:cut]
-	}
 }
 
 func (s *Set) SwapAll(nl bool) {
@@ -168,7 +154,7 @@ func (s *Set) SwapDels() {
 	s.Data = bytes.ReplaceAll(s.Data, []byte{127}, []byte("\u2303"))
 }
 
-// // FF NBSP often displays a ?, it can be replaced with SP --nbsp-as-space (true)
+// FF NBSP often displays a ?, it can be replaced with SP --nbsp-as-space (true)
 func (s *Set) SwapNBSP() {
 	s.Data = bytes.ReplaceAll(s.Data, []byte{255}, []byte("\u263B"))
 }

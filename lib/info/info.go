@@ -12,13 +12,13 @@ import (
 	"strings"
 	"text/tabwriter"
 	"time"
+	"unicode/utf8"
 
 	"github.com/aofei/mimesniffer"
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/humanize"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
-	"github.com/bengarrett/retrotxtgo/lib/transform"
 	c "github.com/gookit/color"
 	"github.com/mattn/go-runewidth"
 	"github.com/mozillazg/go-slugify"
@@ -181,7 +181,7 @@ func (d *Detail) parse(data []byte, stat os.FileInfo, name string) (err error) {
 	d.Modified = stat.ModTime().UTC()
 	d.Slug = slugify.Slugify(stat.Name())
 	d.SHA256 = fmt.Sprintf("%x", sha256)
-	d.Utf8 = transform.UTF8(data)
+	d.Utf8 = utf8.Valid(data)
 	if stat.Size() < 1000 {
 		d.Size = p.Sprintf("%v bytes", p.Sprint(stat.Size()))
 	} else {
