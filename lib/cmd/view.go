@@ -13,13 +13,18 @@ import (
 	"golang.org/x/text/encoding/ianaindex"
 )
 
-var (
-	viewCodePage string = "ibm437"
-	viewFilename string
-	viewFormats  = []string{"color", "text"}
-	viewFormat   string
-	viewWidth    int
-)
+type viewFlags struct {
+	cp      string
+	name    string
+	formats []string
+	format  string
+	width   int
+}
+
+var viewArgs = viewFlags{
+	cp:      "cp437",
+	formats: []string{"color", "text"},
+}
 
 // viewCmd represents the view command
 var viewCmd = &cobra.Command{
@@ -37,18 +42,18 @@ to quickly create a Cobra application.`,
 		// todo scan for unique color codes like 24-bit color
 		// todo scan for new lines or character counts and hard-code the width
 
-		if viewFilename == "" {
+		if viewArgs.name == "" {
 			// todo: remove from final
-			viewFilename = "textfiles/cp-437-all-characters.txt"
+			viewArgs.name = "textfiles/cp-437-all-characters.txt"
 		}
-		// todo handle unchanged viewCodePage, where UTF8 encoding will be checked otherwise use
-		encoding, err := ianaindex.IANA.Encoding(viewCodePage)
+		// todo handle unchanged viewArgs.cp, where UTF8 encoding will be checked otherwise use
+		encoding, err := ianaindex.IANA.Encoding(viewArgs.cp)
 		// TODO: check errors
-		//CheckCodePage(ErrorFmt{"", viewCodePage, err})
+		//CheckCodePage(ErrorFmt{"", viewArgs.cp, err})
 		var d transform.Set
 
-		data, err := filesystem.Read(viewFilename)
-		//logs.ChkErr(logs.Err{"file open", viewFilename, err})
+		data, err := filesystem.Read(viewArgs.name)
+		//logs.ChkErr(logs.Err{"file open", viewArgs.name, err})
 
 		err = d.Transform(data, encoding)
 		logs.Check("codepage", err) // TODO: replace
@@ -72,10 +77,10 @@ var viewTableCmd = &cobra.Command{
 	Use:   "table",
 	Short: "display a table showing the codepage and all its characters",
 	Run: func(cmd *cobra.Command, args []string) {
-		encoding, err := ianaindex.IANA.Encoding(viewCodePage)
-		//CheckCodePage(ErrorFmt{"", viewCodePage, err})
+		encoding, err := ianaindex.IANA.Encoding(viewArgs.cp)
+		//CheckCodePage(ErrorFmt{"", viewArgs.cp, err})
 		cp, err := ianaindex.IANA.Name(encoding)
-		//CheckCodePage(ErrorFmt{"", viewCodePage, err})
+		//CheckCodePage(ErrorFmt{"", viewArgs.cp, err})
 		table, err := transform.Table(cp)
 		logs.ChkErr(logs.Err{Issue: "table", Arg: cp, Msg: err})
 		println(table)
@@ -84,12 +89,12 @@ var viewTableCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(viewCmd)
-	viewCmd.Flags().StringVarP(&viewFilename, "name", "n", "",
+	viewCmd.Flags().StringVarP(&viewArgs.name, "name", "n", "",
 		str.Required("text file to display")+"\n")
-	viewCmd.Flags().StringVarP(&viewCodePage, "codepage", "c", "cp437", "legacy character encoding used by the text file")
-	viewCmd.Flags().StringVarP(&viewFormat, "format", "f", "color",
-		str.Options("output format", viewFormats, true))
-	viewCmd.Flags().IntVarP(&viewWidth, "width", "w", 80, "document column character width")
+	viewCmd.Flags().StringVarP(&viewArgs.cp, "codepage", "c", "cp437", "legacy character encoding used by the text file")
+	viewCmd.Flags().StringVarP(&viewArgs.format, "format", "f", "color",
+		str.Options("output format", viewArgs.formats, true))
+	viewCmd.Flags().IntVarP(&viewArgs.width, "width", "w", 80, "document column character width")
 	// override ascii 0-F + 1-F || Control characters || IBM, ASCII, IBM+
 	// example flag showing CP437 table
 	_ = viewCmd.MarkFlagFilename("name")
@@ -97,6 +102,6 @@ func init() {
 	viewCmd.Flags().SortFlags = false
 	viewCmd.AddCommand(viewCodePagesCmd)
 	viewCmd.AddCommand(viewTableCmd)
-	viewTableCmd.Flags().StringVarP(&viewCodePage, "codepage", "c", "cp437", "legacy character encoding table to display")
+	viewTableCmd.Flags().StringVarP(&viewArgs.cp, "codepage", "c", "cp437", "legacy character encoding table to display")
 	_ = viewTableCmd.MarkFlagRequired("name")
 }
