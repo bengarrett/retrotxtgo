@@ -63,7 +63,7 @@ var viewCmd = &cobra.Command{
 		}
 		err = t.Transform()
 		logs.Check("codepage", err)
-		t.SwapAll(true)
+		t.Swap(true)
 		fmt.Println(string(t.Data))
 	},
 }

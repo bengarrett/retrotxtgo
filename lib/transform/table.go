@@ -41,7 +41,7 @@ func Table(name string) (*bytes.Buffer, error) {
 		}
 		err = ts.Transform()
 		logs.Check("codepage", err)
-		ts.SwapAll(false)
+		ts.Swap(false)
 		t := ts.Data
 		switch {
 		case i == 0:
