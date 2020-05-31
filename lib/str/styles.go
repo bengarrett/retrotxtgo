@@ -83,6 +83,15 @@ func Border(text string) *bytes.Buffer {
 	return &b
 }
 
+// Center align text to the width.
+func Center(text string, width int) string {
+	w := (width - len(text)) / 2
+	if w > 0 {
+		return strings.Repeat("\u0020", w) + text
+	}
+	return text
+}
+
 // Highlight and print the syntax of the source string except when piped to stdout.
 func Highlight(source, lexer, style string) (err error) {
 	return HighlightWriter(os.Stdout, source, lexer, style)
