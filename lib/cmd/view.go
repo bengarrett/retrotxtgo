@@ -57,11 +57,14 @@ var viewCmd = &cobra.Command{
 			data, err = filesystem.Read(viewArgs.name)
 		}
 		enc, err := transform.Encoding(viewArgs.cp)
-		var d transform.Set
-		err = d.Transform(data, enc)
+		var t = transform.Set{
+			Data:     data,
+			Encoding: enc,
+		}
+		err = t.Transform()
 		logs.Check("codepage", err)
-		d.SwapAll(true)
-		fmt.Println(string(d.Data))
+		t.SwapAll(true)
+		fmt.Println(string(t.Data))
 	},
 }
 

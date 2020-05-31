@@ -7,6 +7,8 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/gookit/color"
 )
 
@@ -20,7 +22,7 @@ func Table(name string) (*bytes.Buffer, error) {
 	w := new(tabwriter.Writer)
 	w.Init(&buf, 0, 8, 0, '\t', 0)
 	fmt.Fprintln(w, " "+color.OpFuzzy.Sprint(strings.Repeat("\u2015", 67)))
-	fmt.Fprintln(w, color.Primary.Sprint(Center(fmt.Sprintf("%s", cp), 67)))
+	fmt.Fprintln(w, color.Primary.Sprint(str.Center(fmt.Sprintf("%s", cp), 67)))
 	for i := 0; i < 16; i++ {
 		switch {
 		case i == 0:
@@ -33,8 +35,14 @@ func Table(name string) (*bytes.Buffer, error) {
 	}
 	row := 0
 	for i, m := range MakeMap() {
-		t, _ := TransformX([]byte{m}, cp)
-		t = SwapRecommended(t)
+		ts := Set{
+			Data:     []byte{m},
+			Encoding: cp,
+		}
+		err = ts.Transform()
+		logs.Check("codepage", err)
+		ts.SwapAll(false)
+		t := ts.Data
 		switch {
 		case i == 0:
 			fmt.Fprintf(w, " %s %s %s %s", color.OpFuzzy.Sprint("0"), color.OpFuzzy.Sprint("|"), t, color.OpFuzzy.Sprint("|"))

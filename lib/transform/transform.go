@@ -4,7 +4,6 @@ package transform
 
 import (
 	"bytes"
-	"fmt"
 	"regexp"
 	"strings"
 	"unicode/utf8"
@@ -15,9 +14,13 @@ import (
 	"golang.org/x/text/encoding/ianaindex"
 )
 
+// EOF
+// is an ASCII Control-Z, code 26
+
 // Set blah
 type Set struct {
-	Data []byte
+	Data     []byte
+	Encoding encoding.Encoding
 }
 
 var (
@@ -84,8 +87,7 @@ func Transform(m *charmap.Charmap, px *[]byte) (runes int, encoded []byte, err e
 
 func MakeMap() [256]byte {
 	var m [256]byte
-	encoding, _ := ianaindex.IANA.Encoding("cp437")
-	fmt.Printf("%+v\n", encoding)
+	//encoding, _ := ianaindex.IANA.Encoding("cp437")
 	for i := 0; i <= 255; i++ {
 		// b := []byte{uint8(i)}
 		// c := math.Mod(float64(i), 16)
@@ -97,15 +99,6 @@ func MakeMap() [256]byte {
 		m[i] = uint8(i)
 	}
 	return m
-}
-
-func Center(text string, width int) string {
-	l := len(text)
-	w := (width - l) / 2
-	if w > 0 {
-		return strings.Repeat("\u0020", w) + text
-	}
-	return text
 }
 
 // ToBOM adds a UTF-8 byte order mark if it doesn't already exist.
@@ -138,12 +131,26 @@ func SwapRecommended(b []byte) []byte {
 	return s.Data
 }
 
+// CutEOF cut text at the first DOS end-of-file marker.
+func (s *Set) CutEOF() {
+	if cut := bytes.IndexByte(s.Data, 26); cut > 0 {
+		s.Data = s.Data[:cut]
+	}
+}
+
 func (s *Set) SwapAll(nl bool) {
+	s.CutEOF()
 	s.SwapNuls()
 	s.SwapPipes()
 	s.SwapDels()
 	s.SwapNBSP()
 	s.SwapControls(nl)
+	s.SwapANSI()
+}
+
+// SwapANSI switches out ←[ characters with ANSI escape codes.
+func (s *Set) SwapANSI() {
+	s.Data = bytes.ReplaceAll(s.Data, []byte("←["), []byte{27, 91})
 }
 
 // \u0000 should be swapped for SP \u0000 --nul-as-space (true)
@@ -166,12 +173,12 @@ func (s *Set) SwapNBSP() {
 	s.Data = bytes.ReplaceAll(s.Data, []byte{255}, []byte("\u263B"))
 }
 
+// SwapControls switches out C0 and C1 ASCII controls except for newlines.
 func (s *Set) SwapControls(nl bool) {
-	// notes
 	for i, u := range append(asciiC0, asciiC1...) {
 		if nl {
 			switch i {
-			case 10, 13:
+			case 10, 13: // newlines
 				continue
 			}
 		}
@@ -179,18 +186,9 @@ func (s *Set) SwapControls(nl bool) {
 	}
 }
 
-func TransformX(text []byte, e encoding.Encoding) ([]byte, error) {
-	b, err := e.NewDecoder().Bytes(text)
-	if err != nil {
-		return nil, err
-	}
-	return b, nil
-}
-
-func (s *Set) Transform(text []byte, e encoding.Encoding) error {
-	var err error
-	s.Data, err = TransformX(text, e)
-	if err != nil {
+// Transform ...
+func (s *Set) Transform() (err error) {
+	if s.Data, err = s.Encoding.NewDecoder().Bytes(s.Data); err != nil {
 		return err
 	}
 	return nil
