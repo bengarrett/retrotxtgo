@@ -6,11 +6,11 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/lib/transform"
+	"github.com/bengarrett/retrotxtgo/samples"
 
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 
 	"github.com/spf13/cobra"
-	"golang.org/x/text/encoding/ianaindex"
 )
 
 type viewFlags struct {
@@ -26,42 +26,42 @@ var viewArgs = viewFlags{
 	formats: []string{"color", "text"},
 }
 
+/*
+TODO:
+- reverse scan of file looking for EOF, SAUCE00 & COMNTT
+- scan for unique color codes like 24-bit colors
+- newline scanner to determine the maxWidth
+*/
+
 // viewCmd represents the view command
 var viewCmd = &cobra.Command{
 	Use:   "view",
 	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-
-		// todo reverse scan of file looking for SAUCE00 and COMNTT
-		// todo scan for unique color codes like 24-bit color
-		// todo scan for new lines or character counts and hard-code the width
-
-		if viewArgs.name == "" {
-			// todo: remove from final
+		var (
+			data []byte
+			err  error
+		)
+		switch viewArgs.name {
+		case "ansi":
+			data, err = samples.Base64Decode(samples.LogoANSI)
+			logs.ChkErr(logs.Err{Issue: "logoansi is invalid", Arg: htmlArgs.Src, Msg: err})
+		case "ascii":
+			data, err = samples.Base64Decode(samples.LogoASCII)
+			logs.ChkErr(logs.Err{Issue: "logoascii is invalid", Arg: htmlArgs.Src, Msg: err})
+		case "":
 			viewArgs.name = "textfiles/cp-437-all-characters.txt"
+			fallthrough
+		default:
+			data, err = filesystem.Read(viewArgs.name)
 		}
-		// todo handle unchanged viewArgs.cp, where UTF8 encoding will be checked otherwise use
-		encoding, err := ianaindex.IANA.Encoding(viewArgs.cp)
-		// TODO: check errors
-		//CheckCodePage(ErrorFmt{"", viewArgs.cp, err})
+		enc, err := transform.Encoding(viewArgs.cp)
 		var d transform.Set
-
-		data, err := filesystem.Read(viewArgs.name)
-		//logs.ChkErr(logs.Err{"file open", viewArgs.name, err})
-
-		err = d.Transform(data, encoding)
-		logs.Check("codepage", err) // TODO: replace
-		//logs.ChkErr(logs.Err{"Transform", "encoding", err})
+		err = d.Transform(data, enc)
+		logs.Check("codepage", err)
 		d.SwapAll(true)
-		fmt.Printf("\n%s\n", d.Data)
-		// todo: make an --example that auto generates
-		// a table bytes 0 - 255 | lf every 16 characters
+		fmt.Println(string(d.Data))
 	},
 }
 
@@ -77,13 +77,9 @@ var viewTableCmd = &cobra.Command{
 	Use:   "table",
 	Short: "display a table showing the codepage and all its characters",
 	Run: func(cmd *cobra.Command, args []string) {
-		encoding, err := ianaindex.IANA.Encoding(viewArgs.cp)
-		//CheckCodePage(ErrorFmt{"", viewArgs.cp, err})
-		cp, err := ianaindex.IANA.Name(encoding)
-		//CheckCodePage(ErrorFmt{"", viewArgs.cp, err})
-		table, err := transform.Table(cp)
-		logs.ChkErr(logs.Err{Issue: "table", Arg: cp, Msg: err})
-		println(table)
+		table, err := transform.Table(viewArgs.cp)
+		logs.ChkErr(logs.Err{Issue: "table", Arg: viewArgs.cp, Msg: err})
+		fmt.Println(table.String())
 	},
 }
 
