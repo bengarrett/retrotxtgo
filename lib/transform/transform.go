@@ -84,24 +84,16 @@ func Transform(m *charmap.Charmap, px *[]byte) (runes int, encoded []byte, err e
 	return utf8.RuneCount(encoded), encoded, nil
 }
 
-func MakeMap() [256]byte {
-	var m [256]byte
-	//encoding, _ := ianaindex.IANA.Encoding("cp437")
+// MakeMap generates an 8-bit unsigned int container ready to hold legacy code point values.
+func MakeMap() (m [256]byte) {
 	for i := 0; i <= 255; i++ {
-		// b := []byte{uint8(i)}
-		// c := math.Mod(float64(i), 16)
-		// t, _ := Transform(b, encoding)
-		// if c == 0 {
-		// 	fmt.Print("\n")
-		// }
-		// fmt.Printf("%x %s\t", b, t)
 		m[i] = uint8(i)
 	}
 	return m
 }
 
-// ToBOM adds a UTF-8 byte order mark if it doesn't already exist.
-func ToBOM(b []byte) []byte {
+// AddBOM adds a UTF-8 byte order mark if it doesn't already exist.
+func AddBOM(b []byte) []byte {
 	if len(b) > 2 {
 		if t := b[:3]; bytes.Equal(t, BOM()) {
 			return b
@@ -117,14 +109,16 @@ func (s *Set) CutEOF() {
 	}
 }
 
+// SwapAll transforms all common ...
 func SwapAll(b []byte) []byte {
 	var s Set
 	s.Data = b
-	s.SwapAll(true)
+	s.Swap(true)
 	return s.Data
 }
 
-func (s *Set) SwapAll(nl bool) {
+// Swap transforms common ...
+func (s *Set) Swap(nl bool) {
 	s.CutEOF()
 	s.SwapNuls()
 	s.SwapPipes()
@@ -134,29 +128,29 @@ func (s *Set) SwapAll(nl bool) {
 	s.SwapANSI()
 }
 
-// SwapANSI switches out ←[ characters with ANSI escape codes.
+// SwapANSI replaces out all ←[ character combinations with the ANSI escape control.
 func (s *Set) SwapANSI() {
 	s.Data = bytes.ReplaceAll(s.Data, []byte("←["), []byte{27, 91})
 }
 
-// \u0000 should be swapped for SP \u0000 --nul-as-space (true)
+// SwapNuls replaces the ASCII codepoint 0 NULL value with the Unicode 0020 SP space value.
 func (s *Set) SwapNuls() {
 	s.Data = bytes.ReplaceAll(s.Data, []byte{0}, []byte("\u0020"))
 }
 
-// \u007c (7C) [pipe] can be swapped for broken bar \u00A6 --pipe-as-broken-bar (false)
+// SwapPipes replaces the ASCII codepoint 124 broken bar (or pipe) with the Unicode 00A6 ¦ broken pipe symbol.
 func (s *Set) SwapPipes() {
 	s.Data = bytes.ReplaceAll(s.Data, []byte{124}, []byte("\u00A6"))
 }
 
-// // \u0127? (7F) [delete] can be swapped for a house \u2303 --del-as-house (false)
+// SwapDels replaces the ASCII codepoint 127 delete with the Unicode codepoint 2302 ⌂ house symbol.
 func (s *Set) SwapDels() {
-	s.Data = bytes.ReplaceAll(s.Data, []byte{127}, []byte("\u2303"))
+	s.Data = bytes.ReplaceAll(s.Data, []byte{127}, []byte("\u2302"))
 }
 
-// FF NBSP often displays a ?, it can be replaced with SP --nbsp-as-space (true)
+// SwapNBSP replaces the ASCII codepoint 255 no-break-space with Unicode codepoint C2A0 no-break.
 func (s *Set) SwapNBSP() {
-	s.Data = bytes.ReplaceAll(s.Data, []byte{255}, []byte("\u263B"))
+	s.Data = bytes.ReplaceAll(s.Data, []byte{255}, []byte("\uC2A0"))
 }
 
 // SwapControls switches out C0 and C1 ASCII controls except for newlines.
@@ -172,7 +166,7 @@ func (s *Set) SwapControls(nl bool) {
 	}
 }
 
-// Transform ...
+// Transform byte data from charmap text encoding to UTF-8.
 func (s *Set) Transform() (err error) {
 	if s.Data, err = s.Encoding.NewDecoder().Bytes(s.Data); err != nil {
 		return err
