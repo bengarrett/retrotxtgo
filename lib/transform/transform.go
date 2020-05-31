@@ -9,7 +9,6 @@ import (
 	"unicode/utf8"
 
 	"golang.org/x/text/encoding"
-	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/ianaindex"
 )
 
@@ -20,6 +19,24 @@ import (
 type Set struct {
 	Data     []byte
 	Encoding encoding.Encoding
+}
+
+// Transform byte data from charmap text encoding to UTF-8.
+func (s *Set) Transform(encoding string) (runes int, err error) {
+	if s.Encoding, err = Encoding(encoding); err != nil {
+		return runes, err
+	}
+	if len(s.Data) == 0 {
+		return runes, nil
+	}
+	// only convert if data is not UTF-8
+	if utf8.Valid(s.Data) {
+		return utf8.RuneCount(s.Data), nil
+	}
+	if s.Data, err = s.Encoding.NewDecoder().Bytes(s.Data); err != nil {
+		return runes, err
+	}
+	return utf8.RuneCount(s.Data), nil
 }
 
 var (
@@ -60,28 +77,6 @@ func Valid(name string) bool {
 		return false
 	}
 	return true
-}
-
-// Transform byte data from charmap text encoding to UTF-8.
-func Transform(m *charmap.Charmap, px *[]byte) (runes int, encoded []byte, err error) {
-	p := *px
-	if len(p) == 0 {
-		return 0, encoded, nil
-	}
-	// confirm encoding is not utf8
-	if utf8.Valid(p) {
-		return utf8.RuneCount(p), p, nil
-	}
-	// use cp437 by default if text is not utf8
-	// TODO: add default-unknown.encoding setting
-	if m == nil {
-		m = charmap.CodePage437
-	}
-	// convert to utf8
-	if encoded, err = m.NewDecoder().Bytes(p); err != nil {
-		return 0, encoded, err
-	}
-	return utf8.RuneCount(encoded), encoded, nil
 }
 
 // MakeMap generates an 8-bit unsigned int container ready to hold legacy code point values.
@@ -164,12 +159,4 @@ func (s *Set) SwapControls(nl bool) {
 		}
 		s.Data = bytes.ReplaceAll(s.Data, []byte{uint8(i)}, []byte(u))
 	}
-}
-
-// Transform byte data from charmap text encoding to UTF-8.
-func (s *Set) Transform() (err error) {
-	if s.Data, err = s.Encoding.NewDecoder().Bytes(s.Data); err != nil {
-		return err
-	}
-	return nil
 }

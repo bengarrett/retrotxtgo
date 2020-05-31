@@ -283,11 +283,11 @@ func (args Args) pagedata(data *[]byte) (p PageData, err error) {
 		p.MetaGenerator = false
 	}
 	// convert to utf8
-	_, encoded, err := transform.Transform(nil, data)
-	if err != nil {
+	var s = transform.Set{Data: *data}
+	if _, err = s.Transform("cp437"); err != nil {
 		return p, err
 	}
-	p.PreText = string(encoded)
+	p.PreText = string(s.Data)
 	return p, nil
 }
 

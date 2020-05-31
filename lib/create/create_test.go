@@ -1,7 +1,6 @@
 package create
 
 import (
-	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -10,18 +9,7 @@ import (
 	"testing"
 
 	"github.com/spf13/viper"
-	"golang.org/x/text/encoding/charmap"
 )
-
-func ExampleHonk() {
-	for i, c := range charmap.All {
-		fmt.Println(i, c)
-	}
-	fmt.Printf("\n%v\n", charmap.All)
-	fmt.Printf("\n%+v \n", charmap.CodePage437)
-	fmt.Println(charmap.CodePage037.ID())
-	// Output: ?
-}
 
 func Test_Save(t *testing.T) {
 	type args struct {

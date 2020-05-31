@@ -35,11 +35,8 @@ func Table(name string) (*bytes.Buffer, error) {
 	}
 	row := 0
 	for i, m := range MakeMap() {
-		ts := Set{
-			Data:     []byte{m},
-			Encoding: cp,
-		}
-		err = ts.Transform()
+		ts := Set{Data: []byte{m}}
+		_, err = ts.Transform(name)
 		logs.Check("codepage", err)
 		ts.Swap(false)
 		t := ts.Data
