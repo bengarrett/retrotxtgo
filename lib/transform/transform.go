@@ -12,31 +12,29 @@ import (
 	"golang.org/x/text/encoding/ianaindex"
 )
 
-// EOF
-// is an ASCII Control-Z, code 26
-
-// Set blah
+// Set data for transformation into UTF-8.
 type Set struct {
-	Data     []byte
+	B        []byte
 	Encoding encoding.Encoding
+	Newline  bool
 }
 
-// Transform byte data from charmap text encoding to UTF-8.
-func (s *Set) Transform(encoding string) (runes int, err error) {
-	if s.Encoding, err = Encoding(encoding); err != nil {
+// Transform byte data from named character map text encoding into UTF-8.
+func (s *Set) Transform(name string) (runes int, err error) {
+	if s.Encoding, err = Encoding(name); err != nil {
 		return runes, err
 	}
-	if len(s.Data) == 0 {
+	if len(s.B) == 0 {
 		return runes, nil
 	}
 	// only convert if data is not UTF-8
-	if utf8.Valid(s.Data) {
-		return utf8.RuneCount(s.Data), nil
+	if utf8.Valid(s.B) {
+		return utf8.RuneCount(s.B), nil
 	}
-	if s.Data, err = s.Encoding.NewDecoder().Bytes(s.Data); err != nil {
+	if s.B, err = s.Encoding.NewDecoder().Bytes(s.B); err != nil {
 		return runes, err
 	}
-	return utf8.RuneCount(s.Data), nil
+	return utf8.RuneCount(s.B), nil
 }
 
 var (
@@ -99,64 +97,65 @@ func AddBOM(b []byte) []byte {
 
 // CutEOF cut text at the first DOS end-of-file marker.
 func (s *Set) CutEOF() {
-	if cut := bytes.IndexByte(s.Data, 26); cut > 0 {
-		s.Data = s.Data[:cut]
+	if cut := bytes.IndexByte(s.B, 26); cut > 0 {
+		s.B = s.B[:cut]
 	}
 }
 
 // SwapAll transforms all common ...
 func SwapAll(b []byte) []byte {
 	var s Set
-	s.Data = b
-	s.Swap(true)
-	return s.Data
+	s.B = b
+	s.Newline = true
+	s.Swap()
+	return s.B
 }
 
 // Swap transforms common ...
-func (s *Set) Swap(nl bool) {
+func (s *Set) Swap() {
 	s.CutEOF()
 	s.SwapNuls()
 	s.SwapPipes()
 	s.SwapDels()
 	s.SwapNBSP()
-	s.SwapControls(nl)
+	s.SwapControls()
 	s.SwapANSI()
 }
 
 // SwapANSI replaces out all ←[ character combinations with the ANSI escape control.
 func (s *Set) SwapANSI() {
-	s.Data = bytes.ReplaceAll(s.Data, []byte("←["), []byte{27, 91})
+	s.B = bytes.ReplaceAll(s.B, []byte("←["), []byte{27, 91})
 }
 
 // SwapNuls replaces the ASCII codepoint 0 NULL value with the Unicode 0020 SP space value.
 func (s *Set) SwapNuls() {
-	s.Data = bytes.ReplaceAll(s.Data, []byte{0}, []byte("\u0020"))
+	s.B = bytes.ReplaceAll(s.B, []byte{0}, []byte("\u0020"))
 }
 
 // SwapPipes replaces the ASCII codepoint 124 broken bar (or pipe) with the Unicode 00A6 ¦ broken pipe symbol.
 func (s *Set) SwapPipes() {
-	s.Data = bytes.ReplaceAll(s.Data, []byte{124}, []byte("\u00A6"))
+	s.B = bytes.ReplaceAll(s.B, []byte{124}, []byte("\u00A6"))
 }
 
 // SwapDels replaces the ASCII codepoint 127 delete with the Unicode codepoint 2302 ⌂ house symbol.
 func (s *Set) SwapDels() {
-	s.Data = bytes.ReplaceAll(s.Data, []byte{127}, []byte("\u2302"))
+	s.B = bytes.ReplaceAll(s.B, []byte{127}, []byte("\u2302"))
 }
 
 // SwapNBSP replaces the ASCII codepoint 255 no-break-space with Unicode codepoint C2A0 no-break.
 func (s *Set) SwapNBSP() {
-	s.Data = bytes.ReplaceAll(s.Data, []byte{255}, []byte("\uC2A0"))
+	s.B = bytes.ReplaceAll(s.B, []byte{255}, []byte("\uC2A0"))
 }
 
 // SwapControls switches out C0 and C1 ASCII controls except for newlines.
-func (s *Set) SwapControls(nl bool) {
+func (s *Set) SwapControls() {
 	for i, u := range append(asciiC0, asciiC1...) {
-		if nl {
+		if s.Newline {
 			switch i {
 			case 10, 13: // newlines
 				continue
 			}
 		}
-		s.Data = bytes.ReplaceAll(s.Data, []byte{uint8(i)}, []byte(u))
+		s.B = bytes.ReplaceAll(s.B, []byte{uint8(i)}, []byte(u))
 	}
 }

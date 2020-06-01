@@ -45,22 +45,23 @@ var viewCmd = &cobra.Command{
 		)
 		switch viewArgs.name {
 		case "ansi":
-			t.Data, err = samples.Base64Decode(samples.LogoANSI)
+			t.B, err = samples.Base64Decode(samples.LogoANSI)
 			logs.ChkErr(logs.Err{Issue: "logoansi is invalid", Arg: htmlArgs.Src, Msg: err})
 		case "ascii":
-			t.Data, err = samples.Base64Decode(samples.LogoASCII)
+			t.B, err = samples.Base64Decode(samples.LogoASCII)
 			logs.ChkErr(logs.Err{Issue: "logoascii is invalid", Arg: htmlArgs.Src, Msg: err})
 		case "":
 			viewArgs.name = "textfiles/cp-437-all-characters.txt"
 			fallthrough
 		default:
-			t.Data, err = filesystem.Read(viewArgs.name)
+			t.B, err = filesystem.Read(viewArgs.name)
 			logs.Check("codepage", err)
 		}
 		_, err = t.Transform(viewArgs.cp)
 		logs.Check("codepage", err)
-		t.Swap(true)
-		fmt.Println(string(t.Data))
+		t.Newline = true
+		t.Swap()
+		fmt.Println(string(t.B))
 	},
 }
 

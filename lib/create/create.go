@@ -260,7 +260,7 @@ func (args Args) newTemplate() (*template.Template, error) {
 }
 
 // pagedata creates the meta and page template data.
-func (args Args) pagedata(data *[]byte) (p PageData, err error) {
+func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 	// templates are found in the dir static/html/*.html
 	switch args.Layout {
 	case "full", "standard":
@@ -283,10 +283,10 @@ func (args Args) pagedata(data *[]byte) (p PageData, err error) {
 		p.MetaGenerator = false
 	}
 	// convert to utf8
-	var t = transform.Set{Data: *data}
+	var t = transform.Set{B: *b}
 	if _, err = t.Transform("cp437"); err != nil {
 		return p, err
 	}
-	p.PreText = string(t.Data)
+	p.PreText = string(t.B)
 	return p, nil
 }
