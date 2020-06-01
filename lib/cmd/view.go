@@ -40,23 +40,23 @@ var viewCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
-			data []byte
-			err  error
+			err error
+			t   transform.Set
 		)
 		switch viewArgs.name {
 		case "ansi":
-			data, err = samples.Base64Decode(samples.LogoANSI)
+			t.Data, err = samples.Base64Decode(samples.LogoANSI)
 			logs.ChkErr(logs.Err{Issue: "logoansi is invalid", Arg: htmlArgs.Src, Msg: err})
 		case "ascii":
-			data, err = samples.Base64Decode(samples.LogoASCII)
+			t.Data, err = samples.Base64Decode(samples.LogoASCII)
 			logs.ChkErr(logs.Err{Issue: "logoascii is invalid", Arg: htmlArgs.Src, Msg: err})
 		case "":
 			viewArgs.name = "textfiles/cp-437-all-characters.txt"
 			fallthrough
 		default:
-			data, err = filesystem.Read(viewArgs.name)
+			t.Data, err = filesystem.Read(viewArgs.name)
+			logs.Check("codepage", err)
 		}
-		var t = transform.Set{Data: data}
 		_, err = t.Transform(viewArgs.cp)
 		logs.Check("codepage", err)
 		t.Swap(true)

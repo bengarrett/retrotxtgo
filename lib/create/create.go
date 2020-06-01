@@ -283,44 +283,10 @@ func (args Args) pagedata(data *[]byte) (p PageData, err error) {
 		p.MetaGenerator = false
 	}
 	// convert to utf8
-	var s = transform.Set{Data: *data}
-	if _, err = s.Transform("cp437"); err != nil {
+	var t = transform.Set{Data: *data}
+	if _, err = t.Transform("cp437"); err != nil {
 		return p, err
 	}
-	p.PreText = string(s.Data)
+	p.PreText = string(t.Data)
 	return p, nil
 }
-
-/*
-var encodings = []struct {
-	name        string
-	mib         string
-	comment     string
-	varName     string
-	replacement byte
-	mapping     string
-}{
-		"IBM Code Page 437",
-		"PC8CodePage437",
-		"",
-		"CodePage437",
-		encoding.ASCIISub,
-		"http://source.icu-project.org/repos/icu/data/trunk/charset/data/ucm/glibc-IBM437-2.1.2.ucm",
-	},
-	{
-		"Windows 1254",
-		"Windows1254",
-		"",
-		"Windows1254",
-		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-windows-1254.txt",
-	},	{
-		"Macintosh",
-		"Macintosh",
-		"",
-		"Macintosh",
-		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-macintosh.txt",
-	},
-
-*/

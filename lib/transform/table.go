@@ -35,21 +35,20 @@ func Table(name string) (*bytes.Buffer, error) {
 	}
 	row := 0
 	for i, m := range MakeMap() {
-		ts := Set{Data: []byte{m}}
-		_, err = ts.Transform(name)
+		t := Set{Data: []byte{m}}
+		_, err = t.Transform(name)
 		logs.Check("codepage", err)
-		ts.Swap(false)
-		t := ts.Data
+		t.Swap(false)
 		switch {
 		case i == 0:
 			fmt.Fprintf(w, " %s %s %s %s", color.OpFuzzy.Sprint("0"), color.OpFuzzy.Sprint("|"), t, color.OpFuzzy.Sprint("|"))
 		case i == 255:
-			fmt.Fprintf(w, " %s %s\n", t, color.OpFuzzy.Sprint("|"))
+			fmt.Fprintf(w, " %s %s\n", t.Data, color.OpFuzzy.Sprint("|"))
 		case math.Mod(float64(i+1), 16) == 0: // on every 16th loop
 			row++
-			fmt.Fprintf(w, " %s %s\n %s %s", t, color.OpFuzzy.Sprint("|"), color.OpFuzzy.Sprintf("%X", row), color.OpFuzzy.Sprint("|"))
+			fmt.Fprintf(w, " %s %s\n %s %s", t.Data, color.OpFuzzy.Sprint("|"), color.OpFuzzy.Sprintf("%X", row), color.OpFuzzy.Sprint("|"))
 		default:
-			fmt.Fprintf(w, " %s %s", t, color.OpFuzzy.Sprint("|"))
+			fmt.Fprintf(w, " %s %s", t.Data, color.OpFuzzy.Sprint("|"))
 		}
 	}
 	fmt.Fprint(w, "\n")
