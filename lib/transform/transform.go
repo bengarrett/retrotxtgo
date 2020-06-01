@@ -49,7 +49,7 @@ var BOM = func() []byte {
 
 // Encoding returns the named character set encoding.
 func Encoding(name string) (encoding.Encoding, error) {
-	return ianaindex.IANA.Encoding(Replace(name))
+	return ianaindex.IANA.Encoding(name)
 }
 
 // Replace normalizes common unofficial character set aliases.

@@ -7,6 +7,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/lib/transform"
 	"github.com/bengarrett/retrotxtgo/samples"
+	"golang.org/x/text/encoding/ianaindex"
 
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 
@@ -36,8 +37,7 @@ TODO:
 // viewCmd represents the view command
 var viewCmd = &cobra.Command{
 	Use:   "view",
-	Short: "A brief description of your command",
-	Long:  ``,
+	Short: "Print a legacy text file to the standard output",
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
 			err error
@@ -83,21 +83,44 @@ var viewTableCmd = &cobra.Command{
 	},
 }
 
+var viewTablesCmd = &cobra.Command{
+	Use:   "tables",
+	Short: "display tables showing known codepages and characters",
+	Run: func(cmd *cobra.Command, args []string) {
+		for _, e := range transform.Encodings() {
+			name, err := ianaindex.MIME.Name(e)
+			if err != nil {
+				logs.Log(err)
+			} else {
+				table, err := transform.Table(name)
+				logs.ChkErr(logs.Err{Issue: "table", Arg: name, Msg: err})
+				fmt.Println(table.String())
+			}
+		}
+	},
+}
+
 func init() {
+	// view cmd
 	rootCmd.AddCommand(viewCmd)
 	viewCmd.Flags().StringVarP(&viewArgs.name, "name", "n", "",
 		str.Required("text file to display")+"\n")
-	viewCmd.Flags().StringVarP(&viewArgs.cp, "codepage", "c", "cp437", "legacy character encoding used by the text file")
+	viewCmd.Flags().StringVarP(&viewArgs.cp, "codepage", "c", "cp437",
+		"legacy character encoding used by the text file")
 	viewCmd.Flags().StringVarP(&viewArgs.format, "format", "f", "color",
 		str.Options("output format", viewArgs.formats, true))
 	viewCmd.Flags().IntVarP(&viewArgs.width, "width", "w", 80, "document column character width")
-	// override ascii 0-F + 1-F || Control characters || IBM, ASCII, IBM+
-	// example flag showing CP437 table
-	_ = viewCmd.MarkFlagFilename("name")
-	_ = viewCmd.MarkFlagRequired("name")
+	err := viewCmd.MarkFlagFilename("name")
+	logs.Check("view.filename", err)
+	err = viewCmd.MarkFlagRequired("name")
+	logs.Check("view.required", err)
 	viewCmd.Flags().SortFlags = false
+	// codepages cmd
 	viewCmd.AddCommand(viewCodePagesCmd)
+	// table cmd
 	viewCmd.AddCommand(viewTableCmd)
-	viewTableCmd.Flags().StringVarP(&viewArgs.cp, "codepage", "c", "cp437", "legacy character encoding table to display")
-	_ = viewTableCmd.MarkFlagRequired("name")
+	viewTableCmd.Flags().StringVarP(&viewArgs.cp, "codepage", "c", "cp437",
+		"legacy character encoding table to display")
+	// tables cmd
+	viewCmd.AddCommand(viewTablesCmd)
 }

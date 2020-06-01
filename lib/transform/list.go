@@ -7,6 +7,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/bengarrett/retrotxtgo/lib/str"
+	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/ianaindex"
 	"golang.org/x/text/encoding/japanese"
@@ -17,6 +18,21 @@ type iana struct {
 	index string
 	mib   string
 	s     []string
+}
+
+// Encodings returns all the supported legacy text encodings.
+func Encodings() (e []encoding.Encoding) {
+	a := append(charmap.All, japanese.All...)
+	for _, m := range a {
+		switch fmt.Sprintf("%v", m) {
+		case
+			"Macintosh Cyrillic",
+			"X-User-Defined":
+			continue
+		}
+		e = append(e, m)
+	}
+	return e
 }
 
 // List returns a tabled list of supported IANA character set encodings
@@ -32,7 +48,7 @@ func List() *bytes.Buffer {
 	fmt.Fprintln(w, str.Cf(strings.Repeat("\u2015", 49)))
 	fmt.Fprintln(w, "\tName\tValue\tAlias")
 	// append other supported legacy encodings
-	c := append(charmap.All, japanese.All...)
+	c := Encodings()
 	for _, n := range c {
 		name := fmt.Sprint(n)
 		if name == "X-User-Defined" {
