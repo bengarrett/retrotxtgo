@@ -3,11 +3,11 @@ package transform
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"math"
 	"strings"
 	"text/tabwriter"
 
-	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/gookit/color"
 )
@@ -34,21 +34,34 @@ func Table(name string) (*bytes.Buffer, error) {
 		}
 	}
 	row := 0
-	for i, m := range MakeMap() {
-		t := Set{B: []byte{m}}
-		_, err = t.Transform(name)
-		logs.Check("codepage", err)
-		t.Swap()
+	// init codepage table
+	s := Set{B: MakeMap()}
+	if _, err = s.Transform(name); err != nil {
+		log.Fatal(err)
+	}
+	s.Newline = false
+	s.Swap()
+	for i, r := range s.R {
+		char := string(r)
 		switch {
 		case i == 0:
-			fmt.Fprintf(w, " %s %s %s %s", color.OpFuzzy.Sprint("0"), color.OpFuzzy.Sprint("|"), t.B, color.OpFuzzy.Sprint("|"))
+			fmt.Fprintf(w, " %s %s %s %s",
+				color.OpFuzzy.Sprint("0"),
+				color.OpFuzzy.Sprint("|"),
+				char, color.OpFuzzy.Sprint("|"))
 		case i == 255:
-			fmt.Fprintf(w, " %s %s\n", t.B, color.OpFuzzy.Sprint("|"))
-		case math.Mod(float64(i+1), 16) == 0: // on every 16th loop
+			fmt.Fprintf(w, " %s %s\n", char,
+				color.OpFuzzy.Sprint("|"))
+		case math.Mod(float64(i+1), 16) == 0:
+			// every 16th loop
 			row++
-			fmt.Fprintf(w, " %s %s\n %s %s", t.B, color.OpFuzzy.Sprint("|"), color.OpFuzzy.Sprintf("%X", row), color.OpFuzzy.Sprint("|"))
+			fmt.Fprintf(w, " %s %s\n %s %s", char,
+				color.OpFuzzy.Sprint("|"),
+				color.OpFuzzy.Sprintf("%X", row),
+				color.OpFuzzy.Sprint("|"))
 		default:
-			fmt.Fprintf(w, " %s %s", t.B, color.OpFuzzy.Sprint("|"))
+			fmt.Fprintf(w, " %s %s", char,
+				color.OpFuzzy.Sprint("|"))
 		}
 	}
 	fmt.Fprint(w, "\n")
