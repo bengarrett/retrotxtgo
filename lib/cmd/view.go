@@ -27,13 +27,6 @@ var viewArgs = viewFlags{
 	formats: []string{"color", "text"},
 }
 
-/*
-TODO:
-- reverse scan of file looking for EOF, SAUCE00 & COMNTT
-- scan for unique color codes like 24-bit colors
-- newline scanner to determine the maxWidth
-*/
-
 // viewCmd represents the view command
 var viewCmd = &cobra.Command{
 	Use:   "view",

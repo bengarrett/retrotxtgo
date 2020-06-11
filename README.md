@@ -2,9 +2,9 @@
 
 # RetroTxtGo
 
-[RetroTxt](https://github.com/bengarrett/retrotxt) for the command line 
+[RetroTxt](https://github.com/bengarrett/retrotxt) for the command line
 
-### *α* work-in-progress, feature incomplete & is not in a usable state
+### _α_ work-in-progress, feature incomplete & is not in a usable state
 
 ---
 
@@ -47,14 +47,18 @@ cat ~/index.html
 
   <body>
     <main>
-      <pre>██████╗ ███████╗████████╗██████╗  ██████╗ ████████╗██╗  ██╗████████╗
+      <pre>
+██████╗ ███████╗████████╗██████╗  ██████╗ ████████╗██╗  ██╗████████╗
 ██╔══██╗██╔════╝╚══██╔══╝██╔══██╗██╔═══██╗╚══██╔══╝╚██╗██╔╝╚══██╔══╝
 ██████╔╝█████╗     ██║   ██████╔╝██║   ██║   ██║    ╚███╔╝    ██║
 ██╔══██╗██╔══╝     ██║   ██╔══██╗██║   ██║   ██║    ██╔██╗    ██║
 ██║  ██║███████╗   ██║   ██║  ██║╚██████╔╝   ██║   ██╔╝ ██╗   ██║
-╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝   ╚═╝
+╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝   ╚═╝</pre
+      >
+    </main>
+  </body>
+</html>
 ```
-
 
 ---
 
@@ -63,13 +67,13 @@ cat ~/index.html
 - [ ] Convert ASCII text to HTML.
 - [ ] Convert ANSI text to HTML.
 - [ ] Convert BBS text to HTML.
-- [X] List or export (json, text, xml) meta details of a text file.
+- [x] List or export (json, text, xml) meta details of a text file.
 - [ ] List or export SAUCE metadata of a file.
 - [ ] Transform the encoding of a text file. CP437 -> UTF8, UTF8 -> ISO8859-1 ...
 - [ ] View any legacy encoded text file in a UTF8 terminal by converting on the fly.
-- [X] Extensive customisations through command flags or a configuration file with a setup.
+- [x] Extensive customisations through command flags or a configuration file with a setup.
 - [ ] ANSI compatibility tests, output 16, 88, 256, high and true-color tables.
-- [X] Multiplatform support including Windows, macOS, Linux, Raspbian and FreeBSD.
+- [x] Multiplatform support including Windows, macOS, Linux, Raspbian and FreeBSD.
 
 ---
 
@@ -109,7 +113,7 @@ retrotxt version
 While in α and to troubleshoot, 64-bit versions of linux (arm/amd64), freebsd, darwin, windows should build with the `--race` flag.
 Though this will increase the binary size.
 
-### Shrink the binary 
+### Shrink the binary
 
 ```sh
 # strip the DWARF debugging information
@@ -157,22 +161,23 @@ upx --brute retrotxtgo # (very slow) 17MB --> 4.8MB file
 - [SAUCE](http://www.acid.org/info/sauce/sauce.htm)
 - packages: [Cobra](https://pkg.go.dev/github.com/spf13/cobra)/[Viper](https://pkg.go.dev/mod/github.com/spf13/viper)
 - go pkg: [utf8](https://golang.org/pkg/unicode/utf8/)/[unicode](https://golang.org/pkg/unicode/),
-[x-text](https://pkg.go.dev/golang.org/x/text@v0.3.2?tab=subdirectories), [x-charmap](https://pkg.go.dev/golang.org/x/text@v0.3.2/encoding/charmap?tab=doc), [x-encoding](https://pkg.go.dev/golang.org/x/text@v0.3.2/encoding?tab=doc)
+  [x-text](https://pkg.go.dev/golang.org/x/text@v0.3.2?tab=subdirectories), [x-charmap](https://pkg.go.dev/golang.org/x/text@v0.3.2/encoding/charmap?tab=doc), [x-encoding](https://pkg.go.dev/golang.org/x/text@v0.3.2/encoding?tab=doc)
 
 ### Go libraries
 
 - [Package xstrings: A collection of useful string functions in Go](https://github.com/huandu/xstrings)
-includes center, capitalize, justify, reverse text.
+  includes center, capitalize, justify, reverse text.
 
 - [A collection of common regular expressions for Go](https://github.com/mingrammer/commonregex)
-use for dynamically hyperlinking emails, links. wrap hash values around `<code>` tags. parse known ports.
+  use for dynamically hyperlinking emails, links. wrap hash values around `<code>` tags. parse known ports.
 
 - [Devd - A local webserver for developers](https://github.com/cortesi/devd)
-replacement for the current internal webserver?
+  replacement for the current internal webserver?
 
 ### Cobra hints
 
 Print references
+
 ```go
     println(xxxCmd.CommandPath()) // retrotxtgo xxx
     println(xxxCmd.Name())        // create
@@ -266,21 +271,24 @@ op token list > https://golang.org/pkg/go/token/#Token
 
 - quiet boolean
 
------
+---
 
 ### TODOs - changes to the existing code
 
 - [ ] **Remove all string references to `retrotxtgo`.**
-- [ ] Directory settings, change `.` shortcut to always use the current working directory. 
-Include text mentioning this when using `set`.
-- [ ] When fetching github release data using the `version` command. 
-Use HTTP e-tags cache and save the values to reduce the bandwidth usage.
+- [ ] Directory settings, change `.` shortcut to always use the current working directory.
+      Include text mentioning this when using `set`.
+- [ ] When fetching github release data using the `version` command.
+      Use HTTP e-tags cache and save the values to reduce the bandwidth usage.
 - [ ] config command should support the global --config flag.
 - [ ] config shell should have a `--append/source/or` flag to save shell auto-completion?
 - [ ] scan for supported but current shell configuration.
 - [ ] when using `create` detect any out of range or unsafe unicode encoding and assume cp437.
 - [ ] in `create` HTML insert a header comment with source file, command flags.
 - [ ] generator meta tag should have a working date.
+- [ ] newline scanner to determine the maxWidth of the text.
+- [ ] reverse scan of file looking for EOF, SAUCE00 & COMNTT.
+- [ ] scan for unique color codes like 24-bit colors.
 
 ---
 
