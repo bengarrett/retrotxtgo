@@ -35,7 +35,7 @@ func Table(name string) (*bytes.Buffer, error) {
 	}
 	row := 0
 	// init codepage table
-	s := Set{B: MakeMap()}
+	s := Set{B: MakeBytes()}
 	if _, err = s.Transform(name); err != nil {
 		log.Fatal(err)
 	}

@@ -4,13 +4,14 @@ package transform
 
 import (
 	"bytes"
+	"fmt"
 	"log"
-	"regexp"
 	"strings"
 	"unicode/utf8"
 
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
+	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/encoding/ianaindex"
 	"golang.org/x/text/encoding/japanese"
 )
@@ -45,12 +46,6 @@ func (s *Set) Transform(name string) (runes int, err error) {
 	}
 	s.R = bytes.Runes(s.B)
 
-	//fmt.Println("--> runes", string(s.R), string(s.B), fmt.Sprintf("%X", s.B))
-	// for i, a := range s.R {
-	// 	fmt.Printf("%2d. %v 0x%X %q\n", i, a, a, string(a))
-	// 	fmt.Printf("    -> %v 0x%X\n", s.src[i], s.src[i])
-	// }
-
 	return utf8.RuneCount(s.B), nil
 }
 
@@ -66,36 +61,123 @@ var BOM = func() []byte {
 
 // Encoding returns the named character set encoding.
 func Encoding(name string) (encoding.Encoding, error) {
-	return ianaindex.IANA.Encoding(name)
-}
-
-// Replace normalizes common unofficial character set aliases.
-func Replace(name string) string {
-	name = strings.ToLower(name)
-	reg, _ := regexp.Compile("[^a-z0-9]+")
-	name = reg.ReplaceAllString(name, "")
-	name = strings.ReplaceAll(name, "iso8859", "iso-8859-")
-	name = strings.ReplaceAll(name, "isolatin", "latin")
-	name = strings.ReplaceAll(name, "windows125", "windows-125")
-	name = strings.ReplaceAll(name, "win125", "windows-125")
-	name = strings.ReplaceAll(name, "cp125", "windows-125")
-	return name
-}
-
-// Valid determines if the named character set or alias is known.
-func Valid(name string) bool {
-	if name == "" {
-		return false
+	// use iana names or alias
+	if enc, err := ianaindex.IANA.Encoding(name); err == nil && enc != nil {
+		return enc, err
 	}
-	name = Replace(name)
-	if _, err := ianaindex.IANA.Encoding(name); err != nil {
-		return false
+	// use html index name (only used with HTML compatible encodings)
+	// https://encoding.spec.whatwg.org/#names-and-labels
+	if enc, err := htmlindex.Get(name); err == nil && enc != nil {
+		return enc, err
 	}
-	return true
+	// use custom/common names and aliases
+	n := strings.ToLower(name)
+	switch {
+	case len(n) > 2 && n[:2] == "cp":
+		n = n[2:]
+	case len(n) > 4 && n[:4] == "ibm-":
+		n = n[4:]
+	case len(n) > 3 && n[:3] == "ibm":
+		n = n[3:]
+	case len(n) > 4 && n[:4] == "oem-":
+		n = n[4:]
+	case len(n) > 8 && n[:8] == "windows-":
+		n = n[8:]
+	}
+	// list of valid tables
+	// https://github.com/golang/text/blob/v0.3.2/encoding/charmap/maketables.go
+	switch n {
+	case "37", "037":
+		n = "IBM037"
+	case "437", "dos", "ibmpc", "msdos", "us", "pc-8", "latin-us":
+		n = "IBM437"
+	case "850":
+		n = "IBM850"
+	case "852":
+		n = "IBM852"
+	case "855":
+		n = "IBM855"
+	case "858":
+		n = "IBM00858"
+	case "860":
+		n = "IBM860"
+	case "862":
+		n = "IBM862"
+	case "863":
+		n = "IBM863"
+	case "865":
+		n = "IBM865"
+	case "866":
+		n = "IBM866"
+	case "1047":
+		n = "IBM1047"
+	case "1140", "ibm1140":
+		n = "IBM01140"
+	case "1", "819", "28591":
+		n = "ISO-8859-1"
+	case "2", "1111", "28592":
+		n = "ISO-8859-2"
+	case "3", "913", "28593":
+		n = "ISO-8859-3"
+	case "4", "914", "28594":
+		n = "ISO-8859-4"
+	case "5", "1124", "28595":
+		n = "ISO-8859-5"
+	case "6", "1089", "28596":
+		n = "ISO-8859-6"
+	case "7", "813", "28597":
+		n = "ISO-8859-7"
+	case "8", "916", "1125", "28598":
+		n = "ISO-8859-8"
+	case "9", "920", "28599":
+		n = "ISO-8859-9"
+	case "10", "919", "28600":
+		n = "ISO-8859-10"
+	case "11", "874", "iso-8859-11":
+		n = "Windows-874" // "iso-8859-11" causes a panic
+	case "13", "921", "28603":
+		n = "ISO-8859-13"
+	case "14", "28604":
+		n = "ISO-8859-14"
+	case "15", "923", "28605":
+		n = "ISO-8859-15"
+	case "16", "28606":
+		n = "ISO-8859-16"
+	case "878", "20866":
+		n = "KOI8-R"
+	case "1168", "21866":
+		n = "KOI8-U"
+	case "10000", "macroman", "mac-roman", "mac os roman":
+		n = "Macintosh"
+	case "1250":
+		n = "Windows-1250"
+	case "1251":
+		n = "Windows-1251"
+	case "1252", "1004", "win", "windows":
+		n = "Windows-1252"
+	case "1253":
+		n = "Windows-1253"
+	case "1254":
+		n = "Windows-1254"
+	case "1255":
+		n = "Windows-1255"
+	case "1256":
+		n = "Windows-1256"
+	case "1257":
+		n = "Windows-1257"
+	case "1258":
+		n = "Windows-1258"
+	}
+	enc, err := ianaindex.IANA.Encoding(n)
+	if err != nil {
+		err = fmt.Errorf("%s %q→%q", err, name, n)
+		return enc, err
+	}
+	return enc, err
 }
 
-// MakeMap generates an 8-bit unsigned int container ready to hold legacy code point values.
-func MakeMap() (m []byte) {
+// MakeBytes generates an 8-bit unsigned int container ready to hold legacy code point values.
+func MakeBytes() (m []byte) {
 	m = make([]byte, 256)
 	for i := 0; i <= 255; i++ {
 		m[i] = uint8(i)
@@ -120,26 +202,8 @@ func (s *Set) CutEOF() {
 	}
 }
 
-// SwapAll transforms all common ...
-func SwapAll(b []byte) []byte {
-	var s Set
-	s.B = b
-	s.Newline = true
-	s.Swap()
-	return s.B
-}
-
 // Swap transforms common ...
 func (s *Set) Swap() {
-	// s.CutEOF()
-	//s.SwapNuls()
-	// s.SwapPipes()
-	// s.SwapDels()
-	//s.SwapNBSP()
-	//s.SwapControlsDOS()
-	//s.SwapControlPics()
-	//s.SwapControlsIBM()
-	//s.SwapANSI()
 	switch s.Encoding {
 	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
 		s.RunesEBCDIC()
@@ -152,11 +216,12 @@ func (s *Set) Swap() {
 		charmap.ISO8859_13, charmap.ISO8859_14, charmap.ISO8859_15, charmap.ISO8859_16,
 		charmap.Windows874:
 		s.RunesLatin()
+	case charmap.ISO8859_6E, charmap.ISO8859_6I, charmap.ISO8859_8E, charmap.ISO8859_8I:
+		s.RunesControls()
+		s.RunesLatin()
 	case charmap.KOI8R, charmap.KOI8U:
 		s.RunesKOI8()
 	case charmap.Macintosh:
-		// https://en.wikipedia.org/wiki/Mac_OS_Roman aka aliases cp10000 etc.
-		s.RunesControls()
 		s.RunesMacintosh()
 	case charmap.Windows1250, charmap.Windows1251, charmap.Windows1252, charmap.Windows1253,
 		charmap.Windows1254, charmap.Windows1255, charmap.Windows1256, charmap.Windows1257, charmap.Windows1258:
@@ -171,49 +236,16 @@ func (s *Set) Swap() {
 	}
 }
 
-// Drop EUC-JP,ISO2022JP,
-
-// SwapANSI replaces out all ←[ character combinations with the ANSI escape control.
+// SwapANSI replaces out all ←[ and ␛[ character matches with ANSI escape controls.
 func (s *Set) SwapANSI() {
-	s.B = bytes.ReplaceAll(s.B, []byte("←["), []byte{27, 91})
-}
-
-// SwapNuls replaces the ASCII codepoint 0 NULL value with the Unicode 0020 SP space value.
-func (s *Set) SwapNuls() {
-	s.B = bytes.ReplaceAll(s.B, []byte{0}, []byte("\u0020"))
-}
-
-// SwapPipes replaces the ASCII codepoint 124 broken bar (or pipe) with the Unicode 00A6 ¦ broken pipe symbol.
-func (s *Set) SwapPipes() {
-	s.B = bytes.ReplaceAll(s.B, []byte{124}, []byte("\u00A6"))
-}
-
-// SwapDels replaces the ASCII codepoint 127 delete with the Unicode codepoint 2302 ⌂ house symbol.
-func (s *Set) SwapDels() {
-	s.B = bytes.ReplaceAll(s.B, []byte{127}, []byte("\u2302"))
-}
-
-// SwapNBSP replaces the ASCII codepoint 255 no-break-space with Unicode codepoint C2A0 no-break.
-func (s *Set) SwapNBSP() {
-	s.B = bytes.ReplaceAll(s.B, []byte{255}, []byte("\uC2A0"))
-}
-
-// RunesDOS switches out C0, C1 and other controls with PC/MS-DOS picture glyphs.
-func (s *Set) RunesDOS() {
-	if len(s.R) == 0 {
-		return
-	}
-	var ctrls = append(cp437C0, cp437C1...)
 	for i, r := range s.R {
-		switch {
-		case r == 0x00:
-			s.R[i], _ = utf8.DecodeRune([]byte{0xE2, 0x90, 0x80}) // NUL
-		case r > 0x00 && r <= 0x1f:
-			s.R[i], _ = utf8.DecodeRuneInString(ctrls[r]) // c0, c1 controllers
-		case r == 0x7c: // todo: flag option?
-			s.R[i], _ = utf8.DecodeRune([]byte{0xc2, 0xa6}) // ¦
-		case r == 0x7f:
-			s.R[i], _ = utf8.DecodeRune([]byte{0xE2, 0x8c, 0x82}) // ⌂
+		if i+1 >= len(s.R) {
+			continue
+		}
+		if r == 8592 && s.R[i+1] == 91 {
+			s.R[i] = 27 // replace ←[
+		} else if r == 9243 && s.R[i+1] == 91 {
+			s.R[i] = 27 // replace ␛[
 		}
 	}
 }
@@ -227,81 +259,31 @@ func (s *Set) RunesControls() {
 	for i, r := range s.R {
 		switch {
 		case r >= 0x00 && r <= 0x1f:
-			b := byte(rune(z) + r)
-			s.R[i], _ = utf8.DecodeRune([]byte{0xE2, 0x90, b})
+			s.R[i] = decode(byte(rune(z) + r))
 		}
 	}
 }
 
-// RunesKOI8 blanks out unused C0, C1 and other controls spaces for Russian sets.
-func (s *Set) RunesKOI8() {
+// RunesDOS switches out C0, C1 and other controls with PC/MS-DOS picture glyphs.
+func (s *Set) RunesDOS() {
 	if len(s.R) == 0 {
 		return
 	}
+	var ctrls = append(cp437C0, cp437C1...)
 	for i, r := range s.R {
 		switch {
-		case r >= 0x00 && r <= 0x1f:
-			s.R[i] = rune(32)
+		case r == 0x00:
+			s.R[i] = decode(0x80) // NUL
+		case r > 0x00 && r <= 0x1f:
+			s.R[i], _ = utf8.DecodeRuneInString(ctrls[r]) // c0, c1 controllers
+		case r == 0x7c: // todo: flag option?
+			s.R[i], _ = utf8.DecodeRune([]byte{0xc2, 0xa6}) // ¦
 		case r == 0x7f:
-			s.R[i] = rune(32)
-		case r == 65533:
-			s.R[i] = rune(32)
+			s.R[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0x82}) // ⌂
+		case r == 0xff:
+			s.R[i], _ = utf8.DecodeRune([]byte{0xc2, 0xa0}) // NBSP
 		}
 	}
-}
-
-// RunesLatin blanks out unused C0, C1 and other controls spaces for ISO Latin sets.
-func (s *Set) RunesLatin() {
-	if len(s.R) == 0 {
-		return
-	}
-	for i, r := range s.R {
-		switch {
-		case r >= 0x00 && r <= 0x1f:
-			s.R[i] = rune(32)
-		case r >= 0x7f && r <= 0x9f:
-			s.R[i] = rune(32)
-		case r == 65533:
-			s.R[i] = rune(32)
-		}
-	}
-}
-
-// RunesMacintosh replaces specific Mac OS Roman characters with Unicode picture represenations.
-func (s *Set) RunesMacintosh() {
-	for i, r := range s.R {
-		switch r {
-		case 0x11:
-			s.R[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0x98}) // ⌘
-		case 0x12:
-			s.R[i], _ = utf8.DecodeRune([]byte{0xe2, 0x87, 0xa7}) // ⇧
-		case 0x13:
-			s.R[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0xa5}) // ⌥
-		case 0x14:
-			s.R[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0x83}) // ⌃
-		case 0x7f:
-			s.R[i], _ = utf8.DecodeRune([]byte{0xe2, 0x90, 0xA1}) // DEL
-		case 65533:
-			s.R[i] = rune(32)
-		}
-	}
-}
-
-// RunesWindows tweaks some Unicode picture represenations for Windows-125x sets.
-func (s *Set) RunesWindows() {
-	for i, r := range s.R {
-		switch r {
-		case 0x7f:
-			s.R[i], _ = utf8.DecodeRune([]byte{0xe2, 0x90, 0xA1}) // DEL
-		case 65533:
-			s.R[i] = rune(32)
-		}
-	}
-}
-
-func decode(b byte) (r rune) {
-	r, _ = utf8.DecodeRune([]byte{0xe2, 0x90, b})
-	return r
 }
 
 // RunesEBCDIC switches out EBCDIC IBM mainframe controls with Unicode picture represenations.
@@ -342,6 +324,8 @@ func (s *Set) RunesEBCDIC() {
 			s.R[i] = decode(0x95) // NAK
 		case 26:
 			s.R[i] = decode(0x9A) // SUB
+		case 160:
+			s.R[i], _ = utf8.DecodeRune([]byte{0xc2, 0xa0}) // NBSP
 		case 0x00, 0x01, 0x02, 0x03, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
 			0x10, 0x11, 0x12, 0x13, 0x18, 0x19, 0x1c, 0x1d, 0x1e, 0x1f:
 			// shared controls with ASCII C0+C1
@@ -353,8 +337,86 @@ func (s *Set) RunesEBCDIC() {
 			0x9f:
 			// unprintable controls
 			s.R[i] = rune(32)
-		default:
-			//fmt.Printf("[%d→%v/%X %q]\n", i, r, r, r)
+			// default:
+			// 	fmt.Printf("[%d→%v/%X %q]\n", i, r, r, r)
 		}
 	}
+}
+
+// RunesKOI8 blanks out unused C0, C1 and other controls spaces for Russian sets.
+func (s *Set) RunesKOI8() {
+	if len(s.R) == 0 {
+		return
+	}
+	for i, r := range s.R {
+		switch {
+		case r >= 0x00 && r <= 0x1f:
+			s.R[i] = rune(32)
+		case r == 0x7f:
+			s.R[i] = rune(32)
+		case r == 65533:
+			s.R[i] = rune(32)
+		}
+	}
+}
+
+// RunesLatin blanks out unused C0, C1 and other controls spaces for ISO Latin sets.
+func (s *Set) RunesLatin() {
+	if len(s.R) == 0 {
+		return
+	}
+	for i, r := range s.R {
+		switch {
+		case r >= 0x00 && r <= 0x1f:
+			s.R[i] = rune(32)
+		case r >= 0x7f && r <= 0x9f:
+			s.R[i] = rune(32)
+		case r == 65533:
+			s.R[i] = rune(32)
+		}
+	}
+}
+
+// RunesMacintosh replaces specific Mac OS Roman characters with Unicode picture represenations.
+func (s *Set) RunesMacintosh() {
+	const z = byte(0x80)
+	for i, r := range s.R {
+		switch r {
+		case 0x11:
+			s.R[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0x98}) // ⌘
+		case 0x12:
+			s.R[i], _ = utf8.DecodeRune([]byte{0xe2, 0x87, 0xa7}) // ⇧
+		case 0x13:
+			s.R[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0xa5}) // ⌥
+		case 0x14:
+			s.R[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0x83}) // ⌃
+		case 0x7f:
+			s.R[i] = decode(0xa1) // DEL
+		case 65533:
+			s.R[i] = rune(32)
+		default:
+			switch {
+			case r >= 0x00 && r <= 0x1f:
+				s.R[i] = decode(byte(rune(z) + r))
+			}
+		}
+	}
+}
+
+// RunesWindows tweaks some Unicode picture represenations for Windows-125x sets.
+func (s *Set) RunesWindows() {
+	for i, r := range s.R {
+		switch r {
+		case 0x7f:
+			s.R[i] = decode(0xa1) // DEL
+		case 65533:
+			s.R[i] = rune(32)
+		}
+	}
+}
+
+// utf8.DecodeRune([]byte{0xe2, 0x90, b})
+func decode(b byte) (r rune) {
+	r, _ = utf8.DecodeRune([]byte{0xe2, 0x90, b})
+	return r
 }

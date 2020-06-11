@@ -87,16 +87,13 @@ var viewTablesCmd = &cobra.Command{
 	Use:   "tables",
 	Short: "display tables showing known codepages and characters",
 	Run: func(cmd *cobra.Command, args []string) {
-		for i, e := range transform.Encodings() {
+		for _, e := range transform.Encodings() {
 			name, err := ianaindex.MIME.Name(e)
 			if err != nil {
 				logs.Log(err)
-			} else if i >= 11 && i <= 12 {
-				// need to fix 11, 12
-				// special cases 19,20 ISO-8859-6E  ISO-8859-6I
-				// 8E, 8I
+			} else {
 				// keep 0F,1F controls. blank other ?
-				// tables -> Macintosh to list alt. names
+				// tables -> Macintosh to list alt. names Mac OS Roman
 				// Windows 874 is not showing different chars from ISO-11
 				// https://en.wikipedia.org/wiki/ISO/IEC_8859-11#Vendor_extensions
 				// japanese needs fixing
