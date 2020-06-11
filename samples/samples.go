@@ -18,8 +18,6 @@ import (
 	"golang.org/x/text/transform"
 )
 
-var perm os.FileMode = 0644
-
 const (
 	cp437hex = "\xCD\xB9\xB2\xCC\xCD" // `═╣░╠═`
 	utf      = "═╣ ░ ╠═"
@@ -38,6 +36,8 @@ const (
 
 	lf = "\x0a"
 	cr = "\x0d"
+
+	permf os.FileMode = 0644
 )
 
 // helpful references: How to convert from an encoding to UTF-8 in Go?
@@ -97,7 +97,7 @@ func HexEncode(text string) (result []byte) {
 // ReadBytes reads a named file location or a named temporary file and returns its byte content.
 func ReadBytes(name string) (data []byte, err error) {
 	var path = tempFile(name)
-	file, err := os.OpenFile(path, os.O_RDONLY, perm)
+	file, err := os.OpenFile(path, os.O_RDONLY, permf)
 	if err != nil {
 		return data, err
 	}
@@ -118,15 +118,15 @@ func ReadBytes(name string) (data []byte, err error) {
 
 // ReadLine reads a named file location or a named temporary file and returns its content.
 func ReadLine(name, newline string) (text string, err error) {
-	var path, nl = tempFile(name), nlChar(newline)
-	file, err := os.OpenFile(path, os.O_RDONLY, perm)
+	var path, n = tempFile(name), nl(newline)
+	file, err := os.OpenFile(path, os.O_RDONLY, permf)
 	if err != nil {
 		return text, err
 	}
 	// bufio is the most performant
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		text += fmt.Sprintf("%s%s", scanner.Text(), nl)
+		text += fmt.Sprintf("%s%s", scanner.Text(), n)
 	}
 	if err = scanner.Err(); err != nil {
 		return text, err
@@ -143,26 +143,24 @@ func ReadText(name string) (text string, err error) {
 	return ReadLine(name, "")
 }
 
-// nlChar returns a platform's newline character.
-// TODO: make idomatic
-func nlChar(platform string) (chars string) {
+// nl returns a platform's newline character.
+func nl(platform string) string {
 	switch platform {
 	case "dos", "windows":
-		chars = cr + lf
+		return cr + lf
 	case "c64", "darwin", "mac":
-		chars = cr
+		return cr
 	case "amiga", "linux", "unix":
-		chars = lf
+		return lf
 	default: // use operating system default
-		chars = "\n"
+		return "\n"
 	}
-	return chars
 }
 
 // Save bytes to a named file location or a named temporary file.
 func Save(b []byte, name string) (path string, err error) {
 	path = tempFile(name)
-	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, perm)
+	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, permf)
 	if err != nil {
 		return path, err
 	}

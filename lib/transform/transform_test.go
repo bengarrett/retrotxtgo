@@ -337,7 +337,7 @@ func TestRunesWindows(t *testing.T) {
 	}
 }
 func TestRunesEBCDIC(t *testing.T) {
-	// NOTE: EBCDIC codepages are not compatible with ISO/IEC 646 (ASCII)
+	// EBCDIC codepages are not compatible with ISO/IEC 646 (ASCII)
 	// so a number of these tests either convert input UTF-8 text into CP037
 	tx, _ := charmap.CodePage037.NewEncoder().Bytes([]byte("ring my "))
 	tests := []struct {
