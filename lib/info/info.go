@@ -56,7 +56,7 @@ type File struct {
 	Lines     int       `xml:"size>lines"`
 	Width     int       `xml:"size>width"`
 	CharCount int       `xml:"size>character-count"`
-	CtrlCount int       `xml"size>ansi-control-count"`
+	CtrlCount int       `xml:"size>ansi-control-count"`
 	WordCount int       `xml:"size>word-count"`
 	MD5       string    `xml:"checksum>md5"`
 	SHA256    string    `xml:"checksum>sha256"`
@@ -118,8 +118,6 @@ func Print(filename, format string) (err error) {
 		return err
 	}
 	if IsText(d.Mime) {
-		// TODO: test for ANSI escape codes in content
-		// when contentType == "application/octet-stream"
 		if d.CtrlCount, err = filesystem.Controls(filename); err != nil {
 			return err
 		}
@@ -179,7 +177,6 @@ func (d *Detail) parse(data []byte, stat os.FileInfo, name string) (err error) {
 	}
 	if IsText(d.Mime) {
 		d.CharCount = runewidth.StringWidth(string(data))
-		d.CtrlCount = 0
 	}
 	// create a table of data
 	d.Bytes = stat.Size()
