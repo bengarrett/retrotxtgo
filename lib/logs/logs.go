@@ -23,12 +23,13 @@ const (
 	PortRec uint = 8080
 )
 
-// Filename is the default error log filename
-const Filename = "errors.log"
-
-// posix permissions for the configuration file and directory.
-const perm = 0600
-const permDir = 0700
+const (
+	// Filename is the default error log filename
+	Filename = "errors.log"
+	// posix permissions for the configuration file and directory.
+	permf os.FileMode = 0600
+	permd os.FileMode = 0700
+)
 
 var (
 	scope = gap.NewScope(gap.User, "df2")
@@ -168,11 +169,11 @@ func save(err error, name string) error {
 	}
 	p := filepath.Dir(name)
 	if _, e := os.Stat(p); os.IsNotExist(e) {
-		if e := os.MkdirAll(p, permDir); e != nil {
+		if e := os.MkdirAll(p, permd); e != nil {
 			return e
 		}
 	}
-	file, e := os.OpenFile(name, os.O_APPEND|os.O_CREATE|os.O_WRONLY, perm)
+	file, e := os.OpenFile(name, os.O_APPEND|os.O_CREATE|os.O_WRONLY, permf)
 	if e != nil {
 		return e
 	}

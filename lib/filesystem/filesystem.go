@@ -11,6 +11,13 @@ import (
 	"unicode/utf8"
 )
 
+const (
+	// PermF is posix permission bits for files
+	permf os.FileMode = 0660
+	// PermD is posix permission bits for directories
+	permd os.FileMode = 0700
+)
+
 // Columns counts the number of characters used per line in the named file.
 func Columns(name string) (count int, err error) {
 	file, err := os.Open(name)
@@ -251,7 +258,7 @@ func Runes(name string) (count int, err error) {
 func dir(name string) (path string, err error) {
 	path = filepath.Dir(name)
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		err = os.MkdirAll(path, 0700)
+		err = os.MkdirAll(path, permd)
 	}
 	return path, err
 }
@@ -263,7 +270,7 @@ func Save(b []byte, name string) (path string, err error) {
 		return path, err
 	}
 	path = name
-	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600) // TODO: make var
+	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, permf)
 	if err != nil {
 		return path, err
 	}
