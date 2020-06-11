@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"sort"
@@ -44,6 +45,7 @@ var createCmd = &cobra.Command{
 		case true: // handle hidden --body flag
 			data = []byte(body.Value.String())
 		default:
+			fmt.Println("-->", htmlArgs.Src)
 			switch htmlArgs.Src {
 			case "ascii":
 				// internal example
@@ -58,9 +60,11 @@ var createCmd = &cobra.Command{
 					os.Exit(0)
 				}
 				// show help and exit with no input otherwise a blank template will be shown
+				// this is triggered when --name is missing but other flags are used
 				err = cmd.Usage()
-				logs.ReCheck(err)
-				logs.FileMissingErr()
+				logs.Check("create usage", err)
+				logs.ChkErr(logs.CmdErr{Args: []string{"", ""},
+					Err: errors.New("required flag(s) --name")}.Error())
 			default:
 				data, err = filesystem.Read(htmlArgs.Src)
 				logs.ChkErr(logs.Err{Issue: "file is invalid", Arg: htmlArgs.Src, Msg: err})
@@ -147,6 +151,6 @@ func init() {
 		}
 	}
 	err = createCmd.Flags().MarkHidden("body")
-	logs.ReCheck(err)
+	logs.Check("create mark body hidden", err)
 	createCmd.Flags().SortFlags = false
 }

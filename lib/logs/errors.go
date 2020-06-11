@@ -107,6 +107,7 @@ func (e CmdErr) String() {
 	fmt.Println(e.Error())
 }
 
+// Strings splits the CmdErr.Err value.
 func (e CmdErr) Strings() []string {
 	return strings.Split(fmt.Sprintf("%s", e.Err), " ")
 }
@@ -146,6 +147,7 @@ func CheckCmd(args []string) {
 	err.Exit(1)
 }
 
+// CheckFlag returns flag options when an invalid choice is used.
 func CheckFlag(name, value string, args []string) {
 	err := CmdErr{Args: args,
 		Err: fmt.Errorf("invalid slice %s %s", name, value)}
