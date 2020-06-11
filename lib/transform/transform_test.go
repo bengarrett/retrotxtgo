@@ -108,7 +108,7 @@ func TestEncoding(t *testing.T) {
 		{"ibm437", charmap.CodePage437, false},
 		{"CP437", charmap.CodePage437, false},
 		{"IBM Codepage 437", nil, true},
-		{"CP-437", nil, true},
+		{"CP-437", charmap.CodePage437, false},
 		{"oem-us", charmap.CodePage437, false},
 		{"ibm-37", charmap.CodePage037, false},
 		{"858", charmap.CodePage858, false},

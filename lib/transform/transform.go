@@ -73,16 +73,29 @@ func Encoding(name string) (encoding.Encoding, error) {
 	// use custom/common names and aliases
 	n := strings.ToLower(name)
 	switch {
+	case len(n) > 3 && n[:3] == "cp-":
+		n = n[3:]
 	case len(n) > 2 && n[:2] == "cp":
 		n = n[2:]
+	case len(n) > 14 && n[:14] == "ibm code page ":
+		n = "ibm" + n[14:]
 	case len(n) > 4 && n[:4] == "ibm-":
 		n = n[4:]
 	case len(n) > 3 && n[:3] == "ibm":
 		n = n[3:]
 	case len(n) > 4 && n[:4] == "oem-":
 		n = n[4:]
+	case n == "windows code page 858":
+		n = "IBM00858"
 	case len(n) > 8 && n[:8] == "windows-":
 		n = n[8:]
+	case len(n) > 7 && n[:7] == "windows":
+		n = n[7:]
+	case len(n) > 7 && n[:7] == "iso8859":
+		n = "iso-8859-" + n[7:]
+	case len(n) > 9 && n[:9] == "iso 8859-":
+		n = "iso-8859-" + n[9:]
+
 	}
 	// list of valid tables
 	// https://github.com/golang/text/blob/v0.3.2/encoding/charmap/maketables.go
@@ -91,9 +104,9 @@ func Encoding(name string) (encoding.Encoding, error) {
 		n = "IBM037"
 	case "437", "dos", "ibmpc", "msdos", "us", "pc-8", "latin-us":
 		n = "IBM437"
-	case "850":
+	case "850", "latini":
 		n = "IBM850"
-	case "852":
+	case "852", "latinii":
 		n = "IBM852"
 	case "855":
 		n = "IBM855"
@@ -167,10 +180,16 @@ func Encoding(name string) (encoding.Encoding, error) {
 		n = "Windows-1257"
 	case "1258":
 		n = "Windows-1258"
+	case "koi8r":
+		n = "KOI8R"
+	case "koi8u":
+		n = "KOI8U"
+	case "shift jis":
+		n = "ShiftJIS"
 	}
 	enc, err := ianaindex.IANA.Encoding(n)
 	if err != nil {
-		err = fmt.Errorf("%s %q→%q", err, name, n)
+		err = fmt.Errorf("%s %q → %q", err, name, n)
 		return enc, err
 	}
 	return enc, err
