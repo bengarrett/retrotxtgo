@@ -290,6 +290,15 @@ op token list > https://golang.org/pkg/go/token/#Token
 - [ ] reverse scan of file looking for EOF, SAUCE00 & COMNTT.
 - [ ] scan for unique color codes like 24-bit colors.
 
+// TODO: env
+// Indicates which language, character set, and sort order to use for messages, datatype conversions, and datetime formats.
+// 1. LC_NUMERIC="en_GB.UTF-8"
+// 1. LC_TIME="en_GB.UTF-8"
+// 2. LC_ALL=""
+// 3. LANG=""
+// 4. LANGUAGE=""
+// 4. US
+
 ---
 
 ### Future distribution package managers
