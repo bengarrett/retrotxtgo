@@ -236,17 +236,19 @@ func Setup() {
 	keys := viper.AllKeys()
 	sort.Strings(keys)
 	PrintLocation()
+	w := 42
 	for i, key := range keys {
-		h := fmt.Sprintf("  %d/%d. RetroTxt Setup", i+1, len(keys))
 		if i == 0 {
-			fmt.Println(hr(&h))
+			fmt.Printf("\n%s\n\n", str.Cb(enterKey()))
+		}
+		h := fmt.Sprintf("  %d/%d. RetroTxt Setup - %s",
+			i+1, len(keys), key)
+		if i == 0 {
+			fmt.Println(hr(w))
 		}
 		fmt.Println(h)
-		if i == 0 {
-			fmt.Printf("\n%s\n", str.Cb(enterKey()))
-		}
 		Set(key)
-		fmt.Println(hr(&h))
+		fmt.Println(hr(w))
 	}
 }
 
@@ -257,8 +259,8 @@ func enterKey() string {
 	return "Press ⏎ enter to skip the question or Ctrl-c to quit"
 }
 
-func hr(h *string) string {
-	return str.Cb(strings.Repeat("-", (len(*h)-1)*2))
+func hr(w int) string {
+	return str.Cb(strings.Repeat("-", w))
 }
 
 // Validate the existence of a setting key name.
