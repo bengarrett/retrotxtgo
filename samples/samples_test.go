@@ -7,11 +7,6 @@ import (
 	"testing"
 )
 
-// func ExampleBase64Encodex() {
-// 	fmt.Print(EncodeASCII())
-// 	// Output: X
-// }
-
 func ExampleCP437Decode() {
 	const name = base + "cp437In.txt"
 	result, err := CP437Decode(cp437hex)
@@ -189,19 +184,21 @@ func BenchmarkCP437Decode(b *testing.B) {
 }
 
 func TestBase64Encode(t *testing.T) {
-	type args struct {
-		text string
-	}
 	tests := []struct {
 		name        string
-		args        args
+		text        string
 		wantEncoded string
 	}{
-		// TODO: Add test cases.
+		// can create test cases
+		// https://www.base64encode.org/
+		{"empty", "", ""},
+		{"abc", "abc", "YWJj"},
+		{"octets", `\0\x01\x02\x03\x04\x05\x06\x07\b\t\n\x0B\f\r\x0E\x0F\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_abcdefghijklmnopqrstuvwxyz{|}~\x7F`,
+			"XDBceDAxXHgwMlx4MDNceDA0XHgwNVx4MDZceDA3XGJcdFxuXHgwQlxmXHJceDBFXHgwRlx4MTBceDExXHgxMlx4MTNceDE0XHgxNVx4MTZceDE3XHgxOFx4MTlceDFBXHgxQlx4MUNceDFEXHgxRVx4MUYgISIjJCUmXCcoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj9AQUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpbXFxdXl9hYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ent8fX5ceDdG"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotEncoded := Base64Encode(tt.args.text); gotEncoded != tt.wantEncoded {
+			if gotEncoded := Base64Encode(tt.text); gotEncoded != tt.wantEncoded {
 				t.Errorf("Base64Encode() = %v, want %v", gotEncoded, tt.wantEncoded)
 			}
 		})
