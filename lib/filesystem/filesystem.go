@@ -55,6 +55,43 @@ func columnsCounter(r io.Reader) (width int, err error) {
 	return width, nil
 }
 
+// Controls counts the number of lines in the named file.
+func Controls(name string) (count int, err error) {
+	file, err := os.Open(name)
+	if err != nil {
+		return -1, err
+	}
+	defer file.Close()
+	count, err = ctrlCounter(file)
+	return count, err
+}
+
+func ctrlCounter(r io.Reader) (count int, err error) {
+	lineBreak := []byte("\x1B\x5b") // esc[
+	buf := make([]byte, bufio.MaxScanTokenSize)
+	for {
+		size, err := r.Read(buf)
+		if err != nil && err != io.EOF {
+			return 0, err
+		}
+		var pos int
+		for {
+			i := bytes.Index(buf[pos:], lineBreak)
+			if i == -1 || size == pos {
+				break
+			}
+			pos += i + 1
+			if i > count {
+				count = i
+			}
+		}
+		if err == io.EOF {
+			break
+		}
+	}
+	return count, nil
+}
+
 // Lines counts the number of lines in the named file.
 func Lines(name string) (count int, err error) {
 	file, err := os.Open(name)

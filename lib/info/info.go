@@ -30,6 +30,7 @@ import (
 type Detail struct {
 	Bytes     int64
 	CharCount int
+	CtrlCount int
 	Lines     int
 	Name      string
 	MD5       string
@@ -55,6 +56,7 @@ type File struct {
 	Lines     int       `xml:"size>lines"`
 	Width     int       `xml:"size>width"`
 	CharCount int       `xml:"size>character-count"`
+	CtrlCount int       `xml"size>ansi-control-count"`
 	WordCount int       `xml:"size>word-count"`
 	MD5       string    `xml:"checksum>md5"`
 	SHA256    string    `xml:"checksum>sha256"`
@@ -104,7 +106,6 @@ func IsText(contentType string) bool {
 		return true
 	}
 	if contentType == "application/octet-stream" {
-		// TODO: test for ANSI escape codes in content
 		return true
 	}
 	return false
@@ -117,6 +118,11 @@ func Print(filename, format string) (err error) {
 		return err
 	}
 	if IsText(d.Mime) {
+		// TODO: test for ANSI escape codes in content
+		// when contentType == "application/octet-stream"
+		if d.CtrlCount, err = filesystem.Controls(filename); err != nil {
+			return err
+		}
 		if d.Lines, err = filesystem.Lines(filename); err != nil {
 			return err
 		}
@@ -173,6 +179,7 @@ func (d *Detail) parse(data []byte, stat os.FileInfo, name string) (err error) {
 	}
 	if IsText(d.Mime) {
 		d.CharCount = runewidth.StringWidth(string(data))
+		d.CtrlCount = 0
 	}
 	// create a table of data
 	d.Bytes = stat.Size()
@@ -219,6 +226,7 @@ func (d Detail) Text(color bool) string {
 		{k: "filename", v: d.Name},
 		{k: "UTF-8", v: str.Bool(d.Utf8)},
 		{k: "characters", v: p.Sprint(d.CharCount)},
+		{k: "ANSI controls", v: p.Sprint(d.CtrlCount)},
 		{k: "words", v: p.Sprint(d.WordCount)},
 		{k: "size", v: d.Size},
 		{k: "lines", v: p.Sprint(d.Lines)},
@@ -253,6 +261,7 @@ func (d Detail) XML() ([]byte, error) {
 	v := File{
 		Bytes:     d.Bytes,
 		CharCount: d.CharCount,
+		CtrlCount: d.CtrlCount,
 		ID:        d.Slug,
 		Lines:     d.Lines,
 		MD5:       d.MD5,
