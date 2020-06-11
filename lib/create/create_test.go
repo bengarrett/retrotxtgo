@@ -134,7 +134,7 @@ func Test_writeFile(t *testing.T) {
 		data []byte
 		name string
 	}
-	tmpFile := path.Join(os.TempDir(), "retrotxtgo_create_test.txt")
+	tmpFile := path.Join(os.TempDir(), "retrotxt_create_test.txt")
 	tests := []struct {
 		name    string
 		args    args

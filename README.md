@@ -275,7 +275,7 @@ op token list > https://golang.org/pkg/go/token/#Token
 
 ### TODOs - changes to the existing code
 
-- [ ] **Remove all string references to `retrotxtgo`.**
+- [x] **Remove all string references to `retrotxtgo`.**
 - [ ] Directory settings, change `.` shortcut to always use the current working directory.
       Include text mentioning this when using `set`.
 - [ ] When fetching github release data using the `version` command.

@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const userAgent = "retrotxtgo ping"
+const userAgent = "retrotxt ping"
 const httpTimeout = time.Second * 3
 
 // API blah

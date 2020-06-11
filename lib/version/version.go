@@ -221,7 +221,7 @@ func localBuild(date string) string {
 
 func newRelease() *bytes.Buffer {
 	s := "A newer edition of RetroTxt is available!\n" +
-		"Learn more at https://github.com/bengarrett/retrotxtgo"
+		"Learn more at https://retrotxt.com/go"
 	return str.Border(s)
 }
 
