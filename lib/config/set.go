@@ -275,19 +275,39 @@ func Validate(key string) (ok bool) {
 	return true
 }
 
-func dirAliases(name string) (dir string) {
+// dirExpansion
+func dirExpansion(name string) (dir string) {
+	// Bash tilde expension http://www.gnu.org/software/bash/manual/html_node/Tilde-Expansion.html
 	var err error
-	switch name {
-	case "~":
-		dir, err = os.UserHomeDir()
-	case "..":
-		dir, err = os.Getwd()
-		dir = filepath.Dir(dir)
-	case ".":
-		dir, err = os.Getwd()
-	}
-	if err != nil {
-		logs.Log(err)
+	paths := strings.Split(name, string(os.PathSeparator))
+	for i, s := range paths {
+		p := ""
+		switch s {
+		case "~":
+			p, err = os.UserHomeDir()
+			if err != nil {
+				logs.Log(err)
+			}
+		case ".":
+			p, err = os.Getwd()
+			if err != nil {
+				logs.Log(err)
+			}
+		case "..":
+			if i == 0 {
+				wd, err := os.Getwd()
+				if err != nil {
+					logs.Log(err)
+				}
+				p = filepath.Dir(wd)
+			} else {
+				dir = filepath.Dir(dir)
+				continue
+			}
+		default:
+			p = s
+		}
+		dir = filepath.Join(dir, p)
 	}
 	return dir
 }
@@ -324,7 +344,7 @@ func setDirectory(name string) {
 	if name == "" {
 		logs.Log(errors.New("setdirectory name string is empty"))
 	}
-	dir := dirAliases(prompt.String())
+	dir := dirExpansion(prompt.String())
 	if setupMode && dir == "" {
 		return
 	}
