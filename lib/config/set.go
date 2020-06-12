@@ -275,7 +275,8 @@ func Validate(key string) (ok bool) {
 	return true
 }
 
-// dirExpansion
+// dirExpansion traverses the named directory to apply shell-like expansions.
+// It currently supports limited Bash tilde, shell dot and double dot syntax.
 func dirExpansion(name string) (dir string) {
 	// Bash tilde expension http://www.gnu.org/software/bash/manual/html_node/Tilde-Expansion.html
 	var err error
