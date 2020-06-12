@@ -290,6 +290,9 @@ func dirExpansion(name string) (dir string) {
 				logs.Log(err)
 			}
 		case ".":
+			if i != 0 {
+				continue
+			}
 			p, err = os.Getwd()
 			if err != nil {
 				logs.Log(err)

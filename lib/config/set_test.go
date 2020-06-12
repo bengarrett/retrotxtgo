@@ -27,6 +27,7 @@ func Test_dirExpansion(t *testing.T) {
 		{fmt.Sprintf("..%sfoo", s), filepath.Join(wp, "foo")},
 		{fmt.Sprintf("~%s..%sfoo", s, s), filepath.Join(hp, "foo")},
 		{fmt.Sprintf("%sroot%sfoo%s..%sblah", s, s, s, s), fmt.Sprintf("root%sblah", s)},
+		{fmt.Sprintf("%sroot%sfoo%s.%sblah", s, s, s, s), fmt.Sprintf("root%sfoo%sblah", s, s)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
