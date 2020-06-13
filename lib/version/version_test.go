@@ -9,29 +9,28 @@ import (
 	"time"
 )
 
-// func capVersionText(c bool) (output string) {
-// 	rescueStdout := os.Stdout
-// 	r, w, _ := os.Pipe()
-// 	os.Stdout = w
-// 	color.Enable = true
-// 	versionText(c)
-// 	w.Close()
-// 	bytes, _ := ioutil.ReadAll(r)
-// 	os.Stdout = rescueStdout
-// 	return strings.TrimSpace(string(bytes))
-// }
+const etag = `W/"3715383704fac6f3568e9039b347937a`
 
 func ExampleCacheGet() {
+	if err := CacheSet(etag, "0.0.1"); err != nil {
+		fmt.Println(err)
+	}
 	e, v := CacheGet()
 	fmt.Println("Etag", e)
 	fmt.Println("Version", v)
-	// Output: Hello
+	// Output: Etag W/"3715383704fac6f3568e9039b347937a
+	// Version 0.0.1
 }
 
 func ExampleCacheSet() {
-	err := CacheSet(`W/"3715383704fac6f3568e9039b347937a`, "0.0.1")
-	fmt.Println(err)
-	// Output: X
+	if err := CacheSet(etag, "0.0.1"); err != nil {
+		fmt.Println(err)
+	}
+	e, v := CacheGet()
+	fmt.Println("Etag", e)
+	fmt.Println("Version", v)
+	// Output: Etag W/"3715383704fac6f3568e9039b347937a
+	// Version 0.0.1
 }
 
 func ExampleDigits() {
