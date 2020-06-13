@@ -29,7 +29,7 @@ func Endpoint(url, etag string) (useCache bool, data API, err error) {
 	}
 	if etag != "" {
 		s := resp.StatusCode
-		if s == 304 || (s == 200 && data == nil) {
+		if s == 304 || (s == 200 && body == nil) {
 			// Not Modified
 			return true, data, nil
 		}
