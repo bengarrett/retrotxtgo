@@ -49,6 +49,12 @@ func InitDefaults() {
 
 // SetConfig reads and loads a configuration file.
 func SetConfig(configFlag string) {
+	cfgExit := func(e configErr) {
+		// require manual generation for custom config files
+		e.Err = errors.New("does not exist\n\t use the command: retrotxt config create --config=" + configFlag)
+		fmt.Println(e.String())
+		os.Exit(1)
+	}
 	viper.SetConfigType("yaml")
 	var configPath = Path()
 	if configFlag != "" {
@@ -61,25 +67,33 @@ func SetConfig(configFlag string) {
 			Err:      err,
 		}
 		if errors.Is(err, os.ErrNotExist) {
-			if configFlag != "" {
-				// require manual generation for custom config files
-				e.Err = errors.New("does not exist\n\t use the command: retrotxt config create --config=" + configFlag)
-				fmt.Println(e.String())
-				os.Exit(1)
-			} else if len(os.Args) > 2 {
+			// initialise a new, default config file if conditions are met
+			switch {
+			case len(os.Args) > 2:
 				switch strings.Join(os.Args[1:3], ".") {
 				case "config.create", "config.delete":
+					// never auto-generate a config when these arguments are given
 					return
 				}
-				// auto-generate a new, default config file
-				Create(viper.ConfigFileUsed(), false)
+				if configFlag != "" {
+					cfgExit(e)
+				}
+			case configFlag != "":
+				cfgExit(e)
 			}
+			// auto-generate new config, except when --config flag is used
+			Create(viper.ConfigFileUsed(), false)
 		} else {
 			// config fail
 			fmt.Println(e.String())
 			os.Exit(1)
 		}
 	} else if configFlag != "" {
+		// always print the config location when the --config flag is used
+		if len(os.Args) > 0 && os.Args[1] == "config" {
+			// except when the config command is in use
+			return
+		}
 		PrintLocation()
 	}
 }

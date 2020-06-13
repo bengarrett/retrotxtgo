@@ -279,7 +279,7 @@ op token list > https://golang.org/pkg/go/token/#Token
 - [x] Directory settings, change `.` shortcut to always use the current working directory.
 - [x] When fetching github release data using the `version` command.
       Use HTTP e-tags cache and save the values to reduce the bandwidth usage.
-- [ ] config command should support the global --config flag.
+- [x] config command should support the global --config flag.
 - [ ] config shell should have a `--append/source/or` flag to save shell auto-completion?
 - [ ] scan for supported but current shell configuration.
 - [ ] when using `create` detect any out of range or unsafe unicode encoding and assume cp437.
