@@ -301,8 +301,7 @@ func dir(name string) (path string, err error) {
 }
 
 // Save bytes to a named file location.
-// TODO: switch args order to match ioutil.WriteFile()
-func Save(b []byte, name string) (path string, err error) {
+func Save(name string, b []byte) (path string, err error) {
 	path, err = dir(name)
 	if err != nil {
 		return path, err
@@ -330,5 +329,5 @@ func Save(b []byte, name string) (path string, err error) {
 
 // Touch creates an empty file at the named location.
 func Touch(name string) (path string, err error) {
-	return Save(nil, name)
+	return Save(name, nil)
 }

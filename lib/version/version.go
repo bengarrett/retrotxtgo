@@ -104,7 +104,7 @@ func CacheSet(etag, ver string) error {
 	if err != nil {
 		return err
 	}
-	if _, err := filesystem.Save(out, f); err != nil {
+	if _, err := filesystem.Save(f, out); err != nil {
 		return err
 	}
 	return nil
