@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"regexp"
 	"runtime"
@@ -11,10 +12,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/online"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	c "github.com/gookit/color"
+	gap "github.com/muesli/go-app-paths"
+	"gopkg.in/yaml.v3"
 )
 
 // Build and version information
@@ -38,12 +42,72 @@ type Version struct {
 
 type versionInfo map[string]string
 
+// Cache of version data
+type Cache struct {
+	Etag string `yaml:"etag"`
+	Ver  string `yaml:"version"`
+}
+
+const cacheFile = "api.github.cache"
+
 // B holds build and version information.
 var B = Build{
 	Commit:  "",
 	Date:    "",
 	Domain:  "retrotxt.com",
 	Version: "",
+}
+
+var scope = gap.NewScope(gap.User, "retrotxt")
+
+// CacheGet returns the stored Github API ETag HTTP header and release version.
+func CacheGet() (etag, ver string) {
+	cf, err := scope.DataPath(cacheFile)
+	if err != nil {
+		logs.LogCont(err)
+		return
+	}
+	if _, err := os.Stat(cf); os.IsNotExist(err) {
+		return
+	}
+	f, err := ioutil.ReadFile(cf)
+	if err != nil {
+		logs.LogCont(err)
+	}
+	var c Cache
+	if err = yaml.Unmarshal(f, &c); err != nil {
+		logs.LogCont(err)
+	}
+	// if either value is missing, delete the broken cache
+	if c.Etag == "" || c.Ver == "" {
+		err = os.Remove(cf)
+		logs.LogCont(err)
+		return "", ""
+	}
+	return c.Etag, c.Ver
+}
+
+// CacheSet saves the Github API ETag HTTP header and release version.
+func CacheSet(etag, ver string) error {
+	if etag == "" || ver == "" {
+		return nil
+	}
+	c := Cache{
+		Etag: etag,
+		Ver:  ver,
+	}
+	out, err := yaml.Marshal(&c)
+	if err != nil {
+		return err
+	}
+	f, err := scope.DataPath(cacheFile)
+	if err != nil {
+		return err
+	}
+	if _, err := filesystem.Save(out, f); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Digits returns only the digits and decimal point values from a string.
@@ -71,14 +135,22 @@ func JSON(indent bool) (data []byte) {
 // NewRelease checks to see if the active executable matches the version hosted on GitHub.
 // The ver value contains the result returned from the GitHub releases/latest API.
 func NewRelease() (ok bool, ver string) {
-	g, err := online.Endpoint(online.ReleaseAPI)
+	etag, ver := CacheGet()
+	cache, data, err := online.Endpoint(etag, online.ReleaseAPI)
 	if err != nil {
 		logs.LogCont(err)
 		return false, ver
 	}
-	ver = fmt.Sprint(g["tag_name"])
-	if ver == "" {
-		return false, ver
+	if !cache {
+		ver = fmt.Sprint(data["tag_name"])
+		if ver == "" {
+			return false, ver
+		}
+		if etag := data["etag"].(string); etag != "" {
+			if err = CacheSet(etag, ver); err != nil {
+				logs.LogCont(err)
+			}
+		}
 	}
 	if c := compare(B.Version, ver); c {
 		return true, ver

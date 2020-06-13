@@ -22,8 +22,8 @@ func ExamplePing() {
 }
 
 func ExampleRequest() {
-	d, _ := Get("https://demozoo.org/api/v1/productions/126496/")
-	g, _ := Get(ReleaseAPI)
+	_, d, _ := Get("https://demozoo.org/api/v1/productions/126496/", "")
+	_, g, _ := Get(ReleaseAPI, "")
 	fmt.Println("valid json api?", json.Valid(d))
 	fmt.Println("valid github api?", json.Valid(g))
 	// Output: valid json api? true

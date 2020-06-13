@@ -21,6 +21,19 @@ import (
 // 	return strings.TrimSpace(string(bytes))
 // }
 
+func ExampleCacheGet() {
+	e, v := CacheGet()
+	fmt.Println("Etag", e)
+	fmt.Println("Version", v)
+	// Output: Hello
+}
+
+func ExampleCacheSet() {
+	err := CacheSet(`W/"3715383704fac6f3568e9039b347937a`, "0.0.1")
+	fmt.Println(err)
+	// Output: X
+}
+
 func ExampleDigits() {
 	fmt.Println(Digits("v1.0 (init release)"))
 	// Output: 1.0

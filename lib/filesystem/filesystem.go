@@ -301,6 +301,7 @@ func dir(name string) (path string, err error) {
 }
 
 // Save bytes to a named file location.
+// TODO: switch args order to match ioutil.WriteFile()
 func Save(b []byte, name string) (path string, err error) {
 	path, err = dir(name)
 	if err != nil {
