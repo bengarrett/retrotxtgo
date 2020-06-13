@@ -21,7 +21,7 @@ const ReleaseAPI = "https://api.github.com/repos/bengarrett/retrotxtgo/releases/
 // Endpoint request an API endpoint from the URL.
 // A HTTP ETag can be provided to validate local data cache against the server.
 // The useCache will return true with the etag value matches the server's ETag header.
-func Endpoint(etag, url string) (useCache bool, data API, err error) {
+func Endpoint(url, etag string) (useCache bool, data API, err error) {
 	useCache = false
 	resp, body, err := Get(url, etag)
 	if err != nil {

@@ -136,7 +136,7 @@ func JSON(indent bool) (data []byte) {
 // The ver value contains the result returned from the GitHub releases/latest API.
 func NewRelease() (ok bool, ver string) {
 	etag, ver := CacheGet()
-	cache, data, err := online.Endpoint(etag, online.ReleaseAPI)
+	cache, data, err := online.Endpoint(online.ReleaseAPI, etag)
 	if err != nil {
 		logs.LogCont(err)
 		return false, ver
