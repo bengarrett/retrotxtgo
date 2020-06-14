@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/bengarrett/retrotxtgo/internal/pack"
+	"github.com/bengarrett/retrotxtgo/lib/convert"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/lib/transform"
@@ -69,7 +70,7 @@ var viewCodePagesCmd = &cobra.Command{
 	Use:   "codepages",
 	Short: "list available legacy codepages that RetroTxt can convert into UTF-8",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(transform.List())
+		fmt.Println(convert.List())
 	},
 }
 
@@ -87,7 +88,7 @@ var viewTablesCmd = &cobra.Command{
 	Use:   "tables",
 	Short: "display tables showing known codepages and characters",
 	Run: func(cmd *cobra.Command, args []string) {
-		for _, e := range transform.Encodings() {
+		for _, e := range convert.Encodings() {
 			name, err := ianaindex.MIME.Name(e)
 			if err != nil {
 				logs.Log(err)
