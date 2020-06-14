@@ -45,7 +45,6 @@ var createCmd = &cobra.Command{
 		case true: // handle hidden --body flag
 			data = []byte(body.Value.String())
 		default:
-			fmt.Println("-->", htmlArgs.Src)
 			switch htmlArgs.Src {
 			case "ascii":
 				// internal example
@@ -124,7 +123,7 @@ func init() {
 	// required flags
 	createCmd.Flags().StringVarP(&htmlArgs.Src, "name", "n", "",
 		str.Required("text file to parse")+"\nrun a built-in example "+str.Example("retrotxt create ascii"))
-	createCmd.Flags().StringVarP(&htmlArgs.Enc, "encode", "e", "", "text encoding of the named text file\n")
+	createCmd.Flags().StringVarP(&htmlArgs.Enc, "encode", "e", "", "text encoding of the named text file\nwhen ignored, UTF8 encoding will be automatically detected\notherwise encode will assume default (default CP437)\nsee a list of encode values "+str.Example("retrotxt view codepages")+"\n")
 	createCmd.Flags().BoolVarP(&htmlArgs.SaveToFile, "save", "s", false, "save HTML to a file or ignore to print output")
 	createCmd.Flags().BoolVarP(&htmlArgs.OW, "overwrite", "o", false, "overwrite any existing files when saving\n")
 	// generate flags
