@@ -1,6 +1,6 @@
-//Package transform is extends Go's x/text/encoding capability to convert legacy text
+//Package convert is extends Go's x/text/encoding capability to convert legacy text
 // to UTF-8.
-package transform
+package convert
 
 import (
 	"bytes"

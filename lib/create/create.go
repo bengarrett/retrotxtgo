@@ -11,10 +11,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bengarrett/retrotxtgo/lib/convert"
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
-	"github.com/bengarrett/retrotxtgo/lib/transform"
 	"github.com/bengarrett/retrotxtgo/lib/version"
 	"github.com/gookit/color"
 	"github.com/spf13/viper"
@@ -285,7 +285,7 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 	}
 	// convert encoding into utf8
 	var (
-		t   = transform.Set{B: *b}
+		t   = convert.Set{B: *b}
 		enc = args.Enc
 	)
 	if enc == "" {

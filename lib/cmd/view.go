@@ -8,7 +8,6 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/convert"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
-	"github.com/bengarrett/retrotxtgo/lib/transform"
 	"golang.org/x/text/encoding/ianaindex"
 
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
@@ -36,7 +35,7 @@ var viewCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
 			err error
-			t   transform.Set
+			t   convert.Set
 		)
 		switch viewArgs.name {
 		case "ansi":
@@ -78,7 +77,7 @@ var viewTableCmd = &cobra.Command{
 	Use:   "table",
 	Short: "display a table showing the codepage and all its characters",
 	Run: func(cmd *cobra.Command, args []string) {
-		table, err := transform.Table(viewArgs.cp)
+		table, err := convert.Table(viewArgs.cp)
 		logs.ChkErr(logs.Err{Issue: "table", Arg: viewArgs.cp, Msg: err})
 		fmt.Println(table.String())
 	},
@@ -98,7 +97,7 @@ var viewTablesCmd = &cobra.Command{
 				// Windows 874 is not showing different chars from ISO-11
 				// https://en.wikipedia.org/wiki/ISO/IEC_8859-11#Vendor_extensions
 				// japanese needs fixing
-				table, err := transform.Table(name)
+				table, err := convert.Table(name)
 				logs.ChkErr(logs.Err{Issue: "tables", Arg: name, Msg: err})
 				fmt.Println(table.String())
 			}
