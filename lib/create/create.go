@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/lib/transform"
@@ -151,10 +152,10 @@ func Dest(args []string) (path string, err error) {
 
 // Save creates and saves the html template to the Dest argument.
 func (args Args) Save(data *[]byte) error {
-	name := args.Dest
+	name := filesystem.DirExpansion(args.Dest)
 	stat, err := os.Stat(name)
 	if err != nil {
-		return err
+		return fmt.Errorf("%s %q", err, name)
 	}
 	if stat.IsDir() {
 		name = filepath.Join(name, "index.html")

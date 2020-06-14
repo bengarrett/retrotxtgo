@@ -27,7 +27,8 @@ func ExampleDetail_XML() {
 }
 
 var sampleFile = func() string {
-	path, err := filesystem.SaveTemp("info_test.txt", []byte(filesystem.Tabs))
+	b := []byte(filesystem.Tabs)
+	path, err := filesystem.SaveTemp("info_test.txt", b)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -178,8 +179,9 @@ func Test_Text(t *testing.T) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	want := 604
+	want := 632
 	if got := len(d.Text(false)); got != want {
+		fmt.Printf("%+v\n", tmp)
 		t.Errorf("Text() = %v, want %v", got, want)
 	}
 	filesystem.Clean(tmp)

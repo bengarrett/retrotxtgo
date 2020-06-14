@@ -7,6 +7,13 @@ import (
 	"golang.org/x/text/transform"
 )
 
+const (
+	bom  = unicode.UseBOM
+	_bom = unicode.IgnoreBOM
+	be   = unicode.BigEndian
+	le   = unicode.LittleEndian
+)
+
 // Base64Decode decodes a base64 string.
 func Base64Decode(s string) (result []byte, err error) {
 	return base64.StdEncoding.DecodeString(s)

@@ -42,7 +42,7 @@ func Test_createTemplates(t *testing.T) {
 
 func Test_filename(t *testing.T) {
 	args := Args{Layout: "standard"}
-	w := filepath.Clean("../../static/html/standard.html")
+	w := filepath.Clean("static/html/standard.html")
 	got, _ := args.filename()
 	if got != w {
 		t.Errorf("filename = %v, want %v", got, w)
@@ -108,7 +108,7 @@ func Test_serveFile(t *testing.T) {
 		})
 	}
 }
-func Test_writeFile(t *testing.T) {
+func Test_Save(t *testing.T) {
 	a := Args{Layout: "standard", Test: true}
 	type args struct {
 		data []byte
@@ -122,15 +122,17 @@ func Test_writeFile(t *testing.T) {
 	}{
 		{"no data", args{[]byte(""), ""}, true},
 		{"invalid", args{[]byte("abc"), "this-is-an-invalid-path"}, true},
-		{"tempDir", args{[]byte("abc"), tmpFile}, true},
+		{"tempDir", args{data: []byte("abc"), name: tmpFile}, true},
 		{"homeDir", args{[]byte("abc"), "~"}, false},
 		{"currentDir", args{[]byte("abc"), "."}, false},
-		{"path as name", args{[]byte("abc"), os.TempDir()}, false},
+		{"path as name", args{[]byte("abc"), os.TempDir()}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			a.Dest = tt.args.name
+			a.OW = true
 			if err := a.Save(&tt.args.data); (err != nil) != tt.wantErr {
-				t.Errorf("writeFile() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Save() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

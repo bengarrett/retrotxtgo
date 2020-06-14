@@ -8,8 +8,11 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/bengarrett/retrotxtgo/lib/logs"
 )
 
 const (
@@ -111,6 +114,47 @@ func ctrlCounter(r io.Reader) (count int, err error) {
 		}
 	}
 	return count, nil
+}
+
+// DirExpansion traverses the named directory to apply shell-like expansions.
+// It currently supports limited Bash tilde, shell dot and double dot syntax.
+func DirExpansion(name string) (dir string) {
+	// Bash tilde expension http://www.gnu.org/software/bash/manual/html_node/Tilde-Expansion.html
+	var err error
+	paths := strings.Split(name, string(os.PathSeparator))
+	for i, s := range paths {
+		p := ""
+		switch s {
+		case "~":
+			p, err = os.UserHomeDir()
+			if err != nil {
+				logs.Log(err)
+			}
+		case ".":
+			if i != 0 {
+				continue
+			}
+			p, err = os.Getwd()
+			if err != nil {
+				logs.Log(err)
+			}
+		case "..":
+			if i == 0 {
+				wd, err := os.Getwd()
+				if err != nil {
+					logs.Log(err)
+				}
+				p = filepath.Dir(wd)
+			} else {
+				dir = filepath.Dir(dir)
+				continue
+			}
+		default:
+			p = s
+		}
+		dir = filepath.Join(dir, p)
+	}
+	return dir
 }
 
 // Lines counts the number of lines in the named file.

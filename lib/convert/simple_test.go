@@ -9,7 +9,6 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"golang.org/x/text/encoding/charmap"
-	"golang.org/x/text/encoding/unicode"
 )
 
 const (
@@ -17,11 +16,6 @@ const (
 	utf      = "═╣ ░ ╠═"
 
 	base = "rt_sample-"
-
-	be   = unicode.BigEndian
-	le   = unicode.LittleEndian
-	bom  = unicode.UseBOM
-	_bom = unicode.IgnoreBOM
 
 	permf os.FileMode = 0644
 )

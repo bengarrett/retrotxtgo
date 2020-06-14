@@ -6,6 +6,7 @@ import (
 	"math"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 )
@@ -107,6 +108,37 @@ func Test_filler(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if gotLength, _ := filler(tt.sizeMB); gotLength != tt.wantLength {
 				t.Errorf("filler() = %v, want %v", gotLength, tt.wantLength)
+			}
+		})
+	}
+}
+
+func Test_DirExpansion(t *testing.T) {
+	h, err := os.UserHomeDir()
+	hp := filepath.Dir(h)
+	w, err := os.Getwd()
+	wp := filepath.Dir(w)
+	s := string(os.PathSeparator)
+	if err != nil {
+		t.Error(err)
+	}
+	tests := []struct {
+		name    string
+		wantDir string
+	}{
+		{"~", h},
+		{filepath.Join("~", "foo"), filepath.Join(h, "foo")},
+		{".", w},
+		{fmt.Sprintf(".%sfoo", s), filepath.Join(w, "foo")},
+		{fmt.Sprintf("..%sfoo", s), filepath.Join(wp, "foo")},
+		{fmt.Sprintf("~%s..%sfoo", s, s), filepath.Join(hp, "foo")},
+		{fmt.Sprintf("%sroot%sfoo%s..%sblah", s, s, s, s), fmt.Sprintf("root%sblah", s)},
+		{fmt.Sprintf("%sroot%sfoo%s.%sblah", s, s, s, s), fmt.Sprintf("root%sfoo%sblah", s, s)},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotDir := DirExpansion(tt.name); gotDir != tt.wantDir {
+				t.Errorf("DirExpansion(%v) = %v, want %v", tt.name, gotDir, tt.wantDir)
 			}
 		})
 	}
