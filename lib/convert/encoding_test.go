@@ -382,13 +382,13 @@ func TestSet_Newlines(t *testing.T) {
 	tests := []struct {
 		name string
 		text []byte
-		want [2]byte
+		want [2]rune
 	}{
-		{"unix", []byte("hello\x0aworld\x0a"), [2]byte{10}},
-		{"win", []byte("hello\x0d\x0aworld\x0d\x0a\x1a"), [2]byte{13, 10}},
-		{"c64", []byte("hello\x0dworld\x0d"), [2]byte{13}},
-		{"ibm", []byte("hello\x15world\x15"), [2]byte{21}},
-		{"mix", []byte("\x15Windows newline: \x0d\x0a\x15Unix newline: \x0a\x15"), [2]byte{21}},
+		{"unix", []byte("hello\x0aworld\x0a"), [2]rune{10}},
+		{"win", []byte("hello\x0d\x0aworld\x0d\x0a\x1a"), [2]rune{13, 10}},
+		{"c64", []byte("hello\x0dworld\x0d"), [2]rune{13}},
+		{"ibm", []byte("hello\x15world\x15"), [2]rune{21}},
+		{"mix", []byte("\x15Windows newline: \x0d\x0a\x15Unix newline: \x0a\x15"), [2]rune{21}},
 	}
 	for _, tt := range tests {
 		s := Set{
