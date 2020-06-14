@@ -13,4 +13,4 @@ retrotxtgo
 *.out
 
 # GoReleaser
-/dist
+/internal/dist
