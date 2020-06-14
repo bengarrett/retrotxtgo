@@ -204,21 +204,3 @@ func TestCP437Decode(t *testing.T) {
 		})
 	}
 }
-
-func TestBase64Decode(t *testing.T) {
-	const name = base + "sample.base64"
-	raw, err := ReadLine(ansiFile(), "dos")
-	if err != nil {
-		log.Fatal(err)
-	}
-	ansi, err := Base64Decode(EncodeANSI())
-	if err != nil {
-		log.Fatal(err)
-	}
-	filesystem.SaveTemp(name, []byte(EncodeANSI()))
-	filesystem.Clean(name)
-	match := (string(ansi) == raw)
-	if !match {
-		t.Errorf("Base64Decode() = %v, want %v", match, true)
-	}
-}

@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -155,21 +154,21 @@ func nl(platform string) string {
 	}
 }
 
-func asciiFile() (path string) {
-	var abs, err = filepath.Abs("ascii-logos.txt")
-	if err != nil {
-		log.Fatal(err)
-	}
-	return abs
-}
+// func asciiFile() (path string) {
+// 	var abs, err = filepath.Abs("ascii-logos.txt")
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	return abs
+// }
 
-func ansiFile() (path string) {
-	var abs, err = filepath.Abs("ZII-RTXT.ans")
-	if err != nil {
-		log.Fatal(err)
-	}
-	return abs
-}
+// func ansiFile() (path string) {
+// 	var abs, err = filepath.Abs("ZII-RTXT.ans")
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	return abs
+// }
 
 func tempFile(name string) (path string) {
 	path = name
