@@ -25,26 +25,10 @@ func (e configErr) String() string {
 
 // InitDefaults initialises flag and configuration defaults.
 func InitDefaults() {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		logs.LogCont(err)
+	for key, val := range Defaults {
+		viper.SetDefault(key, val)
+		viper.Set(key, val)
 	}
-	viper.SetDefault("create.layout", "standard")
-	viper.SetDefault("create.meta.author", "")
-	viper.SetDefault("create.meta.color-scheme", "")
-	viper.SetDefault("create.meta.description", "An example")
-	viper.SetDefault("create.meta.generator", true)
-	viper.SetDefault("create.meta.keywords", "")
-	viper.SetDefault("create.meta.notranslate", false)
-	viper.SetDefault("create.meta.referrer", "")
-	viper.SetDefault("create.meta.robots", "index")
-	viper.SetDefault("create.meta.theme-color", "")
-	viper.SetDefault("create.save-directory", home)
-	viper.SetDefault("create.server-port", 8080)
-	viper.SetDefault("create.title", "RetroTxt | example")
-	viper.SetDefault("editor", "")
-	viper.SetDefault("style.html", "lovelace")
-	viper.SetDefault("style.yaml", "monokai")
 }
 
 // SetConfig reads and loads a configuration file.

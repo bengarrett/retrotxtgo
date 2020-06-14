@@ -9,7 +9,10 @@ import (
 )
 
 func TestInitDefaults(t *testing.T) {
-	home, _ := os.UserHomeDir()
+	home, err := os.UserHomeDir()
+	if err != nil {
+		t.Error(err)
+	}
 	tests := []struct {
 		name string
 		key  string

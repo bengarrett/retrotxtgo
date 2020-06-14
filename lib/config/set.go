@@ -56,6 +56,35 @@ func (n names) String(theme bool) string {
 	return strings.Join(s, "")
 }
 
+func home() string {
+	dir, err := os.UserHomeDir()
+	if err != nil {
+		logs.LogCont(err)
+		return ""
+	}
+	return dir
+}
+
+// Defaults for configuration values.
+var Defaults = map[string]interface{}{
+	"create.layout":            "standard",
+	"create.meta.author":       "",
+	"create.meta.color-scheme": "",
+	"create.meta.description":  "An example",
+	"create.meta.generator":    true,
+	"create.meta.keywords":     "",
+	"create.meta.notranslate":  false,
+	"create.meta.referrer":     "",
+	"create.meta.robots":       "index",
+	"create.meta.theme-color":  "",
+	"create.save-directory":    home(),
+	"create.server-port":       8080,
+	"create.title":             "RetroTxt | example",
+	"editor":                   "",
+	"style.html":               "lovelace",
+	"style.yaml":               "monokai",
+}
+
 // Hints provide brief help on the config file configurations.
 var Hints = map[string]string{
 	"create.layout":            "HTML output layout",
