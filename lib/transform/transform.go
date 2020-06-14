@@ -224,6 +224,79 @@ func (s *Set) CutEOF() {
 	}
 }
 
+// Newlines will try to guess the newline representation as a 2 byte value.
+// A guess of Unix will return [10, 0], Windows [13, 10], otherwise a [0, 0] value is returned.
+func (s Set) Newlines() [2]rune {
+	// scan data for possible newlines
+	c := []struct {
+		abbr  string
+		count int
+	}{
+		{"lf", 0},   // linux, unix, amiga...
+		{"cr", 0},   // 8-bit micros
+		{"crlf", 0}, // windows, dos, cp/m...
+		{"lfcr", 0}, // acorn bbc micro
+		{"nl", 0},   // ibm ebcdic encodings
+	}
+	l := len(s.R) - 1 // range limit
+	for i, r := range s.R {
+		switch r {
+		case 10:
+			if i < l && s.R[i+1] == 13 {
+				c[3].count++ // lfcr
+				continue
+			}
+			if i != 0 && s.R[i-1] == 13 {
+				// crlf (already counted)
+				continue
+			}
+			c[0].count++
+		case 13:
+			if i < l && s.R[i+1] == 10 {
+				c[2].count++ // crlf
+				continue
+			}
+			if i != 0 && s.R[i-1] == 10 {
+				// lfcr (already counted)
+				continue
+			}
+			c[1].count++
+		case 21:
+			c[4].count++
+		case 155:
+			// atascii (not currently used)
+		}
+	}
+	// sort results
+	sort.SliceStable(c, func(i, j int) bool {
+		return c[i].count > c[j].count
+	})
+	switch c[0].abbr {
+	case "lf":
+		return [2]rune{10}
+	case "cr":
+		return [2]rune{13}
+	case "crlf":
+		return [2]rune{13, 10}
+	case "lfcr":
+		return [2]rune{10, 13}
+	case "nl":
+		return [2]rune{21}
+	}
+	return [2]rune{}
+}
+
+// Skip the rune if it matches the newline characters.
+func skip(r rune, nl [2]rune) bool {
+	switch r {
+	case 0: // avoid false positives with 1 byte newlines
+		return false
+	case nl[0], nl[1]:
+		return true
+	}
+	return false
+}
+
 // Swap transforms common ...
 func (s *Set) Swap() {
 	switch s.Encoding {
@@ -258,7 +331,7 @@ func (s *Set) Swap() {
 	}
 }
 
-// SwapANSI replaces out all ←[ and ␛[ character matches with ANSI escape controls.
+// SwapANSI replaces out all ←[ and ␛[ character matches with functional ANSI escape controls.
 func (s *Set) SwapANSI() {
 	for i, r := range s.R {
 		if i+1 >= len(s.R) {
@@ -278,13 +351,13 @@ func (s *Set) RunesControls() {
 		return
 	}
 	const z = byte(0x80)
-	nl := s.Newlines()
+	var nl [2]rune
+	if s.Newline {
+		nl = s.Newlines()
+	}
 	for i, r := range s.R {
-		if s.Newline {
-			switch fmt.Sprintf("%x", r) {
-			case fmt.Sprintf("%x", nl):
-				//continue
-			}
+		if s.Newline && skip(r, nl) {
+			continue
 		}
 		switch {
 		case r >= 0x00 && r <= 0x1f:
@@ -293,86 +366,22 @@ func (s *Set) RunesControls() {
 	}
 }
 
-// Newlines will try to guess the newline representation as a 2 byte value.
-// A guess of Unix will return [10, 0], Windows [13, 10].
-func (s Set) Newlines() [2]byte {
-	// scan data for possible newlines
-	c := []struct {
-		abbr  string
-		count int
-	}{
-		{"lf", 0},   // linux, unix, amiga...
-		{"cr", 0},   // 8-bit micros
-		{"crlf", 0}, // windows, dos, cp/m...
-		{"lfcr", 0}, // acorn bbc micro
-		{"nl", 0},   // ibm ebcdic encodings
-	}
-	l := len(s.R) - 1 // range limit
-	for i, r := range s.R {
-		fmt.Printf("%d. %x - %d\n", i, int(r), l)
-		switch r {
-		case 10:
-			if i < l && s.R[i+1] == 13 {
-				c[3].count++ // lfcr
-				continue
-			}
-			if i != 0 && s.R[i-1] == 13 {
-				// crlf (already counted)
-				continue
-			}
-			c[0].count++
-		case 13:
-			fmt.Println("-> 13")
-			if i < l && s.R[i+1] == 10 {
-				c[2].count++ // crlf
-				continue
-			}
-			if i != 0 && s.R[i-1] == 10 {
-				// lfcr (already counted)
-				continue
-			}
-			c[1].count++
-		case 21:
-			c[4].count++
-		case 155:
-			// atascii (not currently used)
-		}
-	}
-	// sort results
-	sort.SliceStable(c, func(i, j int) bool {
-		return c[i].count > c[j].count
-	})
-	fmt.Printf("-? %v\n", c)
-	switch c[0].abbr {
-	case "lf":
-		return [2]byte{10}
-	case "cr":
-		return [2]byte{13}
-	case "crlf":
-		return [2]byte{13, 10}
-	case "lfcr":
-		return [2]byte{10, 13}
-	case "nl":
-		return [2]byte{21}
-	}
-	return [2]byte{}
-}
-
 // RunesDOS switches out C0, C1 and other controls with PC/MS-DOS picture glyphs.
 func (s *Set) RunesDOS() {
 	if len(s.R) == 0 {
 		return
 	}
-	var ctrls = append(cp437C0, cp437C1...)
-
-	//nl := s.Newlines()
+	var (
+		ctrls = append(cp437C0, cp437C1...)
+		nl    [2]rune
+	)
+	if s.Newline {
+		nl = s.Newlines()
+	}
 	for i, r := range s.R {
-		// if s.Newline && i != (len(s.R)-1) {
-		// 	if fmt.Sprintf("0%x0%x", r, s.R[i+1]) == fmt.Sprintf("%x", nl) {
-		// 		fmt.Printf("---> 0%x0%x %x\n", r, s.R[i+1], nl)
-		// 		continue
-		// 	}
-		// }
+		if s.Newline && skip(r, nl) {
+			continue
+		}
 		switch {
 		case r == 0x00:
 			s.R[i] = decode(0x80) // NUL
@@ -396,7 +405,14 @@ func (s *Set) RunesEBCDIC() {
 	if len(s.R) == 0 {
 		return
 	}
+	var nl [2]rune
+	if s.Newline {
+		nl = s.Newlines()
+	}
 	for i, r := range s.R {
+		if s.Newline && skip(r, nl) {
+			continue
+		}
 		switch r {
 		case 9:
 			s.R[i] = decode(0x89) // HT
@@ -452,7 +468,14 @@ func (s *Set) RunesKOI8() {
 	if len(s.R) == 0 {
 		return
 	}
+	var nl [2]rune
+	if s.Newline {
+		nl = s.Newlines()
+	}
 	for i, r := range s.R {
+		if s.Newline && skip(r, nl) {
+			continue
+		}
 		switch {
 		case r >= 0x00 && r <= 0x1f:
 			s.R[i] = rune(32)
@@ -469,7 +492,14 @@ func (s *Set) RunesLatin() {
 	if len(s.R) == 0 {
 		return
 	}
+	var nl [2]rune
+	if s.Newline {
+		nl = s.Newlines()
+	}
 	for i, r := range s.R {
+		if s.Newline && skip(r, nl) {
+			continue
+		}
 		switch {
 		case r >= 0x00 && r <= 0x1f:
 			s.R[i] = rune(32)
@@ -484,7 +514,14 @@ func (s *Set) RunesLatin() {
 // RunesMacintosh replaces specific Mac OS Roman characters with Unicode picture represenations.
 func (s *Set) RunesMacintosh() {
 	const z = byte(0x80)
+	var nl [2]rune
+	if s.Newline {
+		nl = s.Newlines()
+	}
 	for i, r := range s.R {
+		if s.Newline && skip(r, nl) {
+			continue
+		}
 		switch r {
 		case 0x11:
 			s.R[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0x98}) // ⌘
