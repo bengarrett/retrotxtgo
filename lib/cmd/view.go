@@ -48,9 +48,11 @@ var viewCmd = &cobra.Command{
 			if t.B == nil {
 				logs.Log(errors.New("view ascii failed to pack.Get()"))
 			}
-		case "":
-			viewArgs.name = "textfiles/cp-437-all-characters.txt"
-			fallthrough
+		case "chars", "characters":
+			t.B = pack.Get("text/cp-437-all-characters.txt")
+			if t.B == nil {
+				logs.Log(errors.New("view all characters failed to pack.Get()"))
+			}
 		default:
 			t.B, err = filesystem.Read(viewArgs.name)
 			logs.Check("codepage", err)
