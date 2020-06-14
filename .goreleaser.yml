@@ -5,6 +5,7 @@ env:
 before:
   hooks:
     - go mod download
+    - gosec ./...
     - go generate ./...
 builds:
   - binary: retrotxt
