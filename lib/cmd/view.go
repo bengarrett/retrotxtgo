@@ -61,7 +61,7 @@ var viewCmd = &cobra.Command{
 		logs.Check("codepage", err)
 		t.Newline = true
 		t.Swap()
-		fmt.Println(string(t.B))
+		fmt.Println(string(t.R))
 	},
 }
 
