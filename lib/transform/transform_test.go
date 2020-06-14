@@ -377,3 +377,30 @@ func TestRunesEBCDIC(t *testing.T) {
 		})
 	}
 }
+
+func TestSet_Newlines(t *testing.T) {
+	tests := []struct {
+		name string
+		text []byte
+		want [2]byte
+	}{
+		{"unix", []byte("hello\x0aworld\x0a"), [2]byte{10}},
+		{"win", []byte("hello\x0d\x0aworld\x0d\x0a\x1a"), [2]byte{13, 10}},
+		{"c64", []byte("hello\x0dworld\x0d"), [2]byte{13}},
+		{"ibm", []byte("hello\x15world\x15"), [2]byte{21}},
+		{"mix", []byte("\x15Windows newline: \x0d\x0a\x15Unix newline: \x0a\x15"), [2]byte{21}},
+	}
+	for _, tt := range tests {
+		s := Set{
+			B: tt.text,
+		}
+		if _, err := s.Transform(""); err != nil {
+			t.Error(err)
+		}
+		t.Run(tt.name, func(t *testing.T) {
+			if got := s.Newlines(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Set.Newlines() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"sort"
 	"strings"
 	"unicode/utf8"
 
@@ -27,9 +28,14 @@ type Set struct {
 
 // Transform byte data from named character map text encoding into UTF-8.
 func (s *Set) Transform(name string) (runes int, err error) {
+	if name == "" {
+		name = "UTF-8"
+	}
 	if s.Encoding, err = Encoding(name); err != nil {
 		return runes, err
 	}
+	//fmt.Println("Encoding", s.Encoding, "is UTF-8", utf8.Valid(s.B), "length:", len(s.B))
+	//fmt.Println(convert.HexEncode(string(s.B)))
 	if len(s.B) == 0 {
 		return runes, nil
 	}
@@ -272,12 +278,84 @@ func (s *Set) RunesControls() {
 		return
 	}
 	const z = byte(0x80)
+	nl := s.Newlines()
 	for i, r := range s.R {
+		if s.Newline {
+			switch fmt.Sprintf("%x", r) {
+			case fmt.Sprintf("%x", nl):
+				//continue
+			}
+		}
 		switch {
 		case r >= 0x00 && r <= 0x1f:
 			s.R[i] = decode(byte(rune(z) + r))
 		}
 	}
+}
+
+// Newlines will try to guess the newline representation as a 2 byte value.
+// A guess of Unix will return [10, 0], Windows [13, 10].
+func (s Set) Newlines() [2]byte {
+	// scan data for possible newlines
+	c := []struct {
+		abbr  string
+		count int
+	}{
+		{"lf", 0},   // linux, unix, amiga...
+		{"cr", 0},   // 8-bit micros
+		{"crlf", 0}, // windows, dos, cp/m...
+		{"lfcr", 0}, // acorn bbc micro
+		{"nl", 0},   // ibm ebcdic encodings
+	}
+	l := len(s.R) - 1 // range limit
+	for i, r := range s.R {
+		fmt.Printf("%d. %x - %d\n", i, int(r), l)
+		switch r {
+		case 10:
+			if i < l && s.R[i+1] == 13 {
+				c[3].count++ // lfcr
+				continue
+			}
+			if i != 0 && s.R[i-1] == 13 {
+				// crlf (already counted)
+				continue
+			}
+			c[0].count++
+		case 13:
+			fmt.Println("-> 13")
+			if i < l && s.R[i+1] == 10 {
+				c[2].count++ // crlf
+				continue
+			}
+			if i != 0 && s.R[i-1] == 10 {
+				// lfcr (already counted)
+				continue
+			}
+			c[1].count++
+		case 21:
+			c[4].count++
+		case 155:
+			// atascii (not currently used)
+		}
+	}
+	// sort results
+	sort.SliceStable(c, func(i, j int) bool {
+		return c[i].count > c[j].count
+	})
+	fmt.Printf("-? %v\n", c)
+	switch c[0].abbr {
+	case "lf":
+		return [2]byte{10}
+	case "cr":
+		return [2]byte{13}
+	case "crlf":
+		return [2]byte{13, 10}
+	case "lfcr":
+		return [2]byte{10, 13}
+	case "nl":
+		return [2]byte{21}
+	}
+	return [2]byte{}
 }
 
 // RunesDOS switches out C0, C1 and other controls with PC/MS-DOS picture glyphs.
@@ -286,7 +364,15 @@ func (s *Set) RunesDOS() {
 		return
 	}
 	var ctrls = append(cp437C0, cp437C1...)
+
+	//nl := s.Newlines()
 	for i, r := range s.R {
+		// if s.Newline && i != (len(s.R)-1) {
+		// 	if fmt.Sprintf("0%x0%x", r, s.R[i+1]) == fmt.Sprintf("%x", nl) {
+		// 		fmt.Printf("---> 0%x0%x %x\n", r, s.R[i+1], nl)
+		// 		continue
+		// 	}
+		// }
 		switch {
 		case r == 0x00:
 			s.R[i] = decode(0x80) // NUL
@@ -298,6 +384,8 @@ func (s *Set) RunesDOS() {
 			s.R[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0x82}) // ⌂
 		case r == 0xff:
 			s.R[i], _ = utf8.DecodeRune([]byte{0xc2, 0xa0}) // NBSP
+		case r == 0x0d:
+			s.R[i], _ = utf8.DecodeRune([]byte("\n"))
 		}
 	}
 }
