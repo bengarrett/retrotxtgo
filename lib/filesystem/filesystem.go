@@ -309,12 +309,12 @@ func dir(name string) (path string, err error) {
 }
 
 // Save bytes to a named file location.
-func Save(name string, b []byte) (path string, err error) {
-	path, err = dir(name)
+func Save(filename string, b []byte) (path string, err error) {
+	path, err = dir(filename)
 	if err != nil {
 		return path, err
 	}
-	path = name
+	path = filename
 	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, permf)
 	if err != nil {
 		return path, err
@@ -332,7 +332,21 @@ func Save(name string, b []byte) (path string, err error) {
 	if err = file.Close(); err != nil {
 		return path, err
 	}
+	//ioutil.WriteFile(filename,data,perm)
 	return filepath.Abs(file.Name())
+}
+
+// SaveTemp saves bytes to a named temporary file.
+func SaveTemp(filename string, b []byte) (path string, err error) {
+	return Save(tempFile(filename), b)
+}
+
+func tempFile(name string) (path string) {
+	path = name
+	if filepath.Base(name) == name {
+		path = filepath.Join(os.TempDir(), name)
+	}
+	return path
 }
 
 // Touch creates an empty file at the named location.

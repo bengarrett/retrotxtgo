@@ -11,26 +11,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-func Test_Save(t *testing.T) {
-	type args struct {
-		data    []byte
-		value   string
-		changed bool
-	}
-	tests := []struct {
-		name string
-		args args
-	}{
-		// {"empty", args{nil, "", false}},
-		// {"empty", args{nil, "", true}},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			//Save(tt.args.data, tt.args.value, tt.args.changed)
-		})
-	}
-}
-
 func Test_Layouts(t *testing.T) {
 	l := Layouts()
 	if got := len(l); got != 5 {

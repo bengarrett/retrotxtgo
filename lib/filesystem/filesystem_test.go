@@ -18,7 +18,7 @@ func fileExample(s string, i int) (path string) {
 	if s == "" {
 		s = "hello world"
 	}
-	path, err := samples.Save([]byte(s), name)
+	path, err := SaveTemp(name, []byte(s))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -29,7 +29,7 @@ func fileExample(s string, i int) (path string) {
 func largeExample() (path string) {
 	const name = "rs_mega_example_save.txt"
 	_, s := filler(0.8)
-	path, err := samples.Save([]byte(s), name)
+	path, err := SaveTemp(name, []byte(s))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -40,7 +40,7 @@ func largeExample() (path string) {
 func megaExample() (path string) {
 	const name = "rs_giga_mega_save.txt"
 	_, s := filler(1.5)
-	path, err := samples.Save([]byte(s), name)
+	path, err := SaveTemp(name, []byte(s))
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -15,7 +15,7 @@ func ExampleCP437Decode() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	Save(result, name)
+	filesystem.SaveTemp(name, result)
 	t, err := ReadText(name)
 	if err != nil {
 		log.Fatal(err)
@@ -30,7 +30,7 @@ func ExampleCP437Encode() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	Save(result, name)
+	filesystem.SaveTemp(name, result)
 	t, err := ReadText(name)
 	if err != nil {
 		log.Fatal(err)
@@ -65,7 +65,7 @@ func ExampleHexEncode() {
 
 func ExampleSave() {
 	const name = base + "save.txt"
-	path, err := Save([]byte("hello world"), name)
+	path, err := filesystem.SaveTemp(name, []byte("hello world"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -81,7 +81,7 @@ func ExampleBase64Encode() {
 		log.Fatal(err)
 	}
 	fmt.Printf("source:\t%v\nresult:\t%q", b, r)
-	Save(r, name)
+	filesystem.SaveTemp(name, r)
 	t, err := ReadText(name)
 	if err != nil {
 		log.Fatal(err)
@@ -99,7 +99,7 @@ func ExampleUTF8() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	Save(result, name)
+	filesystem.SaveTemp(name, result)
 	t, err := ReadText(name)
 	if err != nil {
 		log.Fatal(err)
@@ -115,7 +115,7 @@ func ExampleUTF16BE() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	Save(result, name)
+	filesystem.SaveTemp(name, result)
 	t, err := ReadText(name)
 	if err != nil {
 		log.Fatal(err)
@@ -131,7 +131,7 @@ func ExampleUTF16LE() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	Save(result, name)
+	filesystem.SaveTemp(name, result)
 	t, err := ReadText(name)
 	if err != nil {
 		log.Fatal(err)
@@ -147,7 +147,7 @@ func BenchmarkCP437Decode(b *testing.B) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	Save(result, name)
+	filesystem.SaveTemp(name, result)
 	t, err := ReadText(name)
 	if err != nil {
 		log.Fatal(err)
@@ -215,7 +215,7 @@ func TestBase64Decode(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	Save([]byte(EncodeANSI()), name)
+	filesystem.SaveTemp(name, []byte(EncodeANSI()))
 	filesystem.Clean(name)
 	match := (string(ansi) == raw)
 	if !match {

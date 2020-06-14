@@ -155,29 +155,6 @@ func nl(platform string) string {
 	}
 }
 
-// Save bytes to a named file location or a named temporary file.
-func Save(b []byte, name string) (path string, err error) {
-	path = tempFile(name)
-	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, permf)
-	if err != nil {
-		return path, err
-	}
-	// bufio is the most performant
-	writer := bufio.NewWriter(file)
-	for _, c := range b {
-		if err = writer.WriteByte(c); err != nil {
-			return path, err
-		}
-	}
-	if err = writer.Flush(); err != nil {
-		return path, err
-	}
-	if err = file.Close(); err != nil {
-		return path, err
-	}
-	return filepath.Abs(file.Name())
-}
-
 func asciiFile() (path string) {
 	var abs, err = filepath.Abs("ascii-logos.txt")
 	if err != nil {

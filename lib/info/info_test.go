@@ -28,7 +28,7 @@ func ExampleDetail_XML() {
 }
 
 var sampleFile = func() string {
-	path, err := samples.Save([]byte(samples.Tabs), "info_test.txt")
+	path, err := filesystem.SaveTemp("info_test.txt", []byte(samples.Tabs))
 	if err != nil {
 		log.Fatal(err)
 	}

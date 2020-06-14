@@ -149,7 +149,7 @@ func Dest(args []string) (path string, err error) {
 	return path, err
 }
 
-// Save creates and saves the html template to the named file.
+// Save creates and saves the html template to the Dest argument.
 func (args Args) Save(data *[]byte) error {
 	name := args.Dest
 	stat, err := os.Stat(name)
