@@ -13,9 +13,22 @@ import (
 )
 
 const (
-	// PermF is posix permission bits for files
+	// Newlines sample using operating system defaults
+	Newlines = "a\nb\nc...\n"
+	// Symbols for Unicode Wingdings
+	Symbols = `[☠|☮|♺]`
+	// Tabs and Unicode glyphs
+	Tabs = "☠\tSkull and crossbones\n\n☮\tPeace symbol\n\n♺\tRecycling"
+	// Escapes and control codes.
+	Escapes = "bell:\a,back:\b,tab:\t,form:\f,vertical:\v,quote:\""
+	// Digits in various formats
+	Digits = "\xb0\260\u0170\U00000170"
+
+	cr = "\x0d"
+	lf = "\x0a"
+	// posix permission bits for files
 	permf os.FileMode = 0660
-	// PermD is posix permission bits for directories
+	// posix permission bits for directories
 	permd os.FileMode = 0700
 )
 
@@ -191,6 +204,47 @@ func IsWord(s string) bool {
 		s = s[size:]
 	}
 	return true
+}
+
+// ReadLine reads a named file location or a named temporary file and returns its content.
+func ReadLine(name, newline string) (text string, err error) {
+	var path, n = tempFile(name), nl(newline)
+	file, err := os.OpenFile(path, os.O_RDONLY, permf)
+	if err != nil {
+		return text, err
+	}
+	// bufio is the most performant
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		text += fmt.Sprintf("%s%s", scanner.Text(), n)
+	}
+	if err = scanner.Err(); err != nil {
+		return text, err
+	}
+	if err = file.Close(); err != nil {
+		return text, err
+	}
+	err = scanner.Err()
+	return text, err
+}
+
+// nl returns a platform's newline character.
+func nl(platform string) string {
+	switch platform {
+	case "dos", "windows":
+		return cr + lf
+	case "c64", "darwin", "mac":
+		return cr
+	case "amiga", "linux", "unix":
+		return lf
+	default: // use operating system default
+		return "\n"
+	}
+}
+
+// ReadText reads a named file location or a named temporary file and returns its content.
+func ReadText(name string) (text string, err error) {
+	return ReadLine(name, "")
 }
 
 // Read opens and returns the content of the named file.

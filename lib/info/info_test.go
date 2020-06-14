@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
-	"github.com/bengarrett/retrotxtgo/samples"
 )
 
 func ExampleDetail_XML() {
@@ -28,7 +27,7 @@ func ExampleDetail_XML() {
 }
 
 var sampleFile = func() string {
-	path, err := filesystem.SaveTemp("info_test.txt", []byte(samples.Tabs))
+	path, err := filesystem.SaveTemp("info_test.txt", []byte(filesystem.Tabs))
 	if err != nil {
 		log.Fatal(err)
 	}
