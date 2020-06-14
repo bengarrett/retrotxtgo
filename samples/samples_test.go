@@ -5,6 +5,8 @@ import (
 	"log"
 	"reflect"
 	"testing"
+
+	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 )
 
 func ExampleCP437Decode() {
@@ -33,7 +35,7 @@ func ExampleCP437Encode() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	Clean(name)
+	filesystem.Clean(name)
 	fmt.Print(len(t))
 	// Output: 8
 }
@@ -67,7 +69,7 @@ func ExampleSave() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	Clean(path)
+	filesystem.Clean(path)
 	// Output:
 }
 
@@ -84,7 +86,7 @@ func ExampleBase64Encode() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	Clean(name)
+	filesystem.Clean(name)
 	fmt.Printf("\nread:\t%q", t) //string(d))
 	// Output: source:	YQpiCmMuLi4K
 	// result:	"a\nb\nc...\n"
@@ -102,7 +104,7 @@ func ExampleUTF8() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	Clean(name)
+	filesystem.Clean(name)
 	fmt.Printf("%dB %s", len(t), t)
 	// Output: 14B [☠|☮|♺]
 }
@@ -118,7 +120,7 @@ func ExampleUTF16BE() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	Clean(name)
+	filesystem.Clean(name)
 	fmt.Print(len(t))
 	// Output: 17
 }
@@ -134,7 +136,7 @@ func ExampleUTF16LE() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	Clean(name)
+	filesystem.Clean(name)
 	fmt.Print(len(t))
 	// Output: 17
 }
@@ -214,7 +216,7 @@ func TestBase64Decode(t *testing.T) {
 		log.Fatal(err)
 	}
 	Save([]byte(EncodeANSI()), name)
-	Clean(name)
+	filesystem.Clean(name)
 	match := (string(ansi) == raw)
 	if !match {
 		t.Errorf("Base64Decode() = %v, want %v", match, true)

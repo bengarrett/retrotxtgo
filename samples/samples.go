@@ -48,13 +48,6 @@ const (
 // helpful references: How to convert from an encoding to UTF-8 in Go?
 // https://stackoverflow.com/questions/32518432/how-to-convert-from-an-encoding-to-utf-8-in-go
 
-// Clean removes the named file or directory.
-func Clean(name string) {
-	if err := os.RemoveAll(name); err != nil {
-		fmt.Fprintln(os.Stderr, "removing path:", err)
-	}
-}
-
 // CP437Decode decodes IBM Code Page 437 encoded text.
 func CP437Decode(s string) (result []byte, err error) {
 	return CPDecode(s, *charmap.CodePage437)

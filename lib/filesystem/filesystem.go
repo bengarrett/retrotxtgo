@@ -4,6 +4,7 @@ package filesystem
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -17,6 +18,13 @@ const (
 	// PermD is posix permission bits for directories
 	permd os.FileMode = 0700
 )
+
+// Clean removes the named file or directory.
+func Clean(name string) {
+	if err := os.RemoveAll(name); err != nil {
+		fmt.Fprintln(os.Stderr, "removing path:", err)
+	}
+}
 
 // Columns counts the number of characters used per line in the named file.
 func Columns(name string) (count int, err error) {

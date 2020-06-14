@@ -77,13 +77,13 @@ func filler(sizeMB float64) (length int, random string) {
 func BenchmarkReadLarge(b *testing.B) {
 	large := largeExample()
 	Read(large)
-	samples.Clean(large)
+	Clean(large)
 }
 
 func BenchmarkReadMega(b *testing.B) {
 	mega := megaExample()
 	Read(mega)
-	samples.Clean(mega)
+	Clean(mega)
 }
 
 func Test_filler(t *testing.T) {
@@ -130,8 +130,8 @@ func TestRead(t *testing.T) {
 			}
 		})
 	}
-	samples.Clean(f)
-	samples.Clean(large)
+	Clean(f)
+	Clean(large)
 }
 
 func TestReadAllBytes(t *testing.T) {
@@ -170,11 +170,11 @@ func TestReadAllBytes(t *testing.T) {
 			}
 		})
 	}
-	samples.Clean(f2)
-	samples.Clean(f3)
-	samples.Clean(f4)
-	samples.Clean(f5)
-	samples.Clean(large)
+	Clean(f2)
+	Clean(f3)
+	Clean(f4)
+	Clean(f5)
+	Clean(large)
 }
 
 func TestReadChunk(t *testing.T) {
@@ -220,11 +220,11 @@ func TestReadChunk(t *testing.T) {
 			}
 		})
 	}
-	samples.Clean(f1)
-	samples.Clean(f2)
-	samples.Clean(f3)
-	samples.Clean(f4)
-	samples.Clean(large)
+	Clean(f1)
+	Clean(f2)
+	Clean(f3)
+	Clean(f4)
+	Clean(large)
 }
 
 func TestReadTail(t *testing.T) {
@@ -267,11 +267,11 @@ func TestReadTail(t *testing.T) {
 			}
 		})
 	}
-	samples.Clean(f1)
-	samples.Clean(f2)
-	samples.Clean(f3)
-	samples.Clean(f4)
-	samples.Clean(large)
+	Clean(f1)
+	Clean(f2)
+	Clean(f3)
+	Clean(f4)
+	Clean(large)
 }
 
 func TestIsWord(t *testing.T) {

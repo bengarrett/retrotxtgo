@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/str"
-	"github.com/bengarrett/retrotxtgo/samples"
 )
 
 func TestErr_String(t *testing.T) {
@@ -152,7 +152,7 @@ func Test_save(t *testing.T) {
 			}
 		})
 	}
-	samples.Clean(file)
+	filesystem.Clean(file)
 }
 
 func TestPath(t *testing.T) {

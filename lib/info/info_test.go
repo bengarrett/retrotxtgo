@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/samples"
 )
 
@@ -19,7 +20,7 @@ func ExampleDetail_XML() {
 	var file Detail
 	file.Read(tmp)
 	data, _ := file.XML()
-	samples.Clean(tmp)
+	filesystem.Clean(tmp)
 	s := strings.ReplaceAll(string(data), "\t", "")
 	ln := strings.Split(s, "\n")
 	fmt.Println(ln[0])
@@ -82,7 +83,7 @@ func Test_Print(t *testing.T) {
 			}
 		})
 	}
-	samples.Clean(tmp)
+	filesystem.Clean(tmp)
 }
 
 func Test_File(t *testing.T) {
@@ -111,7 +112,7 @@ func Test_File(t *testing.T) {
 	if got.MD5 != want {
 		t.Errorf("Read() = %v, want %v", got.MD5, want)
 	}
-	samples.Clean(tmp)
+	filesystem.Clean(tmp)
 }
 
 func Test_parse(t *testing.T) {
@@ -148,7 +149,7 @@ func Test_parse(t *testing.T) {
 			}
 		})
 	}
-	samples.Clean(tmp)
+	filesystem.Clean(tmp)
 }
 
 func Test_JSON(t *testing.T) {
@@ -182,7 +183,7 @@ func Test_Text(t *testing.T) {
 	if got := len(d.Text(false)); got != want {
 		t.Errorf("Text() = %v, want %v", got, want)
 	}
-	samples.Clean(tmp)
+	filesystem.Clean(tmp)
 }
 
 func millennia(name string) {
