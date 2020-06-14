@@ -1,6 +1,8 @@
 //+build ignore
-// credit: https://dev.to/koddr/the-easiest-way-to-embed-static-files-into-a-binary-file-in-your-golang-app-no-external-dependencies-43pc
+
 package main
+
+// credit: https://dev.to/koddr/the-easiest-way-to-embed-static-files-into-a-binary-file-in-your-golang-app-no-external-dependencies-43pc
 
 import (
 	"bytes"
@@ -13,6 +15,8 @@ import (
 	"path/filepath"
 	"strings"
 )
+
+// TODO: compress static files as bytes and decompress with Get()
 
 const (
 	name = "blob.go"

@@ -1,6 +1,6 @@
-//go:generate go run generator.go
-
 package pack
+
+//go:generate go run generator.go
 
 type embed struct {
 	storage map[string][]byte
