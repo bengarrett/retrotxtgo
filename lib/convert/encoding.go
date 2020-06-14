@@ -73,8 +73,18 @@ func Encoding(name string) (encoding.Encoding, error) {
 	if enc, err := htmlindex.Get(name); err == nil && enc != nil {
 		return enc, err
 	}
-	// use custom/common names and aliases
-	n := strings.ToLower(name)
+	n := encodingAlias(shorten(name))
+	enc, err := ianaindex.IANA.Encoding(n)
+	if err != nil {
+		err = fmt.Errorf("%s %q → %q", err, name, n)
+		return enc, err
+	}
+	return enc, err
+}
+
+// shorten name to a custom/common names or aliases
+func shorten(name string) (n string) {
+	n = strings.ToLower(name)
 	switch {
 	case len(n) > 3 && n[:3] == "cp-":
 		n = n[3:]
@@ -98,11 +108,15 @@ func Encoding(name string) (encoding.Encoding, error) {
 		n = "iso-8859-" + n[7:]
 	case len(n) > 9 && n[:9] == "iso 8859-":
 		n = "iso-8859-" + n[9:]
-
 	}
+	return n
+}
+
+// encodingAlias returns a valid IANA index encoding name from a shorten name or alias.
+func encodingAlias(name string) (n string) {
 	// list of valid tables
 	// https://github.com/golang/text/blob/v0.3.2/encoding/charmap/maketables.go
-	switch n {
+	switch name {
 	case "37", "037":
 		n = "IBM037"
 	case "437", "dos", "ibmpc", "msdos", "us", "pc-8", "latin-us":
@@ -190,12 +204,7 @@ func Encoding(name string) (encoding.Encoding, error) {
 	case "shift jis":
 		n = "ShiftJIS"
 	}
-	enc, err := ianaindex.IANA.Encoding(n)
-	if err != nil {
-		err = fmt.Errorf("%s %q → %q", err, name, n)
-		return enc, err
-	}
-	return enc, err
+	return n
 }
 
 // MakeBytes generates an 8-bit unsigned int container ready to hold legacy code point values.
