@@ -282,11 +282,17 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 		p.PageTitle = viper.GetString("create.title")
 		p.MetaGenerator = false
 	}
-	// convert to utf8
-	var t = transform.Set{B: *b}
-	if _, err = t.Transform("cp437"); err != nil {
+	// convert encoding into utf8
+	var (
+		t   = transform.Set{B: *b}
+		enc = args.Enc
+	)
+	if enc == "" {
+		enc = "cp437"
+	}
+	if _, err = t.Transform(enc); err != nil {
 		return p, err
 	}
-	p.PreText = string(t.B)
+	p.PreText = string(t.R)
 	return p, nil
 }

@@ -282,13 +282,16 @@ op token list > https://golang.org/pkg/go/token/#Token
 - [x] config command should support the global --config flag.
 - [ ] config shell should have a `--append/source/or` flag to save shell auto-completion?
 - [ ] scan for supported but current shell configuration.
-- [ ] when using `create` detect any out of range or unsafe unicode encoding and assume cp437.
+- [x] when using `create` detect any out of range or unsafe unicode encoding and assume cp437.
 - [ ] in `create` HTML insert a header comment with source file, command flags.
 - [ ] generator meta tag should have a working date.
 - [ ] newline scanner to determine the maxWidth of the text.
 - [ ] reverse scan of file looking for EOF, SAUCE00 & COMNTT.
 - [ ] scan for unique color codes like 24-bit colors.
+- [ ] implement ASCII font and CSS support.
+- [ ] scan and linkify any http/s, ftp, mailto links in HTML.
 
+```sh
 // TODO: env
 // Indicates which language, character set, and sort order to use for messages, datatype conversions, and datetime formats.
 // 1. LC_NUMERIC="en_GB.UTF-8"
@@ -297,6 +300,7 @@ op token list > https://golang.org/pkg/go/token/#Token
 // 3. LANG=""
 // 4. LANGUAGE=""
 // 4. US
+```
 
 ---
 

@@ -33,9 +33,7 @@ func (s *Set) Transform(name string) (runes int, err error) {
 	if len(s.B) == 0 {
 		return runes, nil
 	}
-
 	s.src = s.B
-
 	// only convert if data is not UTF-8
 	if utf8.Valid(s.B) {
 		s.R = bytes.Runes(s.B)
@@ -45,7 +43,6 @@ func (s *Set) Transform(name string) (runes int, err error) {
 		return runes, err
 	}
 	s.R = bytes.Runes(s.B)
-
 	return utf8.RuneCount(s.B), nil
 }
 
