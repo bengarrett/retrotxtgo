@@ -2,15 +2,19 @@ package logs
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/lib/filesystem"
+	//"github.com/bengarrett/retrotxtgo/lib/filesystem"
+
 	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/gookit/color"
 )
 
 func TestErr_String(t *testing.T) {
+	color.Disable()
 	tests := []struct {
 		name string
 		e    Err
@@ -152,7 +156,9 @@ func Test_save(t *testing.T) {
 			}
 		})
 	}
-	filesystem.Clean(file)
+	if err := os.RemoveAll(file); err != nil {
+		fmt.Fprintln(os.Stderr, "removing path:", err)
+	}
 }
 
 func TestPath(t *testing.T) {
