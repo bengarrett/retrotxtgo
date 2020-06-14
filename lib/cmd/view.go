@@ -1,12 +1,13 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
+	"github.com/bengarrett/retrotxtgo/internal/pack"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/lib/transform"
-	"github.com/bengarrett/retrotxtgo/samples"
 	"golang.org/x/text/encoding/ianaindex"
 
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
@@ -38,11 +39,15 @@ var viewCmd = &cobra.Command{
 		)
 		switch viewArgs.name {
 		case "ansi":
-			t.B, err = samples.Base64Decode(samples.LogoANSI)
-			logs.ChkErr(logs.Err{Issue: "logoansi is invalid", Arg: htmlArgs.Src, Msg: err})
+			t.B = pack.Get("text/ZII-RTXT.ans")
+			if t.B == nil {
+				logs.Log(errors.New("view ansi failed to pack.Get()"))
+			}
 		case "ascii":
-			t.B, err = samples.Base64Decode(samples.LogoASCII)
-			logs.ChkErr(logs.Err{Issue: "logoascii is invalid", Arg: htmlArgs.Src, Msg: err})
+			t.B = pack.Get("text/ascii-logos.txt")
+			if t.B == nil {
+				logs.Log(errors.New("view ascii failed to pack.Get()"))
+			}
 		case "":
 			viewArgs.name = "textfiles/cp-437-all-characters.txt"
 			fallthrough

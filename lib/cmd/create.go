@@ -7,12 +7,12 @@ import (
 	"os"
 	"sort"
 
+	"github.com/bengarrett/retrotxtgo/internal/pack"
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/create"
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
-	"github.com/bengarrett/retrotxtgo/samples"
 	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -48,8 +48,10 @@ var createCmd = &cobra.Command{
 			switch htmlArgs.Src {
 			case "ascii":
 				// internal example
-				data, err = samples.Base64Decode(samples.LogoASCII)
-				logs.ChkErr(logs.Err{Issue: "logoascii is invalid", Arg: htmlArgs.Src, Msg: err})
+				data = pack.Get("text/ascii-logos.txt")
+				if data == nil {
+					logs.Log(errors.New("create ascii failed to pack.Get()"))
+				}
 			case "":
 				// no input (show help & exit)
 				if cmd.Flags().NFlag() == 0 {

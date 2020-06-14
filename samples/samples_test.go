@@ -61,21 +61,6 @@ func ExampleHexEncode() {
 	// Output: cdb9b0cccd [99 100 98 57 98 48 99 99 99 100]
 }
 
-func ExampleReadBytes() {
-	const name = base + "cp437.ans"
-	r, err := Base64Decode(LogoANSI)
-	if err != nil {
-		log.Fatal(err)
-	}
-	Save(r, name)
-	t, err := ReadBytes(name)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Print(len(t))
-	// Output: 26337
-}
-
 func ExampleSave() {
 	const name = base + "save.txt"
 	path, err := Save([]byte("hello world"), name)
@@ -84,21 +69,6 @@ func ExampleSave() {
 	}
 	Clean(path)
 	// Output:
-}
-
-func ExampleBase64Decode() {
-	const name = base + "cp437.ans"
-	r, err := Base64Decode(LogoANSI)
-	if err != nil {
-		log.Fatal(err)
-	}
-	Save(r, name)
-	t, err := ReadText(name)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Print(len(t))
-	// Output: 26369
 }
 
 func ExampleBase64Encode() {
