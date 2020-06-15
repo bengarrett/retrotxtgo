@@ -34,34 +34,33 @@ var viewCmd = &cobra.Command{
 	Short: "Print a legacy text file to the standard output",
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
+			b   []byte
+			r   []rune
 			err error
-			t   convert.Set
 		)
 		switch viewArgs.name {
 		case "ansi":
-			t.B = pack.Get("text/ZII-RTXT.ans")
-			if t.B == nil {
+			b = pack.Get("text/ZII-RTXT.ans")
+			if b == nil {
 				logs.Log(errors.New("view ansi failed to pack.Get()"))
 			}
 		case "ascii":
-			t.B = pack.Get("text/ascii-logos.txt")
-			if t.B == nil {
+			b = pack.Get("text/ascii-logos.txt")
+			if b == nil {
 				logs.Log(errors.New("view ascii failed to pack.Get()"))
 			}
 		case "chars", "characters":
-			t.B = pack.Get("text/cp-437-all-characters.txt")
-			if t.B == nil {
+			b = pack.Get("text/cp-437-all-characters.txt")
+			if b == nil {
 				logs.Log(errors.New("view all characters failed to pack.Get()"))
 			}
 		default:
-			t.B, err = filesystem.Read(viewArgs.name)
+			b, err = filesystem.Read(viewArgs.name)
 			logs.Check("codepage", err)
 		}
-		_, err = t.Transform(viewArgs.cp)
-		logs.Check("codepage", err)
-		t.Newline = true
-		t.Swap()
-		fmt.Println(string(t.R))
+		r, err = convert.Text(viewArgs.cp, &b)
+		logs.Check("view.convert.text", err)
+		fmt.Println(string(r))
 	},
 }
 

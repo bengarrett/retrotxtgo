@@ -17,6 +17,32 @@ import (
 	"golang.org/x/text/encoding/japanese"
 )
 
+// Chars transforms legacy encoded characters and text control codes into UTF-8 characters.
+func Chars(encoding string, b *[]byte) (utf8 []rune, err error) {
+	var t = Set{
+		B:       *b,
+		Newline: false,
+	}
+	if _, err = t.Transform(encoding); err != nil {
+		return nil, err
+	}
+	t.Swap()
+	return t.R, nil
+}
+
+// Text transforms legacy encoded text into modern UTF-8 text.
+func Text(encoding string, b *[]byte) (utf8 []rune, err error) {
+	var t = Set{
+		B:       *b,
+		Newline: true,
+	}
+	if _, err = t.Transform(encoding); err != nil {
+		return nil, err
+	}
+	t.Swap()
+	return t.R, nil
+}
+
 // Set data for transformation into UTF-8.
 type Set struct {
 	B        []byte

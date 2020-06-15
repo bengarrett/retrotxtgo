@@ -3,11 +3,11 @@ package convert
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"math"
 	"strings"
 	"text/tabwriter"
 
+	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/gookit/color"
 )
@@ -34,14 +34,10 @@ func Table(name string) (*bytes.Buffer, error) {
 		}
 	}
 	row := 0
-	// init codepage table
-	s := Set{B: MakeBytes()}
-	if _, err = s.Transform(name); err != nil {
-		log.Fatal(err)
-	}
-	s.Newline = false
-	s.Swap()
-	for i, r := range s.R {
+	var b = MakeBytes()
+	runes, err := Chars(name, &b)
+	logs.Check("convert.table.chars", err)
+	for i, r := range runes {
 		char := string(r)
 		switch {
 		case i == 0:
