@@ -51,7 +51,7 @@ type Set struct {
 	newline bool
 }
 
-// Transform byte data from named character map text encoding into UTF-8.
+// Transform byte data from named character map encoded text into UTF-8.
 func (s *Set) Transform(name string) (runes int, err error) {
 	if name == "" {
 		name = "UTF-8"
@@ -240,8 +240,8 @@ func MakeBytes() (m []byte) {
 	return m
 }
 
-// AddBOM adds a UTF-8 byte order mark if it doesn't already exist.
-func AddBOM(b []byte) []byte {
+// Mark adds a UTF-8 byte order mark to the text if it doesn't already exist.
+func Mark(b []byte) []byte {
 	if len(b) > 2 {
 		if t := b[:3]; bytes.Equal(t, BOM()) {
 			return b
