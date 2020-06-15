@@ -21,7 +21,7 @@ import (
 func Chars(encoding string, b *[]byte) (utf8 []rune, err error) {
 	var t = Set{
 		B:       *b,
-		Newline: false,
+		newline: false,
 	}
 	if _, err = t.Transform(encoding); err != nil {
 		return nil, err
@@ -34,7 +34,7 @@ func Chars(encoding string, b *[]byte) (utf8 []rune, err error) {
 func Text(encoding string, b *[]byte) (utf8 []rune, err error) {
 	var t = Set{
 		B:       *b,
-		Newline: true,
+		newline: true,
 	}
 	if _, err = t.Transform(encoding); err != nil {
 		return nil, err
@@ -43,13 +43,12 @@ func Text(encoding string, b *[]byte) (utf8 []rune, err error) {
 	return t.R, nil
 }
 
-// Set data for transformation into UTF-8.
+// Set data for transformation to UTF-8.
 type Set struct {
-	B        []byte
-	R        []rune
-	Encoding encoding.Encoding
-	Newline  bool
-	src      []byte
+	B       []byte
+	R       []rune
+	encode  encoding.Encoding
+	newline bool
 }
 
 // Transform byte data from named character map text encoding into UTF-8.
@@ -57,7 +56,7 @@ func (s *Set) Transform(name string) (runes int, err error) {
 	if name == "" {
 		name = "UTF-8"
 	}
-	if s.Encoding, err = Encoding(name); err != nil {
+	if s.encode, err = Encoding(name); err != nil {
 		return runes, err
 	}
 	//fmt.Println("Encoding", s.Encoding, "is UTF-8", utf8.Valid(s.B), "length:", len(s.B))
@@ -65,13 +64,12 @@ func (s *Set) Transform(name string) (runes int, err error) {
 	if len(s.B) == 0 {
 		return runes, nil
 	}
-	s.src = s.B
 	// only convert if data is not UTF-8
 	if utf8.Valid(s.B) {
 		s.R = bytes.Runes(s.B)
 		return utf8.RuneCount(s.B), nil
 	}
-	if s.B, err = s.Encoding.NewDecoder().Bytes(s.B); err != nil {
+	if s.B, err = s.encode.NewDecoder().Bytes(s.B); err != nil {
 		return runes, err
 	}
 	s.R = bytes.Runes(s.B)
@@ -334,7 +332,7 @@ func skip(r rune, nl [2]rune) bool {
 
 // Swap transforms common ...
 func (s *Set) Swap() {
-	switch s.Encoding {
+	switch s.encode {
 	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
 		s.RunesEBCDIC()
 	case charmap.CodePage437, charmap.CodePage850, charmap.CodePage852, charmap.CodePage855,
@@ -387,11 +385,11 @@ func (s *Set) RunesControls() {
 	}
 	const z = byte(0x80)
 	var nl [2]rune
-	if s.Newline {
+	if s.newline {
 		nl = s.Newlines()
 	}
 	for i, r := range s.R {
-		if s.Newline && skip(r, nl) {
+		if s.newline && skip(r, nl) {
 			continue
 		}
 		switch {
@@ -410,11 +408,11 @@ func (s *Set) RunesDOS() {
 		ctrls = append(cp437C0, cp437C1...)
 		nl    [2]rune
 	)
-	if s.Newline {
+	if s.newline {
 		nl = s.Newlines()
 	}
 	for i, r := range s.R {
-		if s.Newline && skip(r, nl) {
+		if s.newline && skip(r, nl) {
 			continue
 		}
 		switch {
@@ -441,11 +439,11 @@ func (s *Set) RunesEBCDIC() {
 		return
 	}
 	var nl [2]rune
-	if s.Newline {
+	if s.newline {
 		nl = s.Newlines()
 	}
 	for i, r := range s.R {
-		if s.Newline && skip(r, nl) {
+		if s.newline && skip(r, nl) {
 			continue
 		}
 		switch r {
@@ -504,11 +502,11 @@ func (s *Set) RunesKOI8() {
 		return
 	}
 	var nl [2]rune
-	if s.Newline {
+	if s.newline {
 		nl = s.Newlines()
 	}
 	for i, r := range s.R {
-		if s.Newline && skip(r, nl) {
+		if s.newline && skip(r, nl) {
 			continue
 		}
 		switch {
@@ -528,11 +526,11 @@ func (s *Set) RunesLatin() {
 		return
 	}
 	var nl [2]rune
-	if s.Newline {
+	if s.newline {
 		nl = s.Newlines()
 	}
 	for i, r := range s.R {
-		if s.Newline && skip(r, nl) {
+		if s.newline && skip(r, nl) {
 			continue
 		}
 		switch {
@@ -550,11 +548,11 @@ func (s *Set) RunesLatin() {
 func (s *Set) RunesMacintosh() {
 	const z = byte(0x80)
 	var nl [2]rune
-	if s.Newline {
+	if s.newline {
 		nl = s.Newlines()
 	}
 	for i, r := range s.R {
-		if s.Newline && skip(r, nl) {
+		if s.newline && skip(r, nl) {
 			continue
 		}
 		switch r {
