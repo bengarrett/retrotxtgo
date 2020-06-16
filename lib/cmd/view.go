@@ -50,7 +50,7 @@ var viewCmd = &cobra.Command{
 				logs.Log(errors.New("view ascii failed to pack.Get()"))
 			}
 		case "chars", "characters":
-			b = pack.Get("text/cp-437-all-characters.txt")
+			b = pack.Get("text/cp-437-all-characters_crlf.txt")
 			if b == nil {
 				logs.Log(errors.New("view all characters failed to pack.Get()"))
 			}
