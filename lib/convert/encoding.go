@@ -280,6 +280,7 @@ func (d *Data) Swap() *Data {
 	}
 	if d.newline {
 		d.Newlines()
+		println("using as newline:", fmt.Sprintf("%01d %01d", d.newlines[0], d.newlines[1]))
 	}
 	switch d.encode {
 	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
@@ -320,7 +321,7 @@ func (d *Data) ANSI() {
 		log.Fatal(errors.New("ANSI() is a chain method that is to be used in conjuction with Swap: d.Swap().ANSI()"))
 	}
 	for i, r := range d.Runes {
-		if i+1 >= len(d.Runes) {
+		if i+1 >= d.len {
 			continue
 		}
 		if r == 8592 && d.Runes[i+1] == 91 {
@@ -403,7 +404,8 @@ func (d *Data) RunesControls() {
 		return
 	}
 	const z = byte(0x80)
-	for i, r := range d.Runes {
+	for i := 0; i < d.len; i++ {
+		r := d.Runes[i]
 		if d.skipRune(i) {
 			i++
 			continue
@@ -425,7 +427,8 @@ func (d *Data) RunesDOS() {
 		c1    = []string{"\u25BA", "\u25C4", "\u2195", "\u203C", "\u00B6", "\u00A7", "\u25AC", "\u21A8", "\u2191", "\u2193", "\u2192", "\u2190", "\u221F", "\u2194", "\u25B2", "\u25BC"}
 		ctrls = append(c0, c1...)
 	)
-	for i, r := range d.Runes {
+	for i := 0; i < d.len; i++ {
+		r := d.Runes[i]
 		if d.skipRune(i) {
 			i++
 			continue
@@ -445,39 +448,14 @@ func (d *Data) RunesDOS() {
 	}
 }
 
-func (d *Data) skipRune(i int) bool {
-	var l, r0, r1 = d.len - 1, d.Runes[i], rune(0)
-	if i < l {
-		// check for multi-byte newlines
-		r1 = d.Runes[i+1]
-	}
-	if d.newline && equalNL([2]rune{r0, r1}, d.newlines) {
-		return true
-	}
-	return false
-}
-
-// equalNL reports whether r matches the single or multi-byte, newline character runes.
-func equalNL(r [2]rune, nl [2]rune) bool {
-	// single-byte newline
-	if nl[1] == 0 {
-		if nl[0] == r[0] {
-			return true
-		}
-		return false
-	}
-	// mutli-byte
-	return bytes.Equal([]byte{byte(r[0]), byte(r[1])},
-		[]byte{byte(nl[0]), byte(nl[1])})
-}
-
 // RunesEBCDIC switches out EBCDIC IBM mainframe controls with Unicode picture represenations.
 // Where no appropriate picture exists a space is used.
 func (d *Data) RunesEBCDIC() {
 	if len(d.Runes) == 0 {
 		return
 	}
-	for i, r := range d.Runes {
+	for i := 0; i < d.len; i++ {
+		r := d.Runes[i]
 		if d.skipRune(i) {
 			i++
 			continue
@@ -537,7 +515,8 @@ func (d *Data) RunesKOI8() {
 	if len(d.Runes) == 0 {
 		return
 	}
-	for i, r := range d.Runes {
+	for i := 0; i < d.len; i++ {
+		r := d.Runes[i]
 		if d.skipRune(i) {
 			i++
 			continue
@@ -558,7 +537,8 @@ func (d *Data) RunesLatin() {
 	if len(d.Runes) == 0 {
 		return
 	}
-	for i, r := range d.Runes {
+	for i := 0; i < d.len; i++ {
+		r := d.Runes[i]
 		if d.skipRune(i) {
 			i++
 			continue
@@ -577,7 +557,8 @@ func (d *Data) RunesLatin() {
 // RunesMacintosh replaces specific Mac OS Roman characters with Unicode picture represenations.
 func (d *Data) RunesMacintosh() {
 	const z = byte(0x80)
-	for i, r := range d.Runes {
+	for i := 0; i < d.len; i++ {
+		r := d.Runes[i]
 		if d.skipRune(i) {
 			i++
 			continue
@@ -620,4 +601,30 @@ func (d *Data) RunesWindows() {
 func decode(b byte) (r rune) {
 	r, _ = utf8.DecodeRune([]byte{0xe2, 0x90, b})
 	return r
+}
+
+// equalNL reports whether r matches the single or multi-byte, newline character runes.
+func equalNL(r [2]rune, nl [2]rune) bool {
+	// single-byte newline
+	if nl[1] == 0 {
+		if nl[0] == r[0] {
+			return true
+		}
+		return false
+	}
+	// mutli-byte
+	return bytes.Equal([]byte{byte(r[0]), byte(r[1])},
+		[]byte{byte(nl[0]), byte(nl[1])})
+}
+
+func (d *Data) skipRune(i int) bool {
+	var l, r0, r1 = d.len - 1, d.Runes[i], rune(0)
+	if i < l {
+		// check for multi-byte newlines
+		r1 = d.Runes[i+1]
+	}
+	if d.newline && equalNL([2]rune{r0, r1}, d.newlines) {
+		return true
+	}
+	return false
 }
