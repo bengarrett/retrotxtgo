@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/bengarrett/retrotxtgo/internal/pack"
 	"github.com/bengarrett/retrotxtgo/lib/convert"
@@ -39,6 +40,15 @@ var viewCmd = &cobra.Command{
 			err error
 		)
 		switch viewArgs.name {
+		case "chars", "characters":
+			b = pack.Get("text/cp-437-all-characters_lf.txt")
+			if b == nil {
+				logs.Log(errors.New("view all characters failed to pack.Get()"))
+			}
+			r, err = convert.Dump(viewArgs.cp, &b)
+			logs.Check("view.convert.text", err)
+			fmt.Println(string(r))
+			os.Exit(0)
 		case "ansi":
 			b = pack.Get("text/ZII-RTXT.ans")
 			if b == nil {
@@ -48,11 +58,6 @@ var viewCmd = &cobra.Command{
 			b = pack.Get("text/ascii-logos.txt")
 			if b == nil {
 				logs.Log(errors.New("view ascii failed to pack.Get()"))
-			}
-		case "chars", "characters":
-			b = pack.Get("text/cp-437-all-characters_crlf.txt")
-			if b == nil {
-				logs.Log(errors.New("view all characters failed to pack.Get()"))
 			}
 		default:
 			b, err = filesystem.Read(viewArgs.name)

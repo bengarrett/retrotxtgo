@@ -4,6 +4,7 @@ package convert
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 	"sort"
@@ -30,8 +31,9 @@ func Chars(encoding string, b *[]byte) (utf8 []rune, err error) {
 	return d.Runes, nil
 }
 
-// Text transforms legacy encoded text into modern UTF-8 text.
-func Text(encoding string, b *[]byte) (utf8 []rune, err error) {
+// Dump transforms legacy encoded text or ANSI into modern UTF-8 text
+// including all text contained after any MS-DOS end-of-file markers.
+func Dump(encoding string, b *[]byte) (utf8 []rune, err error) {
 	var d = Data{
 		Source:  *b,
 		newline: true,
@@ -39,47 +41,35 @@ func Text(encoding string, b *[]byte) (utf8 []rune, err error) {
 	if _, err = d.Transform(encoding); err != nil {
 		return nil, err
 	}
-	d.Swap()
+	d.Swap().ANSI()
 	return d.Runes, nil
 }
 
-// Data for the transformation of legacy encoded text to UTF-8.
-type Data struct {
-	Source  []byte            // Source legacy encoded text.
-	encode  encoding.Encoding // Source character set encoding
-	newline bool              // use newline controls
-	Runes   []rune            // Runes with UTF-8 text.
-	len     int               // Runes count
-}
-
-// Transform byte data from named character map encoded text into UTF-8.
-func (d *Data) Transform(name string) (runes int, err error) {
-	if name == "" {
-		name = "UTF-8"
+// Text transforms legacy encoded text or ANSI into modern UTF-8 text.
+func Text(encoding string, b *[]byte) (utf8 []rune, err error) {
+	var d = Data{
+		Source:  *b,
+		newline: true,
 	}
-	if d.encode, err = Encoding(name); err != nil {
-		return runes, err
+	d.Source = EndOfFile(*b)
+	if _, err = d.Transform(encoding); err != nil {
+		return nil, err
 	}
-	if len(d.Source) == 0 {
-		return runes, nil
-	}
-	// only convert if data is not UTF-8
-	if utf8.Valid(d.Source) {
-		d.Runes = bytes.Runes(d.Source)
-		d.len = len(d.Runes)
-		return d.len, nil
-	}
-	if d.Source, err = d.encode.NewDecoder().Bytes(d.Source); err != nil {
-		return runes, err
-	}
-	d.Runes = bytes.Runes(d.Source)
-	d.len = len(d.Runes)
-	return d.len, nil
+	d.Swap().ANSI()
+	return d.Runes, nil
 }
 
 // BOM is the UTF-8 byte order mark prefix.
-var BOM = func() []byte {
+func BOM() []byte {
 	return []byte{239, 187, 191} // 0xEF,0xBB,0xBF
+}
+
+// EndOfFile will cut text at the first DOS end-of-file marker.
+func EndOfFile(b []byte) []byte {
+	if cut := bytes.IndexByte(b, 26); cut > 0 {
+		return b[:cut]
+	}
+	return b
 }
 
 // Encoding returns the named character set encoding.
@@ -100,6 +90,25 @@ func Encoding(name string) (encoding.Encoding, error) {
 		return enc, err
 	}
 	return enc, err
+}
+
+// MakeBytes generates a 256 character or 8-bit container ready to hold legacy code point values.
+func MakeBytes() (m []byte) {
+	m = make([]byte, 256)
+	for i := 0; i <= 255; i++ {
+		m[i] = uint8(i)
+	}
+	return m
+}
+
+// Mark adds a UTF-8 byte order mark to the text if it doesn't already exist.
+func Mark(b []byte) []byte {
+	if len(b) > 2 {
+		if t := b[:3]; bytes.Equal(t, BOM()) {
+			return b
+		}
+	}
+	return append(BOM(), b...)
 }
 
 // shorten name to a custom/common names or aliases
@@ -228,29 +237,93 @@ func encodingAlias(name string) (n string) {
 	return n
 }
 
-// MakeBytes generates an 8-bit unsigned int container ready to hold legacy code point values.
-func MakeBytes() (m []byte) {
-	m = make([]byte, 256)
-	for i := 0; i <= 255; i++ {
-		m[i] = uint8(i)
-	}
-	return m
+// Data for the transformation of legacy encoded text to UTF-8.
+type Data struct {
+	Source  []byte            // Source legacy encoded text.
+	encode  encoding.Encoding // Source character set encoding
+	newline bool              // use newline controls
+	Runes   []rune            // Runes with UTF-8 text.
+	len     int               // Runes count
 }
 
-// Mark adds a UTF-8 byte order mark to the text if it doesn't already exist.
-func Mark(b []byte) []byte {
-	if len(b) > 2 {
-		if t := b[:3]; bytes.Equal(t, BOM()) {
-			return b
+// Transform byte data from named character map encoded text into UTF-8.
+func (d *Data) Transform(name string) (*Data, error) {
+	if name == "" {
+		name = "UTF-8"
+	}
+	var err error
+	if d.encode, err = Encoding(name); err != nil {
+		return d, err
+	}
+	if len(d.Source) == 0 {
+		return d, nil
+	}
+	// only convert if data is not UTF-8
+	if utf8.Valid(d.Source) {
+		d.Runes = bytes.Runes(d.Source)
+		d.len = len(d.Runes)
+		return d, nil
+	}
+	if d.Source, err = d.encode.NewDecoder().Bytes(d.Source); err != nil {
+		return d, err
+	}
+	d.Runes = bytes.Runes(d.Source)
+	d.len = len(d.Runes)
+	return d, nil
+}
+
+// Swap transforms character map and control codes into UTF-8 unicode runes.
+func (d *Data) Swap() *Data {
+	if d.len == 0 {
+		return nil
+	}
+	switch d.encode {
+	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
+		d.RunesEBCDIC()
+	case charmap.CodePage437, charmap.CodePage850, charmap.CodePage852, charmap.CodePage855,
+		charmap.CodePage858, charmap.CodePage860, charmap.CodePage862, charmap.CodePage863,
+		charmap.CodePage865, charmap.CodePage866:
+		d.RunesDOS()
+	case charmap.ISO8859_1, charmap.ISO8859_2, charmap.ISO8859_3, charmap.ISO8859_4, charmap.ISO8859_5,
+		charmap.ISO8859_6, charmap.ISO8859_7, charmap.ISO8859_8, charmap.ISO8859_9, charmap.ISO8859_10,
+		charmap.ISO8859_13, charmap.ISO8859_14, charmap.ISO8859_15, charmap.ISO8859_16,
+		charmap.Windows874:
+		d.RunesLatin()
+	case charmap.ISO8859_6E, charmap.ISO8859_6I, charmap.ISO8859_8E, charmap.ISO8859_8I:
+		d.RunesControls()
+		d.RunesLatin()
+	case charmap.KOI8R, charmap.KOI8U:
+		d.RunesKOI8()
+	case charmap.Macintosh:
+		d.RunesMacintosh()
+	case charmap.Windows1250, charmap.Windows1251, charmap.Windows1252, charmap.Windows1253,
+		charmap.Windows1254, charmap.Windows1255, charmap.Windows1256, charmap.Windows1257, charmap.Windows1258:
+		d.RunesControls()
+		d.RunesWindows()
+	case japanese.ShiftJIS:
+		log.Fatal("japanese character sets are not working")
+		// d.RunesControls()
+		// d.RunesShiftJIS()
+	default:
+		d.RunesControls()
+	}
+	return d
+}
+
+// ANSI replaces out all ←[ and ␛[ character matches with functional ANSI escape controls.
+func (d *Data) ANSI() {
+	if d.len == 0 {
+		log.Fatal(errors.New("ANSI() method must only be used in conjuction with Swap(). d.Swap().ANSI()"))
+	}
+	for i, r := range d.Runes {
+		if i+1 >= len(d.Runes) {
+			continue
 		}
-	}
-	return append(BOM(), b...)
-}
-
-// CutEOF cut text at the first DOS end-of-file marker.
-func (d *Data) CutEOF() {
-	if cut := bytes.IndexByte(d.Source, 26); cut > 0 {
-		d.Source = d.Source[:cut]
+		if r == 8592 && d.Runes[i+1] == 91 {
+			d.Runes[i] = 27 // replace ←[
+		} else if r == 9243 && d.Runes[i+1] == 91 {
+			d.Runes[i] = 27 // replace ␛[
+		}
 	}
 }
 
@@ -290,6 +363,8 @@ func (d Data) Newlines() [2]rune {
 				// lfcr (already counted)
 				continue
 			}
+			// carriage return on modern terminals will overwrite the existing line of text
+			// todo: add flag or change behaviour to replace CR (\r) with NL (\n)
 			c[1].count++
 		case 21:
 			c[4].count++
@@ -325,57 +400,6 @@ func skip(r rune, nl [2]rune) bool {
 		return true
 	}
 	return false
-}
-
-// Swap transforms character map and control codes into UTF-8 unicode runes.
-func (d *Data) Swap() {
-	switch d.encode {
-	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
-		d.RunesEBCDIC()
-	case charmap.CodePage437, charmap.CodePage850, charmap.CodePage852, charmap.CodePage855,
-		charmap.CodePage858, charmap.CodePage860, charmap.CodePage862, charmap.CodePage863,
-		charmap.CodePage865, charmap.CodePage866:
-		d.RunesDOS()
-	case charmap.ISO8859_1, charmap.ISO8859_2, charmap.ISO8859_3, charmap.ISO8859_4, charmap.ISO8859_5,
-		charmap.ISO8859_6, charmap.ISO8859_7, charmap.ISO8859_8, charmap.ISO8859_9, charmap.ISO8859_10,
-		charmap.ISO8859_13, charmap.ISO8859_14, charmap.ISO8859_15, charmap.ISO8859_16,
-		charmap.Windows874:
-		d.RunesLatin()
-	case charmap.ISO8859_6E, charmap.ISO8859_6I, charmap.ISO8859_8E, charmap.ISO8859_8I:
-		d.RunesControls()
-		d.RunesLatin()
-	case charmap.KOI8R, charmap.KOI8U:
-		d.RunesKOI8()
-	case charmap.Macintosh:
-		d.RunesMacintosh()
-	case charmap.Windows1250, charmap.Windows1251, charmap.Windows1252, charmap.Windows1253,
-		charmap.Windows1254, charmap.Windows1255, charmap.Windows1256, charmap.Windows1257, charmap.Windows1258:
-		d.RunesControls()
-		d.RunesWindows()
-	case japanese.ShiftJIS:
-		log.Fatal("japanese character sets are not working")
-		// d.RunesControls()
-		// d.RunesShiftJIS()
-	default:
-		d.RunesControls()
-	}
-}
-
-// SwapANSI replaces out all ←[ and ␛[ character matches with functional ANSI escape controls.
-func (d *Data) SwapANSI() {
-	if len(d.Runes) == 0 {
-		return
-	}
-	for i, r := range d.Runes {
-		if i+1 >= len(d.Runes) {
-			continue
-		}
-		if r == 8592 && d.Runes[i+1] == 91 {
-			d.Runes[i] = 27 // replace ←[
-		} else if r == 9243 && d.Runes[i+1] == 91 {
-			d.Runes[i] = 27 // replace ␛[
-		}
-	}
 }
 
 // RunesControls switches out C0 and C1 ASCII controls with Unicode picture represenations.

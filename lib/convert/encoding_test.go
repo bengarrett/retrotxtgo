@@ -45,7 +45,7 @@ func TestSet_Transform(t *testing.T) {
 	}
 }
 
-func TestSet_SwapANSI(t *testing.T) {
+func TestANSI(t *testing.T) {
 	tests := []struct {
 		name     string
 		codepage string
@@ -64,8 +64,7 @@ func TestSet_SwapANSI(t *testing.T) {
 			data := Data{}
 			data.Source = []byte(tt.str)
 			_, err := data.Transform(tt.codepage)
-			data.Swap()
-			data.SwapANSI()
+			data.Swap().ANSI()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Data.Transform() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -177,12 +176,30 @@ func TestMakeBytes(t *testing.T) {
 	}
 }
 
-func TestCutEOF(t *testing.T) {
+func TestEndOfFileX(t *testing.T) {
 	b := []byte("hello\x1aworld")
-	d := Data{Source: b}
-	d.CutEOF()
-	if string(d.Source) != "hello" {
-		t.Errorf("TestCutEOF() = %v, want %v", string(d.Source), "hello")
+	if got := EndOfFile(b); string(got) != "hello" {
+		t.Errorf("TestEndOfFile() = %v, want %v", string(got), "hello")
+	}
+}
+
+func TestEndOfFile(t *testing.T) {
+	tests := []struct {
+		name string
+		b    []byte
+		want []byte
+	}{
+		{"empty", nil, nil},
+		{"none", []byte("hello world"), []byte("hello world")},
+		{"one", []byte("hello\x1aworld"), []byte("hello")},
+		{"two", []byte("hello\x1aworld\x1athis should be hidden"), []byte("hello\x1aworld")},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := EndOfFile(tt.b); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("EndOfFile() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
 
