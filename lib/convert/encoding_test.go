@@ -192,7 +192,7 @@ func TestEndOfFile(t *testing.T) {
 		{"empty", nil, nil},
 		{"none", []byte("hello world"), []byte("hello world")},
 		{"one", []byte("hello\x1aworld"), []byte("hello")},
-		{"two", []byte("hello\x1aworld\x1athis should be hidden"), []byte("hello\x1aworld")},
+		{"two", []byte("hello\x1aworld\x1athis should be hidden"), []byte("hello")},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
