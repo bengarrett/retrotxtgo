@@ -64,14 +64,6 @@ func BOM() []byte {
 	return []byte{239, 187, 191} // 0xEF,0xBB,0xBF
 }
 
-// EndOfFile will cut text at the first DOS end-of-file marker.
-func EndOfFile(b []byte) []byte {
-	if cut := bytes.IndexByte(b, 26); cut > 0 {
-		return b[:cut]
-	}
-	return b
-}
-
 // Encoding returns the named character set encoding.
 func Encoding(name string) (encoding.Encoding, error) {
 	// use iana names or alias
@@ -90,6 +82,14 @@ func Encoding(name string) (encoding.Encoding, error) {
 		return enc, err
 	}
 	return enc, err
+}
+
+// EndOfFile will cut text at the first DOS end-of-file marker.
+func EndOfFile(b []byte) []byte {
+	if cut := bytes.IndexByte(b, 26); cut > 0 {
+		return b[:cut]
+	}
+	return b
 }
 
 // MakeBytes generates a 256 character or 8-bit container ready to hold legacy code point values.
@@ -239,11 +239,12 @@ func encodingAlias(name string) (n string) {
 
 // Data for the transformation of legacy encoded text to UTF-8.
 type Data struct {
-	Source  []byte            // Source legacy encoded text.
-	encode  encoding.Encoding // Source character set encoding
-	newline bool              // use newline controls
-	Runes   []rune            // Runes with UTF-8 text.
-	len     int               // Runes count
+	Source   []byte            // Source legacy encoded text.
+	encode   encoding.Encoding // Source character set encoding
+	newline  bool              // use newline controls
+	newlines [2]rune           // the newline controls rune values
+	Runes    []rune            // Runes with UTF-8 text.
+	len      int               // Runes count
 }
 
 // Transform byte data from named character map encoded text into UTF-8.
@@ -258,7 +259,7 @@ func (d *Data) Transform(name string) (*Data, error) {
 	if len(d.Source) == 0 {
 		return d, nil
 	}
-	// only convert if data is not UTF-8
+	// only transform source if it is not already UTF-8
 	if utf8.Valid(d.Source) {
 		d.Runes = bytes.Runes(d.Source)
 		d.len = len(d.Runes)
@@ -313,7 +314,7 @@ func (d *Data) Swap() *Data {
 // ANSI replaces out all ←[ and ␛[ character matches with functional ANSI escape controls.
 func (d *Data) ANSI() {
 	if d.len == 0 {
-		log.Fatal(errors.New("ANSI() method must only be used in conjuction with Swap(). d.Swap().ANSI()"))
+		log.Fatal(errors.New("ANSI() is a chain method that is to be used in conjuction with Swap: d.Swap().ANSI()"))
 	}
 	for i, r := range d.Runes {
 		if i+1 >= len(d.Runes) {
@@ -329,7 +330,7 @@ func (d *Data) ANSI() {
 
 // Newlines will try to guess the newline representation as a 2 byte value.
 // A guess of Unix will return [10, 0], Windows [13, 10], otherwise a [0, 0] value is returned.
-func (d Data) Newlines() [2]rune {
+func (d *Data) Newlines() [2]rune {
 	// scan data for possible newlines
 	c := []struct {
 		abbr  string
@@ -378,17 +379,19 @@ func (d Data) Newlines() [2]rune {
 	})
 	switch c[0].abbr {
 	case "lf":
-		return [2]rune{10}
+		d.newlines = [2]rune{10}
 	case "cr":
-		return [2]rune{13}
+		d.newlines = [2]rune{13}
 	case "crlf":
-		return [2]rune{13, 10}
+		d.newlines = [2]rune{13, 10}
 	case "lfcr":
-		return [2]rune{10, 13}
+		d.newlines = [2]rune{10, 13}
 	case "nl":
-		return [2]rune{21}
+		d.newlines = [2]rune{21}
+	default:
+		d.newlines = [2]rune{}
 	}
-	return [2]rune{}
+	return d.newlines
 }
 
 // Skip the rune if it matches the newline characters.
@@ -432,17 +435,12 @@ func (d *Data) RunesDOS() {
 		c0    = []string{"\u0000", "\u263A", "\u263B", "\u2665", "\u2666", "\u2663", "\u2660", "\u2022", "\u25D8", "\u25CB", "\u25D9", "\u2642", "\u2640", "\u266A", "\u266B", "\u263C"}
 		c1    = []string{"\u25BA", "\u25C4", "\u2195", "\u203C", "\u00B6", "\u00A7", "\u25AC", "\u21A8", "\u2191", "\u2193", "\u2192", "\u2190", "\u221F", "\u2194", "\u25B2", "\u25BC"}
 		ctrls = append(c0, c1...)
-		nl    [2]rune
 	)
 	if d.newline {
-		nl = d.Newlines()
+		d.Newlines()
 	}
-	for i, l := 0, len(d.Runes)-1; i <= l; i++ {
-		var n, r = rune(0), d.Runes[i]
-		if i < l {
-			n = d.Runes[i+1]
-		}
-		if d.newline && skipX([]rune{r, n}, nl) {
+	for i, r := range d.Runes {
+		if d.skipRune(i) {
 			i++
 			continue
 		}
@@ -461,19 +459,30 @@ func (d *Data) RunesDOS() {
 	}
 }
 
-// Skip the rune if it matches the newline characters.
-func skipX(r []rune, nl [2]rune) bool {
+func (d *Data) skipRune(i int) bool {
+	var l, r0, r1 = d.len - 1, d.Runes[i], rune(0)
+	if i < l {
+		// check for multi-byte newlines
+		r1 = d.Runes[i+1]
+	}
+	if d.newline && equalNL([2]rune{r0, r1}, d.newlines) {
+		return true
+	}
+	return false
+}
+
+// equalNL reports whether r matches the single or multi-byte, newline character runes.
+func equalNL(r [2]rune, nl [2]rune) bool {
+	// single-byte newline
 	if nl[1] == 0 {
-		// single-byte NL
 		if nl[0] == r[0] {
 			return true
 		}
 		return false
 	}
-	if bytes.Compare([]byte{byte(r[0]), byte(r[1])}, []byte{byte(nl[0]), byte(nl[1])}) == 0 {
-		return true
-	}
-	return false
+	// mutli-byte
+	return bytes.Equal([]byte{byte(r[0]), byte(r[1])},
+		[]byte{byte(nl[0]), byte(nl[1])})
 }
 
 // RunesEBCDIC switches out EBCDIC IBM mainframe controls with Unicode picture represenations.
