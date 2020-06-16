@@ -278,6 +278,9 @@ func (d *Data) Swap() *Data {
 	if d.len == 0 {
 		return nil
 	}
+	if d.newline {
+		d.Newlines()
+	}
 	switch d.encode {
 	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
 		d.RunesEBCDIC()
@@ -394,29 +397,15 @@ func (d *Data) Newlines() [2]rune {
 	return d.newlines
 }
 
-// Skip the rune if it matches the newline characters.
-func skip(r rune, nl [2]rune) bool {
-	switch r {
-	case 0: // avoid false positives with 1 byte newlines
-		return false
-	case nl[0], nl[1]:
-		return true
-	}
-	return false
-}
-
 // RunesControls switches out C0 and C1 ASCII controls with Unicode picture represenations.
 func (d *Data) RunesControls() {
 	if len(d.Runes) == 0 {
 		return
 	}
 	const z = byte(0x80)
-	var nl [2]rune
-	if d.newline {
-		nl = d.Newlines()
-	}
 	for i, r := range d.Runes {
-		if d.newline && skip(r, nl) {
+		if d.skipRune(i) {
+			i++
 			continue
 		}
 		switch {
@@ -436,9 +425,6 @@ func (d *Data) RunesDOS() {
 		c1    = []string{"\u25BA", "\u25C4", "\u2195", "\u203C", "\u00B6", "\u00A7", "\u25AC", "\u21A8", "\u2191", "\u2193", "\u2192", "\u2190", "\u221F", "\u2194", "\u25B2", "\u25BC"}
 		ctrls = append(c0, c1...)
 	)
-	if d.newline {
-		d.Newlines()
-	}
 	for i, r := range d.Runes {
 		if d.skipRune(i) {
 			i++
@@ -491,12 +477,9 @@ func (d *Data) RunesEBCDIC() {
 	if len(d.Runes) == 0 {
 		return
 	}
-	var nl [2]rune
-	if d.newline {
-		nl = d.Newlines()
-	}
 	for i, r := range d.Runes {
-		if d.newline && skip(r, nl) {
+		if d.skipRune(i) {
+			i++
 			continue
 		}
 		switch r {
@@ -554,12 +537,9 @@ func (d *Data) RunesKOI8() {
 	if len(d.Runes) == 0 {
 		return
 	}
-	var nl [2]rune
-	if d.newline {
-		nl = d.Newlines()
-	}
 	for i, r := range d.Runes {
-		if d.newline && skip(r, nl) {
+		if d.skipRune(i) {
+			i++
 			continue
 		}
 		switch {
@@ -578,12 +558,9 @@ func (d *Data) RunesLatin() {
 	if len(d.Runes) == 0 {
 		return
 	}
-	var nl [2]rune
-	if d.newline {
-		nl = d.Newlines()
-	}
 	for i, r := range d.Runes {
-		if d.newline && skip(r, nl) {
+		if d.skipRune(i) {
+			i++
 			continue
 		}
 		switch {
@@ -600,12 +577,9 @@ func (d *Data) RunesLatin() {
 // RunesMacintosh replaces specific Mac OS Roman characters with Unicode picture represenations.
 func (d *Data) RunesMacintosh() {
 	const z = byte(0x80)
-	var nl [2]rune
-	if d.newline {
-		nl = d.Newlines()
-	}
 	for i, r := range d.Runes {
-		if d.newline && skip(r, nl) {
+		if d.skipRune(i) {
+			i++
 			continue
 		}
 		switch r {
