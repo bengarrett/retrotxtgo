@@ -51,6 +51,7 @@ func Text(encoding string, b *[]byte) (utf8 []rune, err error) {
 		Source:  *b,
 		newline: true,
 	}
+	// TODO: gracefully handle horizontal tabs
 	d.Source = EndOfFile(*b)
 	if _, err = d.Transform(encoding); err != nil {
 		return nil, err
