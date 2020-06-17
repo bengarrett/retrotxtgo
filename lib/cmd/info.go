@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/info"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
@@ -10,35 +8,28 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var infoArgs struct {
-	filename string
-	format   string
+var infoFlag struct {
+	format string
 }
 
 // infoCmd represents the info command
 var infoCmd = &cobra.Command{
-	Use:   "info",
-	Short: "Information on a text file",
+	Use:     "info [filenames]",
+	Short:   "Information on a text file",
+	Example: "  retrotxt info text.asc logo.jpg\n  retrotxt info file.txt --format=json",
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := info.Info(infoArgs.filename, infoArgs.format); err.Msg != nil {
-			if fmt.Sprint(err.Msg) == "format:invalid" {
-				err := cmd.Usage()
-				logs.Check("info usage:", err)
-				fmt.Println()
-				logs.CheckFlag("format", infoArgs.format, config.Format.Info)
+		checkUse(cmd, args)
+		for _, arg := range args {
+			if e := info.Info(arg, infoFlag.format); e.Msg != nil {
+				cmd.Usage()
+				logs.ChkErr(e)
 			}
-			logs.ChkErr(err)
 		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(infoCmd)
-	infoCmd.Flags().StringVarP(&infoArgs.filename, "name", "n", "",
-		str.Required("text file to analyse")+"\n")
-	infoCmd.Flags().StringVarP(&infoArgs.format, "format", "f", "color",
+	infoCmd.Flags().StringVarP(&infoFlag.format, "format", "f", "color",
 		str.Options("output format", config.Format.Info, true))
-	err := infoCmd.MarkFlagRequired("name")
-	logs.Check("name flag", err)
-	infoCmd.Flags().SortFlags = false
 }
