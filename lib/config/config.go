@@ -74,6 +74,7 @@ func UpdateConfig(name string, print bool) (err error) {
 	if name == "" {
 		name = viper.ConfigFileUsed()
 	}
+	// TODO: only save permitted settings, add comments.
 	out, err := yaml.Marshal(viper.AllSettings())
 	if err != nil {
 		return err

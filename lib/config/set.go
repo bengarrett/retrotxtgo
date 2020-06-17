@@ -81,8 +81,8 @@ var Defaults = map[string]interface{}{
 	"create.server-port":       8080,
 	"create.title":             "RetroTxt | example",
 	"editor":                   "",
+	"style.info":               "dracula",
 	"style.html":               "lovelace",
-	"style.yaml":               "monokai",
 }
 
 // Hints provide brief help on the config file configurations.
@@ -102,8 +102,8 @@ var Hints = map[string]string{
 	"create.server-port":       "port which the internal web server will use",
 	"create.title":             "page title that is shown in a browser title bar or tab",
 	"editor":                   "text editor to launch when using " + str.Example("config edit"),
+	"style.info":               "syntax highlighter for the config info output",
 	"style.html":               "syntax highlighter for html previews",
-	"style.yaml":               "syntax highlighter for info and version commands",
 }
 
 var setupMode = false
@@ -246,11 +246,11 @@ func Set(name string) {
 	case "editor":
 		fmt.Println("Set a " + Hints[name] + ":")
 		setEditor(name)
+	case "style.info":
+		fmt.Printf("Set a new %s syntax style:\n%s\n", str.Example("config info"), str.Ci(Names()))
+		setStrings(name, styles.Names())
 	case "style.html":
 		fmt.Printf("Set a new HTML syntax style:\n%s\n", str.Ci(Names()))
-		setStrings(name, styles.Names())
-	case "style.yaml":
-		fmt.Printf("Set a new YAML syntax style:\n%s\n", str.Ci(Names()))
 		setStrings(name, styles.Names())
 	default:
 		setMeta(name, value)

@@ -82,7 +82,7 @@ var configInfoCmd = &cobra.Command{
 		if configFlag.configs {
 			config.List()
 		} else if configFlag.list {
-			str.YamlStyles("retrotxt info --style")
+			str.JSONStyles("retrotxt info --style")
 		} else if e := config.Info(configFlag.style); e.Err != nil {
 			e.Exit(1)
 		}
@@ -94,7 +94,7 @@ var configSetCmd = &cobra.Command{
 	Short: "Change a Retrotxt setting",
 	Example: str.Example("  retrotxt config set --name create.meta.description") +
 		" # to change the meta description setting\n" +
-		str.Example("  retrotxt config set --name style.yaml") +
+		str.Example("  retrotxt config set style.info") +
 		"          # to set the version command output format",
 	Run: func(cmd *cobra.Command, args []string) {
 		config.Set(configFlag.set)
@@ -165,7 +165,7 @@ func init() {
 	// info
 	configInfoCmd.Flags().BoolVarP(&configFlag.configs, "configs", "c", false,
 		"list all the available configuration settings")
-	configInfoCmd.Flags().StringVarP(&configFlag.style, "style", "s", "monokai",
+	configInfoCmd.Flags().StringVarP(&configFlag.style, "style", "s", "dracula",
 		"choose a syntax highligher")
 	configInfoCmd.Flags().BoolVarP(&configFlag.list, "list", "l", false,
 		"list and preview the available syntax highlighers")

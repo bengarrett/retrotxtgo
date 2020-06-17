@@ -3,6 +3,7 @@ package str
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
@@ -16,37 +17,37 @@ import (
 	"github.com/alecthomas/chroma/quick"
 	"github.com/alecthomas/chroma/styles"
 	"github.com/gookit/color"
-	"gopkg.in/yaml.v3"
 )
 
 // TestMode disables piping detection which conflicts with go test
 var TestMode = false
 
-// YamlExample is a YAML example
-type YamlExample struct {
+// JSONExample is used for previewing color themes
+type JSONExample struct {
 	Style struct {
-		Name    string `yaml:"name"`
-		Count   int    `yaml:"count"`
-		Default bool   `yaml:"default"`
+		Name    string `json:"name"`
+		Count   int    `json:"count"`
+		Default bool   `json:"default"`
 	}
 }
 
-func (s YamlExample) String(flag string) {
+func (s JSONExample) String(flag string) {
 	fmt.Println()
-	out, _ := yaml.Marshal(s)
-	Highlight(string(out), "yaml", s.Style.Name)
+	// config is stored as YAML but printed as JSON
+	out, _ := json.MarshalIndent(s, "", "  ")
 	if flag != "" {
-		fmt.Println(color.Secondary.Sprintf("%s=%q", flag, s.Style.Name))
+		fmt.Println("\n" + color.Secondary.Sprintf("%s=%q", flag, s.Style.Name))
 	}
+	Highlight(string(out), "json", s.Style.Name)
 }
 
-// YamlStyles prints out a list of available YAML color styles.
-func YamlStyles(cmd string) {
+// JSONStyles prints out a list of available YAML color styles.
+func JSONStyles(cmd string) {
 	for i, s := range styles.Names() {
-		var styles YamlExample
+		var styles JSONExample
 		styles.Style.Name = s
 		styles.Style.Count = i
-		if s == "monokai" {
+		if s == "dracula" {
 			styles.Style.Default = true
 		}
 		styles.String(cmd)
