@@ -88,7 +88,7 @@ func SetConfig(flag string) {
 		}
 		PrintLocation()
 	}
-	// else internal configuration settings are used
+	// otherwise settings are loaded from default config
 }
 
 // PrintLocation prints the location of the current configuration file.
