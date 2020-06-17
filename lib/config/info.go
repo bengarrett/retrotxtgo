@@ -1,51 +1,65 @@
 package config
 
 import (
-	"bytes"
+	"encoding/json"
 	"fmt"
 	"strings"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/gookit/color"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v3"
 )
 
 // Info prints the content of a configuration file.
 func Info(style string) (err logs.IssueErr) {
 	fmt.Println(str.Cp("RetroTxt default configurations when no flags are given."))
 	PrintLocation()
-	if m := missing(); len(m) > 0 {
-		fmt.Printf("These settings are missing should be configured: %s\n", strings.Join(m, ", "))
-	}
-
-	// ignore unknown or invalid settings in the config file
-	// TODO: break into a func and create a count func
-	// if config is missing settings. list those settings and their values at the bottom of config info
-	var used = make(map[string]interface{})
-	for _, key := range viper.AllKeys() {
-		if d := Defaults[key]; d != nil {
-			used[key] = viper.Get(key)
-		}
-	}
-	out, e := yaml.Marshal(used)
+	out, e := json.MarshalIndent(Enabled(), "", " ")
 	if e != nil {
 		return logs.IssueErr{
 			Issue: "failed to read configuration in yaml syntax",
 			Err:   e,
 		}
 	}
-	out = bytes.ReplaceAll(out, []byte("    "), []byte("  "))
 	switch style {
 	case "none", "":
 		fmt.Println(string(out))
 	default:
-		str.Highlight(string(out), "yaml", style)
+		str.Highlight(string(out), "json", style)
+	}
+	if m := Missing(); len(m) > 0 {
+		s := "These settings are missing and should be configured"
+		if len(m) == 1 {
+			s = "This setting is missing and should be configured"
+		}
+		fmt.Printf("\n\n%s:\n%s\n\n%s:\n", color.Warn.Sprint(s),
+			strings.Join(m, ", "), color.Warn.Sprint("To repair"))
+		if len(m) < 5 {
+			fmt.Print(str.Example(fmt.Sprintf("retrotxt config set %s\n", strings.Join(m, " "))))
+		} else {
+			fmt.Print(str.Example(fmt.Sprintf("retrotxt config set setup\n")))
+		}
 	}
 	return logs.IssueErr{}
 }
 
-func missing() (list []string) {
+// Enabled returns all the Viper keys holding a value that are used by RetroTxt.
+// This will hide all unrecognised manual edits to the configuration file.
+func Enabled() map[string]interface{} {
+	var sets = make(map[string]interface{})
+	for _, key := range viper.AllKeys() {
+		if d := Defaults[key]; d != nil {
+			sets[key] = viper.Get(key)
+		}
+	}
+	return sets
+}
+
+// Missing lists the settings that are not found in the configuration file.
+// This could be due to new features being added after the file was generated
+// or because of manual edits.
+func Missing() (list []string) {
 	d, l := len(Defaults), len(viper.AllSettings())
 	if d == l {
 		return list

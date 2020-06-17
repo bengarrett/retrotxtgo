@@ -95,8 +95,7 @@ func SetConfig(flag string) {
 func PrintLocation() {
 	s := str.Cb(fmt.Sprintf("Config file: %s",
 		viper.ConfigFileUsed()))
-	d, l := len(Defaults), len(viper.AllKeys())
-	if diff := d - l; diff > 0 {
+	if diff := len(Missing()); diff > 0 {
 		if diff == 1 {
 			s += str.Cb(fmt.Sprint(" (1 setting is missing)"))
 		} else {
