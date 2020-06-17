@@ -45,6 +45,15 @@ func Check(issue string, err error) (ok bool) {
 	return true
 }
 
+// CheckCont prints an error issue and message then continues the program.
+func CheckCont(issue string, err error) (ok bool) {
+	if err != nil {
+		check(issue, err)
+		return false
+	}
+	return true
+}
+
 func check(issue string, err error) (msg string, code int) {
 	code = 1
 	if err == nil {
