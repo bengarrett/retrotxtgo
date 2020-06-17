@@ -6,7 +6,6 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/lib/version"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 type versionFlags struct {
@@ -44,12 +43,8 @@ if it is launched through an operating system symlink.`,
 }
 
 func init() {
-	// cfgs saved
-	versionFlag.format = viper.GetString("format.version")
 	// cmds and flags
 	rootCmd.AddCommand(versionCmd)
 	versionCmd.Flags().StringVarP(&versionFlag.format, "format", "f", versionFlag.format,
 		str.Options("output format", config.Format.Version, true))
-	err := viper.BindPFlag("format.version", versionCmd.Flags().Lookup("format"))
-	logs.Check("format.version", err)
 }
