@@ -32,11 +32,8 @@ var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Configure and save settings for RetroTxt",
 	Run: func(cmd *cobra.Command, args []string) {
-		err := cmd.Usage()
-		logs.Check("config usage:", err)
-		if len(args) != 0 || cmd.Flags().NFlag() != 0 {
-			logs.CheckCmd(args)
-		}
+		checkUse(cmd, args)
+		logs.CheckCmd(args)
 	},
 }
 
