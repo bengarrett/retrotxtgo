@@ -42,6 +42,7 @@ func Execute() {
 func init() {
 	// OnInitialize will not run if there is no provided command.
 	cobra.OnInitialize(initConfig)
+	// TODO: get viper to flag file autocomplete
 	rootCmd.PersistentFlags().StringVar(&rootFlag.config, "config", "",
 		"optional config file location")
 }
