@@ -92,10 +92,9 @@ func viewPackage(name string) (ok bool, err error) {
 
 // viewCmd represents the view command
 var viewCmd = &cobra.Command{
-	Use:   "view",
+	Use:   "view [filenames]",
 	Short: "Print a legacy text file to the standard output",
-	Example: `  retrotxt view [filenames] [flags]
-  retrotxt view file.txt -c latin1
+	Example: `  retrotxt view file.txt -c latin1
   retrotxt view file1.txt file2.txt --codepage="iso-8859-1"`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
