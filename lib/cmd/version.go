@@ -9,13 +9,18 @@ import (
 	"github.com/spf13/viper"
 )
 
-var versionFmt string
+type versionFlags struct {
+	format string
+}
 
-// versionCmd represents the version command
+var versionFlag = versionFlags{
+	format: "color",
+}
+
 var versionCmd = &cobra.Command{
 	Use:     "version",
 	Aliases: []string{"ver"},
-	Example: "  retrotxt version --format=text",
+	Example: "  retrotxt version --format=text\n  retrotxt ver -f t",
 	Short:   "Version information for RetroTxt",
 	Long: `Version information for Retrotxt
 
@@ -32,16 +37,18 @@ The shown ` + str.Cc("RetroTxt URL") + ` is the weblink to the application Githu
 ` + str.Cc("Binary") + ` should return the path name of this program. It maybe inaccurate
 if it is launched through an operating system symlink.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if ok := version.Print(viper.GetString("format.version")); !ok {
-			logs.CheckFlag("format", versionFmt, config.Format.Version)
+		if ok := version.Print(versionFlag.format); !ok {
+			logs.CheckFlag("format", versionFlag.format, config.Format.Version)
 		}
 	},
 }
 
 func init() {
+	// cfgs saved
+	versionFlag.format = viper.GetString("format.version")
+	// cmds and flags
 	rootCmd.AddCommand(versionCmd)
-	versionCmd.Flags().StringVarP(&versionFmt, "format", "f",
-		viper.GetString("format.version"),
+	versionCmd.Flags().StringVarP(&versionFlag.format, "format", "f", versionFlag.format,
 		str.Options("output format", config.Format.Version, true))
 	err := viper.BindPFlag("format.version", versionCmd.Flags().Lookup("format"))
 	logs.Check("format.version", err)
