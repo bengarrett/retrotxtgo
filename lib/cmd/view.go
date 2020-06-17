@@ -15,13 +15,53 @@ import (
 )
 
 type viewFlags struct {
-	cp    string
-	name  string
-	width int
+	codepage string
+	width    int // TODO: not implemented
 }
 
-var viewArgs = viewFlags{
-	cp: "CP437",
+var viewFlag = viewFlags{
+	codepage: "CP437",
+	width:    80,
+}
+
+// viewCmd represents the view command
+var viewCmd = &cobra.Command{
+	Use:   "view [filenames]",
+	Short: "Print a legacy text file to the standard output",
+	Example: `  retrotxt view file.txt -c latin1
+  retrotxt view file1.txt file2.txt --codepage="iso-8859-1"`,
+	Run: func(cmd *cobra.Command, args []string) {
+		checkUse(cmd, args)
+		for i, arg := range args {
+			if ok, err := viewPackage(arg); err != nil {
+				logs.CheckCont("view.pack", err)
+				continue
+			} else if ok {
+				continue
+			}
+			b, err := filesystem.Read(arg)
+			if ok := logs.CheckCont("view.codepage", err); !ok {
+				continue
+			}
+			r, err := convert.Text(viewFlag.codepage, &b)
+			if ok := logs.CheckCont("view.convert.text", err); !ok {
+				continue
+			}
+			fmt.Println(string(r))
+			if i < len(args) {
+				fmt.Print("\n")
+			}
+		}
+	},
+}
+
+func init() {
+	// view cmd
+	rootCmd.AddCommand(viewCmd)
+	viewCmd.Flags().StringVarP(&viewFlag.codepage, "codepage", "c", viewFlag.codepage,
+		"legacy character encoding used by the text file")
+	viewCmd.Flags().IntVarP(&viewFlag.width, "width", "w", viewFlag.width, "document column character width")
+	viewCmd.Flags().SortFlags = false
 }
 
 type viewPack struct {
@@ -73,56 +113,14 @@ func viewPackage(name string) (ok bool, err error) {
 	var r []rune
 	switch pkg.convert {
 	case "d":
-		if r, err = convert.Dump(viewArgs.cp, &b); err != nil {
+		if r, err = convert.Dump(viewFlag.codepage, &b); err != nil {
 			return false, err
 		}
 	case "", "t":
-		if r, err = convert.Text(viewArgs.cp, &b); err != nil {
+		if r, err = convert.Text(viewFlag.codepage, &b); err != nil {
 			return false, err
 		}
 	}
 	fmt.Println(string(r))
 	return true, nil
-}
-
-// viewCmd represents the view command
-var viewCmd = &cobra.Command{
-	Use:   "view [filenames]",
-	Short: "Print a legacy text file to the standard output",
-	Example: `  retrotxt view file.txt -c latin1
-  retrotxt view file1.txt file2.txt --codepage="iso-8859-1"`,
-	Run: func(cmd *cobra.Command, args []string) {
-		checkUse(cmd, args)
-		for i, arg := range args {
-			ok, err := viewPackage(arg)
-			logs.Check("view.pack", err)
-			if ok {
-				continue
-				//os.Exit(0)
-			}
-			b, err := filesystem.Read(arg)
-			logs.Check("view.codepage", err)
-			r, err := convert.Text(viewArgs.cp, &b)
-			logs.Check("view.convert.text", err)
-			fmt.Println(string(r))
-			if i < len(args) {
-				fmt.Print("\n")
-			}
-		}
-	},
-}
-
-func init() {
-	// view cmd
-	rootCmd.AddCommand(viewCmd)
-	// viewCmd.Flags().StringVarP(&viewArgs.name, "name", "n", "",
-	// 	str.Required("text file to display")+"\n")
-	viewCmd.Flags().StringVarP(&viewArgs.cp, "codepage", "c", "cp437",
-		"legacy character encoding used by the text file")
-	viewCmd.Flags().IntVarP(&viewArgs.width, "width", "w", 80, "document column character width")
-	//	err := viewCmd.MarkFlagFilename("name")
-	//	logs.Check("view.filename", err)
-	// err = viewCmd.MarkFlagRequired("name")
-	// logs.Check("view.required", err)
-	viewCmd.Flags().SortFlags = false
 }
