@@ -73,16 +73,19 @@ var DTFormat = "DMY24"
 // Info parses the named file and prints out its details in a specific syntax.
 func Info(name, format string) (err logs.Err) {
 	if name == "" {
-		return logs.Err{Issue: "info", Arg: "name", Msg: errors.New("value cannot be empty")}
+		return logs.Err{Issue: "info", Arg: "name",
+			Msg: errors.New("value cannot be empty")}
 	}
 	if s, err := os.Stat(name); os.IsNotExist(err) {
-		return logs.Err{Issue: "info --name", Arg: name, Msg: errors.New("file does not exist")}
+		return logs.Err{Issue: "info", Arg: name,
+			Msg: errors.New("file does not exist")}
 	} else if err != nil {
-		return logs.Err{Issue: "info --name", Arg: name, Msg: err}
+		return logs.Err{Issue: "info", Arg: name, Msg: err}
 	} else if s.IsDir() {
-		return logs.Err{Issue: "info --name", Arg: name, Msg: errors.New("directories are not usable with this command")}
+		return logs.Err{Issue: "info", Arg: name,
+			Msg: errors.New("directories are not usable with this command")}
 	} else if e := Print(name, format); e != nil {
-		return logs.Err{Issue: "info print", Arg: format, Msg: e}
+		return logs.Err{Issue: "info.print", Arg: format, Msg: e}
 	}
 	return err
 }
