@@ -92,11 +92,7 @@ var viewCmd = &cobra.Command{
 	Example: `  retrotxt view file.txt -c latin1
   retrotxt view file1.txt file2.txt --codepage="iso-8859-1"`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			err := cmd.Usage()
-			logs.Check("view.usage", err)
-			os.Exit(0)
-		}
+		checkUse(cmd, args)
 		for i, arg := range args {
 			ok, err := viewPackage(arg)
 			logs.Check("view.pack", err)

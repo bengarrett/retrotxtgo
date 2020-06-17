@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/bengarrett/retrotxtgo/lib/convert"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
@@ -16,11 +15,7 @@ var listCmd = &cobra.Command{
 	Short:   "Available codepages and tabled datasets",
 	Example: "  retrotxt list codepages\n  retrotxt list table cp437  \n  retrotxt list tables",
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			err := cmd.Usage()
-			logs.Check("list.usage", err)
-			os.Exit(0)
-		}
+		checkUse(cmd, args)
 	},
 }
 
@@ -34,11 +29,12 @@ var listCmdCodepages = &cobra.Command{
 }
 
 var listCmdTable = &cobra.Command{
-	Use:     "table [codepages]",
+	Use:     "table [codepage names or aliases]",
 	Aliases: []string{"t"},
 	Short:   "display one or more tables showing the codepage and all their characters",
-	Example: "  retrotxt table cp437\n  retrotxt table cp437 latin1 windows-1252",
+	Example: "  retrotxt table cp437\n  retrotxt table cp437 latin1 windows-1252\n  retrotxt table iso-8859-15",
 	Run: func(cmd *cobra.Command, args []string) {
+		checkUse(cmd, args)
 		for _, arg := range args {
 			table, err := convert.Table(arg)
 			if err != nil {
