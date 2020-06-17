@@ -8,11 +8,10 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/internal/pack"
 	"github.com/bengarrett/retrotxtgo/lib/convert"
+	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"golang.org/x/text/encoding/ianaindex"
-
-	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 
 	"github.com/spf13/cobra"
 )
@@ -26,21 +25,14 @@ type viewFlags struct {
 }
 
 var viewArgs = viewFlags{
-	cp:      "cp437",
+	cp:      "CP437",
 	formats: []string{"color", "text"},
 }
-
-var viewTypes = []string{"chars", "dump", "text"}
 
 type viewPack struct {
 	convert string
 	name    string
 }
-
-// TODO: replace --name with args.
-// have a fileexist check for rare possible conflicting names.
-// retrotxt view filename.txt
-// retrotxt view rt.ansi <- ...
 
 var viewPacks = map[string]viewPack{
 	"437.cr":        {"d", "text/cp437-cr.txt"},
@@ -69,8 +61,8 @@ var viewPacks = map[string]viewPack{
 	"utf16.le":      {"", "text/utf-16-le.txt"},
 }
 
-func viewPackage() (ok bool, err error) {
-	var s = strings.ToLower(viewArgs.name)
+func viewPackage(name string) (ok bool, err error) {
+	var s = strings.ToLower(name)
 	if _, err := os.Stat(s); !os.IsNotExist(err) {
 		return false, nil
 	}
@@ -102,22 +94,35 @@ func viewPackage() (ok bool, err error) {
 var viewCmd = &cobra.Command{
 	Use:   "view",
 	Short: "Print a legacy text file to the standard output",
+	Example: `  retrotxt view [filenames] [flags]
+  retrotxt view file.txt -c latin1
+  retrotxt view file1.txt file2.txt --codepage="iso-8859-1"`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("args: %+v\n", args)
-		ok, err := viewPackage()
-		logs.Check("view.pack", err)
-		if ok {
+		if len(args) == 0 {
+			err := cmd.Usage()
+			logs.Check("view.usage", err)
 			os.Exit(0)
 		}
-		b, err := filesystem.Read(viewArgs.name)
-		logs.Check("view.codepage", err)
-		r, err := convert.Text(viewArgs.cp, &b)
-		logs.Check("view.convert.text", err)
-		fmt.Println(string(r))
+		for i, arg := range args {
+			ok, err := viewPackage(arg)
+			logs.Check("view.pack", err)
+			if ok {
+				continue
+				//os.Exit(0)
+			}
+			b, err := filesystem.Read(arg)
+			logs.Check("view.codepage", err)
+			r, err := convert.Text(viewArgs.cp, &b)
+			logs.Check("view.convert.text", err)
+			fmt.Println(string(r))
+			if i < len(args) {
+				fmt.Print("\n")
+			}
+		}
 	},
 }
 
-var viewCodePagesCmd = &cobra.Command{
+var viewCmdCodepages = &cobra.Command{
 	Use:   "codepages",
 	Short: "list available legacy codepages that RetroTxt can convert into UTF-8",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -125,7 +130,7 @@ var viewCodePagesCmd = &cobra.Command{
 	},
 }
 
-var viewTableCmd = &cobra.Command{
+var viewCmdTable = &cobra.Command{
 	Use:   "table",
 	Short: "display a table showing the codepage and all its characters",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -135,7 +140,7 @@ var viewTableCmd = &cobra.Command{
 	},
 }
 
-var viewTablesCmd = &cobra.Command{
+var viewCmdTables = &cobra.Command{
 	Use:   "tables",
 	Short: "display tables showing known codepages and characters",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -160,24 +165,24 @@ var viewTablesCmd = &cobra.Command{
 func init() {
 	// view cmd
 	rootCmd.AddCommand(viewCmd)
-	viewCmd.Flags().StringVarP(&viewArgs.name, "name", "n", "",
-		str.Required("text file to display")+"\n")
+	// viewCmd.Flags().StringVarP(&viewArgs.name, "name", "n", "",
+	// 	str.Required("text file to display")+"\n")
 	viewCmd.Flags().StringVarP(&viewArgs.cp, "codepage", "c", "cp437",
 		"legacy character encoding used by the text file")
 	viewCmd.Flags().StringVarP(&viewArgs.format, "format", "f", "color",
 		str.Options("output format", viewArgs.formats, true))
 	viewCmd.Flags().IntVarP(&viewArgs.width, "width", "w", 80, "document column character width")
-	err := viewCmd.MarkFlagFilename("name")
-	logs.Check("view.filename", err)
-	err = viewCmd.MarkFlagRequired("name")
-	logs.Check("view.required", err)
+	//	err := viewCmd.MarkFlagFilename("name")
+	//	logs.Check("view.filename", err)
+	// err = viewCmd.MarkFlagRequired("name")
+	// logs.Check("view.required", err)
 	viewCmd.Flags().SortFlags = false
 	// codepages cmd
-	viewCmd.AddCommand(viewCodePagesCmd)
+	viewCmd.AddCommand(viewCmdCodepages)
 	// table cmd
-	viewCmd.AddCommand(viewTableCmd)
-	viewTableCmd.Flags().StringVarP(&viewArgs.cp, "codepage", "c", "cp437",
+	viewCmd.AddCommand(viewCmdTable)
+	viewCmdTable.Flags().StringVarP(&viewArgs.cp, "codepage", "c", "cp437",
 		"legacy character encoding table to display")
 	// tables cmd
-	viewCmd.AddCommand(viewTablesCmd)
+	viewCmd.AddCommand(viewCmdTables)
 }

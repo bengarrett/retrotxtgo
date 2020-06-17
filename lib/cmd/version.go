@@ -14,7 +14,7 @@ var versionFmt string
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:     "version",
-	Aliases: []string{"ver", "v"},
+	Aliases: []string{"ver"},
 	Example: "  retrotxt version --format=text",
 	Short:   "Version information for RetroTxt",
 	Long: `Version information for Retrotxt
