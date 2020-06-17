@@ -1,10 +1,5 @@
 package cmd
 
-/*
-fixes:
-1:  config create --config=honk.yml
-*/
-
 import (
 	"bytes"
 	"fmt"
@@ -26,7 +21,7 @@ type configFlags struct {
 	style   string
 }
 
-var configArgs configFlags
+var configFlag configFlags
 
 var configCmd = &cobra.Command{
 	Use:   "config",
@@ -41,7 +36,7 @@ var configCreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create a new or reset the config file",
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := config.Create(viper.ConfigFileUsed(), configArgs.ow); err != nil {
+		if err := config.Create(viper.ConfigFileUsed(), configFlag.ow); err != nil {
 			logs.Check("config create", err)
 		}
 	},
@@ -84,29 +79,25 @@ var configInfoCmd = &cobra.Command{
 	Example: str.Example("  retrotxt config info --syntax-style=\"\"") +
 		" # disable the syntax highligher",
 	Run: func(cmd *cobra.Command, args []string) {
-		if configArgs.configs {
+		if configFlag.configs {
 			config.List()
-		} else if configArgs.list {
+		} else if configFlag.list {
 			str.YamlStyles("retrotxt info --style")
-		} else if e := config.Info(configArgs.style); e.Err != nil {
+		} else if e := config.Info(configFlag.style); e.Err != nil {
 			e.Exit(1)
 		}
 	},
 }
 
-var configSetExample = func() string {
-	return str.Example("  retrotxt config set --name create.meta.description") +
+var configSetCmd = &cobra.Command{
+	Use:   "set",
+	Short: "Change a Retrotxt setting",
+	Example: str.Example("  retrotxt config set --name create.meta.description") +
 		" # to change the meta description setting\n" +
 		str.Example("  retrotxt config set --name style.yaml") +
-		"          # to set the version command output format"
-}
-
-var configSetCmd = &cobra.Command{
-	Use:     "set",
-	Short:   "Change a Retrotxt setting",
-	Example: configSetExample(),
+		"          # to set the version command output format",
 	Run: func(cmd *cobra.Command, args []string) {
-		config.Set(configArgs.set)
+		config.Set(configFlag.set)
 	},
 }
 
@@ -131,7 +122,7 @@ var configShellCmd = &cobra.Command{
 			lexer string
 			style string = viper.GetString("style.html")
 		)
-		switch configArgs.shell {
+		switch configFlag.shell {
 		case "bash", "bsh", "b":
 			lexer = "bash"
 			err = cmd.GenBashCompletion(&buf)
@@ -146,7 +137,7 @@ var configShellCmd = &cobra.Command{
 			logs.Check("shell zsh", err)
 		default:
 			logs.ChkErr(logs.Err{Issue: "the interpreter is not supported:",
-				Arg: configArgs.shell,
+				Arg: configFlag.shell,
 				Msg: fmt.Errorf("options: %s", config.Format.String("shell"))})
 		}
 		if err := str.Highlight(buf.String(), lexer, style); err != nil {
@@ -169,24 +160,24 @@ func init() {
 	configCmd.AddCommand(configSetupCmd)
 	configCmd.AddCommand(configShellCmd)
 	// create
-	configCreateCmd.Flags().BoolVarP(&configArgs.ow, "overwrite", "y", false,
+	configCreateCmd.Flags().BoolVarP(&configFlag.ow, "overwrite", "y", false,
 		"overwrite and reset the existing config file")
 	// info
-	configInfoCmd.Flags().BoolVarP(&configArgs.configs, "configs", "c", false,
+	configInfoCmd.Flags().BoolVarP(&configFlag.configs, "configs", "c", false,
 		"list all the available configuration settings")
-	configInfoCmd.Flags().StringVarP(&configArgs.style, "style", "s", "monokai",
+	configInfoCmd.Flags().StringVarP(&configFlag.style, "style", "s", "monokai",
 		"choose a syntax highligher")
-	configInfoCmd.Flags().BoolVarP(&configArgs.list, "list", "l", false,
+	configInfoCmd.Flags().BoolVarP(&configFlag.list, "list", "l", false,
 		"list and preview the available syntax highlighers")
 	// set
-	configSetCmd.Flags().StringVarP(&configArgs.set, "name", "n", "",
+	configSetCmd.Flags().StringVarP(&configFlag.set, "name", "n", "",
 		str.Required("the setting name in dot syntax")+
 			fmt.Sprintf("\nrun %s", str.Example("retrotxt config info -c"))+
 			" to see a list of names")
 	err = configSetCmd.MarkFlagRequired("name")
 	logs.Check("name flag", err)
 	// shell
-	configShellCmd.Flags().StringVarP(&configArgs.shell, "interpreter", "i", "",
+	configShellCmd.Flags().StringVarP(&configFlag.shell, "interpreter", "i", "",
 		str.Required("user shell to receive retrotxt auto-completions")+
 			str.Options("", config.Format.Shell, true))
 	err = configShellCmd.MarkFlagRequired("interpreter")
