@@ -73,7 +73,7 @@ var Defaults = map[string]interface{}{
 	"create.meta.description":  "An example",
 	"create.meta.generator":    true,
 	"create.meta.keywords":     "",
-	"create.meta.notranslate":  false,
+	"create.meta.notranslate":  false, // TODO: update existing cfg when settings are missing
 	"create.meta.referrer":     "",
 	"create.meta.robots":       "index",
 	"create.meta.theme-color":  "",
