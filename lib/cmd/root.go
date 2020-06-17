@@ -10,7 +10,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-var configFlag string
+type rootFlags struct {
+	config string
+}
+
+var rootFlag = rootFlags{}
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -28,8 +32,7 @@ func Execute() {
 	rootCmd.SilenceErrors = true // set to false to debug
 	if err := rootCmd.Execute(); err != nil {
 		if len(os.Args) < 2 {
-			logs.Check("rootcmd usage",
-				rootCmd.Usage())
+			logs.Check("rootcmd.usage", rootCmd.Usage())
 		}
 		rootErr := logs.CmdErr{Args: os.Args[1:], Err: err}
 		fmt.Println(rootErr.Error().String())
@@ -37,9 +40,10 @@ func Execute() {
 }
 
 func init() {
-	// OnInitialize will not run if no command is provided.
+	// OnInitialize will not run if there is no provided command.
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&configFlag, "config", "", "optional config file location")
+	rootCmd.PersistentFlags().StringVar(&rootFlag.config, "config", "",
+		"optional config file location")
 }
 
 func defaultConfig() string {
@@ -51,12 +55,13 @@ func defaultConfig() string {
 }
 
 // initConfig reads in config file and ENV variables if set.
+// this does not run when rootCmd is in use.
 func initConfig() {
 	// read in environment variables
 	viper.SetEnvPrefix("env")
 	viper.AutomaticEnv()
 	// configuration file
-	config.SetConfig(configFlag)
+	config.SetConfig(rootFlag.config)
 }
 
 // checkUsage will print the help and exit when no arguments are supplied.
