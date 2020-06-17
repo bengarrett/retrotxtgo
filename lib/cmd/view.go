@@ -10,22 +10,18 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/convert"
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
-	"github.com/bengarrett/retrotxtgo/lib/str"
 
 	"github.com/spf13/cobra"
 )
 
 type viewFlags struct {
-	cp      string
-	name    string
-	formats []string
-	format  string
-	width   int
+	cp    string
+	name  string
+	width int
 }
 
 var viewArgs = viewFlags{
-	cp:      "CP437",
-	formats: []string{"color", "text"},
+	cp: "CP437",
 }
 
 type viewPack struct {
@@ -127,8 +123,6 @@ func init() {
 	// 	str.Required("text file to display")+"\n")
 	viewCmd.Flags().StringVarP(&viewArgs.cp, "codepage", "c", "cp437",
 		"legacy character encoding used by the text file")
-	viewCmd.Flags().StringVarP(&viewArgs.format, "format", "f", "color",
-		str.Options("output format", viewArgs.formats, true))
 	viewCmd.Flags().IntVarP(&viewArgs.width, "width", "w", 80, "document column character width")
 	//	err := viewCmd.MarkFlagFilename("name")
 	//	logs.Check("view.filename", err)

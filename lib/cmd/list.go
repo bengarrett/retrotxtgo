@@ -12,7 +12,8 @@ import (
 
 var listCmd = &cobra.Command{
 	Use:     "list",
-	Short:   "Codepages and tabled datasets available",
+	Aliases: []string{"l"},
+	Short:   "Available codepages and tabled datasets",
 	Example: "  retrotxt list codepages\n  retrotxt list table cp437  \n  retrotxt list tables",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
@@ -24,21 +25,28 @@ var listCmd = &cobra.Command{
 }
 
 var listCmdCodepages = &cobra.Command{
-	Use:   "codepages",
-	Short: "list available legacy codepages that RetroTxt can convert into UTF-8",
+	Use:     "codepages",
+	Aliases: []string{"c", "cp"},
+	Short:   "list available legacy codepages that RetroTxt can convert into UTF-8",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(convert.List())
 	},
 }
 
 var listCmdTable = &cobra.Command{
-	Use:     "table",
-	Short:   "display a table showing the codepage and all its characters",
-	Example: "  retrotxt table cp437",
+	Use:     "table [codepages]",
+	Aliases: []string{"t"},
+	Short:   "display one or more tables showing the codepage and all their characters",
+	Example: "  retrotxt table cp437\n  retrotxt table cp437 latin1 windows-1252",
 	Run: func(cmd *cobra.Command, args []string) {
-		table, err := convert.Table(viewArgs.cp)
-		logs.ChkErr(logs.Err{Issue: "table", Arg: viewArgs.cp, Msg: err})
-		fmt.Println(table.String())
+		for _, arg := range args {
+			table, err := convert.Table(arg)
+			if err != nil {
+				// todo: make a log func to print and continue error
+				fmt.Println("list.table: unknown codepage", arg)
+			}
+			fmt.Println(table.String())
+		}
 	},
 }
 
@@ -71,8 +79,6 @@ func init() {
 	listCmd.AddCommand(listCmdCodepages)
 	// table cmd
 	listCmd.AddCommand(listCmdTable)
-	listCmdTable.Flags().StringVarP(&viewArgs.cp, "codepage", "c", "cp437",
-		"legacy character encoding table to display")
 	// tables cmd
 	listCmd.AddCommand(listCmdTables)
 }
