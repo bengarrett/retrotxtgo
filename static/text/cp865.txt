@@ -1,0 +1,9 @@
+RetroTxt CP-865/CP-860 test
+
+°	Light shaded block
+
+±	Medium shaded block
+
+²	Heavy shaded block
+
+Û	Solid block

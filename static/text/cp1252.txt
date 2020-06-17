@@ -1,0 +1,9 @@
+RetroTxt CP-1252 test
+
+‘ single curved quotes ’
+
+“ double curved quotes ”
+
+…	Ellipsis
+
+™	Trademark
