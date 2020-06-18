@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Defaults for configuration values.
+// Defaults for configuration keys and values.
 var Defaults = map[string]interface{}{
 	"create.layout":            "standard",
 	"create.meta.author":       "",
@@ -23,10 +23,10 @@ var Defaults = map[string]interface{}{
 	"create.meta.referrer":     "",
 	"create.meta.robots":       "index",
 	"create.meta.theme-color":  "",
-	"create.save-directory":    home(),
-	"create.server-port":       8080,
 	"create.title":             "RetroTxt | example",
 	"editor":                   "",
+	"save-directory":           home(),
+	"server-port":              8080,
 	"style.info":               "dracula",
 	"style.html":               "lovelace",
 }
@@ -43,11 +43,11 @@ var Hints = map[string]string{
 	"create.meta.referrer":     "controls the Referer HTTP header attached to requests sent from the page",
 	"create.meta.robots":       "behaviour that crawlers from Google, Bing and other engines should use with the page",
 	"create.meta.theme-color":  "indicates a suggested color that user agents should use to customize the display of the page",
-	"create.save-directory":    "directory to store RetroTxt created HTML files",
-	"create.server":            "serve HTML over an internal web server",
-	"create.server-port":       "port which the internal web server will use",
 	"create.title":             "page title that is shown in a browser title bar or tab",
 	"editor":                   "text editor to launch when using " + str.Example("config edit"),
+	"save-directory":           "directory to store RetroTxt created HTML files",
+	"server":                   "serve HTML over an internal web server",
+	"server-port":              "port which the internal web server will use",
 	"style.info":               "syntax highlighter for the config info output",
 	"style.html":               "syntax highlighter for html previews",
 }
@@ -67,12 +67,12 @@ type Settings struct {
 			Robots      string `yaml:"robots"`
 			ThemeColor  string `yaml:"theme-color"`
 		}
-		SaveDirectory string `yaml:"save-directory"`
-		ServerPort    int    `yaml:"server-port"`
-		Title         string `yaml:"title"`
+		Title string `yaml:"title"`
 	}
-	Editor string
-	Style  struct {
+	Editor        string
+	SaveDirectory string `yaml:"save-directory"`
+	ServerPort    int    `yaml:"server-port"`
+	Style         struct {
 		Info string `yaml:"info"`
 		HTML string `yaml:"html"`
 	}
@@ -164,14 +164,14 @@ func Marshal() (interface{}, error) {
 			sc.Create.Meta.Robots = def.(string)
 		case "create.meta.theme-color":
 			sc.Create.Meta.ThemeColor = def.(string)
-		case "create.save-directory":
-			sc.Create.SaveDirectory = def.(string)
-		case "create.server-port":
-			sc.Create.ServerPort = def.(int)
 		case "create.title":
 			sc.Create.Title = def.(string)
 		case "editor":
 			sc.Editor = def.(string)
+		case "save-directory":
+			sc.SaveDirectory = def.(string)
+		case "server-port":
+			sc.ServerPort = def.(int)
 		case "style.info":
 			sc.Style.Info = def.(string)
 		case "style.html":
