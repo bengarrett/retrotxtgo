@@ -80,7 +80,7 @@ var configInfoCmd = &cobra.Command{
 		" # disable the syntax highligher",
 	Run: func(cmd *cobra.Command, args []string) {
 		if configFlag.configs {
-			config.List() // TODO: list only valid settings
+			config.List()
 			os.Exit(0)
 		}
 		if configFlag.styles {

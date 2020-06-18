@@ -73,7 +73,7 @@ var Defaults = map[string]interface{}{
 	"create.meta.description":  "An example",
 	"create.meta.generator":    true,
 	"create.meta.keywords":     "",
-	"create.meta.notranslate":  false, // TODO: update existing cfg when settings are missing
+	"create.meta.notranslate":  false,
 	"create.meta.referrer":     "",
 	"create.meta.robots":       "index",
 	"create.meta.theme-color":  "",
@@ -169,9 +169,20 @@ func portInfo() string {
 	return str.Cp(pm) + "-" + str.Cp(px) + fmt.Sprintf(" (recommend: %s)", str.Cp(pr))
 }
 
+// Keys list all the available configuration setting names.
+func Keys() []string {
+	var keys = make([]string, len(Defaults))
+	i := 0
+	for key := range Defaults {
+		keys[i] = key
+		i++
+	}
+	return keys
+}
+
 // List all the available configurations that can be passed to the --name flag.
 func List() (err error) {
-	keys := viper.AllKeys()
+	keys := Keys()
 	sort.Strings(keys)
 	w := tabwriter.NewWriter(os.Stdout, 2, 2, 0, ' ', 0)
 	fmt.Fprintf(w, "\t\tname value\t\thint\n")
