@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"os"
 
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
@@ -14,11 +15,10 @@ import (
 
 type configFlags struct {
 	configs bool
-	list    bool
 	ow      bool
-	set     string
 	shell   string
 	style   string
+	styles  bool
 }
 
 var configFlag configFlags
@@ -80,24 +80,35 @@ var configInfoCmd = &cobra.Command{
 		" # disable the syntax highligher",
 	Run: func(cmd *cobra.Command, args []string) {
 		if configFlag.configs {
-			config.List()
-		} else if configFlag.list {
+			config.List() // TODO: list only valid settings
+			os.Exit(0)
+		}
+		if configFlag.styles {
 			str.JSONStyles("retrotxt info --style")
-		} else if e := config.Info(configFlag.style); e.Err != nil {
+			os.Exit(0)
+		}
+		if e := config.Info(configFlag.style); e.Err != nil {
 			e.Exit(1)
 		}
 	},
 }
 
 var configSetCmd = &cobra.Command{
-	Use:   "set",
-	Short: "Change a Retrotxt setting",
-	Example: str.Example("  retrotxt config set --name create.meta.description") +
+	Use:   "set [setting names]",
+	Short: "Change individual Retrotxt settings",
+	Example: str.Example("  retrotxt config set create.meta.description") +
 		" # to change the meta description setting\n" +
-		str.Example("  retrotxt config set style.info") +
-		"          # to set the version command output format",
+		str.Example("  retrotxt config set style.info style.html") +
+		"   # to set the color styles",
 	Run: func(cmd *cobra.Command, args []string) {
-		config.Set(configFlag.set)
+		if configFlag.configs {
+			config.List()
+			os.Exit(0)
+		}
+		checkUse(cmd, args)
+		for _, arg := range args {
+			config.Set(arg)
+		}
 	},
 }
 
@@ -164,18 +175,14 @@ func init() {
 		"overwrite and reset the existing config file")
 	// info
 	configInfoCmd.Flags().BoolVarP(&configFlag.configs, "configs", "c", false,
-		"list all the available configuration settings")
+		"list all the available configuration setting names")
 	configInfoCmd.Flags().StringVarP(&configFlag.style, "style", "s", "dracula",
 		"choose a syntax highligher")
-	configInfoCmd.Flags().BoolVarP(&configFlag.list, "list", "l", false,
+	configInfoCmd.Flags().BoolVar(&configFlag.styles, "styles", false,
 		"list and preview the available syntax highlighers")
 	// set
-	configSetCmd.Flags().StringVarP(&configFlag.set, "name", "n", "",
-		str.Required("the setting name in dot syntax")+
-			fmt.Sprintf("\nrun %s", str.Example("retrotxt config info -c"))+
-			" to see a list of names")
-	err = configSetCmd.MarkFlagRequired("name")
-	logs.Check("name flag", err)
+	configSetCmd.Flags().BoolVarP(&configFlag.configs, "list", "l", false,
+		"list all the available setting names")
 	// shell
 	configShellCmd.Flags().StringVarP(&configFlag.shell, "interpreter", "i", "",
 		str.Required("user shell to receive retrotxt auto-completions")+

@@ -198,10 +198,10 @@ func Names() string {
 func Set(name string) {
 	if !Validate(name) {
 		h := logs.Hint{
-			Issue: "invalid value",
-			Arg:   fmt.Sprintf("%q for --name", name),
-			Msg:   errors.New(("to see a list of usable settings")),
-			Hint:  "config info -c",
+			Issue: "invalid setting name",
+			Arg:   fmt.Sprintf("%q for config", name),
+			Msg:   errors.New(("to see a list of setting names")),
+			Hint:  "config set --list",
 		}
 		fmt.Println(h.String())
 		return
