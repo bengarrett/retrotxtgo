@@ -15,6 +15,7 @@ var infoFlag struct {
 // infoCmd represents the info command
 var infoCmd = &cobra.Command{
 	Use:     "info [filenames]",
+	Aliases: []string{"i"},
 	Short:   "Information on a text file",
 	Example: "  retrotxt info text.asc logo.jpg\n  retrotxt info file.txt --format=json",
 	Run: func(cmd *cobra.Command, args []string) {

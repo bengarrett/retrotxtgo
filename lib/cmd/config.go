@@ -24,8 +24,9 @@ type configFlags struct {
 var configFlag configFlags
 
 var configCmd = &cobra.Command{
-	Use:   "config",
-	Short: "Configure and save settings for RetroTxt",
+	Use:     "config",
+	Aliases: []string{"cfg"},
+	Short:   "Configure and save settings for RetroTxt",
 	Run: func(cmd *cobra.Command, args []string) {
 		checkUse(cmd, args)
 		logs.CheckCmd(args)
@@ -33,8 +34,9 @@ var configCmd = &cobra.Command{
 }
 
 var configCreateCmd = &cobra.Command{
-	Use:   "create",
-	Short: "Create a new or reset the config file",
+	Use:     "create",
+	Aliases: []string{"c"},
+	Short:   "Create a new or reset the config file",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := config.Create(viper.ConfigFileUsed(), configFlag.ow); err != nil {
 			logs.Check("config create", err)
@@ -43,8 +45,9 @@ var configCreateCmd = &cobra.Command{
 }
 
 var configDeleteCmd = &cobra.Command{
-	Use:   "delete",
-	Short: "Remove the config file",
+	Use:     "delete",
+	Aliases: []string{"d", "del", "rm"},
+	Short:   "Remove the config file",
 	Run: func(cmd *cobra.Command, args []string) {
 		if e := config.Delete(); e.Err != nil {
 			e.Exit(1)
@@ -57,8 +60,9 @@ var configDeleteCmd = &cobra.Command{
 // viper.GetString("editor") is not yet set and the EDITOR env value
 // will instead always be used.
 var configEditCmd = &cobra.Command{
-	Use:   "edit",
-	Short: fmt.Sprintf("Edit the config file"),
+	Use:     "edit",
+	Aliases: []string{"e"},
+	Short:   fmt.Sprintf("Edit the config file"),
 	Long: fmt.Sprintf("Edit the config file") +
 		"\n\nTo switch editors either:" +
 		"\n  Set one by creating or changing the " +
@@ -74,8 +78,9 @@ var configEditCmd = &cobra.Command{
 }
 
 var configInfoCmd = &cobra.Command{
-	Use:   "info",
-	Short: "View all the settings configured in the config file",
+	Use:     "info",
+	Aliases: []string{"i"},
+	Short:   "View all the settings configured in the config file",
 	Example: str.Example("  retrotxt config info --syntax-style=\"\"") +
 		" # disable the syntax highligher",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -94,8 +99,9 @@ var configInfoCmd = &cobra.Command{
 }
 
 var configSetCmd = &cobra.Command{
-	Use:   "set [setting names]",
-	Short: "Change individual Retrotxt settings",
+	Use:     "set [setting names]",
+	Aliases: []string{"s"},
+	Short:   "Change individual Retrotxt settings",
 	Example: str.Example("  retrotxt config set create.meta.description") +
 		" # to change the meta description setting\n" +
 		str.Example("  retrotxt config set style.info style.html") +
@@ -121,8 +127,9 @@ var configSetupCmd = &cobra.Command{
 }
 
 var configShellCmd = &cobra.Command{
-	Use:   "shell",
-	Short: "Apply autocompletion a terminal shell",
+	Use:     "shell",
+	Aliases: []string{"sh"},
+	Short:   "Apply autocompletion a terminal shell",
 	Example: str.Example("  retrotxt config shell --interpreter string [flags]") +
 		str.Example("\n  retrotxt config shell -i=bash >> ~/.bash_profile") +
 		str.Example("\n  retrotxt config shell -i=zsh >> ~/.zshrc"),
