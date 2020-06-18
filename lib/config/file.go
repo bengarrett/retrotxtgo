@@ -1,14 +1,18 @@
 package config
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v3"
 )
 
 type configErr struct {
@@ -31,12 +35,44 @@ func InitDefaults() {
 	}
 }
 
+// configMissing prints an error notice and exits.
+func configMissing(name string, suffix string) {
+	cmd := strings.TrimSuffix(name, suffix) + " create"
+	fmt.Printf("%s no config file is in use\n create it: %s\n",
+		str.Info(), str.Cp(cmd))
+	os.Exit(21)
+}
+
 func exit(e configErr) {
 	if e.Err != nil {
 		fmt.Println(e.String())
 		os.Exit(1)
 	}
 	os.Exit(0)
+}
+
+// Path is the absolute path and filename of the configuration file.
+func Path() (dir string) {
+	dir, err := scope.ConfigPath(namedFile)
+	if err != nil {
+		h, _ := os.UserHomeDir()
+		return filepath.Join(h, namedFile)
+	}
+	return dir
+}
+
+// PrintLocation prints the location of the current configuration file.
+func PrintLocation() {
+	s := str.Cb(fmt.Sprintf("Config file: %s",
+		viper.ConfigFileUsed()))
+	if diff := len(Missing()); diff > 0 {
+		if diff == 1 {
+			s += str.Cb(fmt.Sprint(" (1 setting is missing)"))
+		} else {
+			s += str.Cb(fmt.Sprintf(" (%d settings are missing)", diff))
+		}
+	}
+	fmt.Println(s)
 }
 
 // SetConfig reads and loads a configuration file.
@@ -91,16 +127,26 @@ func SetConfig(flag string) {
 	// otherwise settings are loaded from default config
 }
 
-// PrintLocation prints the location of the current configuration file.
-func PrintLocation() {
-	s := str.Cb(fmt.Sprintf("Config file: %s",
-		viper.ConfigFileUsed()))
-	if diff := len(Missing()); diff > 0 {
-		if diff == 1 {
-			s += str.Cb(fmt.Sprint(" (1 setting is missing)"))
-		} else {
-			s += str.Cb(fmt.Sprintf(" (%d settings are missing)", diff))
-		}
+// UpdateConfig saves all viper settings to the named file.
+func UpdateConfig(name string, print bool) (err error) {
+	if name == "" {
+		name = viper.ConfigFileUsed()
 	}
-	fmt.Println(s)
+	data, err := Marshal()
+	logs.Check("config.update:", err)
+	out, err := yaml.Marshal(&data)
+	if err != nil {
+		return err
+	}
+	// prepend comments
+	cmt := []byte("# RetroTxt configuration file")
+	out = bytes.Join([][]byte{cmt, out}, []byte("\n"))
+	err = ioutil.WriteFile(name, out, PermF)
+	if err != nil {
+		return err
+	}
+	if print {
+		fmt.Println("The change is saved")
+	}
+	return err
 }
