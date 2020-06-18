@@ -65,47 +65,6 @@ func home() string {
 	return dir
 }
 
-// Defaults for configuration values.
-var Defaults = map[string]interface{}{
-	"create.layout":            "standard",
-	"create.meta.author":       "",
-	"create.meta.color-scheme": "",
-	"create.meta.description":  "An example",
-	"create.meta.generator":    true,
-	"create.meta.keywords":     "",
-	"create.meta.notranslate":  false,
-	"create.meta.referrer":     "",
-	"create.meta.robots":       "index",
-	"create.meta.theme-color":  "",
-	"create.save-directory":    home(),
-	"create.server-port":       8080,
-	"create.title":             "RetroTxt | example",
-	"editor":                   "",
-	"style.info":               "dracula",
-	"style.html":               "lovelace",
-}
-
-// Hints provide brief help on the config file configurations.
-var Hints = map[string]string{
-	"create.layout":            "HTML output layout",
-	"create.meta.author":       "defines the name of the page authors",
-	"create.meta.color-scheme": "specifies one or more color schemes with which the page is compatible",
-	"create.meta.description":  "a short and accurate summary of the content of the page",
-	"create.meta.generator":    "include the RetroTxt version and page generation date?",
-	"create.meta.keywords":     "words relevant to the page content",
-	"create.meta.notranslate":  "used to declare that the page should not be translated by Google Translate",
-	"create.meta.referrer":     "controls the Referer HTTP header attached to requests sent from the page",
-	"create.meta.robots":       "behaviour that crawlers from Google, Bing and other engines should use with the page",
-	"create.meta.theme-color":  "indicates a suggested color that user agents should use to customize the display of the page",
-	"create.save-directory":    "directory to store RetroTxt created HTML files",
-	"create.server":            "serve HTML over an internal web server",
-	"create.server-port":       "port which the internal web server will use",
-	"create.title":             "page title that is shown in a browser title bar or tab",
-	"editor":                   "text editor to launch when using " + str.Example("config edit"),
-	"style.info":               "syntax highlighter for the config info output",
-	"style.html":               "syntax highlighter for html previews",
-}
-
 var setupMode = false
 
 type ports struct {
@@ -169,18 +128,7 @@ func portInfo() string {
 	return str.Cp(pm) + "-" + str.Cp(px) + fmt.Sprintf(" (recommend: %s)", str.Cp(pr))
 }
 
-// Keys list all the available configuration setting names.
-func Keys() []string {
-	var keys = make([]string, len(Defaults))
-	i := 0
-	for key := range Defaults {
-		keys[i] = key
-		i++
-	}
-	return keys
-}
-
-// List all the available configurations that can be passed to the --name flag.
+// List and print all the available configurations.
 func List() (err error) {
 	keys := Keys()
 	sort.Strings(keys)
@@ -273,7 +221,7 @@ func Set(name string) {
 func Setup() {
 	setupMode = true
 	prompt.SetupMode = true
-	keys := viper.AllKeys()
+	keys := Keys()
 	sort.Strings(keys)
 	PrintLocation()
 	w := 42

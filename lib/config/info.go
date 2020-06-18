@@ -8,7 +8,6 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/gookit/color"
-	"github.com/spf13/viper"
 )
 
 // Info prints the content of a configuration file.
@@ -42,32 +41,4 @@ func Info(style string) (err logs.IssueErr) {
 		}
 	}
 	return logs.IssueErr{}
-}
-
-// Enabled returns all the Viper keys holding a value that are used by RetroTxt.
-// This will hide all unrecognised manual edits to the configuration file.
-func Enabled() map[string]interface{} {
-	var sets = make(map[string]interface{})
-	for _, key := range viper.AllKeys() {
-		if d := Defaults[key]; d != nil {
-			sets[key] = viper.Get(key)
-		}
-	}
-	return sets
-}
-
-// Missing lists the settings that are not found in the configuration file.
-// This could be due to new features being added after the file was generated
-// or because of manual edits.
-func Missing() (list []string) {
-	d, l := len(Defaults), len(viper.AllSettings())
-	if d == l {
-		return list
-	}
-	for key := range Defaults {
-		if !viper.IsSet(key) {
-			list = append(list, key)
-		}
-	}
-	return list
 }

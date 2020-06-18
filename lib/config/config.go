@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	gap "github.com/muesli/go-app-paths"
 	"github.com/spf13/viper"
@@ -74,11 +75,13 @@ func UpdateConfig(name string, print bool) (err error) {
 	if name == "" {
 		name = viper.ConfigFileUsed()
 	}
-	// TODO: only save permitted settings, add comments.
-	out, err := yaml.Marshal(viper.AllSettings())
+	data, err := Marshal()
+	logs.Check("config.update:", err)
+	out, err := yaml.Marshal(&data)
 	if err != nil {
 		return err
 	}
+
 	err = ioutil.WriteFile(name, out, PermF)
 	if err != nil {
 		return err
