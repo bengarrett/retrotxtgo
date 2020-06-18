@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -81,7 +82,9 @@ func UpdateConfig(name string, print bool) (err error) {
 	if err != nil {
 		return err
 	}
-
+	// prepend comments
+	cmt := []byte("# RetroTxt configuration file")
+	out = bytes.Join([][]byte{cmt, out}, []byte("\n"))
 	err = ioutil.WriteFile(name, out, PermF)
 	if err != nil {
 		return err
