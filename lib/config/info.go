@@ -26,6 +26,7 @@ func Info(style string) (err logs.IssueErr) {
 		fmt.Println(string(out))
 	default:
 		str.Highlight(string(out), "json", style)
+		fmt.Println()
 	}
 	if m := Missing(); len(m) > 0 {
 		s := "These settings are missing and should be configured"
