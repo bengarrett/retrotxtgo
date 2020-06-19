@@ -45,35 +45,35 @@ func Set(name string) {
 		fmt.Printf("\n%s is currently set to %q\n", str.Cf(name), value)
 	}
 	switch name {
-	case "create.layout":
-		fmt.Println("Choose a new " + str.Options(Hints[name], create.Layouts(), true))
-		setShortStrings(name, createTemplates().Strings())
-	case "create.meta.generator":
-		setGenerator()
-	case "create.meta.referrer":
-		setMeta(name, value)
-		fmt.Println(strings.Join(create.Referrer, ", "))
-		setShortStrings(name, create.Referrer)
-	case "create.meta.robots":
-		setMeta(name, value)
-		fmt.Println(strings.Join(create.Robots, ", "))
-		setString(name)
-	case "create.meta.color-scheme":
-		setMeta(name, value)
-		fmt.Println(strings.Join(create.ColorScheme, ", "))
-		setShortStrings(name, create.ColorScheme)
-	case "create.save-directory":
-		fmt.Println("Choose a new " + Hints[name] + ":")
-		setDirectory(name)
-	case "create.server-port":
-		fmt.Println("Set a new HTTP port to " + Hints[name])
-		setPort(name)
-	case "create.title":
-		fmt.Println("Choose a new " + Hints[name] + ":")
-		setString(name)
 	case "editor":
 		fmt.Println("Set a " + Hints[name] + ":")
 		setEditor(name)
+	case "html.layout":
+		fmt.Println("Choose a new " + str.Options(Hints[name], create.Layouts(), true))
+		setShortStrings(name, createTemplates().Strings())
+	case "html.meta.generator":
+		setGenerator()
+	case "html.meta.referrer":
+		setMeta(name, value)
+		fmt.Println(strings.Join(create.Referrer, ", "))
+		setShortStrings(name, create.Referrer)
+	case "html.meta.robots":
+		setMeta(name, value)
+		fmt.Println(strings.Join(create.Robots, ", "))
+		setString(name)
+	case "html.meta.color-scheme":
+		setMeta(name, value)
+		fmt.Println(strings.Join(create.ColorScheme, ", "))
+		setShortStrings(name, create.ColorScheme)
+	case "html.title":
+		fmt.Println("Choose a new " + Hints[name] + ":")
+		setString(name)
+	case "save-directory":
+		fmt.Println("Choose a new " + Hints[name] + ":")
+		setDirectory(name)
+	case "server-port":
+		fmt.Println("Set a new HTTP port to " + Hints[name])
+		setPort(name)
 	case "style.info":
 		fmt.Printf("Set a new %s syntax style:\n%s\n", str.Example("config info"), str.Ci(Names()))
 		setStrings(name, styles.Names())
@@ -95,9 +95,9 @@ func List() (err error) {
 	for i, key := range keys {
 		fmt.Fprintf(w, "%d\t\t%s\t\t%s", i, key, Hints[key])
 		switch key {
-		case "create.layout":
+		case "html.layout":
 			fmt.Fprintf(w, ", choices: %s (recommend: %s)", str.Cp(createTemplates().String()), str.Cp("standard"))
-		case "create.server-port":
+		case "server-port":
 			fmt.Fprintf(w, ", choices: %s", portInfo())
 		}
 		fmt.Fprint(w, "\n")
@@ -319,7 +319,7 @@ func setEditor(name string) {
 }
 
 func setGenerator() {
-	var name = "create.meta.generator"
+	var name = "html.meta.generator"
 	elm := fmt.Sprintf("<head>\n  <meta name=\"generator\" content=\"RetroTxt v%s, %s\">",
 		v.B.Version, v.B.Date)
 	fmt.Println(logs.ColorHTML(elm))
@@ -339,7 +339,7 @@ func setMeta(name, value string) {
 	}
 	s := strings.Split(name, ".")
 	switch {
-	case len(s) != 3, s[0] != "create", s[1] != "meta":
+	case len(s) != 3, s[0] != "html", s[1] != "meta":
 		return
 	}
 	elm := fmt.Sprintf("<head>\n  <meta name=\"%s\" value=\"%s\">", s[2], value)

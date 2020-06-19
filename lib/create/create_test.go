@@ -60,7 +60,7 @@ func Test_filename(t *testing.T) {
 }
 
 func Test_pagedata(t *testing.T) {
-	viper.SetDefault("create.title", "RetroTxt | example")
+	viper.SetDefault("html.title", "RetroTxt | example")
 
 	args := Args{Layout: "standard"}
 	w := "hello"
@@ -169,7 +169,7 @@ func Test_writeStdout(t *testing.T) {
 }
 
 func TestDest(t *testing.T) {
-	saved := viper.GetString("create.save-directory")
+	saved := viper.GetString("save-directory")
 	wd, _ := os.Getwd()
 	home, _ := os.UserHomeDir()
 	spaces := filepath.Join(home, "some directory", "some file.html")

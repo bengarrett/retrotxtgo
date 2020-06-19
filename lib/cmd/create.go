@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"os"
 	"sort"
+	"strings"
 
 	"github.com/bengarrett/retrotxtgo/internal/pack"
 	"github.com/bengarrett/retrotxtgo/lib/config"
@@ -32,52 +32,53 @@ var exampleCmd = func() string {
 
 // createCmd represents the create command
 var createCmd = &cobra.Command{
-	Use:     "create",
+	Use:     "create [filenames]",
 	Aliases: []string{"c", "html"},
 	Short:   "Create a HTML document from a text file",
 	Example: exampleCmd(),
 	Run: func(cmd *cobra.Command, args []string) {
-		var (
-			data []byte
-			err  error
-			body = cmd.Flags().Lookup("body")
-		)
-		switch body.Changed {
-		case true: // handle hidden --body flag
-			data = []byte(body.Value.String())
-		default:
-			switch htmlArgs.Src {
-			case "ascii":
-				// internal example
-				data = pack.Get("text/ascii-logos.txt")
-				if data == nil {
-					logs.Log(errors.New("create ascii failed to pack.Get()"))
-				}
-			case "":
-				// no input (show help & exit)
-				if cmd.Flags().NFlag() == 0 {
-					fmt.Printf("%s\n\n", cmd.Short)
-					err = cmd.Usage()
-					logs.Check("create usage", err)
-					os.Exit(0)
-				}
-				// show help and exit with no input otherwise a blank template will be shown
-				// this is triggered when --name is missing but other flags are used
-				err = cmd.Usage()
-				logs.Check("create usage", err)
-				logs.ChkErr(logs.CmdErr{Args: []string{"", ""},
-					Err: errors.New("required flag(s) --name")}.Error())
-			default:
-				data, err = filesystem.Read(htmlArgs.Src)
-				logs.ChkErr(logs.Err{Issue: "file is invalid", Arg: htmlArgs.Src, Msg: err})
-			}
+		// handle hidden --body flag that ignores all args
+		if body := cmd.Flags().Lookup("body"); body.Changed {
+			b := []byte(body.Value.String())
+			createHTML(0, b)
+			os.Exit(0)
 		}
-		htmlArgs.Cmd(data, "") // value should = arguments
-		// check for a --server flag to serve the HTML
-		if htmlArgs.HTTP {
-			htmlArgs.Serve(&data)
+		checkUse(cmd, args)
+		var b []byte
+		for i, arg := range args {
+			if b = createPackage(arg); b == nil {
+				var err error
+				b, err = filesystem.Read(arg)
+				logs.ChkErr(logs.Err{Issue: "file is invalid", Arg: arg, Msg: err})
+			}
+			createHTML(i, b)
 		}
 	},
+}
+
+func createHTML(i int, b []byte) {
+	htmlArgs.Cmd(b, "")
+	// only serve the first file
+	if i == 0 && htmlArgs.HTTP {
+		htmlArgs.Serve(&b)
+	}
+}
+
+func createPackage(name string) (b []byte) {
+	var s = strings.ToLower(name)
+	if _, err := os.Stat(s); !os.IsNotExist(err) {
+		return nil
+	}
+	pkg, exist := internalPacks[s]
+	println(fmt.Sprintf("%+v", pkg), exist)
+	if !exist {
+		return nil
+	}
+	b = pack.Get(pkg.name)
+	if b == nil {
+		return nil
+	}
+	return b
 }
 
 type metaFlag struct {
@@ -98,24 +99,24 @@ func init() {
 	// init flags and their usage
 	var metaCfg = map[int]metaFlag{
 		// output
-		1: {"create.server", nil, &htmlArgs.HTTP, nil, "server", "p", nil},
-		2: {"create.server-port", nil, nil, &htmlArgs.Port, "port", "", nil},
+		1: {"html.server", nil, &htmlArgs.HTTP, nil, "server", "p", nil},
+		2: {"html.server-port", nil, nil, &htmlArgs.Port, "port", "", nil},
 		// main tag flags
-		3: {"create.layout", &htmlArgs.Layout, nil, nil, "layout", "l", create.Layouts()},
+		3: {"html.layout", &htmlArgs.Layout, nil, nil, "layout", "l", create.Layouts()},
 		4: {"style.html", &htmlArgs.Syntax, nil, nil, "syntax-style", "c", nil},
-		5: {"create.title", &htmlArgs.Title, nil, nil, "title", "t", nil},
-		6: {"create.meta.description", &htmlArgs.Desc, nil, nil, "meta-description", "d", nil},
-		7: {"create.meta.author", &htmlArgs.Author, nil, nil, "meta-author", "a", nil},
+		5: {"html.title", &htmlArgs.Title, nil, nil, "title", "t", nil},
+		6: {"html.meta.description", &htmlArgs.Desc, nil, nil, "meta-description", "d", nil},
+		7: {"html.meta.author", &htmlArgs.Author, nil, nil, "meta-author", "a", nil},
 		// minor tag flags
-		8:  {"create.meta.generator", nil, &htmlArgs.Generator, nil, "meta-generator", "g", nil},
-		9:  {"create.meta.color-scheme", &htmlArgs.Author, nil, nil, "meta-color-scheme", "", nil},
-		10: {"create.meta.keywords", &htmlArgs.Keys, nil, nil, "meta-keywords", "", nil},
-		11: {"create.meta.notranslate", nil, &htmlArgs.NoTranslate, nil, "meta-notranslate", "", nil},
-		12: {"create.meta.referrer", &htmlArgs.Ref, nil, nil, "meta-referrer", "", nil},
-		13: {"create.meta.robots", &htmlArgs.Robots, nil, nil, "meta-robots", "", nil},
-		14: {"create.meta.theme-color", &htmlArgs.Scheme, nil, nil, "meta-theme-color", "", nil},
+		8:  {"html.meta.generator", nil, &htmlArgs.Generator, nil, "meta-generator", "g", nil},
+		9:  {"html.meta.color-scheme", &htmlArgs.Author, nil, nil, "meta-color-scheme", "", nil},
+		10: {"html.meta.keywords", &htmlArgs.Keys, nil, nil, "meta-keywords", "", nil},
+		11: {"html.meta.notranslate", nil, &htmlArgs.NoTranslate, nil, "meta-notranslate", "", nil},
+		12: {"html.meta.referrer", &htmlArgs.Ref, nil, nil, "meta-referrer", "", nil},
+		13: {"html.meta.robots", &htmlArgs.Robots, nil, nil, "meta-robots", "", nil},
+		14: {"html.meta.theme-color", &htmlArgs.Scheme, nil, nil, "meta-theme-color", "", nil},
 		// hidden flags
-		0: {"create.body", &htmlArgs.Body, nil, nil, "body", "b", nil},
+		0: {"html.body", &htmlArgs.Body, nil, nil, "body", "b", nil},
 	}
 	// create an ordered index for the flags
 	var keys []int
@@ -123,18 +124,16 @@ func init() {
 		keys = append(keys, k)
 	}
 	sort.Ints(keys)
-	// required flags
-	createCmd.Flags().StringVarP(&htmlArgs.Src, "name", "n", "",
-		str.Required("text file to parse")+"\nrun a built-in example "+str.Example("retrotxt create ascii"))
+	// output flags
 	createCmd.Flags().StringVarP(&htmlArgs.Enc, "encode", "e", "", "text encoding of the named text file\nwhen ignored, UTF8 encoding will be automatically detected\notherwise encode will assume default (default CP437)\nsee a list of encode values "+str.Example("retrotxt view codepages")+"\n")
 	createCmd.Flags().BoolVarP(&htmlArgs.SaveToFile, "save", "s", false, "save HTML to a file or ignore to print output")
 	createCmd.Flags().BoolVarP(&htmlArgs.OW, "overwrite", "o", false, "overwrite any existing files when saving\n")
-	// generate flags
+	// html flags
 	for i := range keys {
 		c := metaCfg[i]
 		var buf bytes.Buffer
 		switch {
-		case c.key == "create.body":
+		case c.key == "html.body":
 			fmt.Fprint(&buf, "override and inject a string into the HTML body element")
 		case len(c.opts) == 0:
 			fmt.Fprint(&buf, config.Hints[c.key])

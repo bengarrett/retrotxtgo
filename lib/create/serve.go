@@ -14,7 +14,7 @@ import (
 func (args *Args) Serve(data *[]byte) {
 	port := uint(args.Port)
 	if !prompt.PortValid(port) {
-		port = uint(viper.GetInt("create.server-port"))
+		port = uint(viper.GetInt("server-port"))
 	}
 	args.Port = port
 	if err := args.serveFile(data); err != nil {

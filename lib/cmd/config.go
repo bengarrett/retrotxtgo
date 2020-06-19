@@ -102,7 +102,7 @@ var configSetCmd = &cobra.Command{
 	Use:     "set [setting names]",
 	Aliases: []string{"s"},
 	Short:   "Change individual Retrotxt settings",
-	Example: str.Example("  retrotxt config set create.meta.description") +
+	Example: str.Example("  retrotxt config set html.meta.description") +
 		" # to change the meta description setting\n" +
 		str.Example("  retrotxt config set style.info style.html") +
 		"   # to set the color styles",

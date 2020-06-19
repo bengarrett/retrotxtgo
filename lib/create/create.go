@@ -24,8 +24,6 @@ type files map[string]string
 
 // Args holds arguments and options sourced from user flags or the config file.
 type Args struct {
-	// Src source input text file
-	Src string
 	// Dest HTML destination either a directory or file
 	Dest string
 	// Enc text encoding of the source input
@@ -115,7 +113,7 @@ func (args *Args) Cmd(data []byte, value string) {
 	switch {
 	case args.SaveToFile:
 		// use config save directory
-		dir := []string{viper.GetString("create.save-directory")}
+		dir := []string{viper.GetString("save-directory")}
 		if args.Dest, err = Dest(dir); err != nil {
 			log.Fatal(err)
 		}
@@ -265,22 +263,22 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 	// templates are found in the dir static/html/*.html
 	switch args.Layout {
 	case "full", "standard":
-		p.MetaAuthor = viper.GetString("create.meta.author")
-		p.MetaColorScheme = viper.GetString("create.meta.color-scheme")
-		p.MetaDesc = viper.GetString("create.meta.description")
-		p.MetaGenerator = viper.GetBool("create.meta.generator")
-		p.MetaKeywords = viper.GetString("create.meta.keywords")
-		p.MetaNoTranslate = viper.GetBool("create.meta.notranslate")
-		p.MetaReferrer = viper.GetString("create.meta.referrer")
-		p.MetaRobots = viper.GetString("create.meta.robots")
-		p.MetaThemeColor = viper.GetString("create.meta.theme-color")
-		p.PageTitle = viper.GetString("create.title")
+		p.MetaAuthor = viper.GetString("html.meta.author")
+		p.MetaColorScheme = viper.GetString("html.meta.color-scheme")
+		p.MetaDesc = viper.GetString("html.meta.description")
+		p.MetaGenerator = viper.GetBool("html.meta.generator")
+		p.MetaKeywords = viper.GetString("html.meta.keywords")
+		p.MetaNoTranslate = viper.GetBool("html.meta.notranslate")
+		p.MetaReferrer = viper.GetString("html.meta.referrer")
+		p.MetaRobots = viper.GetString("html.meta.robots")
+		p.MetaThemeColor = viper.GetString("html.meta.theme-color")
+		p.PageTitle = viper.GetString("html.title")
 		// generate data
 		t := time.Now().UTC()
 		p.BuildDate = t.Format(time.RFC3339)
 		p.BuildVersion = version.B.Version
 	case "mini":
-		p.PageTitle = viper.GetString("create.title")
+		p.PageTitle = viper.GetString("html.title")
 		p.MetaGenerator = false
 	}
 	// convert bytes into utf8
