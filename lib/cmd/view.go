@@ -65,44 +65,12 @@ func init() {
 	viewCmd.Flags().SortFlags = false
 }
 
-type viewPack struct {
-	convert string
-	name    string
-}
-
-var viewPacks = map[string]viewPack{
-	"437.cr":        {"d", "text/cp437-cr.txt"},
-	"437.crlf":      {"d", "text/cp437-crlf.txt"},
-	"437.lf":        {"d", "text/cp437-lf.txt"},
-	"865":           {"", "text/cp865.txt"},
-	"1252":          {"", "text/cp1252.txt"},
-	"ascii":         {"", "text/retrotxt.asc"},
-	"ansi":          {"", "text/retrotxt.ans"},
-	"ansi.aix":      {"", "text/ansi-aixterm.ans"},
-	"ansi.blank":    {"", "text/ansi-blank"},
-	"ansi.cp":       {"", "text/ansi-cp.ans"},
-	"ansi.cpf":      {"", "text/ansi-cpf.ans"},
-	"ansi.hvp":      {"", "text/ansi-hvp.ans"},
-	"ansi.proof":    {"", "text/ansi-proof.ans"},
-	"ansi.rgb":      {"", "text/ansi-rgb.ans"},
-	"ansi.setmodes": {"", "text/ansi-setmodes.ans"},
-	"iso-1":         {"", "text/iso-8859-1.txt"},
-	"iso-15":        {"", "text/iso-8859-15.txt"},
-	"sauce":         {"", "text/sauce.txt"},
-	"shiftjis":      {"", "text/shiftjis.txt"},
-	"us-ascii":      {"", "text/us-ascii.txt"},
-	"utf8":          {"", "text/utf-8.txt"},
-	"utf8.bom":      {"", "text/utf-8-bom.txt"},
-	"utf16.be":      {"", "text/utf-16-be.txt"},
-	"utf16.le":      {"", "text/utf-16-le.txt"},
-}
-
 func viewPackage(name string) (ok bool, err error) {
 	var s = strings.ToLower(name)
 	if _, err := os.Stat(s); !os.IsNotExist(err) {
 		return false, nil
 	}
-	pkg, exist := viewPacks[s]
+	pkg, exist := internalPacks[s]
 	println(fmt.Sprintf("%+v", pkg), exist)
 	if !exist {
 		return false, nil
