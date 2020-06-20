@@ -24,38 +24,6 @@ import (
 // TestMode disables piping detection which conflicts with go test
 var TestMode = false
 
-// JSONExample is used for previewing color themes
-type JSONExample struct {
-	Style struct {
-		Name    string `json:"name"`
-		Count   int    `json:"count"`
-		Default bool   `json:"default"`
-	}
-}
-
-func (s JSONExample) String(flag string) {
-	fmt.Println()
-	// config is stored as YAML but printed as JSON
-	out, _ := json.MarshalIndent(s, "", "  ")
-	if flag != "" {
-		fmt.Println("\n" + color.Secondary.Sprintf("%s=%q", flag, s.Style.Name))
-	}
-	Highlight(string(out), "json", s.Style.Name)
-}
-
-// JSONStyles prints out a list of available YAML color styles.
-func JSONStyles(cmd string) {
-	for i, s := range styles.Names() {
-		var styles JSONExample
-		styles.Style.Name = s
-		styles.Style.Count = i
-		if s == "dracula" {
-			styles.Style.Default = true
-		}
-		styles.String(cmd)
-	}
-}
-
 // Border wraps text around a single line border.
 func Border(text string) *bytes.Buffer {
 	maxLen := 0
@@ -129,7 +97,7 @@ func NumberizeKeys(keys []string) string {
 	var s = make([]string, len(keys))
 	sort.Strings(keys)
 	for i, key := range keys {
-		n, err := underlineChar(strconv.Itoa(i))
+		n, err := UnderlineChar(strconv.Itoa(i))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -176,42 +144,8 @@ func Term() (term string) {
 	return term
 }
 
-// UnderlineKeys uses ANSI to underline the first letter of each key.
-func UnderlineKeys(keys []string) string {
-	if len(keys) == 0 {
-		return ""
-	}
-	sort.Strings(keys)
-	for i, key := range keys {
-		if utf8.RuneCountInString(key) > 1 {
-			r, _ := utf8.DecodeRuneInString(key)
-			c, err := underlineChar(string(r))
-			if err != nil {
-				keys[i] = key
-			}
-			keys[i] = fmt.Sprintf("%s%s", c, key[utf8.RuneLen(r):])
-			if filepath.Ext(key) == ".min" {
-				s := strings.Split(keys[i], ".")
-				base := strings.Join(s[0:len(s)-1], ".")
-				m, err := underlineChar("m")
-				if err != nil {
-					log.Fatal(err)
-				}
-				keys[i] = fmt.Sprintf("%s.%sin", base, m)
-			}
-		} else {
-			c, err := underlineChar(key)
-			if err != nil {
-				keys[i] = key
-			} else {
-				keys[i] = c
-			}
-		}
-	}
-	return strings.Join(keys, ", ")
-}
-
-func underlineChar(c string) (s string, err error) {
+// UnderlineChar uses ANSI to underline the first character of a string.
+func UnderlineChar(c string) (s string, err error) {
 	if c == "" {
 		return s, err
 	}
@@ -228,4 +162,71 @@ func underlineChar(c string) (s string, err error) {
 		return s, err
 	}
 	return buf.String(), nil
+}
+
+// UnderlineKeys uses ANSI to underline the first letter of each key.
+func UnderlineKeys(keys []string) string {
+	if len(keys) == 0 {
+		return ""
+	}
+	sort.Strings(keys)
+	for i, key := range keys {
+		if utf8.RuneCountInString(key) > 1 {
+			r, _ := utf8.DecodeRuneInString(key)
+			c, err := UnderlineChar(string(r))
+			if err != nil {
+				keys[i] = key
+			}
+			keys[i] = fmt.Sprintf("%s%s", c, key[utf8.RuneLen(r):])
+			if filepath.Ext(key) == ".min" {
+				s := strings.Split(keys[i], ".")
+				base := strings.Join(s[0:len(s)-1], ".")
+				m, err := UnderlineChar("m")
+				if err != nil {
+					log.Fatal(err)
+				}
+				keys[i] = fmt.Sprintf("%s.%sin", base, m)
+			}
+		} else {
+			c, err := UnderlineChar(key)
+			if err != nil {
+				keys[i] = key
+			} else {
+				keys[i] = c
+			}
+		}
+	}
+	return strings.Join(keys, ", ")
+}
+
+// JSONExample is used for previewing color themes
+type JSONExample struct {
+	Style struct {
+		Name    string `json:"name"`
+		Count   int    `json:"count"`
+		Default bool   `json:"default"`
+	}
+}
+
+func (s JSONExample) String(flag string) {
+	fmt.Println()
+	// config is stored as YAML but printed as JSON
+	out, _ := json.MarshalIndent(s, "", "  ")
+	if flag != "" {
+		fmt.Println("\n" + color.Secondary.Sprintf("%s=%q", flag, s.Style.Name))
+	}
+	Highlight(string(out), "json", s.Style.Name)
+}
+
+// JSONStyles prints out a list of available YAML color styles.
+func JSONStyles(cmd string) {
+	for i, s := range styles.Names() {
+		var styles JSONExample
+		styles.Style.Name = s
+		styles.Style.Count = i
+		if s == "dracula" {
+			styles.Style.Default = true
+		}
+		styles.String(cmd)
+	}
 }

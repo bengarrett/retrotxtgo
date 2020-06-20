@@ -12,7 +12,6 @@ import (
 	"strconv"
 	"strings"
 	"text/tabwriter"
-	"text/template"
 
 	"github.com/alecthomas/chroma/styles"
 	"github.com/bengarrett/retrotxtgo/lib/create"
@@ -34,13 +33,19 @@ func List() (err error) {
 		switch key {
 		case "html.layout":
 			fmt.Fprintf(w, ", choices: %s (recommend: %s)",
-				str.Cp(createTemplates().String()), str.Cp("standard"))
+				str.Cp(createTemplates().string()), str.Cp("standard"))
 		case "server-port":
 			fmt.Fprintf(w, ", choices: %s", portInfo())
 		}
 		fmt.Fprint(w, "\n")
 	}
 	return w.Flush()
+}
+
+// Names lists the names of chroma styles.
+func Names() string {
+	var s names = styles.Names()
+	return s.string(true)
 }
 
 // Set edits and saves a setting within a configuration file.
@@ -100,7 +105,7 @@ func Set(name string) {
 		setEditor(name, value.(string))
 	case "html.layout":
 		fmt.Println("\nChoose a new " + str.Options(Hints[name], create.Layouts(), true))
-		setShortStrings(name, value.(string), createTemplates().Strings())
+		setShortStrings(name, value.(string), createTemplates().keys())
 	case "html.meta.author",
 		"html.meta.description",
 		"html.meta.keywords",
@@ -146,21 +151,6 @@ func Set(name string) {
 	}
 }
 
-func portInfo() string {
-	type ports struct {
-		max uint
-		min uint
-		rec uint
-	}
-	var port = ports{
-		max: prompt.PortMax,
-		min: prompt.PortMin,
-		rec: prompt.PortRec,
-	}
-	pm, px, pr := strconv.Itoa(int(port.min)), strconv.Itoa(int(port.max)), strconv.Itoa(int(port.rec))
-	return str.Cp(pm) + "-" + str.Cp(px) + fmt.Sprintf(" (recommend: %s)", str.Cp(pr))
-}
-
 // Validate the existence of a setting key name.
 func Validate(key string) (ok bool) {
 	ok = false
@@ -173,19 +163,6 @@ func Validate(key string) (ok bool) {
 	return true
 }
 
-type files map[string]string
-
-// createTemplates creates a map of the template filenames used in conjunction with the layout flag.
-func createTemplates() files {
-	f := make(files)
-	f["body"] = "body-content"
-	f["full"] = "standard"
-	f["mini"] = "standard"
-	f["pre"] = "pre-content"
-	f["standard"] = "standard"
-	return f
-}
-
 func copyKeys(keys []string) (copy []string) {
 	if len(keys) == 0 {
 		return copy
@@ -196,44 +173,9 @@ func copyKeys(keys []string) (copy []string) {
 	return copy
 }
 
-// String method returns the files keys as a comma separated list.
-// TODO: dupe of aliases?
-func (f files) String() (s string) {
-	k := []string{}
-	for key := range createTemplates() {
-		k = append(k, key)
-	}
-	sort.Strings(k)
-	// apply an ANSI underline to the first letter of each key
-	t, err := template.New("underline").Parse("{{define \"TEXT\"}}\033[0m\033[4m{{.}}\033[0m{{end}}")
-	if err != nil {
-		logs.LogCont(err)
-		return strings.Join(k, ", ")
-	}
-	for i, key := range k {
-		if len(k) > 1 {
-			var b bytes.Buffer
-			err := t.ExecuteTemplate(&b, "TEXT", string(key[0]))
-			logs.LogCont(err)
-			k[i] = fmt.Sprintf("%s%s", b.String(), key[1:])
-		}
-	}
-	return strings.Join(k, ", ")
-}
-
-// Strings method returns the files keys as a sorted slice.
-func (f files) Strings() []string {
-	s := []string{}
-	for key := range createTemplates() {
-		s = append(s, key)
-	}
-	sort.Strings(s)
-	return s
-}
-
 type names []string
 
-func (n names) String(theme bool) string {
+func (n names) string(theme bool) string {
 	maxWidth := 0
 	for _, s := range n {
 		if l := len(fmt.Sprintf("%s=%q", s, s)); l > maxWidth {
@@ -262,10 +204,30 @@ func (n names) String(theme bool) string {
 	return strings.Join(s, "")
 }
 
-// Names lists the names of chroma styles.
-func Names() string {
-	var s names = styles.Names()
-	return s.String(true)
+type templs map[string]string
+
+// createTemplates creates a map of the template filenames used in conjunction with the layout flag.
+func createTemplates() templs {
+	t := make(templs)
+	t["body"] = "body-content"
+	t["full"] = "standard"
+	t["mini"] = "standard"
+	t["pre"] = "pre-content"
+	t["standard"] = "standard"
+	return t
+}
+
+// keys method returns the keys of templs as a sorted slice.
+func (t templs) keys() (s []string) {
+	for key := range t {
+		s = append(s, key)
+	}
+	sort.Strings(s)
+	return s
+}
+
+func (t templs) string() string {
+	return str.UnderlineKeys(t.keys())
 }
 
 // dirExpansion traverses the named directory to apply shell-like expansions.
@@ -307,6 +269,21 @@ func dirExpansion(name string) (dir string) {
 		dir = filepath.Join(dir, p)
 	}
 	return dir
+}
+
+func portInfo() string {
+	type ports struct {
+		max uint
+		min uint
+		rec uint
+	}
+	var port = ports{
+		max: prompt.PortMax,
+		min: prompt.PortMin,
+		rec: prompt.PortRec,
+	}
+	pm, px, pr := strconv.Itoa(int(port.min)), strconv.Itoa(int(port.max)), strconv.Itoa(int(port.rec))
+	return str.Cp(pm) + "-" + str.Cp(px) + fmt.Sprintf(" (recommend: %s)", str.Cp(pr))
 }
 
 func previewMeta(name, value string) {

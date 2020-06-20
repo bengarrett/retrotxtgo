@@ -51,7 +51,7 @@ func TestTerm16M(t *testing.T) {
 	}
 }
 
-func Test_underlineRune(t *testing.T) {
+func Test_UnderlineChar(t *testing.T) {
 	tests := []struct {
 		name    string
 		c       string
@@ -71,7 +71,7 @@ func Test_underlineRune(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotS, err := underlineChar(tt.c)
+			gotS, err := UnderlineChar(tt.c)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("underlineChar() error = %v, wantErr %v", err, tt.wantErr)
 				return
