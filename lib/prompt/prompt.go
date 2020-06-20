@@ -14,6 +14,8 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/str"
 )
 
+type keys []string
+
 // the lowest, largest and recommended network ports to serve HTTP.
 const (
 	PortMin uint = 0
@@ -24,6 +26,57 @@ const (
 // SetupMode changes the behavor of prompts to exit on empty inputs.
 var SetupMode = false
 
+// IndexStrings asks for a numeric index position and returns a single choice from a string of keys.
+func IndexStrings(options *[]string) (key string) {
+	var k keys = *options
+	return k.prompt(os.Stdin)
+}
+
+// Port asks for and returns a HTTP port value.
+func Port(validate bool) (port uint) {
+	return pport(os.Stdin, validate)
+}
+
+// PortValid checks if the network port is within range to serve HTTP.
+func PortValid(port uint) (ok bool) {
+	if port < PortMin || port > PortMax {
+		return false
+	}
+	return true
+}
+
+// ShortStrings asks for and returns a single choice from a string of keys.
+// Either the first letter or the full name of the key are accepted.
+func ShortStrings(options *[]string) (key string) {
+	var k keys = *options
+	return k.shortPrompt(os.Stdin)
+}
+
+// String asks for and returns a multi-word string.
+// Inputting ⏎ the Enter/Return key exits the program,
+// or returns an empty value when in SetupMode.
+func String() (words string) {
+	return pstring(os.Stdin)
+}
+
+// Strings asks for and returns a single choice from a string of keys.
+func Strings(options *[]string) (key string) {
+	var k keys = *options
+	return k.prompt(os.Stdin)
+}
+
+// YesNo asks for a yes or no input.
+func YesNo(ask string, yesDefault bool) bool {
+	y, n := "Y", "n"
+	if !yesDefault {
+		y, n = "y", "N"
+	}
+	fmt.Printf("%s? [%s/%s] ", ask, y, n)
+	input, err := promptRead(os.Stdin)
+	logs.Log(err)
+	return parseYN(input, yesDefault)
+}
+
 func check(prompts int) {
 	switch {
 	case prompts == 2:
@@ -33,11 +86,6 @@ func check(prompts int) {
 	case prompts >= 4:
 		os.Exit(1)
 	}
-}
-
-// Port asks for and returns a HTTP port value.
-func Port(validate bool) (port uint) {
-	return pport(os.Stdin, validate)
 }
 
 func pport(r io.Reader, validate bool) (port uint) {
@@ -72,31 +120,40 @@ func pport(r io.Reader, validate bool) (port uint) {
 	return 0
 }
 
-// PortValid checks if the network port is within range to serve HTTP.
-func PortValid(port uint) (ok bool) {
-	if port < PortMin || port > PortMax {
-		return false
+func promptRead(stdin io.Reader) (input string, err error) {
+	reader := bufio.NewReader(stdin)
+	input, err = reader.ReadString('\n')
+	input = strings.TrimSpace(input)
+	if err != nil && err != io.EOF {
+		return input, err
 	}
-	return true
+	return input, nil
 }
 
-// String asks for and returns a multi-word string.
-func String() (words string) {
-	return pstring(os.Stdin)
+func parseYN(input string, yesDefault bool) bool {
+	switch input {
+	case "":
+		if yesDefault {
+			return true
+		}
+	case "yes", "y":
+		return true
+	}
+	return false
 }
 
 func pstring(r io.Reader) (words string) {
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		words := scanner.Text()
-		if SetupMode && words == "" {
-			return words
-		}
 		switch words {
-		case "":
-			os.Exit(0)
 		case "-":
-			words = ""
+			return "-"
+		case "":
+			if SetupMode {
+				return ""
+			}
+			os.Exit(0)
 		}
 		return words
 	}
@@ -106,13 +163,45 @@ func pstring(r io.Reader) (words string) {
 	return words
 }
 
-type keys []string
+// numeric checks input string for a valid int value and returns a matching slice.
+func (k keys) numeric(input string) (key string) {
+	if input == "" {
+		return key
+	}
+	i, err := strconv.Atoi(input)
+	if err != nil {
+		return key
+	}
+	if i >= len(k) || i < 0 {
+		return key
+	}
+	sort.Strings(k)
+	return k[i]
+}
 
-// ShortStrings asks for and returns a single choice from a string of keys.
-// Either the first letter or the full name of the key are accepted.
-func ShortStrings(options *[]string) (key string) {
-	var k keys = *options
-	return k.shortPrompt(os.Stdin)
+func (k keys) prompt(r io.Reader) (key string) {
+	prompts := 0
+	scanner := bufio.NewScanner(r)
+	for scanner.Scan() {
+		prompts++
+		key = scanner.Text()
+		if key == "-" {
+			fmt.Println("OKAY")
+			return ""
+		}
+		if SetupMode && key == "" {
+			return ""
+		}
+		if n := k.numeric(key); n != "" {
+			return n
+		}
+		if !k.validate(key) {
+			check(prompts)
+			continue
+		}
+		return key
+	}
+	return ""
 }
 
 func (k keys) shortPrompt(r io.Reader) (key string) {
@@ -121,7 +210,8 @@ func (k keys) shortPrompt(r io.Reader) (key string) {
 	for scanner.Scan() {
 		prompts++
 		key = scanner.Text()
-		if SetupMode && key == "" {
+		switch key {
+		case "", "-":
 			return key
 		}
 		if long := k.shortValidate(key); long != "" {
@@ -157,12 +247,6 @@ func (k keys) shortValidate(key string) string {
 	return k[i]
 }
 
-// Strings asks for and returns a single choice from a string of keys.
-func Strings(options *[]string) (key string) {
-	var k keys = *options
-	return k.prompt(os.Stdin)
-}
-
 func (k keys) validate(key string) (ok bool) {
 	if key == "" {
 		return false
@@ -174,75 +258,4 @@ func (k keys) validate(key string) (ok bool) {
 		return false
 	}
 	return true
-}
-
-// numeric checks input string for a valid int value and returns a matching slice.
-func (k keys) numeric(input string) (key string) {
-	if input == "" {
-		return key
-	}
-	i, err := strconv.Atoi(input)
-	if err != nil {
-		return key
-	}
-	if i >= len(k) || i < 0 {
-		return key
-	}
-	sort.Strings(k)
-	return k[i]
-}
-
-func (k keys) prompt(r io.Reader) (key string) {
-	prompts := 0
-	scanner := bufio.NewScanner(r)
-	for scanner.Scan() {
-		prompts++
-		key = scanner.Text()
-		if SetupMode && key == "" {
-			return key
-		}
-		if n := k.numeric(key); n != "" {
-			return n
-		}
-		if !k.validate(key) {
-			check(prompts)
-			continue
-		}
-		return key
-	}
-	return ""
-}
-
-// YesNo asks for a yes or no input.
-func YesNo(ask string, yesDefault bool) bool {
-	y, n := "Y", "n"
-	if !yesDefault {
-		y, n = "y", "N"
-	}
-	fmt.Printf("%s? [%s/%s] ", ask, y, n)
-	input, err := promptRead(os.Stdin)
-	logs.Log(err)
-	return parseYN(input, yesDefault)
-}
-
-func promptRead(stdin io.Reader) (input string, err error) {
-	reader := bufio.NewReader(stdin)
-	input, err = reader.ReadString('\n')
-	input = strings.TrimSpace(input)
-	if err != nil && err != io.EOF {
-		return input, err
-	}
-	return input, nil
-}
-
-func parseYN(input string, yesDefault bool) bool {
-	switch input {
-	case "":
-		if yesDefault {
-			return true
-		}
-	case "yes", "y":
-		return true
-	}
-	return false
 }

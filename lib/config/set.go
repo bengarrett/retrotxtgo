@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -22,6 +23,26 @@ import (
 	"github.com/spf13/viper"
 )
 
+// List and print all the available configurations.
+func List() (err error) {
+	keys := Keys()
+	sort.Strings(keys)
+	w := tabwriter.NewWriter(os.Stdout, 2, 2, 0, ' ', 0)
+	fmt.Fprintf(w, "\t\tname value\t\thint\n")
+	for i, key := range keys {
+		fmt.Fprintf(w, "%d\t\t%s\t\t%s", i, key, Hints[key])
+		switch key {
+		case "html.layout":
+			fmt.Fprintf(w, ", choices: %s (recommend: %s)",
+				str.Cp(createTemplates().String()), str.Cp("standard"))
+		case "server-port":
+			fmt.Fprintf(w, ", choices: %s", portInfo())
+		}
+		fmt.Fprint(w, "\n")
+	}
+	return w.Flush()
+}
+
 // Set edits and saves a setting within a configuration file.
 func Set(name string) {
 	if !Validate(name) {
@@ -37,72 +58,92 @@ func Set(name string) {
 	if !setupMode {
 		PrintLocation()
 	}
-	value := viper.GetString(name)
-	switch value {
-	case "":
-		fmt.Printf("\n%s is currently disabled\n", str.Cf(name))
-	default:
-		fmt.Printf("\n%s is currently set to %q\n", str.Cf(name), value)
+	value := viper.Get(name)
+	switch value.(type) {
+	case bool:
+		switch value.(bool) {
+		case true:
+			fmt.Printf("\n%s is in use\n", str.Cf(name))
+		default:
+			fmt.Printf("\n%s is currently not in use\n", str.Cf(name))
+		}
+	case string:
+		switch value.(string) {
+		case "":
+			fmt.Printf("\n%s is currently not in use\n", str.Cf(name))
+		default:
+			fmt.Printf("\n%s is set to %q", str.Cf(name), value)
+			switch name {
+			case "editor":
+				_, err := exec.LookPath(value.(string))
+				fmt.Print(" ", str.Bool(err == nil))
+				fmt.Println()
+			case "save-directory":
+				f := false
+				if _, err := os.Stat(value.(string)); !os.IsNotExist(err) {
+					f = true
+				}
+				fmt.Print(" ", str.Bool(f))
+				fmt.Println()
+			default:
+				fmt.Println()
+			}
+		}
 	}
 	switch name {
 	case "editor":
-		fmt.Println("Set a " + Hints[name] + ":")
-		setEditor(name)
+		s := fmt.Sprint("Set a " + Hints[name])
+		if value.(string) != "" {
+			s = fmt.Sprint(s, " or use a dash [-] to remove")
+		}
+		fmt.Printf("%s:\n", s)
+		setEditor(name, value.(string))
 	case "html.layout":
-		fmt.Println("Choose a new " + str.Options(Hints[name], create.Layouts(), true))
-		setShortStrings(name, createTemplates().Strings())
-	case "html.meta.generator":
-		setGenerator()
-	case "html.meta.referrer":
-		setMeta(name, value)
-		fmt.Println(strings.Join(create.Referrer, ", "))
-		setShortStrings(name, create.Referrer)
-	case "html.meta.robots":
-		setMeta(name, value)
-		fmt.Println(strings.Join(create.Robots, ", "))
+		fmt.Println("\nChoose a new " + str.Options(Hints[name], create.Layouts(), true))
+		setShortStrings(name, value.(string), createTemplates().Strings())
+	case "html.meta.author",
+		"html.meta.description",
+		"html.meta.keywords",
+		"html.meta.theme-color":
+		previewMeta(name, value.(string))
 		setString(name)
 	case "html.meta.color-scheme":
-		setMeta(name, value)
-		fmt.Println(strings.Join(create.ColorScheme, ", "))
-		setShortStrings(name, create.ColorScheme)
+		previewMeta(name, value.(string))
+		keys := copyKeys(create.ColorScheme)
+		fmt.Println(str.UnderlineKeys(create.ColorScheme))
+		setShortStrings(name, value.(string), keys)
+	case "html.meta.generator":
+		setGenerator(value.(bool))
+	case "html.meta.notranslate":
+		setNoTranslate(value.(bool))
+	case "html.meta.referrer":
+		previewMeta(name, value.(string))
+		fmt.Println(str.NumberizeKeys(create.Referrer))
+		setIndex(name, value.(string), create.Referrer)
+	case "html.meta.robots":
+		previewMeta(name, value.(string))
+		fmt.Println(str.NumberizeKeys(create.Robots))
+		setIndex(name, value.(string), create.Robots)
 	case "html.title":
+		previewTitle(value.(string))
 		fmt.Println("Choose a new " + Hints[name] + ":")
 		setString(name)
 	case "save-directory":
 		fmt.Println("Choose a new " + Hints[name] + ":")
 		setDirectory(name)
 	case "server-port":
-		fmt.Println("Set a new HTTP port to " + Hints[name])
+		fmt.Printf("\n%slocalhost%s%d\n", str.Cb("http://"), str.Cb(":"), value.(int))
+		fmt.Printf("\nSet a new HTTP %s\nChoices %s:\n", Hints[name], portInfo())
 		setPort(name)
-	case "style.info":
-		fmt.Printf("Set a new %s syntax style:\n%s\n", str.Example("config info"), str.Ci(Names()))
-		setStrings(name, styles.Names())
 	case "style.html":
 		fmt.Printf("Set a new HTML syntax style:\n%s\n", str.Ci(Names()))
 		setStrings(name, styles.Names())
+	case "style.info":
+		fmt.Printf("Set a new %s syntax style:\n%s\n", str.Example("config info"), str.Ci(Names()))
+		setStrings(name, styles.Names())
 	default:
-		setMeta(name, value)
-		setString(name)
+		log.Fatalln("config is not configured:", name)
 	}
-}
-
-// List and print all the available configurations.
-func List() (err error) {
-	keys := Keys()
-	sort.Strings(keys)
-	w := tabwriter.NewWriter(os.Stdout, 2, 2, 0, ' ', 0)
-	fmt.Fprintf(w, "\t\tname value\t\thint\n")
-	for i, key := range keys {
-		fmt.Fprintf(w, "%d\t\t%s\t\t%s", i, key, Hints[key])
-		switch key {
-		case "html.layout":
-			fmt.Fprintf(w, ", choices: %s (recommend: %s)", str.Cp(createTemplates().String()), str.Cp("standard"))
-		case "server-port":
-			fmt.Fprintf(w, ", choices: %s", portInfo())
-		}
-		fmt.Fprint(w, "\n")
-	}
-	return w.Flush()
 }
 
 func portInfo() string {
@@ -145,7 +186,18 @@ func createTemplates() files {
 	return f
 }
 
+func copyKeys(keys []string) (copy []string) {
+	if len(keys) == 0 {
+		return copy
+	}
+	for _, key := range keys {
+		copy = append(copy, key)
+	}
+	return copy
+}
+
 // String method returns the files keys as a comma separated list.
+// TODO: dupe of aliases?
 func (f files) String() (s string) {
 	k := []string{}
 	for key := range createTemplates() {
@@ -257,6 +309,50 @@ func dirExpansion(name string) (dir string) {
 	return dir
 }
 
+func previewMeta(name, value string) {
+	if name == "" {
+		logs.Log(errors.New("setmeta name string is empty"))
+	}
+	if !Validate(name) {
+		logs.Log(errors.New("setmeta name is an unknown setting: " + name))
+	}
+	s := strings.Split(name, ".")
+	switch {
+	case len(s) != 3, s[0] != "html", s[1] != "meta":
+		return
+	}
+	elm := fmt.Sprintf("<head>\n  <meta name=\"%s\" value=\"%s\">", s[2], value)
+	fmt.Print(logs.ColorHTML(elm))
+	h := strings.Split(Hints[name], " ")
+	fmt.Printf("\n%s %s.", strings.Title(h[0]), strings.Join(h[1:], " "))
+	fmt.Println(str.Cf("\nAbout this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name"))
+	fmt.Printf("\n%s \n", previewPrompt(name, value))
+}
+
+func previewTitle(value string) {
+	elm := fmt.Sprintf("<head>\n  <title>%s</title>", value)
+	fmt.Print(logs.ColorHTML(elm))
+	fmt.Println(str.Cf("\nAbout this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title"))
+	fmt.Println()
+}
+
+func previewPrompt(name, value string) (p string) {
+	p = "Set a new value"
+	switch name {
+	case "html.meta.keywords":
+		p = "Set some comma-separated keywords"
+		if value != "" {
+			p = "Replace the current keywords"
+		}
+	}
+	if value != "" {
+		p += ", leave blank to keep as-is or use a dash [-] to remove:"
+	} else {
+		p += " or leave blank to keep it unused:"
+	}
+	return
+}
+
 func save(name string, value interface{}) {
 	if name == "" {
 		logs.Log(errors.New("save name string is empty"))
@@ -264,11 +360,8 @@ func save(name string, value interface{}) {
 	if !Validate(name) {
 		logs.Log(errors.New("save name is an unknown setting: " + name))
 	}
-	if setupMode && fmt.Sprint(value) == "" {
-		return
-	}
 	// don't save unchanged input values
-	if viper.GetString(name) == fmt.Sprint(value) {
+	if viper.Get(name) == fmt.Sprint(value) {
 		if setupMode {
 			return
 		}
@@ -293,6 +386,9 @@ func setDirectory(name string) {
 	if setupMode && dir == "" {
 		return
 	}
+	if dir == "-" {
+		dir = ""
+	}
 	if _, err := os.Stat(dir); err != nil {
 		es := fmt.Sprint(err)
 		e := strings.Split(es, ":")
@@ -304,84 +400,112 @@ func setDirectory(name string) {
 	save(name, dir)
 }
 
-func setEditor(name string) {
+func setEditor(name, value string) {
 	if name == "" {
-		logs.Log(errors.New("setstring name string is empty"))
+		logs.Log(errors.New("seteditor name string is empty"))
 	}
-	editor := prompt.String()
-	if setupMode && editor == "" {
+	v := prompt.String()
+	switch v {
+	case "-":
+		save(name, "")
+		return
+	case "":
 		return
 	}
-	if _, err := exec.LookPath(editor); err != nil {
-		fmt.Printf("%s this editor choice is not accessible: %s\n", str.Info(), err)
+	if _, err := exec.LookPath(v); err != nil {
+		fmt.Printf("%s this editor choice is not accessible by RetroTxt\n%s\n",
+			str.Info(), err.Error())
 	}
-	save(name, editor)
+	save(name, v)
 }
 
-func setGenerator() {
+func setGenerator(value bool) {
 	var name = "html.meta.generator"
 	elm := fmt.Sprintf("<head>\n  <meta name=\"generator\" content=\"RetroTxt v%s, %s\">",
 		v.B.Version, v.B.Date)
 	fmt.Println(logs.ColorHTML(elm))
-	prmt := prompt.YesNo("Enable this element", viper.GetBool(name))
-	viper.Set(name, prmt)
+	p := "Enable the generator element"
+	if value {
+		p = "Keep the generator element"
+	}
+	viper.Set(name, prompt.YesNo(p, viper.GetBool(name)))
 	if err := UpdateConfig("", false); err != nil {
 		logs.Log(err)
 	}
 }
 
-func setMeta(name, value string) {
+func setIndex(name, value string, data []string) {
 	if name == "" {
-		logs.Log(errors.New("setmeta name string is empty"))
+		logs.Log(errors.New("setindex name string is empty"))
 	}
-	if !Validate(name) {
-		logs.Log(errors.New("setmeta name is an unknown setting: " + name))
-	}
-	s := strings.Split(name, ".")
-	switch {
-	case len(s) != 3, s[0] != "html", s[1] != "meta":
+	p := prompt.IndexStrings(&data)
+	switch p {
+	case "-":
+		p = ""
+	case "":
 		return
 	}
-	elm := fmt.Sprintf("<head>\n  <meta name=\"%s\" value=\"%s\">", s[2], value)
-	fmt.Print(logs.ColorHTML(elm))
-	h := strings.Split(Hints[name], " ")
-	fmt.Printf("\n%s %s.", strings.Title(h[0]), strings.Join(h[1:], " "))
-	fmt.Println(str.Cf("\nAbout this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name"))
-	q := "Set a new value or leave blank to keep it disabled:"
-	if value != "" {
-		q = "Set a new value, leave blank to keep as-is or use a dash [-] to disable:"
+	save(name, p)
+}
+
+func setNoTranslate(value bool) {
+	var name = "html.meta.notranslate"
+	elm := fmt.Sprintf("<html translate=\"no\">\n  <head>\n    <meta name=\"google\" content=\"notranslate\">")
+	fmt.Println(logs.ColorHTML(elm))
+	q := "Enable the no translate option"
+	if value {
+		q = "Keep the translate option"
 	}
-	fmt.Printf("\n%s \n", q)
+	v := prompt.YesNo(q, viper.GetBool(name))
+	save(name, v)
 }
 
 func setPort(name string) {
 	if name == "" {
 		logs.Log(errors.New("setport name string is empty"))
 	}
-	p := prompt.Port(true)
-	if setupMode && p == 0 {
+	v := prompt.Port(true)
+	if setupMode && v == 0 {
 		return
 	}
-	save(name, p)
+	save(name, v)
 }
 
-func setShortStrings(name string, data []string) {
-	if name == "" {
-		logs.Log(errors.New("setstrings name string is empty"))
+func setShortStrings(name, value string, data []string) {
+	v := prompt.ShortStrings(&data)
+	switch v {
+	case "-":
+		v = ""
+	case "":
+		return
 	}
-	save(name, prompt.ShortStrings(&data))
+	save(name, v)
 }
 
 func setString(name string) {
 	if name == "" {
 		logs.Log(errors.New("setstring name string is empty"))
 	}
-	save(name, prompt.String())
+	v := prompt.String()
+	switch v {
+	case "-":
+		v = ""
+	case "":
+		return
+	}
+	save(name, v)
 }
 
 func setStrings(name string, data []string) {
 	if name == "" {
 		logs.Log(errors.New("setstrings name string is empty"))
 	}
-	save(name, prompt.Strings(&data))
+	v := prompt.Strings(&data)
+	switch v {
+	case "-":
+		v = ""
+	case "":
+		return
+	}
+	save(name, v)
 }

@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"unicode/utf8"
 
@@ -119,6 +121,23 @@ func HighlightWriter(w io.Writer, source, lexer, style string) (err error) {
 	return nil
 }
 
+// NumberizeKeys uses ANSI to underline and prefix a sequential number in front of each key.
+func NumberizeKeys(keys []string) string {
+	if len(keys) == 0 {
+		return ""
+	}
+	var s = make([]string, len(keys))
+	sort.Strings(keys)
+	for i, key := range keys {
+		n, err := underlineChar(strconv.Itoa(i))
+		if err != nil {
+			log.Fatal(err)
+		}
+		s[i] = fmt.Sprintf("%s)\u00a0%s", n, key)
+	}
+	return strings.Join(s, ", ")
+}
+
 // Term determines the terminal type based on the COLORTERM and TERM environment variables.
 func Term() (term string) {
 	// 9.11.2 The environment variable TERM
@@ -174,7 +193,10 @@ func UnderlineKeys(keys []string) string {
 			if filepath.Ext(key) == ".min" {
 				s := strings.Split(keys[i], ".")
 				base := strings.Join(s[0:len(s)-1], ".")
-				m, _ := underlineChar("m")
+				m, err := underlineChar("m")
+				if err != nil {
+					log.Fatal(err)
+				}
 				keys[i] = fmt.Sprintf("%s.%sin", base, m)
 			}
 		} else {

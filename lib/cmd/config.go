@@ -81,8 +81,6 @@ var configInfoCmd = &cobra.Command{
 	Use:     "info",
 	Aliases: []string{"i"},
 	Short:   "View all the settings configured in the config file",
-	Example: str.Example("  retrotxt config info --syntax-style=\"\"") +
-		" # disable the syntax highligher",
 	Run: func(cmd *cobra.Command, args []string) {
 		if configFlag.configs {
 			config.List()

@@ -8,6 +8,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/lib/prompt"
 	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/spf13/viper"
 )
 
 var setupMode = false
@@ -33,6 +34,7 @@ func Setup() {
 		Set(key)
 		fmt.Println(hr(w))
 	}
+	fmt.Println(Info(viper.GetString("style.info")))
 }
 
 func enterKey() string {

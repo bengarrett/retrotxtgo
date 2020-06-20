@@ -19,32 +19,46 @@ var Info = func() string {
 }
 
 // color aliases
-var (
-	Cb = func(t string) string {
-		return color.Secondary.Sprint(t)
-	}
-	Cc = func(t string) string {
-		return color.Comment.Sprint(t)
-	}
-	Ce = func(t string) string {
-		return color.Warn.Sprint(t)
-	}
-	Cf = func(t string) string {
-		return color.OpFuzzy.Sprint(t)
-	}
-	Ci = func(t string) string {
-		return color.OpItalic.Sprint(t)
-	}
-	Cinf = func(t string) string {
-		return color.Info.Sprint(t)
-	}
-	Cp = func(t string) string {
-		return color.Primary.Sprint(t)
-	}
-	Cs = func(t string) string {
-		return color.Success.Sprint(t)
-	}
-)
+
+// Cb secondary.
+func Cb(t string) string {
+	return color.Secondary.Sprint(t)
+}
+
+// Cc comment.
+func Cc(t string) string {
+	return color.Comment.Sprint(t)
+}
+
+// Ce warn.
+func Ce(t string) string {
+	return color.Warn.Sprint(t)
+}
+
+// Cf fuzzy.
+func Cf(t string) string {
+	return color.OpFuzzy.Sprint(t)
+}
+
+// Ci italic.
+func Ci(t string) string {
+	return color.OpItalic.Sprint(t)
+}
+
+// Cinf info.
+func Cinf(t string) string {
+	return color.Info.Sprint(t)
+}
+
+// Cp primary.
+func Cp(t string) string {
+	return color.Primary.Sprint(t)
+}
+
+// Cs success.
+func Cs(t string) string {
+	return color.Success.Sprint(t)
+}
 
 // Bool returns a ✓ or ✗.
 func Bool(b bool) string {

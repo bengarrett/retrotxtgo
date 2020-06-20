@@ -26,7 +26,7 @@ var Defaults = map[string]interface{}{
 	"html.meta.theme-color":  "",
 	"html.title":             "RetroTxt | example",
 	"save-directory":         home(),
-	"server-port":            8080,
+	"server-port":            uint(8080),
 	"style.info":             "dracula",
 	"style.html":             "lovelace",
 }
@@ -71,7 +71,7 @@ type Settings struct {
 		Title string `yaml:"title"`
 	}
 	SaveDirectory string `yaml:"save-directory"`
-	ServerPort    int    `yaml:"server-port"`
+	ServerPort    uint   `yaml:"server-port"`
 	Style         struct {
 		Info string `yaml:"info"`
 		HTML string `yaml:"html"`
@@ -142,45 +142,66 @@ func Keys() []string {
 // Marshal default values for use in a YAML configuration file.
 func Marshal() (interface{}, error) {
 	var sc = Settings{}
-	for key, def := range Defaults {
+	for key := range Defaults {
 		switch key {
-		case "html.layout":
-			sc.HTML.Layout = def.(string)
-		case "html.meta.author":
-			sc.HTML.Meta.Author = def.(string)
-		case "html.meta.color-scheme":
-			sc.HTML.Meta.ColorScheme = def.(string)
-		case "html.meta.description":
-			sc.HTML.Meta.Description = def.(string)
-		case "html.meta.generator":
-			sc.HTML.Meta.Generator = def.(bool)
-		case "html.meta.keywords":
-			sc.HTML.Meta.Keywords = def.(string)
-		case "html.meta.notranslate":
-			sc.HTML.Meta.Notranslate = def.(bool)
-		case "html.meta.referrer":
-			sc.HTML.Meta.Referrer = def.(string)
-		case "html.meta.robots":
-			sc.HTML.Meta.Robots = def.(string)
-		case "html.meta.theme-color":
-			sc.HTML.Meta.ThemeColor = def.(string)
-		case "html.title":
-			sc.HTML.Title = def.(string)
 		case "editor":
-			sc.Editor = def.(string)
+			sc.Editor = getString(key)
+		case "html.layout":
+			sc.HTML.Layout = getString(key)
+		case "html.meta.author":
+			sc.HTML.Meta.Author = getString(key)
+		case "html.meta.color-scheme":
+			sc.HTML.Meta.ColorScheme = getString(key)
+		case "html.meta.description":
+			sc.HTML.Meta.Description = getString(key)
+		case "html.meta.generator":
+			sc.HTML.Meta.Generator = getBool(key)
+		case "html.meta.keywords":
+			sc.HTML.Meta.Keywords = getString(key)
+		case "html.meta.notranslate":
+			sc.HTML.Meta.Notranslate = getBool(key)
+		case "html.meta.referrer":
+			sc.HTML.Meta.Referrer = getString(key)
+		case "html.meta.robots":
+			sc.HTML.Meta.Robots = getString(key)
+		case "html.meta.theme-color":
+			sc.HTML.Meta.ThemeColor = getString(key)
+		case "html.title":
+			sc.HTML.Title = getString(key)
 		case "save-directory":
-			sc.SaveDirectory = def.(string)
+			sc.SaveDirectory = getString(key)
 		case "server-port":
-			sc.ServerPort = def.(int)
+			sc.ServerPort = getUint(key)
 		case "style.info":
-			sc.Style.Info = def.(string)
+			sc.Style.Info = getString(key)
 		case "style.html":
-			sc.Style.HTML = def.(string)
+			sc.Style.HTML = getString(key)
 		default:
 			return sc, errors.New("default setting was missed, " + key)
 		}
 	}
 	return sc, nil
+}
+
+func getBool(key string) bool {
+	if v := viper.Get(key); v != nil {
+		return v.(bool)
+	}
+	return Defaults[key].(bool)
+}
+
+func getUint(key string) uint {
+	if v := viper.GetUint(key); v != 0 {
+		return v
+	}
+	return Defaults[key].(uint)
+}
+
+func getString(key string) string {
+	if v := viper.GetString(key); v != "" {
+		return v
+	}
+	return Defaults[key].(string)
 }
 
 // Missing lists the settings that are not found in the configuration file.
