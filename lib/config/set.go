@@ -25,7 +25,6 @@ import (
 // List and print all the available configurations.
 func List() (err error) {
 	keys := Keys()
-	sort.Strings(keys)
 	w := tabwriter.NewWriter(os.Stdout, 2, 2, 0, ' ', 0)
 	fmt.Fprintf(w, "\t\tname value\t\thint\n")
 	for i, key := range keys {
@@ -55,7 +54,6 @@ func Set(name string) {
 		Update(name)
 	} else if i >= 0 && i <= (len(Defaults)-1) {
 		k := Keys()
-		sort.Strings(k)
 		Update(k[i])
 	} else {
 		Update(name)
@@ -183,7 +181,7 @@ func Validate(key string) (ok bool) {
 
 func copyKeys(keys []string) (copy []string) {
 	if len(keys) == 0 {
-		return copy
+		return keys
 	}
 	for _, key := range keys {
 		copy = append(copy, key)

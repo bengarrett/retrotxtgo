@@ -15,18 +15,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type configErr struct {
-	FileUsed string
-	Err      error
-}
-
-func (e configErr) String() string {
-	return (logs.Err{
-		Issue: "config file",
-		Arg:   e.FileUsed,
-		Msg:   e.Err}).String()
-}
-
 // InitDefaults initialises flag and configuration defaults.
 func InitDefaults() {
 	for key, val := range Defaults {
@@ -43,20 +31,16 @@ func configMissing(name string, suffix string) {
 	os.Exit(21)
 }
 
-func exit(e configErr) {
-	if e.Err != nil {
-		fmt.Println(e.String())
-		os.Exit(1)
-	}
-	os.Exit(0)
-}
-
 // Path is the absolute path and filename of the configuration file.
 func Path() (dir string) {
 	dir, err := scope.ConfigPath(namedFile)
 	if err != nil {
-		h, _ := os.UserHomeDir()
+		h := ""
+		if h, err = os.UserHomeDir(); err != nil {
+			return ""
+		}
 		return filepath.Join(h, namedFile)
+
 	}
 	return dir
 }
@@ -76,55 +60,49 @@ func PrintLocation() {
 }
 
 // SetConfig reads and loads a configuration file.
-func SetConfig(flag string) {
+func SetConfig(flag string) (err error) {
 	viper.SetConfigType("yaml")
 	var path = flag
 	if flag == "" {
 		path = Path()
 	}
 	viper.SetConfigFile(path)
-	var e = configErr{
-		FileUsed: viper.ConfigFileUsed(),
-		Err:      nil,
-	}
-	if e.Err = viper.ReadInConfig(); e.Err != nil {
+	// viper.ConfigFileUsed()
+	if err = viper.ReadInConfig(); err != nil {
 		if flag == "" {
-			if errors.Is(e.Err, os.ErrNotExist) {
+			if errors.Is(err, os.ErrNotExist) {
 				// auto-generate new config except when the --config flag is used
-				e.Err = Create(viper.ConfigFileUsed(), false)
-				exit(e)
+				return Create(viper.ConfigFileUsed(), false)
 			}
 			// internal config fail
-			exit(e)
+			return err
 		}
-		if errors.Is(e.Err, os.ErrNotExist) {
+		if errors.Is(err, os.ErrNotExist) {
 			// initialise a new, default config file if conditions are met
 			if len(os.Args) > 2 {
 				switch strings.Join(os.Args[1:3], ".") {
 				case "config.create", "config.delete":
 					// never auto-generate a config when these arguments are given
-					return
+					return nil
 				}
 			}
-			e.Err = errors.New("does not exist\n\t use the command: retrotxt config create --config=" + flag)
-			exit(e)
-		} else {
-			// user config file fail
-			exit(e)
+			return errors.New("does not exist\n\t use the command: retrotxt config create --config=" + flag)
 		}
+		// user config file fail
+		return nil
 	} else if flag != "" {
 		if len(viper.AllKeys()) == 0 {
-			e.Err = errors.New("is not a retrotxt config file")
-			exit(e)
+			return errors.New("is not a retrotxt config file")
 		}
 		// always print the config location when the --config flag is used
 		if len(os.Args) > 0 && os.Args[1] == "config" {
 			// except when the config command is in use
-			return
+			return nil
 		}
 		PrintLocation()
 	}
 	// otherwise settings are loaded from default config
+	return nil
 }
 
 // UpdateConfig saves all viper settings to the named file.

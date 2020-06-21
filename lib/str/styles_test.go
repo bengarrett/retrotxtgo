@@ -108,3 +108,45 @@ func TestUnderlineKeys(t *testing.T) {
 		})
 	}
 }
+
+func TestCenter(t *testing.T) {
+	type args struct {
+		text  string
+		width int
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{"empty", args{"", 0}, ""},
+		{"even", args{"hi", 10}, "    hi"},
+		{"odd", args{"hello", 10}, "  hello"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Center(tt.args.text, tt.args.width); got != tt.want {
+				t.Errorf("Center() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNumberizeKeys(t *testing.T) {
+	tests := []struct {
+		name string
+		keys []string
+		want string
+	}{
+		{"empty", nil, ""},
+		{"three", []string{"alpha", "bravo", "charlie"},
+			"[0m[4m0[0m) alpha, [0m[4m1[0m) bravo, [0m[4m2[0m) charlie"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := NumberizeKeys(tt.keys); got != tt.want {
+				t.Errorf("NumberizeKeys() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

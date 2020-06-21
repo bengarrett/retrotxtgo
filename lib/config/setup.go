@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"runtime"
-	"sort"
 	"strings"
 
 	"github.com/bengarrett/retrotxtgo/lib/prompt"
@@ -18,9 +17,8 @@ func Setup() {
 	setupMode = true
 	prompt.SetupMode = true
 	keys := Keys()
-	sort.Strings(keys)
 	PrintLocation()
-	w := 42
+	var w uint = 42
 	for i, key := range keys {
 		if i == 0 {
 			fmt.Printf("\n%s\n\n", str.Cb(enterKey()))
@@ -44,6 +42,6 @@ func enterKey() string {
 	return "Press ⏎ enter to skip the question or Ctrl-c to quit"
 }
 
-func hr(w int) string {
-	return str.Cb(strings.Repeat("-", w))
+func hr(w uint) string {
+	return str.Cb(strings.Repeat("-", int(w)))
 }

@@ -2,7 +2,9 @@ package config
 
 import (
 	"errors"
+	"log"
 	"os"
+	"sort"
 	"strings"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
@@ -128,7 +130,7 @@ func Enabled() map[string]interface{} {
 	return sets
 }
 
-// Keys list all the available configuration setting names.
+// Keys list all the available configuration setting names sorted.
 func Keys() []string {
 	var keys = make([]string, len(Defaults))
 	i := 0
@@ -136,6 +138,7 @@ func Keys() []string {
 		keys[i] = key
 		i++
 	}
+	sort.Strings(keys)
 	return keys
 }
 
@@ -187,21 +190,39 @@ func getBool(key string) bool {
 	if v := viper.Get(key); v != nil {
 		return v.(bool)
 	}
-	return Defaults[key].(bool)
+	switch Defaults[key].(type) {
+	case bool:
+		return Defaults[key].(bool)
+	default:
+		log.Fatal("config.getbool key does not exist or is not a bool value")
+	}
+	return false
 }
 
 func getUint(key string) uint {
 	if v := viper.GetUint(key); v != 0 {
 		return v
 	}
-	return Defaults[key].(uint)
+	switch Defaults[key].(type) {
+	case uint:
+		return Defaults[key].(uint)
+	default:
+		log.Fatal("config.getuint key does not exist or is not a uint value")
+	}
+	return 0
 }
 
 func getString(key string) string {
 	if v := viper.GetString(key); v != "" {
 		return v
 	}
-	return Defaults[key].(string)
+	switch Defaults[key].(type) {
+	case string:
+		return Defaults[key].(string)
+	default:
+		log.Fatal("config.getstring key does not exist or is not a string value")
+	}
+	return ""
 }
 
 // Missing lists the settings that are not found in the configuration file.

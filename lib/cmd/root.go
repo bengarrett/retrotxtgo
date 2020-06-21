@@ -62,7 +62,10 @@ func initConfig() {
 	viper.SetEnvPrefix("env")
 	viper.AutomaticEnv()
 	// configuration file
-	config.SetConfig(rootFlag.config)
+	if err := config.SetConfig(rootFlag.config); err != nil {
+		logs.Check(fmt.Sprintf("config file %q", viper.ConfigFileUsed()), err)
+		os.Exit(1)
+	}
 }
 
 // checkUsage will print the help and exit when no arguments are supplied.
