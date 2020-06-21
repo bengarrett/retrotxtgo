@@ -12,6 +12,6 @@ require (
 	github.com/muesli/go-app-paths v0.2.1
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.7.0
-	golang.org/x/text v0.3.2
-	gopkg.in/yaml.v3 v3.0.0-20200506231410-2ff61e1afc86
+	golang.org/x/text v0.3.3
+	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
 )
