@@ -31,7 +31,7 @@ func Setup() {
 			fmt.Println(hr(w))
 		}
 		fmt.Println(h)
-		Set(key)
+		Update(key)
 		fmt.Println(hr(w))
 	}
 	fmt.Println(Info(viper.GetString("style.info")))

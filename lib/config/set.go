@@ -48,8 +48,22 @@ func Names() string {
 	return s.string(true)
 }
 
-// Set edits and saves a setting within a configuration file.
+// Set edits and saves a named setting within a configuration file.
+// It also accepts numeric index values printed by List().
 func Set(name string) {
+	if i, err := strconv.Atoi(name); err != nil {
+		Update(name)
+	} else if i >= 0 && i <= (len(Defaults)-1) {
+		k := Keys()
+		sort.Strings(k)
+		Update(k[i])
+	} else {
+		Update(name)
+	}
+}
+
+// Update edits and saves a named setting within a configuration file.
+func Update(name string) {
 	if !Validate(name) {
 		h := logs.Hint{
 			Issue: "invalid setting name",
@@ -63,6 +77,7 @@ func Set(name string) {
 	if !setupMode {
 		PrintLocation()
 	}
+	// print the current status of the named setting
 	value := viper.Get(name)
 	switch value.(type) {
 	case bool:
@@ -78,6 +93,8 @@ func Set(name string) {
 			fmt.Printf("\n%s is currently not in use\n", str.Cf(name))
 		default:
 			fmt.Printf("\n%s is set to %q", str.Cf(name), value)
+			// print the operating system's ability to use the existing set values
+			// does the 'editor' exist in the env path, does the save-directory exist?
 			switch name {
 			case "editor":
 				_, err := exec.LookPath(value.(string))
@@ -95,6 +112,7 @@ func Set(name string) {
 			}
 		}
 	}
+	// print the setting user input prompt
 	switch name {
 	case "editor":
 		s := fmt.Sprint("Set a " + Hints[name])

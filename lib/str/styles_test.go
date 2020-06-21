@@ -51,7 +51,7 @@ func TestTerm16M(t *testing.T) {
 	}
 }
 
-func Test_UnderlineChar(t *testing.T) {
+func TestUnderlineChar(t *testing.T) {
 	tests := []struct {
 		name    string
 		c       string
