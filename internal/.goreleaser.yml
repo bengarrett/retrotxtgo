@@ -2,7 +2,6 @@
 # Documentation at http://goreleaser.com
 env:
   - GO111MODULE=on
-dist: internal\dist
 before:
   hooks:
     - go mod download

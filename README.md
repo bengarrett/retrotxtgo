@@ -120,8 +120,8 @@ retrotxt version
 #### Raspberry Pi OS / Raspbian \*
 
 ```sh
-wget https://github.com/bengarrett/retrotxtgo/releases/latest/...
-dpkg -i ...
+wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/RetroTxt_RaspberryPi-2+.tar.gz
+dpkg -i
 retrotxt version
 ```
 
