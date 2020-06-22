@@ -1,20 +1,25 @@
 # RetroTxt Go goreleaser.yaml file.
 # Documentation at http://goreleaser.com
-env:
-  - GO111MODULE=on
+project_name: retrotxt
+release:
+  draft: true
+  prerelease: auto
 before:
   hooks:
     - go mod download
     #- gosec ./...
     - go generate ./...
 builds:
-  - binary: retrotxt
+  # upx compressed binaries
+  - main: ../main.go
+    binary: retrotxt
     env:
       - CGO_ENABLED=0
+      - GO111MODULE=on
     # https://golang.org/doc/install/source#environment
     goos:
       - darwin
-      - freebsd
+      #      - freebsd
       - linux
       - windows
     goarch:
@@ -28,6 +33,10 @@ builds:
         goarch: arm
       - goos: freebsd
         goarch: arm
+    hooks:
+      post:
+        # -qq suppresses errors as freebsd is not supported
+        - upx -qq "{{ .Path }}"
 archives:
   - name_template: "RetroTxt_{{ if .Arm }}RaspberryPi{{ .Arm }}{{ else }}{{ .Os }}{{ end }}"
     replacements:
@@ -46,8 +55,5 @@ archives:
         format: zip
 snapshot:
   name_template: "{{ .Tag }}-next"
-release:
-  draft: true
-  prerelease: auto
 changelog:
   skip: true
