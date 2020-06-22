@@ -1,5 +1,6 @@
 # RetroTxt Go goreleaser.yaml file.
 # Documentation at http://goreleaser.com
+# Go environments https://golang.org/doc/install/source#environment
 project_name: retrotxt
 release:
   draft: true
@@ -9,17 +10,16 @@ before:
     - go mod download
     #- gosec ./...
     - go generate ./...
+env:
+  - CGO_ENABLED=0
+  - GO111MODULE=on
 builds:
   # upx compressed binaries
   - main: ../main.go
+    id: retrotxt
     binary: retrotxt
-    env:
-      - CGO_ENABLED=0
-      - GO111MODULE=on
-    # https://golang.org/doc/install/source#environment
     goos:
       - darwin
-      #      - freebsd
       - linux
       - windows
     goarch:
@@ -37,6 +37,14 @@ builds:
       post:
         # -qq suppresses errors as freebsd is not supported
         - upx -qq "{{ .Path }}"
+  # no upx compression
+  - main: ../main.go
+    id: retrotxt_u
+    binary: retrotxt
+    goos:
+      - freebsd
+    goarch:
+      - amd64
 archives:
   - name_template: "RetroTxt_{{ if .Arm }}RaspberryPi{{ .Arm }}{{ else }}{{ .Os }}{{ end }}"
     replacements:
@@ -53,6 +61,18 @@ archives:
         format: zip
       - goos: windows
         format: zip
+nfpms:
+  - file_name_template: "{{ .ProjectName }}_{{ .Arch }}"
+    builds:
+      - retrotxt
+    vendor: Ben Garrett
+    homepage: https://retrotxt.com/go
+    maintainer: Ben Garrett <code.by.ben@gmail.com>
+    description: RetroTxt is the tool that turns ANSI, ASCII, NFO text into in-browser HTML.
+    license: LGPL 3.0
+    formats:
+      - deb
+      - rpm
 snapshot:
   name_template: "{{ .Tag }}-next"
 changelog:
