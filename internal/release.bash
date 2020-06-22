@@ -26,7 +26,7 @@ git add ../. &&
 # goreleaser requires access to github using a personal access token.
 # https://github.com/settings/tokens
 
-function release() {
+release() {
     file=~/.tokens/goreleaser.txt
     if [ -f $FILE ]; then
         token=$(<$file) && export GITHUB_TOKEN="$token" &&
