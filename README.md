@@ -22,7 +22,7 @@ cat samples/ascii-logos.txt
 ```
 
 ```sh
-retrotxt create samples/ascii-logos.txt # creates an index.html file in the home directory
+retrotxt create ascii-logos.txt # creates an index.html file in the home directory
 ```
 
 ```html
@@ -79,39 +79,113 @@ cat ~/index.html
 
 ## Install
 
+You can download and copy the newest version of RetroTxt for most common platforms from https://github.com/bengarrett/retrotxtgo/releases/latest/.
+
+Otherwise these operating system specific install methods are available.
+
+### Windows
+
+#### ~~[Chocolatey](https://chocolatey.org/)~~ \*
+
+```ps
+choco install retrotxt
+retrotxt version
+```
+
+#### ~~[Scoop](https://scoop.sh/)~~ \*
+
+```ps
+scoop install retrotxt
+retrotxt version
+```
+
+### macOS
+
+#### ~~[Homebrew](https://brew.sh/)~~ \*
+
+```sh
+brew cask install retrotxt
+retrotxt
+```
+
+### Linux
+
+#### ~~[Linux Snap](https://snapcraft.io/)~~ \*
+
+```sh
+snap install retrotxt
+retrotxt version
+```
+
+#### Raspberry Pi OS / Raspbian \*
+
+```sh
+wget https://github.com/bengarrett/retrotxtgo/releases/latest/...
+dpkg -i ...
+retrotxt version
+```
+
+#### DPKG - Debian, Ubuntu, PopOS \*
+
+```sh
+wget https://github.com/bengarrett/retrotxtgo/releases/latest/...
+dpkg -i ...
+retrotxt version
+```
+
+#### RPM - CentOS , Fedora, RHEL \*
+
+```sh
+wget https://github.com/bengarrett/retrotxtgo/releases/latest/...
+rpm -i ...
+retrotxt version
+```
+
+\* not implemented
+
+## Install using Go
+
 RetroTxtGo requires [Go v1.13+](https://github.com/golang/go/wiki/MinimumRequirements)
 
 Assuming [Go](https://golang.org/) and and the relevant build-tools are already installed.
 
 ```sh
-cd ~
-git clone https://github.com/bengarrett/retrotxtgo.git
-# go install -o retrotxt.exe . # on Windows
-go install -o retrotxt .
+git clone https://github.com/bengarrett/retrotxtgo.git && cd retrotxtgo
+go build -i -o $GOBIN/retrotxt # Linux, Mac, Unix
+go build -i -o $Env:GOBIN\retrotxt.exe # Windows PowerShell
 retrotxt version
 ```
 
 The binary will be installed either at `$GOPATH/bin` or `$HOME/go/bin`
 
-## Compile
+## Compile using Go
 
 Assuming Go and and the relevant build-tools are already installed.
 
 ```sh
-cd ~
-git clone https://github.com/bengarrett/retrotxtgo.git
-cd retrotxtgo
-# optional but recommended, run package and import tests on your distribution/platform
+git clone https://github.com/bengarrett/retrotxtgo.git && cd retrotxtgo
+# recommended, run the package and import tests on your distribution/platform
 go test ./...
-# build with --race to also detect concurrent race conditions on major 64-bit operating systems
-go build -o retrotxt --race .
-retrotxt version
+# build with --race to also detect concurrent race conditions on major 64-bit platforms, see go help build.
+go build -o retrotxt --race # Linux, Mac, Unix
+go build -o retrotxt.exe --race # Windows PowerShell
+./retrotxt version
 ```
 
-#### Race detection
+---
 
-While in α and to troubleshoot, 64-bit versions of linux (arm/amd64), freebsd, darwin, windows should build with the `--race` flag.
-Though this will increase the binary size.
+### Why Go?
+
+- native [Unicode](https://golang.org/pkg/unicode/) and UTF8/16/32 support
+- [native legacy text encodings support](golang.org/x/text/encoding/charmap)
+- creates a standalone binary with no dependencies
+- [wide OS and CPU support](https://gist.github.com/asukakenji/f15ba7e588ac42795f421b48b8aede63)
+- simple and fast compiling
+- I know it 😉
+
+---
+
+### From here onwards the following text are developer notes
 
 ### Shrink the binary
 
@@ -141,21 +215,6 @@ upx --best retrotxtgo # (slow) 17MB --> 6.45MB file (not worth the saving)
 upx --brute retrotxtgo # (very slow) 17MB --> 4.8MB file
 ```
 
----
-
-### Why Go?
-
-- native [Unicode](https://golang.org/pkg/unicode/) and UTF8/16/32 support
-- [native legacy text encodings support](golang.org/x/text/encoding/charmap)
-- creates a standalone binary with no dependencies
-- [wide OS and CPU support](https://gist.github.com/asukakenji/f15ba7e588ac42795f421b48b8aede63)
-- simple and fast compiling
-- I know it 😉
-
----
-
-### From here onwards the following text are developer notes
-
 #### References
 
 - [SAUCE](http://www.acid.org/info/sauce/sauce.htm)
@@ -173,28 +232,6 @@ upx --brute retrotxtgo # (very slow) 17MB --> 4.8MB file
 
 - [Devd - A local webserver for developers](https://github.com/cortesi/devd)
   replacement for the current internal webserver?
-
-### Cobra hints
-
-Print references
-
-```go
-    println(xxxCmd.CommandPath()) // retrotxtgo xxx
-    println(xxxCmd.Name())        // create
-    println(cmd.CalledAs())       // create
-    println(xxxCmd.UseLine())     // retrotxt xxx FILE [flags]
-```
-
-### Go built-ins
-
-byte arrays
-
-`slice = append(slice, more...)` `slice = append(slice, elm1, elm2)`
-`copy(dest, srcSlice) = int` # number of elms copied
-
-`cap(array) = int` `cap(slice) #max length, as oppose to current length`
-
-`len(array, string, slice) int` # length or bytes
 
 ---
 
@@ -314,31 +351,19 @@ Another option, store fonts as Base64 encoded text in .go files and export+save 
 
 ---
 
-### Future distribution package managers
+### Submission to distribution package managers
 
-### Windows
+Windows
 
-**[scoop](https://scoop.sh/)** [App Manifests](https://github.com/lukesampson/scoop/wiki/App-Manifests)
+[Scoop App Manifests](https://github.com/lukesampson/scoop/wiki/App-Manifests), [Chocolatey](https://chocolatey.org/docs/createpackages)
 
-**[Chocolatey](https://chocolatey.org/docs/createpackages)**
-
-### macOS
+macOS
 
 **[homebrew](https://brew.sh/)** [casks allow bin submissions](https://github.com/Homebrew/homebrew-cask/blob/master/doc/cask_language_reference/readme.md)
 
-### Linux (auto update)
+Auto-update Linux
 
-**[snapcraft](https://snapcraft.io/)** Snaps (https://snapcraft.io/first-snap#go)
-
-~~**[flathub](https://github.com/flathub/flathub/wiki/App-Submission)**~~ Not intended for CLI apps
-
-### Debian/Ubuntu/Raspbian (manual updates)
-
-**[deb]** `.deb` installed with `dpkg -i`
-
-### Fedora/RHEL/CentOS (manual updates)
-
-**[rpm]** Fedora/RHEL/CentOS installed with `rpm -i`
+Snap [snapcraft](https://snapcraft.io/first-snap#go), flathub is not for terminal apps.
 
 #### Other managers that require sponsorship
 
