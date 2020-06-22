@@ -33,7 +33,7 @@ func List() (err error) {
 		case "html.layout":
 			fmt.Fprintf(w, ", choices: %s (recommend: %s)",
 				str.Cp(createTemplates().string()), str.Cp("standard"))
-		case "server-port":
+		case "serve":
 			fmt.Fprintf(w, ", choices: %s", portInfo())
 		}
 		fmt.Fprint(w, "\n")
@@ -152,9 +152,14 @@ func Update(name string) {
 	case "save-directory":
 		fmt.Println("Choose a new " + Hints[name] + ":")
 		setDirectory(name)
-	case "server-port":
-		fmt.Printf("\n%slocalhost%s%d\n", str.Cb("http://"), str.Cb(":"), value.(int))
-		fmt.Printf("\nSet a new HTTP %s\nChoices %s:\n", Hints[name], portInfo())
+	case "serve":
+		p := Defaults["serve"].(uint)
+		switch value.(type) {
+		case uint:
+			p = value.(uint)
+		}
+		fmt.Printf("\n%slocalhost%s%d\n", str.Cb("http://"), str.Cb(":"), p)
+		fmt.Printf("\nSet a new port value, to %s\nChoices %s:\n", Hints[name], portInfo())
 		setPort(name)
 	case "style.html":
 		fmt.Printf("Set a new HTML syntax style:\n%s\n", str.Ci(Names()))
@@ -170,8 +175,7 @@ func Update(name string) {
 // Validate the existence of a setting key name.
 func Validate(key string) (ok bool) {
 	ok = false
-	keys := viper.AllKeys()
-	sort.Strings(keys)
+	keys := Keys()
 	// var i must be sorted in ascending order.
 	if i := sort.SearchStrings(keys, key); i == len(keys) || keys[i] != key {
 		return ok

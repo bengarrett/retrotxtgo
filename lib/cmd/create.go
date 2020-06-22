@@ -13,7 +13,6 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
-	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -24,9 +23,10 @@ var htmlArgs create.Args
 var exampleCmd = func() string {
 	var b bytes.Buffer
 	s := string(os.PathSeparator)
-	fmt.Fprint(&b, "  retrotxt create -n=ascii\n")
-	fmt.Fprint(&b, `  retrotxt create -n=file.txt -t "Textfile" -d "Some text"`)
-	fmt.Fprintf(&b, "\n  retrotxt create --name ~%sDownloads%stextfile.txt --save", s, s)
+	fmt.Fprint(&b, `  retrotxt create file.txt -t "A text file" -d "Some text goes here"`)
+	fmt.Fprint(&b, "\n  retrotxt create file1.txt file2.asc --save")
+	fmt.Fprintf(&b, "\n  retrotxt create ~%sDownloads%sfile.txt --archive", s, s)
+	fmt.Fprint(&b, "\n  retrotxt create file.txt --serve=8080")
 	return str.Cinf(b.String())
 }
 
@@ -40,7 +40,7 @@ var createCmd = &cobra.Command{
 		// handle hidden --body flag that ignores all args
 		if body := cmd.Flags().Lookup("body"); body.Changed {
 			b := []byte(body.Value.String())
-			createHTML(0, b)
+			htmlArgs.Cmd(b, "")
 			os.Exit(0)
 		}
 		checkUse(cmd, args)
@@ -51,17 +51,26 @@ var createCmd = &cobra.Command{
 				b, err = filesystem.Read(arg)
 				logs.ChkErr(logs.Err{Issue: "file is invalid", Arg: arg, Msg: err})
 			}
-			createHTML(i, b)
+			if h := htmlServe(i, cmd, &b); !h {
+				htmlArgs.Cmd(b, "") // TODO: rename to Print
+			}
 		}
 	},
 }
 
-func createHTML(i int, b []byte) {
-	htmlArgs.Cmd(b, "")
-	// only serve the first file
-	if i == 0 && htmlArgs.HTTP {
-		htmlArgs.Serve(&b)
+func htmlServe(i int, cmd *cobra.Command, b *[]byte) bool {
+	if i != 0 {
+		return false
+		// only ever serve the first file given to the args.
+		// in the future, when handling multiple files an index.html
+		// could be generated with links to each of the htmls.
 	}
+	if serve := cmd.Flags().Lookup("serve"); serve.Changed {
+
+		htmlArgs.Serve(b)
+		return true
+	}
+	return false
 }
 
 func createPackage(name string) (b []byte) {
@@ -99,8 +108,7 @@ func init() {
 	// init flags and their usage
 	var metaCfg = map[int]metaFlag{
 		// output
-		1: {"html.server", nil, &htmlArgs.HTTP, nil, "server", "p", nil},
-		2: {"html.server-port", nil, nil, &htmlArgs.Port, "port", "", nil},
+		1: {"serve", nil, nil, &htmlArgs.Port, "serve", "p", nil},
 		// main tag flags
 		3: {"html.layout", &htmlArgs.Layout, nil, nil, "layout", "l", create.Layouts()},
 		4: {"style.html", &htmlArgs.Syntax, nil, nil, "syntax-style", "c", nil},
@@ -127,7 +135,7 @@ func init() {
 	// output flags
 	createCmd.Flags().StringVarP(&htmlArgs.Enc, "encode", "e", "", "text encoding of the named text file\nwhen ignored, UTF8 encoding will be automatically detected\notherwise encode will assume default (default CP437)\nsee a list of encode values "+str.Example("retrotxt view codepages")+"\n")
 	createCmd.Flags().BoolVarP(&htmlArgs.SaveToFile, "save", "s", false, "save HTML to a file or ignore to print output")
-	createCmd.Flags().BoolVarP(&htmlArgs.OW, "overwrite", "o", false, "overwrite any existing files when saving\n")
+	createCmd.Flags().BoolVarP(&htmlArgs.OW, "overwrite", "o", false, "overwrite any existing files when saving")
 	// html flags
 	for i := range keys {
 		c := metaCfg[i]
@@ -141,14 +149,15 @@ func init() {
 			fmt.Fprint(&buf, str.Options(config.Hints[c.key], c.opts, true))
 		}
 		switch {
-		case c.key == "create.server":
-			createCmd.Flags().BoolVarP(c.boo, c.name, c.short, false, "serve HTML over an insecure local web server\n"+color.Warn.Sprint("please do not use on a production environment"))
+		case c.key == "serve":
+			fmt.Fprint(&buf, "\nsupply a 0 value to use the default, "+str.Example("-p0")+" or "+str.Example("--serve=0"))
+			createCmd.Flags().UintVarP(c.i, c.name, c.short, viper.GetUint(c.key), buf.String())
 		case c.strg != nil:
 			createCmd.Flags().StringVarP(c.strg, c.name, c.short, viper.GetString(c.key), buf.String())
 		case c.boo != nil:
 			createCmd.Flags().BoolVarP(c.boo, c.name, c.short, viper.GetBool(c.key), buf.String())
 		case c.i != nil:
-			createCmd.Flags().UintVar(c.i, c.name, viper.GetUint(c.key), buf.String())
+			createCmd.Flags().UintVarP(c.i, c.name, c.short, viper.GetUint(c.key), buf.String())
 		}
 	}
 	err = createCmd.Flags().MarkHidden("body")

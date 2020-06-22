@@ -28,7 +28,7 @@ var Defaults = map[string]interface{}{
 	"html.meta.theme-color":  "",
 	"html.title":             "RetroTxt | example",
 	"save-directory":         home(),
-	"server-port":            uint(8080),
+	"serve":                  uint(8080),
 	"style.info":             "dracula",
 	"style.html":             "lovelace",
 }
@@ -48,8 +48,7 @@ var Hints = map[string]string{
 	"html.meta.theme-color":  "indicates a suggested color that user agents should use to customize the display of the page",
 	"html.title":             "page title that is shown in a browser title bar or tab",
 	"save-directory":         "directory to store RetroTxt created HTML files",
-	"server":                 "serve HTML over an internal web server",
-	"server-port":            "port which the internal web server will use",
+	"serve":                  "serve HTML over an internal web server using this port",
 	"style.info":             "syntax highlighter for the config info output",
 	"style.html":             "syntax highlighter for html previews",
 }
@@ -73,7 +72,7 @@ type Settings struct {
 		Title string `yaml:"title"`
 	}
 	SaveDirectory string `yaml:"save-directory"`
-	ServerPort    uint   `yaml:"server-port"`
+	ServerPort    uint   `yaml:"serve"`
 	Style         struct {
 		Info string `yaml:"info"`
 		HTML string `yaml:"html"`
@@ -173,7 +172,7 @@ func Marshal() (interface{}, error) {
 			sc.HTML.Title = getString(key)
 		case "save-directory":
 			sc.SaveDirectory = getString(key)
-		case "server-port":
+		case "serve":
 			sc.ServerPort = getUint(key)
 		case "style.info":
 			sc.Style.Info = getString(key)

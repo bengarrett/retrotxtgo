@@ -13,8 +13,8 @@ import (
 // Serve data over an internal HTTP server.
 func (args *Args) Serve(data *[]byte) {
 	port := uint(args.Port)
-	if !prompt.PortValid(port) {
-		port = uint(viper.GetInt("server-port"))
+	if port == 0 || !prompt.PortValid(port) {
+		port = uint(viper.GetInt("serve"))
 	}
 	args.Port = port
 	if err := args.serveFile(data); err != nil {

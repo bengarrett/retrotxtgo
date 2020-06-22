@@ -65,7 +65,7 @@ func Test_getUint(t *testing.T) {
 		key  string
 		want uint
 	}{
-		{"uint", "server-port", 8080},
+		{"uint", "serve", 8080},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
