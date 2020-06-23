@@ -17,6 +17,9 @@ esac
 # goreleaser can only be used with an active git commit.
 
 git status
+
+echo "$newtag" >.version
+
 git add ../. &&
     git commit -m "$newcmmt" &&
     git tag -a $newtag -m "$newcmmt" &&
