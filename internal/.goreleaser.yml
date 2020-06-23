@@ -13,6 +13,10 @@ before:
 env:
   - CGO_ENABLED=0
   - GO111MODULE=on
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  skip: true
 builds:
   # upx compressed binaries
   - main: ../main.go
@@ -102,7 +106,13 @@ nfpms:
     license: LGPL 3.0
     formats:
       - rpm
-snapshot:
-  name_template: "{{ .Tag }}-next"
-changelog:
-  skip: true
+scoop:
+  bucket:
+    owner: bengarrett
+    name: retrotxtgo
+  commit_author:
+    name: Ben Garrett
+    email: code.by.ben@gmail.com
+  homepage: https://retrotxt.com/go
+  description: RetroTxt is the tool that turns ANSI, ASCII, NFO text into in-browser HTML.
+  license: LGPL 3.0
