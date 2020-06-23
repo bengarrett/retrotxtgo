@@ -80,6 +80,14 @@ archives:
         format: zip
       - goos: windows
         format: zip
+brews:
+  - skip_upload: auto
+    github:
+      owner: bengarrett
+      name: homebrew-tap
+    folder: Formula
+    homepage: https://retrotxt.com/go
+    description: RetroTxt is the tool that turns ANSI, ASCII, NFO text into in-browser HTML.
 nfpms:
   - id: "deb"
     file_name_template: "retrotxt_{{ if .Arm }}raspberry{{ .Arm }}{{ else }}{{ .Os }}{{ end }}"

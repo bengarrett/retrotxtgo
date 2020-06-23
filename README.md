@@ -383,7 +383,7 @@ Another option, store fonts as Base64 encoded text in .go files and export+save 
 
 Windows
 
-[Scoop App Manifests](https://github.com/lukesampson/scoop/wiki/App-Manifests), [Chocolatey](https://chocolatey.org/docs/createpackages)
+[Chocolatey](https://chocolatey.org/docs/createpackages)
 
 macOS
 
