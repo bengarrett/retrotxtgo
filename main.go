@@ -23,7 +23,7 @@ import (
 
 // GoReleaser ldflags flags
 var (
-	version = "0.0.0"
+	version = "0.0.0" // TODO: apply go generate
 	commit  = "n/a"
 	date    = "n/a"
 )
