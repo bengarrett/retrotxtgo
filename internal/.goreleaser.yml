@@ -23,7 +23,6 @@ builds:
     id: retrotxt
     binary: retrotxt
     goos:
-      - darwin
       - linux
       - windows
     goarch:
@@ -33,8 +32,6 @@ builds:
       - 6
       - 7
     ignore:
-      - goos: darwin
-        goarch: arm
       - goos: freebsd
         goarch: arm
     hooks:
@@ -43,9 +40,10 @@ builds:
         - upx -qq "{{ .Path }}"
   # no upx compression
   - main: ../main.go
-    id: freebsd
+    id: uncompressed
     binary: retrotxt
     goos:
+      - darwin
       - freebsd
     goarch:
       - amd64
@@ -65,7 +63,7 @@ archives:
   - name_template: "retrotxt_{{ if .Arm }}raspberry{{ .Arm }}{{ else }}{{ .Os }}{{ end }}"
     builds:
       - retrotxt
-      - freebsd
+      - uncompressed
     replacements:
       darwin: macos
       freebsd: freebsd
