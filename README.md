@@ -160,30 +160,44 @@ retrotxt version
 RetroTxt on Go requires [Go v1.13+](https://github.com/golang/go/wiki/MinimumRequirements).
 Assuming [Go](https://golang.org/) and and the relevant build-tools are already installed.
 
+Standard operating systems.
+
 ```sh
 git clone https://github.com/bengarrett/retrotxtgo.git
 cd retrotxtgo
-# Linux, macOS, Unix
+# recommended, run the package and import tests on your distribution/platform
+go test ./...
 go build -i -o $GOBIN/retrotxt
-# Windows PowerShell
+retrotxt version
+```
+
+Windows PowerShell
+
+```powershell
+git clone https://github.com/bengarrett/retrotxtgo.git
+cd retrotxtgo
 go build -i -o $Env:GOBIN\retrotxt.exe
 retrotxt version
 ```
 
 The binary will be installed either at `$GOPATH/bin` or `$HOME/go/bin`
 
-## Compile using Go
+## Compile to other platforms using Go
 
-Assuming Go and and the relevant build-tools are already installed.
+Go supports a maylard of operating systems and platforms that can be built using any other supported platform.
+So if you were on Linux and needed to compile a 32-bit version of RetroTxt to target Windows XP.
 
 ```sh
-git clone https://github.com/bengarrett/retrotxtgo.git && cd retrotxtgo
-# recommended, run the package and import tests on your distribution/platform
-go test ./...
-# build with --race to also detect concurrent race conditions on major 64-bit platforms, see go help build.
-go build -o retrotxt --race # Linux, Mac, Unix
-go build -o retrotxt.exe --race # Windows PowerShell
-./retrotxt version
+# to see a list of supported platforms
+go tool dist list
+
+git clone https://github.com/bengarrett/retrotxtgo.git
+cd retrotxtgo
+env GOOS=windows GOARCH=386 go build -o retrotxt.exe
+# optional, compress the binary
+upx retrotxt.exe
+# test the binary
+file retrotxt.exe
 ```
 
 ---
