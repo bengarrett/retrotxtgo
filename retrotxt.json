@@ -1,12 +1,12 @@
 {
-    "version": "0.0.10",
+    "version": "0.0.11",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/bengarrett/retrotxtgo/releases/download/0.0.10/retrotxt_windows.zip",
+            "url": "https://github.com/bengarrett/retrotxtgo/releases/download/0.0.11/retrotxt_windows.zip",
             "bin": [
                 "retrotxt.exe"
             ],
-            "hash": "df6bcc4d30e9e3835142286006b712c765130246995167d87fc03e2b9f725cd7"
+            "hash": "24eedc8ccdb46a1aa0805c1982f0371b4dbec2eb216ef0944da77e449ddee3e6"
         }
     },
     "homepage": "https://retrotxt.com/go",
