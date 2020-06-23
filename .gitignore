@@ -14,3 +14,6 @@ retrotxtgo
 
 # GoReleaser
 /internal/dist
+
+# Editor
+log.txt
