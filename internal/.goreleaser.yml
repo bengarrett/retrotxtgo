@@ -45,6 +45,18 @@ builds:
       - freebsd
     goarch:
       - amd64
+  # linux for rpm
+  - main: ../main.go
+    id: rpm
+    binary: retrotxt
+    goos:
+      - linux
+    goarch:
+      - amd64
+    hooks:
+      post:
+        # -qq suppresses errors as freebsd is not supported
+        - upx -qq "{{ .Path }}"
 archives:
   - name_template: "retrotxt_{{ if .Arm }}raspberry_pi{{ .Arm }}{{ else }}{{ .Os }}{{ end }}"
     replacements:
@@ -61,10 +73,9 @@ archives:
         format: zip
       - goos: windows
         format: zip
-    rpm:
-      arch: amd64
 nfpms:
-  - file_name_template: "retrotxt_{{ if .Arm }}raspberry_pi{{ .Arm }}{{ else }}{{ .Os }}{{ end }}"
+  - id: "deb"
+    file_name_template: "retrotxt_{{ if .Arm }}raspberry_pi{{ .Arm }}{{ else }}{{ .Os }}{{ end }}"
     builds:
       - retrotxt
     vendor: Ben Garrett
@@ -74,6 +85,16 @@ nfpms:
     license: LGPL 3.0
     formats:
       - deb
+  - id: "rpm"
+    file_name_template: "retrotxt_{{ .Os }}}"
+    builds:
+      - rpm
+    vendor: Ben Garrett
+    homepage: https://retrotxt.com/go
+    maintainer: Ben Garrett <code.by.ben@gmail.com>
+    description: RetroTxt is the tool that turns ANSI, ASCII, NFO text into in-browser HTML.
+    license: LGPL 3.0
+    formats:
       - rpm
 snapshot:
   name_template: "{{ .Tag }}-next"
