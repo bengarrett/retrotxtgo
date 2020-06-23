@@ -1,6 +1,6 @@
 ![Build](https://github.com/bengarrett/retrotxtgo/workflows/Go/badge.svg) ![Tests](https://github.com/bengarrett/retrotxtgo/workflows/Go%20tests/badge.svg)
 
-# RetroTxtGo
+# RetroTxt on Go
 
 [RetroTxt](https://github.com/bengarrett/retrotxt) for the command line
 
@@ -79,7 +79,12 @@ cat ~/index.html
 
 ## Install
 
-You can download and copy the newest version of RetroTxt for most common platforms from https://github.com/bengarrett/retrotxtgo/releases/latest/.
+There are [downloads](https://github.com/bengarrett/retrotxtgo/releases/latest/) available for
+[Windows](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_windows.zip),
+[macOS](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_macos.zip),
+[Linux](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_linux.tar.gz),
+[FreeBSD](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_freebsd.tar.gz) as well as for the
+[Raspberry Pi/ARM family](https://github.com/bengarrett/retrotxtgo/releases/latest/).
 
 Otherwise these operating system specific install methods are available.
 
@@ -117,42 +122,50 @@ snap install retrotxt
 retrotxt version
 ```
 
-#### Raspberry Pi OS / Raspbian \*
+#### Raspberry Pi OS / Raspbian
+
+Download the **deb** package for either the
+[Raspberry Pi](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_raspberry_pi.deb) <small>(ARMv7)</small>
+or the [Zero family](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_raspberry_pi-zero.deb) <small>(ARMv6)</small>
+and install using `dpkg -i`.
 
 ```sh
-wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/RetroTxt_RaspberryPi-2+.tar.gz
-dpkg -i
+# Raspberry Pi example
+wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_raspberry_pi.deb
+dpkg -i retrotxt_raspberry_pi.deb
 retrotxt version
 ```
 
-#### DPKG - Debian, Ubuntu, PopOS \*
+#### Deb - Ubuntu, Mint, Debian
 
 ```sh
-wget https://github.com/bengarrett/retrotxtgo/releases/latest/...
-dpkg -i ...
+wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_linux.deb
+dpkg -i retrotxt_linux.deb
 retrotxt version
 ```
 
-#### RPM - CentOS , Fedora, RHEL \*
+#### RPM - Fedora, OpenSUSE, CentOS, RHEL
 
 ```sh
-wget https://github.com/bengarrett/retrotxtgo/releases/latest/...
-rpm -i ...
+wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_linux.rpm
+rpm -i retrotxt_linux.rpm
 retrotxt version
 ```
 
 \* not implemented
 
-## Install using Go
+## Build using Go
 
-RetroTxtGo requires [Go v1.13+](https://github.com/golang/go/wiki/MinimumRequirements)
-
+RetroTxt on Go requires [Go v1.13+](https://github.com/golang/go/wiki/MinimumRequirements).
 Assuming [Go](https://golang.org/) and and the relevant build-tools are already installed.
 
 ```sh
-git clone https://github.com/bengarrett/retrotxtgo.git && cd retrotxtgo
-go build -i -o $GOBIN/retrotxt # Linux, Mac, Unix
-go build -i -o $Env:GOBIN\retrotxt.exe # Windows PowerShell
+git clone https://github.com/bengarrett/retrotxtgo.git
+cd retrotxtgo
+# Linux, macOS, Unix
+go build -i -o $GOBIN/retrotxt
+# Windows PowerShell
+go build -i -o $Env:GOBIN\retrotxt.exe
 retrotxt version
 ```
 
