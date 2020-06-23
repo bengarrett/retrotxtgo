@@ -97,9 +97,10 @@ choco install retrotxt
 retrotxt version
 ```
 
-#### ~~[Scoop](https://scoop.sh/)~~ \*
+#### [Scoop](https://scoop.sh/)
 
 ```ps
+scoop bucket add retrotxt https://github.com/bengarrett/retrotxtgo.git
 scoop install retrotxt
 retrotxt version
 ```
