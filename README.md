@@ -107,11 +107,11 @@ retrotxt version
 
 ### macOS
 
-#### ~~[Homebrew](https://brew.sh/)~~ \*
+#### [Homebrew](https://brew.sh/)
 
 ```sh
-brew cask install retrotxt
-retrotxt
+brew cask install bengarrett/tap/retrotxt
+retrotxt version
 ```
 
 ### Linux
@@ -381,23 +381,6 @@ Another option, store fonts as Base64 encoded text in .go files and export+save 
 
 ### Submission to distribution package managers
 
-Windows
-
 [Chocolatey](https://chocolatey.org/docs/createpackages)
 
-macOS
-
-**[homebrew](https://brew.sh/)** [casks allow bin submissions](https://github.com/Homebrew/homebrew-cask/blob/master/doc/cask_language_reference/readme.md)
-
-Auto-update Linux
-
 Snap [snapcraft](https://snapcraft.io/first-snap#go), flathub is not for terminal apps.
-
-#### Other managers that require sponsorship
-
-Ubuntu/Mint APT .DEB (http://packaging.ubuntu.com/html/packaging-new-software.html)
-See 4.5 and 4.6
-
-Fedora, CentOS/ RHEL
-https://docs.fedoraproject.org/en-US/quick-docs/creating-rpm-packages/index.html
-https://rpm-packaging-guide.github.io/
