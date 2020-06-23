@@ -39,21 +39,21 @@ builds:
         - upx -qq "{{ .Path }}"
   # no upx compression
   - main: ../main.go
-    id: retrotxt_u
+    id: freebsd
     binary: retrotxt
     goos:
       - freebsd
     goarch:
       - amd64
 archives:
-  - name_template: "RetroTxt_{{ if .Arm }}RaspberryPi{{ .Arm }}{{ else }}{{ .Os }}{{ end }}"
+  - name_template: "retrotxt_{{ if .Arm }}raspberry_pi{{ .Arm }}{{ else }}{{ .Os }}{{ end }}"
     replacements:
-      darwin: macOS
-      freebsd: FreeBSD
-      linux: Linux
-      windows: Windows
-      6: "-1" # VFPv1
-      7: "-2+" # VFPv3
+      darwin: macos
+      freebsd: freebsd
+      linux: linux
+      windows: windows
+      6: "-gen1" # VFPv1
+      7: "" # VFPv3
       386: ""
       amd64: ""
     format_overrides:
@@ -61,8 +61,10 @@ archives:
         format: zip
       - goos: windows
         format: zip
+    rpm:
+      arch: amd64
 nfpms:
-  - file_name_template: "{{ .ProjectName }}_{{ .Arch }}"
+  - file_name_template: "retrotxt_{{ if .Arm }}raspberry_pi{{ .Arm }}{{ else }}{{ .Os }}{{ end }}"
     builds:
       - retrotxt
     vendor: Ben Garrett
