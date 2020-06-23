@@ -1,0 +1,15 @@
+{
+    "version": "0.0.9",
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/bengarrett/retrotxtgo/releases/download/0.0.9/retrotxt_windows.zip",
+            "bin": [
+                "retrotxt.exe"
+            ],
+            "hash": "7024bd0a4e21e13939c57a4283d490231d15eb3509afe830bde3b259a98166d5"
+        }
+    },
+    "homepage": "https://retrotxt.com/go",
+    "license": "LGPL 3.0",
+    "description": "RetroTxt is the tool that turns ANSI, ASCII, NFO text into in-browser HTML."
+}
