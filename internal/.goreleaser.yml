@@ -3,7 +3,7 @@
 # Go environments https://golang.org/doc/install/source#environment
 project_name: retrotxt
 release:
-  draft: true
+  draft: false # setting to true breaks scoop
   prerelease: auto
 before:
   hooks:
