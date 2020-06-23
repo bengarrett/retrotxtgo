@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-goreleaser build --skip-validate --rm-dist
+goreleaser --release-notes ../changelog.md --rm-dist --skip-publish --skip-validate

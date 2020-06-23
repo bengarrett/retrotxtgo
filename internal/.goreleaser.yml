@@ -58,14 +58,17 @@ builds:
         # -qq suppresses errors as freebsd is not supported
         - upx -qq "{{ .Path }}"
 archives:
-  - name_template: "retrotxt_{{ if .Arm }}raspberry_pi{{ .Arm }}{{ else }}{{ .Os }}{{ end }}"
+  - name_template: "retrotxt_{{ if .Arm }}raspberry{{ .Arm }}{{ else }}{{ .Os }}{{ end }}"
+    builds:
+      - retrotxt
+      - freebsd
     replacements:
       darwin: macos
       freebsd: freebsd
       linux: linux
       windows: windows
-      6: "-gen1" # VFPv1
-      7: "" # VFPv3
+      6: "_pi-zero" # VFPv1
+      7: "_pi" # VFPv3
       386: ""
       amd64: ""
     format_overrides:
@@ -75,7 +78,7 @@ archives:
         format: zip
 nfpms:
   - id: "deb"
-    file_name_template: "retrotxt_{{ if .Arm }}raspberry_pi{{ .Arm }}{{ else }}{{ .Os }}{{ end }}"
+    file_name_template: "retrotxt_{{ if .Arm }}raspberry{{ .Arm }}{{ else }}{{ .Os }}{{ end }}"
     builds:
       - retrotxt
     vendor: Ben Garrett
@@ -83,10 +86,13 @@ nfpms:
     maintainer: Ben Garrett <code.by.ben@gmail.com>
     description: RetroTxt is the tool that turns ANSI, ASCII, NFO text into in-browser HTML.
     license: LGPL 3.0
+    replacements:
+      6: "_pi-zero"
+      7: "_pi"
     formats:
       - deb
   - id: "rpm"
-    file_name_template: "retrotxt_{{ .Os }}}"
+    file_name_template: "retrotxt_{{ .Os }}"
     builds:
       - rpm
     vendor: Ben Garrett
