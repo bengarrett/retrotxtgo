@@ -42,7 +42,7 @@ func (args Args) serveFile(data *[]byte) error {
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	fmt.Printf("Web server is available at %s\n",
 		str.Cp(fmt.Sprintf("http://localhost:%v", port)))
-	println(str.Cinf("Press Ctrl+C to stop"))
+	fmt.Println(str.Cinf("Press Ctrl+C to stop"))
 	if err = http.ListenAndServe(fmt.Sprintf(":%v", port), nil); err != nil {
 		return err
 	}
