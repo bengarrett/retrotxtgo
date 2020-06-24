@@ -34,18 +34,18 @@ var viewCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		checkUse(cmd, args)
 		for i, arg := range args {
-			if ok, err := viewPackage(arg); err != nil {
-				logs.CheckCont("view.pack", err)
+			if ok, err := viewPackage(cmd, arg); err != nil {
+				logs.CheckCont("pack", err)
 				continue
 			} else if ok {
 				continue
 			}
 			b, err := filesystem.Read(arg)
-			if ok := logs.CheckCont("view.codepage", err); !ok {
+			if ok := logs.CheckCont("read file", err); !ok {
 				continue
 			}
 			r, err := convert.Text(viewFlag.codepage, &b)
-			if ok := logs.CheckCont("view.convert.text", err); !ok {
+			if ok := logs.CheckCont("convert", err); !ok {
 				continue
 			}
 			fmt.Println(string(r))
@@ -65,13 +65,12 @@ func init() {
 	viewCmd.Flags().SortFlags = false
 }
 
-func viewPackage(name string) (ok bool, err error) {
+func viewPackage(cmd *cobra.Command, name string) (ok bool, err error) {
 	var s = strings.ToLower(name)
 	if _, err := os.Stat(s); !os.IsNotExist(err) {
 		return false, nil
 	}
 	pkg, exist := internalPacks[s]
-	println(fmt.Sprintf("%+v", pkg), exist)
 	if !exist {
 		return false, nil
 	}
@@ -79,14 +78,20 @@ func viewPackage(name string) (ok bool, err error) {
 	if b == nil {
 		return false, errors.New("pkg.name is unknown: " + pkg.name)
 	}
+	// codepage defaults
+	encoding := viewFlag.codepage
+	if cp := cmd.Flags().Lookup("codepage"); !cp.Changed {
+		encoding = pkg.encoding
+	}
+	// convert and print
 	var r []rune
 	switch pkg.convert {
 	case "d":
-		if r, err = convert.Dump(viewFlag.codepage, &b); err != nil {
+		if r, err = convert.Dump(encoding, &b); err != nil {
 			return false, err
 		}
 	case "", "t":
-		if r, err = convert.Text(viewFlag.codepage, &b); err != nil {
+		if r, err = convert.Text(encoding, &b); err != nil {
 			return false, err
 		}
 	}
