@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bengarrett/retrotxtgo/internal/pack"
 	"github.com/bengarrett/retrotxtgo/lib/convert"
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
@@ -18,6 +19,8 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/version"
 	"github.com/gookit/color"
 	"github.com/spf13/viper"
+
+	gap "github.com/muesli/go-app-paths"
 )
 
 type files map[string]string
@@ -62,6 +65,10 @@ type Args struct {
 	SaveToFile bool
 	// OW overwrite any existing files when saving
 	OW bool
+	// template filename
+	tmpl string
+	// template package name
+	pack string
 }
 
 // PageData temporarily holds template data used for the HTML layout.
@@ -91,6 +98,8 @@ var Referrer = []string{"no-referrer", "origin", "no-referrer-when-downgrade",
 
 // Robots values for the content attribute of <meta name="robots">
 var Robots = []string{"index", "noindex", "follow", "nofollow", "none", "noarchive", "nosnippet", "noimageindex", "nocache"}
+
+var scope = gap.NewScope(gap.User, "retrotxt")
 
 func dirs(dir string) (path string, err error) {
 	switch dir {
@@ -226,36 +235,83 @@ func createTemplates() files {
 	return f
 }
 
-// filename creates a filepath for the template filenames.
-func (args Args) filename() (path string, err error) {
-	base := "static/html/"
-	if args.Test {
-		base = filepath.Join("../../", base)
-	}
-	f := createTemplates()[args.Layout]
-	if f == "" {
-		return path, errors.New("filename: invalid-layout")
-	}
-	path = filepath.Join(base, f+".html")
-	return path, err
-}
-
 // newTemplate creates and parses a new template file.
 // The argument test is used internally.
 func (args Args) newTemplate() (*template.Template, error) {
-	fn, err := args.filename()
+	if err := args.templateCache(); err != nil {
+		return nil, err
+	}
+	if s, err := os.Stat(args.tmpl); os.IsNotExist(err) {
+		if err := args.templateSave(); err != nil {
+			return nil, err
+		}
+		println("template cache saved to:", args.tmpl)
+	} else if err != nil {
+		return nil, err
+	} else if s.IsDir() {
+		return nil, fmt.Errorf("create.newtemplate: template file is a directory: %q", args.tmpl)
+	}
+	// to avoid a potential panic, Stat again incase os.IsNotExist() is true
+	s, err := os.Stat(args.tmpl)
 	if err != nil {
 		return nil, err
 	}
-	fn, err = filepath.Abs(fn)
-	if err != nil {
+	if err = args.templatePack(); err != nil {
 		return nil, err
 	}
-	if _, err := os.Stat(fn); os.IsNotExist(err) {
-		return nil, fmt.Errorf("create newTemplate: %s", err)
+	b, err := args.templateData()
+	if s.Size() != int64(len(*b)) {
+		if err != nil {
+			return nil, err
+		}
+		if _, err := filesystem.Save(args.tmpl, *b); err != nil {
+			return nil, err
+		}
 	}
-	t := template.Must(template.ParseFiles(fn))
+	t := template.Must(template.ParseFiles(args.tmpl))
 	return t, nil
+}
+
+// filename creates a filepath for the template filenames.
+func (args *Args) templateCache() (err error) {
+	f := createTemplates()[args.Layout]
+	if f == "" {
+		return fmt.Errorf("create.templatecache: layout does not exist: %q", args.Layout)
+	}
+	args.tmpl, err = scope.DataPath(f + ".html")
+	return err
+}
+
+func (args *Args) templatePack() error {
+	f := createTemplates()[args.Layout]
+	if f == "" {
+		return fmt.Errorf("create.templatepack: package and layout does not exist: %q", args.Layout)
+	}
+	args.pack = fmt.Sprintf("html/%s.html", f)
+	return nil
+}
+
+func (args Args) templateData() (*[]byte, error) {
+	b := pack.Get(args.pack)
+	if len(b) == 0 {
+		return nil, fmt.Errorf("create.templatedata: pack.get name is invalid: %q", args.pack)
+	}
+	return &b, nil
+}
+
+func (args Args) templateSave() error {
+	err := args.templatePack()
+	if err != nil {
+		return err
+	}
+	b, err := args.templateData()
+	if err != nil {
+		return err
+	}
+	if _, err := filesystem.Save(args.tmpl, *b); err != nil {
+		return err
+	}
+	return nil
 }
 
 // pagedata creates the meta and page template data.
