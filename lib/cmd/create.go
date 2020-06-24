@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var htmlArgs create.Args
+var html create.Args
 
 // createCmd makes create usage examples
 var exampleCmd = func() string {
@@ -40,7 +40,7 @@ var createCmd = &cobra.Command{
 		// handle hidden --body flag that ignores all args
 		if body := cmd.Flags().Lookup("body"); body.Changed {
 			b := []byte(body.Value.String())
-			htmlArgs.Cmd(b, "")
+			html.Create(&b)
 			os.Exit(0)
 		}
 		checkUse(cmd, args)
@@ -52,7 +52,7 @@ var createCmd = &cobra.Command{
 				logs.ChkErr(logs.Err{Issue: "file is invalid", Arg: arg, Msg: err})
 			}
 			if h := htmlServe(i, cmd, &b); !h {
-				htmlArgs.Cmd(b, "") // TODO: rename to Print
+				html.Create(&b)
 			}
 		}
 	},
@@ -67,7 +67,7 @@ func htmlServe(i int, cmd *cobra.Command, b *[]byte) bool {
 	}
 	if serve := cmd.Flags().Lookup("serve"); serve.Changed {
 
-		htmlArgs.Serve(b)
+		html.Serve(b)
 		return true
 	}
 	return false
@@ -108,23 +108,23 @@ func init() {
 	// init flags and their usage
 	var metaCfg = map[int]metaFlag{
 		// output
-		1: {"serve", nil, nil, &htmlArgs.Port, "serve", "p", nil},
+		1: {"serve", nil, nil, &html.Port, "serve", "p", nil},
 		// main tag flags
-		3: {"html.layout", &htmlArgs.Layout, nil, nil, "layout", "l", create.Layouts()},
-		4: {"style.html", &htmlArgs.Syntax, nil, nil, "syntax-style", "c", nil},
-		5: {"html.title", &htmlArgs.Title, nil, nil, "title", "t", nil},
-		6: {"html.meta.description", &htmlArgs.Desc, nil, nil, "meta-description", "d", nil},
-		7: {"html.meta.author", &htmlArgs.Author, nil, nil, "meta-author", "a", nil},
+		3: {"html.layout", &html.Layout, nil, nil, "layout", "l", create.Layouts()},
+		4: {"style.html", &html.Syntax, nil, nil, "syntax-style", "c", nil},
+		5: {"html.title", &html.Title, nil, nil, "title", "t", nil},
+		6: {"html.meta.description", &html.Desc, nil, nil, "meta-description", "d", nil},
+		7: {"html.meta.author", &html.Author, nil, nil, "meta-author", "a", nil},
 		// minor tag flags
-		8:  {"html.meta.generator", nil, &htmlArgs.Generator, nil, "meta-generator", "g", nil},
-		9:  {"html.meta.color-scheme", &htmlArgs.Author, nil, nil, "meta-color-scheme", "", nil},
-		10: {"html.meta.keywords", &htmlArgs.Keys, nil, nil, "meta-keywords", "", nil},
-		11: {"html.meta.notranslate", nil, &htmlArgs.NoTranslate, nil, "meta-notranslate", "", nil},
-		12: {"html.meta.referrer", &htmlArgs.Ref, nil, nil, "meta-referrer", "", nil},
-		13: {"html.meta.robots", &htmlArgs.Robots, nil, nil, "meta-robots", "", nil},
-		14: {"html.meta.theme-color", &htmlArgs.Scheme, nil, nil, "meta-theme-color", "", nil},
+		8:  {"html.meta.generator", nil, &html.Generator, nil, "meta-generator", "g", nil},
+		9:  {"html.meta.color-scheme", &html.Author, nil, nil, "meta-color-scheme", "", nil},
+		10: {"html.meta.keywords", &html.Keys, nil, nil, "meta-keywords", "", nil},
+		11: {"html.meta.notranslate", nil, &html.NoTranslate, nil, "meta-notranslate", "", nil},
+		12: {"html.meta.referrer", &html.Ref, nil, nil, "meta-referrer", "", nil},
+		13: {"html.meta.robots", &html.Robots, nil, nil, "meta-robots", "", nil},
+		14: {"html.meta.theme-color", &html.Scheme, nil, nil, "meta-theme-color", "", nil},
 		// hidden flags
-		0: {"html.body", &htmlArgs.Body, nil, nil, "body", "b", nil},
+		0: {"html.body", &html.Body, nil, nil, "body", "b", nil},
 	}
 	// create an ordered index for the flags
 	var keys []int
@@ -133,9 +133,9 @@ func init() {
 	}
 	sort.Ints(keys)
 	// output flags
-	createCmd.Flags().StringVarP(&htmlArgs.Enc, "encode", "e", "", "text encoding of the named text file\nwhen ignored, UTF8 encoding will be automatically detected\notherwise encode will assume default (default CP437)\nsee a list of encode values "+str.Example("retrotxt view codepages")+"\n")
-	createCmd.Flags().BoolVarP(&htmlArgs.SaveToFile, "save", "s", false, "save HTML to a file or ignore to print output")
-	createCmd.Flags().BoolVarP(&htmlArgs.OW, "overwrite", "o", false, "overwrite any existing files when saving")
+	createCmd.Flags().StringVarP(&html.Enc, "encode", "e", "", "text encoding of the named text file\nwhen ignored, UTF8 encoding will be automatically detected\notherwise encode will assume default (default CP437)\nsee a list of encode values "+str.Example("retrotxt view codepages")+"\n")
+	createCmd.Flags().BoolVarP(&html.SaveToFile, "save", "s", false, "save HTML to a file or ignore to print output")
+	createCmd.Flags().BoolVarP(&html.OW, "overwrite", "o", false, "overwrite any existing files when saving")
 	// html flags
 	for i := range keys {
 		c := metaCfg[i]
