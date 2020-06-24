@@ -48,7 +48,12 @@ func Check(issue string, err error) (ok bool) {
 // CheckCont prints an error issue and message then continues the program.
 func CheckCont(issue string, err error) (ok bool) {
 	if err != nil {
-		check(issue, err)
+		e := str.Cf(fmt.Sprint(err))
+		if issue == "" {
+			fmt.Printf("%s %s\n", str.Alert(), e)
+		} else {
+			fmt.Printf("%s %s %s\n", str.Alert(), str.Ci(issue), e)
+		}
 		return false
 	}
 	return true
