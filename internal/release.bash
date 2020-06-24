@@ -25,7 +25,8 @@ git status
 git add ../. &&
     git commit -m "$newcmmt" &&
     git tag -a $newtag -m "$newcmmt" &&
-    git push origin $newtag
+    git push origin $newtag &&
+    git pull
 
 # notes
 # to delete a local tag
