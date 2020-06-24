@@ -234,6 +234,12 @@ func encodingAlias(name string) (n string) {
 		n = "KOI8U"
 	case "shift jis":
 		n = "ShiftJIS"
+	case "utf16":
+		n = "UTF-16" // Go will default to Big Endian
+	case "16be", "utf16b", "utf16be", "utf-16-be":
+		n = "UTF-16BE"
+	case "16le", "utf16l", "utf16le", "utf-16-le":
+		n = "UTF-16LE"
 	}
 	return n
 }
@@ -307,9 +313,6 @@ func (d *Data) Swap() *Data {
 		d.RunesControls()
 		d.RunesWindows()
 	case japanese.ShiftJIS:
-		log.Fatal("japanese character sets are not working")
-		// d.RunesControls()
-		// d.RunesShiftJIS()
 	default:
 		d.RunesControls()
 	}
