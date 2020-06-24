@@ -318,6 +318,7 @@ op token list > https://golang.org/pkg/go/token/#Token
 - - `retrotxt create -n somefile.txt . # would create index.html in the current directory`
 - - `retrotxt create -n somefile.txt somefile.html # create sometfile.htm`
 - [ ] add a flag to --export `create` command results to a tar or zip archive.
+- [ ] add the ability to self-update?
 
 ---
 
@@ -338,26 +339,11 @@ op token list > https://golang.org/pkg/go/token/#Token
 
 ---
 
-### Embedding static files such as JS, CSS and fonts.
-
-[go-bindata](https://github.com/go-bindata/go-bindata) Turn data file into go code.
-
-Another option, store fonts as Base64 encoded text in .go files and export+save them as binary data when required?
-
-`go generate` [create our own packer?](https://dev.to/koddr/the-easiest-way-to-embed-static-files-into-a-binary-file-in-your-golang-app-no-external-dependencies-43pc)
-
----
-
 ### TODOs - changes to the existing code
 
-- [x] **Remove all string references to `retrotxtgo`.**
-- [x] Directory settings, change `.` shortcut to always use the current working directory.
-- [x] When fetching github release data using the `version` command.
-      Use HTTP e-tags cache and save the values to reduce the bandwidth usage.
-- [x] config command should support the global --config flag.
+- [ ] switch all logs checks to be Go idiomatic using if-conditionals.
 - [ ] config shell should have a `--append/source/or` flag to save shell auto-completion?
 - [ ] scan for supported but current shell configuration.
-- [x] when using `create` detect any out of range or unsafe unicode encoding and assume cp437.
 - [ ] in `create` HTML insert a header comment with source file, command flags. encoding info (cp437 -> utf8).
 - [ ] generator meta tag should have a working date.
 - [ ] newline scanner to determine the maxWidth of the text.
