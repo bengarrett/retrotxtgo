@@ -343,7 +343,7 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 	if name == "" {
 		name = "cp437"
 	}
-	runes, err := convert.Chars(name, b)
+	runes, err := convert.Text(name, b)
 	logs.Check("create.pagedata.chars", err)
 	p.PreText = string(runes)
 	return p, nil
