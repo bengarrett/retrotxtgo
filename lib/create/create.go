@@ -55,8 +55,6 @@ type Args struct {
 	Layout string
 	// Syntax and color theming printing HTML
 	Syntax string
-	// HTTP server
-	HTTP bool
 	// Port for HTTP server
 	Port uint
 	// Test mode
@@ -116,49 +114,28 @@ func dirs(dir string) (path string, err error) {
 	return path, err
 }
 
-// Cmd handles the target output command arguments.
-func (args *Args) Cmd(data []byte, value string) {
+// Create handles the target output command arguments.
+func (args *Args) Create(b *[]byte) {
 	var err error
 	switch {
 	case args.SaveToFile:
 		// use config save directory
 		dir := []string{viper.GetString("save-directory")}
-		if args.Dest, err = Dest(dir); err != nil {
+		if args.Dest, err = destination(dir); err != nil {
 			log.Fatal(err)
 		}
-		err = args.Save(&data)
-	case !args.HTTP:
+		err = args.Save(b)
+	default:
 		// print to terminal
-		err = args.Stdout(&data)
+		err = args.Stdout(b)
 	}
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) // TODO: logs.Fatal(error)
 	}
-}
-
-// Dest determines if user supplied arguments are a valid file or directory destination.
-func Dest(args []string) (path string, err error) {
-	if len(args) == 0 {
-		return path, err
-	}
-	dir := strings.Join(args, " ")
-	dir = filepath.Clean(dir)
-	if len(dir) == 1 {
-		return dirs(dir)
-	}
-	part := strings.Split(dir, string(os.PathSeparator))
-	if len(part) > 1 {
-		part[0], err = dirs(part[0])
-		if err != nil {
-			return path, err
-		}
-	}
-	path = strings.Join(part, string(os.PathSeparator))
-	return path, err
 }
 
 // Save creates and saves the html template to the Dest argument.
-func (args Args) Save(data *[]byte) error {
+func (args Args) Save(b *[]byte) error {
 	name := filesystem.DirExpansion(args.Dest)
 	stat, err := os.Stat(name)
 	if err != nil {
@@ -181,7 +158,7 @@ func (args Args) Save(data *[]byte) error {
 	if err != nil {
 		return err
 	}
-	d, err := args.pagedata(data)
+	d, err := args.pagedata(b)
 	if err != nil {
 		return err
 	}
@@ -192,12 +169,12 @@ func (args Args) Save(data *[]byte) error {
 }
 
 // Stdout creates and sends the html template to stdout.
-func (args Args) Stdout(data *[]byte) error {
+func (args Args) Stdout(b *[]byte) error {
 	tmpl, err := args.newTemplate()
 	if err != nil {
 		return err
 	}
-	d, err := args.pagedata(data)
+	d, err := args.pagedata(b)
 	if err != nil {
 		return err
 	}
@@ -214,6 +191,27 @@ func (args Args) Stdout(data *[]byte) error {
 		}
 	}
 	return err
+}
+
+// destination determines if user supplied arguments are a valid file or directory destination.
+func destination(args []string) (path string, err error) {
+	if len(args) == 0 {
+		return path, err
+	}
+	dir := strings.Join(args, " ")
+	dir = filepath.Clean(dir)
+	if len(dir) == 1 {
+		return dirs(dir)
+	}
+	part := strings.Split(dir, string(os.PathSeparator))
+	if len(part) > 1 {
+		part[0], err = dirs(part[0])
+		if err != nil {
+			return path, err
+		}
+	}
+	path = strings.Join(part, string(os.PathSeparator))
+	return path, err
 }
 
 // Layouts returns the options permitted by the layout flag.
@@ -316,6 +314,9 @@ func (args Args) templateSave() error {
 
 // pagedata creates the meta and page template data.
 func (args Args) pagedata(b *[]byte) (p PageData, err error) {
+	if b == nil {
+		return PageData{}, errors.New("create.pagedata: cannot convert b <nil>")
+	}
 	// templates are found in the dir static/html/*.html
 	switch args.Layout {
 	case "full", "standard":

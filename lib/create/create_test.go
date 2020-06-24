@@ -1,6 +1,7 @@
 package create
 
 import (
+	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -10,6 +11,70 @@ import (
 
 	"github.com/spf13/viper"
 )
+
+func Test_Save(t *testing.T) {
+	a := Args{Layout: "standard", Test: true}
+	type args struct {
+		data []byte
+		name string
+	}
+	tmpFile := path.Join(os.TempDir(), "retrotxt_create_test.txt")
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"no data", args{[]byte(""), ""}, true},
+		{"invalid", args{[]byte("abc"), "this-is-an-invalid-path"}, true},
+		{"tempDir", args{data: []byte("abc"), name: tmpFile}, true},
+		{"homeDir", args{[]byte("abc"), "~"}, false},
+		{"currentDir", args{[]byte("abc"), "."}, false},
+		{"path as name", args{[]byte("abc"), os.TempDir()}, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			a.Dest = tt.args.name
+			a.OW = true
+			if err := a.Save(&tt.args.data); (err != nil) != tt.wantErr {
+				t.Errorf("Save() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+	// clean-up
+	if wd, err := os.Getwd(); err == nil {
+		p := filepath.Join(wd, "index.html")
+		if err := os.Remove(p); err != nil {
+			t.Error(err)
+		}
+	}
+}
+
+func TestArgs_Stdout(t *testing.T) {
+	var (
+		a = Args{
+			Layout: "standard",
+		}
+		b  = []byte("")
+		hi = []byte("hello world")
+	)
+	tests := []struct {
+		name    string
+		args    Args
+		b       *[]byte
+		wantErr bool
+	}{
+		{"no data", a, &b, false},
+		{"hi", a, &hi, false},
+		{"nil", a, nil, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := tt.args.Stdout(tt.b); (err != nil) != tt.wantErr {
+				t.Errorf("Args.Stdout() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
 
 func Test_Layouts(t *testing.T) {
 	l := Layouts()
@@ -40,22 +105,18 @@ func Test_createTemplates(t *testing.T) {
 	}
 }
 
-func Test_filename(t *testing.T) {
-	args := Args{Layout: "standard"}
-	w := filepath.Clean("static/html/standard.html")
-	got, _ := args.filename()
-	if got != w {
-		t.Errorf("filename = %v, want %v", got, w)
+func Test_templateSave(t *testing.T) {
+	tmpFile, err := ioutil.TempFile(os.TempDir(), "tmplsave")
+	if err != nil {
+		t.Error(err)
 	}
-	w = filepath.Clean("static/html/standard.html")
-	got, _ = args.filename()
-	if got != w {
-		t.Errorf("filename = %v, want %v", got, w)
+	defer os.Remove(tmpFile.Name())
+	a := Args{
+		Layout: "standard",
+		tmpl:   tmpFile.Name(),
 	}
-	args.Layout = "error"
-	_, err := args.filename()
-	if (err != nil) != true {
-		t.Errorf("filename = %v, want %v", got, w)
+	if err = a.templateSave(); err != nil {
+		t.Errorf("templateSave() created an error: %s", err)
 	}
 }
 
@@ -108,67 +169,8 @@ func Test_serveFile(t *testing.T) {
 		})
 	}
 }
-func Test_Save(t *testing.T) {
-	a := Args{Layout: "standard", Test: true}
-	type args struct {
-		data []byte
-		name string
-	}
-	tmpFile := path.Join(os.TempDir(), "retrotxt_create_test.txt")
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{"no data", args{[]byte(""), ""}, true},
-		{"invalid", args{[]byte("abc"), "this-is-an-invalid-path"}, true},
-		{"tempDir", args{data: []byte("abc"), name: tmpFile}, true},
-		{"homeDir", args{[]byte("abc"), "~"}, false},
-		{"currentDir", args{[]byte("abc"), "."}, false},
-		{"path as name", args{[]byte("abc"), os.TempDir()}, true},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			a.Dest = tt.args.name
-			a.OW = true
-			if err := a.Save(&tt.args.data); (err != nil) != tt.wantErr {
-				t.Errorf("Save() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-	// clean-up
-	if wd, err := os.Getwd(); err == nil {
-		p := filepath.Join(wd, "index.html")
-		if err := os.Remove(p); err != nil {
-			t.Error(err)
-		}
-	}
-}
 
-func Test_writeStdout(t *testing.T) {
-	type args struct {
-		data []byte
-		test bool
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{"no data", args{[]byte(""), true}, false},
-		{"some data", args{[]byte("hello world"), true}, false},
-		{"nil data", args{nil, true}, false},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// if err := Stdout(tt.args.data, tt.args.test); (err != nil) != tt.wantErr {
-			// 	t.Errorf("writeStdout() error = %v, wantErr %v", err, tt.wantErr)
-			// }
-		})
-	}
-}
-
-func TestDest(t *testing.T) {
+func Test_destination(t *testing.T) {
 	saved := viper.GetString("save-directory")
 	wd, _ := os.Getwd()
 	home, _ := os.UserHomeDir()
@@ -197,13 +199,13 @@ func TestDest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotPath, err := Dest(tt.args)
+			gotPath, err := destination(tt.args)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Dest() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("destination() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if gotPath != tt.wantPath {
-				t.Errorf("Dest() = %v, want %v", gotPath, tt.wantPath)
+				t.Errorf("destination() = %v, want %v", gotPath, tt.wantPath)
 			}
 		})
 	}
