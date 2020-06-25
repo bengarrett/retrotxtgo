@@ -70,7 +70,7 @@ cat ~/index.html
 - [x] List or export (json, text, xml) meta details of a text file.
 - [ ] List or export SAUCE metadata of a file.
 - [ ] Transform the encoding of a text file. CP437 -> UTF8, UTF8 -> ISO8859-1 ...
-- [ ] View any legacy encoded text file in a UTF8 terminal by converting on the fly.
+- [x] View any legacy encoded text file in a UTF8 terminal by converting on the fly.
 - [x] Extensive customisations through command flags or a configuration file with a setup.
 - [ ] ANSI compatibility tests, output 16, 88, 256, high and true-color tables.
 - [x] Multiplatform support including Windows, macOS, Linux, Raspbian and FreeBSD.
@@ -184,8 +184,8 @@ The binary will be installed either at `$GOPATH/bin` or `$HOME/go/bin`
 
 ## Compile to other platforms using Go
 
-Go supports a maylard of operating systems and platforms that can be built using any other supported platform.
-So if you were on Linux and needed to compile a 32-bit version of RetroTxt to target Windows XP.
+Go supports a number of operating systems and platforms that can be built using any other supported platform.
+Were you on a Linux system and needed to compile a 32-bit version of RetroTxt to target Windows 7.
 
 ```sh
 # to see a list of supported platforms
@@ -193,6 +193,7 @@ go tool dist list
 
 git clone https://github.com/bengarrett/retrotxtgo.git
 cd retrotxtgo
+# target 32-bit Windows
 env GOOS=windows GOARCH=386 go build -o retrotxt.exe
 # optional, compress the binary
 upx retrotxt.exe
