@@ -74,6 +74,7 @@ type PageData struct {
 	BuildVersion    string
 	BuildDate       string
 	CacheRefresh    string
+	Comment         string
 	MetaAuthor      string
 	MetaColorScheme string
 	MetaDesc        string
@@ -334,6 +335,7 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 		t := time.Now().UTC()
 		p.BuildDate = t.Format(time.RFC3339)
 		p.BuildVersion = version.B.Version
+		p.Comment = "encoding: CP-437; linefeed: crlf; length: 100; width: 80; filename: somefile.txt" // TODO: make functional
 	case "mini":
 		p.PageTitle = viper.GetString("html.title")
 		p.MetaGenerator = false

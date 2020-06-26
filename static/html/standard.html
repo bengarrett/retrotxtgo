@@ -5,6 +5,8 @@
     <meta charset="utf-8" />
     {{- if .PageTitle}}
     <title>{{.PageTitle}}</title>
+    {{- end}} {{if .Comment}}
+    <meta name="retrotxt" content="{{.Comment}}" />
     {{- end}} {{if .MetaDesc}}
     <meta name="description" content="{{.MetaDesc}}" />
     {{- end}} {{if .MetaAuthor}}
