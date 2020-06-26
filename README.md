@@ -354,6 +354,10 @@ op token list > https://golang.org/pkg/go/token/#Token
 - - `retrotxt create -n somefile.txt somefile.html # create sometfile.htm`
 - [ ] add a flag to --export `create` command results to a tar or zip archive.
 - [ ] add the ability to self-update?
+- [ ] option for generated HTML naming convention, either use index.html ... index_1.html, index_2.html etc.
+      or filename.html, another-file-1.html, etc. When generating multiple HTML files, an index.html proof-sheet
+      should be created with hyperlinks to all the other files. Maybe list their file/sauce details and a screenshot.
+- [ ] both the `create/view` commands should support walking both directories and file archives.
 
 ---
 
