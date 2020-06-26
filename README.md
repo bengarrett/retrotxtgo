@@ -8,7 +8,9 @@
 
 ---
 
-## Example
+## About
+
+#### Text files created in the pre Unicode days often fail to display on modern systems.
 
 ```sh
 cat samples/ascii-logos.txt
@@ -21,13 +23,26 @@ cat samples/ascii-logos.txt
 �ͼ  �ͼ������ͼ   �ͼ   �ͼ  �ͼ �����ͼ    �ͼ   �ͼ  �ͼ   �ͼ
 ```
 
+#### Use Retrotxt to print legacy encoded text on modern terminals.
+
 ```sh
-retrotxt create ascii-logos.txt # creates an index.html file in the home directory
+retrotxt view ascii-logos.txt
+
+██████╗ ███████╗████████╗██████╗  ██████╗ ████████╗██╗  ██╗████████╗
+██╔══██╗██╔════╝╚══██╔══╝██╔══██╗██╔═══██╗╚══██╔══╝╚██╗██╔╝╚══██╔══╝
+██████╔╝█████╗     ██║   ██████╔╝██║   ██║   ██║    ╚███╔╝    ██║
+██╔══██╗██╔══╝     ██║   ██╔══██╗██║   ██║   ██║    ██╔██╗    ██║
+██║  ██║███████╗   ██║   ██║  ██║╚██████╔╝   ██║   ██╔╝ ██╗   ██║
+╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝   ╚═╝
+```
+
+#### And turn the text into a static website with accurate fonts and colours.
+
+```sh
+retrotxt create ascii-logos.txt
 ```
 
 ```html
-cat ~/index.html
-
 <!DOCTYPE html>
 
 <html lang="en">
@@ -39,10 +54,10 @@ cat ~/index.html
     <meta name="keywords" content="retrotxt,ansi,ascii" />
     <meta
       name="generator"
-      content="RetroTxt v; 0001-01-01 00:00:00 &#43;0000 UTC"
+      content="RetroTxt v1.0; 0001-01-01 00:00:00 &#43;0000 UTC"
     />
-    <link rel="stylesheet" href="static/css/styles.css" />
-    <script src="static/js/scripts.js" defer></script>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="scripts.js" defer></script>
   </head>
 
   <body>
@@ -58,6 +73,25 @@ cat ~/index.html
     </main>
   </body>
 </html>
+```
+
+#### Easily serve it over its own HTTP server.
+
+```sh
+retrotxt create ascii-logos.txt -p0
+
+Web server is available at http://localhost:8080
+Press Ctrl+C to stop
+```
+
+- insert browser screenshot
+
+#### Convert the text into another encoding of your choosing.
+
+```sh
+retrotxt convert ascii-logs.txt --to=cp860
+
+...
 ```
 
 ---
@@ -346,12 +380,13 @@ op token list > https://golang.org/pkg/go/token/#Token
 - [ ] config shell should have a `--append/source/or` flag to save shell auto-completion?
 - [ ] scan for supported but current shell configuration.
 - [ ] in `create` HTML insert a header comment with source file, command flags. encoding info (cp437 -> utf8).
-- [ ] generator meta tag should have a working date.
 - [ ] newline scanner to determine the maxWidth of the text.
 - [ ] reverse scan of file looking for EOF, SAUCE00 & COMNTT.
 - [ ] scan for unique color codes like 24-bit colors.
 - [ ] implement ASCII font and CSS support.
 - [ ] scan and linkify any http/s, ftp, mailto links in HTML.
+- [ ] when serving HTML over the internal server, monitor the files for any edits and refresh the browser if they occure.
+- [ ] info cmd should work on internal packed files.
 
 ```sh
 // TODO: env
