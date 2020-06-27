@@ -1,1 +1,3 @@
-- Testing the building of binaries
+- Stdin, piped text support.
+- UTF16 and ShiftJIS decoding.
+- `view` command correctly handles newlines.
