@@ -11,12 +11,9 @@ import (
 	"testing"
 )
 
-// fileExample saves `hello world` or a provided string to a text file.
+// fileExample the string to a text file.
 func fileExample(s string, i int) (path string) {
 	var name = fmt.Sprintf("rt_fs_save%d.txt", i)
-	if s == "" {
-		s = "hello world"
-	}
 	path, err := SaveTemp(name, []byte(s))
 	if err != nil {
 		log.Fatal(err)
@@ -145,7 +142,7 @@ func Test_DirExpansion(t *testing.T) {
 }
 
 func TestRead(t *testing.T) {
-	f := fileExample("", 0)
+	f := fileExample("hello", 0)
 	large := largeExample()
 	type args struct {
 		name string

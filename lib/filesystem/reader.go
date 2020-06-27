@@ -4,13 +4,17 @@ import (
 	"bufio"
 	"bytes"
 	"io"
+	"sort"
 	"unicode"
 	"unicode/utf8"
 )
 
 // Columns counts the number of characters used per line in the reader interface.
-func Columns(r io.Reader) (width int, err error) {
-	const lineBreak = '\n'
+func Columns(r io.Reader, nl [2]rune) (width int, err error) {
+	var lineBreak = []byte{byte(nl[0]), byte(nl[1])}
+	if nl[1] == 0 {
+		lineBreak = []byte{byte(nl[0])}
+	}
 	buf := make([]byte, bufio.MaxScanTokenSize)
 	for {
 		size, err := r.Read(buf)
@@ -19,15 +23,14 @@ func Columns(r io.Reader) (width int, err error) {
 		}
 		var pos int
 		for {
-			i := bytes.IndexByte(buf[pos:], lineBreak)
-			if i == -1 {
-				// when no linebreaks are used
-				return -1, err
-			}
 			if size == pos {
 				break
 			}
-			pos += i + 1
+			i := bytes.Index(buf[pos:], lineBreak)
+			if i == -1 {
+				break
+			}
+			pos += i + len(lineBreak)
 			if i > width {
 				width = i
 			}
@@ -51,13 +54,14 @@ func Controls(r io.Reader) (count int, err error) {
 		var pos int
 		for {
 			i := bytes.Index(buf[pos:], lineBreak)
-			if i == -1 || size == pos {
+			if size == pos {
 				break
 			}
-			pos += i + 1
-			if i > count {
-				count = i
+			if i == -1 {
+				return count, nil
 			}
+			pos += i + 1
+			count++
 		}
 		if err == io.EOF {
 			break
@@ -78,6 +82,9 @@ func Lines(r io.Reader) (count int, err error) {
 		var pos int
 		for {
 			i := bytes.IndexByte(buf[pos:], lineBreak)
+			if size == pos {
+				break
+			}
 			if i == -1 {
 				// when no linebreaks are used
 				// return 0 lines for an empty buffer or 1 line of text
@@ -85,9 +92,6 @@ func Lines(r io.Reader) (count int, err error) {
 					return 0, nil
 				}
 				return 1, nil
-			}
-			if size == pos {
-				break
 			}
 			pos += i + 1
 			count++
@@ -97,6 +101,70 @@ func Lines(r io.Reader) (count int, err error) {
 		}
 	}
 	return count, nil
+}
+
+// Newlines will try to guess the newline representation as a 2 byte value.
+// A guess of Unix will return [10, 0], Windows [13, 10], otherwise a [0, 0] value is returned.
+func Newlines(runes []rune) [2]rune {
+	// scan data for possible newlines
+	c := []struct {
+		abbr  string
+		count int
+	}{
+		{"lf", 0},   // linux, unix, amiga...
+		{"cr", 0},   // 8-bit micros & legacy mac
+		{"crlf", 0}, // windows, dos, cp/m...
+		{"lfcr", 0}, // acorn bbc micro
+		{"nl", 0},   // ibm ebcdic encodings
+	}
+	l := len(runes) - 1 // range limit
+	for i, r := range runes {
+		switch r {
+		case 10:
+			if i < l && runes[i+1] == 13 {
+				c[3].count++ // lfcr
+				continue
+			}
+			if i != 0 && runes[i-1] == 13 {
+				// crlf (already counted)
+				continue
+			}
+			c[0].count++
+		case 13:
+			if i < l && runes[i+1] == 10 {
+				c[2].count++ // crlf
+				continue
+			}
+			if i != 0 && runes[i-1] == 10 {
+				// lfcr (already counted)
+				continue
+			}
+			// carriage return on modern terminals will overwrite the existing line of text
+			// todo: add flag or change behaviour to replace CR (\r) with NL (\n)
+			c[1].count++
+		case 21:
+			c[4].count++
+		case 155:
+			// atascii (not currently used)
+		}
+	}
+	// sort results
+	sort.SliceStable(c, func(i, j int) bool {
+		return c[i].count > c[j].count
+	})
+	switch c[0].abbr {
+	case "lf":
+		return [2]rune{10}
+	case "cr":
+		return [2]rune{13}
+	case "crlf":
+		return [2]rune{13, 10}
+	case "lfcr":
+		return [2]rune{10, 13}
+	case "nl":
+		return [2]rune{21}
+	}
+	return [2]rune{}
 }
 
 // Runes returns the number of runes in the reader interface.

@@ -96,6 +96,11 @@ func Print(filename, format string) (err error) {
 		return err
 	}
 	if IsText(d.Mime) {
+		// TODO: display this as an info field
+		newline, err := filesystem.ReadNewlines(filename)
+		if err != nil {
+			return err
+		}
 		file, err := os.Open(filename)
 		if err != nil {
 			return err
@@ -107,7 +112,7 @@ func Print(filename, format string) (err error) {
 		if d.Lines, err = filesystem.Lines(file); err != nil {
 			return err
 		}
-		if d.Width, err = filesystem.Columns(file); err != nil {
+		if d.Width, err = filesystem.Columns(file, newline); err != nil {
 			return err
 		} else if d.Width < 0 {
 			d.Width = d.CharCount
@@ -126,13 +131,15 @@ func Stdin(b []byte, format string) (err error) {
 		return err
 	}
 	if IsText(d.Mime) {
+		// TODO: display this as an info field
+		newline := filesystem.Newlines([]rune(string(b)))
 		if d.CtrlCount, err = filesystem.Controls(bytes.NewReader(b)); err != nil {
 			return err
 		}
 		if d.Lines, err = filesystem.Lines(bytes.NewReader(b)); err != nil {
 			return err
 		}
-		if d.Width, err = filesystem.Columns(bytes.NewReader(b)); err != nil {
+		if d.Width, err = filesystem.Columns(bytes.NewReader(b), newline); err != nil {
 			return err
 		} else if d.Width < 0 {
 			d.Width = d.CharCount

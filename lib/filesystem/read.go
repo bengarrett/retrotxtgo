@@ -2,7 +2,9 @@ package filesystem
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
+	"io/ioutil"
 	"os"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
@@ -86,11 +88,15 @@ func ReadColumns(name string) (count int, err error) {
 		return -1, err
 	}
 	defer file.Close()
-	count, err = Columns(file)
+	nl, err := ReadNewlines(name)
+	if err != nil {
+		return -1, err
+	}
+	count, err = Columns(file, nl)
 	return count, err
 }
 
-// ReadControls counts the number of lines in the named file.
+// ReadControls counts the number of ANSI escape sequences in the named file.
 func ReadControls(name string) (count int, err error) {
 	file, err := os.Open(name)
 	if err != nil {
@@ -132,6 +138,21 @@ func ReadLines(name string) (count int, err error) {
 	defer file.Close()
 	count, err = Lines(file)
 	return count, err
+}
+
+// ReadNewlines scans the named file for the most commonly used newline method.
+func ReadNewlines(name string) ([2]rune, error) {
+	z := [2]rune{0, 0}
+	file, err := os.Open(name)
+	if err != nil {
+		return z, err
+	}
+	defer file.Close()
+	b, err := ioutil.ReadAll(file)
+	if err != nil {
+		return z, err
+	}
+	return Newlines(bytes.Runes(b)), nil
 }
 
 // ReadPipe reads data piped by the operating system's STDIN.
