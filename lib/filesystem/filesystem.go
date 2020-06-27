@@ -11,18 +11,21 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 )
 
-const (
-	// Newlines sample using operating system defaults
-	Newlines = "a\nb\nc...\n"
+// T are short strings shared between various app tests.
+var T = map[string]string{
+	// Newline sample using yjr operating system defaults
+	"Newline": "a\nb\nc...\n",
 	// Symbols for Unicode Wingdings
-	Symbols = `[☠|☮|♺]`
+	"Symbols": `[☠|☮|♺]`,
 	// Tabs and Unicode glyphs
-	Tabs = "☠\tSkull and crossbones\n\n☮\tPeace symbol\n\n♺\tRecycling"
+	"Tabs": "☠\tSkull and crossbones\n\n☮\tPeace symbol\n\n♺\tRecycling",
 	// Escapes and control codes.
-	Escapes = "bell:\a,back:\b,tab:\t,form:\f,vertical:\v,quote:\""
+	"Escapes": "bell:\a,back:\b,tab:\t,form:\f,vertical:\v,quote:\"",
 	// Digits in various formats
-	Digits = "\xb0\260\u0170\U00000170"
+	"Digits": "\xb0\260\u0170\U00000170",
+}
 
+const (
 	cr = "\x0d"
 	lf = "\x0a"
 	// posix permission bits for files

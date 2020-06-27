@@ -7,10 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"sort"
 	"strings"
 	"unicode/utf8"
 
+	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/htmlindex"
@@ -339,67 +339,7 @@ func (d *Data) ANSI() {
 // Newlines will try to guess the newline representation as a 2 byte value.
 // A guess of Unix will return [10, 0], Windows [13, 10], otherwise a [0, 0] value is returned.
 func (d *Data) Newlines() [2]rune {
-	// scan data for possible newlines
-	c := []struct {
-		abbr  string
-		count int
-	}{
-		{"lf", 0},   // linux, unix, amiga...
-		{"cr", 0},   // 8-bit micros & legacy mac
-		{"crlf", 0}, // windows, dos, cp/m...
-		{"lfcr", 0}, // acorn bbc micro
-		{"nl", 0},   // ibm ebcdic encodings
-	}
-	l := len(d.Runes) - 1 // range limit
-	for i, r := range d.Runes {
-		switch r {
-		case 10:
-			if i < l && d.Runes[i+1] == 13 {
-				c[3].count++ // lfcr
-				continue
-			}
-			if i != 0 && d.Runes[i-1] == 13 {
-				// crlf (already counted)
-				continue
-			}
-			c[0].count++
-		case 13:
-			if i < l && d.Runes[i+1] == 10 {
-				c[2].count++ // crlf
-				continue
-			}
-			if i != 0 && d.Runes[i-1] == 10 {
-				// lfcr (already counted)
-				continue
-			}
-			// carriage return on modern terminals will overwrite the existing line of text
-			// todo: add flag or change behaviour to replace CR (\r) with NL (\n)
-			c[1].count++
-		case 21:
-			c[4].count++
-		case 155:
-			// atascii (not currently used)
-		}
-	}
-	// sort results
-	sort.SliceStable(c, func(i, j int) bool {
-		return c[i].count > c[j].count
-	})
-	switch c[0].abbr {
-	case "lf":
-		d.newlines = [2]rune{10}
-	case "cr":
-		d.newlines = [2]rune{13}
-	case "crlf":
-		d.newlines = [2]rune{13, 10}
-	case "lfcr":
-		d.newlines = [2]rune{10, 13}
-	case "nl":
-		d.newlines = [2]rune{21}
-	default:
-		d.newlines = [2]rune{}
-	}
-	return d.newlines
+	return filesystem.Newlines(d.Runes)
 }
 
 // RunesControls switches out C0 and C1 ASCII controls with Unicode picture represenations.

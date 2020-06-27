@@ -174,10 +174,10 @@ func TestRead(t *testing.T) {
 }
 
 func TestReadAllBytes(t *testing.T) {
-	f2 := fileExample(Symbols, 2)
-	f3 := fileExample(Tabs, 3)
-	f4 := fileExample(Escapes, 4)
-	f5 := fileExample(Digits, 5)
+	f2 := fileExample(T["Symbols"], 2)
+	f3 := fileExample(T["Tabs"], 3)
+	f4 := fileExample(T["Escapes"], 4)
+	f5 := fileExample(T["Digits"], 5)
 	large := largeExample()
 	type args struct {
 		name string
@@ -191,10 +191,10 @@ func TestReadAllBytes(t *testing.T) {
 		{"empty", args{""}, nil, true},
 		{"invalid", args{"/invalid-file"}, nil, true},
 		{"dir", args{os.TempDir()}, nil, true},
-		{"utf8", args{f2}, []byte(Symbols), false},
-		{"tabs", args{f3}, []byte(Tabs), false},
-		{"escs", args{f4}, []byte(Escapes), false},
-		{"digs", args{f5}, []byte(Digits), false},
+		{"utf8", args{f2}, []byte(T["Symbols"]), false},
+		{"tabs", args{f3}, []byte(T["Tabs"]), false},
+		{"escs", args{f4}, []byte(T["Escapes"]), false},
+		{"digs", args{f5}, []byte(T["Digits"]), false},
 		{"1.5MB", args{large}, nil, false},
 	}
 	for _, tt := range tests {
@@ -217,10 +217,10 @@ func TestReadAllBytes(t *testing.T) {
 }
 
 func TestReadChunk(t *testing.T) {
-	f1 := fileExample(Newlines, 1)
-	f2 := fileExample(Symbols, 2)
-	f3 := fileExample(Tabs, 3)
-	f4 := fileExample(Escapes, 4)
+	f1 := fileExample(T["Nl"], 1)
+	f2 := fileExample(T["Symbols"], 2)
+	f3 := fileExample(T["Tabs"], 3)
+	f4 := fileExample(T["Escapes"], 4)
 	large := largeExample()
 	type args struct {
 		name string
@@ -237,7 +237,7 @@ func TestReadChunk(t *testing.T) {
 		{"dir", args{os.TempDir(), 0}, nil, true},
 		{"range 0", args{"", 10}, nil, true},
 		{"range -", args{f2, -20}, nil, false},
-		{"range +", args{f2, 20}, []byte(Symbols), false},
+		{"range +", args{f2, 20}, []byte(T["Symbols"]), false},
 		{"nl", args{f1, 4}, []byte("a\nb\n"), false},
 		{"utf8", args{f2, 4}, []byte("[☠|☮"), false},
 		{"tabs", args{f3, 7}, []byte("☠\tSkull"), false},
@@ -267,10 +267,10 @@ func TestReadChunk(t *testing.T) {
 }
 
 func TestReadTail(t *testing.T) {
-	f1 := fileExample(Newlines, 1)
-	f2 := fileExample(Symbols, 2)
-	f3 := fileExample(Tabs, 3)
-	f4 := fileExample(Escapes, 4)
+	f1 := fileExample(T["Newline"], 1)
+	f2 := fileExample(T["Symbols"], 2)
+	f3 := fileExample(T["Tabs"], 3)
+	f4 := fileExample(T["Escapes"], 4)
 	large := largeExample()
 	type args struct {
 		name   string
