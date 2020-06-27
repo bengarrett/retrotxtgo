@@ -1,7 +1,10 @@
 package cmd
 
 import (
+	"os"
+
 	"github.com/bengarrett/retrotxtgo/lib/config"
+	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/info"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
@@ -19,6 +22,14 @@ var infoCmd = &cobra.Command{
 	Short:   "Information on a text file",
 	Example: "  retrotxt info text.asc logo.jpg\n  retrotxt info file.txt --format=json",
 	Run: func(cmd *cobra.Command, args []string) {
+		// piped input from other programs
+		if filesystem.IsPipe() {
+			b, err := filesystem.ReadPipe()
+			logs.Check("piped.info", err)
+			info.Stdin(b, infoFlag.format)
+			logs.Check("piped.info", err)
+			os.Exit(0)
+		}
 		checkUse(cmd, args)
 		for _, arg := range args {
 			if e := info.Info(arg, infoFlag.format); e.Msg != nil {

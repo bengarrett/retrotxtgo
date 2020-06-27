@@ -30,8 +30,19 @@ var viewCmd = &cobra.Command{
 	Aliases: []string{"v"},
 	Short:   "Print a legacy text file to the standard output",
 	Example: `  retrotxt view file.txt -c latin1
-  retrotxt view file1.txt file2.txt --codepage="iso-8859-1"`,
+  retrotxt view file1.txt file2.txt --codepage="iso-8859-1"
+  cat file.txt | retrotxt view`,
 	Run: func(cmd *cobra.Command, args []string) {
+		// piped input from other programs
+		if filesystem.IsPipe() {
+			b, err := filesystem.ReadPipe()
+			logs.Check("piped.view", err)
+			r, err := convert.Text(viewFlag.codepage, &b)
+			logs.Check("piped.view", err)
+			fmt.Println(string(r))
+			os.Exit(0)
+		}
+		// user arguments
 		checkUse(cmd, args)
 		for i, arg := range args {
 			if ok, err := viewPackage(cmd, arg); err != nil {

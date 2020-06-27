@@ -139,7 +139,7 @@ func Test_parse(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var got Detail
-			err := got.parse(tt.args.data, tt.args.stat, "")
+			err := got.parse(tt.args.data, tt.args.stat)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parse() error = %v, wantErr %v", err, tt.wantErr)
 				return

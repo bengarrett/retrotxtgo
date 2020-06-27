@@ -27,6 +27,7 @@ var exampleCmd = func() string {
 	fmt.Fprint(&b, "\n  retrotxt create file1.txt file2.asc --save")
 	fmt.Fprintf(&b, "\n  retrotxt create ~%sDownloads%sfile.txt --archive", s, s)
 	fmt.Fprint(&b, "\n  retrotxt create file.txt --serve=8080")
+	fmt.Fprint(&b, "\n  cat file.txt | retrotxt create")
 	return str.Cinf(b.String())
 }
 
@@ -37,12 +38,20 @@ var createCmd = &cobra.Command{
 	Short:   "Create a HTML document from a text file",
 	Example: exampleCmd(),
 	Run: func(cmd *cobra.Command, args []string) {
-		// handle hidden --body flag that ignores all args
+		// piped input from other programs
+		if filesystem.IsPipe() {
+			b, err := filesystem.ReadPipe()
+			logs.Check("piped.create", err)
+			html.Create(&b)
+			os.Exit(0)
+		}
+		// hidden --body flag that ignores all args
 		if body := cmd.Flags().Lookup("body"); body.Changed {
 			b := []byte(body.Value.String())
 			html.Create(&b)
 			os.Exit(0)
 		}
+		// user arguments
 		checkUse(cmd, args)
 		var b []byte
 		for i, arg := range args {

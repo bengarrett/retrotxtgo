@@ -108,6 +108,7 @@ retrotxt convert ascii-logs.txt --to=cp860
 - [x] Extensive customisations through command flags or a configuration file with a setup.
 - [ ] ANSI compatibility tests, output 16, 88, 256, high and true-color tables.
 - [x] Multiplatform support including Windows, macOS, Linux, Raspbian and FreeBSD.
+- [x] Stdin and piped text input support.
 
 ---
 
@@ -346,12 +347,11 @@ op token list > https://golang.org/pkg/go/token/#Token
 ### Future CLI commands
 
 - [ ] `html` - rename `create`: to encode text to HTML. `retrotxt html -n sometext.txt`
-- [ ] `save` - to encode text to another format. `retrotxt save -n sometext.txt -e cp437`
-- [ ] add piping support - `cat sometext.txt | retrotxt html`
-- - `retrotxt save -sometext.txt # save to utf8`
+- [ ] `save` - to encode text to another format. `retrotxt save sometext.txt -e cp437`
+- - `retrotxt save sometext.txt # save to utf8`
 - [ ] add optional argument for destination (dir or file) that overrides the dir configuration.
-- - `retrotxt create -n somefile.txt . # would create index.html in the current directory`
-- - `retrotxt create -n somefile.txt somefile.html # create sometfile.htm`
+- - `retrotxt create somefile.txt . # would create index.html in the current directory`
+- - `retrotxt create somefile.txt somefile.html # create sometfile.htm`
 - [ ] add a flag to --export `create` command results to a tar or zip archive.
 - [ ] add the ability to self-update?
 - [ ] option for generated HTML naming convention, either use index.html ... index_1.html, index_2.html etc.

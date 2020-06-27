@@ -313,7 +313,7 @@ func TestReadTail(t *testing.T) {
 	Clean(large)
 }
 
-func TestIsWord(t *testing.T) {
+func Test_word(t *testing.T) {
 	type args struct {
 		s string
 	}
@@ -337,8 +337,8 @@ func TestIsWord(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := IsWord(tt.s); got != tt.want {
-				t.Errorf("IsWord() = %v, want %v", got, tt.want)
+			if got := word(tt.s); got != tt.want {
+				t.Errorf("word() = %v, want %v", got, tt.want)
 			}
 		})
 	}

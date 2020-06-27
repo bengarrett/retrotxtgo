@@ -20,7 +20,6 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	c "github.com/gookit/color"
-	"github.com/mattn/go-runewidth"
 	"github.com/mozillazg/go-slugify"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
@@ -90,6 +89,78 @@ func Info(name, format string) (err logs.Err) {
 	return err
 }
 
+// Print the meta and operating system details of a file.
+func Print(filename, format string) (err error) {
+	var d Detail
+	if err := d.Read(filename); err != nil {
+		return err
+	}
+	if IsText(d.Mime) {
+		file, err := os.Open(filename)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		if d.CtrlCount, err = filesystem.Controls(file); err != nil {
+			return err
+		}
+		if d.Lines, err = filesystem.Lines(file); err != nil {
+			return err
+		}
+		if d.Width, err = filesystem.Columns(file); err != nil {
+			return err
+		} else if d.Width < 0 {
+			d.Width = d.CharCount
+		}
+		if d.WordCount, err = filesystem.Words(file); err != nil {
+			return err
+		}
+	}
+	return d.format(format)
+}
+
+// Stdin parses piped data and prints out the details in a specific syntax.
+func Stdin(b []byte, format string) (err error) {
+	var d Detail
+	if err = d.parse(b, nil); err != nil {
+		return err
+	}
+	if IsText(d.Mime) {
+		if d.CtrlCount, err = filesystem.Controls(bytes.NewReader(b)); err != nil {
+			return err
+		}
+		if d.Lines, err = filesystem.Lines(bytes.NewReader(b)); err != nil {
+			return err
+		}
+		if d.Width, err = filesystem.Columns(bytes.NewReader(b)); err != nil {
+			return err
+		} else if d.Width < 0 {
+			d.Width = d.CharCount
+		}
+		if d.WordCount, err = filesystem.Words(bytes.NewReader(b)); err != nil {
+			return err
+		}
+	}
+	return d.format(format)
+}
+
+func (d Detail) format(format string) error {
+	switch format {
+	case "color", "c", "":
+		fmt.Printf("%s", d.Text(true))
+	case "json", "j":
+		fmt.Printf("%s\n", d.JSON(true))
+	case "json.min", "jm":
+		fmt.Printf("%s\n", d.JSON(false))
+	case "text", "t":
+		fmt.Printf("%s", d.Text(false))
+	case "xml", "x":
+		data, _ := d.XML()
+		fmt.Printf("%s\n", data)
+	}
+	return errors.New("format:invalid")
+}
+
 // IsText checks the MIME content-type value for valid text files.
 func IsText(contentType string) bool {
 	s := strings.Split(contentType, "/")
@@ -105,44 +176,6 @@ func IsText(contentType string) bool {
 	return false
 }
 
-// Print the meta and operating system details of a file.
-func Print(filename, format string) (err error) {
-	var d Detail
-	if err := d.Read(filename); err != nil {
-		return err
-	}
-	if IsText(d.Mime) {
-		if d.CtrlCount, err = filesystem.Controls(filename); err != nil {
-			return err
-		}
-		if d.Lines, err = filesystem.Lines(filename); err != nil {
-			return err
-		}
-		if d.Width, err = filesystem.Columns(filename); err != nil {
-			return err
-		}
-		if d.WordCount, err = filesystem.Words(filename); err != nil {
-			return err
-		}
-	}
-	switch format {
-	case "color", "c", "":
-		fmt.Printf("%s", d.Text(true))
-	case "json", "j":
-		fmt.Printf("%s\n", d.JSON(true))
-	case "json.min", "jm":
-		fmt.Printf("%s\n", d.JSON(false))
-	case "text", "t":
-		fmt.Printf("%s", d.Text(false))
-	case "xml", "x":
-		data, _ := d.XML()
-		fmt.Printf("%s\n", data)
-	default:
-		return errors.New("format:invalid")
-	}
-	return err
-}
-
 // Read returns the operating system and meta detail of a named file.
 func (d *Detail) Read(name string) (err error) {
 	// Get the file details
@@ -155,14 +188,12 @@ func (d *Detail) Read(name string) (err error) {
 	if err != nil {
 		return err
 	}
-	return d.parse(data, stat, name)
+	return d.parse(data, stat)
 }
 
 // parse fileinfo and file content.
-func (d *Detail) parse(data []byte, stat os.FileInfo, name string) (err error) {
+func (d *Detail) parse(data []byte, stat os.FileInfo) (err error) {
 	p := message.NewPrinter(Language)
-	md5sum := md5.Sum(data)
-	sha256 := sha256.Sum256(data)
 	ms := mimesniffer.Sniff(data)
 	if strings.Contains(ms, ";") {
 		d.Mime = strings.Split(ms, ";")[0]
@@ -170,21 +201,38 @@ func (d *Detail) parse(data []byte, stat os.FileInfo, name string) (err error) {
 		d.Mime = ms
 	}
 	if IsText(d.Mime) {
-		d.CharCount = runewidth.StringWidth(string(data))
+		if d.CharCount, err = filesystem.Runes(bytes.NewBuffer(data)); err != nil {
+			return err
+		}
 	}
 	// create a table of data
-	d.Bytes = stat.Size()
-	d.Name = stat.Name()
+	if stat != nil {
+		d.Bytes = stat.Size()
+		d.Name = stat.Name()
+		d.Modified = stat.ModTime().UTC()
+		d.Slug = slugify.Slugify(stat.Name())
+		if stat.Size() < 1000 {
+			d.Size = p.Sprintf("%v bytes", p.Sprint(stat.Size()))
+		} else {
+			d.Size = p.Sprintf("%v (%v bytes)", humanize.Bytes(stat.Size(), Language), p.Sprint(stat.Size()))
+		}
+	} else {
+		d.Bytes = int64(len(data))
+		d.Name = "n/a (stdin)"
+		d.Slug = "n/a"
+		d.Modified = time.Now()
+		l := d.Bytes
+		if l < 1000 {
+			d.Size = p.Sprintf("%v bytes", p.Sprint(l))
+		} else {
+			d.Size = p.Sprintf("%v (%v bytes)", humanize.Bytes(l, Language), p.Sprint(l))
+		}
+	}
+	md5sum := md5.Sum(data)
 	d.MD5 = fmt.Sprintf("%x", md5sum)
-	d.Modified = stat.ModTime().UTC()
-	d.Slug = slugify.Slugify(stat.Name())
+	sha256 := sha256.Sum256(data)
 	d.SHA256 = fmt.Sprintf("%x", sha256)
 	d.Utf8 = utf8.Valid(data)
-	if stat.Size() < 1000 {
-		d.Size = p.Sprintf("%v bytes", p.Sprint(stat.Size()))
-	} else {
-		d.Size = p.Sprintf("%v (%v bytes)", humanize.Bytes(stat.Size(), Language), p.Sprint(stat.Size()))
-	}
 	return err
 }
 
