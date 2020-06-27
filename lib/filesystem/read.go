@@ -52,28 +52,6 @@ func ReadAllBytes(name string) (data []byte, err error) {
 	return data, err
 }
 
-// ReadBytes reads a named file location or a named temporary file and returns its byte content.
-func ReadBytes(name string) (b []byte, err error) {
-	var path = tempFile(name)
-	file, err := os.OpenFile(path, os.O_RDONLY, permf)
-	if err != nil {
-		return b, err
-	}
-	// bufio is the most performant
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		b = append(b, scanner.Bytes()...)
-	}
-	if err = scanner.Err(); err != nil {
-		return b, err
-	}
-	if err = file.Close(); err != nil {
-		return b, err
-	}
-	err = scanner.Err()
-	return b, err
-}
-
 // ReadChunk reads and returns the start of the named file.
 func ReadChunk(name string, chars int) (data []byte, err error) {
 	file, err := os.Open(name)
