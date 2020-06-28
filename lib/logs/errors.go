@@ -10,6 +10,11 @@ import (
 	"github.com/gookit/color"
 )
 
+// TODO: replace much of the logs package with a pre-existing sys or structured loggers.
+// zerolog: https://github.com/rs/zerolog
+// apex: https://github.com/apex/log
+// zap: https://github.com/uber-go/zap
+
 // Err is a generic error type used to apply color to errors
 type Err struct {
 	Issue string // Issue is a summary of the problem
