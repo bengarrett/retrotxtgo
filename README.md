@@ -108,7 +108,7 @@ retrotxt convert ascii-logs.txt --to=cp860
 - [x] Extensive customisations through command flags or a configuration file with a setup.
 - [ ] ANSI compatibility tests, output 16, 88, 256, high and true-color tables.
 - [x] Multiplatform support including Windows, macOS, Linux, Raspbian and FreeBSD.
-- [x] Stdin and piped text input support.
+- [x] IO redirection with piping support.
 
 ---
 
