@@ -5,6 +5,9 @@ body {
   display: flex;
   flex-direction: column;
   text-shadow: none;
+  /* these will need to be dynamic */
+  color: var(--vgagray);
+  font-family: vga;
 }
 
 main {
@@ -24,6 +27,11 @@ main b {
 main i {
   font-style: normal;
   font-weight: normal;
+}
+
+/* temporary fix */
+main pre {
+  font-family: vga;
 }
 
 /* retrotxt.css */
