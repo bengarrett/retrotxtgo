@@ -361,23 +361,6 @@ op token list > https://golang.org/pkg/go/token/#Token
 
 ---
 
-## Possible --create flags
-
-- font choice (family)
-- font size
-- font format
-- - base64
-- - woff2
-
-- code-page
-
-- input (overwrite for internal use)
-- - ascii, ansi, etc
-
-- quiet boolean
-
----
-
 ### TODOs - changes to the existing code
 
 - [ ] switch all logs checks to be Go idiomatic using if-conditionals.
