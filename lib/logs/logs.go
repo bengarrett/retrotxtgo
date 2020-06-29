@@ -98,19 +98,25 @@ func (e Err) check() (msg string, code int) {
 	return msg, code
 }
 
+// ColorCSS prints colored CSS syntax highlighting.
+func ColorCSS(elm string) string {
+	style := viper.GetString("style.html")
+	return colorElm(elm, "css", style)
+}
+
 // ColorHTML prints colored syntax highlighting to HTML elements.
 func ColorHTML(elm string) string {
 	style := viper.GetString("style.html")
-	return colorhtml(elm, style)
+	return colorElm(elm, "html", style)
 }
 
-func colorhtml(elm string, style string) string {
+func colorElm(elm, lexer, style string) string {
 	if elm == "" {
 		return ""
 	}
 	var b bytes.Buffer
 	_ = io.Writer(&b)
-	if err := str.HighlightWriter(&b, elm, "html", style); err != nil {
+	if err := str.HighlightWriter(&b, elm, lexer, style); err != nil {
 		Check("logs.colorhtml", err)
 	}
 	return fmt.Sprintf("\n%s\n", b.String())
