@@ -44,8 +44,17 @@ func Clean(name string) {
 // DirExpansion traverses the named directory to apply shell-like expansions.
 // It currently supports limited Bash tilde, shell dot and double dot syntax.
 func DirExpansion(name string) (dir string) {
+	if name == "" {
+		return dir
+	}
 	// Bash tilde expension http://www.gnu.org/software/bash/manual/html_node/Tilde-Expansion.html
 	var err error
+	var root = func() bool {
+		if name[:1] == string(os.PathSeparator) {
+			return true
+		}
+		return false
+	}
 	paths := strings.Split(name, string(os.PathSeparator))
 	for i, s := range paths {
 		p := ""
@@ -78,6 +87,9 @@ func DirExpansion(name string) (dir string) {
 			p = s
 		}
 		dir = filepath.Join(dir, p)
+	}
+	if root() {
+		dir = string(os.PathSeparator) + dir
 	}
 	return dir
 }
