@@ -55,7 +55,7 @@ func defaultConfig() string {
 	return named
 }
 
-// initConfig reads in config file and ENV variables if set.
+// initConfig reads in the config file and ENV variables if set.
 // this does not run when rootCmd is in use.
 func initConfig() {
 	// read in environment variables

@@ -16,6 +16,8 @@ import (
 // Defaults for configuration keys and values.
 var Defaults = map[string]interface{}{
 	"editor":                 "",
+	"html.font.embed":        false,
+	"html.font.family":       "vga",
 	"html.layout":            "standard",
 	"html.meta.author":       "",
 	"html.meta.color-scheme": "",
@@ -36,6 +38,8 @@ var Defaults = map[string]interface{}{
 // Hints provide brief help on the config file configurations.
 var Hints = map[string]string{
 	"editor":                 "text editor to launch when using " + str.Example("config edit"),
+	"html.font.embed":        "encode and include the font file as a base64 binary",
+	"html.font.family":       "specifies the font to use with the HTML",
 	"html.layout":            "HTML output layout",
 	"html.meta.author":       "defines the name of the page authors",
 	"html.meta.color-scheme": "specifies one or more color schemes with which the page is compatible",
@@ -57,6 +61,11 @@ var Hints = map[string]string{
 type Settings struct {
 	Editor string
 	HTML   struct {
+		Font struct {
+			Embed  bool   `yaml:"embed"`
+			Family string `yaml:"family"`
+			Size   string `yaml:"size"`
+		}
 		Layout string `yaml:"layout"`
 		Meta   struct {
 			Author      string `yaml:"author"`
@@ -148,6 +157,10 @@ func Marshal() (interface{}, error) {
 		switch key {
 		case "editor":
 			sc.Editor = getString(key)
+		case "html.font.embed":
+			sc.HTML.Font.Embed = getBool(key)
+		case "html.font.family":
+			sc.HTML.Font.Family = getString(key)
 		case "html.layout":
 			sc.HTML.Layout = getString(key)
 		case "html.meta.author":

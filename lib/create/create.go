@@ -37,6 +37,10 @@ type Args struct {
 	Scheme string
 	// Desc description metadata
 	Desc string
+	// FontEmbed embeds font data into the CSS
+	FontEmbed bool
+	// FontFamily font name
+	FontFamily string
 	// Generator shows retrotxt version and page generated at time
 	Generator bool
 	// Keys are keyword metadata
@@ -75,6 +79,8 @@ type PageData struct {
 	BuildDate       string
 	CacheRefresh    string
 	Comment         string
+	FontEmbed       bool
+	FontFamily      string
 	MetaAuthor      string
 	MetaColorScheme string
 	MetaDesc        string
@@ -90,6 +96,9 @@ type PageData struct {
 
 // ColorScheme values for the content attribute of <meta name="color-scheme">
 var ColorScheme = []string{"normal", "dark light", "only light"}
+
+// FontFamily values for the CSS font-family.
+var FontFamily = []string{"automatic", "mona", "vga"}
 
 // Referrer values for the content attribute of <meta name="referrer">
 var Referrer = []string{"no-referrer", "origin", "no-referrer-when-downgrade",
@@ -321,6 +330,8 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 	// templates are found in the dir static/html/*.html
 	switch args.Layout {
 	case "full", "standard":
+		p.FontEmbed = viper.GetBool("html.font.embed")
+		p.FontFamily = viper.GetString("html.font.family")
 		p.MetaAuthor = viper.GetString("html.meta.author")
 		p.MetaColorScheme = viper.GetString("html.meta.color-scheme")
 		p.MetaDesc = viper.GetString("html.meta.description")

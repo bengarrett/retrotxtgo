@@ -132,6 +132,8 @@ func init() {
 		12: {"html.meta.referrer", &html.Ref, nil, nil, "meta-referrer", "", nil},
 		13: {"html.meta.robots", &html.Robots, nil, nil, "meta-robots", "", nil},
 		14: {"html.meta.theme-color", &html.Scheme, nil, nil, "meta-theme-color", "", nil},
+		15: {"html.font.family", &html.FontFamily, nil, nil, "font.family", "", nil}, // TODO: create.Fonts() func
+		17: {"html.font.embed", nil, &html.FontEmbed, nil, "font.embed", "", nil},
 		// hidden flags
 		0: {"html.body", &html.Body, nil, nil, "body", "b", nil},
 	}
@@ -145,8 +147,9 @@ func init() {
 	createCmd.Flags().StringVarP(&html.Enc, "encode", "e", "", "text encoding of the named text file\nwhen ignored, UTF8 encoding will be automatically detected\notherwise encode will assume default (default CP437)\nsee a list of encode values "+str.Example("retrotxt view codepages")+"\n")
 	createCmd.Flags().BoolVarP(&html.SaveToFile, "save", "s", false, "save HTML to a file or ignore to print output")
 	createCmd.Flags().BoolVarP(&html.OW, "overwrite", "o", false, "overwrite any existing files when saving")
-	// html flags
-	for i := range keys {
+	// html flags, the key int value must be used as the index
+	// rather than the loop count, otherwise flags might be skipped
+	for _, i := range keys {
 		c := metaCfg[i]
 		var buf bytes.Buffer
 		switch {
