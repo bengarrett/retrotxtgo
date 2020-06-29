@@ -91,7 +91,6 @@ func createPackage(name string) (b []byte) {
 		return nil
 	}
 	pkg, exist := internalPacks[s]
-	println(fmt.Sprintf("%+v", pkg), exist)
 	if !exist {
 		return nil
 	}

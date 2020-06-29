@@ -3,7 +3,6 @@ package filesystem
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"io"
 	"sort"
 	"unicode"
@@ -153,7 +152,6 @@ func Newlines(runes []rune) [2]rune {
 	sort.SliceStable(c, func(i, j int) bool {
 		return c[i].count > c[j].count
 	})
-	fmt.Println("runes:", len(runes), c, c[0].abbr)
 	switch c[0].abbr {
 	case "lf":
 		return [2]rune{10}

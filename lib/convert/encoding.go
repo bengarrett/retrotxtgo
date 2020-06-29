@@ -287,7 +287,6 @@ func (d *Data) Swap() *Data {
 	}
 	if d.newline {
 		d.Newlines()
-		println("using as newline:", fmt.Sprintf("%01d %01d", d.newlines[0], d.newlines[1]))
 	}
 	switch d.encode {
 	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:

@@ -68,7 +68,7 @@ func (args Args) watch() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		fmt.Printf("\n\nQuit server and cleaning up: %s\n", args.Dest)
+		fmt.Printf("\n\nServer shutdown and clean up: %s\n", args.Dest)
 		tmp, err := path.Match(fmt.Sprintf("%s%s*",
 			string(os.PathSeparator), os.TempDir()), fmt.Sprintf("%s", args.Dest))
 		if err != nil {
