@@ -106,7 +106,7 @@ func TestErr_check(t *testing.T) {
 	}
 }
 
-func Test_colorhtml(t *testing.T) {
+func Test_colorElm(t *testing.T) {
 	// set test mode for str.HighlightWriter()
 	str.TestMode = true
 	type args struct {
@@ -123,7 +123,7 @@ func Test_colorhtml(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := colorhtml(tt.elm, "bw"); got != tt.want {
+			if got := colorElm(tt.elm, "html", "bw"); got != tt.want {
 				t.Errorf("colorhtml() = %v, want %v", got, tt.want)
 			}
 		})
