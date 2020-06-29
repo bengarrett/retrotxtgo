@@ -13,7 +13,6 @@ import (
 )
 
 func Test_Save(t *testing.T) {
-	a := Args{Layout: "standard", Test: true}
 	type args struct {
 		data []byte
 		name string
@@ -33,9 +32,13 @@ func Test_Save(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			a.Dest = tt.args.name
+			ch := make(chan error)
+			a := Args{Layout: "standard", Test: true}
 			a.OW = true
-			if err := a.savehtml(&tt.args.data); (err != nil) != tt.wantErr {
+			a.Dest = tt.args.name
+			go a.savehtml(&tt.args.data, ch)
+			err := <-ch
+			if (err != nil) != tt.wantErr {
 				t.Errorf("Save() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -43,7 +46,7 @@ func Test_Save(t *testing.T) {
 	// clean-up
 	if wd, err := os.Getwd(); err == nil {
 		p := filepath.Join(wd, "index.html")
-		if err := os.Remove(p); err != nil {
+		if err := os.Remove(p); err != nil && !os.IsNotExist(err) {
 			t.Error(err)
 		}
 	}

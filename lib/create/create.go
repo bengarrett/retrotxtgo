@@ -137,21 +137,23 @@ func (args *Args) Create(b *[]byte) {
 				log.Fatal(err)
 			}
 		}
-		err = args.savecss()
-		if err != nil {
-			log.Fatal(err) // TODO: logs.Fatal(error)
+		ch := make(chan error)
+		go args.savecss(ch)
+		go args.savefont(ch)
+		go args.savehtml(b, ch)
+		go args.savejs(ch)
+		err1, err2, err3, err4 := <-ch, <-ch, <-ch, <-ch
+		if err1 != nil {
+			log.Fatal(err1) // TODO: logs.Fatal(error)
 		}
-		err = args.savefont()
-		if err != nil {
-			log.Fatal(err) // TODO: logs.Fatal(error)
+		if err2 != nil {
+			log.Fatal(err2)
 		}
-		err = args.savehtml(b)
-		if err != nil {
-			log.Fatal(err) // TODO: logs.Fatal(error)
+		if err3 != nil {
+			log.Fatal(err3)
 		}
-		err = args.savejs()
-		if err != nil {
-			log.Fatal(err) // TODO: logs.Fatal(error)
+		if err4 != nil {
+			log.Fatal(err4)
 		}
 	default:
 		// print to terminal
@@ -182,31 +184,31 @@ func (args *Args) destination(name string) (string, error) {
 }
 
 // savecss creates and saves the styles stylesheet to the Dest argument.
-func (args Args) savecss() error {
+func (args Args) savecss(c chan error) {
 	name, err := args.destination("styles.css")
 	if err != nil {
-		return err
+		c <- err
 	}
 	b := pack.Get("css/styles.css")
 	if len(b) == 0 {
-		return fmt.Errorf("create.savecss: pack.get name is invalid: %q", args.pack)
+		c <- fmt.Errorf("create.savecss: pack.get name is invalid: %q", args.pack)
 	}
 	_, err = filesystem.Save(name, b)
 	if err != nil {
-		return err
+		c <- err
 	}
-	return nil
+	c <- nil
 }
 
 // savefont unpacks and saves the font binary to the Dest argument.
-func (args Args) savefont() error {
+func (args Args) savefont(c chan error) {
 	if err := args.savefontwoff2("vga.woff2", "font/ibm-vga8.woff2"); err != nil {
-		return err
+		c <- err
 	}
 	if err := args.savefontcss("font.css", "css/font-vga.css"); err != nil {
-		return err
+		c <- err
 	}
-	return nil
+	c <- nil
 }
 
 func (args Args) savefontcss(name, packName string) error {
@@ -241,45 +243,45 @@ func (args Args) savefontwoff2(name, packName string) error {
 	return nil
 }
 
-func (args Args) savejs() error {
+func (args Args) savejs(c chan error) {
 	name, err := args.destination("scripts.js")
 	if err != nil {
-		return err
+		c <- err
 	}
 	b := pack.Get("js/scripts.js")
 	if len(b) == 0 {
-		return fmt.Errorf("create.savejs: pack.get name is invalid: %q", args.pack)
+		c <- fmt.Errorf("create.savejs: pack.get name is invalid: %q", args.pack)
 	}
 	_, err = filesystem.Save(name, b)
 	if err != nil {
-		return err
+		c <- err
 	}
-	return nil
+	c <- nil
 }
 
 // SaveHTML creates and saves the html template to the Dest argument.
-func (args Args) savehtml(b *[]byte) error {
+func (args Args) savehtml(b *[]byte, c chan error) {
 	name, err := args.destination("index.html")
 	if err != nil {
-		return err
+		c <- err
 	}
 	file, err := os.Create(name)
 	if err != nil {
-		return err
+		c <- err
 	}
 	defer file.Close()
 	tmpl, err := args.newTemplate()
 	if err != nil {
-		return err
+		c <- err
 	}
 	d, err := args.pagedata(b)
 	if err != nil {
-		return err
+		c <- err
 	}
 	if err = tmpl.Execute(file, d); err != nil {
-		return err
+		c <- err
 	}
-	return nil
+	c <- nil
 }
 
 // Stdout creates and sends the html template to stdout.
