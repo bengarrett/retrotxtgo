@@ -92,7 +92,7 @@ var internalPacks = map[string]internalPack{
 	"437.lf":        {"d", "", "text/cp437-lf.txt"},
 	"865":           {"", "ibm865", "text/cp865.txt"},
 	"1252":          {"", "cp1252", "text/cp1252.txt"},
-	"ascii":         {"", "", "text/retrotxt.asc"},
+	"ascii":         {"", "cp437", "text/retrotxt.asc"},
 	"ansi":          {"", "", "text/retrotxt.ans"},
 	"ansi.aix":      {"", "", "text/ansi-aixterm.ans"},
 	"ansi.blank":    {"", "", "text/ansi-blank"},

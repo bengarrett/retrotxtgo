@@ -129,7 +129,8 @@ func (args *Args) Create(b *[]byte) {
 	var err error
 	switch {
 	case args.SaveToFile:
-		// use config save directory or otherwise assume Dest path is a temporary --serve location
+		// use config save directory
+		// otherwise assume Dest path is a temporary --serve location
 		if args.Dest == "" {
 			dir := []string{viper.GetString("save-directory")}
 			if args.Dest, err = destination(dir); err != nil {
