@@ -129,10 +129,12 @@ func (args *Args) Create(b *[]byte) {
 	var err error
 	switch {
 	case args.SaveToFile:
-		// use config save directory
-		dir := []string{viper.GetString("save-directory")}
-		if args.Dest, err = destination(dir); err != nil {
-			log.Fatal(err)
+		// use config save directory or otherwise assume Dest path is a temporary --serve location
+		if args.Dest == "" {
+			dir := []string{viper.GetString("save-directory")}
+			if args.Dest, err = destination(dir); err != nil {
+				log.Fatal(err)
+			}
 		}
 		err = args.savecss()
 		if err != nil {
@@ -143,6 +145,10 @@ func (args *Args) Create(b *[]byte) {
 			log.Fatal(err) // TODO: logs.Fatal(error)
 		}
 		err = args.savehtml(b)
+		if err != nil {
+			log.Fatal(err) // TODO: logs.Fatal(error)
+		}
+		err = args.savejs()
 		if err != nil {
 			log.Fatal(err) // TODO: logs.Fatal(error)
 		}
@@ -176,7 +182,7 @@ func (args *Args) destination(name string) (string, error) {
 
 // savecss creates and saves the styles stylesheet to the Dest argument.
 func (args Args) savecss() error {
-	name, err := args.destination("style.css")
+	name, err := args.destination("styles.css")
 	if err != nil {
 		return err
 	}
@@ -226,6 +232,22 @@ func (args Args) savefontwoff2(name, packName string) error {
 	b := pack.Get(packName)
 	if len(b) == 0 {
 		return fmt.Errorf("create.savefontwoff2: pack.get name is invalid: %q", args.pack)
+	}
+	_, err = filesystem.Save(name, b)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (args Args) savejs() error {
+	name, err := args.destination("scripts.js")
+	if err != nil {
+		return err
+	}
+	b := pack.Get("js/scripts.js")
+	if len(b) == 0 {
+		return fmt.Errorf("create.savejs: pack.get name is invalid: %q", args.pack)
 	}
 	_, err = filesystem.Save(name, b)
 	if err != nil {

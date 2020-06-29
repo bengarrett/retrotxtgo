@@ -79,7 +79,6 @@ func htmlServe(i int, cmd *cobra.Command, b *[]byte) bool {
 		// could be generated with links to each of the htmls.
 	}
 	if serve := cmd.Flags().Lookup("serve"); serve.Changed {
-
 		html.Serve(b)
 		return true
 	}

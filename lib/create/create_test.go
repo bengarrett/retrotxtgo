@@ -149,27 +149,6 @@ func Test_pagedata(t *testing.T) {
 	}
 }
 
-func Test_serveFile(t *testing.T) {
-	a := Args{Layout: "standard"}
-	type args struct {
-		data *[]byte
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		// not tested as it requires operating system permissions
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := a.serveFile(tt.args.data); (err != nil) != tt.wantErr {
-				t.Errorf("serveFile() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
 func Test_destination(t *testing.T) {
 	saved := viper.GetString("save-directory")
 	wd, _ := os.Getwd()
