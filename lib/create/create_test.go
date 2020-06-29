@@ -35,7 +35,7 @@ func Test_Save(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			a.Dest = tt.args.name
 			a.OW = true
-			if err := a.Save(&tt.args.data); (err != nil) != tt.wantErr {
+			if err := a.savehtml(&tt.args.data); (err != nil) != tt.wantErr {
 				t.Errorf("Save() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

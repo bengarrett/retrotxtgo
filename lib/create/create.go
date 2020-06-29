@@ -134,30 +134,111 @@ func (args *Args) Create(b *[]byte) {
 		if args.Dest, err = destination(dir); err != nil {
 			log.Fatal(err)
 		}
-		err = args.Save(b)
+		err = args.savecss()
+		if err != nil {
+			log.Fatal(err) // TODO: logs.Fatal(error)
+		}
+		err = args.savefont()
+		if err != nil {
+			log.Fatal(err) // TODO: logs.Fatal(error)
+		}
+		err = args.savehtml(b)
+		if err != nil {
+			log.Fatal(err) // TODO: logs.Fatal(error)
+		}
 	default:
 		// print to terminal
 		err = args.Stdout(b)
-	}
-	if err != nil {
-		log.Fatal(err) // TODO: logs.Fatal(error)
+		if err != nil {
+			log.Fatal(err) // TODO: logs.Fatal(error)
+		}
 	}
 }
 
-// Save creates and saves the html template to the Dest argument.
-func (args Args) Save(b *[]byte) error {
-	name := filesystem.DirExpansion(args.Dest)
-	stat, err := os.Stat(name)
+func (args *Args) destination(name string) (string, error) {
+	dir := filesystem.DirExpansion(args.Dest)
+	path := dir
+	stat, err := os.Stat(dir)
 	if err != nil {
-		return fmt.Errorf("%s %q", err, name)
+		return "", fmt.Errorf("%s %q", err, dir)
 	}
 	if stat.IsDir() {
-		name = filepath.Join(name, "index.html")
+		path = filepath.Join(dir, name)
 	}
-	color.OpFuzzy.Printf("Saving to %s\n", name)
+	color.OpFuzzy.Printf("Saving to %s\n", path)
+	stat, err = os.Stat(path)
 	if !args.OW && !os.IsNotExist(err) {
-		e := logs.Err{Issue: "html file exists", Arg: name, Msg: errors.New("include an -o flag to overwrite")}
+		e := logs.Err{Issue: "file exists", Arg: path, Msg: errors.New("include an -o flag to overwrite")}
 		logs.ChkErr(e)
+	}
+	return path, nil
+}
+
+// savecss creates and saves the styles stylesheet to the Dest argument.
+func (args Args) savecss() error {
+	name, err := args.destination("style.css")
+	if err != nil {
+		return err
+	}
+	b := pack.Get("css/styles.css")
+	if len(b) == 0 {
+		return fmt.Errorf("create.savecss: pack.get name is invalid: %q", args.pack)
+	}
+	_, err = filesystem.Save(name, b)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// savefont unpacks and saves the font binary to the Dest argument.
+func (args Args) savefont() error {
+	if err := args.savefontwoff2("vga.woff2", "font/ibm-vga8.woff2"); err != nil {
+		return err
+	}
+	if err := args.savefontcss("font.css", "css/font-vga.css"); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (args Args) savefontcss(name, packName string) error {
+	name, err := args.destination(name)
+	if err != nil {
+		return err
+	}
+	b := pack.Get(packName)
+	if len(b) == 0 {
+		return fmt.Errorf("create.savefontcss: pack.get name is invalid: %q", args.pack)
+	}
+	_, err = filesystem.Save(name, b)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (args Args) savefontwoff2(name, packName string) error {
+	name, err := args.destination(name)
+	if err != nil {
+		return err
+	}
+	b := pack.Get(packName)
+	if len(b) == 0 {
+		return fmt.Errorf("create.savefontwoff2: pack.get name is invalid: %q", args.pack)
+	}
+	_, err = filesystem.Save(name, b)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// SaveHTML creates and saves the html template to the Dest argument.
+func (args Args) savehtml(b *[]byte) error {
+	name, err := args.destination("index.html")
+	if err != nil {
+		return err
 	}
 	file, err := os.Create(name)
 	if err != nil {
