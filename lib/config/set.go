@@ -78,6 +78,12 @@ func Update(name string) {
 	// print the current status of the named setting
 	value := viper.Get(name)
 	switch value.(type) {
+	case nil:
+		// avoid potential panics with missing settings by implementing the default value
+		viper.Set(name, Defaults[name])
+		value = viper.Get(name)
+	}
+	switch value.(type) {
 	case bool:
 		switch value.(bool) {
 		case true:
@@ -119,6 +125,10 @@ func Update(name string) {
 		}
 		fmt.Printf("%s:\n", s)
 		setEditor(name, value.(string))
+	case "html.font.embed":
+		setFontEmbed(value.(bool))
+	case "html.font.family":
+		setFont(value.(string))
 	case "html.layout":
 		fmt.Println("\nChoose a new " + str.Options(Hints[name], create.Layouts(), true))
 		setShortStrings(name, value.(string), createTemplates().keys())
@@ -130,9 +140,9 @@ func Update(name string) {
 		setString(name)
 	case "html.meta.color-scheme":
 		previewMeta(name, value.(string))
-		keys := copyKeys(create.ColorScheme)
-		fmt.Println(str.UnderlineKeys(create.ColorScheme))
-		setShortStrings(name, value.(string), keys)
+		prints := copyKeys(create.ColorScheme)
+		fmt.Println(str.UnderlineKeys(prints))
+		setShortStrings(name, value.(string), create.ColorScheme)
 	case "html.meta.generator":
 		setGenerator(value.(bool))
 	case "html.meta.notranslate":
@@ -413,6 +423,38 @@ func setEditor(name, value string) {
 		fmt.Printf("%s this editor choice is not accessible by RetroTxt\n%s\n",
 			str.Info(), err.Error())
 	}
+	save(name, v)
+}
+
+func setFont(value string) {
+	var (
+		b    bytes.Buffer
+		font = value
+	)
+	if value == "automatic" {
+		font = "vga"
+	}
+	fmt.Fprintln(&b, "@font-face {")
+	fmt.Fprintf(&b, "  font-family: \"%s\";\n", font)
+	fmt.Fprintf(&b, "  src: url(\"%s.woff2\") format(\"woff2\");\n", font)
+	fmt.Fprintln(&b, "  font-display: swap;\n}")
+	fmt.Print(logs.ColorCSS(b.String()))
+	fmt.Println(str.Cf("About font families: https://developer.mozilla.org/en-US/docs/Web/CSS/font-family"))
+	fmt.Println("Choose a font (recommend: automatic):")
+	prints := copyKeys(create.FontFamily)
+	fmt.Println(str.UnderlineKeys(prints))
+	setShortStrings("html.font.family", value, create.FontFamily)
+}
+
+func setFontEmbed(value bool) {
+	var name = "html.font.embed"
+	elm := fmt.Sprintf("@font-face{\n  font-family: vga8;\n  src: url(data:font/woff2;base64,[a large font binary will be embedded here]...) format('woff2');\n}")
+	fmt.Println(logs.ColorCSS(elm))
+	q := "This is not recommended unless you need to create self-contained HTML files for offline distribution.\nEmbed the font as base64 data in the HTML"
+	if value {
+		q = "Keep the embedded font option"
+	}
+	v := prompt.YesNo(q, viper.GetBool(name))
 	save(name, v)
 }
 
