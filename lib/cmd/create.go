@@ -42,13 +42,17 @@ var createCmd = &cobra.Command{
 		if filesystem.IsPipe() {
 			b, err := filesystem.ReadPipe()
 			logs.Check("piped.create", err)
-			html.Create(&b)
+			if h := htmlServe(0, cmd, &b); !h {
+				html.Create(&b)
+			}
 			os.Exit(0)
 		}
 		// hidden --body flag that ignores all args
 		if body := cmd.Flags().Lookup("body"); body.Changed {
 			b := []byte(body.Value.String())
-			html.Create(&b)
+			if h := htmlServe(0, cmd, &b); !h {
+				html.Create(&b)
+			}
 			os.Exit(0)
 		}
 		// user arguments
@@ -132,7 +136,7 @@ func init() {
 		12: {"html.meta.referrer", &html.Ref, nil, nil, "meta-referrer", "", nil},
 		13: {"html.meta.robots", &html.Robots, nil, nil, "meta-robots", "", nil},
 		14: {"html.meta.theme-color", &html.Scheme, nil, nil, "meta-theme-color", "", nil},
-		15: {"html.font.family", &html.FontFamily, nil, nil, "font.family", "", nil}, // TODO: create.Fonts() func
+		15: {"html.font.family", &html.FontFamily, nil, nil, "font.family", "", nil},
 		17: {"html.font.embed", nil, &html.FontEmbed, nil, "font.embed", "", nil},
 		// hidden flags
 		0: {"html.body", &html.Body, nil, nil, "body", "b", nil},
