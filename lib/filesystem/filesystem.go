@@ -47,14 +47,14 @@ func DirExpansion(name string) (dir string) {
 	if name == "" {
 		return dir
 	}
-	// Bash tilde expension http://www.gnu.org/software/bash/manual/html_node/Tilde-Expansion.html
-	var err error
 	var root = func() bool {
 		if name[:1] == string(os.PathSeparator) {
 			return true
 		}
 		return false
 	}
+	var err error
+	// Bash tilde expension http://www.gnu.org/software/bash/manual/html_node/Tilde-Expansion.html
 	paths := strings.Split(name, string(os.PathSeparator))
 	for i, s := range paths {
 		p := ""
