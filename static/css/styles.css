@@ -28,26 +28,6 @@ main i {
 
 /* retrotxt.css */
 
-@font-face {
-  font-family: "mona";
-  src: url("../fonts/woff2/mona.woff2") format("woff2");
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "vga8";
-  src: url("../fonts/woff2/PxPlus_IBM_VGA8.woff2") format("woff2");
-  font-display: swap;
-}
-
-.font-mona {
-  font-family: mona;
-}
-
-.font-vga8 {
-  font-family: vga8;
-}
-
 .dos-cursor {
   animation: var(--blink-fast-timer) blink step-end infinite;
   text-shadow: none;
