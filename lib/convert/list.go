@@ -49,19 +49,20 @@ func List() *bytes.Buffer {
 	fmt.Fprintln(w, header)
 	for _, e := range Encodings() {
 		n, v, d, a := cells(e)
-		// do not use ANSI colors in cells as it will break the table layout!
+		// do not use ANSI colors in cells as it will break the table layout
 		fmt.Fprintln(w, fmt.Sprintf(" %s\t %s\t %s\t %s\t", n, v, d, a)) // name, value, numeric, alias
 	}
 	fmt.Fprintln(w, "\nEither argument, numeric or alias values are valid codepage arguments")
-	fmt.Fprintln(w, "All these codepage flags will match ISO 8859-1")
-	fmt.Fprintln(w, str.Example("retrotxt view ascii -c=iso-8859-1"))
-	fmt.Fprintln(w, str.Example("retrotxt view ascii -c1"))
-	fmt.Fprintln(w, str.Example("retrotxt view ascii -c=latin1"))
+	fmt.Fprintln(w, "All these codepage arguments will match ISO 8859-1")
+	fmt.Fprintln(w, str.Example("retrotxt list table iso-8859-1"))
+	fmt.Fprintln(w, str.Example("retrotxt list table 1"))
+	fmt.Fprintln(w, str.Example("retrotxt list table latin1"))
 	fmt.Fprintln(w, "\n"+str.Cinf("*")+" IBM Code Page 437 ("+str.Cc("cp437")+") is commonly used on MS-DOS and with ANSI art")
 	fmt.Fprintln(w, "  ISO 8859-1 ("+str.Cc("latin1")+") is found on legacy Unix, Amiga and the early Internet")
 	fmt.Fprintln(w, "  Windows 1252 ("+str.Cc("cp1252")+") is found on legacy Windows 9x and earlier systems")
 	fmt.Fprintln(w, "  Macintosh ("+str.Cc("macintosh")+") is found on Mac OS 9 and earlier systems")
-	fmt.Fprintln(w, "  Modern systems and the web today use UTF-8, a Unicode encoding that's a subset of ISO 8859-1 which itself is a subset of US-ASCII")
+	fmt.Fprintln(w, "  RetroTxt, modern systems and the web today use UTF-8, a Unicode encoding")
+	fmt.Fprintln(w, "  that's a subset of ISO 8859-1 which itself is a subset of US-ASCII")
 	w.Flush()
 	return &buf
 }
