@@ -30,20 +30,24 @@ func Test_cells(t *testing.T) {
 		args  args
 		wantN string
 		wantV string
+		wantD string
 		wantA string
 	}{
-		{"unknown", args{}, "", "", ""},
-		{"cp437", args{charmap.CodePage437}, "IBM Code Page 437", "cp437", "msdos"},
-		{"latin6", args{charmap.ISO8859_10}, "ISO 8859-10", "iso-8859-10", "latin6"},
+		{"unknown", args{}, "", "", "", ""},
+		{"cp437", args{charmap.CodePage437}, "IBM Code Page 437", "cp437", "437", "msdos"},
+		{"latin6", args{charmap.ISO8859_10}, "ISO 8859-10", "iso-8859-10", "10", "latin6"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotN, gotV, gotA := cells(tt.args.e)
+			gotN, gotV, gotD, gotA := cells(tt.args.e)
 			if gotN != tt.wantN {
 				t.Errorf("cells() gotN = %v, want %v", gotN, tt.wantN)
 			}
 			if gotV != tt.wantV {
 				t.Errorf("cells() gotV = %v, want %v", gotV, tt.wantV)
+			}
+			if gotD != tt.wantD {
+				t.Errorf("cells() gotV = %v, want %v", gotD, tt.wantD)
 			}
 			if gotA != tt.wantA {
 				t.Errorf("cells() gotA = %v, want %v", gotA, tt.wantA)
