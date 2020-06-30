@@ -5,6 +5,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/lib/convert"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/spf13/cobra"
 	"golang.org/x/text/encoding/ianaindex"
 )
@@ -12,8 +13,8 @@ import (
 var listCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"l"},
-	Short:   "Available codepages and tabled datasets",
-	Example: "  retrotxt list codepages\n  retrotxt list table cp437  \n  retrotxt list tables",
+	Short:   "Available built-in examples, codepages and tabled datasets",
+	Example: "  retrotxt list codepages\n  retrotxt list examples\n  retrotxt list table cp437 cp1252 \n  retrotxt list tables",
 	Run: func(cmd *cobra.Command, args []string) {
 		checkUse(cmd, args)
 	},
@@ -31,7 +32,7 @@ var listCmdCodepages = &cobra.Command{
 var listCmdExamples = &cobra.Command{
 	Use:     "examples",
 	Aliases: []string{"e"},
-	Short:   "list pre-packaged text files for use with the create, info and view commands",
+	Short:   "list pre-packaged text files for use with the " + str.Example("create") + ", " + str.Example("save") + " and " + str.Example("view") + " commands",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(examples())
 	},
