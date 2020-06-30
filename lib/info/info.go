@@ -35,6 +35,8 @@ type Detail struct {
 	MD5       string
 	Mime      string
 	Modified  time.Time
+	Newline   [2]rune
+	Newlines  string
 	SHA256    string
 	Slug      string
 	Size      string
@@ -96,32 +98,82 @@ func Print(filename, format string) (err error) {
 		return err
 	}
 	if IsText(d.Mime) {
-		// TODO: display this as an info field
-		newline, err := filesystem.ReadNewlines(filename)
+		d.Newline, err = filesystem.ReadNewlines(filename)
 		if err != nil {
 			return err
 		}
-		file, err := os.Open(filename)
-		if err != nil {
+		if err := d.ctrls(filename); err != nil {
 			return err
 		}
-		defer file.Close()
-		if d.CtrlCount, err = filesystem.Controls(file); err != nil {
+		if err := d.lines(filename); err != nil {
 			return err
 		}
-		if d.Lines, err = filesystem.Lines(file); err != nil {
+		if err := d.width(filename); err != nil {
 			return err
 		}
-		if d.Width, err = filesystem.Columns(file, newline); err != nil {
-			return err
-		} else if d.Width < 0 {
-			d.Width = d.CharCount
-		}
-		if d.WordCount, err = filesystem.Words(file); err != nil {
+		if err := d.words(filename); err != nil {
 			return err
 		}
 	}
 	return d.format(format)
+}
+
+func (d *Detail) ctrls(filename string) (err error) {
+	f, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	var c int
+	if c, err = filesystem.Controls(f); err != nil {
+		return err
+	}
+	d.CtrlCount = c
+	return nil
+}
+
+func (d *Detail) lines(filename string) (err error) {
+	f, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	var l int
+	if l, err = filesystem.Lines(f, d.Newline); err != nil {
+		return err
+	}
+	d.Lines = l
+	return nil
+}
+
+func (d *Detail) width(filename string) (err error) {
+	f, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	var w int
+	if w, err = filesystem.Columns(f, d.Newline); err != nil {
+		return err
+	} else if w < 0 {
+		w = d.CharCount
+	}
+	d.Width = w
+	return nil
+}
+
+func (d *Detail) words(filename string) (err error) {
+	f, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	var w int
+	if w, err = filesystem.Words(f); err != nil {
+		return err
+	}
+	d.WordCount = w
+	return nil
 }
 
 // Stdin parses piped data and prints out the details in a specific syntax.
@@ -131,15 +183,14 @@ func Stdin(b []byte, format string) (err error) {
 		return err
 	}
 	if IsText(d.Mime) {
-		// TODO: display this as an info field
-		newline := filesystem.Newlines([]rune(string(b)))
+		d.Newline = filesystem.Newlines([]rune(string(b)))
 		if d.CtrlCount, err = filesystem.Controls(bytes.NewReader(b)); err != nil {
 			return err
 		}
-		if d.Lines, err = filesystem.Lines(bytes.NewReader(b)); err != nil {
+		if d.Lines, err = filesystem.Lines(bytes.NewReader(b), d.Newline); err != nil {
 			return err
 		}
-		if d.Width, err = filesystem.Columns(bytes.NewReader(b), newline); err != nil {
+		if d.Width, err = filesystem.Columns(bytes.NewReader(b), d.Newline); err != nil {
 			return err
 		} else if d.Width < 0 {
 			d.Width = d.CharCount
@@ -237,15 +288,21 @@ func (d *Detail) parse(data []byte, stat os.FileInfo) (err error) {
 			d.Size = p.Sprintf("%v (%v bytes)", humanize.Bytes(l, Language), p.Sprint(l))
 		}
 	}
-
-	md5sum := md5.Sum(data)
-	d.MD5 = fmt.Sprintf("%x", md5sum)
-
-	sha256 := sha256.Sum256(data)
-	d.SHA256 = fmt.Sprintf("%x", sha256)
-
-	d.Utf8 = utf8.Valid(data)
-
+	ch := make(chan bool, 3)
+	go func() {
+		md5sum := md5.Sum(data)
+		d.MD5 = fmt.Sprintf("%x", md5sum)
+		ch <- true
+	}()
+	go func() {
+		sha256 := sha256.Sum256(data)
+		d.SHA256 = fmt.Sprintf("%x", sha256)
+		ch <- true
+	}()
+	go func() {
+		d.Utf8 = utf8.Valid(data)
+		ch <- true
+	}()
 	return err
 }
 
@@ -260,6 +317,22 @@ func (d Detail) JSON(indent bool) (js []byte) {
 	}
 	logs.ChkErr(logs.Err{Issue: "could not create", Arg: "json", Msg: err})
 	return js
+}
+
+func (d Detail) nl() string {
+	switch d.Newline {
+	case [2]rune{10}:
+		return "LF (Linux, macOS, Unix)"
+	case [2]rune{13}:
+		return "CR (8-bit microcomputers)"
+	case [2]rune{13, 10}:
+		return "CRLF (Windows, DOS)"
+	case [2]rune{10, 13}:
+		return "LFCR (Acorn BBC)"
+	case [2]rune{21}:
+		return "NL (IBM EBCDIC)"
+	}
+	return "??"
 }
 
 // Text format and returns the details of a file.
@@ -277,6 +350,7 @@ func (d Detail) Text(color bool) string {
 	}{
 		{k: "filename", v: d.Name},
 		{k: "UTF-8", v: str.Bool(d.Utf8)},
+		{k: "newline", v: d.nl()},
 		{k: "characters", v: p.Sprint(d.CharCount)},
 		{k: "ANSI controls", v: p.Sprint(d.CtrlCount)},
 		{k: "words", v: p.Sprint(d.WordCount)},

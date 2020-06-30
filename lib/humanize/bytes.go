@@ -35,10 +35,7 @@ func New() *B {
 // For example, 31323 bytes will return 30.59KB with language.AmericanEnglish.
 func (*B) Bytes(b int64, t language.Tag) string {
 	p := message.NewPrinter(t)
-
-	multiple := ""
-	value := float64(b)
-
+	multiple, value := "", float64(b)
 	switch {
 	case b >= TB:
 		value /= TB

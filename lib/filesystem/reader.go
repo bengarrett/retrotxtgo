@@ -71,8 +71,11 @@ func Controls(r io.Reader) (count int, err error) {
 }
 
 // Lines counts the number of lines in the interface.
-func Lines(r io.Reader) (count int, err error) {
-	const lineBreak = '\n'
+func Lines(r io.Reader, nl [2]rune) (count int, err error) {
+	var lineBreak = []byte{byte(nl[0]), byte(nl[1])}
+	if nl[1] == 0 {
+		lineBreak = []byte{byte(nl[0])}
+	}
 	buf := make([]byte, bufio.MaxScanTokenSize)
 	for {
 		size, err := r.Read(buf)
@@ -81,17 +84,20 @@ func Lines(r io.Reader) (count int, err error) {
 		}
 		var pos int
 		for {
-			i := bytes.IndexByte(buf[pos:], lineBreak)
+			i := bytes.Index(buf[pos:], lineBreak)
+			//fmt.Println("i", i, count, pos)
 			if size == pos {
 				break
 			}
 			if i == -1 {
-				// when no linebreaks are used
-				// return 0 lines for an empty buffer or 1 line of text
 				if size == 0 {
-					return 0, nil
+					return 0, nil // empty file
 				}
-				return 1, nil
+				if count == 0 {
+					return 1, nil // no newlines = 1 line
+				}
+				count++
+				return count, nil
 			}
 			pos += i + 1
 			count++

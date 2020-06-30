@@ -136,7 +136,11 @@ func ReadLines(name string) (count int, err error) {
 		return -1, err
 	}
 	defer file.Close()
-	count, err = Lines(file)
+	nl, err := ReadNewlines(name)
+	if err != nil {
+		return -1, err
+	}
+	count, err = Lines(file, nl)
 	return count, err
 }
 
