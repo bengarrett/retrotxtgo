@@ -26,8 +26,7 @@ var TestMode = false
 
 // Border wraps text around a single line border.
 func Border(text string) *bytes.Buffer {
-	maxLen := 0
-	scanner := bufio.NewScanner(strings.NewReader(text))
+	maxLen, scanner := 0, bufio.NewScanner(strings.NewReader(text))
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
 		l := utf8.RuneCountInString(scanner.Text())
@@ -222,8 +221,7 @@ func (s JSONExample) String(flag string) {
 func JSONStyles(cmd string) {
 	for i, s := range styles.Names() {
 		var styles JSONExample
-		styles.Style.Name = s
-		styles.Style.Count = i
+		styles.Style.Name, styles.Style.Count = s, i
 		if s == "dracula" {
 			styles.Style.Default = true
 		}

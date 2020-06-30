@@ -192,9 +192,7 @@ func Semantic(ver string) (ok bool, version Version) {
 		}
 		nums[i] = num
 	}
-	version.Major = nums[0]
-	version.Minor = nums[1]
-	version.Patch = nums[2]
+	version.Major, version.Minor, version.Patch = nums[0], nums[1], nums[2]
 	return true, version
 }
 
