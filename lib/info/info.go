@@ -164,8 +164,10 @@ func (d Detail) format(format string) error {
 	case "xml", "x":
 		data, _ := d.XML()
 		fmt.Printf("%s\n", data)
+	default:
+		return errors.New("format invalid: " + format)
 	}
-	return errors.New("format:invalid")
+	return nil
 }
 
 // IsText checks the MIME content-type value for valid text files.
@@ -235,11 +237,15 @@ func (d *Detail) parse(data []byte, stat os.FileInfo) (err error) {
 			d.Size = p.Sprintf("%v (%v bytes)", humanize.Bytes(l, Language), p.Sprint(l))
 		}
 	}
+
 	md5sum := md5.Sum(data)
 	d.MD5 = fmt.Sprintf("%x", md5sum)
+
 	sha256 := sha256.Sum256(data)
 	d.SHA256 = fmt.Sprintf("%x", sha256)
+
 	d.Utf8 = utf8.Valid(data)
+
 	return err
 }
 
