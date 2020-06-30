@@ -38,7 +38,7 @@ var Defaults = map[string]interface{}{
 // Hints provide brief help on the config file configurations.
 var Hints = map[string]string{
 	"editor":                 "text editor to launch when using " + str.Example("config edit"),
-	"html.font.embed":        "encode and include the font file as a base64 binary",
+	"html.font.embed":        "encode and embed the font binary as base64 text within the CSS",
 	"html.font.family":       "specifies the font to use with the HTML",
 	"html.layout":            "HTML output layout",
 	"html.meta.author":       "defines the name of the page authors",

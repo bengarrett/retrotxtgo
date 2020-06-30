@@ -134,8 +134,8 @@ func init() {
 		12: {"html.meta.referrer", &html.Ref, nil, nil, "meta-referrer", "", nil},
 		13: {"html.meta.robots", &html.Robots, nil, nil, "meta-robots", "", nil},
 		14: {"html.meta.theme-color", &html.Scheme, nil, nil, "meta-theme-color", "", nil},
-		15: {"html.font.family", &html.FontFamily, nil, nil, "font.family", "", nil},
-		17: {"html.font.embed", nil, &html.FontEmbed, nil, "font.embed", "", nil},
+		15: {"html.font.family", &html.FontFamily, nil, nil, "font-family", "f", nil},
+		17: {"html.font.embed", nil, &html.FontEmbed, nil, "font-embed", "", nil},
 		// hidden flags
 		0: {"html.body", &html.Body, nil, nil, "body", "b", nil},
 	}
@@ -146,8 +146,14 @@ func init() {
 	}
 	sort.Ints(keys)
 	// output flags
-	createCmd.Flags().StringVarP(&html.Enc, "encode", "e", "", "text encoding of the named text file\nwhen ignored, UTF8 encoding will be automatically detected\notherwise encode will assume default (default CP437)\nsee a list of encode values "+str.Example("retrotxt view codepages")+"\n")
-	createCmd.Flags().BoolVarP(&html.SaveToFile, "save", "s", false, "save HTML to a file or ignore to print output")
+	createCmd.Flags().StringVarP(&html.Enc, "encode", "e", "",
+		`characture encoding used by the filenames
+when ignored, UTF8 encoding is detected
+if that fails the default is used (default CP437)
+see the list of encode values `+str.Example("retrotxt list codepages")+"\n")
+	createCmd.Flags().BoolVarP(&html.SaveToFile, "save", "s", false,
+		`save HTML and static files to a the save directory 
+or ignore to print (save directory: `+viper.GetString("save-directory")+")")
 	createCmd.Flags().BoolVarP(&html.OW, "overwrite", "o", false, "overwrite any existing files when saving")
 	// html flags, the key int value must be used as the index
 	// rather than the loop count, otherwise flags might be skipped
@@ -164,7 +170,7 @@ func init() {
 		}
 		switch {
 		case c.key == "serve":
-			fmt.Fprint(&buf, "\nsupply a 0 value to use the default, "+str.Example("-p0")+" or "+str.Example("--serve=0"))
+			fmt.Fprint(&buf, "\nsupply a 0 value to use the default port, "+str.Example("-p0")+" or "+str.Example("--serve=0"))
 			createCmd.Flags().UintVarP(c.i, c.name, c.short, viper.GetUint(c.key), buf.String())
 		case c.strg != nil:
 			createCmd.Flags().StringVarP(c.strg, c.name, c.short, viper.GetString(c.key), buf.String())
