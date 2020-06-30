@@ -19,8 +19,7 @@ func Table(name string) (*bytes.Buffer, error) {
 		return nil, err
 	}
 	var buf bytes.Buffer
-	w := new(tabwriter.Writer)
-	w.Init(&buf, 0, 8, 0, '\t', 0)
+	w := new(tabwriter.Writer).Init(&buf, 0, 8, 0, '\t', 0)
 	fmt.Fprintln(w, " "+color.OpFuzzy.Sprint(strings.Repeat("\u2015", 67)))
 	fmt.Fprintln(w, color.Primary.Sprint(str.Center(fmt.Sprintf("%s", cp), 67)))
 	for i := 0; i < 16; i++ {
@@ -33,8 +32,7 @@ func Table(name string) (*bytes.Buffer, error) {
 			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf(" %X  ", i))
 		}
 	}
-	row := 0
-	var b = MakeBytes()
+	var b, row = MakeBytes(), 0
 	runes, err := Chars(name, &b)
 	logs.Check("convert.table.chars", err)
 	for i, r := range runes {

@@ -14,8 +14,7 @@ var setupMode = false
 
 // Setup walks through all the settings and saves them to the configuration file.
 func Setup() {
-	setupMode = true
-	prompt.SetupMode = true
+	setupMode, prompt.SetupMode = true, true
 	keys := Keys()
 	PrintLocation()
 	var w uint = 42

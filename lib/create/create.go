@@ -284,7 +284,7 @@ func (args Args) savehtml(b *[]byte, c chan error) {
 	c <- nil
 }
 
-// Stdout creates and sends the html template to stdout.
+// Stdout creates and prints the html template.
 func (args Args) Stdout(b *[]byte) error {
 	tmpl, err := args.newTemplate()
 	if err != nil {

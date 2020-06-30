@@ -34,8 +34,7 @@ func (args *Args) Serve(b *[]byte) {
 
 func (args *Args) createDir(b *[]byte) (err error) {
 	// TODO: deep-copy channel support?
-	args.SaveToFile = true
-	args.OW = true
+	args.SaveToFile, args.OW = true, true
 	args.Dest, err = ioutil.TempDir(os.TempDir(), "*-serve")
 	if err != nil {
 		return err

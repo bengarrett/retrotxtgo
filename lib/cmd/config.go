@@ -133,11 +133,10 @@ var configShellCmd = &cobra.Command{
 		str.Example("\n  retrotxt config shell -i=zsh >> ~/.zshrc"),
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
-			buf   bytes.Buffer
-			err   error
-			lexer string
-			style string = viper.GetString("style.html")
+			buf bytes.Buffer
+			err error
 		)
+		lexer, style := "", viper.GetString("style.html")
 		switch configFlag.shell {
 		case "bash", "bsh", "b":
 			lexer = "bash"
