@@ -1,7 +1,4 @@
 ﻿Document encoding: UTF-8 with BOM encoding
-'Transcode text' setting: Automatic
-File name: utf-8_bom.txt
-
 RetroTxt UTF-8 test with a Byte Order Mark
 
 ☠	Skull and crossbones

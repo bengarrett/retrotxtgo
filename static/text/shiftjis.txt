@@ -1,6 +1,5 @@
 Document encoding: Shift JIS
-'Transcode text' setting: Automatic
-File name: shift_jis-art.txt
+RetroTxt Shift-JIS test requires the Mona font
 
 75 Name: CTRL+C & CTRL+V : 2007-08-25 04:05 ID:P2WQCHe0
 http://4-ch.net/ascii/kareha.pl/1104923197

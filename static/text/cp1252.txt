@@ -1,3 +1,4 @@
+Document encoding: Windows 1252
 RetroTxt CP-1252 test
 
 ‘ single curved quotes ’

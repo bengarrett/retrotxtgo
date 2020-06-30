@@ -1,7 +1,4 @@
 Document encoding: ISO 8859-1
-'Transcode text' setting: CP-1252
-File name: iso-8859-1.txt
-
 RetroTxt ISO 8859-1 test
 
 ¤	Currency sign
