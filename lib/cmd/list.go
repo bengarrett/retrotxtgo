@@ -28,6 +28,15 @@ var listCmdCodepages = &cobra.Command{
 	},
 }
 
+var listCmdExamples = &cobra.Command{
+	Use:     "examples",
+	Aliases: []string{"e"},
+	Short:   "list pre-packaged text files for use with the create, info and view commands",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(examples())
+	},
+}
+
 var listCmdTable = &cobra.Command{
 	Use:     "table [codepage names or aliases]",
 	Aliases: []string{"t"},
@@ -72,6 +81,8 @@ func init() {
 	rootCmd.AddCommand(listCmd)
 	// codepages cmd
 	listCmd.AddCommand(listCmdCodepages)
+	// examples cmd
+	listCmd.AddCommand(listCmdExamples)
 	// table cmd
 	listCmd.AddCommand(listCmdTable)
 	// tables cmd

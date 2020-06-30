@@ -1,11 +1,16 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"os"
+	"sort"
+	"strings"
+	"text/tabwriter"
 
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -89,28 +94,55 @@ type internalPack struct {
 }
 
 var internalPacks = map[string]internalPack{
-	"437.cr":        {"d", "", "text/cp437-cr.txt", ""},
-	"437.crlf":      {"d", "", "text/cp437-crlf.txt", ""},
-	"437.lf":        {"d", "", "text/cp437-lf.txt", ""},
-	"865":           {"", "ibm865", "text/cp865.txt", ""},
-	"1252":          {"", "cp1252", "text/cp1252.txt", ""},
-	"ascii":         {"", "cp437", "text/retrotxt.asc", ""},
-	"ansi":          {"", "", "text/retrotxt.ans", ""},
-	"ansi.aix":      {"", "", "text/ansi-aixterm.ans", ""},
-	"ansi.blank":    {"", "", "text/ansi-blank", ""},
-	"ansi.cp":       {"", "", "text/ansi-cp.ans", ""},
-	"ansi.cpf":      {"", "", "text/ansi-cpf.ans", ""},
-	"ansi.hvp":      {"", "", "text/ansi-hvp.ans", ""},
-	"ansi.proof":    {"", "", "text/ansi-proof.ans", ""},
-	"ansi.rgb":      {"", "cp437", "text/ansi-rgb.ans", ""},
-	"ansi.setmodes": {"", "", "text/ansi-setmodes.ans", ""},
-	"iso-1":         {"", "1", "text/iso-8859-1.txt", ""},
-	"iso-15":        {"", "15", "text/iso-8859-15.txt", ""},
-	"sauce":         {"", "", "text/sauce.txt", ""},
-	"shiftjis":      {"", "shift-jis", "text/shiftjis.txt", ""},
-	"us-ascii":      {"", "cp1252", "text/us-ascii.txt", ""},
-	"utf8":          {"", "", "text/utf-8.txt", ""},
-	"utf8.bom":      {"", "", "text/utf-8-bom.txt", ""},
-	"utf16.be":      {"", "utf-16be", "text/utf-16-be.txt", ""},
-	"utf16.le":      {"", "utf-16le", "text/utf-16-le.txt", ""},
+	"437.cr":        {"d", "", "text/cp437-cr.txt", "CP-437 all characters test using CR (carriage return)"},
+	"437.crlf":      {"d", "", "text/cp437-crlf.txt", "CP-437 all characters test using Windows newline"},
+	"437.lf":        {"d", "", "text/cp437-lf.txt", "CP-437 all characters test using LF (linefeed)"},
+	"865":           {"", "ibm865", "text/cp865.txt", "CP-865 and CP-860 Nordic test"},
+	"1252":          {"", "cp1252", "text/cp1252.txt", "Windows-1252 English test"},
+	"ascii":         {"", "cp437", "text/retrotxt.asc", "RetroTxt ASCII logos"},
+	"ansi":          {"", "", "text/retrotxt.ans", "RetroTxt 256 color ANSI logo"},
+	"ansi.aix":      {"", "", "text/ansi-aixterm.ans", "IBM AIX terminal colours"},
+	"ansi.blank":    {"", "", "text/ansi-blank", "Empty file test"},
+	"ansi.cp":       {"", "", "text/ansi-cp.ans", "ANSI cursor position tests"},
+	"ansi.cpf":      {"", "", "text/ansi-cpf.ans", "ANSI cursor forward tests"},
+	"ansi.hvp":      {"", "", "text/ansi-hvp.ans", "ANSI horizontal and vertical cursor positioning"},
+	"ansi.proof":    {"", "", "text/ansi-proof.ans", "ANSI formatting proof sheet"},
+	"ansi.rgb":      {"", "cp437", "text/ansi-rgb.ans", "ANSI RGB 24-bit color sheet"},
+	"ansi.setmodes": {"", "", "text/ansi-setmodes.ans", "MS-DOS ANSI.SYS Set Mode examples"},
+	"iso-1":         {"", "1", "text/iso-8859-1.txt", "ISO 8859-1 select characters"},
+	"iso-15":        {"", "15", "text/iso-8859-15.txt", "ISO 8859-15 select characters"},
+	"sauce":         {"", "", "text/sauce.txt", "SAUCE metadata test"},
+	"shiftjis":      {"", "shift-jis", "text/shiftjis.txt", "Shift-JIS and Mona font test"},
+	"us-ascii":      {"", "cp1252", "text/us-ascii.txt", "US-ASCII controls test"},
+	"utf8":          {"", "", "text/utf-8.txt", "UTF-8 test with no Byte Order Mark"},
+	"utf8.bom":      {"", "", "text/utf-8-bom.txt", "UTF-8 test with a Byte Order Mark"},
+	"utf16.be":      {"", "utf-16be", "text/utf-16-be.txt", "UTF-16 Big Endian test"},
+	"utf16.le":      {"", "utf-16le", "text/utf-16-le.txt", "UTF-16 Little Endian test"},
+}
+
+func examples() *bytes.Buffer {
+	keys := make([]string, 0, len(internalPacks))
+	for k := range internalPacks {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	var buf bytes.Buffer
+	var flags uint = 0 //tabwriter.Debug //tabwriter.AlignRight | tabwriter.Debug
+	w := tabwriter.NewWriter(&buf, 0, 0, 2, ' ', flags)
+	fmt.Fprintln(w, str.Cp(" Packaged example text and ANSI files to test and play with RetroTxt"))
+	fmt.Fprintln(w, strings.Repeat("-", 69))
+	for _, k := range keys {
+		fmt.Fprintln(w, fmt.Sprintf("%s\t%s\t", k, internalPacks[k].description))
+	}
+	fmt.Fprintln(w, "\nAny of these packaged examples will work with both the", str.Example("create"), "and", str.Example("view"), "commands")
+	fmt.Fprintln(w, "\n"+str.Example(" retrotxt view 1252"), "will print the Windows-1252 English test to the terminal")
+	fmt.Fprintln(w, str.Example(" retrotxt view 1252 > file.txt"), "will convert and save the Windows-1252 English test to UTF-8 encoding")
+	fmt.Fprintln(w, str.Example(" retrotxt save 1252 > file.txt"), "will save the Windows-1252 English test with its original encoding") // TODO
+	fmt.Fprintln(w, str.Example(" retrotxt save 1252 | retrotxt info"), "displays statistics and information")                           // TODO
+	fmt.Fprintln(w, str.Example(" retrotxt create 1252"), "creates a HTML document from the Windows-1252 English test")
+	fmt.Fprintln(w, str.Example(" retrotxt create 1252 -p0"), "serves the Windows-1252 English test over a local web server")
+	fmt.Fprintln(w, "\nMultiple examples are supported")
+	fmt.Fprintln(w, str.Example(" retrotxt view ansi ascii ansi.rgb"))
+	w.Flush()
+	return &buf
 }
