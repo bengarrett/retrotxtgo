@@ -22,7 +22,7 @@ echo "$newtag" >.version
 
 git status
 
-git add ../. &&
+git add --verbose ../. &&
     git commit -m "$newcmmt" &&
     git tag -a $newtag -m "$newcmmt" &&
     git push origin $newtag &&
