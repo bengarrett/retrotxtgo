@@ -14,11 +14,12 @@ y | yes | ok) ;;
     ;;
 esac
 
+# goreleaser can only be used with an active git commit
+# it MUST run before go generate
+echo "$newtag" >.version
+
 # generate any updated templates before using git
 go generate ./...
-
-# goreleaser can only be used with an active git commit
-echo "$newtag" >.version
 
 git status
 
