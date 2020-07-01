@@ -2,7 +2,7 @@
 
 echo "Current version tag $(git describe)"
 
-read -p 'New release semantic version tag? (1.x.x) ' newtag
+read -p 'New release semantic version tag? (v1.x.x) ' newtag
 read -p 'New release comment? ' newcmmt
 echo -e "new commit version: \"$newtag\" comment: \"$newcmmt\"\nchangelog:\n$(cat ../changelog.md)\n"
 read -p 'confirm? [y/N] ' confirm

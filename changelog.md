@@ -1,3 +1,1 @@
-- Stdin, piped text support.
-- UTF16 and ShiftJIS decoding.
-- `view` command correctly handles newlines.
+- pre-release code, so this log will remain unchanged.
