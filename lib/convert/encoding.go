@@ -64,7 +64,6 @@ func Text(encoding string, b *[]byte) (utf8 []rune, err error) {
 		newline: true,
 		tab:     true,
 	}
-	// TODO: gracefully handle horizontal tabs
 	d.Source = EndOfFile(*b)
 	if _, err = d.Transform(encoding); err != nil {
 		return nil, err
@@ -323,6 +322,9 @@ func (d *Data) Swap() *Data {
 
 // ANSI replaces out all ←[ and ␛[ character matches with functional ANSI escape controls.
 func (d *Data) ANSI() {
+	if d == nil {
+		return
+	}
 	if d.len == 0 {
 		log.Fatal(errors.New("ANSI() is a chain method that is to be used in conjuction with Swap: d.Swap().ANSI()"))
 	}
