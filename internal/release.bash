@@ -26,7 +26,8 @@ git add ../. &&
     git commit -m "$newcmmt" &&
     git tag -a $newtag -m "$newcmmt" &&
     git push origin $newtag &&
-    git pull
+    git pull &&
+    echo "You can now run ./deploy.bash"
 
 # notes
 # to delete a local tag
