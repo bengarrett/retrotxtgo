@@ -100,9 +100,9 @@ var internalPacks = map[string]internalPack{
 	"865":           {"", "ibm865", "text/cp865.txt", "CP-865 and CP-860 Nordic test"},                            //
 	"1252":          {"", "cp1252", "text/cp1252.txt", "Windows-1252 English test"},                               //
 	"ascii":         {"", "cp437", "text/retrotxt.asc", "RetroTxt ASCII logos"},                                   //
-	"ansi":          {"", "cp437", "text/retrotxt.ans", "RetroTxt 256 color ANSI logo"},                           // x
+	"ansi":          {"", "cp437", "text/retrotxt.ans", "RetroTxt 256 color ANSI logo"},                           //
 	"ansi.aix":      {"", "cp437", "text/ansi-aixterm.ans", "IBM AIX terminal colours"},                           //
-	"ansi.blank":    {"", "cp437", "text/ansi-blank.ans", "Empty file test"},                                      // panic
+	"ansi.blank":    {"", "cp437", "text/ansi-blank.ans", "Empty file test"},                                      //
 	"ansi.cp":       {"", "cp437", "text/ansi-cp.ans", "ANSI cursor position tests"},                              //
 	"ansi.cpf":      {"", "cp437", "text/ansi-cpf.ans", "ANSI cursor forward tests"},                              //
 	"ansi.hvp":      {"", "cp437", "text/ansi-hvp.ans", "ANSI horizontal and vertical cursor positioning"},        //
