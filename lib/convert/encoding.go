@@ -18,11 +18,22 @@ import (
 	"retrotxt.com/retrotxt/lib/filesystem"
 )
 
+// Data for the transformation of legacy encoded text to UTF-8.
+type Data struct {
+	Source   []byte            // Source legacy encoded text.
+	Runes    []rune            // Runes with UTF-8 text.
+	encode   encoding.Encoding // Source character set encoding
+	len      int               // Runes count
+	newline  bool              // use newline controls
+	newlines [2]rune           // the newline controls rune values
+	tab      bool              // use horizontal tab controls
+	tabs     [1]rune           // the HT control rune value
+}
+
 // Chars transforms legacy encoded characters and text control codes into UTF-8 characters.
 func Chars(encoding string, b *[]byte) (utf8 []rune, err error) {
 	var d = Data{
-		Source:  *b,
-		newline: false,
+		Source: *b,
 	}
 	if _, err = d.Transform(encoding); err != nil {
 		return nil, err
@@ -37,6 +48,7 @@ func Dump(encoding string, b *[]byte) (utf8 []rune, err error) {
 	var d = Data{
 		Source:  *b,
 		newline: true,
+		tab:     true,
 	}
 	if _, err = d.Transform(encoding); err != nil {
 		return nil, err
@@ -50,6 +62,7 @@ func Text(encoding string, b *[]byte) (utf8 []rune, err error) {
 	var d = Data{
 		Source:  *b,
 		newline: true,
+		tab:     true,
 	}
 	// TODO: gracefully handle horizontal tabs
 	d.Source = EndOfFile(*b)
@@ -244,16 +257,6 @@ func encodingAlias(name string) (n string) {
 	return n
 }
 
-// Data for the transformation of legacy encoded text to UTF-8.
-type Data struct {
-	Source   []byte            // Source legacy encoded text.
-	encode   encoding.Encoding // Source character set encoding
-	newline  bool              // use newline controls
-	newlines [2]rune           // the newline controls rune values
-	Runes    []rune            // Runes with UTF-8 text.
-	len      int               // Runes count
-}
-
 // Transform byte data from named character map encoded text into UTF-8.
 func (d *Data) Transform(name string) (*Data, error) {
 	if name == "" {
@@ -347,6 +350,9 @@ func (d *Data) RunesControls() {
 		return
 	}
 	const z = byte(0x80)
+	if d.tab {
+		d.tabs = [1]rune{9}
+	}
 	for i := 0; i < d.len; i++ {
 		r := d.Runes[i]
 		if d.skipRune(i) {
@@ -372,6 +378,9 @@ func (d *Data) RunesDOS() {
 	)
 	for i := 0; i < d.len; i++ {
 		r := d.Runes[i]
+		if d.tab {
+			d.tabs = [1]rune{9}
+		}
 		if d.skipRune(i) {
 			i++
 			continue
@@ -399,6 +408,9 @@ func (d *Data) RunesEBCDIC() {
 	}
 	for i := 0; i < d.len; i++ {
 		r := d.Runes[i]
+		if d.tab {
+			d.tabs = [1]rune{9}
+		}
 		if d.skipRune(i) {
 			i++
 			continue
@@ -502,6 +514,9 @@ func (d *Data) RunesMacintosh() {
 	const z = byte(0x80)
 	for i := 0; i < d.len; i++ {
 		r := d.Runes[i]
+		if d.tab {
+			d.tabs = [1]rune{9}
+		}
 		if d.skipRune(i) {
 			i++
 			continue
@@ -567,6 +582,9 @@ func (d *Data) skipRune(i int) bool {
 		r1 = d.Runes[i+1]
 	}
 	if d.newline && equalNL([2]rune{r0, r1}, d.newlines) {
+		return true
+	}
+	if d.tab && [1]rune{r0} == d.tabs {
 		return true
 	}
 	return false
