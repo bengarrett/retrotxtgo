@@ -335,7 +335,6 @@ op token list > https://golang.org/pkg/go/token/#Token
 
 ### Future CLI commands
 
-- [ ] `html` - rename `create`: to encode text to HTML. `retrotxt html -n sometext.txt`
 - [ ] `save` - to encode text to another format. `retrotxt save sometext.txt -e cp437`
 - - `retrotxt save sometext.txt # save to utf8`
 - [ ] add optional argument for destination (dir or file) that overrides the dir configuration.
