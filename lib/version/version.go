@@ -50,14 +50,6 @@ type Cache struct {
 
 const cacheFile = "api.github.cache"
 
-// B holds build and version information.
-var B = Build{
-	Commit:  "",
-	Date:    "",
-	Domain:  "retrotxt.com",
-	Version: "",
-}
-
 var scope = gap.NewScope(gap.User, "retrotxt")
 
 // CacheGet returns the stored Github API ETag HTTP header and release version.

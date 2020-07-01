@@ -21,16 +21,19 @@ import (
 	ver "github.com/bengarrett/retrotxtgo/lib/version"
 )
 
-// GoReleaser ldflags flags
-var (
-	version = "0.0.0" // TODO: apply go generate
-	commit  = "n/a"
-	date    = "n/a"
-)
+// goreleaser generated ldflags containers
+// https://goreleaser.com/environment/#using-the-mainversion
+var version, commit, date string
 
 func main() {
-	ver.B.Version = version
-	ver.B.Commit = commit
-	ver.B.Date = date
+	if version != "" {
+		ver.B.Version = version
+	}
+	if commit != "" {
+		ver.B.Commit = commit
+	}
+	if date != "" {
+		ver.B.Date = date
+	}
 	cmd.Execute()
 }
