@@ -1,11 +1,14 @@
 package config
 
 import (
+	"errors"
 	"fmt"
+	"log"
 	"runtime"
 	"strings"
 
 	"github.com/spf13/viper"
+	"retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/prompt"
 	"retrotxt.com/retrotxt/lib/str"
 )
@@ -16,8 +19,9 @@ var setupMode = false
 func Setup() {
 	setupMode, prompt.SetupMode = true, true
 	keys := Keys()
+	logo()
 	PrintLocation()
-	var w uint = 42
+	var w uint = 80
 	for i, key := range keys {
 		if i == 0 {
 			fmt.Printf("\n%s\n\n", str.Cb(enterKey()))
@@ -43,4 +47,14 @@ func enterKey() string {
 
 func hr(w uint) string {
 	return str.Cb(strings.Repeat("-", int(w)))
+}
+
+func logo() {
+	n := "text/retrotxt.utf8ans"
+	b := pack.Get(n)
+	if b == nil {
+		log.Fatal(errors.New("pkg.name is unknown: " + n))
+	}
+	// convert and print
+	fmt.Println(string(b))
 }
