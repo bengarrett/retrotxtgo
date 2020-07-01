@@ -9,7 +9,7 @@ before:
   hooks:
     - go mod download
     #- gosec ./...
-    - go generate ./...
+    #- go generate ./... # this will create a dirty state
 env:
   - CGO_ENABLED=0
   - GO111MODULE=on
