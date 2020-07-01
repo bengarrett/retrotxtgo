@@ -258,3 +258,24 @@ func Test_locBuild(t *testing.T) {
 		})
 	}
 }
+
+func Test_format(t *testing.T) {
+	tests := []struct {
+		name    string
+		version string
+		want    string
+	}{
+		{"empty", "", ""},
+		{"v2+", "v2.5.140", "2.5.140"},
+		{"v1", "v1.0.0", "1.0.0"},
+		{"v0.1", "v0.1.0", "β0.1.0"},
+		{"v0.0.1", "v0.0.1", "α0.0.1"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := format(tt.version); got != tt.want {
+				t.Errorf("format() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

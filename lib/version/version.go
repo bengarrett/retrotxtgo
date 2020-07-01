@@ -257,7 +257,7 @@ func information() versionInfo {
 	v := versionInfo{
 		"copyright": fmt.Sprintf("Copyright © 2020 Ben Garrett"),
 		"url":       fmt.Sprintf("https://%s/go", B.Domain),
-		"app ver":   B.Version,
+		"app ver":   format(B.Version),
 		"go ver":    semanticGo(),
 		"os":        fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
 		"exe":       binary(),
@@ -268,7 +268,6 @@ func information() versionInfo {
 	if a := arch(runtime.GOARCH); a != "" {
 		v["os"] += fmt.Sprintf(" [%s CPU]", a)
 	}
-	v["app ver"] = fmt.Sprintf("α%s", v["app ver"])
 	return v
 }
 
@@ -294,4 +293,19 @@ func semanticGo() string {
 		return ver[2:]
 	}
 	return ver
+}
+
+func format(version string) string {
+	ok, s := Semantic(version)
+	if !ok {
+		return version
+	}
+	p := ""
+	switch {
+	case s.Major == 0 && s.Minor == 0:
+		p = "α"
+	case s.Major == 0:
+		p = "β"
+	}
+	return fmt.Sprintf("%s%d.%d.%d", p, s.Major, s.Minor, s.Patch)
 }
