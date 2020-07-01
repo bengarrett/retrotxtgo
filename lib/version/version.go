@@ -252,6 +252,21 @@ func compare(current, fetched string) bool {
 	return false
 }
 
+func format(version string) string {
+	ok, s := Semantic(version)
+	if !ok {
+		return version
+	}
+	p := ""
+	switch {
+	case s.Major == 0 && s.Minor == 0:
+		p = "α"
+	case s.Major == 0:
+		p = "β"
+	}
+	return fmt.Sprintf("%s%d.%d.%d", p, s.Major, s.Minor, s.Patch)
+}
+
 // information and version details of retrotxt.
 func information() versionInfo {
 	v := versionInfo{
@@ -293,19 +308,4 @@ func semanticGo() string {
 		return ver[2:]
 	}
 	return ver
-}
-
-func format(version string) string {
-	ok, s := Semantic(version)
-	if !ok {
-		return version
-	}
-	p := ""
-	switch {
-	case s.Major == 0 && s.Minor == 0:
-		p = "α"
-	case s.Major == 0:
-		p = "β"
-	}
-	return fmt.Sprintf("%s%d.%d.%d", p, s.Major, s.Minor, s.Patch)
 }
