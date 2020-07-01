@@ -89,7 +89,7 @@ Press Ctrl+C to stop
 #### Convert the text into another encoding of your choosing.
 
 ```sh
-retrotxt convert ascii-logs.txt --to=cp860
+retrotxt save ascii-logs.txt --as=cp860
 
 ...
 ```
@@ -195,23 +195,12 @@ retrotxt version
 RetroTxt on Go requires [Go v1.13+](https://github.com/golang/go/wiki/MinimumRequirements).
 Assuming [Go](https://golang.org/) and and the relevant build-tools are already installed.
 
-Standard operating systems.
-
 ```sh
 git clone https://github.com/bengarrett/retrotxtgo.git
 cd retrotxtgo
 # recommended, run the package and import tests on your distribution/platform
 go test ./...
-go build -i -o $GOBIN/retrotxt
-retrotxt version
-```
-
-Windows PowerShell
-
-```powershell
-git clone https://github.com/bengarrett/retrotxtgo.git
-cd retrotxtgo
-go build -i -o $Env:GOBIN\retrotxt.exe
+go build -i
 retrotxt version
 ```
 
@@ -229,7 +218,7 @@ go tool dist list
 git clone https://github.com/bengarrett/retrotxtgo.git
 cd retrotxtgo
 # target 32-bit Windows
-env GOOS=windows GOARCH=386 go build -o retrotxt.exe
+env GOOS=windows GOARCH=386 go build
 # optional, compress the binary
 upx retrotxt.exe
 # test the binary
