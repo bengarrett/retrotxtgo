@@ -1,9 +1,12 @@
 package create
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -17,6 +20,19 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
+// Port checks the TCP port is available on the local machine.
+func Port(port uint) bool {
+	var d net.Dialer
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	conn, err := d.DialContext(ctx, "tcp", fmt.Sprintf("localhost:%d", port))
+	if err != nil {
+		return true
+	}
+	defer conn.Close()
+	return false
+}
+
 // Serve data over an internal HTTP server.
 func (args *Args) Serve(b *[]byte) {
 	port := uint(args.Port)
@@ -24,11 +40,16 @@ func (args *Args) Serve(b *[]byte) {
 		port = uint(viper.GetInt("serve"))
 	}
 	args.Port = port
+	if !Port(port) {
+		// TODO: automatically detect a free port and use that, but give up after 5 attempts
+		logs.ChkErr(logs.Err{Issue: "tcp port", Arg: fmt.Sprint(port),
+			Msg: errors.New("this port is currently in use on this system")})
+	}
 	if err := args.createDir(b); err != nil {
-		logs.ChkErr(logs.Err{Issue: "create problem", Arg: "HTTP", Msg: err})
+		logs.ChkErr(logs.Err{Issue: "create", Arg: "HTTP", Msg: err})
 	}
 	if err := args.serveDir(); err != nil {
-		logs.ChkErr(logs.Err{Issue: "server problem", Arg: "HTTP", Msg: err})
+		logs.ChkErr(logs.Err{Issue: "server", Arg: "HTTP", Msg: err})
 	}
 }
 

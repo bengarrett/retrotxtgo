@@ -165,10 +165,13 @@ func Update(name string) {
 	case "serve":
 		p := Defaults["serve"].(uint)
 		switch value.(type) {
+		case int:
+			p = uint(value.(int))
 		case uint:
 			p = value.(uint)
 		}
-		fmt.Printf("\n%slocalhost%s%d\n", str.Cb("http://"), str.Cb(":"), p)
+		fmt.Printf("\n%slocalhost%s%d %s\n", str.Cb("http://"),
+			str.Cb(":"), p, str.Bool(create.Port(p)))
 		fmt.Printf("\nSet a new port value, to %s\nChoices %s:\n", Hints[name], portInfo())
 		setPort(name)
 	case "style.html":
