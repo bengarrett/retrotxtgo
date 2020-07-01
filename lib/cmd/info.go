@@ -3,12 +3,12 @@ package cmd
 import (
 	"os"
 
-	"github.com/bengarrett/retrotxtgo/lib/config"
-	"github.com/bengarrett/retrotxtgo/lib/filesystem"
-	"github.com/bengarrett/retrotxtgo/lib/info"
-	"github.com/bengarrett/retrotxtgo/lib/logs"
-	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/spf13/cobra"
+	"retrotxt.com/retrotxt/lib/config"
+	"retrotxt.com/retrotxt/lib/filesystem"
+	"retrotxt.com/retrotxt/lib/info"
+	"retrotxt.com/retrotxt/lib/logs"
+	"retrotxt.com/retrotxt/lib/str"
 )
 
 var infoFlag struct {

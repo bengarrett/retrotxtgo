@@ -14,11 +14,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 package main
 
-// TODO package main // import "retrotxt.com/go" -> godoc.org/github.com/bengarrett/retrotxtgo
-
 import (
-	"github.com/bengarrett/retrotxtgo/lib/cmd"
-	ver "github.com/bengarrett/retrotxtgo/lib/version"
+	"retrotxt.com/retrotxt/lib/cmd"
+	ver "retrotxt.com/retrotxt/lib/version"
 )
 
 // goreleaser generated ldflags containers

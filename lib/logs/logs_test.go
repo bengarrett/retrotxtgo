@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	//"github.com/bengarrett/retrotxtgo/lib/filesystem"
+	//"retrotxt.com/retrotxt/lib/filesystem"
 
-	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/gookit/color"
+	"retrotxt.com/retrotxt/lib/str"
 )
 
 func TestErr_String(t *testing.T) {

@@ -12,13 +12,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bengarrett/retrotxtgo/lib/filesystem"
-	"github.com/bengarrett/retrotxtgo/lib/logs"
-	"github.com/bengarrett/retrotxtgo/lib/online"
-	"github.com/bengarrett/retrotxtgo/lib/str"
 	c "github.com/gookit/color"
 	gap "github.com/muesli/go-app-paths"
 	"gopkg.in/yaml.v3"
+	"retrotxt.com/retrotxt/lib/filesystem"
+	"retrotxt.com/retrotxt/lib/logs"
+	"retrotxt.com/retrotxt/lib/online"
+	"retrotxt.com/retrotxt/lib/str"
 )
 
 // Build and version information

@@ -11,14 +11,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bengarrett/retrotxtgo/internal/pack"
-	"github.com/bengarrett/retrotxtgo/lib/convert"
-	"github.com/bengarrett/retrotxtgo/lib/filesystem"
-	"github.com/bengarrett/retrotxtgo/lib/logs"
-	"github.com/bengarrett/retrotxtgo/lib/str"
-	"github.com/bengarrett/retrotxtgo/lib/version"
 	"github.com/gookit/color"
 	"github.com/spf13/viper"
+	"retrotxt.com/retrotxt/internal/pack"
+	"retrotxt.com/retrotxt/lib/convert"
+	"retrotxt.com/retrotxt/lib/filesystem"
+	"retrotxt.com/retrotxt/lib/logs"
+	"retrotxt.com/retrotxt/lib/str"
+	"retrotxt.com/retrotxt/lib/version"
 
 	gap "github.com/muesli/go-app-paths"
 )

@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/gookit/color"
+	"retrotxt.com/retrotxt/lib/str"
 )
 
 // TODO: replace much of the logs package with a pre-existing sys or structured loggers.

@@ -1,4 +1,4 @@
-module github.com/bengarrett/retrotxtgo
+module retrotxt.com/retrotxt
 
 go 1.13
 

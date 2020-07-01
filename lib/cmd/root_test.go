@@ -4,8 +4,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/spf13/viper"
+	"retrotxt.com/retrotxt/lib/config"
 )
 
 func TestInitDefaults(t *testing.T) {

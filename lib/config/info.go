@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/bengarrett/retrotxtgo/lib/logs"
-	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/gookit/color"
+	"retrotxt.com/retrotxt/lib/logs"
+	"retrotxt.com/retrotxt/lib/str"
 )
 
 // Info prints the content of a configuration file.

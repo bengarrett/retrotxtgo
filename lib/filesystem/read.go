@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"retrotxt.com/retrotxt/lib/logs"
 )
 
 // IsPipe determines if Stdin (standard input) is piped from another command.

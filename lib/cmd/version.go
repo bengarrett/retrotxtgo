@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"github.com/bengarrett/retrotxtgo/lib/config"
-	"github.com/bengarrett/retrotxtgo/lib/logs"
-	"github.com/bengarrett/retrotxtgo/lib/str"
-	"github.com/bengarrett/retrotxtgo/lib/version"
 	"github.com/spf13/cobra"
+	"retrotxt.com/retrotxt/lib/config"
+	"retrotxt.com/retrotxt/lib/logs"
+	"retrotxt.com/retrotxt/lib/str"
+	"retrotxt.com/retrotxt/lib/version"
 )
 
 type versionFlags struct {

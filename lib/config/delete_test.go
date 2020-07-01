@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/spf13/viper"
+	"retrotxt.com/retrotxt/lib/logs"
 )
 
 func TestDelete(t *testing.T) {

@@ -10,10 +10,10 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/gookit/color"
 	gap "github.com/muesli/go-app-paths"
 	"github.com/spf13/viper"
+	"retrotxt.com/retrotxt/lib/str"
 )
 
 // the lowest, largest and recommended network ports to serve HTTP.

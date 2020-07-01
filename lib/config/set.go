@@ -14,12 +14,12 @@ import (
 	"text/tabwriter"
 
 	"github.com/alecthomas/chroma/styles"
-	"github.com/bengarrett/retrotxtgo/lib/create"
-	"github.com/bengarrett/retrotxtgo/lib/logs"
-	"github.com/bengarrett/retrotxtgo/lib/prompt"
-	"github.com/bengarrett/retrotxtgo/lib/str"
-	v "github.com/bengarrett/retrotxtgo/lib/version"
 	"github.com/spf13/viper"
+	"retrotxt.com/retrotxt/lib/create"
+	"retrotxt.com/retrotxt/lib/logs"
+	"retrotxt.com/retrotxt/lib/prompt"
+	"retrotxt.com/retrotxt/lib/str"
+	v "retrotxt.com/retrotxt/lib/version"
 )
 
 // List and print all the available configurations.

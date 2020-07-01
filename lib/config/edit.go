@@ -7,8 +7,8 @@ import (
 	"os/exec"
 	"runtime"
 
-	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/spf13/viper"
+	"retrotxt.com/retrotxt/lib/logs"
 )
 
 // Edit a configuration file.

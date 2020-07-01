@@ -7,12 +7,12 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/bengarrett/retrotxtgo/lib/str"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/encoding/ianaindex"
 	"golang.org/x/text/encoding/japanese"
+	"retrotxt.com/retrotxt/lib/str"
 )
 
 type iana struct {

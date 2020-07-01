@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"retrotxt.com/retrotxt/lib/logs"
 )
 
 // T are short strings shared between various app tests.

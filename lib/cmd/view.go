@@ -6,10 +6,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/bengarrett/retrotxtgo/internal/pack"
-	"github.com/bengarrett/retrotxtgo/lib/convert"
-	"github.com/bengarrett/retrotxtgo/lib/filesystem"
-	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"retrotxt.com/retrotxt/internal/pack"
+	"retrotxt.com/retrotxt/lib/convert"
+	"retrotxt.com/retrotxt/lib/filesystem"
+	"retrotxt.com/retrotxt/lib/logs"
 
 	"github.com/spf13/cobra"
 )

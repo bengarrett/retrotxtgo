@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bengarrett/retrotxtgo/lib/logs"
-	"github.com/bengarrett/retrotxtgo/lib/prompt"
 	"github.com/spf13/viper"
+	"retrotxt.com/retrotxt/lib/logs"
+	"retrotxt.com/retrotxt/lib/prompt"
 )
 
 // Delete a configuration file.

@@ -7,10 +7,10 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/bengarrett/retrotxtgo/lib/logs"
-	"github.com/bengarrett/retrotxtgo/lib/str"
 	gap "github.com/muesli/go-app-paths"
 	"github.com/spf13/viper"
+	"retrotxt.com/retrotxt/lib/logs"
+	"retrotxt.com/retrotxt/lib/str"
 )
 
 // Defaults for configuration keys and values.

@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bengarrett/retrotxtgo/lib/filesystem"
+	"retrotxt.com/retrotxt/lib/filesystem"
 )
 
 func ExampleDetail_XML() {

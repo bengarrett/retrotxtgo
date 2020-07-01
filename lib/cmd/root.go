@@ -8,11 +8,11 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/bengarrett/retrotxtgo/lib/config"
-	"github.com/bengarrett/retrotxtgo/lib/logs"
-	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"retrotxt.com/retrotxt/lib/config"
+	"retrotxt.com/retrotxt/lib/logs"
+	"retrotxt.com/retrotxt/lib/str"
 )
 
 type rootFlags struct {

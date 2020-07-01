@@ -10,12 +10,12 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/encoding/ianaindex"
 	"golang.org/x/text/encoding/japanese"
+	"retrotxt.com/retrotxt/lib/filesystem"
 )
 
 // Chars transforms legacy encoded characters and text control codes into UTF-8 characters.

@@ -5,9 +5,9 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/bengarrett/retrotxtgo/lib/prompt"
-	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/spf13/viper"
+	"retrotxt.com/retrotxt/lib/prompt"
+	"retrotxt.com/retrotxt/lib/str"
 )
 
 var setupMode = false

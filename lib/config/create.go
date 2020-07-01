@@ -6,9 +6,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/bengarrett/retrotxtgo/lib/filesystem"
-	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/spf13/viper"
+	"retrotxt.com/retrotxt/lib/filesystem"
+	"retrotxt.com/retrotxt/lib/str"
 )
 
 // Create a named configuration file.

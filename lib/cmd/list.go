@@ -3,11 +3,11 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/bengarrett/retrotxtgo/lib/convert"
-	"github.com/bengarrett/retrotxtgo/lib/logs"
-	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/spf13/cobra"
 	"golang.org/x/text/encoding/ianaindex"
+	"retrotxt.com/retrotxt/lib/convert"
+	"retrotxt.com/retrotxt/lib/logs"
+	"retrotxt.com/retrotxt/lib/str"
 )
 
 var listCmd = &cobra.Command{
