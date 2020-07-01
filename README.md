@@ -360,8 +360,7 @@ op token list > https://golang.org/pkg/go/token/#Token
 - [ ] scan for unique color codes like 24-bit colors.
 - [ ] implement ASCII font and CSS support.
 - [ ] scan and linkify any http/s, ftp, mailto links in HTML.
-- [ ] when serving HTML over the internal server, monitor the files for any edits and refresh the browser if they occure.
-- [ ] info cmd should work on internal packed files.
+- [ ] when serving HTML over the internal server, monitor the files for any edits and refresh the browser if they occur.
 
 ```sh
 // TODO: env
