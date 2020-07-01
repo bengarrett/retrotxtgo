@@ -57,14 +57,15 @@ var createCmd = &cobra.Command{
 		}
 		// user arguments
 		checkUse(cmd, args)
-		var b []byte
 		for i, arg := range args {
-			if b = createPackage(arg); b == nil {
+			enc, b := createPackage(arg)
+			if b == nil {
 				var err error
 				b, err = filesystem.Read(arg)
 				logs.ChkErr(logs.Err{Issue: "file is invalid", Arg: arg, Msg: err})
 			}
 			if h := htmlServe(i, cmd, &b); !h {
+				html.Enc = enc
 				html.Create(&b)
 			}
 		}
@@ -85,20 +86,21 @@ func htmlServe(i int, cmd *cobra.Command, b *[]byte) bool {
 	return false
 }
 
-func createPackage(name string) (b []byte) {
+func createPackage(name string) (enc string, b []byte) {
 	var s = strings.ToLower(name)
 	if _, err := os.Stat(s); !os.IsNotExist(err) {
-		return nil
+		return "", nil
 	}
 	pkg, exist := internalPacks[s]
 	if !exist {
-		return nil
+		return "", nil
 	}
 	b = pack.Get(pkg.name)
+	enc = pkg.encoding
 	if b == nil {
-		return nil
+		return "", nil
 	}
-	return b
+	return enc, b
 }
 
 type metaFlag struct {
