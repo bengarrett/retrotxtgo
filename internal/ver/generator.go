@@ -53,7 +53,7 @@ func version() string {
 }
 
 func main() {
-	fmt.Println("version syntax:", string(version()))
+	fmt.Println("generated default version:", string(version()))
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		log.Fatal("directory does not exist:", dir)
 	}
