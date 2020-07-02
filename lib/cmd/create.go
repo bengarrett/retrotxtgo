@@ -148,11 +148,7 @@ func init() {
 	}
 	sort.Ints(keys)
 	// output flags
-	createCmd.Flags().StringVarP(&html.Enc, "encode", "e", "",
-		`characture encoding used by the filenames
-when ignored, UTF8 encoding is detected
-if that fails the default is used (default CP437)
-see the list of encode values `+str.Example("retrotxt list codepages")+"\n")
+	flagEncode(&html.Enc, createCmd)
 	createCmd.Flags().BoolVarP(&html.SaveToFile, "save", "s", false,
 		`save HTML and static files to a the save directory 
 or ignore to print (save directory: `+viper.GetString("save-directory")+")")

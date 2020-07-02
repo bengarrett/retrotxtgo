@@ -1,5 +1,3 @@
-//Package convert is extends Go's x/text/encoding capability to convert legacy text
-// to UTF-8.
 package convert
 
 import (
@@ -17,60 +15,6 @@ import (
 	"golang.org/x/text/encoding/japanese"
 	"retrotxt.com/retrotxt/lib/filesystem"
 )
-
-// Data for the transformation of legacy encoded text to UTF-8.
-type Data struct {
-	Source   []byte            // Source legacy encoded text.
-	Runes    []rune            // Runes with UTF-8 text.
-	encode   encoding.Encoding // Source character set encoding
-	len      int               // Runes count
-	newline  bool              // use newline controls
-	newlines [2]rune           // the newline controls rune values
-	tab      bool              // use horizontal tab controls
-	tabs     [1]rune           // the HT control rune value
-}
-
-// Chars transforms legacy encoded characters and text control codes into UTF-8 characters.
-func Chars(encoding string, b *[]byte) (utf8 []rune, err error) {
-	var d = Data{
-		Source: *b,
-	}
-	if _, err = d.Transform(encoding); err != nil {
-		return nil, err
-	}
-	d.Swap()
-	return d.Runes, nil
-}
-
-// Dump transforms legacy encoded text or ANSI into modern UTF-8 text
-// including all text contained after any MS-DOS end-of-file markers.
-func Dump(encoding string, b *[]byte) (utf8 []rune, err error) {
-	var d = Data{
-		Source:  *b,
-		newline: true,
-		tab:     true,
-	}
-	if _, err = d.Transform(encoding); err != nil {
-		return nil, err
-	}
-	d.Swap().ANSI()
-	return d.Runes, nil
-}
-
-// Text transforms legacy encoded text or ANSI into modern UTF-8 text.
-func Text(encoding string, b *[]byte) (utf8 []rune, err error) {
-	var d = Data{
-		Source:  *b,
-		newline: true,
-		tab:     true,
-	}
-	d.Source = EndOfFile(*b)
-	if _, err = d.Transform(encoding); err != nil {
-		return nil, err
-	}
-	d.Swap().ANSI()
-	return d.Runes, nil
-}
 
 // BOM is the UTF-8 byte order mark prefix.
 func BOM() []byte {
@@ -256,32 +200,6 @@ func encodingAlias(name string) (n string) {
 	return n
 }
 
-// Transform byte data from named character map encoded text into UTF-8.
-func (d *Data) Transform(name string) (*Data, error) {
-	if name == "" {
-		name = "UTF-8"
-	}
-	var err error
-	if d.encode, err = Encoding(name); err != nil {
-		return d, err
-	}
-	if len(d.Source) == 0 {
-		return d, nil
-	}
-	// only transform source if it is not already UTF-8
-	if utf8.Valid(d.Source) {
-		d.Runes = bytes.Runes(d.Source)
-		d.len = len(d.Runes)
-		return d, nil
-	}
-	if d.Source, err = d.encode.NewDecoder().Bytes(d.Source); err != nil {
-		return d, err
-	}
-	d.Runes = bytes.Runes(d.Source)
-	d.len = len(d.Runes)
-	return d, nil
-}
-
 // Swap transforms character map and control codes into UTF-8 unicode runes.
 func (d *Data) Swap() *Data {
 	if d.len == 0 {
@@ -346,15 +264,16 @@ func (d *Data) Newlines() {
 	d.newlines = filesystem.Newlines(d.Runes)
 }
 
+func (d *Data) ignore(r rune) {
+	d.ignores = append(d.ignores, r)
+}
+
 // RunesControls switches out C0 and C1 ASCII controls with Unicode picture represenations.
 func (d *Data) RunesControls() {
 	if len(d.Runes) == 0 {
 		return
 	}
 	const z = byte(0x80)
-	if d.tab {
-		d.tabs = [1]rune{9}
-	}
 	for i := 0; i < d.len; i++ {
 		r := d.Runes[i]
 		if d.skipRune(i) {
@@ -380,9 +299,6 @@ func (d *Data) RunesDOS() {
 	)
 	for i := 0; i < d.len; i++ {
 		r := d.Runes[i]
-		if d.tab {
-			d.tabs = [1]rune{9}
-		}
 		if d.skipRune(i) {
 			i++
 			continue
@@ -410,9 +326,6 @@ func (d *Data) RunesEBCDIC() {
 	}
 	for i := 0; i < d.len; i++ {
 		r := d.Runes[i]
-		if d.tab {
-			d.tabs = [1]rune{9}
-		}
 		if d.skipRune(i) {
 			i++
 			continue
@@ -516,9 +429,6 @@ func (d *Data) RunesMacintosh() {
 	const z = byte(0x80)
 	for i := 0; i < d.len; i++ {
 		r := d.Runes[i]
-		if d.tab {
-			d.tabs = [1]rune{9}
-		}
 		if d.skipRune(i) {
 			i++
 			continue
@@ -586,8 +496,10 @@ func (d *Data) skipRune(i int) bool {
 	if d.newline && equalNL([2]rune{r0, r1}, d.newlines) {
 		return true
 	}
-	if d.tab && [1]rune{r0} == d.tabs {
-		return true
+	for _, ign := range d.ignores {
+		if r0 == ign {
+			return true
+		}
 	}
 	return false
 }

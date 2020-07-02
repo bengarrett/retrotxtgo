@@ -82,6 +82,33 @@ func checkUse(cmd *cobra.Command, args []string) {
 	}
 }
 
+func flagEncode(p *string, cc *cobra.Command) {
+	cc.Flags().StringVarP(p, "encode", "e", "",
+		`characture encoding used by the filenames
+when ignored, UTF8 encoding is detected
+if that fails the default is used (default CP437)
+see the list of encode values `+str.Example("retrotxt list codepages")+"\n")
+}
+
+func flagTab(p *bool, cc *cobra.Command) {
+	cc.Flags().BoolVar(p, "tab", true, "parse horizontal tab control characters")
+}
+
+func flagWidth(p *int, cc *cobra.Command) {
+	cc.Flags().IntVarP(p, "width", "w", viewFlag.width, "document column character width")
+}
+
+func flagControls(p *[]string, cc *cobra.Command) {
+	cc.Flags().StringSliceVarP(p, "controls", "x", []string{}, "always use these control codes\n"+
+		"  tab    horizontal tab\n"+
+		"  bell   bell or terminal alert\n"+
+		"  cr     carriage return\n"+
+		"  lf     line feed\n"+
+		"  bs backspace, del delete character, esc escape character, ff formfeed, vt vertical tab\n"+
+		"separate multiple controls with commas\n"+
+		str.Example("-x tab,bell")+" or "+str.Example("--controls=tab,bell")+"\n")
+}
+
 type internalPack struct {
 	// choices: d convert.Dump, t convert.Text (default when blank)
 	convert string
@@ -96,7 +123,7 @@ type internalPack struct {
 var internalPacks = map[string]internalPack{
 	"437.cr":        {"d", "cp437", "text/cp437-cr.txt", "CP-437 all characters test using CR (carriage return)"}, //
 	"437.crlf":      {"d", "cp437", "text/cp437-crlf.txt", "CP-437 all characters test using Windows newline"},    //
-	"437.lf":        {"d", "cp437", "text/cp437-lf.txt", "CP-437 all characters test using LF (linefeed)"},        //
+	"437.lf":        {"d", "cp437", "text/cp437-lf.txt", "CP-437 all characters test using LF (line feed)"},       //
 	"865":           {"", "ibm865", "text/cp865.txt", "CP-865 and CP-860 Nordic test"},                            //
 	"1252":          {"", "cp1252", "text/cp1252.txt", "Windows-1252 English test"},                               //
 	"ascii":         {"", "cp437", "text/retrotxt.asc", "RetroTxt ASCII logos"},                                   //

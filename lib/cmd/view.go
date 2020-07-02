@@ -15,12 +15,14 @@ import (
 )
 
 type viewFlags struct {
-	codepage string
+	controls []string
+	encode   string
 	width    int // TODO: not implemented
 }
 
 var viewFlag = viewFlags{
-	codepage: "CP437",
+	controls: nil,
+	encode:   "CP437",
 	width:    80,
 }
 
@@ -29,15 +31,20 @@ var viewCmd = &cobra.Command{
 	Use:     "view [filenames]",
 	Aliases: []string{"v"},
 	Short:   "Print a legacy text file to the standard output",
-	Example: `  retrotxt view file.txt -c latin1
-  retrotxt view file1.txt file2.txt --codepage="iso-8859-1"
+	Example: `  retrotxt view file.txt -e latin1
+  retrotxt view file1.txt file2.txt --encode="iso-8859-1"
   cat file.txt | retrotxt view`,
 	Run: func(cmd *cobra.Command, args []string) {
+		var conv = convert.Args{
+			Controls: viewFlag.controls,
+			Encoding: viewFlag.encode,
+			Width:    viewFlag.width,
+		}
 		// piped input from other programs
 		if filesystem.IsPipe() {
 			b, err := filesystem.ReadPipe()
 			logs.Check("piped.view", err)
-			r, err := convert.Text(viewFlag.codepage, &b)
+			r, err := conv.Text(&b)
 			logs.Check("piped.view", err)
 			fmt.Println(string(r))
 			os.Exit(0)
@@ -55,7 +62,7 @@ var viewCmd = &cobra.Command{
 			if ok := logs.CheckCont("read file", err); !ok {
 				continue
 			}
-			r, err := convert.Text(viewFlag.codepage, &b)
+			r, err := conv.Text(&b)
 			if ok := logs.CheckCont("convert", err); !ok {
 				continue
 			}
@@ -70,9 +77,9 @@ var viewCmd = &cobra.Command{
 func init() {
 	// view cmd
 	rootCmd.AddCommand(viewCmd)
-	viewCmd.Flags().StringVarP(&viewFlag.codepage, "codepage", "c", viewFlag.codepage,
-		"legacy character encoding used by the text file")
-	viewCmd.Flags().IntVarP(&viewFlag.width, "width", "w", viewFlag.width, "document column character width")
+	flagEncode(&viewFlag.encode, viewCmd)
+	flagControls(&viewFlag.controls, viewCmd)
+	flagWidth(&viewFlag.width, viewCmd)
 	viewCmd.Flags().SortFlags = false
 }
 
@@ -89,20 +96,24 @@ func viewPackage(cmd *cobra.Command, name string) (ok bool, err error) {
 	if b == nil {
 		return false, errors.New("pkg.name is unknown: " + pkg.name)
 	}
-	// codepage defaults
-	encoding := viewFlag.codepage
-	if cp := cmd.Flags().Lookup("codepage"); !cp.Changed {
-		encoding = pkg.encoding
+	var conv = convert.Args{
+		Controls: viewFlag.controls,
+		Encoding: viewFlag.encode,
+		Width:    viewFlag.width,
+	}
+	// encode defaults
+	if cp := cmd.Flags().Lookup("encode"); !cp.Changed {
+		conv.Encoding = pkg.encoding
 	}
 	// convert and print
 	var r []rune
 	switch pkg.convert {
 	case "d":
-		if r, err = convert.Dump(encoding, &b); err != nil {
+		if r, err = conv.Dump(&b); err != nil {
 			return false, err
 		}
 	case "", "t":
-		if r, err = convert.Text(encoding, &b); err != nil {
+		if r, err = conv.Text(&b); err != nil {
 			return false, err
 		}
 	}

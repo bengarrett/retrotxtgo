@@ -452,18 +452,23 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 		t := time.Now().UTC()
 		p.BuildDate = t.Format(time.RFC3339)
 		p.BuildVersion = version.B.Version
-		p.Comment = "encoding: CP-437; linefeed: crlf; length: 100; width: 80; filename: somefile.txt" // TODO: make functional
+		// TODO: use actual data
+		p.Comment = comment(b)
 	case "mini":
 		p.PageTitle = viper.GetString("html.title")
 		p.MetaGenerator = false
 	}
 	// convert bytes into utf8
-	var name = args.Enc
-	if name == "" {
-		name = "cp437"
+	var conv = convert.Args{Encoding: args.Enc}
+	if args.Enc == "" {
+		conv.Encoding = "cp437"
 	}
-	runes, err := convert.Text(name, b)
+	runes, err := conv.Text(b)
 	logs.Check("create.pagedata.chars", err)
 	p.PreText = string(runes)
 	return p, nil
+}
+
+func comment(b *[]byte) string {
+	return "encoding: CP-437; linefeed: crlf; length: 100; width: 80; filename: somefile.txt"
 }

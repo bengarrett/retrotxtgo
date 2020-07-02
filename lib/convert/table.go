@@ -32,8 +32,9 @@ func Table(name string) (*bytes.Buffer, error) {
 			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf(" %X  ", i))
 		}
 	}
+	var conv = Args{Encoding: name}
 	var b, row = MakeBytes(), 0
-	runes, err := Chars(name, &b)
+	runes, err := conv.Chars(&b)
 	logs.Check("convert.table.chars", err)
 	for i, r := range runes {
 		char := string(r)
