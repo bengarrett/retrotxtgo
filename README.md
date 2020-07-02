@@ -361,6 +361,7 @@ op token list > https://golang.org/pkg/go/token/#Token
 - [ ] implement ASCII font and CSS support.
 - [ ] scan and linkify any http/s, ftp, mailto links in HTML.
 - [ ] when serving HTML over the internal server, monitor the files for any edits and refresh the browser if they occur.
+- [ ] replace uint types with iota https://golang.org/pkg/unicode/#pkg-constants
 
 ```sh
 // TODO: env
