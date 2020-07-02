@@ -201,95 +201,91 @@ func encodingAlias(name string) (n string) {
 }
 
 // Swap transforms character map and control codes into UTF-8 unicode runes.
-func (d *Data) Swap() *Data {
-	if d.len == 0 {
+func (c *Convert) Swap() *Convert {
+	if c.len == 0 {
 		return nil
 	}
-	if d.newline {
-		d.Newlines()
+	if c.newline {
+		c.Newlines()
 	}
-	switch d.encode {
+	switch c.encode {
 	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
-		d.RunesEBCDIC()
+		c.RunesEBCDIC()
 	case charmap.CodePage437, charmap.CodePage850, charmap.CodePage852, charmap.CodePage855,
 		charmap.CodePage858, charmap.CodePage860, charmap.CodePage862, charmap.CodePage863,
 		charmap.CodePage865, charmap.CodePage866:
-		d.RunesDOS()
+		c.RunesDOS()
 	case charmap.ISO8859_1, charmap.ISO8859_2, charmap.ISO8859_3, charmap.ISO8859_4, charmap.ISO8859_5,
 		charmap.ISO8859_6, charmap.ISO8859_7, charmap.ISO8859_8, charmap.ISO8859_9, charmap.ISO8859_10,
 		charmap.ISO8859_13, charmap.ISO8859_14, charmap.ISO8859_15, charmap.ISO8859_16,
 		charmap.Windows874:
-		d.RunesLatin()
+		c.RunesLatin()
 	case charmap.ISO8859_6E, charmap.ISO8859_6I, charmap.ISO8859_8E, charmap.ISO8859_8I:
-		d.RunesControls()
-		d.RunesLatin()
+		c.RunesControls()
+		c.RunesLatin()
 	case charmap.KOI8R, charmap.KOI8U:
-		d.RunesKOI8()
+		c.RunesKOI8()
 	case charmap.Macintosh:
-		d.RunesMacintosh()
+		c.RunesMacintosh()
 	case charmap.Windows1250, charmap.Windows1251, charmap.Windows1252, charmap.Windows1253,
 		charmap.Windows1254, charmap.Windows1255, charmap.Windows1256, charmap.Windows1257, charmap.Windows1258:
-		d.RunesControls()
-		d.RunesWindows()
+		c.RunesControls()
+		c.RunesWindows()
 	case japanese.ShiftJIS:
 	default:
-		d.RunesControls()
+		c.RunesControls()
 	}
-	return d
+	return c
 }
 
 // ANSI replaces out all ←[ and ␛[ character matches with functional ANSI escape controls.
-func (d *Data) ANSI() {
-	if d == nil {
+func (c *Convert) ANSI() {
+	if c == nil {
 		return
 	}
-	if d.len == 0 {
-		log.Fatal(errors.New("ANSI() is a chain method that is to be used in conjuction with Swap: d.Swap().ANSI()"))
+	if c.len == 0 {
+		log.Fatal(errors.New("ANSI() is a chain method that is to be used in conjuction with Swap: c.Swap().ANSI()"))
 	}
-	for i, r := range d.Runes {
-		if i+1 >= d.len {
+	for i, r := range c.Runes {
+		if i+1 >= c.len {
 			continue
 		}
-		if r == 8592 && d.Runes[i+1] == 91 {
-			d.Runes[i] = 27 // replace ←[
-		} else if r == 9243 && d.Runes[i+1] == 91 {
-			d.Runes[i] = 27 // replace ␛[
+		if r == 8592 && c.Runes[i+1] == 91 {
+			c.Runes[i] = 27 // replace ←[
+		} else if r == 9243 && c.Runes[i+1] == 91 {
+			c.Runes[i] = 27 // replace ␛[
 		}
 	}
 }
 
 // Newlines will try to guess the newline representation as a 2 byte value.
 // A guess of Unix will return [10, 0], Windows [13, 10], otherwise a [0, 0] value is returned.
-func (d *Data) Newlines() {
-	d.newlines = filesystem.Newlines(d.Runes)
-}
-
-func (d *Data) ignore(r rune) {
-	d.ignores = append(d.ignores, r)
+func (c *Convert) Newlines() {
+	c.newlines = filesystem.Newlines(c.Runes)
 }
 
 // RunesControls switches out C0 and C1 ASCII controls with Unicode picture represenations.
-func (d *Data) RunesControls() {
-	if len(d.Runes) == 0 {
+func (c *Convert) RunesControls() {
+	if len(c.Runes) == 0 {
 		return
 	}
 	const z = byte(0x80)
-	for i := 0; i < d.len; i++ {
-		r := d.Runes[i]
-		if d.skipRune(i) {
+	for i := 0; i < c.len; i++ {
+		r := c.Runes[i]
+		if c.skipRune(i) {
 			i++
 			continue
 		}
 		switch {
 		case r >= 0x00 && r <= 0x1f:
-			d.Runes[i] = decode(byte(rune(z) + r))
+			c.Runes[i] = decode(byte(rune(z) + r))
 		}
 	}
 }
 
 // RunesDOS switches out C0, C1 and other controls with PC/MS-DOS picture glyphs.
-func (d *Data) RunesDOS() {
-	if len(d.Runes) == 0 {
+func (c *Convert) RunesDOS() {
+	if len(c.Runes) == 0 {
 		return
 	}
 	var (
@@ -297,83 +293,83 @@ func (d *Data) RunesDOS() {
 		c1    = []string{"\u25BA", "\u25C4", "\u2195", "\u203C", "\u00B6", "\u00A7", "\u25AC", "\u21A8", "\u2191", "\u2193", "\u2192", "\u2190", "\u221F", "\u2194", "\u25B2", "\u25BC"}
 		ctrls = append(c0, c1...)
 	)
-	for i := 0; i < d.len; i++ {
-		r := d.Runes[i]
-		if d.skipRune(i) {
+	for i := 0; i < c.len; i++ {
+		r := c.Runes[i]
+		if c.skipRune(i) {
 			i++
 			continue
 		}
 		switch {
 		case r == 0x00:
-			d.Runes[i] = decode(0x80) // NUL
+			c.Runes[i] = decode(0x80) // NUL
 		case r > 0x00 && r <= 0x1f:
-			d.Runes[i], _ = utf8.DecodeRuneInString(ctrls[r]) // c0, c1 controllers
+			c.Runes[i], _ = utf8.DecodeRuneInString(ctrls[r]) // c0, c1 controllers
 		case r == 0x7c: // todo: add a user flag toggle
-			d.Runes[i], _ = utf8.DecodeRune([]byte{0xc2, 0xa6}) // ¦
+			c.Runes[i], _ = utf8.DecodeRune([]byte{0xc2, 0xa6}) // ¦
 		case r == 0x7f:
-			d.Runes[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0x82}) // ⌂
+			c.Runes[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0x82}) // ⌂
 		case r == 0xff:
-			d.Runes[i], _ = utf8.DecodeRune([]byte{0xc2, 0xa0}) // NBSP
+			c.Runes[i], _ = utf8.DecodeRune([]byte{0xc2, 0xa0}) // NBSP
 		}
 	}
 }
 
 // RunesEBCDIC switches out EBCDIC IBM mainframe controls with Unicode picture represenations.
 // Where no appropriate picture exists a space is used.
-func (d *Data) RunesEBCDIC() {
-	if len(d.Runes) == 0 {
+func (c *Convert) RunesEBCDIC() {
+	if len(c.Runes) == 0 {
 		return
 	}
-	for i := 0; i < d.len; i++ {
-		r := d.Runes[i]
-		if d.skipRune(i) {
+	for i := 0; i < c.len; i++ {
+		r := c.Runes[i]
+		if c.skipRune(i) {
 			i++
 			continue
 		}
 		switch r {
 		case 9:
-			d.Runes[i] = decode(0x89) // HT
+			c.Runes[i] = decode(0x89) // HT
 		case 127:
-			d.Runes[i] = decode(0xa1) // DEL
+			c.Runes[i] = decode(0xa1) // DEL
 		case 133:
-			d.Runes[i] = decode(0xa4) // NL
+			c.Runes[i] = decode(0xa4) // NL
 		case 8:
-			d.Runes[i] = decode(0x88) // BS
+			c.Runes[i] = decode(0x88) // BS
 		case 10:
-			d.Runes[i] = decode(0x8A) // LF
+			c.Runes[i] = decode(0x8A) // LF
 		case 23:
-			d.Runes[i] = decode(0x97) // ETB
+			c.Runes[i] = decode(0x97) // ETB
 		case 27: // x27 = ESC = x1B unicode
-			d.Runes[i] = decode(0x9B) // ESC
+			c.Runes[i] = decode(0x9B) // ESC
 		case 5:
-			d.Runes[i] = decode(0x85) // ENQ
+			c.Runes[i] = decode(0x85) // ENQ
 		case 6:
-			d.Runes[i] = decode(0x86) // ACK
+			c.Runes[i] = decode(0x86) // ACK
 		case 7:
-			d.Runes[i] = decode(0x87) // BEL
+			c.Runes[i] = decode(0x87) // BEL
 		case 22:
-			d.Runes[i] = decode(0x96) // SYN
+			c.Runes[i] = decode(0x96) // SYN
 		case 150:
-			d.Runes[i] = decode(0x84) // EOT
+			c.Runes[i] = decode(0x84) // EOT
 		case 20:
-			d.Runes[i] = decode(0x94) // DC4
+			c.Runes[i] = decode(0x94) // DC4
 		case 21:
-			d.Runes[i] = decode(0x95) // NAK
+			c.Runes[i] = decode(0x95) // NAK
 		case 26:
-			d.Runes[i] = decode(0x9A) // SUB
+			c.Runes[i] = decode(0x9A) // SUB
 		case 160:
-			d.Runes[i], _ = utf8.DecodeRune([]byte{0xc2, 0xa0}) // NBSP
+			c.Runes[i], _ = utf8.DecodeRune([]byte{0xc2, 0xa0}) // NBSP
 		case 0x00, 0x01, 0x02, 0x03, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
 			0x10, 0x11, 0x12, 0x13, 0x18, 0x19, 0x1c, 0x1d, 0x1e, 0x1f:
 			// shared controls with ASCII C0+C1
-			d.Runes[i] = decode(0x80 + byte(r))
+			c.Runes[i] = decode(0x80 + byte(r))
 		case 0x9c, 0x86, 0x97, 0x8d, 0x8e,
 			0x9D, 0x87, 0x92, 0x8f,
 			0x80, 0x81, 0x82, 0x83, 0xA1, 0x84, 0x88, 0x89, 0x8a, 0x8b, 0x8c,
 			0x90, 0x91, 0x93, 0x94, 0x95, 0x04, 0x98, 0x99, 0x9a, 0x9b, 0x9e,
 			0x9f:
 			// unprintable controls
-			d.Runes[i] = rune(32)
+			c.Runes[i] = rune(32)
 			// default:
 			// 	fmt.Printf("[%d→%v/%X %q]\n", i, r, r, r)
 		}
@@ -381,90 +377,94 @@ func (d *Data) RunesEBCDIC() {
 }
 
 // RunesKOI8 blanks out unused C0, C1 and other controls spaces for Russian sets.
-func (d *Data) RunesKOI8() {
-	if len(d.Runes) == 0 {
+func (c *Convert) RunesKOI8() {
+	if len(c.Runes) == 0 {
 		return
 	}
-	for i := 0; i < d.len; i++ {
-		r := d.Runes[i]
-		if d.skipRune(i) {
+	for i := 0; i < c.len; i++ {
+		r := c.Runes[i]
+		if c.skipRune(i) {
 			i++
 			continue
 		}
 		switch {
 		case r >= 0x00 && r <= 0x1f:
-			d.Runes[i] = rune(32)
+			c.Runes[i] = rune(32)
 		case r == 0x7f:
-			d.Runes[i] = rune(32)
+			c.Runes[i] = rune(32)
 		case r == 65533:
-			d.Runes[i] = rune(32)
+			c.Runes[i] = rune(32)
 		}
 	}
 }
 
 // RunesLatin blanks out unused C0, C1 and other controls spaces for ISO Latin sets.
-func (d *Data) RunesLatin() {
-	if len(d.Runes) == 0 {
+func (c *Convert) RunesLatin() {
+	if len(c.Runes) == 0 {
 		return
 	}
-	for i := 0; i < d.len; i++ {
-		r := d.Runes[i]
-		if d.skipRune(i) {
+	for i := 0; i < c.len; i++ {
+		r := c.Runes[i]
+		if c.skipRune(i) {
 			i++
 			continue
 		}
 		switch {
 		case r >= 0x00 && r <= 0x1f:
-			d.Runes[i] = rune(32)
+			c.Runes[i] = rune(32)
 		case r >= 0x7f && r <= 0x9f:
-			d.Runes[i] = rune(32)
+			c.Runes[i] = rune(32)
 		case r == 65533:
-			d.Runes[i] = rune(32)
+			c.Runes[i] = rune(32)
 		}
 	}
 }
 
 // RunesMacintosh replaces specific Mac OS Roman characters with Unicode picture represenations.
-func (d *Data) RunesMacintosh() {
+func (c *Convert) RunesMacintosh() {
 	const z = byte(0x80)
-	for i := 0; i < d.len; i++ {
-		r := d.Runes[i]
-		if d.skipRune(i) {
+	for i := 0; i < c.len; i++ {
+		r := c.Runes[i]
+		if c.skipRune(i) {
 			i++
 			continue
 		}
 		switch r {
 		case 0x11:
-			d.Runes[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0x98}) // ⌘
+			c.Runes[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0x98}) // ⌘
 		case 0x12:
-			d.Runes[i], _ = utf8.DecodeRune([]byte{0xe2, 0x87, 0xa7}) // ⇧
+			c.Runes[i], _ = utf8.DecodeRune([]byte{0xe2, 0x87, 0xa7}) // ⇧
 		case 0x13:
-			d.Runes[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0xa5}) // ⌥
+			c.Runes[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0xa5}) // ⌥
 		case 0x14:
-			d.Runes[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0x83}) // ⌃
+			c.Runes[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0x83}) // ⌃
 		case 0x7f:
-			d.Runes[i] = decode(0xa1) // DEL
+			c.Runes[i] = decode(0xa1) // DEL
 		case 65533:
-			d.Runes[i] = rune(32)
+			c.Runes[i] = rune(32)
 		default:
 			switch {
 			case r >= 0x00 && r <= 0x1f:
-				d.Runes[i] = decode(byte(rune(z) + r))
+				c.Runes[i] = decode(byte(rune(z) + r))
 			}
 		}
 	}
 }
 
 // RunesWindows tweaks some Unicode picture represenations for Windows-125x sets.
-func (d *Data) RunesWindows() {
-	for i, r := range d.Runes {
+func (c *Convert) RunesWindows() {
+	for i, r := range c.Runes {
 		switch r {
 		case 0x7f:
-			d.Runes[i] = decode(0xa1) // DEL
+			c.Runes[i] = decode(0xa1) // DEL
 		case 65533:
-			d.Runes[i] = rune(32)
+			c.Runes[i] = rune(32)
 		}
 	}
+}
+
+func (c *Convert) ignore(r rune) {
+	c.ignores = append(c.ignores, r)
 }
 
 // utf8.DecodeRune([]byte{0xe2, 0x90, b})
@@ -487,16 +487,16 @@ func equalNL(r [2]rune, nl [2]rune) bool {
 		[]byte{byte(nl[0]), byte(nl[1])})
 }
 
-func (d *Data) skipRune(i int) bool {
-	var l, r0, r1 = d.len - 1, d.Runes[i], rune(0)
+func (c *Convert) skipRune(i int) bool {
+	var l, r0, r1 = c.len - 1, c.Runes[i], rune(0)
 	if i < l {
 		// check for multi-byte newlines
-		r1 = d.Runes[i+1]
+		r1 = c.Runes[i+1]
 	}
-	if d.newline && equalNL([2]rune{r0, r1}, d.newlines) {
+	if c.newline && equalNL([2]rune{r0, r1}, c.newlines) {
 		return true
 	}
-	for _, ign := range d.ignores {
+	for _, ign := range c.ignores {
 		if r0 == ign {
 			return true
 		}
