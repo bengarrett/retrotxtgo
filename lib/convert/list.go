@@ -12,6 +12,7 @@ import (
 	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/encoding/ianaindex"
 	"golang.org/x/text/encoding/japanese"
+	"golang.org/x/text/encoding/unicode"
 	"retrotxt.com/retrotxt/lib/str"
 )
 
@@ -25,13 +26,12 @@ type iana struct {
 // Encodings returns all the supported legacy text encodings.
 func Encodings() (e []encoding.Encoding) {
 	a := append(charmap.All, japanese.All...)
+	a = append(a, unicode.All...)
 	for _, m := range a {
-		switch fmt.Sprintf("%v", m) {
-		case
-			"EUC-JP",
-			"ISO-2022-JP",
-			"Macintosh Cyrillic",
-			"X-User-Defined":
+		switch m {
+		case japanese.EUCJP, japanese.ISO2022JP,
+			charmap.MacintoshCyrillic,
+			charmap.XUserDefined:
 			continue
 		}
 		e = append(e, m)
