@@ -391,3 +391,29 @@ func TestRunesEBCDIC(t *testing.T) {
 		})
 	}
 }
+
+func Test_equalNL(t *testing.T) {
+	var o, n, lf, win = [2]rune{0, 0}, [2]rune{-1, -1}, [2]rune{10, 0}, [2]rune{13, 0}
+	type args struct {
+		r  [2]rune
+		nl [2]rune
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{"negative", args{n, lf}, false},
+		{"nil lf", args{o, lf}, false},
+		{"nil win", args{o, win}, false},
+		{"lf", args{lf, lf}, true},
+		{"win", args{win, win}, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := equalNL(tt.args.r, tt.args.nl); got != tt.want {
+				t.Errorf("equalNL() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

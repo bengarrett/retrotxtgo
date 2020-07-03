@@ -5,14 +5,9 @@ import (
 	"testing"
 )
 
-const (
-	c = "═╣░╠═"
-	h = "cdb9b0cccd"
-)
+const c, h = "═╣░╠═", "cdb9b0cccd"
 
-var (
-	samp, _ = E437(c)
-)
+var samp, _ = E437(c)
 
 func TestHexDecode(t *testing.T) {
 	type args struct {
