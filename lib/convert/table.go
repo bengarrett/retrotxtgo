@@ -8,6 +8,8 @@ import (
 	"text/tabwriter"
 
 	"github.com/gookit/color"
+	"golang.org/x/text/encoding/charmap"
+	"golang.org/x/text/encoding/unicode"
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/str"
 )
@@ -18,10 +20,22 @@ func Table(name string) (*bytes.Buffer, error) {
 	if err != nil {
 		return nil, err
 	}
+	h := fmt.Sprintf("%s", cp)
+	switch cp {
+	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
+		h += " - EBCDIC"
+	case unicode.UTF8, unicode.UTF8BOM,
+		unicode.UTF16(unicode.BigEndian, unicode.UseBOM),
+		unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM),
+		unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM):
+		h += " - Unicode"
+	default:
+		h += " - Extended ASCII"
+	}
 	var buf bytes.Buffer
 	w := new(tabwriter.Writer).Init(&buf, 0, 8, 0, '\t', 0)
 	fmt.Fprintln(w, " "+color.OpFuzzy.Sprint(strings.Repeat("\u2015", 67)))
-	fmt.Fprintln(w, color.Primary.Sprint(str.Center(fmt.Sprintf("%s", cp), 67)))
+	fmt.Fprintln(w, color.Primary.Sprint(str.Center(h, 67)))
 	for i := 0; i < 16; i++ {
 		switch {
 		case i == 0:
