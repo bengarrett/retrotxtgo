@@ -121,6 +121,7 @@ type internalPack struct {
 }
 
 var internalPacks = map[string]internalPack{
+	"037":           {"", "cp037", "text/cp037.txt", "EBCDIC 037 IBM mainframe test"},
 	"437.cr":        {"d", "cp437", "text/cp437-cr.txt", "CP-437 all characters test using CR (carriage return)"}, //
 	"437.crlf":      {"d", "cp437", "text/cp437-crlf.txt", "CP-437 all characters test using Windows newline"},    //
 	"437.lf":        {"d", "cp437", "text/cp437-lf.txt", "CP-437 all characters test using LF (line feed)"},       //
