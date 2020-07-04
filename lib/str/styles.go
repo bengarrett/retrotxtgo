@@ -227,4 +227,5 @@ func JSONStyles(cmd string) {
 		}
 		styles.String(cmd)
 	}
+	fmt.Println()
 }
