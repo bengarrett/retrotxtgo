@@ -144,7 +144,7 @@ func (args *Args) Create(b *[]byte) {
 		go args.savejs(ch)
 		err1, err2, err3, err4 := <-ch, <-ch, <-ch, <-ch
 		if err1 != nil {
-			log.Fatal(err1) // TODO: logs.Fatal(error)
+			log.Fatal(err1)
 		}
 		if err2 != nil {
 			log.Fatal(err2)
@@ -178,7 +178,7 @@ func (args *Args) destination(name string) (string, error) {
 	stat, err = os.Stat(path)
 	if !args.OW && !os.IsNotExist(err) {
 		e := logs.Err{Issue: "file exists", Arg: path, Msg: errors.New("include an -o flag to overwrite")}
-		logs.ChkErr(e)
+		fmt.Println(e)
 	}
 	return path, nil
 }
