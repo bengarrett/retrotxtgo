@@ -148,10 +148,8 @@ func Newlines(runes []rune) [2]rune {
 			// carriage return on modern terminals will overwrite the existing line of text
 			// todo: add flag or change behaviour to replace CR (\r) with NL (\n)
 			c[1].count++
-		case 21:
+		case 133: // NL after transformation
 			c[4].count++
-		case 155:
-			// atascii (not currently used)
 		}
 	}
 	// sort results
@@ -168,7 +166,7 @@ func Newlines(runes []rune) [2]rune {
 	case "lfcr":
 		return [2]rune{10, 13}
 	case "nl":
-		return [2]rune{21}
+		return [2]rune{133}
 	}
 	return [2]rune{}
 }

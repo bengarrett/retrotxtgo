@@ -210,6 +210,7 @@ func (c *Convert) Swap() *Convert {
 	if c.newline {
 		c.Newlines()
 	}
+	println(fmt.Sprintf("newline detected: %+v", c.newlines))
 	switch c.encode {
 	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
 		c.RunesEBCDIC()
@@ -274,7 +275,10 @@ func (c *Convert) RunesControls() {
 	const z = byte(0x80)
 	for i := 0; i < c.len; i++ {
 		r := c.Runes[i]
-		if c.skipRune(i) {
+		if c.skipNewlines(i) {
+			if c.newlines == [2]rune{13, 0} {
+				c.Runes[i] = 10 // swap CR with LF
+			}
 			i++
 			continue
 		}
@@ -297,7 +301,10 @@ func (c *Convert) RunesDOS() {
 	)
 	for i := 0; i < c.len; i++ {
 		r := c.Runes[i]
-		if c.skipRune(i) {
+		if c.skipNewlines(i) {
+			if c.newlines == [2]rune{13, 0} {
+				c.Runes[i] = 10 // swap CR with LF
+			}
 			i++
 			continue
 		}
@@ -324,8 +331,8 @@ func (c *Convert) RunesEBCDIC() {
 	}
 	for i := 0; i < c.len; i++ {
 		r := c.Runes[i]
-		if c.skipRune(i) {
-			i++
+		if c.skipIgnores(i) {
+			//i++
 			continue
 		}
 		switch r {
@@ -334,6 +341,10 @@ func (c *Convert) RunesEBCDIC() {
 		case 127:
 			c.Runes[i] = decode(0xa1) // DEL
 		case 133:
+			if c.newline {
+				c.Runes[i] = 10 // Go will automatically convert this to CRLF on Windows
+				continue
+			}
 			c.Runes[i] = decode(0xa4) // NL
 		case 8:
 			c.Runes[i] = decode(0x88) // BS
@@ -372,8 +383,6 @@ func (c *Convert) RunesEBCDIC() {
 			0x9f:
 			// unprintable controls
 			c.Runes[i] = rune(32)
-			// default:
-			// 	fmt.Printf("[%d→%v/%X %q]\n", i, r, r, r)
 		}
 	}
 }
@@ -385,7 +394,7 @@ func (c *Convert) RunesKOI8() {
 	}
 	for i := 0; i < c.len; i++ {
 		r := c.Runes[i]
-		if c.skipRune(i) {
+		if c.skipNewlines(i) {
 			i++
 			continue
 		}
@@ -407,7 +416,7 @@ func (c *Convert) RunesLatin() {
 	}
 	for i := 0; i < c.len; i++ {
 		r := c.Runes[i]
-		if c.skipRune(i) {
+		if c.skipNewlines(i) {
 			i++
 			continue
 		}
@@ -427,7 +436,7 @@ func (c *Convert) RunesMacintosh() {
 	const z = byte(0x80)
 	for i := 0; i < c.len; i++ {
 		r := c.Runes[i]
-		if c.skipRune(i) {
+		if c.skipNewlines(i) {
 			i++
 			continue
 		}
@@ -489,17 +498,24 @@ func equalNL(r [2]rune, nl [2]rune) bool {
 		[]byte{byte(nl[0]), byte(nl[1])})
 }
 
-func (c *Convert) skipRune(i int) bool {
+func (c Convert) skipNewlines(i int) bool {
+	if !c.newline {
+		return false
+	}
 	var l, r0, r1 = c.len - 1, c.Runes[i], rune(0)
 	if i < l {
 		// check for multi-byte newlines
 		r1 = c.Runes[i+1]
 	}
-	if c.newline && equalNL([2]rune{r0, r1}, c.newlines) {
+	if equalNL([2]rune{r0, r1}, c.newlines) {
 		return true
 	}
+	return false
+}
+
+func (c Convert) skipIgnores(i int) bool {
 	for _, ign := range c.ignores {
-		if r0 == ign {
+		if c.Runes[i] == ign {
 			return true
 		}
 	}
