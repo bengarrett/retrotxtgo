@@ -302,11 +302,16 @@ func (args Args) Stdout(b *[]byte) error {
 	case "", "none":
 		fmt.Printf("%s", buf.String())
 	default:
+		if !str.IsStyle(args.Syntax) {
+			fmt.Printf("unknown style %q, so using none\n", args.Syntax)
+			fmt.Printf("%s", buf.String())
+			return nil
+		}
 		if err = str.Highlight(buf.String(), "html", args.Syntax); err != nil {
 			return err
 		}
 	}
-	return err
+	return nil
 }
 
 // destination determines if user supplied arguments are a valid file or directory destination.

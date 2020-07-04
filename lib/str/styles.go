@@ -105,6 +105,15 @@ func NumberizeKeys(keys []string) string {
 	return strings.Join(s, ", ")
 }
 
+func IsStyle(style string) bool {
+	for _, n := range styles.Names() {
+		if n == style {
+			return true
+		}
+	}
+	return false
+}
+
 // Term determines the terminal type based on the COLORTERM and TERM environment variables.
 func Term() (term string) {
 	// 9.11.2 The environment variable TERM

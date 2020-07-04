@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/alecthomas/chroma/styles"
 	"github.com/gookit/color"
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/str"
@@ -26,14 +25,7 @@ func Info(style string) (err logs.IssueErr) {
 	case "none", "":
 		fmt.Println(string(out))
 	default:
-		ok := false
-		for _, n := range styles.Names() {
-			if n == style {
-				ok = true
-				break
-			}
-		}
-		if !ok {
+		if !str.IsStyle(style) {
 			fmt.Printf("unknown style %q, so using none\n", style)
 			fmt.Println(string(out))
 			break
