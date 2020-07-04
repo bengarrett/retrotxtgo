@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/alecthomas/chroma/styles"
 	"github.com/gookit/color"
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/str"
@@ -25,7 +26,25 @@ func Info(style string) (err logs.IssueErr) {
 	case "none", "":
 		fmt.Println(string(out))
 	default:
-		str.Highlight(string(out), "json", style)
+		ok := false
+		for _, n := range styles.Names() {
+			if n == style {
+				ok = true
+				break
+			}
+		}
+		if !ok {
+			fmt.Printf("unknown style %q, so using plaintext\n", style)
+			fmt.Println(string(out))
+			break
+		}
+		e = str.Highlight(string(out), "json", style)
+		if e != nil {
+			return logs.IssueErr{
+				Issue: "failed to run highligher",
+				Err:   e,
+			}
+		}
 		fmt.Println()
 	}
 	if m := Missing(); len(m) > 0 {
