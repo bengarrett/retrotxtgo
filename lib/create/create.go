@@ -338,6 +338,21 @@ func Layouts() (s []string) {
 	return s
 }
 
+func layout(name string) string {
+	if name == "" {
+		return ""
+	}
+	for key, val := range createTemplates() {
+		if name == key {
+			return val
+		}
+		if name == key[:1] {
+			return val
+		}
+	}
+	return ""
+}
+
 // createTemplates creates a map of the template filenames used in conjunction with the layout flag.
 func createTemplates() files {
 	f := make(files)
@@ -388,20 +403,20 @@ func (args Args) newTemplate() (*template.Template, error) {
 
 // filename creates a filepath for the template filenames.
 func (args *Args) templateCache() (err error) {
-	f := createTemplates()[args.Layout]
-	if f == "" {
+	l := layout(args.Layout)
+	if l == "" {
 		return fmt.Errorf("create.templatecache: layout does not exist: %q", args.Layout)
 	}
-	args.tmpl, err = scope.DataPath(f + ".html")
+	args.tmpl, err = scope.DataPath(l + ".html")
 	return err
 }
 
 func (args *Args) templatePack() error {
-	f := createTemplates()[args.Layout]
-	if f == "" {
+	l := layout(args.Layout)
+	if l == "" {
 		return fmt.Errorf("create.templatepack: package and layout does not exist: %q", args.Layout)
 	}
-	args.pack = fmt.Sprintf("html/%s.html", f)
+	args.pack = fmt.Sprintf("html/%s.html", l)
 	return nil
 }
 

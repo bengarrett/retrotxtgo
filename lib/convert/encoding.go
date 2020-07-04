@@ -35,7 +35,7 @@ func Encoding(name string) (encoding.Encoding, error) {
 	n := encodingAlias(shorten(name))
 	enc, err := ianaindex.IANA.Encoding(n)
 	if err != nil {
-		err = fmt.Errorf("%s %q → %q", err, name, n)
+		err = fmt.Errorf("%s %q", err, name) // TODO fix error for --encode flags
 		return enc, err
 	}
 	return enc, err
