@@ -458,11 +458,12 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 		p.PageTitle = viper.GetString("html.title")
 		p.MetaGenerator = false
 	}
-	// convert bytes into utf8
+	// check encoding
 	var conv = convert.Args{Encoding: args.Enc}
 	if args.Enc == "" {
 		conv.Encoding = "cp437"
 	}
+	// convert bytes into utf8
 	runes, err := conv.Text(b)
 	logs.Check("create.pagedata.chars", err)
 	p.PreText = string(runes)
