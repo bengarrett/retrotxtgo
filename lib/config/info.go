@@ -34,7 +34,7 @@ func Info(style string) (err logs.IssueErr) {
 			}
 		}
 		if !ok {
-			fmt.Printf("unknown style %q, so using plaintext\n", style)
+			fmt.Printf("unknown style %q, so using none\n", style)
 			fmt.Println(string(out))
 			break
 		}
