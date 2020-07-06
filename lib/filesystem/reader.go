@@ -171,6 +171,37 @@ func Newlines(runes []rune) [2]rune {
 	return [2]rune{}
 }
 
+// Newline humanizes the value of Newlines().
+func Newline(r [2]rune, extraInfo bool) string {
+	if !extraInfo {
+		switch r {
+		case [2]rune{10}:
+			return "LF"
+		case [2]rune{13}:
+			return "CR"
+		case [2]rune{13, 10}:
+			return "CRLF"
+		case [2]rune{10, 13}:
+			return "LFCR"
+		case [2]rune{21}:
+			return "NL"
+		}
+	}
+	switch r {
+	case [2]rune{10}:
+		return "LF (Linux, macOS, Unix)"
+	case [2]rune{13}:
+		return "CR (8-bit microcomputers)"
+	case [2]rune{13, 10}:
+		return "CRLF (Windows, DOS)"
+	case [2]rune{10, 13}:
+		return "LFCR (Acorn BBC)"
+	case [2]rune{21}:
+		return "NL (IBM EBCDIC)"
+	}
+	return "??"
+}
+
 // Runes returns the number of runes in the reader interface.
 func Runes(r io.Reader) (count int, err error) {
 	scanner := bufio.NewScanner(r)

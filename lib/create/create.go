@@ -48,8 +48,9 @@ type Args struct {
 	// template package name
 	pack string
 
-	// Flag values and change state
+	// Flag values, command arguments and change state
 
+	FilenameVal        string
 	TitleVal           string
 	Title              bool
 	MetaAuthorVal      string
@@ -485,8 +486,7 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 		t := time.Now().UTC()
 		p.BuildDate = t.Format(time.RFC3339)
 		p.BuildVersion = version.B.Version
-		// TODO: use actual data
-		p.Comment = comment(b)
+
 	case "mini":
 		p.PageTitle = args.pageTitle()
 		p.MetaGenerator = false
@@ -498,14 +498,33 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 	}
 	// convert bytes into utf8
 	runes, err := conv.Text(b)
+	if p.MetaRetroTxt {
+		p.Comment = args.comment(conv, runes)
+	}
 	logs.Check("create.pagedata.chars", err)
 	p.PreText = string(runes)
 	fmt.Println(args)
 	return p, nil
 }
 
-func comment(b *[]byte) string {
-	return "encoding: CP-437; linefeed: crlf; length: 100; width: 80; filename: somefile.txt"
+func (args Args) comment(c convert.Args, r []rune) string {
+	e, nl, l, w, f := "", "", 0, 0, "n/a"
+	b := []byte(string(r))
+	nlr := filesystem.Newlines(r)
+	e = convert.Humanize(c.Encoding)
+	nl = filesystem.Newline(nlr, false)
+	l, err := filesystem.Lines(bytes.NewReader(b), nlr)
+	if err != nil {
+		l = -1
+	}
+	w, err = filesystem.Columns(bytes.NewReader(b), nlr)
+	if err != nil {
+		w = -1
+	}
+	if args.FilenameVal != "" {
+		f = args.FilenameVal
+	}
+	return fmt.Sprintf("encoding: %s; newline: %s; length: %d; width: %d; name: %s", e, nl, l, w, f)
 }
 
 func (args Args) fontFamily() string {

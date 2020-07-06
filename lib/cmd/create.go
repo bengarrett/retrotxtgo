@@ -78,6 +78,7 @@ var createCmd = &cobra.Command{
 		// user arguments
 		checkUse(cmd, args)
 		for i, arg := range args {
+			html.FilenameVal = arg
 			enc, b := createPackage(arg)
 			if b == nil {
 				var err error

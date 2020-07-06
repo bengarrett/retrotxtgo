@@ -41,6 +41,14 @@ func Encoding(name string) (encoding.Encoding, error) {
 	return enc, err
 }
 
+// Humanize the encoding by using an shorter, less formal name.
+func Humanize(name string) string {
+	if _, err := Encoding(name); err != nil {
+		return ""
+	}
+	return encodingAlias(shorten(name))
+}
+
 // EndOfFile will cut text at the first DOS end-of-file marker.
 func EndOfFile(b []byte) []byte {
 	if cut := bytes.IndexByte(b, 26); cut > 0 {

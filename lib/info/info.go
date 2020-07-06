@@ -319,22 +319,6 @@ func (d Detail) JSON(indent bool) (js []byte) {
 	return js
 }
 
-func (d Detail) nl() string {
-	switch d.Newline {
-	case [2]rune{10}:
-		return "LF (Linux, macOS, Unix)"
-	case [2]rune{13}:
-		return "CR (8-bit microcomputers)"
-	case [2]rune{13, 10}:
-		return "CRLF (Windows, DOS)"
-	case [2]rune{10, 13}:
-		return "LFCR (Acorn BBC)"
-	case [2]rune{21}:
-		return "NL (IBM EBCDIC)"
-	}
-	return "??"
-}
-
 // Text format and returns the details of a file.
 func (d Detail) Text(color bool) string {
 	p := message.NewPrinter(Language)
@@ -350,7 +334,7 @@ func (d Detail) Text(color bool) string {
 	}{
 		{k: "filename", v: d.Name},
 		{k: "UTF-8", v: str.Bool(d.Utf8)},
-		{k: "newline", v: d.nl()},
+		{k: "newline", v: filesystem.Newline(d.Newline, true)},
 		{k: "characters", v: p.Sprint(d.CharCount)},
 		{k: "ANSI controls", v: p.Sprint(d.CtrlCount)},
 		{k: "words", v: p.Sprint(d.WordCount)},
