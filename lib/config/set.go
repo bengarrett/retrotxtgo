@@ -155,6 +155,8 @@ func Update(name string) {
 		previewMeta(name, value.(string))
 		fmt.Println(str.NumberizeKeys(create.Robots))
 		setIndex(name, value.(string), create.Robots)
+	case "html.meta.retrotxt":
+		setRetrotxt(value.(bool))
 	case "html.title":
 		previewTitle(value.(string))
 		fmt.Println("Choose a new " + Hints[name] + ":")
@@ -511,6 +513,20 @@ func setPort(name string) {
 		return
 	}
 	save(name, v)
+}
+
+func setRetrotxt(value bool) {
+	var name = "html.meta.retrotxt"
+	elm := fmt.Sprint("<head>\n  <meta name=\"retrotxt\" content=\"encoding: IBM437; newline: CRLF; length: 50; width: 80; name: file.txt\">")
+	fmt.Println(logs.ColorHTML(elm))
+	p := "Enable the retrotxt element"
+	if value {
+		p = "Keep the retrotxt element"
+	}
+	viper.Set(name, prompt.YesNo(p, viper.GetBool(name)))
+	if err := UpdateConfig("", false); err != nil {
+		logs.Log(err)
+	}
 }
 
 func setShortStrings(name, value string, data []string) {

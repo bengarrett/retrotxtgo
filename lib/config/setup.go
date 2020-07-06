@@ -4,8 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
 	"runtime"
 	"strings"
+	"syscall"
 
 	"github.com/spf13/viper"
 	"retrotxt.com/retrotxt/internal/pack"
@@ -22,6 +25,7 @@ func Setup() {
 	logo()
 	PrintLocation()
 	var w uint = 80
+	watch()
 	for i, key := range keys {
 		if i == 0 {
 			fmt.Printf("\n%s\n\n", str.Cb(enterKey()))
@@ -57,4 +61,15 @@ func logo() {
 	}
 	// convert and print
 	fmt.Println(string(b))
+}
+
+// watch intercepts Ctrl-C exit key combination.
+func watch() {
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		fmt.Printf("\n\nexited setup\n")
+		os.Exit(0)
+	}()
 }

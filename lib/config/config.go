@@ -77,6 +77,7 @@ type Settings struct {
 			Keywords    string `yaml:"keywords"`
 			Notranslate bool   `yaml:"notranslate"`
 			Referrer    string `yaml:"referrer"`
+			RetroTxt    bool   `yaml:"retrotxt"`
 			Robots      string `yaml:"robots"`
 			ThemeColor  string `yaml:"theme-color"`
 		}
@@ -179,6 +180,8 @@ func Marshal() (interface{}, error) {
 			sc.HTML.Meta.Notranslate = getBool(key)
 		case "html.meta.referrer":
 			sc.HTML.Meta.Referrer = getString(key)
+		case "html.meta.retrotxt":
+			sc.HTML.Meta.RetroTxt = getBool(key)
 		case "html.meta.robots":
 			sc.HTML.Meta.Robots = getString(key)
 		case "html.meta.theme-color":
