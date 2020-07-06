@@ -163,7 +163,8 @@ func init() {
 		29: {"html.font.family", &html.FontFamilyVal, nil, nil, "font-family", "f", nil},
 		31: {"html.font.embed", nil, &html.FontEmbedVal, nil, "font-embed", "", nil},
 		// hidden flags
-		0: {"html.body", &html.Body, nil, nil, "body", "b", nil},
+		0:  {"html.body", &html.Body, nil, nil, "body", "b", nil},
+		99: {"html.layout.cache", nil, &html.Cache, nil, "cache", "", nil},
 	}
 	// create an ordered index for the flags
 	var keys []int
@@ -204,5 +205,7 @@ or ignore to print (save directory: `+viper.GetString("save-directory")+")")
 	}
 	err = createCmd.Flags().MarkHidden("body")
 	logs.Check("create mark body hidden", err)
+	err = createCmd.Flags().MarkHidden("cache")
+	logs.Check("create mark cache hidden", err)
 	createCmd.Flags().SortFlags = false
 }

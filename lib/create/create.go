@@ -31,6 +31,8 @@ type Args struct {
 	Encoding string
 	// Body text content
 	Body string
+	// Cache when false will always unpack a new .gohtml template
+	Cache bool
 	// Layout of the HTML
 	Layout string
 	// Syntax and color theming printing HTML
@@ -81,6 +83,8 @@ type PageData struct {
 	BuildDate       string
 	CacheRefresh    string
 	Comment         string
+	CSSEmbed        template.CSS
+	ExternalEmbed   bool
 	FontEmbed       bool
 	FontFamily      string
 	MetaAuthor      string
@@ -95,6 +99,7 @@ type PageData struct {
 	MetaThemeColor  string
 	PageTitle       string
 	PreText         string
+	ScriptEmbed     template.JS
 }
 
 type files map[string]string
@@ -380,15 +385,22 @@ func (args Args) newTemplate() (*template.Template, error) {
 	if err := args.templateCache(); err != nil {
 		return nil, err
 	}
-	if s, err := os.Stat(args.tmpl); os.IsNotExist(err) {
+	if !args.Cache {
 		if err := args.templateSave(); err != nil {
 			return nil, err
 		}
 		println("template cache saved to:", args.tmpl)
-	} else if err != nil {
-		return nil, err
-	} else if s.IsDir() {
-		return nil, fmt.Errorf("create.newtemplate: template file is a directory: %q", args.tmpl)
+	} else {
+		if s, err := os.Stat(args.tmpl); os.IsNotExist(err) {
+			if err := args.templateSave(); err != nil {
+				return nil, err
+			}
+			println("template cache saved to:", args.tmpl)
+		} else if err != nil {
+			return nil, err
+		} else if s.IsDir() {
+			return nil, fmt.Errorf("create.newtemplate: template file is a directory: %q", args.tmpl)
+		}
 	}
 	// to avoid a potential panic, Stat again incase os.IsNotExist() is true
 	s, err := os.Stat(args.tmpl)
@@ -417,7 +429,7 @@ func (args *Args) templateCache() (err error) {
 	if l == "" {
 		return fmt.Errorf("create.templatecache: layout does not exist: %q", args.Layout)
 	}
-	args.tmpl, err = scope.DataPath(l + ".html")
+	args.tmpl, err = scope.DataPath(l + ".gohtml")
 	return err
 }
 
@@ -426,7 +438,7 @@ func (args *Args) templatePack() error {
 	if l == "" {
 		return fmt.Errorf("create.templatepack: package and layout does not exist: %q", args.Layout)
 	}
-	args.pack = fmt.Sprintf("html/%s.html", l)
+	args.pack = fmt.Sprintf("html/%s.gohtml", l)
 	return nil
 }
 
@@ -458,7 +470,7 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 	if b == nil {
 		return PageData{}, errors.New("create.pagedata: cannot convert b <nil>")
 	}
-	// templates are found in the dir static/html/*.html
+	// templates are found in the dir static/html/*.gohtml
 	switch args.Layout {
 	/*
 		TODO:
@@ -467,8 +479,28 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 				f["mini"] = "standard"
 				f["pre"] = "pre-content"
 				f["standard"] = "standard"
+
+
+				full = css embed // embed CSS into HTML
+				standard !
+				mini !
+				main just generated HTML with no parents
 	*/
-	case "full", "standard":
+	case "full":
+		p.ExternalEmbed = true
+		s := pack.Get("css/styles.css")
+		s = bytes.TrimSpace(s)
+
+		f := pack.Get("css/font-vga.css")
+		f = bytes.TrimSpace(f)
+
+		c := [][]byte{s, []byte("/* font */"), f}
+		css := bytes.Join(c, []byte("\n\n"))
+		p.CSSEmbed = template.CSS(string(css))
+		js := pack.Get("js/scripts.js")
+		p.ScriptEmbed = template.JS(string(js))
+		fallthrough
+	case "standard":
 		p.FontEmbed = args.FontEmbedVal  // todo
 		p.FontFamily = args.fontFamily() // todo
 		p.MetaAuthor = args.metaAuthor()
@@ -487,7 +519,7 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 		p.BuildDate = t.Format(time.RFC3339)
 		p.BuildVersion = version.B.Version
 
-	case "mini":
+	case "mini": // disables all meta tags
 		p.PageTitle = args.pageTitle()
 		p.MetaGenerator = false
 	}
