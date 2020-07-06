@@ -86,7 +86,7 @@ var createCmd = &cobra.Command{
 			}
 			if h := htmlServe(i, cmd, &b); !h {
 				if cp := cmd.Flags().Lookup("encode"); !cp.Changed {
-					html.Enc = enc // --encode overwrite
+					html.Encoding = enc // --encode overwrite
 				}
 				html.Create(&b)
 			}
@@ -171,7 +171,7 @@ func init() {
 	}
 	sort.Ints(keys)
 	// output flags
-	flagEncode(&html.Enc, createCmd)
+	flagEncode(&html.Encoding, createCmd)
 	createCmd.Flags().BoolVarP(&html.SaveToFile, "save", "s", false,
 		`save HTML and static files to a the save directory 
 or ignore to print (save directory: `+viper.GetString("save-directory")+")")

@@ -56,7 +56,7 @@ func (args *Args) Serve(b *[]byte) {
 func (args *Args) createDir(b *[]byte) (err error) {
 	// TODO: deep-copy channel support?
 	args.SaveToFile, args.OW = true, true
-	args.Dest, err = ioutil.TempDir(os.TempDir(), "*-serve")
+	args.Destination, err = ioutil.TempDir(os.TempDir(), "*-serve")
 	if err != nil {
 		return err
 	}
@@ -66,7 +66,7 @@ func (args *Args) createDir(b *[]byte) (err error) {
 
 // serveDir creates and serves b over an internal HTTP server.
 func (args Args) serveDir() (err error) {
-	http.Handle("/", http.FileServer(http.Dir(args.Dest)))
+	http.Handle("/", http.FileServer(http.Dir(args.Destination)))
 	srv := &http.Server{
 		Addr:         fmt.Sprintf("127.0.0.1:%v", args.Port),
 		WriteTimeout: 15 * time.Second,
@@ -88,14 +88,14 @@ func (args Args) watch() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		fmt.Printf("\n\nServer shutdown and clean up: %s\n", args.Dest)
+		fmt.Printf("\n\nServer shutdown and clean up: %s\n", args.Destination)
 		tmp, err := path.Match(fmt.Sprintf("%s%s*",
-			string(os.PathSeparator), os.TempDir()), fmt.Sprintf("%s", args.Dest))
+			string(os.PathSeparator), os.TempDir()), fmt.Sprintf("%s", args.Destination))
 		if err != nil {
 			log.Fatal(err)
 		}
 		if tmp {
-			os.RemoveAll(args.Dest)
+			os.RemoveAll(args.Destination)
 		}
 		os.Exit(0)
 	}()

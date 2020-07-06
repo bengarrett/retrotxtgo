@@ -35,7 +35,7 @@ func Test_Save(t *testing.T) {
 			ch := make(chan error)
 			a := Args{Layout: "standard", Test: true}
 			a.OW = true
-			a.Dest = tt.args.name
+			a.Destination = tt.args.name
 			go a.savehtml(&tt.args.data, ch)
 			err := <-ch
 			if (err != nil) != tt.wantErr {

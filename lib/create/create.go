@@ -25,10 +25,10 @@ import (
 
 // Args holds arguments and options sourced from user flags or the config file.
 type Args struct {
-	// Dest HTML destination either a directory or file
-	Dest string
-	// Enc text encoding of the source input
-	Enc string
+	// Destination HTML destination either a directory or file
+	Destination string
+	// Encoding text encoding of the source input
+	Encoding string
 	// Body text content
 	Body string
 	// Layout of the HTML
@@ -134,10 +134,10 @@ func (args *Args) Create(b *[]byte) {
 	switch {
 	case args.SaveToFile:
 		// use config save directory
-		// otherwise assume Dest path is a temporary --serve location
-		if args.Dest == "" {
+		// otherwise assume Destination path is a temporary --serve location
+		if args.Destination == "" {
 			dir := []string{viper.GetString("save-directory")}
-			if args.Dest, err = destination(dir); err != nil {
+			if args.Destination, err = destination(dir); err != nil {
 				log.Fatal(err)
 			}
 		}
@@ -169,7 +169,7 @@ func (args *Args) Create(b *[]byte) {
 }
 
 func (args *Args) destination(name string) (string, error) {
-	dir := filesystem.DirExpansion(args.Dest)
+	dir := filesystem.DirExpansion(args.Destination)
 	path := dir
 	stat, err := os.Stat(dir)
 	if err != nil {
@@ -187,7 +187,7 @@ func (args *Args) destination(name string) (string, error) {
 	return path, nil
 }
 
-// savecss creates and saves the styles stylesheet to the Dest argument.
+// savecss creates and saves the styles stylesheet to the Destination argument.
 func (args Args) savecss(c chan error) {
 	name, err := args.destination("styles.css")
 	if err != nil {
@@ -204,7 +204,7 @@ func (args Args) savecss(c chan error) {
 	c <- nil
 }
 
-// savefont unpacks and saves the font binary to the Dest argument.
+// savefont unpacks and saves the font binary to the Destination argument.
 func (args Args) savefont(c chan error) {
 	if err := args.savefontwoff2("vga.woff2", "font/ibm-vga8.woff2"); err != nil {
 		c <- err
@@ -263,7 +263,7 @@ func (args Args) savejs(c chan error) {
 	c <- nil
 }
 
-// SaveHTML creates and saves the html template to the Dest argument.
+// SaveHTML creates and saves the html template to the Destination argument.
 func (args Args) savehtml(b *[]byte, c chan error) {
 	name, err := args.destination("index.html")
 	if err != nil {
@@ -492,8 +492,8 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 		p.MetaGenerator = false
 	}
 	// check encoding
-	var conv = convert.Args{Encoding: args.Enc}
-	if args.Enc == "" {
+	var conv = convert.Args{Encoding: args.Encoding}
+	if args.Encoding == "" {
 		conv.Encoding = "cp437"
 	}
 	// convert bytes into utf8
