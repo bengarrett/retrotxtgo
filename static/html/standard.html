@@ -5,8 +5,6 @@
     <meta charset="utf-8" />
     {{- if .PageTitle}}
     <title>{{.PageTitle}}</title>
-    {{- end}} {{if .Comment}}
-    <meta name="retrotxt" content="{{.Comment}}" />
     {{- end}} {{if .MetaDesc}}
     <meta name="description" content="{{.MetaDesc}}" />
     {{- end}} {{if .MetaAuthor}}
@@ -23,6 +21,8 @@
     <meta name="color-scheme" content="{{.MetaColorScheme}}" />
     {{- end}} {{if .MetaNoTranslate}}
     <meta name="google" content="notranslate" />
+    {{- end}} {{if .Comment}}
+    <meta name="retrotxt" content="{{.Comment}}" />
     {{- end}} {{if .MetaGenerator}}
     <meta
       name="generator"
