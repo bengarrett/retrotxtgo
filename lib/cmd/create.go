@@ -38,6 +38,26 @@ var createCmd = &cobra.Command{
 	Short:   "Create a HTML document from a text file",
 	Example: exampleCmd(),
 	Run: func(cmd *cobra.Command, args []string) {
+		var changed = func(key string) bool {
+			l := cmd.Flags().Lookup(key)
+			if l == nil {
+				return false
+			}
+			return l.Changed
+		}
+		// monitor striing flag changes to allow three user states.
+		// 1) flag not changed so use viper default.
+		// 2) flag with new value to overwrite viper default.
+		// 3) blank flag value to overwrite viper default with an empty/disable value.
+		html.FontFamily = changed("font-family")
+		html.MetaAuthor = changed("meta-author")
+		html.MetaColorScheme = changed("meta-color-scheme")
+		html.MetaDescription = changed("meta-description")
+		html.MetaKeywords = changed("meta-keywords")
+		html.MetaReferrer = changed("meta-referrer")
+		html.MetaRobots = changed("meta-robots")
+		html.MetaThemeColor = changed("meta-theme-color")
+		html.Title = changed("title")
 		// piped input from other programs
 		if filesystem.IsPipe() {
 			b, err := filesystem.ReadPipe()
@@ -125,21 +145,22 @@ func init() {
 		// output
 		1: {"serve", nil, nil, &html.Port, "serve", "p", nil},
 		// main tag flags
-		3: {"html.layout", &html.Layout, nil, nil, "layout", "l", create.Layouts()},
-		4: {"style.html", &html.Syntax, nil, nil, "syntax-style", "c", nil},
-		5: {"html.title", &html.Title, nil, nil, "title", "t", nil},
-		6: {"html.meta.description", &html.Desc, nil, nil, "meta-description", "d", nil},
-		7: {"html.meta.author", &html.Author, nil, nil, "meta-author", "a", nil},
+		3:  {"html.layout", &html.Layout, nil, nil, "layout", "l", create.Layouts()},
+		5:  {"style.html", &html.Syntax, nil, nil, "syntax-style", "c", nil},
+		7:  {"html.title", &html.TitleVal, nil, nil, "title", "t", nil},
+		9:  {"html.meta.description", &html.MetaDescriptionVal, nil, nil, "meta-description", "d", nil},
+		11: {"html.meta.author", &html.MetaAuthorVal, nil, nil, "meta-author", "a", nil},
+		13: {"html.meta.retrotxt", nil, &html.MetaRetroTxtVal, nil, "meta-retrotxt", "r", nil},
 		// minor tag flags
-		8:  {"html.meta.generator", nil, &html.Generator, nil, "meta-generator", "g", nil},
-		9:  {"html.meta.color-scheme", &html.Author, nil, nil, "meta-color-scheme", "", nil},
-		10: {"html.meta.keywords", &html.Keys, nil, nil, "meta-keywords", "", nil},
-		11: {"html.meta.notranslate", nil, &html.NoTranslate, nil, "meta-notranslate", "", nil},
-		12: {"html.meta.referrer", &html.Ref, nil, nil, "meta-referrer", "", nil},
-		13: {"html.meta.robots", &html.Robots, nil, nil, "meta-robots", "", nil},
-		14: {"html.meta.theme-color", &html.Scheme, nil, nil, "meta-theme-color", "", nil},
-		15: {"html.font.family", &html.FontFamily, nil, nil, "font-family", "f", nil},
-		17: {"html.font.embed", nil, &html.FontEmbed, nil, "font-embed", "", nil},
+		15: {"html.meta.generator", nil, &html.MetaGeneratorVal, nil, "meta-generator", "g", nil},
+		17: {"html.meta.color-scheme", &html.MetaColorSchemeVal, nil, nil, "meta-color-scheme", "", nil},
+		19: {"html.meta.keywords", &html.MetaKeywordsVal, nil, nil, "meta-keywords", "", nil},
+		21: {"html.meta.notranslate", nil, &html.MetaNoTranslateVal, nil, "meta-notranslate", "", nil},
+		23: {"html.meta.referrer", &html.MetaReferrerVal, nil, nil, "meta-referrer", "", nil},
+		25: {"html.meta.robots", &html.MetaRobotsVal, nil, nil, "meta-robots", "", nil},
+		27: {"html.meta.theme-color", &html.MetaThemeColorVal, nil, nil, "meta-theme-color", "", nil},
+		29: {"html.font.family", &html.FontFamilyVal, nil, nil, "font-family", "f", nil},
+		31: {"html.font.embed", nil, &html.FontEmbedVal, nil, "font-embed", "", nil},
 		// hidden flags
 		0: {"html.body", &html.Body, nil, nil, "body", "b", nil},
 	}

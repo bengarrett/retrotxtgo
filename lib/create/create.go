@@ -23,36 +23,12 @@ import (
 	gap "github.com/muesli/go-app-paths"
 )
 
-type files map[string]string
-
 // Args holds arguments and options sourced from user flags or the config file.
 type Args struct {
 	// Dest HTML destination either a directory or file
 	Dest string
 	// Enc text encoding of the source input
 	Enc string
-	// Author of the page metadata
-	Author string
-	// Scheme color metadata
-	Scheme string
-	// Desc description metadata
-	Desc string
-	// FontEmbed embeds font data into the CSS
-	FontEmbed bool
-	// FontFamily font name
-	FontFamily string
-	// Generator shows retrotxt version and page generated at time
-	Generator bool
-	// Keys are keyword metadata
-	Keys string
-	// Google notranslate
-	NoTranslate bool
-	// Referrer metadata
-	Ref string
-	// Robots metadata
-	Robots string
-	// Title for the page and browser tab
-	Title string
 	// Body text content
 	Body string
 	// Layout of the HTML
@@ -71,6 +47,31 @@ type Args struct {
 	tmpl string
 	// template package name
 	pack string
+
+	// Flag values and change state
+
+	TitleVal           string
+	Title              bool
+	MetaAuthorVal      string
+	MetaAuthor         bool
+	MetaDescriptionVal string
+	MetaDescription    bool
+	MetaGeneratorVal   bool
+	MetaColorSchemeVal string
+	MetaColorScheme    bool
+	MetaKeywordsVal    string
+	MetaKeywords       bool
+	MetaNoTranslateVal bool
+	MetaReferrerVal    string
+	MetaReferrer       bool
+	MetaRetroTxtVal    bool
+	MetaRobotsVal      string
+	MetaRobots         bool
+	MetaThemeColorVal  string
+	MetaThemeColor     bool
+	FontFamilyVal      string
+	FontFamily         bool
+	FontEmbedVal       bool
 }
 
 // PageData temporarily holds template data used for the HTML layout.
@@ -88,11 +89,14 @@ type PageData struct {
 	MetaKeywords    string
 	MetaNoTranslate bool
 	MetaReferrer    string
+	MetaRetroTxt    bool
 	MetaRobots      string
 	MetaThemeColor  string
 	PageTitle       string
 	PreText         string
 }
+
+type files map[string]string
 
 // ColorScheme values for the content attribute of <meta name="color-scheme">
 var ColorScheme = []string{"normal", "dark light", "only light"}
@@ -455,19 +459,28 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 	}
 	// templates are found in the dir static/html/*.html
 	switch args.Layout {
+	/*
+		TODO:
+				f["body"] = "body-content"
+				f["full"] = "standard"
+				f["mini"] = "standard"
+				f["pre"] = "pre-content"
+				f["standard"] = "standard"
+	*/
 	case "full", "standard":
-		p.FontEmbed = viper.GetBool("html.font.embed")
-		p.FontFamily = viper.GetString("html.font.family")
-		p.MetaAuthor = viper.GetString("html.meta.author")
-		p.MetaColorScheme = viper.GetString("html.meta.color-scheme")
-		p.MetaDesc = viper.GetString("html.meta.description")
-		p.MetaGenerator = viper.GetBool("html.meta.generator")
-		p.MetaKeywords = viper.GetString("html.meta.keywords")
-		p.MetaNoTranslate = viper.GetBool("html.meta.notranslate")
-		p.MetaReferrer = viper.GetString("html.meta.referrer")
-		p.MetaRobots = viper.GetString("html.meta.robots")
-		p.MetaThemeColor = viper.GetString("html.meta.theme-color")
-		p.PageTitle = viper.GetString("html.title")
+		p.FontEmbed = args.FontEmbedVal  // todo
+		p.FontFamily = args.fontFamily() // todo
+		p.MetaAuthor = args.metaAuthor()
+		p.MetaColorScheme = args.metaColorScheme()
+		p.MetaDesc = args.metaDesc()
+		p.MetaGenerator = args.MetaGeneratorVal
+		p.MetaKeywords = args.metaKeywords()
+		p.MetaNoTranslate = args.MetaNoTranslateVal
+		p.MetaReferrer = args.metaReferrer()
+		p.MetaRobots = args.metaRobots()
+		p.MetaRetroTxt = args.MetaRetroTxtVal
+		p.MetaThemeColor = args.metaThemeColor()
+		p.PageTitle = args.pageTitle()
 		// generate data
 		t := time.Now().UTC()
 		p.BuildDate = t.Format(time.RFC3339)
@@ -475,7 +488,7 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 		// TODO: use actual data
 		p.Comment = comment(b)
 	case "mini":
-		p.PageTitle = viper.GetString("html.title")
+		p.PageTitle = args.pageTitle()
 		p.MetaGenerator = false
 	}
 	// check encoding
@@ -487,9 +500,73 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 	runes, err := conv.Text(b)
 	logs.Check("create.pagedata.chars", err)
 	p.PreText = string(runes)
+	fmt.Println(args)
 	return p, nil
 }
 
 func comment(b *[]byte) string {
 	return "encoding: CP-437; linefeed: crlf; length: 100; width: 80; filename: somefile.txt"
+}
+
+func (args Args) fontFamily() string {
+	if args.FontFamily {
+		return args.FontFamilyVal
+	}
+	return viper.GetString("html.font.family")
+}
+
+func (args Args) metaAuthor() string {
+	if args.MetaAuthor {
+		return args.MetaAuthorVal
+	}
+	return viper.GetString("html.meta.author")
+}
+
+func (args Args) metaColorScheme() string {
+	if args.MetaColorScheme {
+		return args.MetaColorSchemeVal
+	}
+	return viper.GetString("html.meta.color-scheme")
+}
+
+func (args Args) metaDesc() string {
+	if args.MetaDescription {
+		return args.MetaDescriptionVal
+	}
+	return viper.GetString("html.meta.description")
+}
+
+func (args Args) metaKeywords() string {
+	if args.MetaKeywords {
+		return args.MetaKeywordsVal
+	}
+	return viper.GetString("html.meta.keywords")
+}
+
+func (args Args) metaReferrer() string {
+	if args.MetaReferrer {
+		return args.MetaReferrerVal
+	}
+	return viper.GetString("html.meta.referrer")
+}
+
+func (args Args) metaRobots() string {
+	if args.MetaRobots {
+		return args.MetaRobotsVal
+	}
+	return viper.GetString("html.meta.robots")
+}
+
+func (args Args) metaThemeColor() string {
+	if args.MetaThemeColor {
+		return args.MetaThemeColorVal
+	}
+	return viper.GetString("html.meta.theme-color")
+}
+
+func (args Args) pageTitle() string {
+	if args.Title {
+		return args.TitleVal
+	}
+	return viper.GetString("html.title")
 }
