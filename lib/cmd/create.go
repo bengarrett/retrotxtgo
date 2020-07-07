@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"os"
 	"sort"
 	"strings"
@@ -29,7 +30,10 @@ var exampleCmd = func() string {
   retrotxt create file.txt --serve=8080
   cat file.txt | retrotxt create`
 	t := template.Must(template.New("example").Parse(tmpl))
-	t.Execute(&b, string(os.PathSeparator))
+	err := t.Execute(&b, string(os.PathSeparator))
+	if err != nil {
+		log.Fatal(err)
+	}
 	return str.Cinf(b.String())
 }
 
@@ -47,7 +51,7 @@ var createCmd = &cobra.Command{
 			}
 			return l.Changed
 		}
-		// monitor striing flag changes to allow three user states.
+		// monitor string flag changes to allow three user states.
 		// 1) flag not changed so use viper default.
 		// 2) flag with new value to overwrite viper default.
 		// 3) blank flag value to overwrite viper default with an empty/disable value.
