@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -106,8 +107,6 @@ type PageData struct {
 	ScriptEmbed     template.JS
 }
 
-type files map[string]string
-
 // ColorScheme values for the content attribute of <meta name="color-scheme">
 var ColorScheme = []string{"normal", "dark light", "only light"}
 
@@ -133,6 +132,32 @@ func dirs(dir string) (path string, err error) {
 		return "", err
 	}
 	return path, err
+}
+
+// TmplsPacks are a map of the named packed templates.
+type TmplsPacks map[string]string
+
+// Templates creates a map of the template packed names used in conjunction with the layout flag.
+func Templates() TmplsPacks {
+	f := make(TmplsPacks, 5)
+	f["standard"] = "standard" // standard template with external CSS, JS, fonts
+	f["inline"] = "standard"   // standard template with CSS and JS embedded
+	f["compact"] = "standard"  // standard template with external CSS, JS, fonts and no meta-tags
+	f["none"] = ""             // no template, just print the generated HTML
+	return f
+}
+
+func (t TmplsPacks) String() string {
+	return str.UnderlineKeys(t.Keys())
+}
+
+// Keys method returns the keys of templs as a sorted slice.
+func (t TmplsPacks) Keys() (s []string) {
+	for key := range t {
+		s = append(s, key)
+	}
+	sort.Strings(s)
+	return s
 }
 
 // Create handles the target output command arguments.
@@ -389,7 +414,7 @@ func destination(args []string) (path string, err error) {
 
 // Layouts returns the options permitted by the layout flag.
 func Layouts() (s []string) {
-	for key := range createTemplates() {
+	for key := range Templates() {
 		s = append(s, key)
 	}
 	return s
@@ -399,7 +424,7 @@ func layout(name string) string {
 	if name == "" {
 		return ""
 	}
-	for key, val := range createTemplates() {
+	for key, val := range Templates() {
 		if name == key {
 			return val
 		}
@@ -408,17 +433,6 @@ func layout(name string) string {
 		}
 	}
 	return ""
-}
-
-// createTemplates creates a map of the template filenames used in conjunction with the layout flag.
-func createTemplates() files {
-	f := make(files)
-	f["body"] = "body-content"
-	f["full"] = "standard"
-	f["mini"] = "standard"
-	f["pre"] = "pre-content"
-	f["standard"] = "standard"
-	return f
 }
 
 // newTemplate creates and parses a new template file.
@@ -514,20 +528,7 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 	}
 	// templates are found in the dir static/html/*.gohtml
 	switch args.Layout {
-	/*
-		TODO:
-				f["body"] = "body-content"
-				f["full"] = "standard"
-				f["mini"] = "standard"
-				f["pre"] = "pre-content"
-				f["standard"] = "standard"
-
-				full = css embed // embed CSS into HTML
-				standard !
-				mini !
-				main just generated HTML with no parents
-	*/
-	case "full":
+	case "inline":
 		p.ExternalEmbed = true
 		m := minify.New()
 		m.AddFunc("text/css", css.Minify)
@@ -574,10 +575,13 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 		t := time.Now().UTC()
 		p.BuildDate = t.Format(time.RFC3339)
 		p.BuildVersion = version.B.Version
-
-	case "mini": // disables all meta tags
+	case "compact": // disables all meta tags
 		p.PageTitle = args.pageTitle()
 		p.MetaGenerator = false
+	case "none":
+		// do nothing
+	default:
+		return PageData{}, errors.New("create.pagedata: unknown layout: " + args.Layout)
 	}
 	// check encoding
 	var conv = convert.Args{Encoding: args.Encoding}

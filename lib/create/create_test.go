@@ -84,25 +84,25 @@ func Test_Layouts(t *testing.T) {
 	if got := len(l); got != 5 {
 		t.Errorf("createTemplates() = %v, want %v", got, 5)
 	}
-	if got := createTemplates()["body"]; got != "body-content" {
-		t.Errorf("createTemplates() = %v, want %v", got, "body-content")
+	if got := Templates()["body"]; got != "body-content" {
+		t.Errorf("Templates() = %v, want %v", got, "body-content")
 	}
 }
 
-func Test_createTemplates(t *testing.T) {
+func Test_Templates(t *testing.T) {
 	tests := []struct {
 		name string
 		key  string
 		want string
 	}{
 		{"empty", "", ""},
-		{"body", "body", "body-content"},
+		{"none", "none", ""},
 		{"standard", "standard", "standard"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := createTemplates()[tt.key]; !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("createTemplates() = %v, want %v", got, tt.want)
+			if got := Templates()[tt.key]; !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Templates() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -125,7 +125,6 @@ func Test_templateSave(t *testing.T) {
 
 func Test_pagedata(t *testing.T) {
 	viper.SetDefault("html.title", "RetroTxt | example")
-
 	args := Args{Layout: "standard"}
 	w := "hello"
 	d := []byte(w)
@@ -133,7 +132,7 @@ func Test_pagedata(t *testing.T) {
 	if got.PreText != w {
 		t.Errorf("pagedata().PreText = %v, want %v", got, w)
 	}
-	args.Layout = "mini"
+	args.Layout = "compact"
 	w = "RetroTxt | example"
 	got, _ = args.pagedata(&d)
 	if got.PageTitle != w {

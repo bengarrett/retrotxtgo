@@ -32,7 +32,7 @@ func List() (err error) {
 		switch key {
 		case "html.layout":
 			fmt.Fprintf(w, ", choices: %s (recommend: %s)",
-				str.Cp(createTemplates().string()), str.Cp("standard"))
+				str.Cp(create.Templates().String()), str.Cp("standard"))
 		case "serve":
 			fmt.Fprintf(w, ", choices: %s", portInfo())
 		}
@@ -131,7 +131,7 @@ func Update(name string) {
 		setFont(value.(string))
 	case "html.layout":
 		fmt.Println("\nChoose a new " + str.Options(Hints[name], create.Layouts(), true))
-		setShortStrings(name, value.(string), createTemplates().keys())
+		setShortStrings(name, value.(string), create.Templates().Keys())
 	case "html.meta.author",
 		"html.meta.description",
 		"html.meta.keywords",
@@ -237,32 +237,6 @@ func (n names) string(theme bool) string {
 		s = append(s, b.String())
 	}
 	return strings.Join(s, "")
-}
-
-type templs map[string]string
-
-// createTemplates creates a map of the template filenames used in conjunction with the layout flag.
-func createTemplates() templs {
-	t := make(templs)
-	t["body"] = "body-content"
-	t["full"] = "standard"
-	t["mini"] = "standard"
-	t["pre"] = "pre-content"
-	t["standard"] = "standard"
-	return t
-}
-
-// keys method returns the keys of templs as a sorted slice.
-func (t templs) keys() (s []string) {
-	for key := range t {
-		s = append(s, key)
-	}
-	sort.Strings(s)
-	return s
-}
-
-func (t templs) string() string {
-	return str.UnderlineKeys(t.keys())
 }
 
 // dirExpansion traverses the named directory to apply shell-like expansions.
