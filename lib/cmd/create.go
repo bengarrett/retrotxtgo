@@ -6,6 +6,7 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"text/template"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -22,12 +23,13 @@ var html create.Args
 // createCmd makes create usage examples
 var exampleCmd = func() string {
 	var b bytes.Buffer
-	s := string(os.PathSeparator)
-	fmt.Fprint(&b, `  retrotxt create file.txt -t "A text file" -d "Some text goes here"`)
-	fmt.Fprint(&b, "\n  retrotxt create file1.txt file2.asc --save")
-	fmt.Fprintf(&b, "\n  retrotxt create ~%sDownloads%sfile.txt --archive", s, s)
-	fmt.Fprint(&b, "\n  retrotxt create file.txt --serve=8080")
-	fmt.Fprint(&b, "\n  cat file.txt | retrotxt create")
+	tmpl := `  retrotxt create file.txt -t "A text file" -d "Some text goes here"
+  retrotxt create file1.txt file2.asc --save
+  retrotxt create ~{{.}}Downloads{{.}}file.txt --archive
+  retrotxt create file.txt --serve=8080
+  cat file.txt | retrotxt create`
+	t := template.Must(template.New("example").Parse(tmpl))
+	t.Execute(&b, string(os.PathSeparator))
 	return str.Cinf(b.String())
 }
 
