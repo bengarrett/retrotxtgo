@@ -434,11 +434,8 @@ func setEditor(name, value string) {
 func setFont(value string) {
 	var (
 		b    bytes.Buffer
-		font = value
+		font = create.SelectFont(value)
 	)
-	if value == "automatic" {
-		font = "vga"
-	}
 	fmt.Fprintln(&b, "@font-face {")
 	fmt.Fprintf(&b, "  font-family: \"%s\";\n", font)
 	fmt.Fprintf(&b, "  src: url(\"%s.woff2\") format(\"woff2\");\n", font)

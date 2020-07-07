@@ -8,11 +8,15 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/gookit/color"
 	"github.com/spf13/viper"
+	"github.com/tdewolff/minify"
+	"github.com/tdewolff/minify/css"
+	"github.com/tdewolff/minify/js"
 	"retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/convert"
 	"retrotxt.com/retrotxt/lib/filesystem"
@@ -107,9 +111,6 @@ type files map[string]string
 // ColorScheme values for the content attribute of <meta name="color-scheme">
 var ColorScheme = []string{"normal", "dark light", "only light"}
 
-// FontFamily values for the CSS font-family.
-var FontFamily = []string{"automatic", "mona", "vga"}
-
 // Referrer values for the content attribute of <meta name="referrer">
 var Referrer = []string{"no-referrer", "origin", "no-referrer-when-downgrade",
 	"origin-when-cross-origin", "same-origin", "strict-origin", "strict-origin-when-cross-origin", "unsafe-URL"}
@@ -195,6 +196,10 @@ func (args *Args) destination(name string) (string, error) {
 
 // savecss creates and saves the styles stylesheet to the Destination argument.
 func (args Args) savecss(c chan error) {
+	if args.Layout != "standard" {
+		c <- nil
+		return
+	}
 	name, err := args.destination("styles.css")
 	if err != nil {
 		c <- err
@@ -212,11 +217,16 @@ func (args Args) savecss(c chan error) {
 
 // savefont unpacks and saves the font binary to the Destination argument.
 func (args Args) savefont(c chan error) {
-	if err := args.savefontwoff2("vga.woff2", "font/ibm-vga8.woff2"); err != nil {
-		c <- err
+	// TODO: handle different font names
+	if !args.FontEmbedVal {
+		if err := args.savefontwoff2("vga.woff2", "font/ibm-vga8.woff2"); err != nil {
+			c <- err
+		}
 	}
-	if err := args.savefontcss("font.css", "css/font-vga.css"); err != nil {
-		c <- err
+	if args.Layout == "standard" {
+		if err := args.savefontcss("font.css", "css/font.css"); err != nil {
+			c <- err
+		}
 	}
 	c <- nil
 }
@@ -226,9 +236,13 @@ func (args Args) savefontcss(name, packName string) error {
 	if err != nil {
 		return err
 	}
-	b := pack.Get(packName)
-	if len(b) == 0 {
-		return fmt.Errorf("create.savefontcss: pack.get name is invalid: %q", args.pack)
+	f := SelectFont(args.FontFamilyVal)
+	if f == "" {
+		return errors.New("create.savefontcss: unknown font name: " + name)
+	}
+	b, err := FontCSS(f, args.FontEmbedVal)
+	if err != nil {
+		return err
 	}
 	_, err = filesystem.Save(name, b)
 	if err != nil {
@@ -254,6 +268,10 @@ func (args Args) savefontwoff2(name, packName string) error {
 }
 
 func (args Args) savejs(c chan error) {
+	if args.Layout != "standard" {
+		c <- nil
+		return
+	}
 	name, err := args.destination("scripts.js")
 	if err != nil {
 		c <- err
@@ -480,7 +498,6 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 				f["pre"] = "pre-content"
 				f["standard"] = "standard"
 
-
 				full = css embed // embed CSS into HTML
 				standard !
 				mini !
@@ -488,21 +505,37 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 	*/
 	case "full":
 		p.ExternalEmbed = true
-		s := pack.Get("css/styles.css")
-		s = bytes.TrimSpace(s)
-
-		f := pack.Get("css/font-vga.css")
+		m := minify.New()
+		m.AddFunc("text/css", css.Minify)
+		m.AddFuncRegexp(regexp.MustCompile("^(application|text)/(x-)?(java|ecma)script$"), js.Minify)
+		// styles
+		s := bytes.TrimSpace(pack.Get("css/styles.css"))
+		// font
+		f, err := FontCSS(args.FontFamilyVal, args.FontEmbedVal)
+		if err != nil {
+			return p, err
+		}
 		f = bytes.TrimSpace(f)
-
+		// merge
 		c := [][]byte{s, []byte("/* font */"), f}
-		css := bytes.Join(c, []byte("\n\n"))
-		p.CSSEmbed = template.CSS(string(css))
+		b := bytes.Join(c, []byte("\n\n"))
+		// compress & embed
+		b, err = m.Bytes("text/css", b)
+		if err != nil {
+			panic(err)
+		}
+		p.CSSEmbed = template.CSS(string(b))
 		js := pack.Get("js/scripts.js")
+		js, err = m.Bytes("application/javascript", js)
+		if err != nil {
+			panic(err)
+		}
 		p.ScriptEmbed = template.JS(string(js))
+
 		fallthrough
 	case "standard":
-		p.FontEmbed = args.FontEmbedVal  // todo
-		p.FontFamily = args.fontFamily() // todo
+		p.FontEmbed = args.FontEmbedVal
+		p.FontFamily = args.fontFamily()
 		p.MetaAuthor = args.metaAuthor()
 		p.MetaColorScheme = args.metaColorScheme()
 		p.MetaDesc = args.metaDesc()
