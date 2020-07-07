@@ -111,7 +111,7 @@ func Lines(r io.Reader, nl [2]rune) (count int, err error) {
 
 // Newlines will try to guess the newline representation as a 2 byte value.
 // A guess of Unix will return [10, 0], Windows [13, 10], otherwise a [0, 0] value is returned.
-func Newlines(runes []rune) [2]rune {
+func Newlines(runes []rune, utf8 bool) [2]rune {
 	// scan data for possible newlines
 	c := []struct {
 		abbr  string
@@ -148,8 +148,12 @@ func Newlines(runes []rune) [2]rune {
 			// carriage return on modern terminals will overwrite the existing line of text
 			// todo: add flag or change behaviour to replace CR (\r) with NL (\n)
 			c[1].count++
-		case 133: // NL after transformation
-			c[4].count++
+		case 21, 133:
+			if utf8 && r == 133 {
+				c[4].count++ // NL as utf8
+			} else if r == 21 {
+				c[4].count++ // NL as ebcdic
+			}
 		}
 	}
 	// sort results
@@ -166,7 +170,10 @@ func Newlines(runes []rune) [2]rune {
 	case "lfcr":
 		return [2]rune{10, 13}
 	case "nl":
-		return [2]rune{133}
+		if utf8 {
+			return [2]rune{133}
+		}
+		return [2]rune{21}
 	}
 	return [2]rune{}
 }
@@ -183,7 +190,7 @@ func Newline(r [2]rune, extraInfo bool) string {
 			return "CRLF"
 		case [2]rune{10, 13}:
 			return "LFCR"
-		case [2]rune{21}:
+		case [2]rune{21}, [2]rune{133}:
 			return "NL"
 		}
 	}
@@ -196,7 +203,7 @@ func Newline(r [2]rune, extraInfo bool) string {
 		return "CRLF (Windows, DOS)"
 	case [2]rune{10, 13}:
 		return "LFCR (Acorn BBC)"
-	case [2]rune{21}:
+	case [2]rune{21}, [2]rune{133}:
 		return "NL (IBM EBCDIC)"
 	}
 	return "??"

@@ -587,7 +587,7 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 	// convert bytes into utf8
 	runes, err := conv.Text(b)
 	if p.MetaRetroTxt {
-		p.Comment = args.comment(conv, runes)
+		p.Comment = args.comment(conv, b, runes)
 	}
 	logs.Check("create.pagedata.chars", err)
 	p.PreText = string(runes)
@@ -595,17 +595,19 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 	return p, nil
 }
 
-func (args Args) comment(c convert.Args, r []rune) string {
+func (args Args) comment(c convert.Args, old *[]byte, new []rune) string {
 	e, nl, l, w, f := "", "", 0, 0, "n/a"
-	b := []byte(string(r))
-	nlr := filesystem.Newlines(r)
-	e = convert.Humanize(c.Encoding)
+	b := []byte(string(new))
+	// to handle EBCDIC cases, both raw bytes and utf8 runes need newline scans.
+	nlr := filesystem.Newlines([]rune(string(*old)), false)
 	nl = filesystem.Newline(nlr, false)
-	l, err := filesystem.Lines(bytes.NewReader(b), nlr)
+	nnl := filesystem.Newlines(new, true)
+	e = convert.Humanize(c.Encoding)
+	l, err := filesystem.Lines(bytes.NewReader(b), nnl)
 	if err != nil {
 		l = -1
 	}
-	w, err = filesystem.Columns(bytes.NewReader(b), nlr)
+	w, err = filesystem.Columns(bytes.NewReader(b), nnl)
 	if err != nil {
 		w = -1
 	}

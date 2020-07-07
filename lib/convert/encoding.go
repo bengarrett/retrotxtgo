@@ -272,7 +272,7 @@ func (c *Convert) ANSI() {
 // Newlines will try to guess the newline representation as a 2 byte value.
 // A guess of Unix will return [10, 0], Windows [13, 10], otherwise a [0, 0] value is returned.
 func (c *Convert) Newlines() {
-	c.newlines = filesystem.Newlines(c.Runes)
+	c.newlines = filesystem.Newlines(c.Runes, true)
 }
 
 // RunesControls switches out C0 and C1 ASCII controls with Unicode picture represenations.

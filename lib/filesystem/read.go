@@ -156,7 +156,7 @@ func ReadNewlines(name string) ([2]rune, error) {
 	if err != nil {
 		return z, err
 	}
-	return Newlines(bytes.Runes(b)), nil
+	return Newlines(bytes.Runes(b), true), nil
 }
 
 // ReadPipe reads data piped by the operating system's STDIN.
