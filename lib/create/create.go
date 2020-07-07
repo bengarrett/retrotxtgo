@@ -143,7 +143,7 @@ func Templates() TmplsPacks {
 	f["standard"] = "standard" // standard template with external CSS, JS, fonts
 	f["inline"] = "standard"   // standard template with CSS and JS embedded
 	f["compact"] = "standard"  // standard template with external CSS, JS, fonts and no meta-tags
-	f["none"] = ""             // no template, just print the generated HTML
+	f["none"] = "none"         // no template, just print the generated HTML
 	return f
 }
 
