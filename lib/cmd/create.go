@@ -85,10 +85,10 @@ var createCmd = &cobra.Command{
 				b, err = filesystem.Read(arg)
 				logs.ChkErr(logs.Err{Issue: "file is invalid", Arg: arg, Msg: err})
 			}
+			if cp := cmd.Flags().Lookup("encode"); !cp.Changed {
+				html.Encoding = enc // --encode overwrite
+			}
 			if h := htmlServe(i, cmd, &b); !h {
-				if cp := cmd.Flags().Lookup("encode"); !cp.Changed {
-					html.Encoding = enc // --encode overwrite
-				}
 				html.Create(&b)
 			}
 		}
