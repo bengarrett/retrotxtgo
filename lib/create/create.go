@@ -153,7 +153,8 @@ func (args *Args) Create(b *[]byte) {
 		go args.savefont(ch)
 		go args.savehtml(b, ch)
 		go args.savejs(ch)
-		err1, err2, err3, err4 := <-ch, <-ch, <-ch, <-ch
+		go args.savefavicon(ch)
+		err1, err2, err3, err4, err5 := <-ch, <-ch, <-ch, <-ch, <-ch
 		if err1 != nil {
 			log.Fatal(err1)
 		}
@@ -165,6 +166,9 @@ func (args *Args) Create(b *[]byte) {
 		}
 		if err4 != nil {
 			log.Fatal(err4)
+		}
+		if err5 != nil {
+			log.Fatal(err5)
 		}
 	default:
 		// print to terminal
@@ -207,6 +211,26 @@ func (args Args) savecss(c chan error) {
 	b := pack.Get("css/styles.css")
 	if len(b) == 0 {
 		c <- fmt.Errorf("create.savecss: pack.get name is invalid: %q", args.pack)
+	}
+	_, err = filesystem.Save(name, b)
+	if err != nil {
+		c <- err
+	}
+	c <- nil
+}
+
+func (args Args) savefavicon(c chan error) {
+	if args.Layout != "standard" {
+		c <- nil
+		return
+	}
+	name, err := args.destination("favicon.ico")
+	if err != nil {
+		c <- err
+	}
+	b := pack.Get("img/retrotxt_16.png")
+	if len(b) == 0 {
+		c <- fmt.Errorf("create.savefavicon: pack.get name is invalid: %q", args.pack)
 	}
 	_, err = filesystem.Save(name, b)
 	if err != nil {
@@ -531,7 +555,6 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 			panic(err)
 		}
 		p.ScriptEmbed = template.JS(string(js))
-
 		fallthrough
 	case "standard":
 		p.FontEmbed = args.FontEmbedVal
