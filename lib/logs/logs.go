@@ -37,19 +37,6 @@ var (
 	Panic = false
 )
 
-// CheckNilArg returns instructions for empty command arguments.
-func CheckNilArg(arg string, args []string) {
-	if len(args) != 0 {
-		return
-	}
-	Exit(checkNilArgument(arg, args))
-}
-
-func checkNilArgument(arg string, args []string) (msg string, code int) {
-	msg += fmt.Sprintf("%s required argument%s cannot be empty and requires a value\n", str.Alert(), color.Bold.Sprintf(" %q", arg))
-	return msg, code
-}
-
 // ColorCSS prints colored CSS syntax highlighting.
 func ColorCSS(elm string) string {
 	style := viper.GetString("style.html")
@@ -72,15 +59,6 @@ func colorElm(elm, lexer, style string) string {
 		Fatal("logs", "colorhtml", err)
 	}
 	return fmt.Sprintf("\n%s\n", b.String())
-}
-
-// Exit prints the message and causes the program to exit.
-func Exit(msg string, code int) {
-	i, err := fmt.Println(msg)
-	if err != nil {
-		log.Fatalf("logs.exit println at %dB: %s", i, err)
-	}
-	os.Exit(code)
 }
 
 // Log the error and exit to the operating system with the error code 1.
