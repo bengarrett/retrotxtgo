@@ -149,30 +149,54 @@ func init() {
 	rootCmd.AddCommand(createCmd)
 	// config must be initialized before getting saved default values
 	initConfig()
+
+	type metas int
+
+	const (
+		serve = iota
+		layout
+		style
+		title
+		desc
+		author
+		retro
+		gen
+		cscheme
+		kwords
+		nolang
+		refer
+		bots
+		themec
+		fontf
+		fonte
+		body
+		cache
+	)
+
 	// init flags and their usage
 	var metaCfg = map[int]metaFlag{
 		// output
-		1: {"serve", nil, nil, &html.Port, "serve", "p", nil},
+		serve: {"serve", nil, nil, &html.Port, "serve", "p", nil},
 		// main tag flags
-		3:  {"html.layout", &html.Layout, nil, nil, "layout", "l", create.Templates().Keys()},
-		5:  {"style.html", &html.Syntax, nil, nil, "syntax-style", "c", nil},
-		7:  {"html.title", &html.TitleVal, nil, nil, "title", "t", nil},
-		9:  {"html.meta.description", &html.MetaDescriptionVal, nil, nil, "meta-description", "d", nil},
-		11: {"html.meta.author", &html.MetaAuthorVal, nil, nil, "meta-author", "a", nil},
-		13: {"html.meta.retrotxt", nil, &html.MetaRetroTxtVal, nil, "meta-retrotxt", "r", nil},
+		layout: {"html.layout", &html.Layout, nil, nil, "layout", "l", create.Templates().Keys()},
+		style:  {"style.html", &html.Syntax, nil, nil, "syntax-style", "c", nil},
+		title:  {"html.title", &html.TitleVal, nil, nil, "title", "t", nil},
+		desc:   {"html.meta.description", &html.MetaDescriptionVal, nil, nil, "meta-description", "d", nil},
+		author: {"html.meta.author", &html.MetaAuthorVal, nil, nil, "meta-author", "a", nil},
+		retro:  {"html.meta.retrotxt", nil, &html.MetaRetroTxtVal, nil, "meta-retrotxt", "r", nil},
 		// minor tag flags
-		15: {"html.meta.generator", nil, &html.MetaGeneratorVal, nil, "meta-generator", "g", nil},
-		17: {"html.meta.color-scheme", &html.MetaColorSchemeVal, nil, nil, "meta-color-scheme", "", nil},
-		19: {"html.meta.keywords", &html.MetaKeywordsVal, nil, nil, "meta-keywords", "", nil},
-		21: {"html.meta.notranslate", nil, &html.MetaNoTranslateVal, nil, "meta-notranslate", "", nil},
-		23: {"html.meta.referrer", &html.MetaReferrerVal, nil, nil, "meta-referrer", "", nil},
-		25: {"html.meta.robots", &html.MetaRobotsVal, nil, nil, "meta-robots", "", nil},
-		27: {"html.meta.theme-color", &html.MetaThemeColorVal, nil, nil, "meta-theme-color", "", nil},
-		29: {"html.font.family", &html.FontFamilyVal, nil, nil, "font-family", "f", nil},
-		31: {"html.font.embed", nil, &html.FontEmbedVal, nil, "font-embed", "", nil},
+		gen:     {"html.meta.generator", nil, &html.MetaGeneratorVal, nil, "meta-generator", "g", nil},
+		cscheme: {"html.meta.color-scheme", &html.MetaColorSchemeVal, nil, nil, "meta-color-scheme", "", nil},
+		kwords:  {"html.meta.keywords", &html.MetaKeywordsVal, nil, nil, "meta-keywords", "", nil},
+		nolang:  {"html.meta.notranslate", nil, &html.MetaNoTranslateVal, nil, "meta-notranslate", "", nil},
+		refer:   {"html.meta.referrer", &html.MetaReferrerVal, nil, nil, "meta-referrer", "", nil},
+		bots:    {"html.meta.robots", &html.MetaRobotsVal, nil, nil, "meta-robots", "", nil},
+		themec:  {"html.meta.theme-color", &html.MetaThemeColorVal, nil, nil, "meta-theme-color", "", nil},
+		fontf:   {"html.font.family", &html.FontFamilyVal, nil, nil, "font-family", "f", nil},
+		fonte:   {"html.font.embed", nil, &html.FontEmbedVal, nil, "font-embed", "", nil},
 		// hidden flags
-		0:  {"html.body", &html.Body, nil, nil, "body", "b", nil},
-		99: {"html.layout.cache", nil, &html.Cache, nil, "cache", "", nil},
+		body:  {"html.body", &html.Body, nil, nil, "body", "b", nil},
+		cache: {"html.layout.cache", nil, &html.Cache, nil, "cache", "", nil},
 	}
 	// create an ordered index for the flags
 	var keys []int
