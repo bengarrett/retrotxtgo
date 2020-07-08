@@ -122,7 +122,7 @@ func UpdateConfig(name string, print bool) (err error) {
 	// prepend comments
 	cmt := []byte("# RetroTxt configuration file")
 	out = bytes.Join([][]byte{cmt, out}, []byte("\n"))
-	err = ioutil.WriteFile(name, out, PermF)
+	err = ioutil.WriteFile(name, out, filemode)
 	if err != nil {
 		return err
 	}

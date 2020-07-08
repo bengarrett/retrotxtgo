@@ -29,9 +29,9 @@ const (
 	cr = "\x0d"
 	lf = "\x0a"
 	// posix permission bits for files
-	permf os.FileMode = 0660
+	filemode os.FileMode = 0660
 	// posix permission bits for directories
-	permd os.FileMode = 0700
+	dirmode os.FileMode = 0700
 )
 
 // Clean removes the named file or directory.
@@ -101,7 +101,7 @@ func Save(filename string, b []byte) (path string, err error) {
 		return path, err
 	}
 	path = filename
-	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, permf)
+	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, filemode)
 	if err != nil {
 		return path, err
 	}
@@ -135,7 +135,7 @@ func Touch(name string) (path string, err error) {
 func dir(name string) (path string, err error) {
 	path = filepath.Dir(name)
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		err = os.MkdirAll(path, permd)
+		err = os.MkdirAll(path, dirmode)
 	}
 	return path, err
 }

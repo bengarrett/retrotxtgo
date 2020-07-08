@@ -16,8 +16,8 @@ const (
 	// Filename is the default error log filename
 	Filename = "errors.log"
 	// posix permissions for the configuration file and directory.
-	permf os.FileMode = 0600
-	permd os.FileMode = 0700
+	filemode os.FileMode = 0600
+	dirmode  os.FileMode = 0700
 )
 
 var (
@@ -76,11 +76,11 @@ func save(err error, name string) error {
 	}
 	p := filepath.Dir(name)
 	if _, e := os.Stat(p); os.IsNotExist(e) {
-		if e := os.MkdirAll(p, permd); e != nil {
+		if e := os.MkdirAll(p, dirmode); e != nil {
 			return e
 		}
 	}
-	file, e := os.OpenFile(name, os.O_APPEND|os.O_CREATE|os.O_WRONLY, permf)
+	file, e := os.OpenFile(name, os.O_APPEND|os.O_CREATE|os.O_WRONLY, filemode)
 	if e != nil {
 		return e
 	}

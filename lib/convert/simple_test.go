@@ -3,7 +3,6 @@ package convert
 import (
 	"fmt"
 	"log"
-	"os"
 	"reflect"
 	"testing"
 
@@ -14,10 +13,7 @@ import (
 const (
 	cp437hex = "\xCD\xB9\xB2\xCC\xCD" // `═╣░╠═`
 	utf      = "═╣ ░ ╠═"
-
-	base = "rt_sample-"
-
-	permf os.FileMode = 0644
+	base     = "rt_sample-"
 )
 
 func ExampleD437() {

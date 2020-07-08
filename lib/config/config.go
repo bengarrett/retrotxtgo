@@ -92,13 +92,10 @@ type Settings struct {
 }
 
 const (
-	// PermF is posix permission bits for files
-	PermF os.FileMode = 0660
-	// PermD is posix permission bits for directories
-	PermD os.FileMode = 0700
-
-	cmdPath   = "retrotxt config"
-	namedFile = "config.yaml"
+	// filemode is posix permission bits for files
+	filemode  os.FileMode = 0660
+	cmdPath               = "retrotxt config"
+	namedFile             = "config.yaml"
 )
 
 var scope = gap.NewScope(gap.User, "retrotxt")
