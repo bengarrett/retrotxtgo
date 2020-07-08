@@ -43,9 +43,13 @@ var viewCmd = &cobra.Command{
 		// piped input from other programs
 		if filesystem.IsPipe() {
 			b, err := filesystem.ReadPipe()
-			logs.Check("piped.view", err)
+			if err != nil {
+				logs.Fatal("view", "stdin read", err)
+			}
 			r, err := conv.Text(&b)
-			logs.Check("piped.view", err)
+			if err != nil {
+				logs.Fatal("view", "stdin convert", err)
+			}
 			fmt.Println(string(r))
 			os.Exit(0)
 		}

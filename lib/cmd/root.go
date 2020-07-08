@@ -37,7 +37,9 @@ func Execute() {
 	rootCmd.SilenceErrors = true // set to false to debug
 	if err := rootCmd.Execute(); err != nil {
 		if len(os.Args) < 2 {
-			logs.Check("rootcmd.usage", rootCmd.Usage())
+			if err := rootCmd.Usage(); err != nil {
+				logs.Fatal("rootcmd", "usage", err)
+			}
 		}
 		logs.Execute(os.Args[1:], err)
 	}
@@ -67,16 +69,16 @@ func initConfig() {
 	viper.AutomaticEnv()
 	// configuration file
 	if err := config.SetConfig(rootFlag.config); err != nil {
-		logs.Check(fmt.Sprintf("config file %q", viper.ConfigFileUsed()), err)
-		os.Exit(1)
+		logs.Fatal("config file", viper.ConfigFileUsed(), err)
 	}
 }
 
 // checkUsage will print the help and exit when no arguments are supplied.
 func checkUse(cmd *cobra.Command, args []string) {
 	if len(args) == 0 {
-		err := cmd.Help()
-		logs.Check("cmd.help", err)
+		if err := cmd.Help(); err != nil {
+			logs.Fatal("root", "cmd.help", err)
+		}
 		os.Exit(0)
 	}
 }

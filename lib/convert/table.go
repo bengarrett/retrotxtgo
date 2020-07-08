@@ -49,7 +49,9 @@ func Table(name string) (*bytes.Buffer, error) {
 	var conv = Args{Encoding: name}
 	var b, row = MakeBytes(), 0
 	runes, err := conv.Chars(&b)
-	logs.Check("convert.table.chars", err)
+	if err != nil {
+		logs.Fatal("table", "convert characters", err)
+	}
 	for i, r := range runes {
 		char := string(r)
 		switch {

@@ -25,9 +25,12 @@ var infoCmd = &cobra.Command{
 		// piped input from other programs
 		if filesystem.IsPipe() {
 			b, err := filesystem.ReadPipe()
-			logs.Check("piped.info", err)
-			info.Stdin(b, infoFlag.format)
-			logs.Check("piped.info", err)
+			if err != nil {
+				logs.Fatal("info", "read stdin", err)
+			}
+			if err = info.Stdin(b, infoFlag.format); err != nil {
+				logs.Fatal("info", "parse stdin", err)
+			}
 			os.Exit(0)
 		}
 		checkUse(cmd, args)

@@ -39,7 +39,7 @@ var configCreateCmd = &cobra.Command{
 	Short:   "Create a new or reset the config file",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := config.Create(viper.ConfigFileUsed(), configFlag.ow); err != nil {
-			logs.Check("config create", err)
+			logs.Fatal("config", "create", err)
 		}
 	},
 }
@@ -140,23 +140,26 @@ var configShellCmd = &cobra.Command{
 		switch configFlag.shell {
 		case "bash", "bsh", "b":
 			lexer = "bash"
-			err = cmd.GenBashCompletion(&buf)
-			logs.Check("shell bash", err)
+			if err = cmd.GenBashCompletion(&buf); err != nil {
+				logs.Fatal("shell", "bash", err)
+			}
 		case "powershell", "posh", "ps", "p":
 			lexer = "powershell"
-			err = cmd.GenPowerShellCompletion(&buf)
-			logs.Check("shell powershell", err)
+			if err = cmd.GenPowerShellCompletion(&buf); err != nil {
+				logs.Fatal("shell", "powershell", err)
+			}
 		case "zsh", "z":
 			lexer = "bash"
-			err = cmd.GenZshCompletion(&buf)
-			logs.Check("shell zsh", err)
+			if err = cmd.GenZshCompletion(&buf); err != nil {
+				logs.Fatal("shell", "zsh", err)
+			}
 		default:
 			logs.Fatal("the interpreter is not supported:",
 				configFlag.shell,
 				fmt.Errorf("options: %s", config.Format.String("shell")))
 		}
 		if err := str.Highlight(buf.String(), lexer, style); err != nil {
-			logs.Check("config shell", err)
+			logs.Fatal("config", "shell", err)
 		}
 	},
 }
@@ -191,7 +194,8 @@ func init() {
 	configShellCmd.Flags().StringVarP(&configFlag.shell, "interpreter", "i", "",
 		str.Required("user shell to receive retrotxt auto-completions")+
 			str.Options("", config.Format.Shell, true))
-	err = configShellCmd.MarkFlagRequired("interpreter")
-	logs.Check("interpreter flag", err)
+	if err = configShellCmd.MarkFlagRequired("interpreter"); err != nil {
+		logs.Fatal("interpreter flag", "", err)
+	}
 	configShellCmd.SilenceErrors = true
 }

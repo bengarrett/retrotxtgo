@@ -600,10 +600,12 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 	}
 	// convert bytes into utf8
 	runes, err := conv.Text(b)
+	if err != nil {
+		logs.Fatal("create pagedata", "text conversion", err)
+	}
 	if p.MetaRetroTxt {
 		p.Comment = args.comment(conv, b, runes)
 	}
-	logs.Check("create.pagedata.chars", err)
 	p.PreText = string(runes)
 	return p, nil
 }

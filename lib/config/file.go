@@ -111,7 +111,10 @@ func UpdateConfig(name string, print bool) (err error) {
 		name = viper.ConfigFileUsed()
 	}
 	data, err := Marshal()
-	logs.Check("config.update:", err)
+	if err != nil {
+		logs.Fatal("config", "update", err) // TODO: replace return err with an append func
+		// logs.Append("config","update", err) error
+	}
 	out, err := yaml.Marshal(&data)
 	if err != nil {
 		return err

@@ -37,27 +37,6 @@ var (
 	Panic = false
 )
 
-// Check prints an error issue and message then exits the program.
-func Check(issue string, err error) (ok bool) {
-	if err != nil {
-		Exit(check(issue, err))
-	}
-	return true
-}
-
-func check(issue string, err error) (msg string, code int) {
-	code = 1
-	if err == nil {
-		err = errors.New("")
-	}
-	if issue == "" {
-		msg = fmt.Sprintf("%s\n", err)
-	} else {
-		msg = fmt.Sprintf("%s %s\n", issue, err)
-	}
-	return msg, code
-}
-
 // CheckNilArg returns instructions for empty command arguments.
 func CheckNilArg(arg string, args []string) {
 	if len(args) != 0 {
@@ -68,12 +47,6 @@ func CheckNilArg(arg string, args []string) {
 
 func checkNilArgument(arg string, args []string) (msg string, code int) {
 	msg += fmt.Sprintf("%s required argument%s cannot be empty and requires a value\n", str.Alert(), color.Bold.Sprintf(" %q", arg))
-	return msg, code
-}
-
-func (e Generic) check() (msg string, code int) {
-	code = 1
-	msg = e.String()
 	return msg, code
 }
 
@@ -96,7 +69,7 @@ func colorElm(elm, lexer, style string) string {
 	var b bytes.Buffer
 	_ = io.Writer(&b)
 	if err := str.HighlightWriter(&b, elm, lexer, style); err != nil {
-		Check("logs.colorhtml", err)
+		Fatal("logs", "colorhtml", err)
 	}
 	return fmt.Sprintf("\n%s\n", b.String())
 }

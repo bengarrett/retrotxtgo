@@ -67,7 +67,9 @@ var createCmd = &cobra.Command{
 		// piped input from other programs
 		if filesystem.IsPipe() {
 			b, err := filesystem.ReadPipe()
-			logs.Check("piped.create", err)
+			if err != nil {
+				logs.Fatal("create", "read stdin", err)
+			}
 			if h := htmlServe(0, cmd, &b); !h {
 				html.Create(&b)
 			}
@@ -237,9 +239,11 @@ or ignore to print (save directory: `+viper.GetString("save-directory")+")")
 			createCmd.Flags().UintVarP(c.i, c.name, c.short, viper.GetUint(c.key), buf.String())
 		}
 	}
-	err = createCmd.Flags().MarkHidden("body")
-	logs.Check("create mark body hidden", err)
-	err = createCmd.Flags().MarkHidden("cache")
-	logs.Check("create mark cache hidden", err)
+	if err = createCmd.Flags().MarkHidden("body"); err != nil {
+		logs.Fatal("create mark", "body hidden", err)
+	}
+	if err = createCmd.Flags().MarkHidden("cache"); err != nil {
+		logs.Fatal("create mark", "cache hidden", err)
+	}
 	createCmd.Flags().SortFlags = false
 }
