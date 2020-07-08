@@ -259,7 +259,7 @@ func Test_locBuild(t *testing.T) {
 	}
 }
 
-func Test_format(t *testing.T) {
+func Test_Format(t *testing.T) {
 	tests := []struct {
 		name    string
 		version string
@@ -273,8 +273,8 @@ func Test_format(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := format(tt.version); got != tt.want {
-				t.Errorf("format() = %v, want %v", got, tt.want)
+			if got := Format(tt.version); got != tt.want {
+				t.Errorf("Format() = %v, want %v", got, tt.want)
 			}
 		})
 	}

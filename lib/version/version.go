@@ -111,6 +111,22 @@ func Digits(s string) string {
 	return reg.ReplaceAllString(s, "")
 }
 
+// Format the version string to a uniformed semantic syntax.
+func Format(version string) string {
+	ok, s := Semantic(version)
+	if !ok {
+		return version
+	}
+	p := ""
+	switch {
+	case s.Major == 0 && s.Minor == 0:
+		p = "α"
+	case s.Major == 0:
+		p = "β"
+	}
+	return fmt.Sprintf("%s%d.%d.%d", p, s.Major, s.Minor, s.Patch)
+}
+
 // JSON formats the RetroTxt version and binary compile infomation.
 func JSON(indent bool) (data []byte) {
 	var err error
@@ -252,27 +268,12 @@ func compare(current, fetched string) bool {
 	return false
 }
 
-func format(version string) string {
-	ok, s := Semantic(version)
-	if !ok {
-		return version
-	}
-	p := ""
-	switch {
-	case s.Major == 0 && s.Minor == 0:
-		p = "α"
-	case s.Major == 0:
-		p = "β"
-	}
-	return fmt.Sprintf("%s%d.%d.%d", p, s.Major, s.Minor, s.Patch)
-}
-
 // information and version details of retrotxt.
 func information() versionInfo {
 	v := versionInfo{
 		"copyright": fmt.Sprintf("Copyright © 2020 Ben Garrett"),
 		"url":       fmt.Sprintf("https://%s/go", B.Domain),
-		"app ver":   format(B.Version),
+		"app ver":   Format(B.Version),
 		"go ver":    semanticGo(),
 		"os":        fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
 		"exe":       binary(),
