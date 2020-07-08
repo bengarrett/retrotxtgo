@@ -31,6 +31,17 @@ func (g Generic) String() string {
 		str.Cf(fmt.Sprintf("%v", g.Err)))              // error message
 }
 
+// Hint is a standard error type that also offers a user hint
+type Hint struct {
+	Gen  Generic
+	Hint string // Hint is an optional solution such as a retrotxt command
+}
+
+func (h Hint) String() string {
+	gen := h.Gen
+	return gen.String() + fmt.Sprintf("\n         run %s", str.Example("retrotxt "+h.Hint))
+}
+
 // Fatal prints a generic error and exits.
 func (g Generic) Fatal() {
 	fmt.Println(g.String())
@@ -51,19 +62,6 @@ func Println(issue, arg string, err error) {
 func Fatal(issue, arg string, msg error) {
 	Println(issue, arg, msg)
 	os.Exit(1)
-}
-
-// Hint is a generic error type used to apply color to errors and offer a hint
-type Hint struct {
-	Issue string // Issue is a summary of the problem
-	Arg   string // Arg is the argument, flag or item that triggered the error
-	Msg   error  // Msg is the actual error generated
-	Hint  string // Hint is an optional solution such as a retrotxt command
-}
-
-func (h Hint) String() string {
-	e := Generic{Issue: h.Issue, Arg: h.Arg, Err: h.Msg}
-	return e.String() + fmt.Sprintf("\n         run %s", str.Example("retrotxt "+h.Hint))
 }
 
 // CmdErr is a root command error type to handle command arguments and flags
