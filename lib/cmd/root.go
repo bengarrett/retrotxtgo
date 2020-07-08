@@ -39,8 +39,7 @@ func Execute() {
 		if len(os.Args) < 2 {
 			logs.Check("rootcmd.usage", rootCmd.Usage())
 		}
-		rootErr := logs.CmdErr{Args: os.Args[1:], Err: err}
-		fmt.Println(rootErr.Error().String())
+		logs.Execute(os.Args[1:], err)
 	}
 }
 
