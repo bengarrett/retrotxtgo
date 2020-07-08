@@ -80,11 +80,11 @@ func TestArgs_Stdout(t *testing.T) {
 }
 
 func Test_Keys(t *testing.T) {
-	l := Templates().Keys()
+	l := Layouts()
 	if got := len(l); got != 4 {
 		t.Errorf("Templates().Keys() = %v, want %v", got, 4)
 	}
-	if got := Templates()["none"]; got != "none" {
+	if got := Layouts()[3]; got != "none" {
 		t.Errorf("Templates().Keys() = %v, want %v", got, "none")
 	}
 }
@@ -96,13 +96,13 @@ func Test_Templates(t *testing.T) {
 		want string
 	}{
 		{"empty", "", ""},
-		{"none", "none", ""},
+		{"none", "none", "none"},
 		{"standard", "standard", "standard"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Templates()[tt.key]; !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Templates() = %v, want %v", got, tt.want)
+			if got := layout(tt.key).Pack(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("layout() = %v, want %v", got, tt.want)
 			}
 		})
 	}

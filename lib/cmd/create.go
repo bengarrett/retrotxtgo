@@ -178,7 +178,7 @@ func init() {
 		// output
 		serve: {"serve", nil, nil, &html.Port, "serve", "p", nil},
 		// main tag flags
-		layout: {"html.layout", &html.Layout, nil, nil, "layout", "l", create.Templates().Keys()},
+		layout: {"html.layout", &html.Layout, nil, nil, "layout", "l", create.Layouts()},
 		style:  {"style.html", &html.Syntax, nil, nil, "syntax-style", "c", nil},
 		title:  {"html.title", &html.TitleVal, nil, nil, "title", "t", nil},
 		desc:   {"html.meta.description", &html.MetaDescriptionVal, nil, nil, "meta-description", "d", nil},

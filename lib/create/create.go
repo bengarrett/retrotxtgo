@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"sort"
 	"strings"
 	"time"
 
@@ -119,45 +118,40 @@ var Robots = []string{"index", "noindex", "follow", "nofollow", "none", "noarchi
 
 var scope = gap.NewScope(gap.User, "retrotxt")
 
-func dirs(dir string) (path string, err error) {
-	switch dir {
-	case "~":
-		path, err = os.UserHomeDir()
-	case ".":
-		path, err = os.Getwd()
-	case "\\", "/":
-		path, err = filepath.Abs(dir)
+// Layout are HTML template variations.
+type Layout int
+
+const (
+	// Standard template with external CSS, JS, fonts
+	Standard Layout = iota
+	// Inline template with CSS and JS embedded
+	Inline
+	// Compact template with external CSS, JS, fonts and no meta-tags
+	Compact
+	// None template, just print the generated HTML
+	None
+)
+
+func (l Layout) String() string {
+	layouts := [...]string{"standard", "inline", "compact", "none"}
+	if l < Standard || l > None {
+		return ""
 	}
-	if err != nil {
-		return "", err
-	}
-	return path, err
+	return layouts[l]
 }
 
-// TmplsPacks are a map of the named packed templates.
-type TmplsPacks map[string]string
-
-// Templates creates a map of the template packed names used in conjunction with the layout flag.
-func Templates() TmplsPacks {
-	f := make(TmplsPacks, 5)
-	f["standard"] = "standard" // standard template with external CSS, JS, fonts
-	f["inline"] = "standard"   // standard template with CSS and JS embedded
-	f["compact"] = "standard"  // standard template with external CSS, JS, fonts and no meta-tags
-	f["none"] = "none"         // no template, just print the generated HTML
-	return f
+// Layouts are the names of the HTML templates.
+func Layouts() []string {
+	return []string{Standard.String(), Inline.String(), Compact.String(), None.String()}
 }
 
-func (t TmplsPacks) String() string {
-	return str.UnderlineKeys(t.Keys())
-}
-
-// Keys method returns the keys of templs as a sorted slice.
-func (t TmplsPacks) Keys() (s []string) {
-	for key := range t {
-		s = append(s, key)
+// Pack is the packed name of the HTML template.
+func (l Layout) Pack() string {
+	packs := [...]string{"standard", "standard", "standard", "none"}
+	if l < Standard || l > None {
+		return ""
 	}
-	sort.Strings(s)
-	return s
+	return packs[l]
 }
 
 // Create handles the target output command arguments.
@@ -271,18 +265,12 @@ func (args Args) savefavicon(c chan error) {
 // savefont unpacks and saves the font binary to the Destination argument.
 func (args Args) savefont(c chan error) {
 	if !args.FontEmbedVal {
-		f, pck := SelectFont(args.FontFamilyVal), ""
-		if f == "" {
+		f := Family(args.FontFamilyVal)
+		if f.String() == "" {
 			c <- errors.New("create.savefont: unknown font name: " + args.FontFamilyVal)
 			return
 		}
-		switch f {
-		case "automatic", "vga":
-			pck = "ibm-vga8"
-		case "mona":
-			pck = "mona"
-		}
-		if err := args.savefontwoff2(f+".woff2", "font/"+pck+".woff2"); err != nil {
+		if err := args.savefontwoff2(f.String()+".woff2", "font/"+f.File()); err != nil {
 			c <- err
 		}
 	}
@@ -300,7 +288,7 @@ func (args Args) savefontcss(name, packName string) error {
 	if err != nil {
 		return err
 	}
-	f := SelectFont(args.FontFamilyVal)
+	f := Family(args.FontFamilyVal).String()
 	if f == "" {
 		return errors.New("create.savefontcss: unknown font name: " + name)
 	}
@@ -429,6 +417,21 @@ func destination(args []string) (path string, err error) {
 	return path, err
 }
 
+func dirs(dir string) (path string, err error) {
+	switch dir {
+	case "~":
+		path, err = os.UserHomeDir()
+	case ".":
+		path, err = os.Getwd()
+	case "\\", "/":
+		path, err = filepath.Abs(dir)
+	}
+	if err != nil {
+		return "", err
+	}
+	return path, err
+}
+
 // newTemplate creates and parses a new template file.
 // The argument test is used internally.
 func (args Args) newTemplate() (*template.Template, error) {
@@ -475,7 +478,7 @@ func (args Args) newTemplate() (*template.Template, error) {
 
 // filename creates a filepath for the template filenames.
 func (args *Args) templateCache() (err error) {
-	l := layout(args.Layout)
+	l := layout(args.Layout).Pack()
 	if l == "" {
 		return fmt.Errorf("create.templatecache: layout does not exist: %q", args.Layout)
 	}
@@ -484,7 +487,7 @@ func (args *Args) templateCache() (err error) {
 }
 
 func (args *Args) templatePack() error {
-	l := layout(args.Layout)
+	l := layout(args.Layout).Pack()
 	if l == "" {
 		return fmt.Errorf("create.templatepack: package and layout does not exist: %q", args.Layout)
 	}
@@ -515,14 +518,28 @@ func (args Args) templateSave() error {
 	return nil
 }
 
+func layout(name string) Layout {
+	switch name {
+	case "standard", "s":
+		return Standard
+	case "inline", "i":
+		return Inline
+	case "compact", "c":
+		return Compact
+	case "none", "n":
+		return None
+	}
+	return -1
+}
+
 // pagedata creates the meta and page template data.
 func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 	if b == nil {
 		return PageData{}, errors.New("create.pagedata: cannot convert b <nil>")
 	}
 	// templates are found in the dir static/html/*.gohtml
-	switch args.Layout {
-	case "inline", "i":
+	switch layout(args.Layout) {
+	case Inline:
 		p.ExternalEmbed = true
 		m := minify.New()
 		m.AddFunc("text/css", css.Minify)
@@ -551,7 +568,7 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 		}
 		p.ScriptEmbed = template.JS(string(js))
 		fallthrough
-	case "standard", "s":
+	case Standard:
 		p.FontEmbed = args.FontEmbedVal
 		p.FontFamily = args.fontFamily()
 		p.MetaAuthor = args.metaAuthor()
@@ -569,10 +586,10 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 		t := time.Now().UTC()
 		p.BuildDate = t.Format(time.RFC3339)
 		p.BuildVersion = version.B.Version
-	case "compact", "c": // disables all meta tags
+	case Compact: // disables all meta tags
 		p.PageTitle = args.pageTitle()
 		p.MetaGenerator = false
-	case "none", "n":
+	case None:
 		// do nothing
 	default:
 		return PageData{}, errors.New("create.pagedata: unknown layout: " + args.Layout)
@@ -675,19 +692,4 @@ func (args Args) pageTitle() string {
 		return args.TitleVal
 	}
 	return viper.GetString("html.title")
-}
-
-func layout(name string) string {
-	if name == "" {
-		return ""
-	}
-	for key, val := range Templates() {
-		if name == key {
-			return val
-		}
-		if name == key[:1] {
-			return val
-		}
-	}
-	return ""
 }

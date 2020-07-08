@@ -32,7 +32,7 @@ func List() (err error) {
 		switch key {
 		case "html.layout":
 			fmt.Fprintf(w, ", choices: %s (recommend: %s)",
-				str.Cp(create.Templates().String()), str.Cp("standard"))
+				str.Cp(strings.Join(create.Layouts(), ", ")), str.Cp("standard"))
 		case "serve":
 			fmt.Fprintf(w, ", choices: %s", portInfo())
 		}
@@ -130,12 +130,12 @@ func Update(name string) {
 	case "html.font.family":
 		setFont(value.(string))
 	case "html.layout":
-		fmt.Println("\nChoose a new " + str.Options(Hints[name], create.Templates().Keys(), true))
+		fmt.Println("\nChoose a new " + str.Options(Hints[name], create.Layouts(), true))
 		fmt.Println("\n  standard: uses external CSS, JS and woff2 fonts and is the recommended layout for web servers")
 		fmt.Println("  inline:   includes both the CSS and JS as inline elements but is not recommended")
 		fmt.Println("  compact:  is the same as the standard layout but without any <meta> tags")
 		fmt.Println("  none:     no template is used, instead only the generated markup is returned")
-		setShortStrings(name, value.(string), create.Templates().Keys())
+		setShortStrings(name, value.(string), create.Layouts())
 	case "html.meta.author",
 		"html.meta.description",
 		"html.meta.keywords",
@@ -411,19 +411,21 @@ func setEditor(name, value string) {
 
 func setFont(value string) {
 	var (
-		b    bytes.Buffer
-		font = create.SelectFont(value)
+		b bytes.Buffer
+		f = create.Family(value)
 	)
+	if f == create.Automatic {
+		f = create.VGA
+	}
 	fmt.Fprintln(&b, "@font-face {")
-	fmt.Fprintf(&b, "  font-family: \"%s\";\n", font)
-	fmt.Fprintf(&b, "  src: url(\"%s.woff2\") format(\"woff2\");\n", font)
+	fmt.Fprintf(&b, "  font-family: \"%s\";\n", f.String())
+	fmt.Fprintf(&b, "  src: url(\"%s.woff2\") format(\"woff2\");\n", f.String())
 	fmt.Fprintln(&b, "  font-display: swap;\n}")
 	fmt.Print(logs.ColorCSS(b.String()))
 	fmt.Println(str.Cf("About font families: https://developer.mozilla.org/en-US/docs/Web/CSS/font-family"))
 	fmt.Println("Choose a font (recommend: automatic):")
-	prints := copyKeys(create.FontFamily)
-	fmt.Println(str.UnderlineKeys(prints))
-	setShortStrings("html.font.family", value, create.FontFamily)
+	fmt.Println(str.UnderlineKeys(create.Fonts()))
+	setShortStrings("html.font.family", value, create.Fonts())
 }
 
 func setFontEmbed(value bool) {

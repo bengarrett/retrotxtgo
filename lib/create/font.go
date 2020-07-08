@@ -6,17 +6,75 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
-	"strings"
 
+	"golang.org/x/text/encoding"
+	"golang.org/x/text/encoding/japanese"
 	"retrotxt.com/retrotxt/internal/pack"
 )
 
+// Font blah
+type Font int
+
+const (
+	// Automatic uses AutoFont to suggest a font.
+	Automatic Font = iota
+	// Mona is a Japanese language font for ShiftJIS encoding.
+	Mona
+	// VGA is an all-purpose 8 pixel IBM/MS-DOS era VGA font.
+	VGA
+)
+
+func (f Font) String() string {
+	fonts := [...]string{"automatic", "mona", "vga"}
+	if f < Automatic || f > VGA {
+		return ""
+	}
+	return fonts[f]
+}
+
+// File is the packed filename of the font.
+func (f Font) File() string {
+	files := [...]string{"ibm-vga8", "mona", "ibm-vga8"}
+	if f < Automatic || f > VGA {
+		return ""
+	}
+	return fmt.Sprintf("%s.woff2", files[f])
+}
+
+// AutoFont applies the automatic font-family setting to suggest a font based on the given encoding.
+func AutoFont(e encoding.Encoding) Font {
+	switch e {
+	case japanese.ShiftJIS:
+		return Mona
+	}
+	return VGA
+}
+
+// Family returns the named font.
+func Family(name string) Font {
+	switch name {
+	case "automatic", "a":
+		return Automatic
+	case "mona", "m":
+		return Mona
+	case "vga", "v":
+		return VGA
+	}
+	return -1
+}
+
+// Fonts are values for the CSS font-family attribute.
+func Fonts() []string {
+	return []string{Automatic.String(), Mona.String(), VGA.String()}
+}
+
 // FontFamily values for the CSS font-family.
-var FontFamily = []string{"automatic", "mona", "vga"}
+var xFontFamily = []string{"automatic", "mona", "vga"}
 
 // FontCSS creates the CSS required for customized fonts.
 func FontCSS(name string, embed bool) (b []byte, err error) {
-	if !font(name) {
+	f := Family(name).String()
+	if f == "" {
 		return nil, errors.New("create.fontcss: font name is not known: " + name)
 	}
 	const css = `@font-face {
@@ -37,7 +95,6 @@ main pre {
   font-family: {{.Name}}; /* temp */
 }
 `
-	f := SelectFont(name)
 	data := struct {
 		Name string
 		URL  template.HTML // use HTML type to avoid contextual encoding
@@ -51,7 +108,7 @@ main pre {
 		}
 		data.URL = template.HTML(url)
 	} else {
-		data.URL = template.HTML(f + ".woff2")
+		data.URL = template.HTML(Family(name).File())
 	}
 	var out bytes.Buffer
 	t, err := template.New("fontface").Parse(css)
@@ -65,43 +122,14 @@ main pre {
 	return out.Bytes(), nil
 }
 
-// SelectFont blah...
-func SelectFont(name string) (font string) {
-	switch name {
-	case "automatic":
-		// TODO:
-		font = "vga"
-	case "mona", "vga":
-		font = name
-	}
-	return strings.ToLower(font)
-}
-
-func font(name string) bool {
-	if name == "" {
-		return false
-	}
-	for _, f := range FontFamily {
-		if f == name {
-			return true
-		}
-	}
-	return false
-}
-
 func fontBase64(name string) (string, error) {
-	if name == "" {
-		return "", errors.New("create.fontbase64: empty name")
+	f := Family(name).File()
+	if f == "" {
+		return "", errors.New("create.fontbase64: font name is not known: " + name)
 	}
-	n := name
-	// TODO: temp work around until font names are confirmed
-	switch name {
-	case "vga":
-		n = "ibm-vga8"
-	}
-	b := pack.Get(fmt.Sprintf("font/%s.woff2", n))
+	b := pack.Get(fmt.Sprintf("font/%s", f))
 	if len(b) == 0 {
-		return "", errors.New("create.fontbase64: unknown pack name: " + n)
+		return "", errors.New("create.fontbase64: unknown pack name: " + f)
 	}
 	var s bytes.Buffer
 	encoder := base64.NewEncoder(base64.StdEncoding, &s)
