@@ -49,8 +49,8 @@ var configDeleteCmd = &cobra.Command{
 	Aliases: []string{"d", "del", "rm"},
 	Short:   "Remove the config file",
 	Run: func(cmd *cobra.Command, args []string) {
-		if e := config.Delete(); e.Err != nil {
-			e.Exit(1)
+		if err := config.Delete(); err.Err != nil {
+			err.Fatal()
 		}
 	},
 }
@@ -71,8 +71,8 @@ var configEditCmd = &cobra.Command{
 		"\n  Set an editor in the configuration file, " +
 		str.Example("retrotxt config set --name=editor"),
 	Run: func(cmd *cobra.Command, args []string) {
-		if e := config.Edit(); e.Err != nil {
-			e.Exit(1)
+		if err := config.Edit(); err.Err != nil {
+			err.Fatal()
 		}
 	},
 }
@@ -90,8 +90,8 @@ var configInfoCmd = &cobra.Command{
 			str.JSONStyles("retrotxt info --style")
 			os.Exit(0)
 		}
-		if e := config.Info(configFlag.style); e.Err != nil {
-			e.Exit(1)
+		if err := config.Info(configFlag.style); err.Err != nil {
+			err.Fatal()
 		}
 	},
 }

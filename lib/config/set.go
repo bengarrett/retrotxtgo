@@ -64,7 +64,7 @@ func Set(name string) {
 func Update(name string) {
 	if !Validate(name) {
 		h := logs.Hint{
-			Gen: logs.Generic{
+			Error: logs.Generic{
 				Issue: "invalid setting name",
 				Arg:   fmt.Sprintf("%q for config", name),
 				Err:   errors.New(("to see a list of setting names")),

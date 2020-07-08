@@ -53,17 +53,19 @@ var viewCmd = &cobra.Command{
 		checkUse(cmd, args)
 		for i, arg := range args {
 			if ok, err := viewPackage(cmd, arg); err != nil {
-				logs.CheckCont("pack", err)
+				logs.Println("pack", arg, err)
 				continue
 			} else if ok {
 				continue
 			}
 			b, err := filesystem.Read(arg)
-			if ok := logs.CheckCont("read file", err); !ok {
+			if err != nil {
+				logs.Println("read file", arg, err)
 				continue
 			}
 			r, err := conv.Text(&b)
-			if ok := logs.CheckCont("convert", err); !ok {
+			if err != nil {
+				logs.Println("convert text", arg, err)
 				continue
 			}
 			fmt.Println(string(r))

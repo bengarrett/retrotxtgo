@@ -18,9 +18,9 @@ func TestDelete(t *testing.T) {
 	defer os.Remove(tmpFile.Name())
 	tests := []struct {
 		name    string
-		wantErr logs.IssueErr
+		wantErr logs.Generic
 	}{
-		{"ok", logs.IssueErr{}},
+		{"ok", logs.Generic{}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

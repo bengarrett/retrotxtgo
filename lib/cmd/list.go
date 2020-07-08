@@ -47,9 +47,11 @@ var listCmdTable = &cobra.Command{
 		checkUse(cmd, args)
 		for _, arg := range args {
 			table, err := convert.Table(arg)
-			if ok := logs.CheckCont("list.table", err); ok {
-				fmt.Println(table.String())
+			if err != nil {
+				logs.Println("list.table", "", err)
+				continue
 			}
+			fmt.Println(table.String())
 		}
 	},
 }
@@ -60,8 +62,8 @@ var listCmdTables = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		for _, e := range convert.Encodings() {
 			name, err := ianaindex.MIME.Name(e)
-			if ok := logs.CheckCont("list.tables.ianaindex", err); !ok {
-				logs.LogCont(err)
+			if err != nil {
+				logs.Println("list.tables.ianaindex", "", err)
 				continue
 			}
 			// keep 0F,1F controls. blank other ?
@@ -70,9 +72,11 @@ var listCmdTables = &cobra.Command{
 			// https://en.wikipedia.org/wiki/ISO/IEC_8859-11#Vendor_extensions
 			// japanese needs fixing
 			table, err := convert.Table(name)
-			if ok := logs.CheckCont("list.tables", err); ok {
-				fmt.Println(table.String())
+			if err != nil {
+				logs.Println("list.tables", "", err)
+				continue
 			}
+			fmt.Println(table.String())
 		}
 	},
 }
