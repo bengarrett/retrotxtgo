@@ -257,7 +257,7 @@ func dirExpansion(name string) (dir string) {
 		case "~":
 			p, err = os.UserHomeDir()
 			if err != nil {
-				logs.Log(err)
+				logs.LogFatal(err)
 			}
 		case ".":
 			if i != 0 {
@@ -265,13 +265,13 @@ func dirExpansion(name string) (dir string) {
 			}
 			p, err = os.Getwd()
 			if err != nil {
-				logs.Log(err)
+				logs.LogFatal(err)
 			}
 		case "..":
 			if i == 0 {
 				wd, err := os.Getwd()
 				if err != nil {
-					logs.Log(err)
+					logs.LogFatal(err)
 				}
 				p = filepath.Dir(wd)
 			} else {
@@ -303,10 +303,10 @@ func portInfo() string {
 
 func previewMeta(name, value string) {
 	if name == "" {
-		logs.Log(errors.New("setmeta name string is empty"))
+		logs.LogFatal(errors.New("setmeta name string is empty"))
 	}
 	if !Validate(name) {
-		logs.Log(errors.New("setmeta name is an unknown setting: " + name))
+		logs.LogFatal(errors.New("setmeta name is an unknown setting: " + name))
 	}
 	s := strings.Split(name, ".")
 	switch {
@@ -347,10 +347,10 @@ func previewPrompt(name, value string) (p string) {
 
 func save(name string, value interface{}) {
 	if name == "" {
-		logs.Log(errors.New("save name string is empty"))
+		logs.LogFatal(errors.New("save name string is empty"))
 	}
 	if !Validate(name) {
-		logs.Log(errors.New("save name is an unknown setting: " + name))
+		logs.LogFatal(errors.New("save name is an unknown setting: " + name))
 	}
 	// don't save unchanged input values
 	if viper.Get(name) == fmt.Sprint(value) {
@@ -362,7 +362,7 @@ func save(name string, value interface{}) {
 	// save named value
 	viper.Set(name, value)
 	if err := UpdateConfig("", false); err != nil {
-		logs.Log(err)
+		logs.LogFatal(err)
 	}
 	fmt.Printf("%s %s is set to \"%v\"\n", str.Cs("✓"), str.Cs(name), value)
 	if !setupMode {
@@ -372,7 +372,7 @@ func save(name string, value interface{}) {
 
 func setDirectory(name string) {
 	if name == "" {
-		logs.Log(errors.New("setdirectory name string is empty"))
+		logs.LogFatal(errors.New("setdirectory name string is empty"))
 	}
 	dir := dirExpansion(prompt.String())
 	if setupMode && dir == "" {
@@ -394,7 +394,7 @@ func setDirectory(name string) {
 
 func setEditor(name, value string) {
 	if name == "" {
-		logs.Log(errors.New("seteditor name string is empty"))
+		logs.LogFatal(errors.New("seteditor name string is empty"))
 	}
 	v := prompt.String()
 	switch v {
@@ -453,13 +453,13 @@ func setGenerator(value bool) {
 	}
 	viper.Set(name, prompt.YesNo(p, viper.GetBool(name)))
 	if err := UpdateConfig("", false); err != nil {
-		logs.Log(err)
+		logs.LogFatal(err)
 	}
 }
 
 func setIndex(name, value string, data []string) {
 	if name == "" {
-		logs.Log(errors.New("setindex name string is empty"))
+		logs.LogFatal(errors.New("setindex name string is empty"))
 	}
 	p := prompt.IndexStrings(&data)
 	switch p {
@@ -485,7 +485,7 @@ func setNoTranslate(value bool) {
 
 func setPort(name string) {
 	if name == "" {
-		logs.Log(errors.New("setport name string is empty"))
+		logs.LogFatal(errors.New("setport name string is empty"))
 	}
 	v := prompt.Port(true)
 	if setupMode && v == 0 {
@@ -504,7 +504,7 @@ func setRetrotxt(value bool) {
 	}
 	viper.Set(name, prompt.YesNo(p, viper.GetBool(name)))
 	if err := UpdateConfig("", false); err != nil {
-		logs.Log(err)
+		logs.LogFatal(err)
 	}
 }
 
@@ -521,7 +521,7 @@ func setShortStrings(name, value string, data []string) {
 
 func setString(name string) {
 	if name == "" {
-		logs.Log(errors.New("setstring name string is empty"))
+		logs.LogFatal(errors.New("setstring name string is empty"))
 	}
 	v := prompt.String()
 	switch v {
@@ -535,7 +535,7 @@ func setString(name string) {
 
 func setStrings(name string, data []string) {
 	if name == "" {
-		logs.Log(errors.New("setstrings name string is empty"))
+		logs.LogFatal(errors.New("setstrings name string is empty"))
 	}
 	v := prompt.Strings(&data)
 	switch v {

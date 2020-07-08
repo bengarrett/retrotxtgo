@@ -261,7 +261,7 @@ func Missing() (list []string) {
 func home() string {
 	dir, err := os.UserHomeDir()
 	if err != nil {
-		logs.LogCont(err)
+		logs.Log(err)
 		return ""
 	}
 	return dir

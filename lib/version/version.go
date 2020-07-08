@@ -56,7 +56,7 @@ var scope = gap.NewScope(gap.User, "retrotxt")
 func CacheGet() (etag, ver string) {
 	cf, err := scope.DataPath(cacheFile)
 	if err != nil {
-		logs.LogCont(err)
+		logs.Log(err)
 		return
 	}
 	if _, err := os.Stat(cf); os.IsNotExist(err) {
@@ -64,16 +64,16 @@ func CacheGet() (etag, ver string) {
 	}
 	f, err := ioutil.ReadFile(cf)
 	if err != nil {
-		logs.LogCont(err)
+		logs.Log(err)
 	}
 	var c Cache
 	if err = yaml.Unmarshal(f, &c); err != nil {
-		logs.LogCont(err)
+		logs.Log(err)
 	}
 	// if either value is missing, delete the broken cache
 	if c.Etag == "" || c.Ver == "" {
 		err = os.Remove(cf)
-		logs.LogCont(err)
+		logs.Log(err)
 		return "", ""
 	}
 	return c.Etag, c.Ver
@@ -148,7 +148,7 @@ func NewRelease() (ok bool, ver string) {
 	etag, ver := CacheGet()
 	cache, data, err := online.Endpoint(online.ReleaseAPI, etag)
 	if err != nil {
-		logs.LogCont(err)
+		logs.Log(err)
 		return false, ver
 	}
 	if !cache {
@@ -158,7 +158,7 @@ func NewRelease() (ok bool, ver string) {
 		}
 		if etag := data["etag"].(string); etag != "" {
 			if err = CacheSet(etag, ver); err != nil {
-				logs.LogCont(err)
+				logs.Log(err)
 			}
 		}
 	}

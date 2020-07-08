@@ -62,7 +62,7 @@ func DirExpansion(name string) (dir string) {
 		case "~":
 			p, err = os.UserHomeDir()
 			if err != nil {
-				logs.Log(err)
+				logs.LogFatal(err)
 			}
 		case ".":
 			if i != 0 {
@@ -70,13 +70,13 @@ func DirExpansion(name string) (dir string) {
 			}
 			p, err = os.Getwd()
 			if err != nil {
-				logs.Log(err)
+				logs.LogFatal(err)
 			}
 		case "..":
 			if i == 0 {
 				wd, err := os.Getwd()
 				if err != nil {
-					logs.Log(err)
+					logs.LogFatal(err)
 				}
 				p = filepath.Dir(wd)
 			} else {

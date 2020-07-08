@@ -43,9 +43,9 @@ func (c Cmd) error() Generic {
 		}
 	)
 	if l < 3 {
-		Log(errors.New("cmderr.args: word count is < 3"))
+		LogFatal(errors.New("cmd error args: word count is too short, less than 3"))
 	} else if len(c.Args) < 1 {
-		Log(errors.New("cmderr.err: value is empty"))
+		LogFatal(errors.New("cmd error err: value is empty"))
 	}
 	a := fmt.Sprintf("%q", c.Args[0])
 	switch strings.Join(s[0:2], " ") {

@@ -16,13 +16,6 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
-// the lowest, largest and recommended network ports to serve HTTP.
-const (
-	PortMin uint = 0
-	PortMax uint = 65535
-	PortRec uint = 8080
-)
-
 const (
 	// Filename is the default error log filename
 	Filename = "errors.log"
@@ -61,8 +54,18 @@ func colorElm(elm, lexer, style string) string {
 	return fmt.Sprintf("\n%s\n", b.String())
 }
 
-// Log the error and exit to the operating system with the error code 1.
+// Log logs the error and continues the program.
 func Log(err error) {
+	if err != nil {
+		// save error to log file
+		if err := save(err, ""); err != nil {
+			log.Fatalf("%s %s", color.Danger.Sprint("!"), err)
+		}
+	}
+}
+
+// LogFatal the error and exit to the operating system with the error code 1.
+func LogFatal(err error) {
 	if err != nil {
 		// save error to log file
 		if err := save(err, ""); err != nil {
@@ -74,17 +77,7 @@ func Log(err error) {
 			log.Println(fmt.Sprintf("error type: %T\tmsg: %v", err, err))
 			log.Panic(err)
 		default:
-			log.Fatal(color.Danger.Sprint("ERROR: "), err)
-		}
-	}
-}
-
-// LogCont logs the error and continues the program.
-func LogCont(err error) {
-	if err != nil {
-		// save error to log file
-		if err := save(err, ""); err != nil {
-			log.Fatalf("%s %s", color.Danger.Sprint("!"), err)
+			Fatal("log error", "", err)
 		}
 	}
 }
