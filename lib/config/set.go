@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -21,6 +22,18 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 	v "retrotxt.com/retrotxt/lib/version"
 )
+
+// ColorCSS prints colored CSS syntax highlighting.
+func ColorCSS(elm string) string {
+	style := viper.GetString("style.html")
+	return colorElm(elm, "css", style)
+}
+
+// ColorHTML prints colored syntax highlighting to HTML elements.
+func ColorHTML(elm string) string {
+	style := viper.GetString("style.html")
+	return colorElm(elm, "html", style)
+}
 
 // List and print all the available configurations.
 func List() (err error) {
@@ -204,6 +217,18 @@ func Validate(key string) (ok bool) {
 	return true
 }
 
+func colorElm(elm, lexer, style string) string {
+	if elm == "" {
+		return ""
+	}
+	var b bytes.Buffer
+	_ = io.Writer(&b)
+	if err := str.HighlightWriter(&b, elm, lexer, style); err != nil {
+		logs.Fatal("logs", "colorhtml", err)
+	}
+	return fmt.Sprintf("\n%s\n", b.String())
+}
+
 func copyKeys(keys []string) (copy []string) {
 	if len(keys) == 0 {
 		return keys
@@ -314,7 +339,7 @@ func previewMeta(name, value string) {
 		return
 	}
 	elm := fmt.Sprintf("<head>\n  <meta name=\"%s\" value=\"%s\">", s[2], value)
-	fmt.Print(logs.ColorHTML(elm))
+	fmt.Print(ColorHTML(elm))
 	h := strings.Split(Hints[name], " ")
 	fmt.Printf("\n%s %s.", strings.Title(h[0]), strings.Join(h[1:], " "))
 	fmt.Println(str.Cf("\nAbout this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name"))
@@ -323,7 +348,7 @@ func previewMeta(name, value string) {
 
 func previewTitle(value string) {
 	elm := fmt.Sprintf("<head>\n  <title>%s</title>", value)
-	fmt.Print(logs.ColorHTML(elm))
+	fmt.Print(ColorHTML(elm))
 	fmt.Println(str.Cf("\nAbout this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title"))
 	fmt.Println()
 }
@@ -423,7 +448,7 @@ func setFont(value string) {
 	fmt.Fprintf(&b, "  font-family: \"%s\";\n", f.String())
 	fmt.Fprintf(&b, "  src: url(\"%s.woff2\") format(\"woff2\");\n", f.String())
 	fmt.Fprintln(&b, "  font-display: swap;\n}")
-	fmt.Print(logs.ColorCSS(b.String()))
+	fmt.Print(ColorCSS(b.String()))
 	fmt.Println(str.Cf("About font families: https://developer.mozilla.org/en-US/docs/Web/CSS/font-family"))
 	fmt.Println("Choose a font (recommend: automatic):")
 	fmt.Println(str.UnderlineKeys(create.Fonts()))
@@ -433,7 +458,7 @@ func setFont(value string) {
 func setFontEmbed(value bool) {
 	var name = "html.font.embed"
 	elm := fmt.Sprintf("@font-face{\n  font-family: vga8;\n  src: url(data:font/woff2;base64,[a large font binary will be embedded here]...) format('woff2');\n}")
-	fmt.Println(logs.ColorCSS(elm))
+	fmt.Println(ColorCSS(elm))
 	q := "This is not recommended unless you need to create self-contained HTML files for offline distribution.\nEmbed the font as base64 data in the HTML"
 	if value {
 		q = "Keep the embedded font option"
@@ -446,7 +471,7 @@ func setGenerator(value bool) {
 	var name = "html.meta.generator"
 	elm := fmt.Sprintf("<head>\n  <meta name=\"generator\" content=\"RetroTxt v%s, %s\">",
 		v.Format(v.B.Version), v.B.Date)
-	fmt.Println(logs.ColorHTML(elm))
+	fmt.Println(ColorHTML(elm))
 	p := "Enable the generator element"
 	if value {
 		p = "Keep the generator element"
@@ -474,7 +499,7 @@ func setIndex(name, value string, data []string) {
 func setNoTranslate(value bool) {
 	var name = "html.meta.notranslate"
 	elm := fmt.Sprintf("<html translate=\"no\">\n  <head>\n    <meta name=\"google\" content=\"notranslate\">")
-	fmt.Println(logs.ColorHTML(elm))
+	fmt.Println(ColorHTML(elm))
 	q := "Enable the no translate option"
 	if value {
 		q = "Keep the translate option"
@@ -497,7 +522,7 @@ func setPort(name string) {
 func setRetrotxt(value bool) {
 	var name = "html.meta.retrotxt"
 	elm := fmt.Sprint("<head>\n  <meta name=\"retrotxt\" content=\"encoding: IBM437; newline: CRLF; length: 50; width: 80; name: file.txt\">")
-	fmt.Println(logs.ColorHTML(elm))
+	fmt.Println(ColorHTML(elm))
 	p := "Enable the retrotxt element"
 	if value {
 		p = "Keep the retrotxt element"

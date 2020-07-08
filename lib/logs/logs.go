@@ -1,10 +1,8 @@
 package logs
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"path"
@@ -12,8 +10,6 @@ import (
 
 	"github.com/gookit/color"
 	gap "github.com/muesli/go-app-paths"
-	"github.com/spf13/viper"
-	"retrotxt.com/retrotxt/lib/str"
 )
 
 const (
@@ -29,30 +25,6 @@ var (
 	// Panic uses the panic function to handle all error logs.
 	Panic = false
 )
-
-// ColorCSS prints colored CSS syntax highlighting.
-func ColorCSS(elm string) string {
-	style := viper.GetString("style.html")
-	return colorElm(elm, "css", style)
-}
-
-// ColorHTML prints colored syntax highlighting to HTML elements.
-func ColorHTML(elm string) string {
-	style := viper.GetString("style.html")
-	return colorElm(elm, "html", style)
-}
-
-func colorElm(elm, lexer, style string) string {
-	if elm == "" {
-		return ""
-	}
-	var b bytes.Buffer
-	_ = io.Writer(&b)
-	if err := str.HighlightWriter(&b, elm, lexer, style); err != nil {
-		Fatal("logs", "colorhtml", err)
-	}
-	return fmt.Sprintf("\n%s\n", b.String())
-}
 
 // Log logs the error and continues the program.
 func Log(err error) {
@@ -82,6 +54,16 @@ func LogFatal(err error) {
 	}
 }
 
+// Path is the absolute path and filename of the error log file.
+func Path() string {
+	fp, err := scope.LogPath(Filename)
+	if err != nil {
+		h, _ := os.UserHomeDir()
+		return path.Join(h, Filename)
+	}
+	return fp
+}
+
 // save an error to the log directory, an optional named file is available for unit tests.
 func save(err error, name string) error {
 	if err == nil || fmt.Sprintf("%v", err) == "" {
@@ -107,14 +89,4 @@ func save(err error, name string) error {
 	log.Print(err)
 	log.SetOutput(os.Stderr)
 	return nil
-}
-
-// Path is the absolute path and filename of the error log file.
-func Path() string {
-	fp, err := scope.LogPath(Filename)
-	if err != nil {
-		h, _ := os.UserHomeDir()
-		return path.Join(h, Filename)
-	}
-	return fp
 }

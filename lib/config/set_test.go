@@ -4,6 +4,8 @@ import (
 	"os"
 	"reflect"
 	"testing"
+
+	"retrotxt.com/retrotxt/lib/str"
 )
 
 func TestList(t *testing.T) {
@@ -97,6 +99,30 @@ func Test_dirExpansion(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if gotDir := dirExpansion(tt.name); gotDir != tt.wantDir {
 				t.Errorf("dirExpansion() = %v, want %v", gotDir, tt.wantDir)
+			}
+		})
+	}
+}
+
+func Test_colorElm(t *testing.T) {
+	// set test mode for str.HighlightWriter()
+	str.TestMode = true
+	type args struct {
+		elm string
+	}
+	tests := []struct {
+		name string
+		elm  string
+		want string
+	}{
+		{"empty", "", ""},
+		{"str", "hello", "\nhello\n"},
+		{"basic", "<h1>hello</h1>", "\n<\x1b[1mh1\x1b[0m>hello</\x1b[1mh1\x1b[0m>\n"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := colorElm(tt.elm, "html", "bw"); got != tt.want {
+				t.Errorf("colorhtml() = %v, want %v", got, tt.want)
 			}
 		})
 	}
