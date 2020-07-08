@@ -110,8 +110,10 @@ func flagControls(p *[]string, cc *cobra.Command) {
 }
 
 type internalPack struct {
-	// choices: d convert.Dump, t convert.Text (default when blank)
+	// convert type, choices: d convert.Dump, t convert.Text (default when blank)
 	convert string
+	// font choice or leave blank for vga
+	font string
 	// default character encoding for the packed data
 	encoding string
 	// package name used in internal/pack/blob.go
@@ -121,31 +123,31 @@ type internalPack struct {
 }
 
 var internalPacks = map[string]internalPack{
-	"037":           {"", "cp037", "text/cp037.txt", "EBCDIC 037 IBM mainframe test"},
-	"437.cr":        {"d", "cp437", "text/cp437-cr.txt", "CP-437 all characters test using CR (carriage return)"}, //
-	"437.crlf":      {"d", "cp437", "text/cp437-crlf.txt", "CP-437 all characters test using Windows newline"},    //
-	"437.lf":        {"d", "cp437", "text/cp437-lf.txt", "CP-437 all characters test using LF (line feed)"},       //
-	"865":           {"", "ibm865", "text/cp865.txt", "CP-865 and CP-860 Nordic test"},                            //
-	"1252":          {"", "cp1252", "text/cp1252.txt", "Windows-1252 English test"},                               //
-	"ascii":         {"", "cp437", "text/retrotxt.asc", "RetroTxt ASCII logos"},                                   //
-	"ansi":          {"", "cp437", "text/retrotxt.ans", "RetroTxt 256 color ANSI logo"},                           //
-	"ansi.aix":      {"", "cp437", "text/ansi-aixterm.ans", "IBM AIX terminal colours"},                           //
-	"ansi.blank":    {"", "cp437", "text/ansi-blank.ans", "Empty file test"},                                      //
-	"ansi.cp":       {"", "cp437", "text/ansi-cp.ans", "ANSI cursor position tests"},                              //
-	"ansi.cpf":      {"", "cp437", "text/ansi-cpf.ans", "ANSI cursor forward tests"},                              //
-	"ansi.hvp":      {"", "cp437", "text/ansi-hvp.ans", "ANSI horizontal and vertical cursor positioning"},        //
-	"ansi.proof":    {"", "cp437", "text/ansi-proof.ans", "ANSI formatting proof sheet"},                          //
-	"ansi.rgb":      {"", "cp437", "text/ansi-rgb.ans", "ANSI RGB 24-bit color sheet"},                            //
-	"ansi.setmodes": {"", "cp437", "text/ansi-setmodes.ans", "MS-DOS ANSI.SYS Set Mode examples"},                 //
-	"iso-1":         {"", "1", "text/iso-8859-1.txt", "ISO 8859-1 select characters"},                             //
-	"iso-15":        {"", "15", "text/iso-8859-15.txt", "ISO 8859-15 select characters"},                          //
-	"sauce":         {"", "", "text/sauce.txt", "SAUCE metadata test"},                                            // TODO
-	"shiftjis":      {"", "shift-jis", "text/shiftjis.txt", "Shift-JIS and Mona font test"},                       // TODO
-	"us-ascii":      {"", "cp1252", "text/us-ascii.txt", "US-ASCII controls test"},                                //
-	"utf8":          {"", "", "text/utf-8.txt", "UTF-8 test with no Byte Order Mark"},                             //
-	"utf8.bom":      {"", "", "text/utf-8-bom.txt", "UTF-8 test with a Byte Order Mark"},                          //
-	"utf16.be":      {"", "utf-16be", "text/utf-16-be.txt", "UTF-16 Big Endian test"},                             //
-	"utf16.le":      {"", "utf-16le", "text/utf-16-le.txt", "UTF-16 Little Endian test"},                          //
+	"037":           {"", "", "cp037", "text/cp037.txt", "EBCDIC 037 IBM mainframe test"},
+	"437.cr":        {"d", "", "cp437", "text/cp437-cr.txt", "CP-437 all characters test using CR (carriage return)"}, //
+	"437.crlf":      {"d", "", "cp437", "text/cp437-crlf.txt", "CP-437 all characters test using Windows newline"},    //
+	"437.lf":        {"d", "", "cp437", "text/cp437-lf.txt", "CP-437 all characters test using LF (line feed)"},       //
+	"865":           {"", "", "ibm865", "text/cp865.txt", "CP-865 and CP-860 Nordic test"},                            //
+	"1252":          {"", "", "cp1252", "text/cp1252.txt", "Windows-1252 English test"},                               //
+	"ascii":         {"", "", "cp437", "text/retrotxt.asc", "RetroTxt ASCII logos"},                                   //
+	"ansi":          {"", "", "cp437", "text/retrotxt.ans", "RetroTxt 256 color ANSI logo"},                           //
+	"ansi.aix":      {"", "", "cp437", "text/ansi-aixterm.ans", "IBM AIX terminal colours"},                           //
+	"ansi.blank":    {"", "", "cp437", "text/ansi-blank.ans", "Empty file test"},                                      //
+	"ansi.cp":       {"", "", "cp437", "text/ansi-cp.ans", "ANSI cursor position tests"},                              //
+	"ansi.cpf":      {"", "", "cp437", "text/ansi-cpf.ans", "ANSI cursor forward tests"},                              //
+	"ansi.hvp":      {"", "", "cp437", "text/ansi-hvp.ans", "ANSI horizontal and vertical cursor positioning"},        //
+	"ansi.proof":    {"", "", "cp437", "text/ansi-proof.ans", "ANSI formatting proof sheet"},                          //
+	"ansi.rgb":      {"", "", "cp437", "text/ansi-rgb.ans", "ANSI RGB 24-bit color sheet"},                            //
+	"ansi.setmodes": {"", "", "cp437", "text/ansi-setmodes.ans", "MS-DOS ANSI.SYS Set Mode examples"},                 //
+	"iso-1":         {"", "", "1", "text/iso-8859-1.txt", "ISO 8859-1 select characters"},                             //
+	"iso-15":        {"", "", "15", "text/iso-8859-15.txt", "ISO 8859-15 select characters"},                          //
+	"sauce":         {"", "", "", "text/sauce.txt", "SAUCE metadata test"},                                            // TODO
+	"shiftjis":      {"", "mona", "shift-jis", "text/shiftjis.txt", "Shift-JIS and Mona font test"},                   // TODO
+	"us-ascii":      {"", "", "cp1252", "text/us-ascii.txt", "US-ASCII controls test"},                                //
+	"utf8":          {"", "", "", "text/utf-8.txt", "UTF-8 test with no Byte Order Mark"},                             //
+	"utf8.bom":      {"", "", "", "text/utf-8-bom.txt", "UTF-8 test with a Byte Order Mark"},                          //
+	"utf16.be":      {"", "", "utf-16be", "text/utf-16-be.txt", "UTF-16 Big Endian test"},                             //
+	"utf16.le":      {"", "", "utf-16le", "text/utf-16-le.txt", "UTF-16 Little Endian test"},                          //
 }
 
 func examples() *bytes.Buffer {

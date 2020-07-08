@@ -85,14 +85,17 @@ var createCmd = &cobra.Command{
 		checkUse(cmd, args)
 		for i, arg := range args {
 			html.FilenameVal = arg
-			enc, b := createPackage(arg)
+			enc, font, b := createPackage(arg)
 			if b == nil {
 				var err error
 				b, err = filesystem.Read(arg)
 				logs.ChkErr(logs.Err{Issue: "file is invalid", Arg: arg, Msg: err})
 			}
 			if cp := cmd.Flags().Lookup("encode"); !cp.Changed {
-				html.Encoding = enc // --encode overwrite
+				html.Encoding = enc
+			}
+			if ff := cmd.Flags().Lookup("font-family"); !ff.Changed {
+				html.FontFamilyVal = font
 			}
 			if h := htmlServe(i, cmd, &b); !h {
 				html.Create(&b)
@@ -115,21 +118,20 @@ func htmlServe(i int, cmd *cobra.Command, b *[]byte) bool {
 	return false
 }
 
-func createPackage(name string) (enc string, b []byte) {
+func createPackage(name string) (enc, font string, b []byte) {
 	var s = strings.ToLower(name)
 	if _, err := os.Stat(s); !os.IsNotExist(err) {
-		return "", nil
+		return "", "", nil
 	}
 	pkg, exist := internalPacks[s]
 	if !exist {
-		return "", nil
+		return "", "", nil
 	}
 	b = pack.Get(pkg.name)
-	enc = pkg.encoding
 	if b == nil {
-		return "", nil
+		return "", "", nil
 	}
-	return enc, b
+	return pkg.encoding, pkg.font, b
 }
 
 type metaFlag struct {
