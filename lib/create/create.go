@@ -225,7 +225,9 @@ func (args *Args) destination(name string) (string, error) {
 
 // savecss creates and saves the styles stylesheet to the Destination argument.
 func (args Args) savecss(c chan error) {
-	if args.Layout != "standard" {
+	switch args.Layout {
+	case "standard", "s":
+	default:
 		c <- nil
 		return
 	}
@@ -245,7 +247,9 @@ func (args Args) savecss(c chan error) {
 }
 
 func (args Args) savefavicon(c chan error) {
-	if args.Layout != "standard" {
+	switch args.Layout {
+	case "standard", "s":
+	default:
 		c <- nil
 		return
 	}
@@ -266,13 +270,24 @@ func (args Args) savefavicon(c chan error) {
 
 // savefont unpacks and saves the font binary to the Destination argument.
 func (args Args) savefont(c chan error) {
-	// TODO: handle different font names
 	if !args.FontEmbedVal {
-		if err := args.savefontwoff2("vga.woff2", "font/ibm-vga8.woff2"); err != nil {
+		f, pck := SelectFont(args.FontFamilyVal), ""
+		if f == "" {
+			c <- errors.New("create.savefont: unknown font name: " + args.FontFamilyVal)
+			return
+		}
+		switch f {
+		case "automatic", "vga":
+			pck = "ibm-vga8"
+		case "mona":
+			pck = "mona"
+		}
+		if err := args.savefontwoff2(f+".woff2", "font/"+pck+".woff2"); err != nil {
 			c <- err
 		}
 	}
-	if args.Layout == "standard" {
+	switch args.Layout {
+	case "standard", "s":
 		if err := args.savefontcss("font.css", "css/font.css"); err != nil {
 			c <- err
 		}
@@ -317,7 +332,9 @@ func (args Args) savefontwoff2(name, packName string) error {
 }
 
 func (args Args) savejs(c chan error) {
-	if args.Layout != "standard" {
+	switch args.Layout {
+	case "standard", "s":
+	default:
 		c <- nil
 		return
 	}
