@@ -15,20 +15,42 @@ import (
 // apex: https://github.com/apex/log
 // zap: https://github.com/uber-go/zap
 
-// Err is a generic error type used to apply color to errors
-type Err struct {
+// Generic is the standard error type used to apply color to errors
+type Generic struct {
 	Issue string // Issue is a summary of the problem
 	Arg   string // Arg is the argument, flag or item that triggered the error
-	Msg   error  // Msg is the actual error generated
+	Err   error  // Err is the actual error generated
 }
 
-func (e Err) String() string {
-	if e.Msg == nil {
+func (g Generic) String() string {
+	if g.Err == nil {
 		return ""
 	}
 	return fmt.Sprintf("%s %s %s", str.Alert(),
-		str.Ci(fmt.Sprintf("%s %s,", e.Issue, e.Arg)), // issue & argument
-		str.Cf(fmt.Sprintf("%v", e.Msg)))              // error message
+		str.Ci(fmt.Sprintf("%s %s,", g.Issue, g.Arg)), // issue & argument
+		str.Cf(fmt.Sprintf("%v", g.Err)))              // error message
+}
+
+// Fatal prints a generic error and exits.
+func (g Generic) Fatal() {
+	fmt.Println(g.String())
+	os.Exit(1)
+}
+
+// Println prints a generic error type.
+func Println(issue, arg string, err error) {
+	var g = Generic{
+		Issue: issue,
+		Arg:   arg,
+		Err:   err,
+	}
+	fmt.Println(g.String())
+}
+
+// Fatal prints a generic error and exits.
+func Fatal(issue, arg string, msg error) {
+	Println(issue, arg, msg)
+	os.Exit(1)
 }
 
 // Hint is a generic error type used to apply color to errors and offer a hint
@@ -40,7 +62,7 @@ type Hint struct {
 }
 
 func (h Hint) String() string {
-	e := Err{Issue: h.Issue, Arg: h.Arg, Msg: h.Msg}
+	e := Generic{Issue: h.Issue, Arg: h.Arg, Err: h.Msg}
 	return e.String() + fmt.Sprintf("\n         run %s", str.Example("retrotxt "+h.Hint))
 }
 
@@ -50,7 +72,7 @@ type CmdErr struct {
 	Err  error    // rootCmd.Execute output
 }
 
-func (e CmdErr) Error() Err {
+func (e CmdErr) Error() Generic {
 	quote := func(s string) string {
 		return fmt.Sprintf("%q", s)
 	}
@@ -64,48 +86,48 @@ func (e CmdErr) Error() Err {
 	a := fmt.Sprintf("%q", e.Args[0])
 	switch strings.Join(s[0:2], " ") {
 	case "bad flag":
-		return Err{Issue: "flag syntax",
+		return Generic{Issue: "flag syntax",
 			Arg: quote(s[l-1]),
-			Msg: errors.New("flags can only be in -s (short) or --long (long) form")}
+			Err: errors.New("flags can only be in -s (short) or --long (long) form")}
 	case "flag needs":
-		return Err{Issue: "invalid flag",
+		return Generic{Issue: "invalid flag",
 			Arg: quote(s[l-1]),
-			Msg: errors.New("cannot be empty and requires a value")}
+			Err: errors.New("cannot be empty and requires a value")}
 	case "invalid argument":
 		m := strings.Split(fmt.Sprint(e.Err), ":")
-		return Err{Issue: "flag value",
+		return Generic{Issue: "flag value",
 			Arg: a,
-			Msg: errors.New(m[0])}
+			Err: errors.New(m[0])}
 	case "invalid slice":
-		return Err{Issue: "flag value",
+		return Generic{Issue: "flag value",
 			Arg: quote(s[l-1]),
-			Msg: errors.New("is not a valid choice for --" + s[l-2])}
+			Err: errors.New("is not a valid choice for --" + s[l-2])}
 	case "invalid command":
-		return Err{Issue: "invalid command",
+		return Generic{Issue: "invalid command",
 			Arg: quote(s[l-1]),
-			Msg: errors.New("choose another command from the available commands")}
+			Err: errors.New("choose another command from the available commands")}
 	case "required flag(s)":
-		return Err{Issue: "a required flag is missing",
+		return Generic{Issue: "a required flag is missing",
 			Arg: s[2],
-			Msg: errors.New("you must include this flag in your command")}
+			Err: errors.New("you must include this flag in your command")}
 	case "subcommand is":
 		fmt.Printf("SUBCMD DEBUG: %+v", e.Err)
-		return Err{} // ignore error
+		return Generic{} // ignore error
 	case "unknown command":
-		return Err{Issue: "invalid command",
+		return Generic{Issue: "invalid command",
 			Arg: a,
-			Msg: errors.New("choose a command from the list available")}
+			Err: errors.New("choose a command from the list available")}
 	case "unknown flag:":
-		return Err{Issue: "unknown flag",
+		return Generic{Issue: "unknown flag",
 			Arg: s[2],
-			Msg: errors.New("use a flag from the list of flags")}
+			Err: errors.New("use a flag from the list of flags")}
 	case "unknown shorthand":
-		return Err{Issue: "unknown shorthand flag",
+		return Generic{Issue: "unknown shorthand flag",
 			Arg: s[5],
-			Msg: errors.New("use a flag from the list of flags")}
+			Err: errors.New("use a flag from the list of flags")}
 	}
 	//fmt.Printf("DEBUG: %+v\n", e.Err)
-	return Err{Issue: "command", Arg: "execute", Msg: e.Err}
+	return Generic{Issue: "command", Arg: "execute", Err: e.Err}
 }
 
 func (e CmdErr) String() {

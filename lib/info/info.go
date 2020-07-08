@@ -72,23 +72,26 @@ var Language = language.English
 var DTFormat = "DMY24"
 
 // Info parses the named file and prints out its details in a specific syntax.
-func Info(name, format string) (err logs.Err) {
+func Info(name, format string) logs.Generic {
+	gen := logs.Generic{Issue: "info", Arg: name}
 	if name == "" {
-		return logs.Err{Issue: "info", Arg: "name",
-			Msg: errors.New("value cannot be empty")}
+		gen.Issue = "name"
+		gen.Err = errors.New("value cannot be empty")
+		return gen
 	}
 	if s, err := os.Stat(name); os.IsNotExist(err) {
-		return logs.Err{Issue: "info", Arg: name,
-			Msg: errors.New("file does not exist")}
+		gen.Err = errors.New("file does not exist")
 	} else if err != nil {
-		return logs.Err{Issue: "info", Arg: name, Msg: err}
+		gen.Err = err
 	} else if s.IsDir() {
-		return logs.Err{Issue: "info", Arg: name,
-			Msg: errors.New("directories are not usable with this command")}
-	} else if e := Print(name, format); e != nil {
-		return logs.Err{Issue: "info.print", Arg: format, Msg: e}
+		gen.Issue = "info"
+		gen.Err = errors.New("directories are not usable with this command")
+	} else if err := Print(name, format); err != nil {
+		gen.Issue = "info.print"
+		gen.Arg = format
+		gen.Err = err
 	}
-	return err
+	return gen
 }
 
 // Print the meta and operating system details of a file.
@@ -315,7 +318,9 @@ func (d Detail) JSON(indent bool) (js []byte) {
 	default:
 		js, err = json.Marshal(d)
 	}
-	logs.ChkErr(logs.Err{Issue: "could not create", Arg: "json", Msg: err})
+	if err != nil {
+		logs.Fatal("info could not marshal", "json", err)
+	}
 	return js
 }
 

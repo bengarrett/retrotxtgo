@@ -136,7 +136,9 @@ func JSON(indent bool) (data []byte) {
 	default:
 		data, err = json.Marshal(information())
 	}
-	logs.ChkErr(logs.Err{Issue: "could not create", Arg: "json", Msg: err})
+	if err != nil {
+		logs.Fatal("version could not marshal", "json", err)
+	}
 	return data
 }
 

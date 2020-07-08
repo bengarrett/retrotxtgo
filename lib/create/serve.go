@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -42,14 +43,14 @@ func (args *Args) Serve(b *[]byte) {
 	args.Port = port
 	if !Port(port) {
 		// TODO: automatically detect a free port and use that, but give up after 5 attempts
-		logs.ChkErr(logs.Err{Issue: "tcp port", Arg: fmt.Sprint(port),
-			Msg: errors.New("this port is currently in use on this system")})
+		logs.Fatal("tcp port", strconv.Itoa(int(port)),
+			errors.New("this port is currently in use on this system"))
 	}
 	if err := args.createDir(b); err != nil {
-		logs.ChkErr(logs.Err{Issue: "create", Arg: "HTTP", Msg: err})
+		logs.Fatal("create", "HTTP", err)
 	}
 	if err := args.serveDir(); err != nil {
-		logs.ChkErr(logs.Err{Issue: "server", Arg: "HTTP", Msg: err})
+		logs.Fatal("server", "HTTP", err)
 	}
 }
 

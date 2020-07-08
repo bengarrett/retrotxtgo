@@ -89,7 +89,9 @@ var createCmd = &cobra.Command{
 			if b == nil {
 				var err error
 				b, err = filesystem.Read(arg)
-				logs.ChkErr(logs.Err{Issue: "file is invalid", Arg: arg, Msg: err})
+				if err != nil {
+					logs.Fatal("file is invalid", arg, err)
+				}
 			}
 			if cp := cmd.Flags().Lookup("encode"); !cp.Changed {
 				html.Encoding = enc

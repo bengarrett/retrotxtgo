@@ -32,9 +32,9 @@ var infoCmd = &cobra.Command{
 		}
 		checkUse(cmd, args)
 		for _, arg := range args {
-			if e := info.Info(arg, infoFlag.format); e.Msg != nil {
+			if err := info.Info(arg, infoFlag.format); err.Err != nil {
 				cmd.Usage()
-				logs.ChkErr(e)
+				err.Fatal()
 			}
 		}
 	},

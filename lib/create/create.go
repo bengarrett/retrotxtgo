@@ -211,8 +211,7 @@ func (args *Args) destination(name string) (string, error) {
 	color.OpFuzzy.Printf("Saving to %s\n", path)
 	stat, err = os.Stat(path)
 	if !args.OW && !os.IsNotExist(err) {
-		e := logs.Err{Issue: "file exists", Arg: path, Msg: errors.New("include an -o flag to overwrite")}
-		fmt.Println(e)
+		logs.Println("file exists", path, errors.New("include an -o flag to overwrite"))
 	}
 	return path, nil
 }

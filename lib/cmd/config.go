@@ -151,9 +151,9 @@ var configShellCmd = &cobra.Command{
 			err = cmd.GenZshCompletion(&buf)
 			logs.Check("shell zsh", err)
 		default:
-			logs.ChkErr(logs.Err{Issue: "the interpreter is not supported:",
-				Arg: configFlag.shell,
-				Msg: fmt.Errorf("options: %s", config.Format.String("shell"))})
+			logs.Fatal("the interpreter is not supported:",
+				configFlag.shell,
+				fmt.Errorf("options: %s", config.Format.String("shell")))
 		}
 		if err := str.Highlight(buf.String(), lexer, style); err != nil {
 			logs.Check("config shell", err)

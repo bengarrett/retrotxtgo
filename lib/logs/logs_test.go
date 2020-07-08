@@ -17,11 +17,11 @@ func TestErr_String(t *testing.T) {
 	color.Disable()
 	tests := []struct {
 		name string
-		e    Err
+		e    Generic
 		want string
 	}{
-		{"empty", Err{}, ""},
-		{"abc", Err{Issue: "A", Arg: "B", Msg: errors.New("C")}, "problem: A B, C"},
+		{"empty", Generic{}, ""},
+		{"abc", Generic{Issue: "A", Arg: "B", Err: errors.New("C")}, "problem: A B, C"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -84,10 +84,10 @@ func Test_check(t *testing.T) {
 }
 
 func TestErr_check(t *testing.T) {
-	var e Err
+	var e Generic
 	tests := []struct {
 		name     string
-		e        Err
+		e        Generic
 		wantMsg  string
 		wantCode int
 	}{

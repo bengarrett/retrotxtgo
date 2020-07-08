@@ -85,14 +85,7 @@ func checkNilArgument(arg string, args []string) (msg string, code int) {
 	return msg, code
 }
 
-// ChkErr prints an error message and exits the program.
-func ChkErr(e Err) {
-	if e.Msg != nil {
-		Exit(e.check())
-	}
-}
-
-func (e Err) check() (msg string, code int) {
+func (e Generic) check() (msg string, code int) {
 	code = 1
 	msg = e.String()
 	return msg, code
