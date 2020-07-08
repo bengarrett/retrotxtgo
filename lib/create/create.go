@@ -572,7 +572,6 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 	}
 	logs.Check("create.pagedata.chars", err)
 	p.PreText = string(runes)
-	fmt.Println(args)
 	return p, nil
 }
 

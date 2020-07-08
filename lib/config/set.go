@@ -131,6 +131,10 @@ func Update(name string) {
 		setFont(value.(string))
 	case "html.layout":
 		fmt.Println("\nChoose a new " + str.Options(Hints[name], create.Templates().Keys(), true))
+		fmt.Println("\n  standard: uses external CSS, JS and woff2 fonts and is the recommended layout for web servers")
+		fmt.Println("  inline:   includes both the CSS and JS as inline elements but is not recommended")
+		fmt.Println("  compact:  is the same as the standard layout but without any <meta> tags")
+		fmt.Println("  none:     no template is used, instead only the generated markup is returned")
 		setShortStrings(name, value.(string), create.Templates().Keys())
 	case "html.meta.author",
 		"html.meta.description",
