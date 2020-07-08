@@ -79,13 +79,13 @@ func TestArgs_Stdout(t *testing.T) {
 	}
 }
 
-func Test_Layouts(t *testing.T) {
-	l := Layouts()
-	if got := len(l); got != 5 {
-		t.Errorf("createTemplates() = %v, want %v", got, 5)
+func Test_Keys(t *testing.T) {
+	l := Templates().Keys()
+	if got := len(l); got != 4 {
+		t.Errorf("Templates().Keys() = %v, want %v", got, 4)
 	}
-	if got := Templates()["body"]; got != "body-content" {
-		t.Errorf("Templates() = %v, want %v", got, "body-content")
+	if got := Templates()["none"]; got != "none" {
+		t.Errorf("Templates().Keys() = %v, want %v", got, "none")
 	}
 }
 

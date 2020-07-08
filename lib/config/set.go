@@ -130,7 +130,7 @@ func Update(name string) {
 	case "html.font.family":
 		setFont(value.(string))
 	case "html.layout":
-		fmt.Println("\nChoose a new " + str.Options(Hints[name], create.Layouts(), true))
+		fmt.Println("\nChoose a new " + str.Options(Hints[name], create.Templates().Keys(), true))
 		setShortStrings(name, value.(string), create.Templates().Keys())
 	case "html.meta.author",
 		"html.meta.description",

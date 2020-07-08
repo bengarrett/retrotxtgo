@@ -412,29 +412,6 @@ func destination(args []string) (path string, err error) {
 	return path, err
 }
 
-// Layouts returns the options permitted by the layout flag.
-func Layouts() (s []string) {
-	for key := range Templates() {
-		s = append(s, key)
-	}
-	return s
-}
-
-func layout(name string) string {
-	if name == "" {
-		return ""
-	}
-	for key, val := range Templates() {
-		if name == key {
-			return val
-		}
-		if name == key[:1] {
-			return val
-		}
-	}
-	return ""
-}
-
 // newTemplate creates and parses a new template file.
 // The argument test is used internally.
 func (args Args) newTemplate() (*template.Template, error) {
@@ -528,7 +505,7 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 	}
 	// templates are found in the dir static/html/*.gohtml
 	switch args.Layout {
-	case "inline":
+	case "inline", "i":
 		p.ExternalEmbed = true
 		m := minify.New()
 		m.AddFunc("text/css", css.Minify)
@@ -557,7 +534,7 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 		}
 		p.ScriptEmbed = template.JS(string(js))
 		fallthrough
-	case "standard":
+	case "standard", "s":
 		p.FontEmbed = args.FontEmbedVal
 		p.FontFamily = args.fontFamily()
 		p.MetaAuthor = args.metaAuthor()
@@ -575,10 +552,10 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 		t := time.Now().UTC()
 		p.BuildDate = t.Format(time.RFC3339)
 		p.BuildVersion = version.B.Version
-	case "compact": // disables all meta tags
+	case "compact", "c": // disables all meta tags
 		p.PageTitle = args.pageTitle()
 		p.MetaGenerator = false
-	case "none":
+	case "none", "n":
 		// do nothing
 	default:
 		return PageData{}, errors.New("create.pagedata: unknown layout: " + args.Layout)
@@ -682,4 +659,19 @@ func (args Args) pageTitle() string {
 		return args.TitleVal
 	}
 	return viper.GetString("html.title")
+}
+
+func layout(name string) string {
+	if name == "" {
+		return ""
+	}
+	for key, val := range Templates() {
+		if name == key {
+			return val
+		}
+		if name == key[:1] {
+			return val
+		}
+	}
+	return ""
 }
