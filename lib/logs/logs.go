@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	// Filename is the default error log filename
-	Filename = "errors.log"
+	// default error log
+	filename = "errors.log"
 	// posix permissions for the configuration file and directory.
 	filemode os.FileMode = 0600
 	dirmode  os.FileMode = 0700
@@ -56,10 +56,10 @@ func LogFatal(err error) {
 
 // Path is the absolute path and filename of the error log file.
 func Path() string {
-	fp, err := scope.LogPath(Filename)
+	fp, err := scope.LogPath(filename)
 	if err != nil {
 		h, _ := os.UserHomeDir()
-		return path.Join(h, Filename)
+		return path.Join(h, filename)
 	}
 	return fp
 }
