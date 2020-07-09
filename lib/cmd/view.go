@@ -17,12 +17,14 @@ import (
 type viewFlags struct {
 	controls []string
 	encode   string
+	to       string
 	width    int // TODO: not implemented
 }
 
 var viewFlag = viewFlags{
 	controls: nil,
 	encode:   "CP437",
+	to:       "",
 	width:    80,
 }
 
@@ -85,6 +87,7 @@ func init() {
 	rootCmd.AddCommand(viewCmd)
 	flagEncode(&viewFlag.encode, viewCmd)
 	flagControls(&viewFlag.controls, viewCmd)
+	flagTo(&viewFlag.to, viewCmd)
 	flagWidth(&viewFlag.width, viewCmd)
 	viewCmd.Flags().SortFlags = false
 }
@@ -111,6 +114,13 @@ func viewPackage(cmd *cobra.Command, name string) (ok bool, err error) {
 	if cp := cmd.Flags().Lookup("encode"); !cp.Changed {
 		conv.Encoding = pkg.encoding
 	}
+	// to flag
+	if to := cmd.Flags().Lookup("to"); to.Changed {
+		b, err = toDecode(viewFlag.to, &b)
+		if err != nil {
+			logs.Println("using UTF8 encoding as text could not convert to", viewFlag.to, err)
+		}
+	}
 	// convert and print
 	var r []rune
 	switch pkg.convert {
@@ -123,17 +133,18 @@ func viewPackage(cmd *cobra.Command, name string) (ok bool, err error) {
 			return false, err
 		}
 	}
-	// TODO: optional char conversion
-	// ab, err := charmap.CodePage437.NewDecoder().Bytes(b)
-	// if err != nil {
-	// 	logs.Println("conversion from", "CodePage437", err)
-	// }
-	// nr, err := charmap.CodePage437.NewEncoder().Bytes(ab)
-	// if err != nil {
-	// 	logs.Println("conversion to", "CodePage437", err)
-	// }
-	// fmt.Println(string(nr))
-	// os.Exit(0)
 	fmt.Println(string(r))
 	return true, nil
+}
+
+func toDecode(name string, b *[]byte) ([]byte, error) {
+	encode, err := convert.Encoding(name)
+	if err != nil {
+		return *b, err
+	}
+	cp, err := encode.NewDecoder().Bytes(*b)
+	if err != nil {
+		return *b, err
+	}
+	return cp, nil
 }

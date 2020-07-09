@@ -95,12 +95,19 @@ func flagTab(p *bool, cc *cobra.Command) {
 	cc.Flags().BoolVar(p, "tab", true, "parse horizontal tab control characters")
 }
 
+func flagTo(p *string, cc *cobra.Command) {
+	cc.Flags().StringVar(p, "to", "", `character encoding to print to stdout
+modern terminals always use UTF8 encoding
+so this option is for special cases (default UTF8)
+see the list of to values `+str.Example("retrotxt list codepages")+"\n")
+}
+
 func flagWidth(p *int, cc *cobra.Command) {
 	cc.Flags().IntVarP(p, "width", "w", viewFlag.width, "document column character width")
 }
 
 func flagControls(p *[]string, cc *cobra.Command) {
-	cc.Flags().StringSliceVarP(p, "controls", "x", []string{}, "always use these control codes\n"+
+	cc.Flags().StringSliceVarP(p, "controls", "x", []string{}, "use these control codes\n"+
 		"  tab    horizontal tab\n"+
 		"  bell   bell or terminal alert\n"+
 		"  cr     carriage return\n"+
