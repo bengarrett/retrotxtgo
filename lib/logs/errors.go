@@ -12,6 +12,22 @@ import (
 // apex: https://github.com/apex/log
 // zap: https://github.com/uber-go/zap
 
+// Fatal prints a generic error and exits.
+func Fatal(issue, arg string, msg error) {
+	Println(issue, arg, msg)
+	os.Exit(1)
+}
+
+// Println prints a generic error.
+func Println(issue, arg string, err error) {
+	var g = Generic{
+		Issue: issue,
+		Arg:   arg,
+		Err:   err,
+	}
+	fmt.Println(g.String())
+}
+
 // Generic is the standard error type used to apply color to errors.
 type Generic struct {
 	Issue string // Issue is a summary of the problem
@@ -35,6 +51,12 @@ func (g Generic) String() string {
 	return fmt.Sprintf("%s %s %s", a, b, c)
 }
 
+// Fatal prints a generic error and exits.
+func (g Generic) Fatal() {
+	fmt.Println(g.String())
+	os.Exit(1)
+}
+
 // Hint is a standard error type that also offers the user a command hint.
 type Hint struct {
 	Error Generic
@@ -44,26 +66,4 @@ type Hint struct {
 func (h Hint) String() string {
 	err := h.Error
 	return err.String() + fmt.Sprintf("\n         run %s", str.Example("retrotxt "+h.Hint))
-}
-
-// Println prints a generic error type.
-func Println(issue, arg string, err error) {
-	var g = Generic{
-		Issue: issue,
-		Arg:   arg,
-		Err:   err,
-	}
-	fmt.Println(g.String())
-}
-
-// Fatal prints a generic error and exits.
-func (g Generic) Fatal() {
-	fmt.Println(g.String())
-	os.Exit(1)
-}
-
-// Fatal prints a generic error and exits.
-func Fatal(issue, arg string, msg error) {
-	Println(issue, arg, msg)
-	os.Exit(1)
 }
