@@ -18,13 +18,11 @@ const (
 	// posix permissions for the configuration file and directory.
 	filemode os.FileMode = 0600
 	dirmode  os.FileMode = 0700
-)
-
-var (
-	scope = gap.NewScope(gap.User, "df2")
-	// Panic uses the panic function to handle all error logs.
+	// Panic uses log.Panic to print all saved errors.
 	Panic = false
 )
+
+var scope = gap.NewScope(gap.User, "df2")
 
 // Log logs the error and continues the program.
 func Log(err error) {
