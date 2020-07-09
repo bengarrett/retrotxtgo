@@ -183,7 +183,7 @@ func init() {
 		serve: {"serve", nil, nil, &html.Port, "serve", "p", nil},
 		// main tag flags
 		layout: {"html.layout", &html.Layout, nil, nil, "layout", "l", create.Layouts()},
-		style:  {"style.html", &html.Syntax, nil, nil, "syntax-style", "c", nil},
+		style:  {"style.html", &html.Syntax, nil, nil, "syntax-style", "", nil},
 		title:  {"html.title", &html.TitleVal, nil, nil, "title", "t", nil},
 		desc:   {"html.meta.description", &html.MetaDescriptionVal, nil, nil, "meta-description", "d", nil},
 		author: {"html.meta.author", &html.MetaAuthorVal, nil, nil, "meta-author", "a", nil},
@@ -213,6 +213,7 @@ func init() {
 	createCmd.Flags().BoolVarP(&html.SaveToFile, "save", "s", false,
 		`save HTML and static files to a the save directory 
 or ignore to print (save directory: `+viper.GetString("save-directory")+")")
+	createCmd.Flags().BoolVarP(&html.Compress, "compress", "c", false, "store and compress all files into an archive when saving")
 	createCmd.Flags().BoolVarP(&html.OW, "overwrite", "o", false, "overwrite any existing files when saving")
 	// html flags, the key int value must be used as the index
 	// rather than the loop count, otherwise flags might be skipped

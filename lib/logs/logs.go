@@ -24,7 +24,7 @@ const (
 
 var scope = gap.NewScope(gap.User, "df2")
 
-// Log logs the error and continues the program.
+// Log saves the error and continues the program.
 func Log(err error) {
 	if err != nil {
 		// save error to log file
@@ -34,7 +34,7 @@ func Log(err error) {
 	}
 }
 
-// LogFatal the error and exit to the operating system with the error code 1.
+// LogFatal saves the error and exits.
 func LogFatal(err error) {
 	if err != nil {
 		// save error to log file

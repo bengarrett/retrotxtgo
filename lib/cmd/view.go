@@ -123,6 +123,17 @@ func viewPackage(cmd *cobra.Command, name string) (ok bool, err error) {
 			return false, err
 		}
 	}
+	// TODO: optional char conversion
+	// ab, err := charmap.CodePage437.NewDecoder().Bytes(b)
+	// if err != nil {
+	// 	logs.Println("conversion from", "CodePage437", err)
+	// }
+	// nr, err := charmap.CodePage437.NewEncoder().Bytes(ab)
+	// if err != nil {
+	// 	logs.Println("conversion to", "CodePage437", err)
+	// }
+	// fmt.Println(string(nr))
+	// os.Exit(0)
 	fmt.Println(string(r))
 	return true, nil
 }

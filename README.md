@@ -341,7 +341,6 @@ op token list > https://golang.org/pkg/go/token/#Token
 - - `retrotxt create somefile.txt . # would create index.html in the current directory`
 - - `retrotxt create somefile.txt somefile.html # create sometfile.htm`
 - [ ] add a flag to --export `create` command results to a tar or zip archive.
-- [ ] add the ability to self-update?
 - [ ] option for generated HTML naming convention, either use index.html ... index_1.html, index_2.html etc.
       or filename.html, another-file-1.html, etc. When generating multiple HTML files, an index.html proof-sheet
       should be created with hyperlinks to all the other files. Maybe list their file/sauce details and a screenshot.
@@ -351,14 +350,12 @@ op token list > https://golang.org/pkg/go/token/#Token
 
 ### TODOs - changes to the existing code
 
-- [ ] switch all logs checks to be Go idiomatic using if-conditionals.
 - [ ] config shell should have a `--append/source/or` flag to save shell auto-completion?
 - [ ] scan for supported but current shell configuration.
 - [ ] reverse scan of file looking for EOF, SAUCE00 & COMNTT.
 - [ ] scan for unique color codes like 24-bit colors.
 - [ ] scan and linkify any http/s, ftp, mailto links in HTML.
 - [ ] when serving HTML over the internal server, monitor the files for any edits and refresh the browser if they occur.
-- [ ] replace uint types with iota https://golang.org/pkg/unicode/#pkg-constants
 
 ```sh
 // TODO: env

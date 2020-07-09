@@ -2,8 +2,10 @@
 package filesystem
 
 import (
+	"archive/tar"
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -125,6 +127,54 @@ func Save(filename string, b []byte) (path string, err error) {
 // SaveTemp saves bytes to a named temporary file.
 func SaveTemp(filename string, b []byte) (path string, err error) {
 	return Save(tempFile(filename), b)
+}
+
+// Tar blah
+func Tar(name string, files []string) error {
+	f, err := os.Create(name)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	w := tar.NewWriter(f)
+	defer w.Close()
+
+	for _, file := range files {
+		if err := addTar(file, w); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func addTar(name string, w *tar.Writer) error {
+	f, err := os.Open(name)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	s, err := f.Stat()
+	if err != nil {
+		return err
+	}
+
+	h := &tar.Header{
+		Name:    f.Name(),
+		Size:    s.Size(),
+		Mode:    int64(s.Mode()),
+		ModTime: s.ModTime(),
+	}
+	if err = w.WriteHeader(h); err != nil {
+		return err
+	}
+	_, err = io.Copy(w, f)
+	if err != nil {
+		return nil
+	}
+
+	return nil
 }
 
 // Touch creates an empty file at the named location.

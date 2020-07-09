@@ -85,7 +85,7 @@ func checkUse(cmd *cobra.Command, args []string) {
 
 func flagEncode(p *string, cc *cobra.Command) {
 	cc.Flags().StringVarP(p, "encode", "e", "",
-		`characture encoding used by the filenames
+		`character encoding used by the filenames
 when ignored, UTF8 encoding is detected
 if that fails the default is used (default CP437)
 see the list of encode values `+str.Example("retrotxt list codepages")+"\n")

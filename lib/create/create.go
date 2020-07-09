@@ -49,6 +49,8 @@ type Args struct {
 	SaveToFile bool
 	// OW overwrite any existing files when saving
 	OW bool
+	// Compress and store all files into an archive
+	Compress bool
 	// template filename
 	tmpl string
 	// template package name
