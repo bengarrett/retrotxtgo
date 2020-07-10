@@ -39,6 +39,7 @@ func (a Args) Chars(b *[]byte) (utf8 []rune, err error) {
 		return nil, err
 	}
 	c.Swap()
+	c.width(a.Width)
 	return c.Runes, nil
 }
 
@@ -54,6 +55,7 @@ func (a Args) Dump(b *[]byte) (utf8 []rune, err error) {
 		return nil, err
 	}
 	c.Swap().ANSI()
+	c.width(a.Width)
 	return c.Runes, nil
 }
 
@@ -69,12 +71,7 @@ func (a Args) Text(b *[]byte) (utf8 []rune, err error) {
 		return nil, err
 	}
 	c.Swap().ANSI()
-	if a.Width > 0 {
-		err := c.width(a.Width)
-		if err != nil {
-			logs.Println("ignoring width argument", "", err)
-		}
-	}
+	c.width(a.Width)
 	return c.Runes, nil
 }
 
@@ -104,14 +101,19 @@ func (c *Convert) Transform(name string) (*Convert, error) {
 	return c, nil
 }
 
-func (c *Convert) width(max int) error {
+func (c *Convert) width(max int) {
+	if max < 1 {
+		return
+	}
 	cnt := len(c.Runes)
 	cols, err := filesystem.Columns(bytes.NewReader(c.Source), c.newlines)
 	if err != nil {
-		return fmt.Errorf("width could not determine the columns: %s", err)
+		logs.Println("ignoring width argument", "",
+			fmt.Errorf("width could not determine the columns: %s", err))
+		return
 	}
 	if cols <= max {
-		return nil
+		return
 	}
 	limit := math.Ceil(float64(cnt) / float64(max))
 	var w bytes.Buffer
@@ -130,7 +132,7 @@ func (c *Convert) width(max int) error {
 		}
 	}
 	c.Runes = []rune(w.String())
-	return nil
+	return
 }
 
 func (c *Convert) controls(a Args) {
