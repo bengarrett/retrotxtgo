@@ -103,7 +103,7 @@ see the list of to values `+str.Example("retrotxt list codepages")+"\n")
 }
 
 func flagWidth(p *int, cc *cobra.Command) {
-	cc.Flags().IntVarP(p, "width", "w", viewFlag.width, "document column character width")
+	cc.Flags().IntVarP(p, "width", "w", viewFlag.width, "maximum document character/column width")
 }
 
 func flagControls(p *[]string, cc *cobra.Command) {

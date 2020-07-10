@@ -18,14 +18,14 @@ type viewFlags struct {
 	controls []string
 	encode   string
 	to       string
-	width    int // TODO: not implemented
+	width    int
 }
 
 var viewFlag = viewFlags{
 	controls: nil,
 	encode:   "CP437",
 	to:       "",
-	width:    80,
+	width:    0,
 }
 
 // viewCmd represents the view command

@@ -2,10 +2,14 @@ package convert
 
 import (
 	"bytes"
+	"fmt"
+	"math"
 	"strings"
 	"unicode/utf8"
 
 	"golang.org/x/text/encoding"
+	"retrotxt.com/retrotxt/lib/filesystem"
+	"retrotxt.com/retrotxt/lib/logs"
 )
 
 // Convert for the transformation of legacy encoded text to UTF-8.
@@ -65,6 +69,12 @@ func (a Args) Text(b *[]byte) (utf8 []rune, err error) {
 		return nil, err
 	}
 	c.Swap().ANSI()
+	if a.Width > 0 {
+		err := c.width(a.Width)
+		if err != nil {
+			logs.Println("ignoring width argument", "", err)
+		}
+	}
 	return c.Runes, nil
 }
 
@@ -92,6 +102,35 @@ func (c *Convert) Transform(name string) (*Convert, error) {
 	c.Runes = bytes.Runes(c.Source)
 	c.len = len(c.Runes)
 	return c, nil
+}
+
+func (c *Convert) width(max int) error {
+	cnt := len(c.Runes)
+	cols, err := filesystem.Columns(bytes.NewReader(c.Source), c.newlines)
+	if err != nil {
+		return fmt.Errorf("width could not determine the columns: %s", err)
+	}
+	if cols <= max {
+		return nil
+	}
+	limit := math.Ceil(float64(cnt) / float64(max))
+	var w bytes.Buffer
+	for f := float64(1); f <= limit; f++ {
+		switch f {
+		case 1:
+			fmt.Fprintf(&w, "%s\n", string(c.Runes[0:max]))
+		default:
+			i := int(f)
+			a, b := (i-1)*max, i*max
+			if b >= cnt {
+				fmt.Fprintf(&w, "%s\n", string(c.Runes[a:cnt]))
+			} else {
+				fmt.Fprintf(&w, "%s\n", string(c.Runes[a:b]))
+			}
+		}
+	}
+	c.Runes = []rune(w.String())
+	return nil
 }
 
 func (c *Convert) controls(a Args) {
