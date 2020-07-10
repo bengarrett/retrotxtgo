@@ -48,6 +48,12 @@ var viewCmd = &cobra.Command{
 			if err != nil {
 				logs.Fatal("view", "stdin read", err)
 			}
+			if to := cmd.Flags().Lookup("to"); to.Changed {
+				b, err = toDecode(viewFlag.to, &b)
+				if err != nil {
+					logs.Println("using UTF8 encoding as text could not convert to", viewFlag.to, err)
+				}
+			}
 			r, err := conv.Text(&b)
 			if err != nil {
 				logs.Fatal("view", "stdin convert", err)
@@ -64,11 +70,20 @@ var viewCmd = &cobra.Command{
 			} else if ok {
 				continue
 			}
+			// read file
 			b, err := filesystem.Read(arg)
 			if err != nil {
 				logs.Println("read file", arg, err)
 				continue
 			}
+			// to flag
+			if to := cmd.Flags().Lookup("to"); to.Changed {
+				b, err = toDecode(viewFlag.to, &b)
+				if err != nil {
+					logs.Println("using UTF8 encoding as text could not convert to", viewFlag.to, err)
+				}
+			}
+			// convert text
 			r, err := conv.Text(&b)
 			if err != nil {
 				logs.Println("convert text", arg, err)
