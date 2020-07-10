@@ -175,8 +175,8 @@ func examples() *bytes.Buffer {
 	fmt.Fprintln(w, "\nAny of these packaged examples will work with both the", str.Example("create"), "and", str.Example("view"), "commands")
 	fmt.Fprintln(w, "\n"+str.Example(" retrotxt view 1252"), "will print the Windows-1252 English test to the terminal")
 	fmt.Fprintln(w, str.Example(" retrotxt view 1252 > file.txt"), "will convert and save the Windows-1252 English test to UTF-8 encoding")
-	fmt.Fprintln(w, str.Example(" retrotxt save 1252 > file.txt"), "will save the Windows-1252 English test with its original encoding") // TODO
-	fmt.Fprintln(w, str.Example(" retrotxt save 1252 | retrotxt info"), "displays statistics and information")                           // TODO
+	fmt.Fprintln(w, str.Example(" retrotxt view 1252 --to=cp1252 > file.txt"), "will save the Windows-1252 English test with its original encoding")
+	fmt.Fprintln(w, str.Example(" retrotxt view 1252 --to=cp1252 | retrotxt info"), "displays statistics and information")
 	fmt.Fprintln(w, str.Example(" retrotxt create 1252"), "creates a HTML document from the Windows-1252 English test")
 	fmt.Fprintln(w, str.Example(" retrotxt create 1252 -p0"), "serves the Windows-1252 English test over a local web server")
 	fmt.Fprintln(w, "\nMultiple examples are supported")

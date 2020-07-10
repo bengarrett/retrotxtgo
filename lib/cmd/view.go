@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"unicode/utf8"
 
 	"retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/convert"
@@ -53,6 +54,8 @@ var viewCmd = &cobra.Command{
 				if err != nil {
 					logs.Println("using UTF8 encoding as text could not convert to", viewFlag.to, err)
 				}
+				fmt.Println(string(b))
+				os.Exit(0)
 			}
 			r, err := conv.Text(&b)
 			if err != nil {
@@ -82,6 +85,8 @@ var viewCmd = &cobra.Command{
 				if err != nil {
 					logs.Println("using UTF8 encoding as text could not convert to", viewFlag.to, err)
 				}
+				fmt.Println(string(b))
+				continue
 			}
 			// convert text
 			r, err := conv.Text(&b)
@@ -135,6 +140,8 @@ func viewPackage(cmd *cobra.Command, name string) (ok bool, err error) {
 		if err != nil {
 			logs.Println("using UTF8 encoding as text could not convert to", viewFlag.to, err)
 		}
+		fmt.Println(string(b))
+		return true, nil
 	}
 	// convert and print
 	var r []rune
@@ -157,9 +164,12 @@ func toDecode(name string, b *[]byte) ([]byte, error) {
 	if err != nil {
 		return *b, err
 	}
-	cp, err := encode.NewDecoder().Bytes(*b)
-	if err != nil {
-		return *b, err
+	if !utf8.Valid(*b) {
+		*b, err = encode.NewDecoder().Bytes(*b)
+		if err != nil {
+			return *b, fmt.Errorf("toDecode could not convert bytes to UTF-8: %s", err)
+		}
 	}
+	cp, err := encode.NewEncoder().Bytes(*b)
 	return cp, nil
 }
