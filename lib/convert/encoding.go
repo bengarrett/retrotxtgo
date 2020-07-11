@@ -35,20 +35,23 @@ func BOM() []byte {
 func Encoding(name string) (encoding.Encoding, error) {
 	// use iana names or alias
 	if enc, err := ianaindex.IANA.Encoding(name); err == nil && enc != nil {
-		return enc, err
+		return enc, nil
 	}
 	// use html index name (only used with HTML compatible encodings)
 	// https://encoding.spec.whatwg.org/#names-and-labels
 	if enc, err := htmlindex.Get(name); err == nil && enc != nil {
-		return enc, err
+		return enc, nil
 	}
-	n := encodingAlias(shorten(name))
-	enc, err := ianaindex.IANA.Encoding(n)
+	a := shorten(name)
+	enc, err := ianaindex.IANA.Encoding(a)
 	if err != nil {
-		err = fmt.Errorf("%s %q", err, name) // TODO fix error for --encode flags
-		return enc, err
+		enc, err = ianaindex.IANA.Encoding(encodingAlias(name))
 	}
-	return enc, err
+	if err != nil {
+		return enc, fmt.Errorf("encoding could not match name %q or alias %q: %s",
+			name, a, err)
+	}
+	return enc, nil
 }
 
 // Humanize the encoding by using an shorter, less formal name.
@@ -112,7 +115,9 @@ func shorten(name string) (n string) {
 		n = "iso-8859-" + n[7:]
 	case len(n) > 9 && n[:9] == "iso 8859-":
 		n = "iso-8859-" + n[9:]
+
 	}
+	fmt.Println(name, " ", n)
 	return n
 }
 
@@ -176,11 +181,11 @@ func encodingAlias(name string) (n string) {
 		n = "ISO-8859-14"
 	case "15", "923", "28605":
 		n = "ISO-8859-15"
-	case "16", "28606":
+	case "16", "28606", "iso885916":
 		n = "ISO-8859-16"
-	case "878", "20866":
+	case "878", "20866", "koi8r":
 		n = "KOI8-R"
-	case "1168", "21866":
+	case "1168", "21866", "koi8u":
 		n = "KOI8-U"
 	case "10000", "macroman", "mac-roman", "mac os roman":
 		n = "Macintosh"
@@ -202,12 +207,8 @@ func encodingAlias(name string) (n string) {
 		n = "Windows-1257"
 	case "1258":
 		n = "Windows-1258"
-	case "koi8r":
-		n = "KOI8R"
-	case "koi8u":
-		n = "KOI8U"
-	case "shift jis":
-		n = "ShiftJIS"
+	case "shift jis", "shiftjis":
+		n = "shift_jis"
 	case "utf16":
 		n = "UTF-16" // Go will use the byte-order-mark
 	case "16be", "utf16b", "utf16be", "utf-16-be":
@@ -216,6 +217,9 @@ func encodingAlias(name string) (n string) {
 		n = "UTF-16LE"
 	case "ebcdic", "ibm":
 		n = "IBM037"
+	case "iso88598e", "iso88598i", "iso88596e", "iso88596i":
+		l := len(name)
+		n = fmt.Sprintf("ISO-8859-%v-%v", name[l-2:l-1], name[l-1:])
 	}
 	return n
 }
