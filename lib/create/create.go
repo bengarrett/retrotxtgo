@@ -206,7 +206,7 @@ func (args *Args) destination(name string) (string, error) {
 	path := dir
 	stat, err := os.Stat(dir)
 	if err != nil {
-		return "", fmt.Errorf("%s %q", err, dir)
+		return "", fmt.Errorf("destination directory failed %q: %s", dir, err)
 	}
 	if stat.IsDir() {
 		path = filepath.Join(dir, name)
@@ -299,7 +299,7 @@ func (args Args) savefontcss(name, packName string) error {
 	}
 	f := Family(args.FontFamilyVal).String()
 	if f == "" {
-		return errors.New("create.savefontcss: unknown font name: " + name)
+		return fmt.Errorf("create.savefontcss: unknown font name: %s", name)
 	}
 	b, err := FontCSS(f, args.FontEmbedVal)
 	if err != nil {
@@ -379,15 +379,15 @@ func (args Args) savehtml(b *[]byte, c chan error) {
 func (args Args) Stdout(b *[]byte) error {
 	tmpl, err := args.newTemplate()
 	if err != nil {
-		return err
+		return fmt.Errorf("stdout new template failure: %s", err)
 	}
 	d, err := args.pagedata(b)
 	if err != nil {
-		return err
+		return fmt.Errorf("stdout meta and pagedata failure: %s", err)
 	}
 	var buf bytes.Buffer
 	if err = tmpl.Execute(&buf, d); err != nil {
-		return err
+		return fmt.Errorf("stdout template execute failure: %s", err)
 	}
 	switch args.Syntax {
 	case "", "none":
@@ -399,7 +399,7 @@ func (args Args) Stdout(b *[]byte) error {
 			return nil
 		}
 		if err = str.Highlight(buf.String(), "html", args.Syntax); err != nil {
-			return err
+			return fmt.Errorf("stdout html highlight: %s", err)
 		}
 	}
 	return nil
@@ -408,7 +408,7 @@ func (args Args) Stdout(b *[]byte) error {
 // destination determines if user supplied arguments are a valid file or directory destination.
 func destination(args []string) (path string, err error) {
 	if len(args) == 0 {
-		return path, err
+		return path, nil
 	}
 	dir := strings.Join(args, " ")
 	dir = filepath.Clean(dir)
@@ -419,11 +419,10 @@ func destination(args []string) (path string, err error) {
 	if len(part) > 1 {
 		part[0], err = dirs(part[0])
 		if err != nil {
-			return path, err
+			return path, fmt.Errorf("destination arguments: %s", err)
 		}
 	}
-	path = strings.Join(part, string(os.PathSeparator))
-	return path, err
+	return strings.Join(part, string(os.PathSeparator)), nil
 }
 
 func dirs(dir string) (path string, err error) {
@@ -436,30 +435,30 @@ func dirs(dir string) (path string, err error) {
 		path, err = filepath.Abs(dir)
 	}
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("parse directory error: %q: %s", dir, err)
 	}
-	return path, err
+	return path, nil
 }
 
 // newTemplate creates and parses a new template file.
 // The argument test is used internally.
 func (args Args) newTemplate() (*template.Template, error) {
 	if err := args.templateCache(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("using existing template cache: %s", err)
 	}
 	if !args.Cache {
 		if err := args.templateSave(); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("creating a new template: %s", err)
 		}
 	} else {
 		if s, err := os.Stat(args.tmpl); os.IsNotExist(err) {
 			if err := args.templateSave(); err != nil {
-				return nil, err
+				return nil, fmt.Errorf("saving to the template: %s", err)
 			}
 		} else if err != nil {
 			return nil, err
 		} else if s.IsDir() {
-			return nil, fmt.Errorf("create.newtemplate: template file is a directory: %q", args.tmpl)
+			return nil, fmt.Errorf("the path to the template file is a directory: %q", args.tmpl)
 		}
 	}
 	// to avoid a potential panic, Stat again incase os.IsNotExist() is true

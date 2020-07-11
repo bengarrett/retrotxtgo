@@ -51,10 +51,10 @@ func (args *Args) Serve(b *[]byte) {
 		}
 	}
 	if err := args.createDir(b); err != nil {
-		logs.Fatal("create", "HTTP", err)
+		logs.Fatal("serve create directory", "", err)
 	}
 	if err := args.serveDir(); err != nil {
-		logs.Fatal("server", "HTTP", err)
+		logs.Fatal("serve directory", "", err)
 	}
 }
 

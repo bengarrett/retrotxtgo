@@ -101,7 +101,7 @@ main pre {
 	if embed {
 		url, err := fontBase64(f)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("binary font to base64 failed: %s", err)
 		}
 		data.URL = template.HTML(url)
 	} else {
@@ -110,11 +110,11 @@ main pre {
 	var out bytes.Buffer
 	t, err := template.New("fontface").Parse(css)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fontface new template failed: %s", err)
 	}
 	err = t.Execute(&out, data)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fontface execute template failed: %s", err)
 	}
 	return out.Bytes(), nil
 }
@@ -122,11 +122,11 @@ main pre {
 func fontBase64(name string) (string, error) {
 	f := Family(name).File()
 	if f == "" {
-		return "", errors.New("create.fontbase64: font name is not known: " + name)
+		return "", fmt.Errorf("font name is not known: %q", name)
 	}
 	b := pack.Get(fmt.Sprintf("font/%s", f))
 	if len(b) == 0 {
-		return "", errors.New("create.fontbase64: unknown pack name: " + f)
+		return "", fmt.Errorf("font pack name is not known: %q", f)
 	}
 	var s bytes.Buffer
 	encoder := base64.NewEncoder(base64.StdEncoding, &s)
