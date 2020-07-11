@@ -11,7 +11,6 @@ import (
 	"os"
 	"os/signal"
 	"path"
-	"strconv"
 	"syscall"
 	"time"
 
@@ -40,11 +39,17 @@ func (args *Args) Serve(b *[]byte) {
 	if port == 0 || !prompt.PortValid(port) {
 		port = uint(viper.GetInt("serve"))
 	}
-	args.Port = port
-	if !Port(port) {
-		// TODO: automatically detect a free port and use that, but give up after 5 attempts
-		logs.Fatal("tcp port", strconv.Itoa(int(port)),
-			errors.New("this port is currently in use on this system"))
+	max := 10
+	for tries := 0; tries <= max; tries++ {
+		if !Port(port) {
+			port++
+		} else if tries >= max {
+			logs.Fatal("http ports", fmt.Sprintf("%d-%d", args.Port, port),
+				errors.New("tried and failed to serve using these ports"))
+		} else {
+			args.Port = port
+			break
+		}
 	}
 	if err := args.createDir(b); err != nil {
 		logs.Fatal("create", "HTTP", err)
