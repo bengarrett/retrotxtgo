@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -60,11 +59,10 @@ func (args *Args) Serve(b *[]byte) {
 }
 
 func (args *Args) createDir(b *[]byte) (err error) {
-	// TODO: deep-copy channel support?
 	args.SaveToFile, args.OW = true, true
 	args.Destination, err = ioutil.TempDir(os.TempDir(), "*-serve")
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to make a temporary serve directory: %s", err)
 	}
 	args.Create(b)
 	return nil
@@ -83,7 +81,7 @@ func (args Args) serveDir() (err error) {
 	fmt.Println(str.Cinf("Press Ctrl+C to stop"))
 	args.watch()
 	if err = srv.ListenAndServe(); err != nil {
-		return err
+		return fmt.Errorf("tcp listen and serve failed: %s", err)
 	}
 	return nil
 }
@@ -98,7 +96,7 @@ func (args Args) watch() {
 		tmp, err := path.Match(fmt.Sprintf("%s%s*",
 			string(os.PathSeparator), os.TempDir()), fmt.Sprintf("%s", args.Destination))
 		if err != nil {
-			log.Fatal(err)
+			logs.Fatal("path match pattern failed", "", err)
 		}
 		if tmp {
 			os.RemoveAll(args.Destination)
