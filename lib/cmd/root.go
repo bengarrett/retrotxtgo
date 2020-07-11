@@ -83,6 +83,20 @@ func checkUse(cmd *cobra.Command, args []string) {
 	}
 }
 
+func flagControls(p *[]string, cc *cobra.Command) {
+	cc.Flags().StringSliceVarP(p, "controls", "c", []string{},
+		`use these control codes
+  tab    horizontal tab
+  bell   bell or terminal alert
+  cr     carriage return
+  lf     line feed
+  bs backspace, del delete character, esc escape character
+  ff formfeed, vt vertical tab
+(default tab)
+separate multiple controls with commas
+`+str.Example("--controls=tab,bell")+"\n")
+}
+
 func flagEncode(p *string, cc *cobra.Command) {
 	cc.Flags().StringVarP(p, "encode", "e", "",
 		`character encoding used by the filenames
@@ -91,30 +105,32 @@ if that fails the default is used (default CP437)
 see the list of encode values `+str.Example("retrotxt list codepages")+"\n")
 }
 
+func flagRunes(p *[]int, cc *cobra.Command) {
+	cc.Flags().IntSliceVarP(p, "swap-chars", "x", []int{},
+		`swap out these characters with UTF8 alternatives
+  0    C null for a space
+  124  Unicode vertical bar | for the IBM broken pipe ¦
+  127  IBM house ⌂ for the Greek capital delta Δ
+  178  Box pipe │ for the Unicode integral extension ⎮
+  251  Square root √ for the Unicode check mark ✓
+(default 0,124)
+separate multiple values with commas
+`+str.Example("--swap-chars=0,124,127")+"\n")
+}
+
 func flagTab(p *bool, cc *cobra.Command) {
 	cc.Flags().BoolVar(p, "tab", true, "parse horizontal tab control characters")
 }
 
 func flagTo(p *string, cc *cobra.Command) {
-	cc.Flags().StringVar(p, "to", "", `character encoding to print to stdout
-modern terminals always use UTF8 encoding
-so this option is for special cases (default UTF8)
-see the list of to values `+str.Example("retrotxt list codepages")+"\n")
+	cc.Flags().StringVar(p, "to", "", `alternative character encoding to print to stdout
+modern terminals and RetroTxt use UTF8 encoding
+this alternative option is unreliable and not recommended
+see the list of usable values `+str.Example("retrotxt list codepages")+"\n")
 }
 
 func flagWidth(p *int, cc *cobra.Command) {
 	cc.Flags().IntVarP(p, "width", "w", viewFlag.width, "maximum document character/column width")
-}
-
-func flagControls(p *[]string, cc *cobra.Command) {
-	cc.Flags().StringSliceVarP(p, "controls", "x", []string{}, "use these control codes\n"+
-		"  tab    horizontal tab\n"+
-		"  bell   bell or terminal alert\n"+
-		"  cr     carriage return\n"+
-		"  lf     line feed\n"+
-		"  bs backspace, del delete character, esc escape character, ff formfeed, vt vertical tab\n"+
-		"separate multiple controls with commas\n"+
-		str.Example("-x tab,bell")+" or "+str.Example("--controls=tab,bell")+"\n")
 }
 
 type internalPack struct {

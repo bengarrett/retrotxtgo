@@ -14,26 +14,29 @@ import (
 
 // Convert for the transformation of legacy encoded text to UTF-8.
 type Convert struct {
-	Source   []byte            // Source legacy encoded text.
-	Runes    []rune            // Runes with UTF-8 text.
-	encode   encoding.Encoding // Source character set encoding
-	len      int               // Runes count
-	newline  bool              // use newline controls
-	newlines [2]rune           // the newline controls rune values
-	ignores  []rune            // these runes will not be transformed
+	Source    []byte            // Source legacy encoded text.
+	Runes     []rune            // Runes with UTF-8 text.
+	encode    encoding.Encoding // Source character set encoding
+	len       int               // Runes count
+	newline   bool              // use newline controls
+	newlines  [2]rune           // the newline controls rune values
+	ignores   []rune            // these runes will not be transformed
+	swapChars []int
 }
 
 // Args are user supplied flag values
 type Args struct {
 	Controls []string
 	Encoding string
+	Swap     []int
 	Width    int
 }
 
 // Chars transforms legacy encoded characters and text control codes into UTF-8 characters.
 func (a Args) Chars(b *[]byte) (utf8 []rune, err error) {
 	var c = Convert{
-		Source: *b,
+		Source:    *b,
+		swapChars: a.Swap,
 	}
 	if _, err = c.Transform(a.Encoding); err != nil {
 		return nil, err
@@ -47,8 +50,9 @@ func (a Args) Chars(b *[]byte) (utf8 []rune, err error) {
 // including all text contained after any MS-DOS end-of-file markers.
 func (a Args) Dump(b *[]byte) (utf8 []rune, err error) {
 	var c = Convert{
-		Source:  *b,
-		newline: true,
+		Source:    *b,
+		newline:   true,
+		swapChars: a.Swap,
 	}
 	c.controls(a)
 	if _, err = c.Transform(a.Encoding); err != nil {
@@ -62,8 +66,9 @@ func (a Args) Dump(b *[]byte) (utf8 []rune, err error) {
 // Text transforms legacy encoded text or ANSI into modern UTF-8 text.
 func (a Args) Text(b *[]byte) (utf8 []rune, err error) {
 	var c = Convert{
-		Source:  *b,
-		newline: true,
+		Source:    *b,
+		newline:   true,
+		swapChars: a.Swap,
 	}
 	c.controls(a)
 	c.Source = EndOfFile(*b)

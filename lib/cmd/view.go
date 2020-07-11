@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"unicode/utf8"
 
 	"retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/convert"
@@ -18,13 +17,15 @@ import (
 type viewFlags struct {
 	controls []string
 	encode   string
+	swap     []int
 	to       string
 	width    int
 }
 
 var viewFlag = viewFlags{
-	controls: nil,
+	controls: []string{"tab"},
 	encode:   "CP437",
+	swap:     []int{0, 124},
 	to:       "",
 	width:    0,
 }
@@ -41,7 +42,15 @@ var viewCmd = &cobra.Command{
 		var conv = convert.Args{
 			Controls: viewFlag.controls,
 			Encoding: viewFlag.encode,
+			Swap:     viewFlag.swap,
 			Width:    viewFlag.width,
+		}
+		// handle defaults that are left empty for usage formatting
+		if c := cmd.Flags().Lookup("controls"); !c.Changed {
+			conv.Controls = []string{"tab"}
+		}
+		if s := cmd.Flags().Lookup("swap-chars"); !s.Changed {
+			conv.Swap = []int{0, 124}
 		}
 		// piped input from other programs
 		if filesystem.IsPipe() {
@@ -49,17 +58,18 @@ var viewCmd = &cobra.Command{
 			if err != nil {
 				logs.Fatal("view", "stdin read", err)
 			}
-			if to := cmd.Flags().Lookup("to"); to.Changed {
-				b, err = toDecode(viewFlag.to, &b)
-				if err != nil {
-					logs.Println("using UTF8 encoding as text could not convert to", viewFlag.to, err)
-				}
-				fmt.Println(string(b))
-				os.Exit(0)
-			}
 			r, err := conv.Text(&b)
 			if err != nil {
 				logs.Fatal("view", "stdin convert", err)
+			}
+			// to flag
+			if to := cmd.Flags().Lookup("to"); to.Changed {
+				r, err = toDecode(viewFlag.to, r)
+				if err != nil {
+					logs.Println("using utf8 encoding and not", viewFlag.to, err)
+				}
+				fmt.Println(string(r))
+				os.Exit(0)
 			}
 			fmt.Println(string(r))
 			os.Exit(0)
@@ -67,7 +77,7 @@ var viewCmd = &cobra.Command{
 		// user arguments
 		checkUse(cmd, args)
 		for i, arg := range args {
-			if ok, err := viewPackage(cmd, arg); err != nil {
+			if ok, err := viewPackage(cmd, conv, arg); err != nil {
 				logs.Println("pack", arg, err)
 				continue
 			} else if ok {
@@ -79,19 +89,19 @@ var viewCmd = &cobra.Command{
 				logs.Println("read file", arg, err)
 				continue
 			}
-			// to flag
-			if to := cmd.Flags().Lookup("to"); to.Changed {
-				b, err = toDecode(viewFlag.to, &b)
-				if err != nil {
-					logs.Println("using UTF8 encoding as text could not convert to", viewFlag.to, err)
-				}
-				fmt.Println(string(b))
-				continue
-			}
 			// convert text
 			r, err := conv.Text(&b)
 			if err != nil {
 				logs.Println("convert text", arg, err)
+				continue
+			}
+			// to flag
+			if to := cmd.Flags().Lookup("to"); to.Changed {
+				r, err = toDecode(viewFlag.to, r)
+				if err != nil {
+					logs.Println("using utf8 encoding and not", viewFlag.to, err)
+				}
+				fmt.Println(string(r))
 				continue
 			}
 			fmt.Println(string(r))
@@ -107,12 +117,13 @@ func init() {
 	rootCmd.AddCommand(viewCmd)
 	flagEncode(&viewFlag.encode, viewCmd)
 	flagControls(&viewFlag.controls, viewCmd)
+	flagRunes(&viewFlag.swap, viewCmd)
 	flagTo(&viewFlag.to, viewCmd)
 	flagWidth(&viewFlag.width, viewCmd)
 	viewCmd.Flags().SortFlags = false
 }
 
-func viewPackage(cmd *cobra.Command, name string) (ok bool, err error) {
+func viewPackage(cmd *cobra.Command, conv convert.Args, name string) (ok bool, err error) {
 	var s = strings.ToLower(name)
 	if _, err := os.Stat(s); !os.IsNotExist(err) {
 		return false, nil
@@ -125,23 +136,9 @@ func viewPackage(cmd *cobra.Command, name string) (ok bool, err error) {
 	if b == nil {
 		return false, errors.New("pkg.name is unknown: " + pkg.name)
 	}
-	var conv = convert.Args{
-		Controls: viewFlag.controls,
-		Encoding: viewFlag.encode,
-		Width:    viewFlag.width,
-	}
 	// encode defaults
 	if cp := cmd.Flags().Lookup("encode"); !cp.Changed {
 		conv.Encoding = pkg.encoding
-	}
-	// to flag
-	if to := cmd.Flags().Lookup("to"); to.Changed {
-		b, err = toDecode(viewFlag.to, &b)
-		if err != nil {
-			logs.Println("using UTF8 encoding as text could not convert to", viewFlag.to, err)
-		}
-		fmt.Println(string(b))
-		return true, nil
 	}
 	// convert and print
 	var r []rune
@@ -155,21 +152,30 @@ func viewPackage(cmd *cobra.Command, name string) (ok bool, err error) {
 			return false, err
 		}
 	}
+	// to flag
+	if to := cmd.Flags().Lookup("to"); to.Changed {
+		r, err = toDecode(viewFlag.to, r)
+		if err != nil {
+			logs.Println("using utf8 encoding and not", viewFlag.to, err)
+		}
+		fmt.Println(string(r))
+		return true, nil
+	}
 	fmt.Println(string(r))
 	return true, nil
 }
 
-func toDecode(name string, b *[]byte) ([]byte, error) {
+func toDecode(name string, r []rune) ([]rune, error) {
 	encode, err := convert.Encoding(name)
 	if err != nil {
-		return *b, err
+		return r, fmt.Errorf("encoding unknown %s. %s", encode, err)
 	}
-	if !utf8.Valid(*b) {
-		*b, err = encode.NewDecoder().Bytes(*b)
-		if err != nil {
-			return *b, fmt.Errorf("toDecode could not convert bytes to UTF-8: %s", err)
+	cp, err := encode.NewEncoder().String(string(r))
+	if err != nil {
+		if len(cp) == 0 {
+			return r, fmt.Errorf("encoder could not convert runes to %s. %s", encode, err)
 		}
+		return []rune(cp), nil
 	}
-	cp, err := encode.NewEncoder().Bytes(*b)
-	return cp, nil
+	return []rune(cp), nil
 }

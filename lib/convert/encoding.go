@@ -16,6 +16,15 @@ import (
 	"retrotxt.com/retrotxt/lib/filesystem"
 )
 
+// Characters map code page 437 characters with alternative runes
+var Characters = map[int]rune{
+	0:   32,    // NUL
+	124: 166,   // ¦
+	127: 916,   // Δ
+	178: 9134,  // ⎮
+	251: 10003, // ✓
+}
+
 // BOM is the UTF-8 byte order mark prefix.
 func BOM() []byte {
 	return []byte{239, 187, 191} // 0xEF,0xBB,0xBF
@@ -218,7 +227,7 @@ func (c *Convert) Swap() *Convert {
 	if c.newline {
 		c.Newlines()
 	}
-	println(fmt.Sprintf("newline detected: %+v", c.newlines))
+	//println(fmt.Sprintf("newline detected: %+v", c.newlines))
 	switch c.encode {
 	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
 		c.RunesEBCDIC()
@@ -245,6 +254,13 @@ func (c *Convert) Swap() *Convert {
 	case japanese.ShiftJIS:
 	default:
 		c.RunesControls()
+	}
+	if len(c.swapChars) > 0 {
+		for i := 0; i < c.len; i++ {
+			if s := c.runeSwap(c.Runes[i]); s >= 0 {
+				c.Runes[i] = s
+			}
+		}
 	}
 	return c
 }
@@ -283,6 +299,9 @@ func (c *Convert) RunesControls() {
 	const z = byte(0x80)
 	for i := 0; i < c.len; i++ {
 		r := c.Runes[i]
+		if c.skipIgnores(i) {
+			continue
+		}
 		if c.skipNewlines(i) {
 			if c.newlines == [2]rune{13, 0} {
 				c.Runes[i] = 10 // swap CR with LF
@@ -317,12 +336,8 @@ func (c *Convert) RunesDOS() {
 			continue
 		}
 		switch {
-		case r == 0x00:
-			c.Runes[i] = decode(0x80) // NUL
 		case r > 0x00 && r <= 0x1f:
 			c.Runes[i], _ = utf8.DecodeRuneInString(ctrls[r]) // c0, c1 controllers
-		case r == 0x7c: // todo: add a user flag toggle
-			c.Runes[i], _ = utf8.DecodeRune([]byte{0xc2, 0xa6}) // ¦
 		case r == 0x7f:
 			c.Runes[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0x82}) // ⌂
 		case r == 0xff:
@@ -521,9 +536,57 @@ func (c Convert) skipNewlines(i int) bool {
 	return false
 }
 
+func (c Convert) runeSwap(r rune) rune {
+	if !c.swap(r) {
+		return -1
+	}
+	switch {
+	case r == 0x00:
+		return Characters[0] // NUL
+	case r == 0x2400:
+		return Characters[0]
+	case r == 0x7c:
+		return Characters[124] // ¦
+	case r == 0x2302:
+		return Characters[127] // ⌂
+	case r == 0x2502:
+		return Characters[178] // │
+	case r == 0x221A:
+		return Characters[251] // √
+	}
+	return -1
+}
+
 func (c Convert) skipIgnores(i int) bool {
 	for _, ign := range c.ignores {
 		if c.Runes[i] == ign {
+			return true
+		}
+	}
+	return false
+}
+
+func (c Convert) swap(r rune) bool {
+	/*
+		0:   32,    // NUL
+		124: 166,   // ¦
+		127: 916,   // Δ
+		178: 9134,  // ⎮
+		251: 10003, // ✓
+	*/
+	chk := 0
+	switch r {
+	case 0x7c:
+		chk = 124
+	case 0x2302:
+		chk = 127
+	case 0x2502:
+		chk = 178
+	case 0x221A:
+		chk = 251
+	}
+	for _, c := range c.swapChars {
+		if c == int(chk) {
 			return true
 		}
 	}
