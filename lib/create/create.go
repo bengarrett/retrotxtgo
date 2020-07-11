@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
-	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -166,7 +165,7 @@ func (args *Args) Create(b *[]byte) {
 		if args.Destination == "" {
 			dir := []string{viper.GetString("save-directory")}
 			if args.Destination, err = destination(dir); err != nil {
-				log.Fatal(err)
+				logs.Fatal("save to directory failure", fmt.Sprintf("%s", dir), err)
 			}
 		}
 		ch := make(chan error)
@@ -177,25 +176,27 @@ func (args *Args) Create(b *[]byte) {
 		go args.savefavicon(ch)
 		err1, err2, err3, err4, err5 := <-ch, <-ch, <-ch, <-ch, <-ch
 		if err1 != nil {
-			log.Fatal(err1)
+			logs.Println("save file 1", "", err1)
 		}
 		if err2 != nil {
-			log.Fatal(err2)
+			logs.Println("save file 2", "", err2)
 		}
 		if err3 != nil {
-			log.Fatal(err3)
+			logs.Println("save file 3", "", err3)
 		}
 		if err4 != nil {
-			log.Fatal(err4)
+			logs.Println("save file 4", "", err4)
 		}
 		if err5 != nil {
-			log.Fatal(err5)
+			logs.Println("save file 5", "", err5)
+		}
+		if err1 != nil || err2 != nil || err3 != nil || err4 != nil || err5 != nil {
+			os.Exit(1)
 		}
 	default:
 		// print to terminal
-		err = args.Stdout(b)
-		if err != nil {
-			log.Fatal(err) // TODO: logs.Fatal(error)
+		if err = args.Stdout(b); err != nil {
+			logs.Fatal("print to stdout", "", err)
 		}
 	}
 }
