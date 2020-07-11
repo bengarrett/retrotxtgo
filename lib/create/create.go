@@ -210,10 +210,17 @@ func (args *Args) destination(name string) (string, error) {
 	if stat.IsDir() {
 		path = filepath.Join(dir, name)
 	}
-	color.OpFuzzy.Printf("Saving to %s\n", path)
 	stat, err = os.Stat(path)
 	if !args.OW && !os.IsNotExist(err) {
+		switch name {
+		case "favicon.ico", "scripts.js",
+			"vga.woff2":
+			// existing static files can be ignored
+			return path, nil
+		}
 		logs.Println("file exists", path, errors.New("include an -o flag to overwrite"))
+	} else {
+		color.OpFuzzy.Printf("saving to %s\n", path)
 	}
 	return path, nil
 }
@@ -268,7 +275,7 @@ func (args Args) savefont(c chan error) {
 	if !args.FontEmbedVal {
 		f := Family(args.FontFamilyVal)
 		if f.String() == "" {
-			c <- errors.New("create.savefont: unknown font name: " + args.FontFamilyVal)
+			c <- fmt.Errorf("could not save this unknown font family %q", args.FontFamilyVal)
 			return
 		}
 		if err := args.savefontwoff2(f.String()+".woff2", "font/"+f.File()); err != nil {
@@ -443,13 +450,11 @@ func (args Args) newTemplate() (*template.Template, error) {
 		if err := args.templateSave(); err != nil {
 			return nil, err
 		}
-		println("template cache saved to:", args.tmpl)
 	} else {
 		if s, err := os.Stat(args.tmpl); os.IsNotExist(err) {
 			if err := args.templateSave(); err != nil {
 				return nil, err
 			}
-			println("template cache saved to:", args.tmpl)
 		} else if err != nil {
 			return nil, err
 		} else if s.IsDir() {
