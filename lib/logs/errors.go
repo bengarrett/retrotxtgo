@@ -7,11 +7,6 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
-// TODO: replace much of the logs package with a pre-existing sys or structured loggers.
-// zerolog: https://github.com/rs/zerolog
-// apex: https://github.com/apex/log
-// zap: https://github.com/uber-go/zap
-
 // Fatal prints a generic error and exits.
 func Fatal(issue, arg string, msg error) {
 	Println(issue, arg, msg)
