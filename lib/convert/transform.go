@@ -8,6 +8,8 @@ import (
 	"unicode/utf8"
 
 	"golang.org/x/text/encoding"
+	"golang.org/x/text/encoding/japanese"
+	"golang.org/x/text/encoding/unicode"
 	"retrotxt.com/retrotxt/lib/filesystem"
 	"retrotxt.com/retrotxt/lib/logs"
 )
@@ -92,7 +94,27 @@ func (c *Convert) Transform(name string) (*Convert, error) {
 	if len(c.Source) == 0 {
 		return c, nil
 	}
-	// only transform source if it is not already UTF-8
+	// don't transform unicode, japanese..
+	switch c.encode {
+	case unicode.UTF8, unicode.UTF8BOM:
+		for _, b := range c.Source {
+			c.Runes = append(c.Runes, rune(b))
+		}
+		c.len = len(c.Runes)
+		return c, nil
+	}
+	// blank invalid shiftjis characters
+	switch c.encode {
+	case japanese.ShiftJIS:
+		for i, b := range c.Source {
+			switch {
+			case b > 0x7f && b <= 0xa0,
+				b >= 0xe0 && b <= 0xff:
+				c.Source[i] = 32
+			}
+		}
+	}
+	// transform source if it is not already UTF-8
 	if utf8.Valid(c.Source) {
 		c.Runes = bytes.Runes(c.Source)
 		c.len = len(c.Runes)

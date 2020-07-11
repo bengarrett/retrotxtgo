@@ -13,6 +13,7 @@ import (
 	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/encoding/ianaindex"
 	"golang.org/x/text/encoding/japanese"
+	"golang.org/x/text/encoding/unicode"
 	"retrotxt.com/retrotxt/lib/filesystem"
 )
 
@@ -70,7 +71,7 @@ func EndOfFile(b []byte) []byte {
 func MakeBytes() (m []byte) {
 	m = make([]byte, 256)
 	for i := 0; i <= 255; i++ {
-		m[i] = uint8(i)
+		m[i] = uint8(byte(i))
 	}
 	return m
 }
@@ -252,8 +253,13 @@ func (c *Convert) Swap() *Convert {
 		c.RunesControls()
 		c.RunesWindows()
 	case japanese.ShiftJIS:
-	default:
+		fmt.Println(c.encode)
 		c.RunesControls()
+		c.RunesShiftJIS()
+	case unicode.UTF8, unicode.UTF8BOM:
+		c.RunesControls()
+		c.RunesUTF8()
+	default:
 	}
 	if len(c.swapChars) > 0 {
 		for i := 0; i < c.len; i++ {
@@ -485,6 +491,23 @@ func (c *Convert) RunesMacintosh() {
 	}
 }
 
+// RunesShiftJIS tweaks some Unicode picture represenations for Shift-JIS.
+func (c *Convert) RunesShiftJIS() {
+	for i, r := range c.Runes {
+		switch {
+		case r == 0x5c:
+			c.Runes[i] = rune(0xa5) // ¥
+		case r == 0x7e:
+			c.Runes[i] = rune(0x203e) // ‾
+		case r == 0x7f:
+			c.Runes[i] = decode(0xa1) // DEL
+		case r > 0x7f && r <= 0xa0,
+			r >= 0xe0 && r <= 0xff:
+			c.Runes[i] = rune(32)
+		}
+	}
+}
+
 // RunesWindows tweaks some Unicode picture represenations for Windows-125x sets.
 func (c *Convert) RunesWindows() {
 	for i, r := range c.Runes {
@@ -492,6 +515,18 @@ func (c *Convert) RunesWindows() {
 		case 0x7f:
 			c.Runes[i] = decode(0xa1) // DEL
 		case 65533:
+			c.Runes[i] = rune(32)
+		}
+	}
+}
+
+// RunesUTF8 tweaks some Unicode picture represenations for UTF-8 Basic Latin.
+func (c *Convert) RunesUTF8() {
+	for i, r := range c.Runes {
+		switch {
+		case r == 0x7f:
+			c.Runes[i] = decode(0xa1) // DEL
+		case r > 0x7f && r < 0xa0:
 			c.Runes[i] = rune(32)
 		}
 	}
