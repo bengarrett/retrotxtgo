@@ -24,6 +24,7 @@ type Convert struct {
 	newlines  [2]rune           // the newline controls rune values
 	ignores   []rune            // these runes will not be transformed
 	swapChars []int
+	table     bool
 }
 
 // Args are user supplied flag values
@@ -39,6 +40,7 @@ func (a Args) Chars(b *[]byte) (utf8 []rune, err error) {
 	var c = Convert{
 		Source:    *b,
 		swapChars: a.Swap,
+		table:     true,
 	}
 	if _, err = c.Transform(a.Encoding); err != nil {
 		return nil, err
@@ -103,9 +105,13 @@ func (c *Convert) Transform(name string) (*Convert, error) {
 		c.len = len(c.Runes)
 		return c, nil
 	}
-	// blank invalid shiftjis characters
+	// blank invalid shiftjis characters when printing 8-bit tables
 	switch c.encode {
 	case japanese.ShiftJIS:
+		if !c.table {
+			break
+		}
+		// this will break normal shift-jis encoding
 		for i, b := range c.Source {
 			switch {
 			case b > 0x7f && b <= 0xa0,

@@ -256,7 +256,6 @@ func (c *Convert) Swap() *Convert {
 		c.RunesControls()
 		c.RunesWindows()
 	case japanese.ShiftJIS:
-		fmt.Println(c.encode)
 		c.RunesControls()
 		c.RunesShiftJIS()
 	case unicode.UTF8, unicode.UTF8BOM:
