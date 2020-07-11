@@ -74,7 +74,7 @@ func HighlightWriter(w io.Writer, source, lexer, style string) (err error) {
 	// source: https://stackoverflow.com/questions/43947363/detect-if-a-command-is-piped-or-not
 	fo, err := os.Stdout.Stat()
 	if err != nil {
-		return err
+		return fmt.Errorf("highlight writer stdout error: %s", err)
 	}
 	if term == "none" {
 		// user disabled color output, but it doesn't disable ANSI output
@@ -83,7 +83,7 @@ func HighlightWriter(w io.Writer, source, lexer, style string) (err error) {
 		// disable colour when piping, this will also trigger with go test
 		fmt.Fprintln(w, source)
 	} else if err := quick.Highlight(w, source, lexer, term, style); err != nil {
-		return err
+		return fmt.Errorf("highlight writer: %s", err)
 	}
 	return nil
 }
@@ -103,15 +103,6 @@ func NumberizeKeys(keys []string) string {
 		s[i] = fmt.Sprintf("%s)\u00a0%s", n, key)
 	}
 	return strings.Join(s, ", ")
-}
-
-func IsStyle(style string) bool {
-	for _, n := range styles.Names() {
-		if n == style {
-			return true
-		}
-	}
-	return false
 }
 
 // Term determines the terminal type based on the COLORTERM and TERM environment variables.
@@ -155,19 +146,19 @@ func Term() (term string) {
 // UnderlineChar uses ANSI to underline the first character of a string.
 func UnderlineChar(c string) (s string, err error) {
 	if c == "" {
-		return s, err
+		return "", nil
 	}
 	if !utf8.ValidString(c) {
-		return s, errors.New("underlinechar: invalid utf-8 encoded rune")
+		return s, errors.New("invalid underlinechar encoded rune")
 	}
 	var buf bytes.Buffer
 	r, _ := utf8.DecodeRuneInString(c)
 	t, err := template.New("underline").Parse("{{define \"TEXT\"}}\033[0m\033[4m{{.}}\033[0m{{end}}")
 	if err != nil {
-		return s, err
+		return s, fmt.Errorf("underlinechar new template: %s", err)
 	}
 	if err = t.ExecuteTemplate(&buf, "TEXT", string(r)); err != nil {
-		return s, err
+		return s, fmt.Errorf("underlinechar execute template: %s", err)
 	}
 	return buf.String(), nil
 }
@@ -191,7 +182,8 @@ func UnderlineKeys(keys []string) string {
 				base := strings.Join(s[0:len(s)-1], ".")
 				m, err := UnderlineChar("m")
 				if err != nil {
-					log.Fatal(err)
+					// must use standard log package
+					log.Fatal("underline keys", keys, err)
 				}
 				keys[i] = fmt.Sprintf("%s.%sin", base, m)
 			}
@@ -237,4 +229,14 @@ func JSONStyles(cmd string) {
 		styles.String(cmd)
 	}
 	fmt.Println()
+}
+
+// Valid checks style name validity.
+func Valid(style string) bool {
+	for _, n := range styles.Names() {
+		if n == style {
+			return true
+		}
+	}
+	return false
 }

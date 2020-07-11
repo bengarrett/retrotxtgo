@@ -10,7 +10,6 @@ import (
 	"github.com/gookit/color"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/unicode"
-	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/str"
 )
 
@@ -18,7 +17,7 @@ import (
 func Table(name string) (*bytes.Buffer, error) {
 	cp, err := Encoding(name)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("table encoding error: %s", err)
 	}
 	h := fmt.Sprintf("%s", cp)
 	switch cp {
@@ -50,7 +49,7 @@ func Table(name string) (*bytes.Buffer, error) {
 	var b, row = MakeBytes(), 0
 	runes, err := conv.Chars(&b)
 	if err != nil {
-		logs.Fatal("table", "convert characters", err)
+		return nil, fmt.Errorf("table convert bytes error: %s", err)
 	}
 	for i, r := range runes {
 		char := string(r)

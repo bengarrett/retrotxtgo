@@ -393,7 +393,7 @@ func (args Args) Stdout(b *[]byte) error {
 	case "", "none":
 		fmt.Printf("%s", buf.String())
 	default:
-		if !str.IsStyle(args.Syntax) {
+		if !str.Valid(args.Syntax) {
 			fmt.Printf("unknown style %q, so using none\n", args.Syntax)
 			fmt.Printf("%s", buf.String())
 			return nil
@@ -461,21 +461,21 @@ func (args Args) newTemplate() (*template.Template, error) {
 			return nil, fmt.Errorf("the path to the template file is a directory: %q", args.tmpl)
 		}
 	}
-	// to avoid a potential panic, Stat again incase os.IsNotExist() is true
+	// to avoid a potential panic, Stat again in case os.IsNotExist() is true
 	s, err := os.Stat(args.tmpl)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not access file: %q: %s", args.tmpl, err)
 	}
 	if err = args.templatePack(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("template pack: %s", err)
 	}
 	b, err := args.templateData()
 	if s.Size() != int64(len(*b)) {
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("template data: %s", err)
 		}
 		if _, err := filesystem.Save(args.tmpl, *b); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("saving template: %q: %s", args.tmpl, err)
 		}
 	}
 	t := template.Must(template.ParseFiles(args.tmpl))
@@ -486,16 +486,19 @@ func (args Args) newTemplate() (*template.Template, error) {
 func (args *Args) templateCache() (err error) {
 	l := layout(args.Layout).Pack()
 	if l == "" {
-		return fmt.Errorf("create.templatecache: layout does not exist: %q", args.Layout)
+		return fmt.Errorf("template cache layout does not exist: %q", args.Layout)
 	}
 	args.tmpl, err = scope.DataPath(l + ".gohtml")
-	return err
+	if err != nil {
+		return fmt.Errorf("template cache path: %q: %s", args.tmpl, err)
+	}
+	return nil
 }
 
 func (args *Args) templatePack() error {
 	l := layout(args.Layout).Pack()
 	if l == "" {
-		return fmt.Errorf("create.templatepack: package and layout does not exist: %q", args.Layout)
+		return fmt.Errorf("template pack and layout does not exist: %q", args.Layout)
 	}
 	args.pack = fmt.Sprintf("html/%s.gohtml", l)
 	return nil
@@ -504,7 +507,7 @@ func (args *Args) templatePack() error {
 func (args Args) templateData() (*[]byte, error) {
 	b := pack.Get(args.pack)
 	if len(b) == 0 {
-		return nil, fmt.Errorf("create.templatedata: pack.get name is invalid: %q", args.pack)
+		return nil, fmt.Errorf("template data pack name is invalid: %q", args.pack)
 	}
 	return &b, nil
 }
@@ -512,14 +515,14 @@ func (args Args) templateData() (*[]byte, error) {
 func (args Args) templateSave() error {
 	err := args.templatePack()
 	if err != nil {
-		return err
+		return fmt.Errorf("template save pack error: %s", err)
 	}
 	b, err := args.templateData()
 	if err != nil {
-		return err
+		return fmt.Errorf("template save data error: %s", err)
 	}
 	if _, err := filesystem.Save(args.tmpl, *b); err != nil {
-		return err
+		return fmt.Errorf("template save error: %s", err)
 	}
 	return nil
 }
@@ -541,7 +544,7 @@ func layout(name string) Layout {
 // pagedata creates the meta and page template data.
 func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 	if b == nil {
-		return PageData{}, errors.New("create.pagedata: cannot convert b <nil>")
+		return PageData{}, errors.New("pagedata cannot convert a nil byte value")
 	}
 	// templates are found in the dir static/html/*.gohtml
 	switch layout(args.Layout) {
@@ -555,7 +558,7 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 		// font
 		f, err := FontCSS(args.FontFamilyVal, args.FontEmbedVal)
 		if err != nil {
-			return p, err
+			return p, fmt.Errorf("pagedata font error: %s", err)
 		}
 		f = bytes.TrimSpace(f)
 		// merge
@@ -564,13 +567,13 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 		// compress & embed
 		b, err = m.Bytes("text/css", b)
 		if err != nil {
-			panic(err)
+			return p, fmt.Errorf("pagedata minify css: %s", err)
 		}
 		p.CSSEmbed = template.CSS(string(b))
 		js := pack.Get("js/scripts.js")
 		js, err = m.Bytes("application/javascript", js)
 		if err != nil {
-			panic(err)
+			return p, fmt.Errorf("pagedata minify javascript: %s", err)
 		}
 		p.ScriptEmbed = template.JS(string(js))
 		fallthrough
@@ -598,7 +601,7 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 	case None:
 		// do nothing
 	default:
-		return PageData{}, errors.New("create.pagedata: unknown layout: " + args.Layout)
+		return PageData{}, fmt.Errorf("unknown pagedata layout: %s", args.Layout)
 	}
 	// check encoding
 	var conv = convert.Args{Encoding: args.Encoding}
@@ -608,7 +611,7 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 	// convert bytes into utf8
 	runes, err := conv.Text(b)
 	if err != nil {
-		logs.Fatal("create pagedata", "text conversion", err)
+		return p, fmt.Errorf("pagedata convert text bytes to utf8 failure: %s", err)
 	}
 	if p.MetaRetroTxt {
 		p.Comment = args.comment(conv, b, runes)

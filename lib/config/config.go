@@ -2,7 +2,7 @@ package config
 
 import (
 	"errors"
-	"log"
+	"fmt"
 	"os"
 	"sort"
 	"strings"
@@ -12,6 +12,8 @@ import (
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/str"
 )
+
+const missingKey = "key does not exist or is not a bool value"
 
 // Defaults for configuration keys and values.
 var Defaults = map[string]interface{}{
@@ -194,7 +196,7 @@ func Marshal() (interface{}, error) {
 		case "style.html":
 			sc.Style.HTML = getString(key)
 		default:
-			return sc, errors.New("default setting was missed, " + key)
+			return sc, fmt.Errorf("unknown configuration name: %q", key)
 		}
 	}
 	return sc, nil
@@ -208,7 +210,7 @@ func getBool(key string) bool {
 	case bool:
 		return Defaults[key].(bool)
 	default:
-		log.Fatal("config.getbool key does not exist or is not a bool value")
+		logs.Fatal("getbool", key, errors.New(missingKey))
 	}
 	return false
 }
@@ -221,7 +223,7 @@ func getUint(key string) uint {
 	case uint:
 		return Defaults[key].(uint)
 	default:
-		log.Fatal("config.getuint key does not exist or is not a uint value")
+		logs.Fatal("getunit", key, errors.New(missingKey))
 	}
 	return 0
 }
@@ -234,7 +236,7 @@ func getString(key string) string {
 	case string:
 		return Defaults[key].(string)
 	default:
-		log.Fatal("config.getstring key does not exist or is not a string value")
+		logs.Fatal("getstring", key, errors.New(missingKey))
 	}
 	return ""
 }

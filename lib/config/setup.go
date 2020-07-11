@@ -3,7 +3,6 @@ package config
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"runtime"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/spf13/viper"
 	"retrotxt.com/retrotxt/internal/pack"
+	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/prompt"
 	"retrotxt.com/retrotxt/lib/str"
 )
@@ -57,7 +57,7 @@ func logo() {
 	n := "text/retrotxt.utf8ans"
 	b := pack.Get(n)
 	if b == nil {
-		log.Fatal(errors.New("pkg.name is unknown: " + n))
+		logs.Fatal("unknown pack name", n, errors.New("retrotxt logo is missing"))
 	}
 	// convert and print
 	fmt.Println(string(b))

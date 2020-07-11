@@ -1,12 +1,18 @@
 package convert
 
-import "encoding/hex"
+import (
+	"encoding/hex"
+	"fmt"
+)
 
 // HexDecode decodes hexadecimal into string bytes.
 func HexDecode(hexadecimal string) (result []byte, err error) {
 	src := []byte(hexadecimal)
 	result = make([]byte, hex.DecodedLen(len(src)))
 	_, err = hex.Decode(result, src)
+	if err != nil {
+		return nil, fmt.Errorf("could not decode hexadecimal string: %q: %s", hexadecimal, err)
+	}
 	return result, err
 }
 

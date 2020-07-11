@@ -85,7 +85,7 @@ func SetConfig(flag string) (err error) {
 					return nil
 				}
 			}
-			return errors.New("does not exist\n\t use the command: retrotxt config create --config=" + flag)
+			return fmt.Errorf("does not exist\n\t use the command:retrotxt config create --config=%s", flag)
 		}
 		// user config file fail
 		return nil
@@ -121,7 +121,7 @@ func UpdateConfig(name string, print bool) (err error) {
 	cmt := []byte("# RetroTxt configuration file")
 	out = bytes.Join([][]byte{cmt, out}, []byte("\n"))
 	if err = ioutil.WriteFile(name, out, filemode); err != nil {
-		return fmt.Errorf("config update saving data to the file failed: filename %q: %s", name, err)
+		return fmt.Errorf("config update saving data to the file failed: %q: %s", name, err)
 	}
 	if print {
 		fmt.Println("The change is saved")

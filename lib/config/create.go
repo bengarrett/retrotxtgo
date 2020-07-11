@@ -14,22 +14,26 @@ import (
 // Create a named configuration file.
 func Create(name string, ow bool) (err error) {
 	if name == "" {
-		return errors.New("config create: name value cannot be empty")
+		return errors.New("the configuration filename cannot be empty")
 	}
 	if _, err := os.Stat(name); !os.IsNotExist(err) && !ow {
 		configDoesExist(cmdPath, "create")
 	} else if os.IsNotExist(err) {
 		// a missing named file is okay
 	} else if err != nil {
-		return err
+		return fmt.Errorf("could not access the configuration file: %q: %s", name, err)
 	}
 	// create a new config file
 	path, err := filesystem.Touch(name)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not create the configuration file: %q: %s", name, err)
 	}
 	InitDefaults()
-	return UpdateConfig(path, false)
+	err = UpdateConfig(path, false)
+	if err != nil {
+		return fmt.Errorf("could not update the configuration file: %q: %s", name, err)
+	}
+	return nil
 }
 
 func configDoesExist(name string, suffix string) {

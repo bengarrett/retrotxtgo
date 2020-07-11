@@ -127,7 +127,7 @@ func promptRead(stdin io.Reader) (input string, err error) {
 	input, err = reader.ReadString('\n')
 	input = strings.TrimSpace(input)
 	if err != nil && err != io.EOF {
-		return input, err
+		return input, fmt.Errorf("prompt string reader error: %s", err)
 	}
 	return input, nil
 }
@@ -160,7 +160,7 @@ func pstring(r io.Reader) (words string) {
 		return words
 	}
 	if err := scanner.Err(); err != nil {
-		log.Fatalf("reading standard input: %s", err)
+		logs.Fatal("prompt string scanner", "stdin", err)
 	}
 	return words
 }

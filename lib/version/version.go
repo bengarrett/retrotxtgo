@@ -90,14 +90,14 @@ func CacheSet(etag, ver string) error {
 	}
 	out, err := yaml.Marshal(&c)
 	if err != nil {
-		return err
+		return fmt.Errorf("cache set yaml marshal error: %s", err)
 	}
 	f, err := scope.DataPath(cacheFile)
 	if err != nil {
-		return err
+		return fmt.Errorf("cache set data path error: %q: %s", cacheFile, err)
 	}
 	if _, err := filesystem.Save(f, out); err != nil {
-		return err
+		return fmt.Errorf("cache set save error: %s", err)
 	}
 	return nil
 }
@@ -190,8 +190,7 @@ func Semantic(ver string) (ok bool, version Version) {
 	if ver == "" {
 		return false, version
 	}
-	vers := strings.Split(ver, ".")
-	var nums [3]int
+	vers, nums := strings.Split(ver, "."), [3]int{}
 	for i, v := range vers {
 		if v == "" {
 			v = "0"

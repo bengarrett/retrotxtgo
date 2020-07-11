@@ -43,7 +43,7 @@ func (a Args) Chars(b *[]byte) (utf8 []rune, err error) {
 		table:     true,
 	}
 	if _, err = c.Transform(a.Encoding); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("chars transform failed: %s", err)
 	}
 	c.Swap()
 	c.width(a.Width)
@@ -60,7 +60,7 @@ func (a Args) Dump(b *[]byte) (utf8 []rune, err error) {
 	}
 	c.controls(a)
 	if _, err = c.Transform(a.Encoding); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("dump transform failed: %s", err)
 	}
 	c.Swap().ANSI()
 	c.width(a.Width)
@@ -77,7 +77,7 @@ func (a Args) Text(b *[]byte) (utf8 []rune, err error) {
 	c.controls(a)
 	c.Source = EndOfFile(*b)
 	if _, err = c.Transform(a.Encoding); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("text transform failed: %s", err)
 	}
 	c.Swap().ANSI()
 	c.width(a.Width)
@@ -91,7 +91,7 @@ func (c *Convert) Transform(name string) (*Convert, error) {
 	}
 	var err error
 	if c.encode, err = Encoding(name); err != nil {
-		return c, err
+		return c, fmt.Errorf("transform encoding error: %s", err)
 	}
 	if len(c.Source) == 0 {
 		return c, nil
@@ -127,7 +127,7 @@ func (c *Convert) Transform(name string) (*Convert, error) {
 		return c, nil
 	}
 	if c.Source, err = c.encode.NewDecoder().Bytes(c.Source); err != nil {
-		return c, err
+		return c, fmt.Errorf("transform new decoder error: %s", err)
 	}
 	c.Runes = bytes.Runes(c.Source)
 	c.len = len(c.Runes)

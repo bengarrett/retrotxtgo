@@ -2,14 +2,16 @@ package online
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
 )
 
-const userAgent = "retrotxt version ping"
-const httpTimeout = time.Second * 3
+const (
+	userAgent   = "retrotxt version ping"
+	httpTimeout = time.Second * 3
+)
 
 // API interface to store the JSON results from GitHub
 type API map[string]interface{}
@@ -25,7 +27,7 @@ func Endpoint(url, etag string) (useCache bool, data API, err error) {
 	useCache = false
 	resp, body, err := Get(url, etag)
 	if err != nil {
-		return useCache, data, err
+		return useCache, data, fmt.Errorf("endpoint get failed: %s", err)
 	}
 	if etag != "" {
 		s := resp.StatusCode
@@ -35,7 +37,7 @@ func Endpoint(url, etag string) (useCache bool, data API, err error) {
 		}
 	}
 	if ok := json.Valid(body); !ok {
-		return useCache, data, errors.New("the response from is not in json syntax: " + url)
+		return useCache, data, fmt.Errorf("the endpoint response is not valid json: %s", url)
 	}
 	err = json.Unmarshal(body, &data)
 	data["etag"] = resp.Header.Get("Etag")
@@ -50,7 +52,7 @@ func Get(url, etag string) (resp *http.Response, body []byte, err error) {
 	}
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return nil, body, err
+		return nil, body, fmt.Errorf("getting a new request error: %s", err)
 	}
 	if etag != "" {
 		req.Header.Set("If-None-Match", etag)
@@ -58,11 +60,14 @@ func Get(url, etag string) (resp *http.Response, body []byte, err error) {
 	req.Header.Set("User-Agent", userAgent)
 	resp, err = client.Do(req)
 	if err != nil {
-		return nil, body, err
+		return nil, body, fmt.Errorf("requesting to set the get user-agent header: %s", err)
 	}
 	defer resp.Body.Close()
 	body, err = ioutil.ReadAll(resp.Body)
-	return resp, body, err
+	if err != nil {
+		return nil, body, fmt.Errorf("reading the response body failed: %s", err)
+	}
+	return resp, body, nil
 }
 
 // Ping requests a URL and determines if the status is ok.
@@ -73,12 +78,12 @@ func Ping(url string) (ok bool, err error) {
 	}
 	req, err := http.NewRequest(http.MethodHead, url, nil)
 	if err != nil {
-		return ok, err
+		return ok, fmt.Errorf("pinging a new request error: %s", err)
 	}
 	req.Header.Set("User-Agent", userAgent)
 	resp, err := client.Do(req)
 	if err != nil {
-		return ok, err
+		return ok, fmt.Errorf("requesting to set the ping user-agent header: %s", err)
 	}
 	defer resp.Body.Close()
 	return (resp.StatusCode >= 200 && resp.StatusCode <= 299), nil

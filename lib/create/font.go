@@ -72,7 +72,7 @@ func Fonts() []string {
 func FontCSS(name string, embed bool) (b []byte, err error) {
 	f := Family(name).String()
 	if f == "" {
-		return nil, errors.New("create.fontcss: font name is not known: " + name)
+		return nil, errors.New("unknown fontcss name: " + name)
 	}
 	const css = `@font-face {
   font-family: '{{.Name}}';

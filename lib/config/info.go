@@ -25,7 +25,7 @@ func Info(style string) (err logs.Generic) {
 	case "none", "":
 		fmt.Println(string(out))
 	default:
-		if !str.IsStyle(style) {
+		if !str.Valid(style) {
 			fmt.Printf("unknown style %q, so using none\n", style)
 			fmt.Println(string(out))
 			break
