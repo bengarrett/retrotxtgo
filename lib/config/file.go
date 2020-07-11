@@ -11,7 +11,6 @@ import (
 
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
-	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/str"
 )
 
@@ -112,22 +111,20 @@ func UpdateConfig(name string, print bool) (err error) {
 	}
 	data, err := Marshal()
 	if err != nil {
-		logs.Fatal("config", "update", err) // TODO: replace return err with an append func
-		// logs.Append("config","update", err) error
+		return fmt.Errorf("config update marshal failed: %s", err)
 	}
 	out, err := yaml.Marshal(&data)
 	if err != nil {
-		return err
+		return fmt.Errorf("config update marshal data failed: %s", err)
 	}
 	// prepend comments
 	cmt := []byte("# RetroTxt configuration file")
 	out = bytes.Join([][]byte{cmt, out}, []byte("\n"))
-	err = ioutil.WriteFile(name, out, filemode)
-	if err != nil {
-		return err
+	if err = ioutil.WriteFile(name, out, filemode); err != nil {
+		return fmt.Errorf("config update saving data to the file failed: filename %q: %s", name, err)
 	}
 	if print {
 		fmt.Println("The change is saved")
 	}
-	return err
+	return nil
 }

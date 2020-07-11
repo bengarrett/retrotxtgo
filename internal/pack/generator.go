@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-// TODO: compress static files as bytes and decompress with Get()
+// todo: compress static files as bytes and decompress with Get()
 
 const (
 	name = "blob.go"
