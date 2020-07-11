@@ -117,7 +117,6 @@ func shorten(name string) (n string) {
 		n = "iso-8859-" + n[9:]
 
 	}
-	fmt.Println(name, " ", n)
 	return n
 }
 
