@@ -68,9 +68,6 @@ func Fonts() []string {
 	return []string{Automatic.String(), Mona.String(), VGA.String()}
 }
 
-// FontFamily values for the CSS font-family.
-var xFontFamily = []string{"automatic", "mona", "vga"}
-
 // FontCSS creates the CSS required for customized fonts.
 func FontCSS(name string, embed bool) (b []byte, err error) {
 	f := Family(name).String()

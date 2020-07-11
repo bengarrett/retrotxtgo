@@ -279,7 +279,7 @@ func (args Args) savefont(c chan error) {
 			c <- fmt.Errorf("could not save this unknown font family %q", args.FontFamilyVal)
 			return
 		}
-		if err := args.savefontwoff2(f.String()+".woff2", "font/"+f.File()); err != nil {
+		if err := args.savefontwoff2(f.File(), "font/"+f.File()); err != nil {
 			c <- err
 		}
 	}
