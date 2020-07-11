@@ -99,6 +99,9 @@ var createCmd = &cobra.Command{
 				html.Encoding = enc
 			}
 			if ff := cmd.Flags().Lookup("font-family"); !ff.Changed {
+				if font == "" {
+					font = "vga"
+				}
 				html.FontFamilyVal = font
 			}
 			if h := htmlServe(i, cmd, &b); !h {
