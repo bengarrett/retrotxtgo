@@ -4,7 +4,7 @@
 
 [RetroTxt](https://github.com/bengarrett/retrotxt) for the command line
 
-### _α_ work-in-progress, feature incomplete & is not in a usable state
+### _α_ - work-in-progress and feature incomplete
 
 ---
 
@@ -36,10 +36,16 @@ retrotxt view ascii-logos.txt
 ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝   ╚═╝
 ```
 
+#### Save it to a file.
+
+```sh
+retrotxt view ascii-logos.txt > ascii-logos-utf8.txt
+```
+
 #### And turn the text into a static website with accurate fonts and colours.
 
 ```sh
-retrotxt create ascii-logos.txt
+retrotxt create --layout=compact ascii-logos.txt
 ```
 
 ```html
@@ -49,14 +55,8 @@ retrotxt create ascii-logos.txt
   <head>
     <meta charset="utf-8" />
     <title>RetroTXT | ASCII logos</title>
-    <meta name="description" content="The RetroTxt logo" />
-    <meta name="author" content="Ben Garrett" />
-    <meta name="keywords" content="retrotxt,ansi,ascii" />
-    <meta
-      name="generator"
-      content="RetroTxt v1.0; 0001-01-01 00:00:00 &#43;0000 UTC"
-    />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="font.css" />
     <script src="scripts.js" defer></script>
   </head>
 
@@ -78,7 +78,7 @@ retrotxt create ascii-logos.txt
 #### Easily serve it over its own HTTP server.
 
 ```sh
-retrotxt create ascii-logos.txt -p0
+retrotxt create -p0 ascii-logos.txt
 
 Web server is available at http://localhost:8080
 Press Ctrl+C to stop
@@ -86,24 +86,66 @@ Press Ctrl+C to stop
 
 - insert browser screenshot
 
-#### Convert the text into another encoding of your choosing.
+#### Save the files as a ready to use webpage.
 
 ```sh
-retrotxt save ascii-logs.txt --as=cp860
+retrotxt create --save ascii-logs.txt
 
+saving to /home/ben/scripts.js
+saving to /home/ben/styles.css
+saving to /home/ben/index.html
+saving to /home/ben/ibm-vga8.woff2
+saving to /home/ben/font.css
 ...
+```
+
+#### Inline all the assets into a single HTML file for easier sharing.
+
+```sh
+retrotxt create --layout=inline --font-embed
+```
+
+```html
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>RetroTXT | ASCII logos</title>
+    <style type="text/css">
+      body{background-color:#000;display:flex;flex-dir...}
+      @font-face{font-family:vga;src:url(data:application/font-woff2;charset=utf-8;base64,d09GMgA...)}
+    </style>
+    <script defer>
+      ...
+    </script>
+  </head>
+
+  <body>
+    <main>
+      <pre>
+██████╗ ███████╗████████╗██████╗  ██████╗ ████████╗██╗  ██╗████████╗
+██╔══██╗██╔════╝╚══██╔══╝██╔══██╗██╔═══██╗╚══██╔══╝╚██╗██╔╝╚══██╔══╝
+██████╔╝█████╗     ██║   ██████╔╝██║   ██║   ██║    ╚███╔╝    ██║
+██╔══██╗██╔══╝     ██║   ██╔══██╗██║   ██║   ██║    ██╔██╗    ██║
+██║  ██║███████╗   ██║   ██║  ██║╚██████╔╝   ██║   ██╔╝ ██╗   ██║
+╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝   ╚═╝</pre
+      >
+    </main>
+  </body>
+</html>
 ```
 
 ---
 
 # Features
 
-- [ ] Convert ASCII text to HTML.
+- [x] Convert ASCII text to HTML.
 - [ ] Convert ANSI text to HTML.
 - [ ] Convert BBS text to HTML.
 - [x] List or export (json, text, xml) meta details of a text file.
 - [ ] List or export SAUCE metadata of a file.
-- [ ] Transform the encoding of a text file. CP437 -> UTF8, UTF8 -> ISO8859-1 ...
+- [x] Transform the encoding of a text file. CP437 -> UTF8, UTF8 -> ISO8859-1 ...
 - [x] View any legacy encoded text file in a UTF8 terminal by converting on the fly.
 - [x] Extensive customisations through command flags or a configuration file with a setup.
 - [ ] ANSI compatibility tests, output 16, 88, 256, high and true-color tables.
@@ -140,7 +182,7 @@ scoop install retrotxt
 retrotxt version
 ```
 
-### macOS
+### macOS (intel)
 
 #### [Homebrew](https://brew.sh/)
 
@@ -158,7 +200,7 @@ snap install retrotxt
 retrotxt version
 ```
 
-#### Raspberry Pi OS / Raspbian
+#### Raspberry Pi, Raspbian, ARM
 
 Download the **deb** package for either the
 [Raspberry Pi](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_raspberry_pi.deb) <small>(ARMv7)</small>
@@ -229,16 +271,16 @@ file retrotxt.exe
 
 ### Why Go?
 
-- native [Unicode](https://golang.org/pkg/unicode/) and UTF8/16/32 support
+- native [Unicode](https://golang.org/pkg/unicode/) and UTF-8/16 support
 - [native legacy text encodings support](golang.org/x/text/encoding/charmap)
 - creates a standalone binary with no dependencies
 - [wide OS and CPU support](https://gist.github.com/asukakenji/f15ba7e588ac42795f421b48b8aede63)
-- simple and fast compiling
-- I know it 😉
+- simple, compact standard library and fast compiling
+- it is a language I know 😉
 
 ---
 
-### From here onwards the following text are developer notes
+### From here onwards the following text are developer notes that will eventually be removed
 
 ### Shrink the binary
 
@@ -350,10 +392,8 @@ op token list > https://golang.org/pkg/go/token/#Token
 
 - [ ] config shell should have a `--append/source/or` flag to save shell auto-completion?
 - [ ] scan for supported but current shell configuration.
-- [ ] reverse scan of file looking for EOF, SAUCE00 & COMNTT.
 - [ ] scan for unique color codes like 24-bit colors.
 - [ ] scan and linkify any http/s, ftp, mailto links in HTML.
-- [ ] when serving HTML over the internal server, monitor the files for any edits and refresh the browser if they occur.
 
 ```sh
 // TODO: env
