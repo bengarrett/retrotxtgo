@@ -62,13 +62,13 @@ var configDeleteCmd = &cobra.Command{
 var configEditCmd = &cobra.Command{
 	Use:     "edit",
 	Aliases: []string{"e"},
-	Short:   fmt.Sprintf("Edit the config file"),
-	Long: fmt.Sprintf("Edit the config file") +
-		"\n\nTo switch editors either:" +
-		"\n  Set one by creating or changing the " +
-		str.Example("$EDITOR") +
-		" environment variable in your shell configuration." +
-		"\n  Set an editor in the configuration file, " +
+	Short:   "Edit the config file",
+	Long: `Edit the config file
+
+To switch editors either:
+  Set one by creating or changing the ` + str.Example("$EDITOR") +
+		` environment variable in your shell configuration.
+  Set an editor in the configuration file, ` +
 		str.Example("retrotxt config set --name=editor"),
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := config.Edit(); err.Err != nil {
