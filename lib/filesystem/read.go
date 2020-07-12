@@ -22,7 +22,11 @@ func IsPipe() bool {
 
 // Read opens and returns the content of the named file.
 func Read(name string) (data []byte, err error) {
-	return ReadAllBytes(name)
+	data, err = ReadAllBytes(name)
+	if err != nil {
+		return nil, fmt.Errorf("read file failed: %q: %s", name, err)
+	}
+	return data, nil
 }
 
 // ReadAllBytes reads the named file and returns the content as a byte array.
@@ -30,7 +34,7 @@ func Read(name string) (data []byte, err error) {
 func ReadAllBytes(name string) (data []byte, err error) {
 	file, err := os.Open(name)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("read all bytes could not open file: %q: %s", name, err)
 	}
 	defer file.Close()
 	// bufio is the most performant way to scan streamed data
@@ -45,20 +49,19 @@ func ReadAllBytes(name string) (data []byte, err error) {
 		data = append(data, scanner.Bytes()...)
 	}
 	if err = scanner.Err(); err != nil {
-		return data, err
+		return data, fmt.Errorf("read all bytes could not scan file: %q: %s", name, err)
 	}
 	if err = file.Close(); err != nil {
-		return data, err
+		return data, fmt.Errorf("read all bytes could not close file: %q: %s", name, err)
 	}
-	err = scanner.Err()
-	return data, err
+	return data, nil
 }
 
 // ReadChunk reads and returns the start of the named file.
 func ReadChunk(name string, chars int) (data []byte, err error) {
 	file, err := os.Open(name)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("read chunk could not open file: %q: %s", name, err)
 	}
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
@@ -72,39 +75,44 @@ func ReadChunk(name string, chars int) (data []byte, err error) {
 		data = append(data, scanner.Bytes()...)
 	}
 	if err = scanner.Err(); err != nil {
-		return data, err
+		return data, fmt.Errorf("read chunk could not scan file: %q: %s", name, err)
 	}
 	if err = file.Close(); err != nil {
-		return data, err
+		return data, fmt.Errorf("read chunk could not close file: %q: %s", name, err)
 	}
-	err = scanner.Err()
-	return data, err
+	return data, nil
 }
 
 // ReadColumns counts the number of characters used per line in the named file.
 func ReadColumns(name string) (count int, err error) {
 	file, err := os.Open(name)
 	if err != nil {
-		return -1, err
+		return -1, fmt.Errorf("read columns could not open file: %q: %s", name, err)
 	}
 	defer file.Close()
 	nl, err := ReadNewlines(name)
 	if err != nil {
-		return -1, err
+		return -1, fmt.Errorf("read columns could not find the newline method: %s", err)
 	}
 	count, err = Columns(file, nl)
-	return count, err
+	if err != nil {
+		return -1, fmt.Errorf("read columns count the file: %q: %s", name, err)
+	}
+	return count, nil
 }
 
 // ReadControls counts the number of ANSI escape sequences in the named file.
 func ReadControls(name string) (count int, err error) {
 	file, err := os.Open(name)
 	if err != nil {
-		return -1, err
+		return -1, fmt.Errorf("read countrols could not open file: %q: %s", name, err)
 	}
 	defer file.Close()
 	count, err = Controls(file)
-	return count, err
+	if err != nil {
+		return -1, fmt.Errorf("read countrols could not parse the file: %q: %s", name, err)
+	}
+	return count, nil
 }
 
 // ReadLine reads a named file location or a named temporary file and returns its content.
@@ -112,7 +120,7 @@ func ReadLine(name, newline string) (text string, err error) {
 	var path, n = tempFile(name), nl(newline)
 	file, err := os.OpenFile(path, os.O_RDONLY, filemode)
 	if err != nil {
-		return text, err
+		return text, fmt.Errorf("read line could not open file: %q: %s", name, err)
 	}
 	// bufio is the most performant
 	scanner := bufio.NewScanner(file)
@@ -120,27 +128,29 @@ func ReadLine(name, newline string) (text string, err error) {
 		text += fmt.Sprintf("%s%s", scanner.Text(), n)
 	}
 	if err = scanner.Err(); err != nil {
-		return text, err
+		return text, fmt.Errorf("read line could not scan file: %s", err)
 	}
 	if err = file.Close(); err != nil {
-		return text, err
+		return text, fmt.Errorf("read line could not close file: %q: %s", name, err)
 	}
-	err = scanner.Err()
-	return text, err
+	return text, nil
 }
 
 // ReadLines counts the number of lines in the named file.
 func ReadLines(name string) (count int, err error) {
 	file, err := os.Open(name)
 	if err != nil {
-		return -1, err
+		return -1, fmt.Errorf("read lines could not open file: %q: %s", name, err)
 	}
 	defer file.Close()
 	nl, err := ReadNewlines(name)
 	if err != nil {
-		return -1, err
+		return -1, fmt.Errorf("read lines could not scan the file: %s", err)
 	}
 	count, err = Lines(file, nl)
+	if err != nil {
+		return -1, fmt.Errorf("read tail could not open file: %q: %s", name, err)
+	}
 	return count, err
 }
 
@@ -149,12 +159,12 @@ func ReadNewlines(name string) ([2]rune, error) {
 	z := [2]rune{0, 0}
 	file, err := os.Open(name)
 	if err != nil {
-		return z, err
+		return z, fmt.Errorf("read new lines could not open file: %q: %s", name, err)
 	}
 	defer file.Close()
 	b, err := ioutil.ReadAll(file)
 	if err != nil {
-		return z, err
+		return z, fmt.Errorf("read new lines could not read the file: %q: %s", name, err)
 	}
 	return Newlines(bytes.Runes(b), true), nil
 }
@@ -167,7 +177,7 @@ func ReadPipe() (b []byte, err error) {
 		b = append(b, scanner.Bytes()...)
 	}
 	if err = scanner.Err(); err != nil {
-		return b, err
+		return b, fmt.Errorf("read pipe could not scan stdin: %s", err)
 	}
 	if len(b) == 0 {
 		os.Exit(0)
@@ -179,23 +189,27 @@ func ReadPipe() (b []byte, err error) {
 func ReadRunes(name string) (count int, err error) {
 	file, err := os.Open(name)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("read runes could not open file: %q: %s", name, err)
 	}
 	defer file.Close()
-	return Runes(file)
+	count, err = Runes(file)
+	if err != nil {
+		return 0, fmt.Errorf("read runes could not calculate this file: %q: %s", name, err)
+	}
+	return count, nil
 }
 
 // ReadTail reads the named file from the offset position relative to the end of the file.
 func ReadTail(name string, offset int) (data []byte, err error) {
 	file, err := os.Open(name)
 	if err != nil {
-		return data, err
+		return data, fmt.Errorf("read tail could not open file: %q: %s", name, err)
 	}
 	defer file.Close()
 	count, total := 0, 0
 	total, err = ReadRunes(name)
 	if err != nil {
-		return data, err
+		return data, fmt.Errorf("read tail could not read runes: %q: %s", name, err)
 	}
 	// bufio is the most performant
 	scanner := bufio.NewScanner(file)
@@ -208,25 +222,33 @@ func ReadTail(name string, offset int) (data []byte, err error) {
 		data = append(data, scanner.Bytes()...)
 	}
 	if err = scanner.Err(); err != nil {
-		return data, err
+		return data, fmt.Errorf("read tail could scan file bytes: %q: %s", name, err)
 	}
 	if err = file.Close(); err != nil {
-		return data, err
+		return data, fmt.Errorf("read tail could not close file: %q: %s", name, err)
 	}
-	return data, err
+	return data, nil
 }
 
 // ReadText reads a named file location or a named temporary file and returns its content.
 func ReadText(name string) (text string, err error) {
-	return ReadLine(name, "")
+	text, err = ReadLine(name, "")
+	if err != nil {
+		return text, fmt.Errorf("read text: %q: %s", name, err)
+	}
+	return text, nil
 }
 
 // ReadWords counts the number of spaced words in the named file.
 func ReadWords(name string) (count int, err error) {
 	file, err := os.Open(name)
 	if err != nil {
-		return -1, err
+		return -1, fmt.Errorf("read words could not open: %q: %s", name, err)
 	}
 	defer file.Close()
-	return Words(file)
+	count, err = Words(file)
+	if err != nil {
+		return count, fmt.Errorf("read words failed to count words: %q: %s", name, err)
+	}
+	return count, nil
 }
