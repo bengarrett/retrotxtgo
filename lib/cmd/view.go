@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -134,7 +133,7 @@ func viewPackage(cmd *cobra.Command, conv convert.Args, name string) (ok bool, e
 	}
 	b := pack.Get(pkg.name)
 	if b == nil {
-		return false, errors.New("pkg.name is unknown: " + pkg.name)
+		return false, fmt.Errorf("pack name is unknown: %q", pkg.name)
 	}
 	// encode defaults
 	if cp := cmd.Flags().Lookup("encode"); !cp.Changed {
@@ -168,7 +167,7 @@ func viewPackage(cmd *cobra.Command, conv convert.Args, name string) (ok bool, e
 func toDecode(name string, r []rune) ([]rune, error) {
 	encode, err := convert.Encoding(name)
 	if err != nil {
-		return r, fmt.Errorf("encoding unknown %s. %s", encode, err)
+		return r, fmt.Errorf("encoding not known or supported %s: %s", encode, err)
 	}
 	cp, err := encode.NewEncoder().String(string(r))
 	if err != nil {
