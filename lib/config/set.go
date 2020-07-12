@@ -264,7 +264,9 @@ func (n names) string(theme bool) string {
 			break
 		}
 		var b bytes.Buffer
-		str.HighlightWriter(&b, t, "yaml", name)
+		if err := str.HighlightWriter(&b, t, "yaml", name); err != nil {
+			logs.Println("yaml highlight writer failed", name, err)
+		}
 		s = append(s, b.String())
 	}
 	return strings.Join(s, "")

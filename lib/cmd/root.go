@@ -196,6 +196,8 @@ func examples() *bytes.Buffer {
 	fmt.Fprintln(w, str.Example(" retrotxt create 1252 -p0"), "serves the Windows-1252 English test over a local web server")
 	fmt.Fprintln(w, "\nMultiple examples are supported")
 	fmt.Fprintln(w, str.Example(" retrotxt view ansi ascii ansi.rgb"))
-	w.Flush()
+	if err := w.Flush(); err != nil {
+		logs.Fatal("flush of tab writer failed", "", err)
+	}
 	return &buf
 }

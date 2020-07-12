@@ -75,6 +75,8 @@ func Table(name string) (*bytes.Buffer, error) {
 		}
 	}
 	fmt.Fprint(w, "\n")
-	w.Flush()
+	if err = w.Flush(); err != nil {
+		return nil, fmt.Errorf("table tab writer failed to flush data: %s", err)
+	}
 	return &buf, nil
 }

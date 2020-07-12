@@ -367,7 +367,9 @@ func (d Detail) Text(color bool) string {
 		fmt.Fprintf(w, "\t %s\t  %s\n", x.k, info(x.v))
 	}
 	fmt.Fprint(w, hr(l))
-	w.Flush()
+	if err := w.Flush(); err != nil {
+		logs.Fatal("flush of tab writer failed", "", err)
+	}
 	return buf.String()
 }
 

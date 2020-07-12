@@ -13,6 +13,7 @@ import (
 	"golang.org/x/text/encoding/ianaindex"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/encoding/unicode"
+	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/str"
 )
 
@@ -63,7 +64,9 @@ func List() *bytes.Buffer {
 	fmt.Fprintln(w, "  Macintosh ("+str.Cc("macintosh")+") is found on Mac OS 9 and earlier systems")
 	fmt.Fprintln(w, "  RetroTxt, modern systems and the web today use UTF-8, a Unicode encoding")
 	fmt.Fprintln(w, "  that's a subset of ISO 8859-1 which itself is a subset of US-ASCII")
-	w.Flush()
+	if err := w.Flush(); err != nil {
+		logs.Fatal("convert list", "flush", err)
+	}
 	return &buf
 }
 

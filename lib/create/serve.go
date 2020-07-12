@@ -99,7 +99,9 @@ func (args Args) watch() {
 			logs.Fatal("path match pattern failed", "", err)
 		}
 		if tmp {
-			os.RemoveAll(args.Destination)
+			if err := os.RemoveAll(args.Destination); err != nil {
+				logs.Fatal("could not clean the temporary directory: %q: %s", args.Destination, err)
+			}
 		}
 		os.Exit(0)
 	}()

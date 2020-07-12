@@ -83,7 +83,9 @@ var configInfoCmd = &cobra.Command{
 	Short:   "View all the settings configured in the config file",
 	Run: func(cmd *cobra.Command, args []string) {
 		if configFlag.configs {
-			config.List()
+			if err := config.List(); err != nil {
+				logs.Fatal("config info", "list", err)
+			}
 			os.Exit(0)
 		}
 		if configFlag.styles {
@@ -106,7 +108,9 @@ var configSetCmd = &cobra.Command{
 		"   # to set the color styles",
 	Run: func(cmd *cobra.Command, args []string) {
 		if configFlag.configs {
-			config.List()
+			if err := config.List(); err != nil {
+				logs.Fatal("config", "list", err)
+			}
 			os.Exit(0)
 		}
 		checkUse(cmd, args)
