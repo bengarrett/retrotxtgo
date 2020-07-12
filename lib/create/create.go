@@ -360,7 +360,10 @@ func (args Args) savehtml(b *[]byte, c chan error) {
 	if err != nil {
 		c <- err
 	}
-	defer file.Close()
+	defer func() {
+		cerr := file.Close()
+		c <- cerr
+	}()
 	tmpl, err := args.newTemplate()
 	if err != nil {
 		c <- err
