@@ -3,6 +3,7 @@ package filesystem
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"sort"
 	"unicode"
@@ -19,7 +20,7 @@ func Columns(r io.Reader, nl [2]rune) (width int, err error) {
 	for {
 		size, err := r.Read(buf)
 		if err != nil && err != io.EOF {
-			return -1, err
+			return -1, fmt.Errorf("columns could not read buffer: %s", err)
 		}
 		var pos int
 		for {
@@ -49,7 +50,7 @@ func Controls(r io.Reader) (count int, err error) {
 	for {
 		size, err := r.Read(buf)
 		if err != nil && err != io.EOF {
-			return 0, err
+			return 0, fmt.Errorf("controls could not read buffer: %s", err)
 		}
 		var pos int
 		for {
@@ -80,7 +81,7 @@ func Lines(r io.Reader, nl [2]rune) (count int, err error) {
 	for {
 		size, err := r.Read(buf)
 		if err != nil && err != io.EOF {
-			return 0, err
+			return 0, fmt.Errorf("lines could not read buffer: %s", err)
 		}
 		var pos int
 		for {
@@ -216,6 +217,9 @@ func Runes(r io.Reader) (count int, err error) {
 	for scanner.Scan() {
 		count++
 	}
+	if err := scanner.Err(); err != nil {
+		return -1, fmt.Errorf("runes could not scan reader: %s", err)
+	}
 	return count, nil
 }
 
@@ -242,9 +246,9 @@ func Words(r io.Reader) (count int, err error) {
 		}
 	}
 	if err = scanner.Err(); err != nil {
-		return -1, err
+		return -1, fmt.Errorf("words could not scan reader: %s", err)
 	}
-	return count, err
+	return count, nil
 }
 
 // isWord scans the content of a word for characters that are not digits,
