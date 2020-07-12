@@ -39,7 +39,9 @@ const (
 // Clean removes the named file or directory.
 func Clean(name string) {
 	if err := os.RemoveAll(name); err != nil {
-		fmt.Fprintln(os.Stderr, "removing path:", err)
+		if _, err := fmt.Fprintf(os.Stderr, "failed to clean: %q: %s", name, err); err != nil {
+			logs.LogFatal(fmt.Errorf("failed to print to stderr and to clean: %s", name))
+		}
 	}
 }
 
@@ -97,36 +99,44 @@ func DirExpansion(name string) (dir string) {
 }
 
 // Save bytes to a named file location.
-func Save(filename string, b []byte) (path string, err error) {
-	path, err = dir(filename)
+func Save(name string, b []byte) (path string, err error) {
+	path, err = dir(name)
 	if err != nil {
-		return path, err
+		return path, fmt.Errorf("save could not open directory: %q: %s", name, err)
 	}
-	path = filename
+	path = name
 	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, filemode)
 	if err != nil {
-		return path, err
+		return path, fmt.Errorf("save could not open file: %q: %s", path, err)
 	}
 	// bufio is the most performant
 	writer := bufio.NewWriter(file)
 	for _, c := range b {
 		if err = writer.WriteByte(c); err != nil {
-			return path, err
+			return path, fmt.Errorf("save could not write bytes: %s", err)
 		}
 	}
 	if err = writer.Flush(); err != nil {
-		return path, err
+		return path, fmt.Errorf("save could not flush the writer: %s", err)
 	}
 	if err = file.Close(); err != nil {
-		return path, err
+		return path, fmt.Errorf("save could not close the file: %s", err)
 	}
 	//ioutil.WriteFile(filename,data,perm)
-	return filepath.Abs(file.Name())
+	path, err = filepath.Abs(file.Name())
+	if err != nil {
+		return path, fmt.Errorf("save could not find the absolute filename: %s", err)
+	}
+	return path, nil
 }
 
 // SaveTemp saves bytes to a named temporary file.
 func SaveTemp(filename string, b []byte) (path string, err error) {
-	return Save(tempFile(filename), b)
+	path, err = Save(tempFile(filename), b)
+	if err != nil {
+		return path, fmt.Errorf("could not save the temporary file: %s", err)
+	}
+	return path, nil
 }
 
 // Tar blah
@@ -179,13 +189,19 @@ func addTar(name string, w *tar.Writer) error {
 
 // Touch creates an empty file at the named location.
 func Touch(name string) (path string, err error) {
-	return Save(name, nil)
+	path, err = Save(name, nil)
+	if err != nil {
+		return path, fmt.Errorf("could not touch a new file: %s", err)
+	}
+	return path, nil
 }
 
 func dir(name string) (path string, err error) {
 	path = filepath.Dir(name)
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		err = os.MkdirAll(path, dirmode)
+		if err = os.MkdirAll(path, dirmode); err != nil {
+			return "", fmt.Errorf("dir could not make the directory: %s %s: %s", dirmode, path, err)
+		}
 	}
 	return path, err
 }
