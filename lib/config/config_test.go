@@ -5,25 +5,6 @@ import (
 	"testing"
 )
 
-func TestFormats_String(t *testing.T) {
-	tests := []struct {
-		name  string
-		f     Formats
-		field string
-		want  string
-	}{
-		{"empty", Formats{}, "", ""},
-		{"", Format, "shell", "bash, powershell, zsh"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.f.String(tt.field); got != tt.want {
-				t.Errorf("Formats.String() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestKeys(t *testing.T) {
 	tests := []struct {
 		name string

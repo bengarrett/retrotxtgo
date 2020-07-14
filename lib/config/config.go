@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	"strings"
 
 	gap "github.com/muesli/go-app-paths"
 	"github.com/spf13/viper"
@@ -114,30 +113,6 @@ var Format = Formats{
 	Info:    [5]string{"color", "json", "json.min", "text", "xml"},
 	Shell:   [3]string{"bash", "powershell", "zsh"},
 	Version: [4]string{"color", "json", "json.min", "text"},
-}
-
-func (f Formats) String(field string) string {
-	switch field {
-	case "info":
-		s := f.Info
-		return fmt.Sprintf("%s, %s, %s, %s, %s", s[0], s[1], s[2], s[3], s[4])
-	case "shell":
-		s := f.Shell
-		return fmt.Sprintf("%s, %s, %s", s[0], s[1], s[2])
-	case "version":
-		s := f.Version
-		return fmt.Sprintf("%s, %s, %s, %s", s[0], s[1], s[2], s[3])
-	}
-	return ""
-}
-
-// Strings returns the flag choice as a slice.
-func (f Formats) Strings(field string) []string {
-	switch field {
-	case "info", "shell", "version":
-		return strings.Split(f.String(field), ", ")
-	}
-	return []string{}
 }
 
 // Enabled returns all the Viper keys holding a value that are used by RetroTxt.

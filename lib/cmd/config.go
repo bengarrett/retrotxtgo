@@ -160,7 +160,7 @@ var configShellCmd = &cobra.Command{
 		default:
 			logs.Fatal("the interpreter is not supported:",
 				configFlag.shell,
-				fmt.Errorf("options: %s", config.Format.String("shell")))
+				fmt.Errorf("options: %s", config.Format.Shell[:]))
 		}
 		if err := str.Highlight(buf.String(), lexer, style); err != nil {
 			logs.Fatal("config", "shell", err)
@@ -197,7 +197,7 @@ func init() {
 	// shell
 	configShellCmd.Flags().StringVarP(&configFlag.shell, "interpreter", "i", "",
 		str.Required("user shell to receive retrotxt auto-completions")+
-			str.Options("", config.Format.Strings("shell"), true))
+			str.Options("", config.Format.Shell[:], true))
 	if err = configShellCmd.MarkFlagRequired("interpreter"); err != nil {
 		logs.Fatal("interpreter flag", "", err)
 	}

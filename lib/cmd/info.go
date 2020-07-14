@@ -48,5 +48,5 @@ var infoCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(infoCmd)
 	infoCmd.Flags().StringVarP(&infoFlag.format, "format", "f", "color",
-		str.Options("output format", config.Format.Strings("info"), true))
+		str.Options("output format", config.Format.Info[:], true))
 }
