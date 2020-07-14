@@ -104,28 +104,40 @@ var scope = gap.NewScope(gap.User, "retrotxt")
 
 // Formats choices for flags
 type Formats struct {
-	Info    []string
-	Shell   []string
-	Version []string
+	Info    [5]string
+	Shell   [3]string
+	Version [4]string
 }
 
 // Format flag choices for info, shell and version commands.
 var Format = Formats{
-	Info:    []string{"color", "json", "json.min", "text", "xml"},
-	Shell:   []string{"bash", "powershell", "zsh"},
-	Version: []string{"color", "json", "json.min", "text"},
+	Info:    [5]string{"color", "json", "json.min", "text", "xml"},
+	Shell:   [3]string{"bash", "powershell", "zsh"},
+	Version: [4]string{"color", "json", "json.min", "text"},
 }
 
 func (f Formats) String(field string) string {
 	switch field {
 	case "info":
-		return strings.Join(f.Info, ", ")
+		s := f.Info
+		return fmt.Sprintf("%s, %s, %s, %s, %s", s[0], s[1], s[2], s[3], s[4])
 	case "shell":
-		return strings.Join(f.Shell, ", ")
+		s := f.Shell
+		return fmt.Sprintf("%s, %s, %s", s[0], s[1], s[2])
 	case "version":
-		return strings.Join(f.Version, ", ")
+		s := f.Version
+		return fmt.Sprintf("%s, %s, %s, %s", s[0], s[1], s[2], s[3])
 	}
 	return ""
+}
+
+// Strings returns the flag choice as a slice.
+func (f Formats) Strings(field string) []string {
+	switch field {
+	case "info", "shell", "version":
+		return strings.Split(f.String(field), ", ")
+	}
+	return []string{}
 }
 
 // Enabled returns all the Viper keys holding a value that are used by RetroTxt.

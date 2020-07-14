@@ -197,7 +197,7 @@ func init() {
 	// shell
 	configShellCmd.Flags().StringVarP(&configFlag.shell, "interpreter", "i", "",
 		str.Required("user shell to receive retrotxt auto-completions")+
-			str.Options("", config.Format.Shell, true))
+			str.Options("", config.Format.Strings("shell"), true))
 	if err = configShellCmd.MarkFlagRequired("interpreter"); err != nil {
 		logs.Fatal("interpreter flag", "", err)
 	}
