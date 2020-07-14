@@ -19,7 +19,6 @@ import (
 	"github.com/alecthomas/chroma/quick"
 	"github.com/alecthomas/chroma/styles"
 	"github.com/gookit/color"
-	"retrotxt.com/retrotxt/lib/logs"
 )
 
 // TestMode disables piping detection which conflicts with go test
@@ -217,7 +216,8 @@ func (s JSONExample) String(flag string) {
 		fmt.Println("\n" + color.Secondary.Sprintf("%s=%q", flag, s.Style.Name))
 	}
 	if err := Highlight(string(out), "json", s.Style.Name); err != nil {
-		logs.Fatal("example syntax highlight failure", "json", err)
+		// cannot use the logs package as it causes an import cycle error
+		log.Fatalln(fmt.Errorf("json example highlight syntax error: %s", err))
 	}
 }
 

@@ -94,7 +94,7 @@ func Update(name string) {
 	value := viper.Get(name)
 	switch value.(type) {
 	case nil:
-		// avoid potential panics with missing settings by implementing the default value
+		// avoid potential panics from missing settings by implementing the default value
 		viper.Set(name, Defaults[name])
 		value = viper.Get(name)
 	}
