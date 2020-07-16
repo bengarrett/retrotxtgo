@@ -145,7 +145,7 @@ func Update(name string) {
 	case "html.font.family":
 		setFont(value.(string))
 	case "html.layout":
-		fmt.Println("\nChoose a new " + str.Options(Hints[name], create.Layouts(), true))
+		fmt.Println("\nChoose a new " + str.Options(Hints[name], true, create.Layouts()...))
 		fmt.Println("\n  standard: uses external CSS, JS and woff2 fonts and is the recommended layout for web servers")
 		fmt.Println("  inline:   includes both the CSS and JS as inline elements but is not recommended")
 		fmt.Println("  compact:  is the same as the standard layout but without any <meta> tags")

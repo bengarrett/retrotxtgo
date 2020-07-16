@@ -41,7 +41,7 @@ func Execute() {
 				logs.Fatal("rootcmd", "usage", err)
 			}
 		}
-		logs.Execute(os.Args[1:], err)
+		logs.Execute(err, os.Args[1:]...)
 	}
 }
 

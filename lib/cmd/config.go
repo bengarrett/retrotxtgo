@@ -29,7 +29,7 @@ var configCmd = &cobra.Command{
 	Short:   "Configure and save settings for RetroTxt",
 	Run: func(cmd *cobra.Command, args []string) {
 		checkUse(cmd, args...)
-		logs.ArgFatal(args)
+		logs.ArgFatal(args...)
 	},
 }
 
@@ -197,7 +197,7 @@ func init() {
 	// shell
 	configShellCmd.Flags().StringVarP(&configFlag.shell, "interpreter", "i", "",
 		str.Required("user shell to receive retrotxt auto-completions")+
-			str.Options("", config.Format.Shell[:], true))
+			str.Options("", true, config.Format.Shell[:]...))
 	if err = configShellCmd.MarkFlagRequired("interpreter"); err != nil {
 		logs.Fatal("interpreter flag", "", err)
 	}

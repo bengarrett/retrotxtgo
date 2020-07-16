@@ -14,20 +14,20 @@ type Cmd struct {
 }
 
 // Execute is the error handler for command flags and arguments.
-func Execute(args []string, err error) {
+func Execute(err error, args ...string) {
 	cmd := Cmd{Args: args, Err: err}
 	fmt.Println(cmd.error().String())
 }
 
 // ArgFatal returns instructions for invalid command arguments.
-func ArgFatal(args []string) {
+func ArgFatal(args ...string) {
 	cmd := Cmd{Args: args, Err: errors.New("invalid command " + args[0])}
 	fmt.Println(cmd.error().String())
 	os.Exit(1)
 }
 
 // FlagFatal returns flag options when an invalid choice is used.
-func FlagFatal(name, value string, args []string) {
+func FlagFatal(name, value string, args ...string) {
 	cmd := Cmd{Args: args, Err: fmt.Errorf("invalid slice %s %s", name, value)}
 	fmt.Println(cmd.error().String())
 	fmt.Printf("         choices: %s\n", strings.Join(args, ", "))

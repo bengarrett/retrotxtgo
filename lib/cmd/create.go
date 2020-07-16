@@ -229,7 +229,7 @@ or ignore to print (save directory: `+viper.GetString("save-directory")+")")
 		case len(c.opts) == 0:
 			fmt.Fprint(&buf, config.Hints[c.key])
 		default:
-			fmt.Fprint(&buf, str.Options(config.Hints[c.key], c.opts, true))
+			fmt.Fprint(&buf, str.Options(config.Hints[c.key], true, c.opts...))
 		}
 		switch {
 		case c.key == "serve":

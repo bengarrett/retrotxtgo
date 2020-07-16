@@ -81,7 +81,7 @@ func Example(s string) string {
 }
 
 // Options appends options: ... to the usage string.
-func Options(s string, opts []string, shorthand bool) (usage string) {
+func Options(s string, shorthand bool, opts ...string) (usage string) {
 	var keys string
 	if len(opts) == 0 {
 		return s
