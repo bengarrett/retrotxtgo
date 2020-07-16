@@ -375,7 +375,7 @@ func (args Args) savehtml(b *[]byte, c chan error) {
 	if err = tmpl.Execute(file, d); err != nil {
 		c <- err
 	}
-	c <- nil
+	c <- file.Close()
 }
 
 // Stdout creates and prints the html template.

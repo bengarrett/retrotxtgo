@@ -132,7 +132,7 @@ func (d *Detail) ctrls(filename string) (err error) {
 		return err
 	}
 	d.CtrlCount = c
-	return nil
+	return f.Close()
 }
 
 func (d *Detail) lines(filename string) (err error) {
@@ -146,7 +146,7 @@ func (d *Detail) lines(filename string) (err error) {
 		return err
 	}
 	d.Lines = l
-	return nil
+	return f.Close()
 }
 
 func (d *Detail) width(filename string) (err error) {
@@ -162,7 +162,7 @@ func (d *Detail) width(filename string) (err error) {
 		w = d.CharCount
 	}
 	d.Width = w
-	return nil
+	return f.Close()
 }
 
 func (d *Detail) words(filename string) (err error) {
@@ -176,7 +176,7 @@ func (d *Detail) words(filename string) (err error) {
 		return err
 	}
 	d.WordCount = w
-	return nil
+	return f.Close()
 }
 
 // Stdin parses piped data and prints out the details in a specific syntax.

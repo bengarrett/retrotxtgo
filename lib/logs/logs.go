@@ -86,5 +86,5 @@ func save(err error, name string) error {
 	log.SetOutput(file)
 	log.Print(err)
 	log.SetOutput(os.Stderr)
-	return nil
+	return file.Close()
 }

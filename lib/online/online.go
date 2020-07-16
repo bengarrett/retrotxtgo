@@ -67,7 +67,7 @@ func Get(url, etag string) (resp *http.Response, body []byte, err error) {
 	if err != nil {
 		return nil, body, fmt.Errorf("reading the response body failed: %s", err)
 	}
-	return resp, body, nil
+	return resp, body, resp.Body.Close()
 }
 
 // Ping requests a URL and determines if the status is ok.
@@ -85,6 +85,5 @@ func Ping(url string) (ok bool, err error) {
 	if err != nil {
 		return ok, fmt.Errorf("requesting to set the ping user-agent header: %s", err)
 	}
-	defer resp.Body.Close()
-	return (resp.StatusCode >= 200 && resp.StatusCode <= 299), nil
+	return (resp.StatusCode >= 200 && resp.StatusCode <= 299), resp.Body.Close()
 }

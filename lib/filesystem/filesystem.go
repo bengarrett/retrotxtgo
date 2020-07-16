@@ -109,6 +109,7 @@ func Save(name string, b ...byte) (path string, err error) {
 	if err != nil {
 		return path, fmt.Errorf("save could not open file: %q: %s", path, err)
 	}
+	defer file.Close()
 	// bufio is the most performant
 	writer := bufio.NewWriter(file)
 	for _, c := range b {
@@ -119,15 +120,12 @@ func Save(name string, b ...byte) (path string, err error) {
 	if err = writer.Flush(); err != nil {
 		return path, fmt.Errorf("save could not flush the writer: %s", err)
 	}
-	if err = file.Close(); err != nil {
-		return path, fmt.Errorf("save could not close the file: %s", err)
-	}
 	//ioutil.WriteFile(filename,data,perm)
 	path, err = filepath.Abs(file.Name())
 	if err != nil {
 		return path, fmt.Errorf("save could not find the absolute filename: %s", err)
 	}
-	return path, nil
+	return path, file.Close()
 }
 
 // SaveTemp saves bytes to a named temporary file.
@@ -146,10 +144,8 @@ func Tar(name string, files ...string) error {
 		return err
 	}
 	defer f.Close()
-
 	w := tar.NewWriter(f)
 	defer w.Close()
-
 	for _, file := range files {
 		if err := addTar(file, w); err != nil {
 			return err
@@ -164,12 +160,10 @@ func addTar(name string, w *tar.Writer) error {
 		return err
 	}
 	defer f.Close()
-
 	s, err := f.Stat()
 	if err != nil {
 		return err
 	}
-
 	h := &tar.Header{
 		Name:    f.Name(),
 		Size:    s.Size(),
@@ -183,8 +177,7 @@ func addTar(name string, w *tar.Writer) error {
 	if err != nil {
 		return nil
 	}
-
-	return nil
+	return f.Close()
 }
 
 // Touch creates an empty file at the named location.
