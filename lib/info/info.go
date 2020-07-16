@@ -306,6 +306,7 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 		d.Utf8 = utf8.Valid(data)
 		ch <- true
 	}()
+	_, _, _ = <-ch, <-ch, <-ch
 	return err
 }
 
