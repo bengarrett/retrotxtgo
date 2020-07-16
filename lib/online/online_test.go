@@ -7,11 +7,8 @@ import (
 
 func ExampleEndpoint() {
 	_, p, _ := Endpoint("https://demozoo.org/api/v1/productions/126496/", `W/"0708012ac3fb439a46dd5156195901b4"`)
-	_, g, _ := Endpoint(ReleaseAPI, "")
 	fmt.Println("id:", p["id"])
-	fmt.Println("ver:", g["tag_name"])
 	// Output: id: 126496
-	// ver: 0.0.1
 }
 
 func ExamplePing() {
