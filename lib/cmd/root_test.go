@@ -19,8 +19,9 @@ func TestInitDefaults(t *testing.T) {
 		want string
 	}{
 		{"empty", "", ""},
-		{"layout", "create.layout", "standard"},
-		{"save dir", "create.save-directory", home},
+		{"layout", "html.layout", "standard"},
+		{"save dir", "save-directory", home},
+		{"style", "style.html", "lovelace"},
 	}
 	config.InitDefaults()
 	for _, tt := range tests {

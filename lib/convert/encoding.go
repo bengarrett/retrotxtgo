@@ -33,6 +33,13 @@ func BOM() []byte {
 
 // Encoding returns the named character set encoding.
 func Encoding(name string) (encoding.Encoding, error) {
+	// use charmap string
+	for _, c := range charmap.All {
+		//fmt.Println("--->", fmt.Sprint(c), "--->", name)
+		if fmt.Sprint(c) == name {
+			return c, nil
+		}
+	}
 	// use iana names or alias
 	if enc, err := ianaindex.IANA.Encoding(name); err == nil && enc != nil {
 		return enc, nil
@@ -42,10 +49,15 @@ func Encoding(name string) (encoding.Encoding, error) {
 	if enc, err := htmlindex.Get(name); err == nil && enc != nil {
 		return enc, nil
 	}
-	a := shorten(name)
-	enc, err := ianaindex.IANA.Encoding(a)
-	if err != nil {
-		enc, err = ianaindex.IANA.Encoding(encodingAlias(name))
+	s := shorten(name)
+	a := encodingAlias(s)
+	n := encodingAlias(name)
+	enc, err := ianaindex.IANA.Encoding(s)
+	if enc == nil {
+		enc, err = ianaindex.IANA.Encoding(a)
+	}
+	if enc == nil {
+		enc, err = ianaindex.IANA.Encoding(n)
 	}
 	if err != nil {
 		return enc, fmt.Errorf("encoding could not match name %q or alias %q: %s",

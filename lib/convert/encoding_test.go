@@ -26,7 +26,7 @@ func TestSet_Transform(t *testing.T) {
 		{"latin1", "latin1", "abcde", "abcde", false},
 		{"6e", "iso-8859-6-e", "ring a \x07", "ring a ␇", false},
 		{"koi8", "koi", "\xf5\xf2\xf3\xf3", "УРСС", false},
-		{"jp", "shiftjis", "", "", true},
+		{"jp", "shiftjis", "abc", "abc", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -106,7 +106,7 @@ func TestEncoding(t *testing.T) {
 	}{
 		{"ibm437", charmap.CodePage437, false},
 		{"CP437", charmap.CodePage437, false},
-		{"IBM Codepage 437", nil, true},
+		{"IBM Code Page 437", charmap.CodePage437, false},
 		{"CP-437", charmap.CodePage437, false},
 		{"oem-us", charmap.CodePage437, false},
 		{"ibm-37", charmap.CodePage037, false},

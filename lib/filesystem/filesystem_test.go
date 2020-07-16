@@ -215,7 +215,7 @@ func TestReadAllBytes(t *testing.T) {
 }
 
 func TestReadChunk(t *testing.T) {
-	f1 := fileExample(T["Nl"], 1)
+	f1 := fileExample(T["Newline"], 1)
 	f2 := fileExample(T["Symbols"], 2)
 	f3 := fileExample(T["Tabs"], 3)
 	f4 := fileExample(T["Escapes"], 4)
@@ -257,7 +257,7 @@ func TestReadChunk(t *testing.T) {
 			}
 		})
 	}
-	Clean(f1)
+	//Clean(f1)
 	Clean(f2)
 	Clean(f3)
 	Clean(f4)

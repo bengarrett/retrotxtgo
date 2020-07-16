@@ -8,7 +8,7 @@ import (
 )
 
 func TestEncodings(t *testing.T) {
-	got, want := len(Encodings()), 45
+	got, want := len(Encodings()), 49
 	if got != want {
 		t.Errorf("Encodings() count = %v, want %v", got, want)
 	}

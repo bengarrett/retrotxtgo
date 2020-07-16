@@ -1,6 +1,7 @@
 package create
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -17,7 +18,8 @@ func Test_Save(t *testing.T) {
 		data []byte
 		name string
 	}
-	tmpFile := path.Join(os.TempDir(), "retrotxt_create_test.txt")
+	tmpDir := os.TempDir()
+	tmpFile := path.Join(tmpDir, "retrotxt_create_test.txt")
 	tests := []struct {
 		name    string
 		args    args
@@ -28,7 +30,7 @@ func Test_Save(t *testing.T) {
 		{"tempDir", args{data: []byte("abc"), name: tmpFile}, true},
 		{"homeDir", args{[]byte("abc"), "~"}, false},
 		{"currentDir", args{[]byte("abc"), "."}, false},
-		{"path as name", args{[]byte("abc"), os.TempDir()}, true},
+		{"path as name", args{[]byte("abc"), tmpDir}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -39,7 +41,8 @@ func Test_Save(t *testing.T) {
 			go a.savehtml(&tt.args.data, ch)
 			err := <-ch
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Save() error = %v, wantErr %v", err, tt.wantErr)
+				fmt.Println("dir:", tmpDir)
+				t.Errorf("Save(%s) error = %v, wantErr %v", tt.name, err, tt.wantErr)
 			}
 		})
 	}

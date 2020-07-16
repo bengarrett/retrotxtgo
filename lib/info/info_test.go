@@ -135,7 +135,7 @@ func Test_parse(t *testing.T) {
 	}{
 		{"empty", args{[]byte(""), f}, 0, false},
 		{"string", args{[]byte("hello"), f}, 5, false},
-		{"string", args{[]byte("世界你好"), f}, 8, false},
+		{"string", args{[]byte("世界你好"), f}, 4, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -173,14 +173,14 @@ func Test_JSON(t *testing.T) {
 }
 
 func Test_Text(t *testing.T) {
-	tmp := sampleFile()
+	const want = 655
 	var d Detail
+	tmp := sampleFile()
 	err := d.Read(tmp)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	want := 632
 	if got := len(d.Text(false)); got != want {
 		fmt.Printf("%+v\n", tmp)
 		t.Errorf("Text() = %v, want %v", got, want)

@@ -1,20 +1,25 @@
 package config
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/gookit/color"
+)
 
 func Test_hr(t *testing.T) {
 	tests := []struct {
-		name string
-		w    uint
-		want string
+		name  string
+		width uint
+		want  string
 	}{
 		{"empty", 0, ""},
 		{"5", 5, "-----"},
 	}
+	color.Disable()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := hr(tt.w); got != tt.want {
-				t.Errorf("hr() = %v, want %v", got, tt.want)
+			if got := hr(tt.width); got != tt.want {
+				t.Errorf("hr() = %q, want %q", got, tt.want)
 			}
 		})
 	}
