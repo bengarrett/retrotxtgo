@@ -58,11 +58,15 @@ func Editor() (edit string) {
 }
 
 func lookEdit() (edit string) {
-	editors := []string{"nano", "vim", "emacs"}
+	editors := [5]string{"nano", "vim", "emacs"}
 	if runtime.GOOS == "windows" {
-		editors = append(editors, "notepad++.exe", "notepad.exe")
+		editors[3] = "notepad++.exe"
+		editors[4] = "notepad.exe"
 	}
 	for _, editor := range editors {
+		if editor == "" {
+			continue
+		}
 		if _, err := exec.LookPath(editor); err == nil {
 			edit = editor
 			break
