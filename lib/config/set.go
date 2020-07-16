@@ -150,7 +150,7 @@ func Update(name string) {
 		fmt.Println("  inline:   includes both the CSS and JS as inline elements but is not recommended")
 		fmt.Println("  compact:  is the same as the standard layout but without any <meta> tags")
 		fmt.Println("  none:     no template is used, instead only the generated markup is returned")
-		setShortStrings(name, value.(string), create.Layouts())
+		setShortStrings(name, value.(string), create.Layouts()...)
 	case "html.meta.author",
 		"html.meta.description",
 		"html.meta.keywords",
@@ -161,7 +161,7 @@ func Update(name string) {
 		previewMeta(name, value.(string))
 		prints := copyKeys(create.ColorScheme...)
 		fmt.Println(str.UnderlineKeys(prints))
-		setShortStrings(name, value.(string), create.ColorScheme)
+		setShortStrings(name, value.(string), create.ColorScheme...)
 	case "html.meta.generator":
 		setGenerator(value.(bool))
 	case "html.meta.notranslate":
@@ -169,11 +169,11 @@ func Update(name string) {
 	case "html.meta.referrer":
 		previewMeta(name, value.(string))
 		fmt.Println(str.NumberizeKeys(create.Referrer))
-		setIndex(name, value.(string), create.Referrer)
+		setIndex(name, value.(string), create.Referrer...)
 	case "html.meta.robots":
 		previewMeta(name, value.(string))
 		fmt.Println(str.NumberizeKeys(create.Robots))
-		setIndex(name, value.(string), create.Robots)
+		setIndex(name, value.(string), create.Robots...)
 	case "html.meta.retrotxt":
 		setRetrotxt(value.(bool))
 	case "html.title":
@@ -197,10 +197,10 @@ func Update(name string) {
 		setPort(name)
 	case "style.html":
 		fmt.Printf("Set a new HTML syntax style:\n%s\n", str.Ci(Names()))
-		setStrings(name, styles.Names())
+		setStrings(name, styles.Names()...)
 	case "style.info":
 		fmt.Printf("Set a new %s syntax style:\n%s\n", str.Example("config info"), str.Ci(Names()))
-		setStrings(name, styles.Names())
+		setStrings(name, styles.Names()...)
 	default:
 		log.Fatalln("config is not configured:", name)
 	}
@@ -251,7 +251,7 @@ func (n names) string(theme bool) string {
 	if !theme {
 		return strings.Join(n, ", ")
 	}
-	var s []string
+	var s = make([]string, len(n))
 	split := (len(n) / 2)
 	for i, name := range n {
 		var t string
@@ -454,7 +454,7 @@ func setFont(value string) {
 	fmt.Println(str.Cf("About font families: https://developer.mozilla.org/en-US/docs/Web/CSS/font-family"))
 	fmt.Println("Choose a font (recommend: automatic):")
 	fmt.Println(str.UnderlineKeys(create.Fonts()))
-	setShortStrings("html.font.family", value, create.Fonts())
+	setShortStrings("html.font.family", value, create.Fonts()...)
 }
 
 func setFontEmbed(value bool) {
@@ -484,7 +484,7 @@ func setGenerator(value bool) {
 	}
 }
 
-func setIndex(name, value string, data []string) {
+func setIndex(name, value string, data ...string) {
 	if name == "" {
 		logs.LogFatal(errors.New("setindex name string is empty"))
 	}
@@ -535,7 +535,7 @@ func setRetrotxt(value bool) {
 	}
 }
 
-func setShortStrings(name, value string, data []string) {
+func setShortStrings(name, value string, data ...string) {
 	v := prompt.ShortStrings(&data)
 	switch v {
 	case "-":
@@ -560,7 +560,7 @@ func setString(name string) {
 	save(name, v)
 }
 
-func setStrings(name string, data []string) {
+func setStrings(name string, data ...string) {
 	if name == "" {
 		logs.LogFatal(errors.New("set strings name cannot be empty"))
 	}
