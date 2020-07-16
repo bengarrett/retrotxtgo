@@ -140,7 +140,7 @@ func SaveTemp(filename string, b []byte) (path string, err error) {
 }
 
 // Tar blah
-func Tar(name string, files []string) error {
+func Tar(name string, files ...string) error {
 	f, err := os.Create(name)
 	if err != nil {
 		return err
