@@ -617,13 +617,13 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 		return p, fmt.Errorf("pagedata convert text bytes to utf8 failure: %s", err)
 	}
 	if p.MetaRetroTxt {
-		p.Comment = args.comment(conv, b, runes)
+		p.Comment = args.comment(conv, b, runes...)
 	}
 	p.PreText = string(runes)
 	return p, nil
 }
 
-func (args Args) comment(c convert.Args, old *[]byte, new []rune) string {
+func (args Args) comment(c convert.Args, old *[]byte, new ...rune) string {
 	e, nl, l, w, f := "", "", 0, 0, "n/a"
 	b := []byte(string(new))
 	// to handle EBCDIC cases, both raw bytes and utf8 runes need newline scans.

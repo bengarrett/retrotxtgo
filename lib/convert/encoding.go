@@ -63,7 +63,7 @@ func Humanize(name string) string {
 }
 
 // EndOfFile will cut text at the first DOS end-of-file marker.
-func EndOfFile(b []byte) []byte {
+func EndOfFile(b ...byte) []byte {
 	if cut := bytes.IndexByte(b, 26); cut > 0 {
 		return b[:cut]
 	}
@@ -80,7 +80,7 @@ func MakeBytes() (m []byte) {
 }
 
 // Mark adds a UTF-8 byte order mark to the text if it doesn't already exist.
-func Mark(b []byte) []byte {
+func Mark(b ...byte) []byte {
 	if len(b) > 2 {
 		if t := b[:3]; bytes.Equal(t, BOM()) {
 			return b

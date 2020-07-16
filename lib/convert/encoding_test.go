@@ -91,7 +91,7 @@ func TestMark(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Mark(tt.args.b); !reflect.DeepEqual(got, tt.want) {
+			if got := Mark(tt.args.b...); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Mark() = %v, want %v", got, tt.want)
 			}
 		})
@@ -178,7 +178,7 @@ func TestMakeBytes(t *testing.T) {
 
 func TestEndOfFileX(t *testing.T) {
 	b := []byte("hello\x1aworld")
-	if got := EndOfFile(b); string(got) != "hello" {
+	if got := EndOfFile(b...); string(got) != "hello" {
 		t.Errorf("TestEndOfFile() = %v, want %v", string(got), "hello")
 	}
 }
@@ -196,7 +196,7 @@ func TestEndOfFile(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := EndOfFile(tt.b); !reflect.DeepEqual(got, tt.want) {
+			if got := EndOfFile(tt.b...); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("EndOfFile() = %v, want %v", got, tt.want)
 			}
 		})

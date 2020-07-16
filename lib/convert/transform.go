@@ -75,7 +75,7 @@ func (a Args) Text(b *[]byte) (utf8 []rune, err error) {
 		swapChars: a.Swap,
 	}
 	c.controls(a)
-	c.Source = EndOfFile(*b)
+	c.Source = EndOfFile(*b...)
 	if _, err = c.Transform(a.Encoding); err != nil {
 		return nil, fmt.Errorf("text transform failed: %s", err)
 	}
