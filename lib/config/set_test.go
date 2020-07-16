@@ -51,7 +51,7 @@ func Test_copyKeys(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotCopy := copyKeys(tt.keys); !reflect.DeepEqual(gotCopy, tt.wantCopy) {
+			if gotCopy := copyKeys(tt.keys...); !reflect.DeepEqual(gotCopy, tt.wantCopy) {
 				t.Errorf("copyKeys() = %v, want %v", gotCopy, tt.wantCopy)
 			}
 		})

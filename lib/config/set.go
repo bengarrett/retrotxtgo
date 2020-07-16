@@ -159,7 +159,7 @@ func Update(name string) {
 		setString(name)
 	case "html.meta.color-scheme":
 		previewMeta(name, value.(string))
-		prints := copyKeys(create.ColorScheme)
+		prints := copyKeys(create.ColorScheme...)
 		fmt.Println(str.UnderlineKeys(prints))
 		setShortStrings(name, value.(string), create.ColorScheme)
 	case "html.meta.generator":
@@ -229,7 +229,7 @@ func colorElm(elm, lexer, style string) string {
 	return fmt.Sprintf("\n%s\n", b.String())
 }
 
-func copyKeys(keys []string) (copy []string) {
+func copyKeys(keys ...string) (copy []string) {
 	if len(keys) == 0 {
 		return keys
 	}
