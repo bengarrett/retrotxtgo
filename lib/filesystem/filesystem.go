@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"retrotxt.com/retrotxt/lib/logs"
@@ -90,7 +91,11 @@ func DirExpansion(name string) (dir string) {
 		default:
 			p = s
 		}
-		dir = filepath.Join(dir, p)
+		if runtime.GOOS == "windows" && dir == "" {
+			dir = p + "\\"
+		} else {
+			dir = filepath.Join(dir, p)
+		}
 	}
 	if root() {
 		dir = string(os.PathSeparator) + dir

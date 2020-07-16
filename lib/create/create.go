@@ -206,7 +206,7 @@ func (args *Args) destination(name string) (string, error) {
 	path := dir
 	stat, err := os.Stat(dir)
 	if err != nil {
-		return "", fmt.Errorf("destination directory failed %q: %s", dir, err)
+		return "", fmt.Errorf("args destination directory failed %q: %s", dir, err)
 	}
 	if stat.IsDir() {
 		path = filepath.Join(dir, name)
