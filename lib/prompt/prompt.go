@@ -236,7 +236,7 @@ func (k keys) shortValidate(key string) string {
 	if key == "" || len(key) > 1 {
 		return ""
 	}
-	var letters []string
+	var letters = make([]string, len(k))
 	sort.Strings(k)
 	for _, key := range k {
 		letters = append(letters, string(key[0]))
