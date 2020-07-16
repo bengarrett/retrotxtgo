@@ -288,7 +288,7 @@ func TestRunesDOS(t *testing.T) {
 	}{
 		{"empty", "", ""},
 		{"hi", "\x01hello world\x7f", "☺hello world⌂"},
-		{"dos pipes", "|!\x7c", "¦!¦"},
+		{"dos pipes", "|!\x7c", "|!|"},
 	}
 	for _, tt := range tests {
 		d := Convert{Source: []byte(tt.text)}
