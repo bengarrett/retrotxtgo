@@ -108,14 +108,14 @@ type PageData struct {
 }
 
 // ColorScheme values for the content attribute of <meta name="color-scheme">
-var ColorScheme = []string{"normal", "dark light", "only light"}
+var ColorScheme = [...]string{"normal", "dark light", "only light"}
 
 // Referrer values for the content attribute of <meta name="referrer">
-var Referrer = []string{"no-referrer", "origin", "no-referrer-when-downgrade",
+var Referrer = [...]string{"no-referrer", "origin", "no-referrer-when-downgrade",
 	"origin-when-cross-origin", "same-origin", "strict-origin", "strict-origin-when-cross-origin", "unsafe-URL"}
 
 // Robots values for the content attribute of <meta name="robots">
-var Robots = []string{"index", "noindex", "follow", "nofollow", "none", "noarchive", "nosnippet", "noimageindex", "nocache"}
+var Robots = [...]string{"index", "noindex", "follow", "nofollow", "none", "noarchive", "nosnippet", "noimageindex", "nocache"}
 
 var scope = gap.NewScope(gap.User, "retrotxt")
 
@@ -164,7 +164,7 @@ func (args *Args) Create(b *[]byte) {
 		// otherwise assume Destination path is a temporary --serve location
 		if args.Destination == "" {
 			dir := []string{viper.GetString("save-directory")}
-			if args.Destination, err = destination(dir); err != nil {
+			if args.Destination, err = destination(dir...); err != nil {
 				logs.Fatal("save to directory failure", fmt.Sprintf("%s", dir), err)
 			}
 		}
@@ -409,7 +409,7 @@ func (args Args) Stdout(b *[]byte) error {
 }
 
 // destination determines if user supplied arguments are a valid file or directory destination.
-func destination(args []string) (path string, err error) {
+func destination(args ...string) (path string, err error) {
 	if len(args) == 0 {
 		return path, nil
 	}

@@ -180,7 +180,7 @@ func Test_destination(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotPath, err := destination(tt.args)
+			gotPath, err := destination(tt.args...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("destination() error = %v, wantErr %v", err, tt.wantErr)
 				return

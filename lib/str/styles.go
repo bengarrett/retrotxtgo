@@ -89,7 +89,7 @@ func HighlightWriter(w io.Writer, source, lexer, style string) (err error) {
 }
 
 // NumberizeKeys uses ANSI to underline and prefix a sequential number in front of each key.
-func NumberizeKeys(keys []string) string {
+func NumberizeKeys(keys ...string) string {
 	if len(keys) == 0 {
 		return ""
 	}
@@ -164,7 +164,7 @@ func UnderlineChar(c string) (s string, err error) {
 }
 
 // UnderlineKeys uses ANSI to underline the first letter of each key.
-func UnderlineKeys(keys []string) string {
+func UnderlineKeys(keys ...string) string {
 	if len(keys) == 0 {
 		return ""
 	}

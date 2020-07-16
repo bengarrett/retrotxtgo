@@ -88,7 +88,7 @@ func Options(s string, opts []string, shorthand bool) (usage string) {
 	}
 	sort.Strings(opts)
 	if shorthand {
-		keys = UnderlineKeys(opts)
+		keys = UnderlineKeys(opts...)
 	} else {
 		keys = strings.Join(opts, ", ")
 	}

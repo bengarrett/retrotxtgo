@@ -159,21 +159,21 @@ func Update(name string) {
 		setString(name)
 	case "html.meta.color-scheme":
 		previewMeta(name, value.(string))
-		prints := copyKeys(create.ColorScheme...)
-		fmt.Println(str.UnderlineKeys(prints))
-		setShortStrings(name, value.(string), create.ColorScheme...)
+		prints := copyKeys(create.ColorScheme[:]...)
+		fmt.Println(str.UnderlineKeys(prints...))
+		setShortStrings(name, value.(string), create.ColorScheme[:]...)
 	case "html.meta.generator":
 		setGenerator(value.(bool))
 	case "html.meta.notranslate":
 		setNoTranslate(value.(bool))
 	case "html.meta.referrer":
 		previewMeta(name, value.(string))
-		fmt.Println(str.NumberizeKeys(create.Referrer))
-		setIndex(name, value.(string), create.Referrer...)
+		fmt.Println(str.NumberizeKeys(create.Referrer[:]...))
+		setIndex(name, value.(string), create.Referrer[:]...)
 	case "html.meta.robots":
 		previewMeta(name, value.(string))
-		fmt.Println(str.NumberizeKeys(create.Robots))
-		setIndex(name, value.(string), create.Robots...)
+		fmt.Println(str.NumberizeKeys(create.Robots[:]...))
+		setIndex(name, value.(string), create.Robots[:]...)
 	case "html.meta.retrotxt":
 		setRetrotxt(value.(bool))
 	case "html.title":
@@ -453,7 +453,7 @@ func setFont(value string) {
 	fmt.Print(ColorCSS(b.String()))
 	fmt.Println(str.Cf("About font families: https://developer.mozilla.org/en-US/docs/Web/CSS/font-family"))
 	fmt.Println("Choose a font (recommend: automatic):")
-	fmt.Println(str.UnderlineKeys(create.Fonts()))
+	fmt.Println(str.UnderlineKeys(create.Fonts()...))
 	setShortStrings("html.font.family", value, create.Fonts()...)
 }
 
