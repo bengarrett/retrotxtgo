@@ -91,11 +91,16 @@ func DirExpansion(name string) (dir string) {
 		default:
 			p = s
 		}
-		if runtime.GOOS == "windows" && dir == "" {
-			dir = p + "\\"
-		} else {
-			dir = filepath.Join(dir, p)
+		if runtime.GOOS == "windows" {
+			if len(p) == 2 && p[1:] == ":" {
+				dir = strings.ToUpper(p) + "\\"
+				continue
+			} else if dir == "" && i > 0 {
+				dir = p + "\\"
+				continue
+			}
 		}
+		dir = filepath.Join(dir, p)
 	}
 	if root() {
 		dir = string(os.PathSeparator) + dir

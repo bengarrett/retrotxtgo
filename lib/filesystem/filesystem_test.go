@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"testing"
 )
 
@@ -119,19 +120,37 @@ func Test_DirExpansion(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tests := []struct {
+	type dirTests []struct {
 		name    string
 		wantDir string
-	}{
-		{fmt.Sprintf("%shome%suser", s, s), fmt.Sprintf("%shome%suser", s, s)},
-		{"~", h},
-		{filepath.Join("~", "foo"), filepath.Join(h, "foo")},
-		{".", w},
-		{fmt.Sprintf(".%sfoo", s), filepath.Join(w, "foo")},
-		{fmt.Sprintf("..%sfoo", s), filepath.Join(wp, "foo")},
-		{fmt.Sprintf("~%s..%sfoo", s, s), filepath.Join(hp, "foo")},
-		{fmt.Sprintf("%sroot%sfoo%s..%sblah", s, s, s, s), fmt.Sprintf("%sroot%sblah", s, s)},
-		{fmt.Sprintf("%sroot%sfoo%s.%sblah", s, s, s, s), fmt.Sprintf("%sroot%sfoo%sblah", s, s, s)},
+	}
+	var tests dirTests
+	if runtime.GOOS == "windows" {
+		// WINDOWS
+		tests = dirTests{
+			{fmt.Sprintf("C:%shome%suser", s, s), fmt.Sprintf("C:%shome%suser", s, s)},
+			{"~", h},
+			{filepath.Join("~", "foo"), filepath.Join(h, "foo")},
+			{".", w},
+			{fmt.Sprintf(".%sfoo", s), filepath.Join(w, "foo")},
+			{fmt.Sprintf("..%sfoo", s), filepath.Join(wp, "foo")},
+			{fmt.Sprintf("~%s..%sfoo", s, s), filepath.Join(hp, "foo")},
+			{fmt.Sprintf("d:%sroot%sfoo%s..%sblah", s, s, s, s), fmt.Sprintf("D:%sroot%sblah", s, s)},
+			{fmt.Sprintf("z:%sroot%sfoo%s.%sblah", s, s, s, s), fmt.Sprintf("Z:%sroot%sfoo%sblah", s, s, s)},
+		}
+	} else {
+		// LINUX, UNIX
+		tests = dirTests{
+			{fmt.Sprintf("%shome%suser", s, s), fmt.Sprintf("%shome%suser", s, s)},
+			{"~", h},
+			{filepath.Join("~", "foo"), filepath.Join(h, "foo")},
+			{".", w},
+			{fmt.Sprintf(".%sfoo", s), filepath.Join(w, "foo")},
+			{fmt.Sprintf("..%sfoo", s), filepath.Join(wp, "foo")},
+			{fmt.Sprintf("~%s..%sfoo", s, s), filepath.Join(hp, "foo")},
+			{fmt.Sprintf("%sroot%sfoo%s..%sblah", s, s, s, s), fmt.Sprintf("%sroot%sblah", s, s)},
+			{fmt.Sprintf("%sroot%sfoo%s.%sblah", s, s, s, s), fmt.Sprintf("%sroot%sfoo%sblah", s, s, s)},
+		}
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
