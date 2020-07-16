@@ -102,7 +102,7 @@ func TestUnderlineKeys(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := UnderlineKeys(tt.keys); got != tt.want {
+			if got := UnderlineKeys(tt.keys...); got != tt.want {
 				t.Errorf("UnderlineKeys() = %v, want %v", got, tt.want)
 			}
 		})
@@ -144,7 +144,7 @@ func TestNumberizeKeys(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NumberizeKeys(tt.keys); got != tt.want {
+			if got := NumberizeKeys(tt.keys...); got != tt.want {
 				t.Errorf("NumberizeKeys() = %v, want %v", got, tt.want)
 			}
 		})

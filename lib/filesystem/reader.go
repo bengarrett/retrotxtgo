@@ -112,7 +112,7 @@ func Lines(r io.Reader, nl [2]rune) (count int, err error) {
 
 // Newlines will try to guess the newline representation as a 2 byte value.
 // A guess of Unix will return [10, 0], Windows [13, 10], otherwise a [0, 0] value is returned.
-func Newlines(runes []rune, utf8 bool) [2]rune {
+func Newlines(utf8 bool, runes ...rune) [2]rune {
 	// scan data for possible newlines
 	c := []struct {
 		abbr  string

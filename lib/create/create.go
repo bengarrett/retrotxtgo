@@ -627,9 +627,9 @@ func (args Args) comment(c convert.Args, old *[]byte, new ...rune) string {
 	e, nl, l, w, f := "", "", 0, 0, "n/a"
 	b := []byte(string(new))
 	// to handle EBCDIC cases, both raw bytes and utf8 runes need newline scans.
-	nlr := filesystem.Newlines([]rune(string(*old)), false)
+	nlr := filesystem.Newlines(false, []rune(string(*old))...)
 	nl = filesystem.Newline(nlr, false)
-	nnl := filesystem.Newlines(new, true)
+	nnl := filesystem.Newlines(true, new...)
 	e = convert.Humanize(c.Encoding)
 	l, err := filesystem.Lines(bytes.NewReader(b), nnl)
 	if err != nil {

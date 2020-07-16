@@ -186,7 +186,7 @@ func Stdin(format string, b ...byte) (err error) {
 		return err
 	}
 	if IsText(d.Mime) {
-		d.Newline = filesystem.Newlines([]rune(string(b)), true)
+		d.Newline = filesystem.Newlines(true, []rune(string(b))...)
 		if d.CtrlCount, err = filesystem.Controls(bytes.NewReader(b)); err != nil {
 			return err
 		}
