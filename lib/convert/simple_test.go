@@ -22,7 +22,7 @@ func ExampleD437() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	filesystem.SaveTemp(name, result)
+	filesystem.SaveTemp(name, result...)
 	t, err := filesystem.ReadText(name)
 	if err != nil {
 		log.Fatal(err)
@@ -64,7 +64,7 @@ func ExampleE437() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	filesystem.SaveTemp(name, result)
+	filesystem.SaveTemp(name, result...)
 	t, err := filesystem.ReadText(name)
 	if err != nil {
 		log.Fatal(err)

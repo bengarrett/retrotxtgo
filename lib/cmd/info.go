@@ -28,7 +28,7 @@ var infoCmd = &cobra.Command{
 			if err != nil {
 				logs.Fatal("info", "read stdin", err)
 			}
-			if err = info.Stdin(b, infoFlag.format); err != nil {
+			if err = info.Stdin(infoFlag.format, b...); err != nil {
 				logs.Fatal("info", "parse stdin", err)
 			}
 			os.Exit(0)

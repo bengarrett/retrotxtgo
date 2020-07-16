@@ -96,7 +96,7 @@ func CacheSet(etag, ver string) error {
 	if err != nil {
 		return fmt.Errorf("cache set data path error: %q: %s", cacheFile, err)
 	}
-	if _, err := filesystem.Save(f, out); err != nil {
+	if _, err := filesystem.Save(f, out...); err != nil {
 		return fmt.Errorf("cache set save error: %s", err)
 	}
 	return nil

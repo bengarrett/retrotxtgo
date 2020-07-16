@@ -14,7 +14,7 @@ import (
 // fileExample the string to a text file.
 func fileExample(s string, i int) (path string) {
 	var name = fmt.Sprintf("rt_fs_save%d.txt", i)
-	path, err := SaveTemp(name, []byte(s))
+	path, err := SaveTemp(name, []byte(s)...)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -25,7 +25,7 @@ func fileExample(s string, i int) (path string) {
 func largeExample() (path string) {
 	const name = "rs_mega_example_save.txt"
 	_, s := filler(0.8)
-	path, err := SaveTemp(name, []byte(s))
+	path, err := SaveTemp(name, []byte(s)...)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -36,7 +36,7 @@ func largeExample() (path string) {
 func megaExample() (path string) {
 	const name = "rs_giga_mega_save.txt"
 	_, s := filler(1.5)
-	path, err := SaveTemp(name, []byte(s))
+	path, err := SaveTemp(name, []byte(s)...)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -83,7 +83,7 @@ func BenchmarkReadMega(b *testing.B) {
 }
 
 func ExampleSave() {
-	path, err := SaveTemp("examplesave.txt", []byte("hello world"))
+	path, err := SaveTemp("examplesave.txt", []byte("hello world")...)
 	if err != nil {
 		log.Fatal(err)
 	}

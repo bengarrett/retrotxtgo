@@ -242,7 +242,7 @@ func (args Args) savecss(c chan error) {
 	if len(b) == 0 {
 		c <- fmt.Errorf("create.savecss: pack.get name is invalid: %q", args.pack)
 	}
-	_, err = filesystem.Save(name, b)
+	_, err = filesystem.Save(name, b...)
 	if err != nil {
 		c <- err
 	}
@@ -264,7 +264,7 @@ func (args Args) savefavicon(c chan error) {
 	if len(b) == 0 {
 		c <- fmt.Errorf("create.savefavicon: pack.get name is invalid: %q", args.pack)
 	}
-	_, err = filesystem.Save(name, b)
+	_, err = filesystem.Save(name, b...)
 	if err != nil {
 		c <- err
 	}
@@ -305,7 +305,7 @@ func (args Args) savefontcss(name, packName string) error {
 	if err != nil {
 		return err
 	}
-	_, err = filesystem.Save(name, b)
+	_, err = filesystem.Save(name, b...)
 	if err != nil {
 		return err
 	}
@@ -321,7 +321,7 @@ func (args Args) savefontwoff2(name, packName string) error {
 	if len(b) == 0 {
 		return fmt.Errorf("create.savefontwoff2: pack.get name is invalid: %q", args.pack)
 	}
-	_, err = filesystem.Save(name, b)
+	_, err = filesystem.Save(name, b...)
 	if err != nil {
 		return err
 	}
@@ -343,7 +343,7 @@ func (args Args) savejs(c chan error) {
 	if len(b) == 0 {
 		c <- fmt.Errorf("create.savejs: pack.get name is invalid: %q", args.pack)
 	}
-	_, err = filesystem.Save(name, b)
+	_, err = filesystem.Save(name, b...)
 	if err != nil {
 		c <- err
 	}
@@ -477,7 +477,7 @@ func (args Args) newTemplate() (*template.Template, error) {
 		if err != nil {
 			return nil, fmt.Errorf("template data: %s", err)
 		}
-		if _, err := filesystem.Save(args.tmpl, *b); err != nil {
+		if _, err := filesystem.Save(args.tmpl, *b...); err != nil {
 			return nil, fmt.Errorf("saving template: %q: %s", args.tmpl, err)
 		}
 	}
@@ -524,7 +524,7 @@ func (args Args) templateSave() error {
 	if err != nil {
 		return fmt.Errorf("template save data error: %s", err)
 	}
-	if _, err := filesystem.Save(args.tmpl, *b); err != nil {
+	if _, err := filesystem.Save(args.tmpl, *b...); err != nil {
 		return fmt.Errorf("template save error: %s", err)
 	}
 	return nil

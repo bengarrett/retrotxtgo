@@ -28,7 +28,7 @@ func ExampleDetail_XML() {
 
 var sampleFile = func() string {
 	b := []byte(filesystem.T["Tabs"])
-	path, err := filesystem.SaveTemp("info_test.txt", b)
+	path, err := filesystem.SaveTemp("info_test.txt", b...)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -139,7 +139,7 @@ func Test_parse(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var got Detail
-			err := got.parse(tt.args.data, tt.args.stat)
+			err := got.parse(tt.args.stat, tt.args.data...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parse() error = %v, wantErr %v", err, tt.wantErr)
 				return

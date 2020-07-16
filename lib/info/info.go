@@ -180,9 +180,9 @@ func (d *Detail) words(filename string) (err error) {
 }
 
 // Stdin parses piped data and prints out the details in a specific syntax.
-func Stdin(b []byte, format string) (err error) {
+func Stdin(format string, b ...byte) (err error) {
 	var d Detail
-	if err = d.parse(b, nil); err != nil {
+	if err = d.parse(nil, b...); err != nil {
 		return err
 	}
 	if IsText(d.Mime) {
@@ -251,11 +251,11 @@ func (d *Detail) Read(name string) (err error) {
 	if err != nil {
 		return err
 	}
-	return d.parse(data, stat)
+	return d.parse(stat, data...)
 }
 
 // parse fileinfo and file content.
-func (d *Detail) parse(data []byte, stat os.FileInfo) (err error) {
+func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 	p := message.NewPrinter(Language)
 	ms := mimesniffer.Sniff(data)
 	if strings.Contains(ms, ";") {

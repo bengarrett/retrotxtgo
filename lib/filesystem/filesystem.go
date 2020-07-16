@@ -99,7 +99,7 @@ func DirExpansion(name string) (dir string) {
 }
 
 // Save bytes to a named file location.
-func Save(name string, b []byte) (path string, err error) {
+func Save(name string, b ...byte) (path string, err error) {
 	path, err = dir(name)
 	if err != nil {
 		return path, fmt.Errorf("save could not open directory: %q: %s", name, err)
@@ -131,8 +131,8 @@ func Save(name string, b []byte) (path string, err error) {
 }
 
 // SaveTemp saves bytes to a named temporary file.
-func SaveTemp(filename string, b []byte) (path string, err error) {
-	path, err = Save(tempFile(filename), b)
+func SaveTemp(filename string, b ...byte) (path string, err error) {
+	path, err = Save(tempFile(filename), b...)
 	if err != nil {
 		return path, fmt.Errorf("could not save the temporary file: %s", err)
 	}
@@ -189,7 +189,7 @@ func addTar(name string, w *tar.Writer) error {
 
 // Touch creates an empty file at the named location.
 func Touch(name string) (path string, err error) {
-	path, err = Save(name, nil)
+	path, err = Save(name, nil...)
 	if err != nil {
 		return path, fmt.Errorf("could not touch a new file: %s", err)
 	}
