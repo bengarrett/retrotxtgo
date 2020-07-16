@@ -84,7 +84,7 @@ var createCmd = &cobra.Command{
 			os.Exit(0)
 		}
 		// user arguments
-		checkUse(cmd, args)
+		checkUse(cmd, args...)
 		for i, arg := range args {
 			html.FilenameVal = arg
 			enc, font, b := createPackage(arg)

@@ -74,7 +74,7 @@ var viewCmd = &cobra.Command{
 			os.Exit(0)
 		}
 		// user arguments
-		checkUse(cmd, args)
+		checkUse(cmd, args...)
 		for i, arg := range args {
 			if ok, err := viewPackage(cmd, conv, arg); err != nil {
 				logs.Println("pack", arg, err)

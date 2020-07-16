@@ -73,7 +73,7 @@ func initConfig() {
 }
 
 // checkUsage will print the help and exit when no arguments are supplied.
-func checkUse(cmd *cobra.Command, args []string) {
+func checkUse(cmd *cobra.Command, args ...string) {
 	if len(args) == 0 {
 		if err := cmd.Help(); err != nil {
 			logs.Fatal("root", "cmd.help", err)

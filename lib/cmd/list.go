@@ -16,7 +16,7 @@ var listCmd = &cobra.Command{
 	Short:   "Available built-in examples, codepages and tabled datasets",
 	Example: "  retrotxt list codepages\n  retrotxt list examples\n  retrotxt list table cp437 cp1252 \n  retrotxt list tables",
 	Run: func(cmd *cobra.Command, args []string) {
-		checkUse(cmd, args)
+		checkUse(cmd, args...)
 	},
 }
 
@@ -44,7 +44,7 @@ var listCmdTable = &cobra.Command{
 	Short:   "display one or more tables showing the codepage and all their characters",
 	Example: "  retrotxt table cp437\n  retrotxt table cp437 latin1 windows-1252\n  retrotxt table iso-8859-15",
 	Run: func(cmd *cobra.Command, args []string) {
-		checkUse(cmd, args)
+		checkUse(cmd, args...)
 		for _, arg := range args {
 			table, err := convert.Table(arg)
 			if err != nil {
