@@ -44,7 +44,7 @@ func TestCP437Decode(t *testing.T) {
 		{"hex", cp437hex, "═╣▓╠═", false},
 		{"nl", filesystem.T["Newline"], filesystem.T["Newline"], false},
 		{"utf", filesystem.T["Symbols"], "[Γÿá|Γÿ«|ΓÖ║]", false},
-		{"escapes", filesystem.T["Escapes"], `bell:,back:,tab:	,form:,vertical:,quote:"`, false},
+		{"escapes", filesystem.T["Escapes"], "bell:\a,back:\b,tab:\t,form:\f,vertical:\v,quote:\"", false},
 		{"digits", filesystem.T["Digits"], "░░┼░┼░", false},
 	}
 	for _, tt := range tests {

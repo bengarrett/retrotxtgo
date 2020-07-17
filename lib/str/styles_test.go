@@ -59,15 +59,15 @@ func TestUnderlineChar(t *testing.T) {
 		wantErr bool
 	}{
 		{"nil", "", "", false},
-		{"ascii", "Z", "[0m[4mZ[0m", false},
+		{"ascii", "Z", "\x1b[0m\x1b[4mZ\x1b[0m", false},
 		{"hex", "\x90", "", true},
-		{"utf8", "\u005A", "[0m[4mZ[0m", false},
-		{"░utf8", "\u2591", "[0m[4m░[0m", false},
-		{"░hex", "\xe2\x96\x91", "[0m[4m░[0m", false},
-		{"😀", "😀", "[0m[4m😀[0m", false},
-		{"😀hex", "\xf0\x9f\x98\x80", "[0m[4m😀[0m", false},
-		{"😀b", string([]byte{240, 159, 152, 128}), "[0m[4m😀[0m", false},
-		{"string", "blahblah", "[0m[4mb[0m", false},
+		{"utf8", "\u005A", "\x1b[0m\x1b[4mZ\x1b[0m", false},
+		{"░utf8", "\u2591", "\x1b[0m\x1b[4m░\x1b[0m", false},
+		{"░hex", "\xe2\x96\x91", "\x1b[0m\x1b[4m░\x1b[0m", false},
+		{"😀", "😀", "\x1b[0m\x1b[4m😀\x1b[0m", false},
+		{"😀hex", "\xf0\x9f\x98\x80", "\x1b[0m\x1b[4m😀\x1b[0m", false},
+		{"😀b", string([]byte{240, 159, 152, 128}), "\x1b[0m\x1b[4m😀\x1b[0m", false},
+		{"string", "blahblah", "\x1b[0m\x1b[4mb\x1b[0m", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -90,15 +90,15 @@ func TestUnderlineKeys(t *testing.T) {
 		want string
 	}{
 		{"empty", []string{}, ""},
-		{"t", []string{"t"}, "[0m[4mt[0m"},
-		{"test", []string{"test"}, "[0m[4mt[0mest"},
-		{"tests", []string{"test1", "test2"}, "[0m[4mt[0mest1, [0m[4mt[0mest2"},
-		{"😀", []string{"😀"}, "[0m[4m😀[0m"},
-		{"test😀", []string{"test😀"}, "[0m[4mt[0mest😀"},
-		{"😀test", []string{"😀test"}, "[0m[4m😀[0mtest"},
-		{"file.min", []string{"file.min"}, "[0m[4mf[0mile.[0m[4mm[0min"},
-		{"file.js.min", []string{"file.js.min"}, "[0m[4mf[0mile.js.[0m[4mm[0min"},
-		{"📁.min", []string{"📁.min"}, "[0m[4m📁[0m.[0m[4mm[0min"},
+		{"t", []string{"t"}, "\x1b[0m\x1b[4mt\x1b[0m"},
+		{"test", []string{"test"}, "\x1b[0m\x1b[4mt\x1b[0mest"},
+		{"tests", []string{"test1", "test2"}, "\x1b[0m\x1b[4mt\x1b[0mest1, \x1b[0m\x1b[4mt\x1b[0mest2"},
+		{"😀", []string{"😀"}, "\x1b[0m\x1b[4m😀\x1b[0m"},
+		{"test😀", []string{"test😀"}, "\x1b[0m\x1b[4mt\x1b[0mest😀"},
+		{"😀test", []string{"😀test"}, "\x1b[0m\x1b[4m😀\x1b[0mtest"},
+		{"file.min", []string{"file.min"}, "\x1b[0m\x1b[4mf\x1b[0mile.\x1b[0m\x1b[4mm\x1b[0min"},
+		{"file.js.min", []string{"file.js.min"}, "\x1b[0m\x1b[4mf\x1b[0mile.js.\x1b[0m\x1b[4mm\x1b[0min"},
+		{"📁.min", []string{"📁.min"}, "\x1b[0m\x1b[4m📁\x1b[0m.\x1b[0m\x1b[4mm\x1b[0min"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -140,7 +140,7 @@ func TestNumberizeKeys(t *testing.T) {
 	}{
 		{"empty", nil, ""},
 		{"three", []string{"alpha", "bravo", "charlie"},
-			"[0m[4m0[0m) alpha, [0m[4m1[0m) bravo, [0m[4m2[0m) charlie"},
+			"\x1b[0m\x1b[4m0\x1b[0m) alpha, \x1b[0m\x1b[4m1\x1b[0m) bravo, \x1b[0m\x1b[4m2\x1b[0m) charlie"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

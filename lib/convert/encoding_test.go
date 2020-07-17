@@ -336,7 +336,7 @@ func TestRunesWindows(t *testing.T) {
 	}{
 		{"empty", "", ""},
 		{"hi", "hello world", "hello world"},
-		{"ansi control example", "\x1b[0m;", "[0m;"},
+		{"ansi control example", "\x1b[0m;", "\x1b[0m;"},
 		{"DEL", "\x7f", "␡"},
 		{"invalid", "\x90", " "},
 	}
