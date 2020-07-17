@@ -179,3 +179,27 @@ func Test_parseYN(t *testing.T) {
 		})
 	}
 }
+
+func Test_keys_shortValidate(t *testing.T) {
+	fruits := []string{"Apple", "Watermelon", "Orange", "Pear", "Cherry"}
+	tests := []struct {
+		name string
+		k    keys // should be unique
+		key  string
+		want string
+	}{
+		{"empty", keys{""}, "", ""},
+		{"match l1", keys{"hi"}, "hi", "hi"},
+		{"match s1", keys{"hi"}, "h", "hi"},
+		{"match fullname fruit", fruits, "Orange", "Orange"},
+		{"match letter of fruit", fruits, "o", "Orange"},
+		{"mismatch letter of fruit", fruits, "z", ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.k.shortValidate(tt.key); got != tt.want {
+				t.Errorf("keys.shortValidate(%s) = %v, want %v", tt.key, got, tt.want)
+			}
+		})
+	}
+}

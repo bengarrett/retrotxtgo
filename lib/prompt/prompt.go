@@ -228,23 +228,32 @@ func (k keys) shortPrompt(r io.Reader) (key string) {
 	return ""
 }
 
-// shortValidate validates that the key exists in keys.
+// shortValidate validates the key exists in keys.
 // Both the first letter of the key and the full name of the key are accepted as valid.
-// When the key is valid its full name will be returned otherwise an empty string
+// Whenever the key is valid the full key name will be returned otherwise an empty string
 // signifies a false result.
 func (k keys) shortValidate(key string) string {
-	if key == "" || len(key) > 1 {
+	if key == "" {
 		return ""
 	}
-	var letters = make([]string, len(k))
+	l, x := len(k), strings.ToLower(key)
 	sort.Strings(k)
-	for _, key := range k {
-		letters = append(letters, string(key[0]))
+	var a, b = make([]string, l), make([]string, l)
+	for i, l := range k {
+		a[i] = strings.ToLower(string(l[0]))
+		b[i] = strings.ToLower(l)
 	}
-	sort.Strings(letters)
-	var i = sort.SearchStrings(letters, key)
-	if i >= len(letters) || letters[i] != key {
-		return ""
+	// match the first letter
+	sort.Strings(a)
+	var i = sort.SearchStrings(a, x)
+	if i >= len(a) || a[i] != x {
+		// match the whole word
+		sort.Strings(b)
+		var j = sort.SearchStrings(b, x)
+		if j >= len(b) || b[j] != x {
+			return ""
+		}
+		return k[j]
 	}
 	return k[i]
 }
