@@ -341,20 +341,9 @@ func (c *Convert) RunesDOS() {
 	if len(c.Runes) == 0 {
 		return
 	}
-	var (
-		c0    = [16]string{"\u0000", "\u263A", "\u263B", "\u2665", "\u2666", "\u2663", "\u2660", "\u2022", "\u25D8", "\u25CB", "\u25D9", "\u2642", "\u2640", "\u266A", "\u266B", "\u263C"}
-		c1    = [16]string{"\u25BA", "\u25C4", "\u2195", "\u203C", "\u00B6", "\u00A7", "\u25AC", "\u21A8", "\u2191", "\u2193", "\u2192", "\u2190", "\u221F", "\u2194", "\u25B2", "\u25BC"}
-		ctrls = [32]string{}
-	)
-	for i := range ctrls {
-		switch {
-		case i < 16:
-			ctrls[i] = c0[i]
-		case i >= 16:
-			ctrls[i] = c1[i-16]
-		}
-	}
-	//ctrls = append(c0[:], c1[:]...) // convert [16]string arrays into slices
+	// ASCII C0 = row 1, C1 = row 2
+	var ctrls = [32]string{"\u0000", "\u263A", "\u263B", "\u2665", "\u2666", "\u2663", "\u2660", "\u2022", "\u25D8", "\u25CB", "\u25D9", "\u2642", "\u2640", "\u266A", "\u266B", "\u263C",
+		"\u25BA", "\u25C4", "\u2195", "\u203C", "\u00B6", "\u00A7", "\u25AC", "\u21A8", "\u2191", "\u2193", "\u2192", "\u2190", "\u221F", "\u2194", "\u25B2", "\u25BC"}
 	for i := 0; i < c.len; i++ {
 		r := c.Runes[i]
 		if c.skipNewlines(i) {

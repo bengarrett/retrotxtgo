@@ -206,9 +206,9 @@ func init() {
 		cache: {"html.layout.cache", nil, &html.Cache, nil, "cache", "", nil},
 	}
 	// create an ordered index for the flags
-	var keys []int
-	for k := range metaCfg {
-		keys = append(keys, k)
+	var keys = make([]int, len(metaCfg))
+	for i := range metaCfg {
+		keys[i] = i
 	}
 	sort.Ints(keys)
 	// output flags
@@ -233,6 +233,7 @@ or ignore to print (save directory: `+viper.GetString("save-directory")+")")
 		}
 		switch {
 		case c.key == "serve":
+			fmt.Println("k", c.key)
 			fmt.Fprint(&buf, "\nsupply a 0 value to use the default port, "+str.Example("-p0")+" or "+str.Example("--serve=0"))
 			createCmd.Flags().UintVarP(c.i, c.name, c.short, viper.GetUint(c.key), buf.String())
 		case c.strg != nil:

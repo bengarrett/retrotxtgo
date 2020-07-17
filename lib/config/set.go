@@ -230,11 +230,13 @@ func colorElm(elm, lexer, style string) string {
 }
 
 func copyKeys(keys ...string) (copy []string) {
-	if len(keys) == 0 {
+	l := len(keys)
+	if l == 0 {
 		return keys
 	}
-	for _, key := range keys {
-		copy = append(copy, key)
+	copy = make([]string, l)
+	for i, key := range keys {
+		copy[i] = key
 	}
 	return copy
 }

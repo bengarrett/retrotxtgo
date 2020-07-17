@@ -96,9 +96,10 @@ func (c *Convert) Transform(name string) (*Convert, error) {
 	if len(c.Source) == 0 {
 		return c, nil
 	}
-	// don't transform unicode, japanese..
+	// don't transform unicode encoded strings
 	switch c.encode {
 	case unicode.UTF8, unicode.UTF8BOM:
+		c.Runes = make([]rune, len(c.Source))
 		for _, b := range c.Source {
 			c.Runes = append(c.Runes, rune(b))
 		}
@@ -111,7 +112,8 @@ func (c *Convert) Transform(name string) (*Convert, error) {
 		if !c.table {
 			break
 		}
-		// this will break normal shift-jis encoding
+		// this is only for the table command,
+		// it will break normal shift-jis encode text
 		for i, b := range c.Source {
 			switch {
 			case b > 0x7f && b <= 0xa0,
