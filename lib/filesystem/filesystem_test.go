@@ -360,3 +360,32 @@ func Test_word(t *testing.T) {
 		})
 	}
 }
+
+func TestTouch(t *testing.T) {
+	type args struct {
+		name string
+	}
+	tmpFile := filepath.Join(os.TempDir(), "testtouch")
+	tests := []struct {
+		name     string
+		args     args
+		wantPath string
+		wantErr  bool
+	}{
+		{"empty", args{}, "", true},
+		{"tmp", args{tmpFile}, tmpFile, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotPath, err := Touch(tt.args.name)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Touch() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotPath != tt.wantPath {
+				t.Errorf("Touch() = %v, want %v", gotPath, tt.wantPath)
+			}
+		})
+	}
+	Clean(tmpFile)
+}
