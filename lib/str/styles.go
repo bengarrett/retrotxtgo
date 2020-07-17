@@ -24,6 +24,37 @@ import (
 // TestMode disables piping detection which conflicts with go test
 var TestMode = false
 
+const (
+	// TerminalMono no colour
+	TerminalMono = iota
+	// Terminal16 ANSI standard 16 colour
+	Terminal16
+	// Terminal88 XTerm 88 colour
+	Terminal88
+	// Terminal256 XTerm 256 colour
+	Terminal256
+	// Terminal16M ANSI high-colour
+	Terminal16M
+)
+
+// terminal type
+type terminal int
+
+// Formatter takes a terminal value and returns the quick.Highlight formatter value.
+func (t terminal) Formatter() string {
+	switch t {
+	case TerminalMono:
+		return "none"
+	case Terminal16, Terminal88:
+		return "terminal"
+	case Terminal256:
+		return "terminal256"
+	case Terminal16M:
+		return "terminal16m"
+	}
+	return ""
+}
+
 // Border wraps text around a single line border.
 func Border(text string) *bytes.Buffer {
 	maxLen, scanner := 0, bufio.NewScanner(strings.NewReader(text))
@@ -106,41 +137,46 @@ func NumberizeKeys(keys ...string) string {
 }
 
 // Term determines the terminal type based on the COLORTERM and TERM environment variables.
-func Term() (term string) {
+func Term() string {
 	// 9.11.2 The environment variable TERM
 	// https://www.gnu.org/software/gettext/manual/html_node/The-TERM-variable.html
 	// Terminal Colors
 	// https://gist.github.com/XVilka/8346728
-	//
-	term = "terminal256" // 256 colors (default)
+	var t terminal = -1
 	// first attempt to detect COLORTERM variable
 	c := strings.TrimSpace(strings.ToLower(os.Getenv("COLORTERM")))
 	switch c {
 	case "24bit", "truecolor":
-		return "terminal16m"
+		t = Terminal16M
+		return t.Formatter()
 	}
 	// then fallback to the -color suffix in TERM variable values
-	t := strings.TrimSpace(strings.ToLower(os.Getenv("TERM")))
-	s := strings.Split(t, "-")
+	env := strings.TrimSpace(strings.ToLower(os.Getenv("TERM")))
+	s := strings.Split(env, "-")
 	if len(s) > 1 {
 		switch s[len(s)-1] {
 		case "mono":
-			return "none"
+			t = TerminalMono
+			return t.Formatter()
 		case "color", "16color", "88color":
-			return "terminal"
+			t = Terminal16
+			return t.Formatter()
 		case "256color":
-			return term
+			t = Terminal256
+			return t.Formatter()
 		}
 	}
 	// otherwise do a direct match of the TERM variable value
-	switch t {
+	switch env {
 	case "linux":
-		return "none"
+		t = TerminalMono
+		return t.Formatter()
 	case "konsole", "rxvt", "xterm", "vt100":
-		return "terminal"
+		t = Terminal16
+		return t.Formatter()
 	}
-	// anything else defaults to 256 colors
-	return term
+	t = Terminal256
+	return t.Formatter()
 }
 
 // UnderlineChar uses ANSI to underline the first character of a string.
