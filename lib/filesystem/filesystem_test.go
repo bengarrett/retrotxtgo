@@ -119,13 +119,16 @@ func Test_filler(t *testing.T) {
 
 func Test_DirExpansion(t *testing.T) {
 	h, err := os.UserHomeDir()
-	hp := filepath.Dir(h)
-	w, err := os.Getwd()
-	wp := filepath.Dir(w)
-	s := string(os.PathSeparator)
 	if err != nil {
 		t.Error(err)
 	}
+	hp := filepath.Dir(h)
+	w, err := os.Getwd()
+	if err != nil {
+		t.Error(err)
+	}
+	wp := filepath.Dir(w)
+	s := string(os.PathSeparator)
 	type dirTests []struct {
 		name    string
 		wantDir string
