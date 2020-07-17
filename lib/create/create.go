@@ -288,14 +288,14 @@ func (args Args) savefont(c chan error) {
 	}
 	switch args.Layout {
 	case "standard", "s":
-		if err := args.savefontcss("font.css", "css/font.css"); err != nil {
+		if err := args.savefontcss("font.css"); err != nil {
 			c <- err
 		}
 	}
 	c <- nil
 }
 
-func (args Args) savefontcss(name, packName string) error {
+func (args Args) savefontcss(name string) error {
 	name, err := args.destination(name)
 	if err != nil {
 		return err

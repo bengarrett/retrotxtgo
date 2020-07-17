@@ -32,7 +32,7 @@ func TestSet_Transform(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			data := Convert{}
 			data.Source = []byte(tt.str)
-			_, err := data.Transform(tt.codepage)
+			err := data.Transform(tt.codepage)
 			data.Swap()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
@@ -63,7 +63,7 @@ func TestANSI(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			data := Convert{}
 			data.Source = []byte(tt.str)
-			_, err := data.Transform(tt.codepage)
+			err := data.Transform(tt.codepage)
 			data.Swap().ANSI()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
@@ -217,7 +217,7 @@ func TestRunesControls(t *testing.T) {
 	}
 	for _, tt := range tests {
 		d := Convert{Source: []byte(tt.text)}
-		if _, err := d.Transform("windows-1252"); err != nil {
+		if err := d.Transform("windows-1252"); err != nil {
 			t.Error(err)
 		}
 		d.Swap()
@@ -243,7 +243,7 @@ func TestRunesKOI8(t *testing.T) {
 	}
 	for _, tt := range tests {
 		d := Convert{Source: []byte(tt.text)}
-		if _, err := d.Transform("koi8-r"); err != nil {
+		if err := d.Transform("koi8-r"); err != nil {
 			t.Error(err)
 		}
 		d.RunesKOI8()
@@ -268,7 +268,7 @@ func TestRunesLatin(t *testing.T) {
 	}
 	for _, tt := range tests {
 		d := Convert{Source: []byte(tt.text)}
-		if _, err := d.Transform("iso-8859-1"); err != nil {
+		if err := d.Transform("iso-8859-1"); err != nil {
 			t.Error(err)
 		}
 		d.RunesLatin()
@@ -292,7 +292,7 @@ func TestRunesDOS(t *testing.T) {
 	}
 	for _, tt := range tests {
 		d := Convert{Source: []byte(tt.text)}
-		if _, err := d.Transform("cp437"); err != nil {
+		if err := d.Transform("cp437"); err != nil {
 			t.Error(err)
 		}
 		d.RunesDOS()
@@ -316,7 +316,7 @@ func TestRunesMacintosh(t *testing.T) {
 	}
 	for _, tt := range tests {
 		d := Convert{Source: []byte(tt.text)}
-		if _, err := d.Transform("mac"); err != nil {
+		if err := d.Transform("mac"); err != nil {
 			t.Error(err)
 		}
 		d.RunesMacintosh()
@@ -342,7 +342,7 @@ func TestRunesWindows(t *testing.T) {
 	}
 	for _, tt := range tests {
 		d := Convert{Source: []byte(tt.text)}
-		if _, err := d.Transform("Windows-1252"); err != nil {
+		if err := d.Transform("Windows-1252"); err != nil {
 			t.Error(err)
 		}
 		d.RunesWindows()
@@ -379,7 +379,7 @@ func TestRunesEBCDIC(t *testing.T) {
 		d := Convert{
 			Source: c,
 		}
-		if _, err := d.Transform("cp037"); err != nil {
+		if err := d.Transform("cp037"); err != nil {
 			t.Error(err)
 		}
 		d.RunesEBCDIC()

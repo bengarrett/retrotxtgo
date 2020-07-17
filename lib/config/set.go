@@ -139,7 +139,7 @@ func Update(name string) {
 			s = fmt.Sprint(s, " or use a dash [-] to remove")
 		}
 		fmt.Printf("%s:\n", s)
-		setEditor(name, value.(string))
+		setEditor(name)
 	case "html.font.embed":
 		setFontEmbed(value.(bool))
 	case "html.font.family":
@@ -150,7 +150,7 @@ func Update(name string) {
 		fmt.Println("  inline:   includes both the CSS and JS as inline elements but is not recommended")
 		fmt.Println("  compact:  is the same as the standard layout but without any <meta> tags")
 		fmt.Println("  none:     no template is used, instead only the generated markup is returned")
-		setShortStrings(name, value.(string), create.Layouts()...)
+		setShortStrings(name, create.Layouts()...)
 	case "html.meta.author",
 		"html.meta.description",
 		"html.meta.keywords",
@@ -162,7 +162,7 @@ func Update(name string) {
 		var prints = make([]string, len(create.ColorScheme[:]))
 		copy(prints, create.ColorScheme[:])
 		fmt.Println(str.UnderlineKeys(prints...))
-		setShortStrings(name, value.(string), create.ColorScheme[:]...)
+		setShortStrings(name, create.ColorScheme[:]...)
 	case "html.meta.generator":
 		setGenerator(value.(bool))
 	case "html.meta.notranslate":
@@ -170,11 +170,11 @@ func Update(name string) {
 	case "html.meta.referrer":
 		previewMeta(name, value.(string))
 		fmt.Println(str.NumberizeKeys(create.Referrer[:]...))
-		setIndex(name, value.(string), create.Referrer[:]...)
+		setIndex(name, create.Referrer[:]...)
 	case "html.meta.robots":
 		previewMeta(name, value.(string))
 		fmt.Println(str.NumberizeKeys(create.Robots[:]...))
-		setIndex(name, value.(string), create.Robots[:]...)
+		setIndex(name, create.Robots[:]...)
 	case "html.meta.retrotxt":
 		setRetrotxt(value.(bool))
 	case "html.title":
@@ -417,7 +417,7 @@ func setDirectory(name string) {
 	save(name, dir)
 }
 
-func setEditor(name, value string) {
+func setEditor(name string) {
 	if name == "" {
 		logs.LogFatal(errors.New("set editor name cannot be empty"))
 	}
@@ -452,7 +452,7 @@ func setFont(value string) {
 	fmt.Println(str.Cf("About font families: https://developer.mozilla.org/en-US/docs/Web/CSS/font-family"))
 	fmt.Println("Choose a font (recommend: automatic):")
 	fmt.Println(str.UnderlineKeys(create.Fonts()...))
-	setShortStrings("html.font.family", value, create.Fonts()...)
+	setShortStrings("html.font.family", create.Fonts()...)
 }
 
 func setFontEmbed(value bool) {
@@ -482,7 +482,7 @@ func setGenerator(value bool) {
 	}
 }
 
-func setIndex(name, value string, data ...string) {
+func setIndex(name string, data ...string) {
 	if name == "" {
 		logs.LogFatal(errors.New("setindex name string is empty"))
 	}
@@ -533,7 +533,7 @@ func setRetrotxt(value bool) {
 	}
 }
 
-func setShortStrings(name, value string, data ...string) {
+func setShortStrings(name string, data ...string) {
 	v := prompt.ShortStrings(&data)
 	switch v {
 	case "-":

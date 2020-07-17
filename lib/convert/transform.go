@@ -42,7 +42,7 @@ func (a Args) Chars(b *[]byte) (utf8 []rune, err error) {
 		swapChars: a.Swap,
 		table:     true,
 	}
-	if _, err = c.Transform(a.Encoding); err != nil {
+	if err = c.Transform(a.Encoding); err != nil {
 		return nil, fmt.Errorf("chars transform failed: %s", err)
 	}
 	c.Swap()
@@ -59,7 +59,7 @@ func (a Args) Dump(b *[]byte) (utf8 []rune, err error) {
 		swapChars: a.Swap,
 	}
 	c.controls(a)
-	if _, err = c.Transform(a.Encoding); err != nil {
+	if err = c.Transform(a.Encoding); err != nil {
 		return nil, fmt.Errorf("dump transform failed: %s", err)
 	}
 	c.Swap().ANSI()
@@ -76,7 +76,7 @@ func (a Args) Text(b *[]byte) (utf8 []rune, err error) {
 	}
 	c.controls(a)
 	c.Source = EndOfFile(*b...)
-	if _, err = c.Transform(a.Encoding); err != nil {
+	if err = c.Transform(a.Encoding); err != nil {
 		return nil, fmt.Errorf("text transform failed: %s", err)
 	}
 	c.Swap().ANSI()
@@ -85,16 +85,16 @@ func (a Args) Text(b *[]byte) (utf8 []rune, err error) {
 }
 
 // Transform byte data from named character map encoded text into UTF-8.
-func (c *Convert) Transform(name string) (*Convert, error) {
+func (c *Convert) Transform(name string) error {
 	if name == "" {
 		name = "UTF-8"
 	}
 	var err error
 	if c.encode, err = Encoding(name); err != nil {
-		return c, fmt.Errorf("transform encoding error: %s", err)
+		return fmt.Errorf("transform encoding error: %s", err)
 	}
 	if len(c.Source) == 0 {
-		return c, nil
+		return nil
 	}
 	// don't transform unicode encoded strings
 	switch c.encode {
@@ -103,7 +103,7 @@ func (c *Convert) Transform(name string) (*Convert, error) {
 			c.Runes = append(c.Runes, rune(b))
 		}
 		c.len = len(c.Runes)
-		return c, nil
+		return nil
 	}
 	// blank invalid shiftjis characters when printing 8-bit tables
 	switch c.encode {
@@ -125,14 +125,14 @@ func (c *Convert) Transform(name string) (*Convert, error) {
 	if utf8.Valid(c.Source) {
 		c.Runes = bytes.Runes(c.Source)
 		c.len = len(c.Runes)
-		return c, nil
+		return nil
 	}
 	if c.Source, err = c.encode.NewDecoder().Bytes(c.Source); err != nil {
-		return c, fmt.Errorf("transform new decoder error: %s", err)
+		return fmt.Errorf("transform new decoder error: %s", err)
 	}
 	c.Runes = bytes.Runes(c.Source)
 	c.len = len(c.Runes)
-	return c, nil
+	return nil
 }
 
 func (c *Convert) width(max int) {
