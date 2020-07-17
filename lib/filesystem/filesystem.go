@@ -53,10 +53,7 @@ func DirExpansion(name string) (dir string) {
 		return dir
 	}
 	var root = func() bool {
-		if name[:1] == string(os.PathSeparator) {
-			return true
-		}
-		return false
+		return name[:1] == string(os.PathSeparator)
 	}
 	var err error
 	// Bash tilde expension http://www.gnu.org/software/bash/manual/html_node/Tilde-Expansion.html
