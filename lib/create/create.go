@@ -211,7 +211,10 @@ func (args *Args) destination(name string) (string, error) {
 	if stat.IsDir() {
 		path = filepath.Join(dir, name)
 	}
-	stat, err = os.Stat(path)
+	_, err = os.Stat(path)
+	if err != nil {
+		return "", fmt.Errorf("args destination path failed %q: %s", path, err)
+	}
 	if !args.OW && !os.IsNotExist(err) {
 		switch name {
 		case "favicon.ico", "scripts.js",
