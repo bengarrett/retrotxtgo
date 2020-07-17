@@ -17,13 +17,6 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
-type iana struct {
-	mime  string
-	index string
-	mib   string
-	s     []string
-}
-
 // Encodings returns all the supported legacy text encodings.
 func Encodings() (e []encoding.Encoding) {
 	a := append(charmap.All, japanese.All...)
