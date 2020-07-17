@@ -52,14 +52,6 @@ func init() {
 		"optional config file location")
 }
 
-func defaultConfig() string {
-	named := viper.GetViper().ConfigFileUsed()
-	if named == "" {
-		named = config.Path()
-	}
-	return named
-}
-
 // initConfig reads in the config file and ENV variables if set.
 // this does not run when rootCmd is in use.
 func initConfig() {
@@ -115,10 +107,6 @@ func flagRunes(p *[]int, cc *cobra.Command) {
 (default 0,124)
 separate multiple values with commas
 `+str.Example("--swap-chars=0,124,127")+"\n")
-}
-
-func flagTab(p *bool, cc *cobra.Command) {
-	cc.Flags().BoolVar(p, "tab", true, "parse horizontal tab control characters")
 }
 
 func flagTo(p *string, cc *cobra.Command) {
