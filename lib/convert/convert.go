@@ -23,7 +23,7 @@ func EndOfFile(b ...byte) []byte {
 func MakeBytes() (m []byte) {
 	m = make([]byte, 256)
 	for i := 0; i <= 255; i++ {
-		m[i] = uint8(byte(i))
+		m[i] = byte(i)
 	}
 	return m
 }

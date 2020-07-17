@@ -75,7 +75,7 @@ func Border(text string) *bytes.Buffer {
 		lp := ((maxLen - l) / 2)
 		rp := lp
 		// if lp/rp are X.5 decimal values, add 1 right padd to account for the uneven split
-		if float32((maxLen-l)/2) != float32(float32(maxLen-l)/2) {
+		if float32((maxLen-l)/2) != float32(maxLen-l)/2 {
 			rp = rp + 1
 		}
 		fmt.Fprintf(&b, "│%s%s%s│\n", strings.Repeat(" ", lp), scanner.Text(), strings.Repeat(" ", rp))

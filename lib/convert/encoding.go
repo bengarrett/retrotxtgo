@@ -598,7 +598,7 @@ func (c Convert) swap(r rune) bool {
 		chk = 251
 	}
 	for _, c := range c.swapChars {
-		if c == int(chk) {
+		if c == chk {
 			return true
 		}
 	}

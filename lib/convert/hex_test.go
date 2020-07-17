@@ -19,7 +19,7 @@ func TestHexDecode(t *testing.T) {
 		wantResult []byte
 		wantErr    bool
 	}{
-		{"═╣░╠═", args{h}, []byte(samp), false},
+		{"═╣░╠═", args{h}, samp, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

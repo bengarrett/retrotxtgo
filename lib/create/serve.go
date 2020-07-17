@@ -34,7 +34,7 @@ func Port(port uint) bool {
 
 // Serve data over an internal HTTP server.
 func (args *Args) Serve(b *[]byte) {
-	port := uint(args.Port)
+	port := args.Port
 	if port == 0 || !prompt.PortValid(port) {
 		port = uint(viper.GetInt("serve"))
 	}
