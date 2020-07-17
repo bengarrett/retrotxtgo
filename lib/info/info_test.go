@@ -17,7 +17,9 @@ func ExampleDetail_XML() {
 	tmp := sampleFile()
 	millennia(tmp)
 	var file Detail
-	file.Read(tmp)
+	if err := file.Read(tmp); err != nil {
+		log.Fatal(err)
+	}
 	data, _ := file.XML()
 	filesystem.Clean(tmp)
 	s := strings.ReplaceAll(string(data), "\t", "")
