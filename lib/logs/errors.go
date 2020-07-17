@@ -34,13 +34,15 @@ func (g Generic) String() string {
 	if g.Err == nil {
 		return ""
 	}
-	var a, b, c = str.Alert(), "", str.Cf(fmt.Sprintf("%v", g.Err))
+	var a, c = str.Alert(), str.Cf(fmt.Sprintf("%v", g.Err))
 	switch {
 	case g.Issue == "" && g.Arg == "":
 		return fmt.Sprintf("%s %s", a, c) // alert and err
-	case g.Arg == "":
+	}
+	var b string
+	if g.Arg == "" {
 		b = str.Ci(fmt.Sprintf("%s,", g.Issue)) // alert, issue and err
-	default:
+	} else {
 		b = str.Ci(fmt.Sprintf("%s %s,", g.Issue, g.Arg)) // alert, issue, arg, err
 	}
 	return fmt.Sprintf("%s %s %s", a, b, c)
