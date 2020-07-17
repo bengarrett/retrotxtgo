@@ -283,7 +283,7 @@ func compare(current, fetched string) bool {
 func information() versionInfo {
 	ver := Semantic(B.Version)
 	v := versionInfo{
-		"copyright": fmt.Sprintf("Copyright © 2020 Ben Garrett"),
+		"copyright": "Copyright © 2020 Ben Garrett",
 		"url":       fmt.Sprintf("https://%s/go", B.Domain),
 		"app ver":   ver.String(),
 		"go ver":    semanticGo(),
@@ -291,7 +291,7 @@ func information() versionInfo {
 		"exe":       binary(),
 		"date":      localBuild(B.Date),
 		"git":       B.Commit,
-		"license":   fmt.Sprintf("LGPL-3.0 [https://www.gnu.org/licenses/lgpl-3.0.html]"),
+		"license":   "LGPL-3.0 [https://www.gnu.org/licenses/lgpl-3.0.html]",
 	}
 	if a := arch(runtime.GOARCH); a != "" {
 		v["os"] += fmt.Sprintf(" [%s CPU]", a)
