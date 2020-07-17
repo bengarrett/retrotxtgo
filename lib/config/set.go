@@ -472,9 +472,9 @@ func setFontEmbed(value bool) {
 }
 
 func setGenerator(value bool) {
-	var name = "html.meta.generator"
+	var name, ver = "html.meta.generator", v.Semantic(v.B.Version)
 	elm := fmt.Sprintf("<head>\n  <meta name=\"generator\" content=\"RetroTxt v%s, %s\">",
-		v.Format(v.B.Version), v.B.Date)
+		ver.String(), v.B.Date)
 	fmt.Println(ColorHTML(elm))
 	p := "Enable the generator element"
 	if value {

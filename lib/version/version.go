@@ -111,22 +111,6 @@ func Digits(s string) string {
 	return reg.ReplaceAllString(s, "")
 }
 
-// Format the version string to a uniformed semantic syntax.
-func Format(version string) string {
-	ok, s := Semantic(version)
-	if !ok {
-		return version
-	}
-	p := ""
-	switch {
-	case s.Major == 0 && s.Minor == 0:
-		p = "α"
-	case s.Major == 0:
-		p = "β"
-	}
-	return fmt.Sprintf("%s%d.%d.%d", p, s.Major, s.Minor, s.Patch)
-}
-
 // JSON formats the RetroTxt version and binary compile infomation.
 func JSON(indent bool) (data []byte) {
 	var err error
@@ -186,9 +170,10 @@ func Print(format string) (ok bool) {
 }
 
 // Semantic breaks down a semantic version string into major, minor and patch integers.
-func Semantic(ver string) (ok bool, version Version) {
+func Semantic(ver string) Version {
+	invalid := Version{-1, -1, -1}
 	if ver == "" {
-		return false, version
+		return invalid
 	}
 	vers, nums := strings.Split(ver, "."), [3]int{}
 	for i, v := range vers {
@@ -197,12 +182,37 @@ func Semantic(ver string) (ok bool, version Version) {
 		}
 		num, err := strconv.Atoi(Digits(v))
 		if err != nil {
-			return false, version
+			return invalid
 		}
 		nums[i] = num
 	}
-	version.Major, version.Minor, version.Patch = nums[0], nums[1], nums[2]
-	return true, version
+	return Version{
+		Major: nums[0],
+		Minor: nums[1],
+		Patch: nums[2],
+	}
+}
+
+func (v Version) String() string {
+	if !v.Valid() {
+		return ""
+	}
+	p := ""
+	switch {
+	case v.Major == 0 && v.Minor == 0:
+		p = "α"
+	case v.Major == 0:
+		p = "β"
+	}
+	return fmt.Sprintf("%s%d.%d.%d", p, v.Major, v.Minor, v.Patch)
+}
+
+// Valid checks the Version syntax is correct.
+func (v Version) Valid() bool {
+	if v.Major < 0 && v.Minor < 0 && v.Patch < 0 {
+		return false
+	}
+	return true
 }
 
 // Sprint formats the RetroTxt version and binary compile infomation.
@@ -249,12 +259,12 @@ func binary() string {
 }
 
 func compare(current, fetched string) bool {
-	ok, c := Semantic(current)
-	if !ok {
+	c := Semantic(current)
+	if !c.Valid() {
 		return false
 	}
-	ok, f := Semantic(fetched)
-	if !ok {
+	f := Semantic(fetched)
+	if !f.Valid() {
 		return false
 	}
 	if c.Major < f.Major {
@@ -271,10 +281,11 @@ func compare(current, fetched string) bool {
 
 // information and version details of retrotxt.
 func information() versionInfo {
+	ver := Semantic(B.Version)
 	v := versionInfo{
 		"copyright": fmt.Sprintf("Copyright © 2020 Ben Garrett"),
 		"url":       fmt.Sprintf("https://%s/go", B.Domain),
-		"app ver":   Format(B.Version),
+		"app ver":   ver.String(),
 		"go ver":    semanticGo(),
 		"os":        fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
 		"exe":       binary(),

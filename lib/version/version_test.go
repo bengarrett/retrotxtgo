@@ -118,8 +118,8 @@ func TestSemantic(t *testing.T) {
 		wantOk      bool
 		wantVersion Version
 	}{
-		{"empty", "", false, Version{0, 0, 0}},
-		{"text", "hello world", false, Version{0, 0, 0}},
+		{"empty", "", false, Version{-1, -1, -1}},
+		{"text", "hello world", false, Version{-1, -1, -1}},
 		{"zero", "0.0.0", true, Version{0, 0, 0}},
 		{"vzero", "v0.0.0", true, Version{0, 0, 0}},
 		{"ver str", "v1.2.3 (super-release)", true, Version{1, 2, 3}},
@@ -128,7 +128,8 @@ func TestSemantic(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotOk, gotVersion := Semantic(tt.ver)
+			gotVersion := Semantic(tt.ver)
+			gotOk := gotVersion.Valid()
 			if gotOk != tt.wantOk {
 				t.Errorf("Semantic() gotOk = %v, want %v", gotOk, tt.wantOk)
 			}
@@ -272,8 +273,9 @@ func Test_Format(t *testing.T) {
 		{"v0.0.1", "v0.0.1", "α0.0.1"},
 	}
 	for _, tt := range tests {
+		v := Semantic(tt.version)
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Format(tt.version); got != tt.want {
+			if got := v.String(); got != tt.want {
 				t.Errorf("Format() = %v, want %v", got, tt.want)
 			}
 		})
