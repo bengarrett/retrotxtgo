@@ -74,13 +74,19 @@ func filler(sizeMB float64) (length int, random string) {
 func BenchmarkReadLarge(b *testing.B) {
 	large := largeExample()
 	defer Clean(large)
-	Read(large)
+	_, err := Read(large)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func BenchmarkReadMega(b *testing.B) {
 	mega := megaExample()
 	defer Clean(mega)
-	Read(mega)
+	_, err := Read(mega)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func ExampleSave() {
