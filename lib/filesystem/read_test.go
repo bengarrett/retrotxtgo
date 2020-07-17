@@ -73,3 +73,134 @@ func TestReadControls(t *testing.T) {
 		})
 	}
 }
+
+func TestIsPipe(t *testing.T) {
+	tests := []struct {
+		name string
+		want bool
+	}{
+		{"none", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := IsPipe(); got != tt.want {
+				t.Errorf("IsPipe() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestReadLine(t *testing.T) {
+	tmp0 := fileExample("hello\nworld\n", 0)
+	type args struct {
+		name    string
+		newline string
+	}
+	tests := []struct {
+		name     string
+		args     args
+		wantText string
+		wantErr  bool
+	}{
+		{"none", args{"", ""}, "", true},
+		{"tmp0", args{tmp0, ""}, "hello\nworld\n", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotText, err := ReadLine(tt.args.name, tt.args.newline)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ReadLine() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotText != tt.wantText {
+				t.Errorf("ReadLine() = %v, want %v", gotText, tt.wantText)
+			}
+		})
+	}
+}
+
+func TestReadLines(t *testing.T) {
+	tmp0 := fileExample("hello\nworld\n", 0)
+	type args struct {
+		name string
+	}
+	tests := []struct {
+		name      string
+		args      args
+		wantCount int
+		wantErr   bool
+	}{
+		{"none", args{""}, -1, true},
+		{"tmp0", args{tmp0}, 2, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotCount, err := ReadLines(tt.args.name)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ReadLines() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotCount != tt.wantCount {
+				t.Errorf("ReadLines() = %v, want %v", gotCount, tt.wantCount)
+			}
+		})
+	}
+}
+
+func TestReadText(t *testing.T) {
+	tmp0 := fileExample("hello\nworld\n", 0)
+	type args struct {
+		name string
+	}
+	tests := []struct {
+		name     string
+		args     args
+		wantText string
+		wantErr  bool
+	}{
+		{"empty", args{}, "", true},
+		{"invalid", args{"this_file_doesnt_exist"}, "", true},
+		{"tmp0", args{tmp0}, "hello\nworld\n", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotText, err := ReadText(tt.args.name)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ReadText() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotText != tt.wantText {
+				t.Errorf("ReadText() = %v, want %v", gotText, tt.wantText)
+			}
+		})
+	}
+}
+
+func TestReadWords(t *testing.T) {
+	tmp0 := fileExample("hello\nworld,\nmy name is Ben\n", 0)
+	type args struct {
+		name string
+	}
+	tests := []struct {
+		name      string
+		args      args
+		wantCount int
+		wantErr   bool
+	}{
+		{"empty", args{}, -1, true},
+		{"invalid", args{"this_file_doesnt_exist"}, -1, true},
+		{"tmp0", args{tmp0}, 6, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotCount, err := ReadWords(tt.args.name)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ReadWords() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotCount != tt.wantCount {
+				t.Errorf("ReadWords() = %v, want %v", gotCount, tt.wantCount)
+			}
+		})
+	}
+}
