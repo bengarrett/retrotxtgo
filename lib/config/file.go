@@ -50,7 +50,7 @@ func PrintLocation() {
 		viper.ConfigFileUsed()))
 	if diff := len(Missing()); diff > 0 {
 		if diff == 1 {
-			s += str.Cb(fmt.Sprint(" (1 setting is missing)"))
+			s += str.Cb(" (1 setting is missing)")
 		} else {
 			s += str.Cb(fmt.Sprintf(" (%d settings are missing)", diff))
 		}
