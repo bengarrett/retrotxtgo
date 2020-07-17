@@ -18,10 +18,14 @@ type (
 
 const (
 	_ = 1.0 << (10 * iota) // ignore first value by assigning to blank identifier
-	KB
-	MB
-	GB
-	TB
+	// KiB kibibyte
+	KiB
+	// MiB mebibyte
+	MiB
+	// GiB gibibyte
+	GiB
+	// TiB Tebibyte
+	TiB
 )
 
 var global = New()
@@ -37,24 +41,24 @@ func (*B) Bytes(b int64, t language.Tag) string {
 	p := message.NewPrinter(t)
 	multiple, value := "", float64(b)
 	switch {
-	case b >= TB:
-		value /= TB
-		multiple = "TB"
-	case b >= GB:
-		value /= GB
-		multiple = "GB"
-	case b >= MB:
-		value /= MB
-		multiple = "MB"
-	case b >= KB:
-		value /= KB
-		multiple = "KB"
+	case b >= TiB:
+		value /= TiB
+		multiple = "TiB"
+	case b >= GiB:
+		value /= GiB
+		multiple = "GiB"
+	case b >= MiB:
+		value /= MiB
+		multiple = "MiB"
+	case b >= KiB:
+		value /= KiB
+		multiple = "KiB"
 	case b == 0:
 		return "0"
 	default:
 		return p.Sprintf("%dB", b)
 	}
-	return p.Sprintf("%.2f%s", value, multiple)
+	return p.Sprintf("%.2f %s", value, multiple)
 }
 
 // Bytes formats bytes integer to localized readable string.
