@@ -98,16 +98,16 @@ func Update(name string) {
 		viper.Set(name, Defaults[name])
 		value = viper.Get(name)
 	}
-	switch value.(type) {
-	case bool:
-		switch value.(bool) {
+	if b, ok := value.(bool); ok {
+		switch b {
 		case true:
 			fmt.Printf("\n%s is in use\n", str.Cf(name))
 		default:
 			fmt.Printf("\n%s is currently not in use\n", str.Cf(name))
 		}
-	case string:
-		switch value.(string) {
+	}
+	if s, ok := value.(string); ok {
+		switch s {
 		case "":
 			fmt.Printf("\n%s is currently not in use\n", str.Cf(name))
 		default:
@@ -186,11 +186,10 @@ func Update(name string) {
 		setDirectory(name)
 	case "serve":
 		p := Defaults["serve"].(uint)
-		switch value.(type) {
-		case int:
-			p = uint(value.(int))
-		case uint:
-			p = value.(uint)
+		if u, ok := value.(uint); ok {
+			p = u
+		} else if i, ok := value.(int); ok {
+			p = uint(i)
 		}
 		fmt.Printf("\n%slocalhost%s%d %s\n", str.Cb("http://"),
 			str.Cb(":"), p, str.Bool(create.Port(p)))
