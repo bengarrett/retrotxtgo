@@ -166,7 +166,6 @@ func (c *Convert) width(max int) {
 		}
 	}
 	c.Runes = []rune(w.String())
-	return
 }
 
 func (c *Convert) controls(a Args) {

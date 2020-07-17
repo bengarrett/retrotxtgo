@@ -526,10 +526,7 @@ func decode(b byte) (r rune) {
 func equalNL(r [2]rune, nl [2]rune) bool {
 	// single-byte newline
 	if nl[1] == 0 {
-		if nl[0] == r[0] {
-			return true
-		}
-		return false
+		return nl[0] == r[0]
 	}
 	// mutli-byte
 	return bytes.Equal([]byte{byte(r[0]), byte(r[1])},
