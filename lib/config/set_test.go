@@ -2,7 +2,6 @@ package config
 
 import (
 	"os"
-	"reflect"
 	"testing"
 
 	"retrotxt.com/retrotxt/lib/str"
@@ -36,24 +35,6 @@ func TestSet(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			Set(tt.name)
-		})
-	}
-}
-
-func Test_copyKeys(t *testing.T) {
-	tests := []struct {
-		name     string
-		keys     []string
-		wantCopy []string
-	}{
-		{"empty", []string{}, []string{}},
-		{"3 vals", []string{"a", "b", "c"}, []string{"a", "b", "c"}},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if gotCopy := copyKeys(tt.keys...); !reflect.DeepEqual(gotCopy, tt.wantCopy) {
-				t.Errorf("copyKeys() = %v, want %v", gotCopy, tt.wantCopy)
-			}
 		})
 	}
 }
