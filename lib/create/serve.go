@@ -94,7 +94,7 @@ func (args Args) watch() {
 		<-c
 		fmt.Printf("\n\nServer shutdown and clean up: %s\n", args.Destination)
 		tmp, err := path.Match(fmt.Sprintf("%s%s*",
-			string(os.PathSeparator), os.TempDir()), fmt.Sprintf("%s", args.Destination))
+			string(os.PathSeparator), os.TempDir()), args.Destination)
 		if err != nil {
 			logs.Fatal("path match pattern failed", "", err)
 		}
