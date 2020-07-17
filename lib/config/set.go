@@ -265,13 +265,17 @@ func (n names) string(theme bool) string {
 // dirExpansion traverses the named directory to apply shell-like expansions.
 // It currently supports limited Bash tilde, shell dot and double dot syntax.
 func dirExpansion(name string) (dir string) {
+	const sep = string(os.PathSeparator)
+	if name == "" || name == sep {
+		return name
+	}
 	// Bash tilde expension http://www.gnu.org/software/bash/manual/html_node/Tilde-Expansion.html
-	var err error
-	paths := strings.Split(name, string(os.PathSeparator))
+	r, paths := bool(name[0:1] == sep), strings.Split(name, sep)
 	for i, s := range paths {
 		p := ""
 		switch s {
 		case "~":
+			var err error
 			p, err = os.UserHomeDir()
 			if err != nil {
 				logs.LogFatal(err)
@@ -280,6 +284,7 @@ func dirExpansion(name string) (dir string) {
 			if i != 0 {
 				continue
 			}
+			var err error
 			p, err = os.Getwd()
 			if err != nil {
 				logs.LogFatal(err)
@@ -299,6 +304,9 @@ func dirExpansion(name string) (dir string) {
 			p = s
 		}
 		dir = filepath.Join(dir, p)
+	}
+	if r {
+		dir = filepath.Join(sep, dir)
 	}
 	return dir
 }
@@ -404,7 +412,7 @@ func setDirectory(name string) {
 		if len(e) > 1 {
 			es = strings.TrimSpace(strings.Join(e[1:], ""))
 		}
-		fmt.Printf("%s this directory returned the following error: %s\n", str.Info(), es)
+		fmt.Printf("%s the directory is invalid: %s\n", str.Alert(), es)
 	}
 	save(name, dir)
 }

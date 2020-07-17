@@ -156,8 +156,9 @@ func pstring(r io.Reader) (words string) {
 				return ""
 			}
 			os.Exit(0)
+		default:
+			return words
 		}
-		return words
 	}
 	if err := scanner.Err(); err != nil {
 		logs.Fatal("prompt string scanner", "stdin", err)
