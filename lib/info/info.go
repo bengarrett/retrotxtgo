@@ -69,7 +69,7 @@ var Language = language.English
 
 // DTFormat is the datetime format
 // DMY12, YMD12, MDY12, DMY24, YMD24, MDY24
-var DTFormat = "DMY24"
+const DTFormat = "DMY24"
 
 // Info parses the named file and prints out its details in a specific syntax.
 func Info(name, format string) logs.Generic {
