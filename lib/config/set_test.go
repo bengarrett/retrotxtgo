@@ -127,3 +127,42 @@ func Test_colorElm(t *testing.T) {
 		})
 	}
 }
+
+func TestColorCSS(t *testing.T) {
+	tests := []struct {
+		name string
+		elm  string
+		want string
+	}{
+		{"empty", "", ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := ColorCSS(tt.elm); got != tt.want {
+				t.Errorf("ColorCSS() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_previewPrompt(t *testing.T) {
+	type args struct {
+		name  string
+		value string
+	}
+	tests := []struct {
+		name  string
+		args  args
+		wantP string
+	}{
+		{"empty", args{}, "Set a new value or leave blank to keep it unused:"},
+		{"key", args{"html.meta.keywords", "ooooh"}, "Replace the current keywords, leave blank to keep as-is or use a dash [-] to remove:"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotP := previewPrompt(tt.args.name, tt.args.value); gotP != tt.wantP {
+				t.Errorf("previewPrompt() = %v, want %v", gotP, tt.wantP)
+			}
+		})
+	}
+}
