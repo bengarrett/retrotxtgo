@@ -25,3 +25,26 @@ func TestNewlines(t *testing.T) {
 		})
 	}
 }
+
+func TestNewline(t *testing.T) {
+	type args struct {
+		r         [2]rune
+		extraInfo bool
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{"empty", args{}, "??"},
+		{"nl", args{[2]rune{133}, false}, "NL"},
+		{"nl", args{[2]rune{133}, true}, "NL (IBM EBCDIC)"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Newline(tt.args.r, tt.args.extraInfo); got != tt.want {
+				t.Errorf("Newline() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
