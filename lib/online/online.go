@@ -39,7 +39,9 @@ func Endpoint(url, etag string) (useCache bool, data API, err error) {
 	if ok := json.Valid(body); !ok {
 		return useCache, data, fmt.Errorf("the endpoint response is not valid json: %s", url)
 	}
-	err = json.Unmarshal(body, &data)
+	if err = json.Unmarshal(body, &data); err != nil {
+		return useCache, data, fmt.Errorf("could not unmarshal the endpoint: %s", url)
+	}
 	data["etag"] = resp.Header.Get("Etag")
 	return useCache, data, nil
 }
