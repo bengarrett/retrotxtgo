@@ -152,6 +152,12 @@ func Test_pagedata(t *testing.T) {
 	if got.MetaAuthor != w {
 		t.Errorf("pagedata().MetaAuthor = %v, want %v", got, w)
 	}
+	args.Layout = "inline"
+	w = ""
+	got, _ = args.pagedata(&d)
+	if got.MetaAuthor != w {
+		t.Errorf("pagedata().MetaAuthor = %v, want %v", got, w)
+	}
 }
 
 func Test_destination(t *testing.T) {

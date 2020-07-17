@@ -99,7 +99,6 @@ func (c *Convert) Transform(name string) (*Convert, error) {
 	// don't transform unicode encoded strings
 	switch c.encode {
 	case unicode.UTF8, unicode.UTF8BOM:
-		c.Runes = make([]rune, len(c.Source))
 		for _, b := range c.Source {
 			c.Runes = append(c.Runes, rune(b))
 		}

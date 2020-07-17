@@ -46,7 +46,7 @@ func TestArgs_Dump(t *testing.T) {
 				return
 			}
 			if string(gotUtf8) != tt.want {
-				t.Errorf("Args.Dump() = %v, want %v", gotUtf8, tt.want)
+				t.Errorf("Args.Dump() = %v, want %v", string(gotUtf8), tt.want)
 			}
 		})
 	}
