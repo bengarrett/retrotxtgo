@@ -4,15 +4,6 @@ package convert
 
 import (
 	"bytes"
-
-	"golang.org/x/text/encoding/unicode"
-)
-
-const (
-	bom  = unicode.UseBOM
-	_bom = unicode.IgnoreBOM
-	be   = unicode.BigEndian
-	le   = unicode.LittleEndian
 )
 
 // BOM is the UTF-8 byte order mark prefix.
