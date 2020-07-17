@@ -185,7 +185,7 @@ func examples() *bytes.Buffer {
 	fmt.Fprintln(w, str.Cp(" Packaged example text and ANSI files to test and play with RetroTxt"))
 	fmt.Fprintln(w, strings.Repeat("-", 69))
 	for _, k := range keys {
-		fmt.Fprintln(w, fmt.Sprintf("%s\t%s\t", k, internalPacks[k].description))
+		fmt.Fprintf(w, "%s\t%s\t\n", k, internalPacks[k].description)
 	}
 	fmt.Fprintln(w, "\nAny of these packaged examples will work with both the", str.Example("create"), "and", str.Example("view"), "commands")
 	fmt.Fprintln(w, "\n"+str.Example(" retrotxt view 1252"), "will print the Windows-1252 English test to the terminal")

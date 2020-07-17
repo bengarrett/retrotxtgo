@@ -49,7 +49,7 @@ func Info(style string) (err logs.Generic) {
 		if len(m) < 5 {
 			fmt.Print(str.Example(fmt.Sprintf("retrotxt config set %s\n", strings.Join(m, " "))))
 		} else {
-			fmt.Print(str.Example(fmt.Sprintf("retrotxt config set setup\n")))
+			fmt.Print(str.Example("retrotxt config set setup\n"))
 		}
 	}
 	return logs.Generic{}

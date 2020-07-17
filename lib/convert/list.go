@@ -44,7 +44,7 @@ func List() *bytes.Buffer {
 	for _, e := range Encodings() {
 		n, v, d, a := cells(e)
 		// do not use ANSI colors in cells as it will break the table layout
-		fmt.Fprintln(w, fmt.Sprintf(" %s\t %s\t %s\t %s\t", n, v, d, a)) // name, value, numeric, alias
+		fmt.Fprintf(w, " %s\t %s\t %s\t %s\t\n", n, v, d, a) // name, value, numeric, alias
 	}
 	fmt.Fprintln(w, "\nEither argument, numeric or alias values are valid codepage arguments")
 	fmt.Fprintln(w, "All these codepage arguments will match ISO 8859-1")

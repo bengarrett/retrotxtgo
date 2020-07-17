@@ -414,7 +414,7 @@ func setDirectory(name string) {
 		es := fmt.Sprint(err)
 		e := strings.Split(es, ":")
 		if len(e) > 1 {
-			es = fmt.Sprintf("%s", strings.TrimSpace(strings.Join(e[1:], "")))
+			es = strings.TrimSpace(strings.Join(e[1:], ""))
 		}
 		fmt.Printf("%s this directory returned the following error: %s\n", str.Info(), es)
 	}
@@ -461,7 +461,7 @@ func setFont(value string) {
 
 func setFontEmbed(value bool) {
 	var name = "html.font.embed"
-	elm := fmt.Sprintf("@font-face{\n  font-family: vga8;\n  src: url(data:font/woff2;base64,[a large font binary will be embedded here]...) format('woff2');\n}")
+	elm := "@font-face{\n  font-family: vga8;\n  src: url(data:font/woff2;base64,[a large font binary will be embedded here]...) format('woff2');\n}"
 	fmt.Println(ColorCSS(elm))
 	q := "This is not recommended unless you need to create self-contained HTML files for offline distribution.\nEmbed the font as base64 data in the HTML"
 	if value {
@@ -502,7 +502,7 @@ func setIndex(name, value string, data ...string) {
 
 func setNoTranslate(value bool) {
 	var name = "html.meta.notranslate"
-	elm := fmt.Sprintf("<html translate=\"no\">\n  <head>\n    <meta name=\"google\" content=\"notranslate\">")
+	elm := "<html translate=\"no\">\n  <head>\n    <meta name=\"google\" content=\"notranslate\">"
 	fmt.Println(ColorHTML(elm))
 	q := "Enable the no translate option"
 	if value {
@@ -525,7 +525,7 @@ func setPort(name string) {
 
 func setRetrotxt(value bool) {
 	var name = "html.meta.retrotxt"
-	elm := fmt.Sprint("<head>\n  <meta name=\"retrotxt\" content=\"encoding: IBM437; newline: CRLF; length: 50; width: 80; name: file.txt\">")
+	elm := "<head>\n  <meta name=\"retrotxt\" content=\"encoding: IBM437; newline: CRLF; length: 50; width: 80; name: file.txt\">"
 	fmt.Println(ColorHTML(elm))
 	p := "Enable the retrotxt element"
 	if value {
