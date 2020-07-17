@@ -35,8 +35,7 @@ func (g Generic) String() string {
 		return ""
 	}
 	var a, c = str.Alert(), str.Cf(fmt.Sprintf("%v", g.Err))
-	switch {
-	case g.Issue == "" && g.Arg == "":
+	if g.Issue == "" && g.Arg == "" {
 		return fmt.Sprintf("%s %s", a, c) // alert and err
 	}
 	var b string
