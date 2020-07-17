@@ -331,9 +331,6 @@ func TestReadTail(t *testing.T) {
 }
 
 func Test_word(t *testing.T) {
-	type args struct {
-		s string
-	}
 	tests := []struct {
 		name string
 		s    string

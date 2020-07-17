@@ -157,8 +157,6 @@ func init() {
 	// config must be initialized before getting saved default values
 	initConfig()
 
-	type metas int
-
 	const (
 		serve = iota
 		layout

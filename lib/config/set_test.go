@@ -107,9 +107,6 @@ func Test_dirExpansion(t *testing.T) {
 func Test_colorElm(t *testing.T) {
 	// set test mode for str.HighlightWriter()
 	str.TestMode = true
-	type args struct {
-		elm string
-	}
 	tests := []struct {
 		name string
 		elm  string
