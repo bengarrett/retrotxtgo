@@ -16,9 +16,9 @@ import (
 type configFlags struct {
 	configs bool
 	ow      bool
+	styles  bool
 	shell   string
 	style   string
-	styles  bool
 }
 
 var configFlag configFlags

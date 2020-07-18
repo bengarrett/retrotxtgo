@@ -84,26 +84,26 @@ type Args struct {
 
 // PageData temporarily holds template data used for the HTML layout.
 type PageData struct {
+	ExternalEmbed   bool
+	FontEmbed       bool
+	MetaGenerator   bool
+	MetaNoTranslate bool
+	MetaRetroTxt    bool
 	BuildVersion    string
 	BuildDate       string
 	CacheRefresh    string
 	Comment         string
-	CSSEmbed        template.CSS
-	ExternalEmbed   bool
-	FontEmbed       bool
 	FontFamily      string
 	MetaAuthor      string
 	MetaColorScheme string
 	MetaDesc        string
-	MetaGenerator   bool
 	MetaKeywords    string
-	MetaNoTranslate bool
 	MetaReferrer    string
-	MetaRetroTxt    bool
 	MetaRobots      string
 	MetaThemeColor  string
 	PageTitle       string
 	PreText         string
+	CSSEmbed        template.CSS
 	ScriptEmbed     template.JS
 }
 

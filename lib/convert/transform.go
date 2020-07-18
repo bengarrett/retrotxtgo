@@ -16,8 +16,6 @@ import (
 
 // Convert for the transformation of legacy encoded text to UTF-8.
 type Convert struct {
-	Source    []byte            // Source legacy encoded text.
-	Runes     []rune            // Runes with UTF-8 text.
 	encode    encoding.Encoding // Source character set encoding
 	len       int               // Runes count
 	newline   bool              // use newline controls
@@ -25,6 +23,8 @@ type Convert struct {
 	ignores   []rune            // these runes will not be transformed
 	swapChars []int
 	table     bool
+	Runes     []rune // Runes with UTF-8 text.
+	Source    []byte // Source legacy encoded text.
 }
 
 // Args are user supplied flag values
