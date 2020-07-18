@@ -113,6 +113,12 @@ func Lines(r io.Reader, nl [2]rune) (count int, err error) {
 // Newlines will try to guess the newline representation as a 2 byte value.
 // A guess of Unix will return [10, 0], Windows [13, 10], otherwise a [0, 0] value is returned.
 func Newlines(utf8 bool, runes ...rune) [2]rune {
+	const (
+		lf     = 10
+		cr     = 13
+		nl     = 21
+		nlutf8 = 133
+	)
 	// scan data for possible newlines
 	c := []struct {
 		abbr  string
@@ -124,13 +130,6 @@ func Newlines(utf8 bool, runes ...rune) [2]rune {
 		{"lfcr", 0}, // acorn bbc micro
 		{"nl", 0},   // ibm ebcdic encodings
 	}
-	const (
-		lf     = 10
-		cr     = 13
-		nl     = 21
-		nlutf8 = 133
-	)
-
 	l := len(runes) - 1 // range limit
 	for i, r := range runes {
 		switch r {
@@ -168,7 +167,11 @@ func Newlines(utf8 bool, runes ...rune) [2]rune {
 	sort.SliceStable(c, func(i, j int) bool {
 		return c[i].count > c[j].count
 	})
-	switch c[0].abbr {
+	return abbr(utf8, c[0].abbr)
+}
+
+func abbr(utf8 bool, s string) [2]rune {
+	switch s {
 	case "lf":
 		return [2]rune{10}
 	case "cr":

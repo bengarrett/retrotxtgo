@@ -131,6 +131,10 @@ func Update(name string) {
 			}
 		}
 	}
+	updatePrompt(name, value)
+}
+
+func updatePrompt(name string, value interface{}) {
 	// print the setting user input prompt
 	switch name {
 	case "editor":

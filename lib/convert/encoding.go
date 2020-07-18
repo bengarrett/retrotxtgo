@@ -331,7 +331,7 @@ func (c *Convert) ANSI() {
 		return
 	}
 	if c.len == 0 {
-		log.Fatal(errors.New("ansi() is a chain method that is to be used in conjuction with swap: c.swap().ansi()"))
+		log.Fatal(errors.New("ansi() is a chain method that is to be used in conjunction with swap: c.swap().ansi()"))
 	}
 	for i, r := range c.Runes {
 		if i+1 >= c.len {

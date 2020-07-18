@@ -66,7 +66,7 @@ func Border(text string) *bytes.Buffer {
 			maxLen = l
 		}
 	}
-	maxLen = maxLen + split
+	maxLen += split
 	scanner = bufio.NewScanner(strings.NewReader(text))
 	scanner.Split(bufio.ScanLines)
 	var b bytes.Buffer
@@ -77,7 +77,7 @@ func Border(text string) *bytes.Buffer {
 		rp := lp
 		// if lp/rp are X.5 decimal values, add 1 right padd to account for the uneven split
 		if float32((maxLen-l)/split) != float32(maxLen-l)/split {
-			rp = rp + 1
+			rp++
 		}
 		fmt.Fprintf(&b, "│%s%s%s│\n", strings.Repeat(" ", lp), scanner.Text(), strings.Repeat(" ", rp))
 	}

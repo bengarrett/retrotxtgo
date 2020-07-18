@@ -104,14 +104,11 @@ func CacheSet(etag, ver string) error {
 
 // Digits returns only the digits and decimal point values from a string.
 func Digits(s string) string {
-	reg, err := regexp.Compile("[^0-9/.]+")
-	if err != nil {
-		return ""
-	}
+	reg := regexp.MustCompile("[^0-9/.]+")
 	return reg.ReplaceAllString(s, "")
 }
 
-// JSON formats the RetroTxt version and binary compile infomation.
+// JSON formats the RetroTxt version and binary compile information.
 func JSON(indent bool) (data []byte) {
 	var err error
 	switch indent {
@@ -152,7 +149,7 @@ func NewRelease() (ok bool, ver string) {
 	return false, ver
 }
 
-// Print formats and prints the RetroTxt version and binary compile infomation.
+// Print formats and prints the RetroTxt version and binary compile information.
 func Print(format string) (ok bool) {
 	switch format {
 	case "color", "c", "":
@@ -215,7 +212,7 @@ func (v Version) Valid() bool {
 	return true
 }
 
-// Sprint formats the RetroTxt version and binary compile infomation.
+// Sprint formats the RetroTxt version and binary compile information.
 func Sprint(color bool) (text string) {
 	c.Enable = color
 	i := information()
