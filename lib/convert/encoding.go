@@ -54,29 +54,48 @@ const (
 )
 
 const (
-	LeftSquareBracket = 91
-	DEL               = 127
-	NBSP              = 255
-	LeftwardsArrow    = 8592
-	SymbolESC         = 9243
-	Replacement       = 65533
+	LeftSquareBracket   = 91
+	VerticalBar         = 124
+	DEL                 = 127
+	Dash                = 150
+	Nbsp                = 160
+	InvertedExclamation = 161
+	Cent                = 162
+	BrokenBar           = 166
+	Negation            = 172
+	PlusMinus           = 177
+	LightVertical       = 179 // TODO: test 178 vs 179
+	SquareRoot          = 251
+	NBSP                = 255
+	Delta               = 916
+	LeftwardsArrow      = 8592
+	SquareRootU         = 8730
+	House               = 8962
+	IntegralExtension   = 9134
+	SymbolNUL           = 9216
+	SymbolESC           = 9243
+	SymbolDEL           = 9249
+	LightVerticalU      = 9474
+	CheckMark           = 10003
+	Replacement         = 65533
 )
 
 const (
 	row8  = 128
 	row8f = 143
-	row90 = 144
+	row9  = 144
 	row9f = 159
 	rowA  = 160
+	rowE  = 224
 )
 
 // Characters map code page 437 characters with alternative runes
 var Characters = map[int]rune{
-	NUL: SP,
-	124: 166,   // ¦
-	DEL: 916,   // Δ
-	178: 9134,  // ⎮
-	251: 10003, // ✓
+	NUL:           SP,
+	VerticalBar:   BrokenBar,
+	DEL:           Delta,             // Δ
+	LightVertical: IntegralExtension, // ⎮
+	SquareRoot:    CheckMark,         // ✓
 }
 
 // Encoding returns the named character set encoding.
@@ -409,6 +428,7 @@ func (c *Convert) RunesEBCDIC() {
 		sub    = 0x9A
 		nlutf8 = 133
 	)
+	const skipA, skipB, skipC, skipD = 0xA0, 0xBF, 0xC0, 0xFF
 	for i := 0; i < c.len; i++ {
 		r := c.Runes[i]
 		if c.skipIgnores(i) {
@@ -443,7 +463,7 @@ func (c *Convert) RunesEBCDIC() {
 			c.Runes[i] = decode(bel)
 		case SYN:
 			c.Runes[i] = decode(syn)
-		case 150:
+		case Dash:
 			c.Runes[i] = decode(eot)
 		case DC4:
 			c.Runes[i] = decode(dc4)
@@ -451,18 +471,26 @@ func (c *Convert) RunesEBCDIC() {
 			c.Runes[i] = decode(nak)
 		case SUB:
 			c.Runes[i] = decode(sub)
-		case 160:
-			c.Runes[i], _ = utf8.DecodeRune([]byte{0xc2, 0xa0}) // NBSP
+		case Nbsp:
+			c.Runes[i], _ = utf8.DecodeRune([]byte{0xc2, 0xa0})
 		case NUL, SOH, STX, ETX, VT, FF, CR, SO, SI, DLE, DC1, DC2, DC3, CAN, EM, FS, GS, RS, US:
 			// shared controls with ASCII C0+C1
 			c.Runes[i] = decode(row8 + byte(r))
-		case
-			0x04,
-			row8, 0x81, 0x82, 0x83, 0x84, 0x86, 0x87, 0x88, 0x89, 0x8a, 0x8b, 0x8c, 0x8d, 0x8e, 0x8f,
-			0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x97, 0x98, 0x99, 0x9a, 0x9b, 0x9c, 0x9d, 0x9e, 0x9f,
-			0xA1:
-			// unprintable controls
+		case EOT, InvertedExclamation:
+			//unprintable controls
 			c.Runes[i] = rune(SP)
+		case Cent, Negation, PlusMinus:
+			// keep these symbols
+		default:
+			switch {
+			case
+				r >= skipA && r <= skipB,
+				r >= skipC && r <= skipD,
+				r >= row8 && r <= row8f,
+				r >= row9 && r <= row9f:
+				c.Runes[i] = rune(SP)
+
+			}
 		}
 	}
 }
@@ -515,10 +543,10 @@ func (c *Convert) RunesLatin() {
 func (c *Convert) RunesMacintosh() {
 	const z = byte(row8)
 	const (
-		command = iota + 17
-		shift
-		option
-		control
+		command = iota + 17 // ⌘
+		shift               // ⇧
+		option              // ⌥
+		control             // ⌃
 	)
 	for i := 0; i < c.len; i++ {
 		r := c.Runes[i]
@@ -528,15 +556,15 @@ func (c *Convert) RunesMacintosh() {
 		}
 		switch r {
 		case command:
-			c.Runes[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0x98}) // ⌘
+			c.Runes[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0x98})
 		case shift:
-			c.Runes[i], _ = utf8.DecodeRune([]byte{0xe2, 0x87, 0xa7}) // ⇧
+			c.Runes[i], _ = utf8.DecodeRune([]byte{0xe2, 0x87, 0xa7})
 		case option:
-			c.Runes[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0xa5}) // ⌥
+			c.Runes[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0xa5})
 		case control:
-			c.Runes[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0x83}) // ⌃
+			c.Runes[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0x83})
 		case DEL:
-			c.Runes[i] = decode(0xa1) // DEL
+			c.Runes[i] = SymbolDEL
 		case Replacement:
 			c.Runes[i] = rune(SP)
 		default:
@@ -551,20 +579,22 @@ func (c *Convert) RunesMacintosh() {
 // RunesShiftJIS tweaks some Unicode picture represenations for Shift-JIS.
 func (c *Convert) RunesShiftJIS() {
 	const (
-		yen      = 0xa5   // ¥
-		overline = 0x203e // ‾
-		del      = 0xa1   // del
+		backslash = 92     // /
+		tilde     = 126    // ~
+		yen       = 0xa5   // ¥
+		overline  = 0x203e // ‾
+		del       = 0xa1   // del
 	)
 	for i, r := range c.Runes {
 		switch {
-		case r == 0x5c:
+		case r == backslash:
 			c.Runes[i] = rune(yen)
-		case r == 0x7e:
+		case r == tilde:
 			c.Runes[i] = rune(overline)
 		case r == DEL:
 			c.Runes[i] = decode(del)
 		case r > DEL && r <= rowA,
-			r >= 0xe0 && r <= NBSP:
+			r >= rowE && r <= NBSP:
 			c.Runes[i] = rune(SP)
 		}
 	}
@@ -575,7 +605,7 @@ func (c *Convert) RunesWindows() {
 	for i, r := range c.Runes {
 		switch r {
 		case DEL:
-			c.Runes[i] = decode(0xa1) // DEL
+			c.Runes[i] = SymbolDEL
 		case Replacement:
 			c.Runes[i] = rune(SP)
 		}
@@ -587,7 +617,7 @@ func (c *Convert) RunesUTF8() {
 	for i, r := range c.Runes {
 		switch {
 		case r == DEL:
-			c.Runes[i] = decode(0xa1) // DEL
+			c.Runes[i] = SymbolDEL
 		case r > DEL && r < rowA:
 			c.Runes[i] = rune(SP)
 		}
@@ -636,17 +666,17 @@ func (c Convert) runeSwap(r rune) rune {
 	}
 	switch {
 	case r == NUL:
-		return Characters[0] // NUL
-	case r == 0x2400:
 		return Characters[0]
-	case r == 0x7c:
-		return Characters[124] // ¦
-	case r == 0x2302:
-		return Characters[DEL] // ⌂
-	case r == 0x2502:
-		return Characters[178] // │
-	case r == 0x221A:
-		return Characters[251] // √
+	case r == SymbolNUL:
+		return Characters[0]
+	case r == VerticalBar:
+		return Characters[VerticalBar]
+	case r == House:
+		return Characters[DEL]
+	case r == LightVerticalU:
+		return Characters[LightVertical]
+	case r == SquareRootU:
+		return Characters[SquareRoot]
 	}
 	return -1
 }
@@ -661,23 +691,16 @@ func (c Convert) skipIgnores(i int) bool {
 }
 
 func (c Convert) swap(r rune) bool {
-	/*
-		0:   32,    // NUL
-		124: 166,   // ¦
-		DEL: 916,   // Δ
-		178: 9134,  // ⎮
-		251: 10003, // ✓
-	*/
-	chk := 0
+	chk := NUL
 	switch r {
-	case 0x7c:
-		chk = 124
-	case 0x2302:
+	case VerticalBar:
+		chk = VerticalBar
+	case House:
 		chk = DEL
-	case 0x2502:
-		chk = 178
-	case 0x221A:
-		chk = 251
+	case LightVerticalU:
+		chk = LightVertical
+	case SquareRootU:
+		chk = SquareRoot
 	}
 	for _, c := range c.swapChars {
 		if c == chk {

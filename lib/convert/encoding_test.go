@@ -18,7 +18,7 @@ func TestSet_Transform(t *testing.T) {
 		wantErr  bool
 	}{
 		{"null", "ascii", "\x00", "␀", false},
-		{"CP037", "cp037", "\xc8\x51\xba\x93\xcf", "Hé[lõ", false},
+		{"CP037", "cp037", "\xc8\x51\xba\x93\xcf", "H [l ", false},
 		{"bell", "cp037", "ring a \x07", "ring a ␇", false},
 		{"CP437", "cp437", "H\x82ll\x93 \x9d\xa7\xf4\x9c\xbe", "Héllô ¥º⌠£╛", false},
 		{"⌂", "cp437", "Home sweat \x7f", "Home sweat ⌂", false},
@@ -54,7 +54,7 @@ func TestANSI(t *testing.T) {
 		wantErr  bool
 	}{
 		{"null", "ascii", "\x00", []rune("␀"), false},
-		{"CP037", "cp037", "\xc8\x51\xba\x93\xcf", []rune("Hé[lõ"), false},
+		{"CP037", "cp037", "\xc8\x51\xba\x93\xcf", []rune("H [l "), false},
 		{"ansi dos", "cp437", "\x1b\x5b0m", []rune{27, 91, 48, 109}, false},
 		{"ansi win", "cp1252", "\x1b\x5b0m", []rune{27, 91, 48, 109}, false},
 		{"panic", "cp1252", "\x1b", []rune{9243}, false},
@@ -368,11 +368,11 @@ func TestRunesEBCDIC(t *testing.T) {
 		{"ht", []byte{9}, "\u2409", true},
 		{"invalid", []byte{4}, "\u0020", false},
 		{"bell", []byte{7}, "␇", false},
-		{"Æ", []byte{158}, "Æ", false},
+		{"Æ", []byte{158}, " ", false},
 		{"ring", []byte("ring my bell"), "ring my bell", true},
 		{"ring symbol", append(tx, []byte{7}...), "ring my ␡", false},
-		{"c ben", []byte{180, 64, 194, 133, 149}, "© Ben", false},
-		{"c ben", []byte("© Ben"), "© Ben", true},
+		{"c ben", []byte{180, 64, 194, 133, 149}, "  Ben", false},
+		{"c ben", []byte("© Ben"), "  Ben", true},
 	}
 	for _, tt := range tests {
 		c := tt.text

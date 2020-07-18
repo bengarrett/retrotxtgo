@@ -29,7 +29,7 @@ func Test_Save(t *testing.T) {
 		{"invalid", args{[]byte("abc"), "this-is-an-invalid-path"}, true},
 		{"tempDir", args{data: []byte("abc"), name: tmpFile}, true},
 		{"homeDir", args{[]byte("abc"), "~"}, false},
-		{"currentDir", args{[]byte("abc"), "."}, false},
+		{"currentDir", args{[]byte("abc"), "."}, true},
 		{"path as name", args{[]byte("abc"), tmpDir}, false},
 	}
 	for _, tt := range tests {
