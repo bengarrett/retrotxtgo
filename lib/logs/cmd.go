@@ -42,7 +42,8 @@ func (c Cmd) error() Generic {
 			return fmt.Sprintf("%q", s)
 		}
 	)
-	if l < 3 {
+	const min = 3
+	if l < min {
 		LogFatal(errors.New("cmd error args: word count is too short, less than 3"))
 	} else if len(c.Args) < 1 {
 		LogFatal(errors.New("cmd error err: value is empty"))

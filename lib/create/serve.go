@@ -71,10 +71,11 @@ func (args *Args) createDir(b *[]byte) (err error) {
 // serveDir creates and serves b over an internal HTTP server.
 func (args Args) serveDir() (err error) {
 	http.Handle("/", http.FileServer(http.Dir(args.Destination)))
+	const timeout = 15
 	srv := &http.Server{
 		Addr:         fmt.Sprintf("127.0.0.1:%v", args.Port),
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
+		WriteTimeout: timeout * time.Second,
+		ReadTimeout:  timeout * time.Second,
 	}
 	fmt.Printf("Web server is available at %s\n",
 		str.Cp(fmt.Sprintf("http:/%v", srv.Addr)))

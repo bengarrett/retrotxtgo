@@ -57,6 +57,7 @@ func (t terminal) Formatter() string {
 
 // Border wraps text around a single line border.
 func Border(text string) *bytes.Buffer {
+	const split = 2
 	maxLen, scanner := 0, bufio.NewScanner(strings.NewReader(text))
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
@@ -65,7 +66,7 @@ func Border(text string) *bytes.Buffer {
 			maxLen = l
 		}
 	}
-	maxLen = maxLen + 2
+	maxLen = maxLen + split
 	scanner = bufio.NewScanner(strings.NewReader(text))
 	scanner.Split(bufio.ScanLines)
 	var b bytes.Buffer
@@ -75,7 +76,7 @@ func Border(text string) *bytes.Buffer {
 		lp := ((maxLen - l) / 2)
 		rp := lp
 		// if lp/rp are X.5 decimal values, add 1 right padd to account for the uneven split
-		if float32((maxLen-l)/2) != float32(maxLen-l)/2 {
+		if float32((maxLen-l)/split) != float32(maxLen-l)/split {
 			rp = rp + 1
 		}
 		fmt.Fprintf(&b, "│%s%s%s│\n", strings.Repeat(" ", lp), scanner.Text(), strings.Repeat(" ", rp))
@@ -86,7 +87,8 @@ func Border(text string) *bytes.Buffer {
 
 // Center align text to the width.
 func Center(text string, width int) string {
-	w := (width - len(text)) / 2
+	const split = 2
+	w := (width - len(text)) / split
 	if w > 0 {
 		return strings.Repeat("\u0020", w) + text
 	}

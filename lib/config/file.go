@@ -27,7 +27,7 @@ func configMissing(name string, suffix string) {
 	cmd := strings.TrimSuffix(name, suffix) + " create"
 	fmt.Printf("%s no config file is in use\n create it: %s\n",
 		str.Info(), str.Cp(cmd))
-	os.Exit(21)
+	os.Exit(1)
 }
 
 // Path is the absolute path and filename of the configuration file.
@@ -78,7 +78,8 @@ func SetConfig(flag string) (err error) {
 		}
 		if errors.Is(err, os.ErrNotExist) {
 			// initialise a new, default config file if conditions are met
-			if len(os.Args) > 2 {
+			const min = 2
+			if len(os.Args) > min {
 				switch strings.Join(os.Args[1:3], ".") {
 				case "config.create", "config.delete":
 					// never auto-generate a config when these arguments are given

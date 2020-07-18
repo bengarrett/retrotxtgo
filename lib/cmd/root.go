@@ -36,7 +36,8 @@ copy in a web browser.`,
 func Execute() {
 	rootCmd.SilenceErrors = true // set to false to debug
 	if err := rootCmd.Execute(); err != nil {
-		if len(os.Args) < 2 {
+		const minArgs = 2
+		if len(os.Args) < minArgs {
 			if err := rootCmd.Usage(); err != nil {
 				logs.Fatal("rootcmd", "usage", err)
 			}

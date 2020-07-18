@@ -169,26 +169,39 @@ func (c *Convert) width(max int) {
 }
 
 func (c *Convert) controls(a Args) {
+	const (
+		esc = 27
+		del = 127
+	)
+	const (
+		bell = iota + 7
+		bs
+		tab
+		lf
+		vt
+		ff
+		cr
+	)
 	for _, v := range a.Controls {
 		switch strings.ToLower(v) {
 		case "bell", "b":
-			c.ignore(7)
+			c.ignore(bell)
 		case "backspace", "bs":
-			c.ignore(8)
+			c.ignore(bs)
 		case "tab", "ht", "t":
-			c.ignore(9)
+			c.ignore(tab)
 		case "lf", "l":
-			c.ignore(10)
+			c.ignore(lf)
 		case "vtab", "vt", "v":
-			c.ignore(11)
+			c.ignore(vt)
 		case "formfeed", "ff", "f":
-			c.ignore(12)
+			c.ignore(ff)
 		case "cr", "c":
-			c.ignore(13)
+			c.ignore(cr)
 		case "esc", "e":
-			c.ignore(27)
+			c.ignore(esc)
 		case "del", "d":
-			c.ignore(127)
+			c.ignore(del)
 		}
 	}
 }

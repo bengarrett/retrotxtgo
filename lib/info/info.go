@@ -227,7 +227,8 @@ func (d Detail) format(format string) error {
 // IsText checks the MIME content-type value for valid text files.
 func IsText(contentType string) bool {
 	s := strings.Split(contentType, "/")
-	if len(s) != 2 {
+	const req = 2
+	if len(s) != req {
 		return false
 	}
 	if s[0] == "text" {
@@ -268,13 +269,14 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 			return err
 		}
 	}
+	const kB = 1000
 	// create a table of data
 	if stat != nil {
 		d.Bytes = stat.Size()
 		d.Name = stat.Name()
 		d.Modified = stat.ModTime().UTC()
 		d.Slug = slugify.Slugify(stat.Name())
-		if stat.Size() < 1000 {
+		if stat.Size() < kB {
 			d.Size = p.Sprintf("%v bytes", p.Sprint(stat.Size()))
 		} else {
 			d.Size = p.Sprintf("%v (%v bytes)", humanize.Bytes(stat.Size(), Language), p.Sprint(stat.Size()))
@@ -285,13 +287,14 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 		d.Slug = "n/a"
 		d.Modified = time.Now()
 		l := d.Bytes
-		if l < 1000 {
+		if l < kB {
 			d.Size = p.Sprintf("%v bytes", p.Sprint(l))
 		} else {
 			d.Size = p.Sprintf("%v (%v bytes)", humanize.Bytes(l, Language), p.Sprint(l))
 		}
 	}
-	ch := make(chan bool, 3)
+	const channels = 3
+	ch := make(chan bool, channels)
 	go func() {
 		md5sum := md5.Sum(data)
 		d.MD5 = fmt.Sprintf("%x", md5sum)

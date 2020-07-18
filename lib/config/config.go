@@ -12,7 +12,10 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
-const missingKey = "key does not exist or is not a bool value"
+const (
+	missingKey      = "key does not exist or is not a bool value"
+	httpPort   uint = 8080
+)
 
 // Defaults for configuration keys and values.
 var Defaults = map[string]interface{}{
@@ -32,7 +35,7 @@ var Defaults = map[string]interface{}{
 	"html.meta.theme-color":  "",
 	"html.title":             "RetroTxt | example",
 	"save-directory":         home(),
-	"serve":                  uint(8080),
+	"serve":                  httpPort,
 	"style.info":             "dracula",
 	"style.html":             "lovelace",
 }

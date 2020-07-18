@@ -243,11 +243,12 @@ func (n names) string(theme bool) string {
 	}
 	var s = make([]string, len(n))
 	split := (len(n) / 2)
+	const space = 2
 	for i, name := range n {
 		var t string
 		pad := maxWidth - len(fmt.Sprintf("%s=%q", name, name))
 		// prints a sequential list of styles
-		t = fmt.Sprintf(" %2d) %s=%q%s", i, name, name, strings.Repeat(" ", pad+2))
+		t = fmt.Sprintf(" %2d) %s=%q%s", i, name, name, strings.Repeat(" ", pad+space))
 		if split+i < len(n) {
 			t += fmt.Sprintf("%2d) %s=%q\n", split+i, n[split+i], n[split+i])
 		} else {
@@ -334,8 +335,9 @@ func previewMeta(name, value string) {
 		logs.LogFatal(fmt.Errorf("preview meta setting name is not known: %q", name))
 	}
 	s := strings.Split(name, ".")
+	const req = 3
 	switch {
-	case len(s) != 3, s[0] != "html", s[1] != "meta":
+	case len(s) != req, s[0] != "html", s[1] != "meta":
 		return
 	}
 	elm := fmt.Sprintf("<head>\n  <meta name=\"%s\" value=\"%s\">", s[2], value)

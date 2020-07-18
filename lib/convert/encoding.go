@@ -17,11 +17,64 @@ import (
 	"retrotxt.com/retrotxt/lib/filesystem"
 )
 
+const (
+	NUL = iota
+	SOH
+	STX
+	ETX
+	EOT
+	ENQ
+	ACK
+	BEL
+	BS
+	HT
+	LF
+	VT
+	FF
+	CR
+	SO
+	SI
+	DLE
+	DC1
+	DC2
+	DC3
+	DC4
+	NAK
+	SYN
+	ETB
+	CAN
+	EM
+	SUB
+	ESC
+	FS
+	GS
+	RS
+	US
+	SP
+)
+
+const (
+	LeftSquareBracket = 91
+	DEL               = 127
+	NBSP              = 255
+	LeftwardsArrow    = 8592
+	SymbolESC         = 9243
+	Replacement       = 65533
+)
+
+const (
+	row8  = 128
+	row8f = 143
+	row90 = 144
+	row9f = 159
+	rowA  = 160
+)
+
 // Characters map code page 437 characters with alternative runes
 var Characters = map[int]rune{
-	0:   32,    // NUL
+	NUL: SP,
 	124: 166,   // ¦
-	127: 916,   // Δ
+	DEL: 916,   // Δ
 	178: 9134,  // ⎮
 	251: 10003, // ✓
 }
@@ -265,10 +318,10 @@ func (c *Convert) ANSI() {
 		if i+1 >= c.len {
 			continue
 		}
-		if r == 8592 && c.Runes[i+1] == 91 {
-			c.Runes[i] = 27 // replace ←[
-		} else if r == 9243 && c.Runes[i+1] == 91 {
-			c.Runes[i] = 27 // replace ␛[
+		if r == LeftwardsArrow && c.Runes[i+1] == LeftSquareBracket {
+			c.Runes[i] = ESC // replace ←[
+		} else if r == SymbolESC && c.Runes[i+1] == LeftSquareBracket {
+			c.Runes[i] = ESC // replace ␛[
 		}
 	}
 }
@@ -284,21 +337,21 @@ func (c *Convert) RunesControls() {
 	if len(c.Runes) == 0 {
 		return
 	}
-	const z = byte(0x80)
+	const z = byte(row8)
 	for i := 0; i < c.len; i++ {
 		r := c.Runes[i]
 		if c.skipIgnores(i) {
 			continue
 		}
 		if c.skipNewlines(i) {
-			if c.newlines == [2]rune{13, 0} {
-				c.Runes[i] = 10 // swap CR with LF
+			if c.newlines == [2]rune{CR, 0} {
+				c.Runes[i] = LF
 			}
 			i++
 			continue
 		}
 		switch {
-		case r >= 0x00 && r <= 0x1f:
+		case r >= NUL && r <= US:
 			c.Runes[i] = decode(byte(rune(z) + r))
 		}
 	}
@@ -316,17 +369,17 @@ func (c *Convert) RunesDOS() {
 		r := c.Runes[i]
 		if c.skipNewlines(i) {
 			if c.newlines == [2]rune{13, 0} {
-				c.Runes[i] = 10 // swap CR with LF
+				c.Runes[i] = LF // swap CR with LF
 			}
 			i++
 			continue
 		}
 		switch {
-		case r > 0x00 && r <= 0x1f:
+		case r > NUL && r <= US:
 			c.Runes[i], _ = utf8.DecodeRuneInString(ctrls[r]) // c0, c1 controllers
-		case r == 0x7f:
+		case r == DEL:
 			c.Runes[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0x82}) // ⌂
-		case r == 0xff:
+		case r == NBSP:
 			c.Runes[i], _ = utf8.DecodeRune([]byte{0xc2, 0xa0}) // NBSP
 		}
 	}
@@ -338,6 +391,24 @@ func (c *Convert) RunesEBCDIC() {
 	if len(c.Runes) == 0 {
 		return
 	}
+	const (
+		ht     = 0x89
+		del    = 0xa1
+		nl     = 0xa4
+		bs     = 0x88
+		lf     = 0x8A
+		etb    = 0x97
+		esc    = 0x9B
+		enq    = 0x85
+		ack    = 0x86
+		bel    = 0x87
+		syn    = 0x96
+		eot    = 0x84
+		dc4    = 0x94
+		nak    = 0x95
+		sub    = 0x9A
+		nlutf8 = 133
+	)
 	for i := 0; i < c.len; i++ {
 		r := c.Runes[i]
 		if c.skipIgnores(i) {
@@ -345,53 +416,53 @@ func (c *Convert) RunesEBCDIC() {
 			continue
 		}
 		switch r {
-		case 9:
-			c.Runes[i] = decode(0x89) // HT
-		case 127:
-			c.Runes[i] = decode(0xa1) // DEL
-		case 133:
+		case HT:
+			c.Runes[i] = decode(ht)
+		case DEL:
+			c.Runes[i] = decode(del)
+		case nlutf8:
 			if c.newline {
-				c.Runes[i] = 10 // Go will automatically convert this to CRLF on Windows
+				// Go will automatically convert this to CRLF on Windows
+				c.Runes[i] = LF
 				continue
 			}
-			c.Runes[i] = decode(0xa4) // NL
-		case 8:
-			c.Runes[i] = decode(0x88) // BS
-		case 10:
-			c.Runes[i] = decode(0x8A) // LF
-		case 23:
-			c.Runes[i] = decode(0x97) // ETB
-		case 27: // x27 = ESC = x1B unicode
-			c.Runes[i] = decode(0x9B) // ESC
-		case 5:
-			c.Runes[i] = decode(0x85) // ENQ
-		case 6:
-			c.Runes[i] = decode(0x86) // ACK
-		case 7:
-			c.Runes[i] = decode(0x87) // BEL
-		case 22:
-			c.Runes[i] = decode(0x96) // SYN
+			c.Runes[i] = decode(nl)
+		case BS:
+			c.Runes[i] = decode(bs)
+		case LF:
+			c.Runes[i] = decode(lf)
+		case ETB:
+			c.Runes[i] = decode(etb)
+		case ESC:
+			c.Runes[i] = decode(esc)
+		case ENQ:
+			c.Runes[i] = decode(enq)
+		case ACK:
+			c.Runes[i] = decode(ack)
+		case BEL:
+			c.Runes[i] = decode(bel)
+		case SYN:
+			c.Runes[i] = decode(syn)
 		case 150:
-			c.Runes[i] = decode(0x84) // EOT
-		case 20:
-			c.Runes[i] = decode(0x94) // DC4
-		case 21:
-			c.Runes[i] = decode(0x95) // NAK
-		case 26:
-			c.Runes[i] = decode(0x9A) // SUB
+			c.Runes[i] = decode(eot)
+		case DC4:
+			c.Runes[i] = decode(dc4)
+		case NAK:
+			c.Runes[i] = decode(nak)
+		case SUB:
+			c.Runes[i] = decode(sub)
 		case 160:
 			c.Runes[i], _ = utf8.DecodeRune([]byte{0xc2, 0xa0}) // NBSP
-		case 0x00, 0x01, 0x02, 0x03, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
-			0x10, 0x11, 0x12, 0x13, 0x18, 0x19, 0x1c, 0x1d, 0x1e, 0x1f:
+		case NUL, SOH, STX, ETX, VT, FF, CR, SO, SI, DLE, DC1, DC2, DC3, CAN, EM, FS, GS, RS, US:
 			// shared controls with ASCII C0+C1
-			c.Runes[i] = decode(0x80 + byte(r))
-		case 0x9c, 0x86, 0x97, 0x8d, 0x8e,
-			0x9D, 0x87, 0x92, 0x8f,
-			0x80, 0x81, 0x82, 0x83, 0xA1, 0x84, 0x88, 0x89, 0x8a, 0x8b, 0x8c,
-			0x90, 0x91, 0x93, 0x94, 0x95, 0x04, 0x98, 0x99, 0x9a, 0x9b, 0x9e,
-			0x9f:
+			c.Runes[i] = decode(row8 + byte(r))
+		case
+			0x04,
+			row8, 0x81, 0x82, 0x83, 0x84, 0x86, 0x87, 0x88, 0x89, 0x8a, 0x8b, 0x8c, 0x8d, 0x8e, 0x8f,
+			0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x97, 0x98, 0x99, 0x9a, 0x9b, 0x9c, 0x9d, 0x9e, 0x9f,
+			0xA1:
 			// unprintable controls
-			c.Runes[i] = rune(32)
+			c.Runes[i] = rune(SP)
 		}
 	}
 }
@@ -408,12 +479,12 @@ func (c *Convert) RunesKOI8() {
 			continue
 		}
 		switch {
-		case r >= 0x00 && r <= 0x1f:
-			c.Runes[i] = rune(32)
-		case r == 0x7f:
-			c.Runes[i] = rune(32)
-		case r == 65533:
-			c.Runes[i] = rune(32)
+		case r >= NUL && r <= US:
+			c.Runes[i] = rune(SP)
+		case r == DEL:
+			c.Runes[i] = rune(SP)
+		case r == Replacement:
+			c.Runes[i] = rune(SP)
 		}
 	}
 }
@@ -430,19 +501,25 @@ func (c *Convert) RunesLatin() {
 			continue
 		}
 		switch {
-		case r >= 0x00 && r <= 0x1f:
-			c.Runes[i] = rune(32)
-		case r >= 0x7f && r <= 0x9f:
-			c.Runes[i] = rune(32)
-		case r == 65533:
-			c.Runes[i] = rune(32)
+		case r >= NUL && r <= US:
+			c.Runes[i] = rune(SP)
+		case r >= DEL && r <= row9f:
+			c.Runes[i] = rune(SP)
+		case r == Replacement:
+			c.Runes[i] = rune(SP)
 		}
 	}
 }
 
 // RunesMacintosh replaces specific Mac OS Roman characters with Unicode picture represenations.
 func (c *Convert) RunesMacintosh() {
-	const z = byte(0x80)
+	const z = byte(row8)
+	const (
+		command = iota + 17
+		shift
+		option
+		control
+	)
 	for i := 0; i < c.len; i++ {
 		r := c.Runes[i]
 		if c.skipNewlines(i) {
@@ -450,21 +527,21 @@ func (c *Convert) RunesMacintosh() {
 			continue
 		}
 		switch r {
-		case 0x11:
+		case command:
 			c.Runes[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0x98}) // ⌘
-		case 0x12:
+		case shift:
 			c.Runes[i], _ = utf8.DecodeRune([]byte{0xe2, 0x87, 0xa7}) // ⇧
-		case 0x13:
+		case option:
 			c.Runes[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0xa5}) // ⌥
-		case 0x14:
+		case control:
 			c.Runes[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0x83}) // ⌃
-		case 0x7f:
+		case DEL:
 			c.Runes[i] = decode(0xa1) // DEL
-		case 65533:
-			c.Runes[i] = rune(32)
+		case Replacement:
+			c.Runes[i] = rune(SP)
 		default:
 			switch {
-			case r >= 0x00 && r <= 0x1f:
+			case r >= NUL && r <= US:
 				c.Runes[i] = decode(byte(rune(z) + r))
 			}
 		}
@@ -473,17 +550,22 @@ func (c *Convert) RunesMacintosh() {
 
 // RunesShiftJIS tweaks some Unicode picture represenations for Shift-JIS.
 func (c *Convert) RunesShiftJIS() {
+	const (
+		yen      = 0xa5   // ¥
+		overline = 0x203e // ‾
+		del      = 0xa1   // del
+	)
 	for i, r := range c.Runes {
 		switch {
 		case r == 0x5c:
-			c.Runes[i] = rune(0xa5) // ¥
+			c.Runes[i] = rune(yen)
 		case r == 0x7e:
-			c.Runes[i] = rune(0x203e) // ‾
-		case r == 0x7f:
-			c.Runes[i] = decode(0xa1) // DEL
-		case r > 0x7f && r <= 0xa0,
-			r >= 0xe0 && r <= 0xff:
-			c.Runes[i] = rune(32)
+			c.Runes[i] = rune(overline)
+		case r == DEL:
+			c.Runes[i] = decode(del)
+		case r > DEL && r <= rowA,
+			r >= 0xe0 && r <= NBSP:
+			c.Runes[i] = rune(SP)
 		}
 	}
 }
@@ -492,10 +574,10 @@ func (c *Convert) RunesShiftJIS() {
 func (c *Convert) RunesWindows() {
 	for i, r := range c.Runes {
 		switch r {
-		case 0x7f:
+		case DEL:
 			c.Runes[i] = decode(0xa1) // DEL
-		case 65533:
-			c.Runes[i] = rune(32)
+		case Replacement:
+			c.Runes[i] = rune(SP)
 		}
 	}
 }
@@ -504,10 +586,10 @@ func (c *Convert) RunesWindows() {
 func (c *Convert) RunesUTF8() {
 	for i, r := range c.Runes {
 		switch {
-		case r == 0x7f:
+		case r == DEL:
 			c.Runes[i] = decode(0xa1) // DEL
-		case r > 0x7f && r < 0xa0:
-			c.Runes[i] = rune(32)
+		case r > DEL && r < rowA:
+			c.Runes[i] = rune(SP)
 		}
 	}
 }
@@ -553,14 +635,14 @@ func (c Convert) runeSwap(r rune) rune {
 		return -1
 	}
 	switch {
-	case r == 0x00:
+	case r == NUL:
 		return Characters[0] // NUL
 	case r == 0x2400:
 		return Characters[0]
 	case r == 0x7c:
 		return Characters[124] // ¦
 	case r == 0x2302:
-		return Characters[127] // ⌂
+		return Characters[DEL] // ⌂
 	case r == 0x2502:
 		return Characters[178] // │
 	case r == 0x221A:
@@ -582,7 +664,7 @@ func (c Convert) swap(r rune) bool {
 	/*
 		0:   32,    // NUL
 		124: 166,   // ¦
-		127: 916,   // Δ
+		DEL: 916,   // Δ
 		178: 9134,  // ⎮
 		251: 10003, // ✓
 	*/
@@ -591,7 +673,7 @@ func (c Convert) swap(r rune) bool {
 	case 0x7c:
 		chk = 124
 	case 0x2302:
-		chk = 127
+		chk = DEL
 	case 0x2502:
 		chk = 178
 	case 0x221A:

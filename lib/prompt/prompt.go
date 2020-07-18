@@ -80,12 +80,13 @@ func YesNo(ask string, yesDefault bool) bool {
 }
 
 func check(prompts int) {
+	const info, max = 2, 4
 	switch {
-	case prompts == 2:
+	case prompts == info:
 		if i, err := fmt.Println("Ctrl+C to keep the existing value"); err != nil {
 			log.Fatalf("prompt check println at %dB: %s", i, err)
 		}
-	case prompts >= 4:
+	case prompts >= max:
 		os.Exit(1)
 	}
 }

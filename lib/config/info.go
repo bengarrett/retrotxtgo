@@ -46,7 +46,8 @@ func Info(style string) (err logs.Generic) {
 		}
 		fmt.Printf("\n\n%s:\n%s\n\n%s:\n", color.Warn.Sprint(s),
 			strings.Join(m, ", "), color.Warn.Sprint("To repair"))
-		if len(m) < 5 {
+		const tries = 5
+		if len(m) < tries {
 			fmt.Print(str.Example(fmt.Sprintf("retrotxt config set %s\n", strings.Join(m, " "))))
 		} else {
 			fmt.Print(str.Example("retrotxt config set setup\n"))

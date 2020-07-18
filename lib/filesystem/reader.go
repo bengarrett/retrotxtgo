@@ -124,35 +124,42 @@ func Newlines(utf8 bool, runes ...rune) [2]rune {
 		{"lfcr", 0}, // acorn bbc micro
 		{"nl", 0},   // ibm ebcdic encodings
 	}
+	const (
+		lf     = 10
+		cr     = 13
+		nl     = 21
+		nlutf8 = 133
+	)
+
 	l := len(runes) - 1 // range limit
 	for i, r := range runes {
 		switch r {
-		case 10:
-			if i < l && runes[i+1] == 13 {
+		case lf:
+			if i < l && runes[i+1] == cr {
 				c[3].count++ // lfcr
 				continue
 			}
-			if i != 0 && runes[i-1] == 13 {
+			if i != 0 && runes[i-1] == cr {
 				// crlf (already counted)
 				continue
 			}
 			c[0].count++
-		case 13:
-			if i < l && runes[i+1] == 10 {
+		case cr:
+			if i < l && runes[i+1] == lf {
 				c[2].count++ // crlf
 				continue
 			}
-			if i != 0 && runes[i-1] == 10 {
+			if i != 0 && runes[i-1] == lf {
 				// lfcr (already counted)
 				continue
 			}
 			// carriage return on modern terminals will overwrite the existing line of text
 			// todo: add flag or change behaviour to replace CR (\r) with NL (\n)
 			c[1].count++
-		case 21, 133:
-			if utf8 && r == 133 {
+		case nl, nlutf8:
+			if utf8 && r == nlutf8 {
 				c[4].count++ // NL as utf8
-			} else if r == 21 {
+			} else if r == nl {
 				c[4].count++ // NL as ebcdic
 			}
 		}
@@ -230,7 +237,8 @@ func Words(r io.Reader) (count int, err error) {
 	for scanner.Scan() {
 		var t = scanner.Text()
 		r, _ := utf8.DecodeRuneInString(t)
-		if r >= 65533 {
+		const max = 65533
+		if r >= max {
 			continue
 		}
 		// scan single chars

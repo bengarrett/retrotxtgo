@@ -35,11 +35,12 @@ func Table(name string) (*bytes.Buffer, error) {
 	w := new(tabwriter.Writer).Init(&buf, 0, 8, 0, '\t', 0)
 	fmt.Fprintln(w, " "+color.OpFuzzy.Sprint(strings.Repeat("\u2015", 67)))
 	fmt.Fprintln(w, color.Primary.Sprint(str.Center(h, 67)))
+	const start, end, max = 0, 15, 255
 	for i := 0; i < 16; i++ {
 		switch {
-		case i == 0:
+		case i == start:
 			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf("     %X  ", i))
-		case i == 15:
+		case i == end:
 			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf(" %X  \n", i))
 		default:
 			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf(" %X  ", i))
@@ -59,7 +60,7 @@ func Table(name string) (*bytes.Buffer, error) {
 				color.OpFuzzy.Sprint("0"),
 				color.OpFuzzy.Sprint("|"),
 				char, color.OpFuzzy.Sprint("|"))
-		case i == 255:
+		case i == max:
 			fmt.Fprintf(w, " %s %s\n", char,
 				color.OpFuzzy.Sprint("|"))
 		case math.Mod(float64(i+1), 16) == 0:
