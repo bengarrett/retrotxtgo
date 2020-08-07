@@ -7,9 +7,6 @@ linters-settings:
       - github.com/sirupsen/logrus
     packages-with-error-message:
       - github.com/sirupsen/logrus: "logging is allowed only by logutils.Log"
-  dupl: # todo this kills testing
-    # tokens count to trigger issue, 150 by default
-    threshold: 500
   exhaustive:
     default-signifies-exhaustive: false
   errcheck:
@@ -19,10 +16,10 @@ linters-settings:
     # report about assignment of errors to blank identifier: `num, _ := strconv.Atoi(numStr)`;
     # default is false: such cases aren't reported by default.
     check-blank: true
-  funlen:
-    lines: 100
-    statements: 50
   gci:
+    # put imports beginning with prefix after 3rd-party packages;
+    # only support one prefix
+    # if not set, use goimports.local-prefixes
     local-prefixes: retrotxt.com/retrotxt
   goconst:
     # minimal length of string constant, 3 by default
@@ -31,32 +28,19 @@ linters-settings:
     min-occurrences: 3
   gocritic:
     enabled-tags:
-      - diagnostic
-      - experimental
-      - opinionated
-      - performance
-      - style
+      - diagnostic # kind of checks that detect various errors in code
+      - experimental # check is under testing and development. Disabled by default
+      - opinionated # check can be unwanted for some people. Disabled by default
+      - performance # kind of checks that detect potential performance issues in code
+      - style # kind of checks that find style issues in code
     disabled-checks:
       - dupImport # https://github.com/go-critic/go-critic/issues/845
-      - ifElseChain
-      - octalLiteral
-      - whyNoLint
-      - wrapperFunc
   gocyclo:
     # minimal code complexity to report, 30 by default (but we recommend 10-20)
     min-complexity: 30
   godot:
     # check all top-level comments, not only declarations
     check-all: true
-  gofmt:
-    # simplify code: gofmt with `-s` option, true by default
-    simplify: false
-  gofumpt:
-    # Choose whether or not to use the extra rules that are disabled
-    # by default
-    extra-rules: false
-  goimports:
-    local-prefixes: retrotxt.com/retrotxt
   golint:
     # minimal confidence for issues, default is 0.8
     min-confidence: 0
@@ -115,8 +99,6 @@ linters:
     - goconst
     - gocritic
     - godot
-    #- gofmt
-    #- gofumpt
     - goerr113
     - goheader
     - golint
@@ -147,14 +129,16 @@ linters:
     #- unused # TODO do not use until version is in beta
     - varcheck
     - whitespace
-    # don't enable:
-    # - dupl # this breaks the linter
-    # - dogsled
-    # - funlen
+    # run manually using cli:
     # - gocognit
     # - gocyclo
-    # - godox
-    # - goerr113
+    # don't enable:
+    # - dupl # this takes too long
+    # - dogsled
+    # - funlen
+    # - godox # flags todo/bug/fixme
+    # - gofmt # conflicts with Go Language Server
+    # - gofumpt # conflicts with Go Language Server
     # - goimports
     # - nestif
     # - nlreturn
@@ -186,10 +170,6 @@ issues:
     - path: filesystem/read\.go
       linters:
         - unused
-        #     # https://github.com/go-critic/go-critic/issues/926
-    #     - linters:
-    #         - gocritic
-    #       text: "unnecessaryDefer:"
     # Exclude known linters from partially hard-vendored code,
     # which is impossible to exclude via "nolint" comments.
     - path: info/info\.go
