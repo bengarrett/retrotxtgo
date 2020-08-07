@@ -106,8 +106,6 @@ var Referrer = [...]string{"no-referrer", "origin", "no-referrer-when-downgrade"
 // Robots values for the content attribute of <meta name="robots">.
 var Robots = [...]string{"index", "noindex", "follow", "nofollow", none, "noarchive", "nosnippet", "noimageindex", "nocache"}
 
-var scope = gap.NewScope(gap.User, "retrotxt")
-
 // Layout are HTML template variations.
 type Layout int
 
@@ -492,7 +490,7 @@ func (args *Args) templateCache() (err error) {
 	if l == "" {
 		return fmt.Errorf("template cache %q: %w", args.Layout, ErrNoLayout)
 	}
-	args.tmpl, err = scope.DataPath(l + ".gohtml")
+	args.tmpl, err = gap.NewScope(gap.User, "retrotxt").DataPath(l + ".gohtml")
 	if err != nil {
 		return fmt.Errorf("template cache path: %q: %w", args.tmpl, err)
 	}

@@ -111,7 +111,7 @@ linters:
     - exportloopref
     - gochecknoinits
     - gci
-    #- gochecknoglobals # TODO
+    - gochecknoglobals # TODO
     - goconst
     #- gocritic # TODO
     - godot
@@ -119,7 +119,6 @@ linters:
     #- gofumpt
     - goerr113
     - goheader
-    #- goimports
     - golint
     - gomodguard
     - gomnd
@@ -156,6 +155,7 @@ linters:
     # - gocyclo
     # - godox
     # - goerr113
+    # - goimports
     # - nestif
     # - nlreturn
     # - testpackage
@@ -164,6 +164,9 @@ issues:
   max-same-issues: 0
   # Excluding configuration per-path, per-linter, per-text and per-source
   exclude-rules:
+    - path: main\.go
+      linters:
+        - gochecknoglobals
     - path: lib/config/config\.go
       linters:
         - maligned
@@ -179,6 +182,7 @@ issues:
         - gosec
         - unused
         - scopelint
+        - gochecknoglobals
     - path: filesystem/read\.go
       linters:
         - unused

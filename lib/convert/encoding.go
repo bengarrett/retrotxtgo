@@ -89,13 +89,17 @@ const (
 	rowE  = 224
 )
 
+type Chars map[int]rune
+
 // Characters map code page 437 characters with alternative runes.
-var Characters = map[int]rune{
-	NUL:           SP,
-	VerticalBar:   BrokenBar,
-	DEL:           Delta,             // Δ
-	LightVertical: IntegralExtension, // ⎮
-	SquareRoot:    CheckMark,         // ✓
+func Characters() Chars {
+	return Chars{
+		NUL:           SP,
+		VerticalBar:   BrokenBar,
+		DEL:           Delta,             // Δ
+		LightVertical: IntegralExtension, // ⎮
+		SquareRoot:    CheckMark,         // ✓
+	}
 }
 
 var ErrChainANSI = errors.New("ansi() is a chain method that is to be used in conjunction with swap: c.swap().ansi()")
@@ -104,7 +108,6 @@ var ErrChainANSI = errors.New("ansi() is a chain method that is to be used in co
 func Encoding(name string) (encoding.Encoding, error) {
 	// use charmap string
 	for _, c := range charmap.All {
-		//fmt.Println("--->", fmt.Sprint(c), "--->", name)
 		if fmt.Sprint(c) == name {
 			return c, nil
 		}
@@ -666,17 +669,17 @@ func (c Convert) runeSwap(r rune) rune {
 	}
 	switch {
 	case r == NUL:
-		return Characters[0]
+		return Characters()[0]
 	case r == SymbolNUL:
-		return Characters[0]
+		return Characters()[0]
 	case r == VerticalBar:
-		return Characters[VerticalBar]
+		return Characters()[VerticalBar]
 	case r == House:
-		return Characters[DEL]
+		return Characters()[DEL]
 	case r == LightVerticalU:
-		return Characters[LightVertical]
+		return Characters()[LightVertical]
 	case r == SquareRootU:
-		return Characters[SquareRoot]
+		return Characters()[SquareRoot]
 	}
 	return -1
 }

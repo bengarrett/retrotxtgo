@@ -6,7 +6,6 @@ import (
 	"os"
 	"sort"
 
-	gap "github.com/muesli/go-app-paths"
 	"github.com/spf13/viper"
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/str"
@@ -36,50 +35,58 @@ const (
 	styleh   = "style.html"
 )
 
-// Defaults for configuration keys and values.
-var Defaults = map[string]interface{}{
-	editor:   "",
-	fontEmb:  false,
-	fontFam:  "vga",
-	layout:   "standard",
-	author:   "",
-	scheme:   "",
-	desc:     "An example",
-	genr:     true,
-	keywords: "",
-	notlate:  false,
-	referr:   "",
-	rtx:      true,
-	bot:      "index",
-	theme:    "",
-	title:    "RetroTxt | example",
-	saveDir:  home(),
-	serve:    httpPort,
-	stylei:   "dracula",
-	styleh:   "lovelace",
+type Defaults map[string]interface{}
+
+// Reset configuration values.
+func Reset() Defaults {
+	return Defaults{
+		editor:   "",
+		fontEmb:  false,
+		fontFam:  "vga",
+		layout:   "standard",
+		author:   "",
+		scheme:   "",
+		desc:     "An example",
+		genr:     true,
+		keywords: "",
+		notlate:  false,
+		referr:   "",
+		rtx:      true,
+		bot:      "index",
+		theme:    "",
+		title:    "RetroTxt | example",
+		saveDir:  home(),
+		serve:    httpPort,
+		stylei:   "dracula",
+		styleh:   "lovelace",
+	}
 }
 
-// Hints provide brief help on the config file configurations.
-var Hints = map[string]string{
-	editor:        "text editor to launch when using " + str.Example("config edit"),
-	fontEmb:       "encode and embed the font as Base64 binary-to-text within the CSS",
-	fontFam:       "specifies the font to use with the HTML",
-	"html.layout": "HTML template for the layout of CSS, JS and fonts",
-	author:        "defines the name of the page authors",
-	scheme:        "specifies one or more color schemes with which the page is compatible",
-	desc:          "a short and accurate summary of the content of the page",
-	genr:          "include the RetroTxt version and page generation date?",
-	keywords:      "words relevant to the page content",
-	notlate:       "used to declare that the page should not be translated by Google Translate",
-	referr:        "controls the Referer HTTP header attached to requests sent from the page",
-	rtx:           "include a custom tag containing the meta information of the source textfile",
-	bot:           "behaviour that crawlers from Google, Bing and other engines should use with the page",
-	theme:         "indicates a suggested color that user agents should use to customize the display of the page",
-	title:         "page title that is shown in a browser title bar or tab",
-	saveDir:       "directory to store RetroTxt created HTML files",
-	serve:         "serve HTML over an internal web server using this port",
-	stylei:        "syntax highlighter for the config info output",
-	styleh:        "syntax highlighter for html previews",
+type Hints map[string]string
+
+// Tip provides a brief help on the config file configurations.
+func Tip() Hints {
+	return Hints{
+		editor:        "text editor to launch when using " + str.Example("config edit"),
+		fontEmb:       "encode and embed the font as Base64 binary-to-text within the CSS",
+		fontFam:       "specifies the font to use with the HTML",
+		"html.layout": "HTML template for the layout of CSS, JS and fonts",
+		author:        "defines the name of the page authors",
+		scheme:        "specifies one or more color schemes with which the page is compatible",
+		desc:          "a short and accurate summary of the content of the page",
+		genr:          "include the RetroTxt version and page generation date?",
+		keywords:      "words relevant to the page content",
+		notlate:       "used to declare that the page should not be translated by Google Translate",
+		referr:        "controls the Referer HTTP header attached to requests sent from the page",
+		rtx:           "include a custom tag containing the meta information of the source textfile",
+		bot:           "behaviour that crawlers from Google, Bing and other engines should use with the page",
+		theme:         "indicates a suggested color that user agents should use to customize the display of the page",
+		title:         "page title that is shown in a browser title bar or tab",
+		saveDir:       "directory to store RetroTxt created HTML files",
+		serve:         "serve HTML over an internal web server using this port",
+		stylei:        "syntax highlighter for the config info output",
+		styleh:        "syntax highlighter for html previews",
+	}
 }
 
 // Settings types and names to be saved in YAML.
@@ -122,8 +129,6 @@ const (
 	namedFile = "config.yaml"
 )
 
-var scope = gap.NewScope(gap.User, "retrotxt")
-
 var (
 	ErrCFG     = errors.New("unknown configuration name")
 	ErrEnv     = errors.New("set one by creating an $EDITOR environment variable in your shell configuration")
@@ -152,7 +157,7 @@ var Format = Formats{
 func Enabled() map[string]interface{} {
 	var sets = make(map[string]interface{})
 	for _, key := range viper.AllKeys() {
-		if d := Defaults[key]; d != nil {
+		if d := Reset()[key]; d != nil {
 			sets[key] = viper.Get(key)
 		}
 	}
@@ -161,9 +166,9 @@ func Enabled() map[string]interface{} {
 
 // Keys list all the available configuration setting names sorted.
 func Keys() []string {
-	var keys = make([]string, len(Defaults))
+	var keys = make([]string, len(Reset()))
 	i := 0
-	for key := range Defaults {
+	for key := range Reset() {
 		keys[i] = key
 		i++
 	}
@@ -174,7 +179,7 @@ func Keys() []string {
 // Marshal default values for use in a YAML configuration file.
 func Marshal() (interface{}, error) {
 	var sc = Settings{}
-	for key := range Defaults {
+	for key := range Reset() {
 		switch key {
 		case editor:
 			sc.Editor = getString(key)
@@ -225,9 +230,9 @@ func getBool(key string) bool {
 	if v := viper.Get(key); v != nil {
 		return v.(bool)
 	}
-	switch Defaults[key].(type) {
+	switch Reset()[key].(type) {
 	case bool:
-		return Defaults[key].(bool)
+		return Reset()[key].(bool)
 	default:
 		logs.Fatal("getbool", key, ErrKey)
 	}
@@ -238,9 +243,9 @@ func getUint(key string) uint {
 	if v := viper.GetUint(key); v != 0 {
 		return v
 	}
-	switch Defaults[key].(type) {
+	switch Reset()[key].(type) {
 	case uint:
-		return Defaults[key].(uint)
+		return Reset()[key].(uint)
 	default:
 		logs.Fatal("getunit", key, ErrKey)
 	}
@@ -251,9 +256,9 @@ func getString(key string) string {
 	if v := viper.GetString(key); v != "" {
 		return v
 	}
-	switch Defaults[key].(type) {
+	switch Reset()[key].(type) {
 	case string:
-		return Defaults[key].(string)
+		return Reset()[key].(string)
 	default:
 		logs.Fatal("getstring", key, ErrKey)
 	}
@@ -264,12 +269,12 @@ func getString(key string) string {
 // This could be due to new features being added after the file was generated
 // or because of manual edits.
 func Missing() (list []string) {
-	d, l := len(Defaults), len(viper.AllSettings())
+	d, l := len(Reset()), len(viper.AllSettings())
 	if d == l {
 		return list
 	}
 	list = make([]string, l)
-	for key := range Defaults {
+	for key := range Reset() {
 		if !viper.IsSet(key) {
 			list = append(list, key)
 		}

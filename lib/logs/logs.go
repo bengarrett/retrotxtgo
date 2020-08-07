@@ -24,8 +24,6 @@ const (
 
 var ErrNil = errors.New("error value cannot be nil")
 
-var scope = gap.NewScope(gap.User, "df2")
-
 // Log saves the error and continues the program.
 func Log(err error) {
 	if err != nil {
@@ -56,7 +54,7 @@ func LogFatal(err error) {
 
 // Path is the absolute path and filename of the error log file.
 func Path() string {
-	fp, err := scope.LogPath(filename)
+	fp, err := gap.NewScope(gap.User, "df2").LogPath(filename)
 	if err != nil {
 		h, err := os.UserHomeDir()
 		if err != nil {

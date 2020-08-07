@@ -50,11 +50,9 @@ type Cache struct {
 
 const cacheFile = "api.github.cache"
 
-var scope = gap.NewScope(gap.User, "retrotxt")
-
 // CacheGet returns the stored Github API ETag HTTP header and release version.
 func CacheGet() (etag, ver string) {
-	cf, err := scope.DataPath(cacheFile)
+	cf, err := Home().DataPath(cacheFile)
 	if err != nil {
 		logs.Log(err)
 		return
@@ -92,7 +90,7 @@ func CacheSet(etag, ver string) error {
 	if err != nil {
 		return fmt.Errorf("cache set yaml marshal error: %w", err)
 	}
-	f, err := scope.DataPath(cacheFile)
+	f, err := Home().DataPath(cacheFile)
 	if err != nil {
 		return fmt.Errorf("cache set data path error: %q: %w", cacheFile, err)
 	}
@@ -106,6 +104,11 @@ func CacheSet(etag, ver string) error {
 func Digits(s string) string {
 	reg := regexp.MustCompile("[^0-9/.]+")
 	return reg.ReplaceAllString(s, "")
+}
+
+// Home directory path determined by the host operating system.
+func Home() *gap.Scope {
+	return gap.NewScope(gap.User, "retrotxt")
 }
 
 // JSON formats the RetroTxt version and binary compile information.

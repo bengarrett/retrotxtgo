@@ -14,18 +14,12 @@ import (
 type B struct{}
 
 const (
-	_ = 1.0 << (10 * iota) // ignore first value by assigning to blank identifier
-	// KiB kibibyte.
-	KiB
-	// MiB mebibyte.
-	MiB
-	// GiB gibibyte.
-	GiB
-	// TiB Tebibyte.
-	TiB
+	_   = 1.0 << (10 * iota) // ignore first value by assigning to blank identifier
+	KiB                      // KiB kibibyte.
+	MiB                      // MiB mebibyte.
+	GiB                      // GiB gibibyte.
+	TiB                      // TiB Tebibyte.
 )
-
-var global = New()
 
 // New creates a B instance.
 func New() *B {
@@ -61,5 +55,5 @@ func (*B) Bytes(b int64, t language.Tag) string {
 // Bytes formats bytes integer to localized readable string.
 // For example, 31323 bytes will return 30.59KB with language.AmericanEnglish.
 func Bytes(b int64, t language.Tag) string {
-	return global.Bytes(b, t)
+	return New().Bytes(b, t)
 }

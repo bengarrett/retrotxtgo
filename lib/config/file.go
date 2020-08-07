@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	gap "github.com/muesli/go-app-paths"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 	"retrotxt.com/retrotxt/lib/str"
@@ -21,7 +22,7 @@ var (
 
 // InitDefaults initialises flag and configuration defaults.
 func InitDefaults() {
-	for key, val := range Defaults {
+	for key, val := range Reset() {
 		viper.SetDefault(key, val)
 		viper.Set(key, val)
 	}
@@ -37,7 +38,7 @@ func configMissing(name string, suffix string) {
 
 // Path is the absolute path and filename of the configuration file.
 func Path() (dir string) {
-	dir, err := scope.ConfigPath(namedFile)
+	dir, err := gap.NewScope(gap.User, "retrotxt").ConfigPath(namedFile)
 	if err != nil {
 		h := ""
 		if h, err = os.UserHomeDir(); err != nil {

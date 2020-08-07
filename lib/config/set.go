@@ -40,7 +40,7 @@ func List() (err error) {
 	w := tabwriter.NewWriter(os.Stdout, 2, 2, 0, ' ', 0)
 	fmt.Fprintf(w, "\t\tname value\t\thint\n")
 	for i, key := range keys {
-		fmt.Fprintf(w, "%d\t\t%s\t\t%s", i, key, Hints[key])
+		fmt.Fprintf(w, "%d\t\t%s\t\t%s", i, key, Tip()[key])
 		switch key {
 		case "html.layout":
 			fmt.Fprintf(w, ", choices: %s (recommend: %s)",
@@ -63,17 +63,17 @@ func Names() string {
 // It also accepts numeric index values printed by List().
 func Set(name string) {
 	if i, err := strconv.Atoi(name); err != nil {
-		Update(name)
-	} else if i >= 0 && i <= (len(Defaults)-1) {
+		Update(name, false)
+	} else if i >= 0 && i <= (len(Reset())-1) {
 		k := Keys()
-		Update(k[i])
+		Update(k[i], false)
 	} else {
-		Update(name)
+		Update(name, false)
 	}
 }
 
 // Update edits and saves a named setting within a configuration file.
-func Update(name string) {
+func Update(name string, setup bool) {
 	if !Validate(name) {
 		h := logs.Hint{
 			Error: logs.Generic{
@@ -86,7 +86,7 @@ func Update(name string) {
 		fmt.Println(h.String())
 		return
 	}
-	if !setupMode {
+	if !setup {
 		PrintLocation()
 	}
 	// print the current status of the named setting
@@ -94,7 +94,7 @@ func Update(name string) {
 	switch value.(type) {
 	case nil:
 		// avoid potential panics from missing settings by implementing the default value
-		viper.Set(name, Defaults[name])
+		viper.Set(name, Reset()[name])
 		value = viper.Get(name)
 	}
 	if b, ok := value.(bool); ok {
@@ -130,66 +130,66 @@ func Update(name string) {
 			}
 		}
 	}
-	updatePrompt(name, value)
+	updatePrompt(name, setup, value)
 }
 
-func updatePrompt(name string, value interface{}) {
+func updatePrompt(name string, setup bool, value interface{}) {
 	// print the setting user input prompt
 	switch name {
 	case "editor":
-		s := fmt.Sprint("Set a " + Hints[name])
+		s := fmt.Sprint("Set a " + Tip()[name])
 		if value.(string) != "" {
 			s = fmt.Sprint(s, " or use a dash [-] to remove")
 		}
 		fmt.Printf("%s:\n", s)
-		setEditor(name)
+		setEditor(name, setup)
 	case "html.font.embed":
-		setFontEmbed(value.(bool))
+		setFontEmbed(value.(bool), setup)
 	case "html.font.family":
-		setFont(value.(string))
+		setFont(value.(string), setup)
 	case "html.layout":
-		fmt.Println("\nChoose a new " + str.Options(Hints[name], true, create.Layouts()...))
+		fmt.Println("\nChoose a new " + str.Options(Tip()[name], true, create.Layouts()...))
 		fmt.Println("\n  standard: uses external CSS, JS and woff2 fonts and is the recommended layout for web servers")
 		fmt.Println("  inline:   includes both the CSS and JS as inline elements but is not recommended")
 		fmt.Println("  compact:  is the same as the standard layout but without any <meta> tags")
 		fmt.Println("  none:     no template is used, instead only the generated markup is returned")
-		setShortStrings(name, create.Layouts()...)
+		setShortStrings(name, setup, create.Layouts()...)
 	case "html.meta.author",
 		"html.meta.description",
 		"html.meta.keywords",
 		"html.meta.theme-color":
 		previewMeta(name, value.(string))
-		setString(name)
+		setString(name, setup)
 	case "html.meta.color-scheme":
 		previewMeta(name, value.(string))
 		var prints = make([]string, len(create.ColorScheme[:]))
 		copy(prints, create.ColorScheme[:])
 		fmt.Println(str.UnderlineKeys(prints...))
-		setShortStrings(name, create.ColorScheme[:]...)
+		setShortStrings(name, setup, create.ColorScheme[:]...)
 	case "html.meta.generator":
 		setGenerator(value.(bool))
 	case "html.meta.notranslate":
-		setNoTranslate(value.(bool))
+		setNoTranslate(value.(bool), setup)
 	case "html.meta.referrer":
 		previewMeta(name, value.(string))
 		fmt.Println(str.NumberizeKeys(create.Referrer[:]...))
-		setIndex(name, create.Referrer[:]...)
+		setIndex(name, setup, create.Referrer[:]...)
 	case "html.meta.robots":
 		previewMeta(name, value.(string))
 		fmt.Println(str.NumberizeKeys(create.Robots[:]...))
-		setIndex(name, create.Robots[:]...)
+		setIndex(name, setup, create.Robots[:]...)
 	case "html.meta.retrotxt":
 		setRetrotxt(value.(bool))
 	case "html.title":
 		previewTitle(value.(string))
-		fmt.Println("Choose a new " + Hints[name] + ":")
-		setString(name)
+		fmt.Println("Choose a new " + Tip()[name] + ":")
+		setString(name, setup)
 	case "save-directory":
-		fmt.Println("Choose a new " + Hints[name] + ":")
-		setDirectory(name)
+		fmt.Println("Choose a new " + Tip()[name] + ":")
+		setDirectory(name, setup)
 	case "serve":
 		var p uint
-		switch Defaults["serve"].(type) {
+		switch Reset()["serve"].(type) {
 		case uint:
 			if u, ok := value.(uint); ok {
 				p = u
@@ -201,14 +201,14 @@ func updatePrompt(name string, value interface{}) {
 		}
 		fmt.Printf("\n%slocalhost%s%d %s\n", str.Cb("http://"),
 			str.Cb(":"), p, str.Bool(create.Port(p)))
-		fmt.Printf("\nSet a new port value, to %s\nChoices %s:\n", Hints[name], portInfo())
-		setPort(name)
+		fmt.Printf("\nSet a new port value, to %s\nChoices %s:\n", Tip()[name], portInfo())
+		setPort(name, setup)
 	case "style.html":
 		fmt.Printf("Set a new HTML syntax style:\n%s\n", str.Ci(Names()))
-		setStrings(name, styles.Names()...)
+		setStrings(name, setup, styles.Names()...)
 	case "style.info":
 		fmt.Printf("Set a new %s syntax style:\n%s\n", str.Example("config info"), str.Ci(Names()))
-		setStrings(name, styles.Names()...)
+		setStrings(name, setup, styles.Names()...)
 	default:
 		log.Fatalln("config is not configured:", name)
 	}
@@ -350,7 +350,7 @@ func previewMeta(name, value string) {
 	}
 	elm := fmt.Sprintf("<head>\n  <meta name=\"%s\" value=\"%s\">", s[2], value)
 	fmt.Print(ColorHTML(elm))
-	h := strings.Split(Hints[name], " ")
+	h := strings.Split(Tip()[name], " ")
 	fmt.Printf("\n%s %s.", strings.Title(h[0]), strings.Join(h[1:], " "))
 	fmt.Println(str.Cf("\nAbout this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name"))
 	fmt.Printf("\n%s \n", previewPrompt(name, value))
@@ -380,7 +380,7 @@ func previewPrompt(name, value string) (p string) {
 	return
 }
 
-func save(name string, value interface{}) {
+func save(name string, setup bool, value interface{}) {
 	if name == "" {
 		logs.LogFatal(fmt.Errorf("save: %w", ErrNoName))
 	}
@@ -389,7 +389,7 @@ func save(name string, value interface{}) {
 	}
 	// don't save unchanged input values
 	if viper.Get(name) == fmt.Sprint(value) {
-		if setupMode {
+		if setup {
 			return
 		}
 		os.Exit(0)
@@ -400,17 +400,17 @@ func save(name string, value interface{}) {
 		logs.LogFatal(err)
 	}
 	fmt.Printf("%s %s is set to \"%v\"\n", str.Cs("✓"), str.Cs(name), value)
-	if !setupMode {
+	if !setup {
 		os.Exit(0)
 	}
 }
 
-func setDirectory(name string) {
+func setDirectory(name string, setup bool) {
 	if name == "" {
 		logs.LogFatal(fmt.Errorf("set directory: %w", ErrNoName))
 	}
 	dir := dirExpansion(prompt.String())
-	if setupMode && dir == "" {
+	if setup && dir == "" {
 		return
 	}
 	if dir == "-" {
@@ -424,17 +424,17 @@ func setDirectory(name string) {
 		}
 		fmt.Printf("%s the directory is invalid: %s\n", str.Alert(), es)
 	}
-	save(name, dir)
+	save(name, setup, dir)
 }
 
-func setEditor(name string) {
+func setEditor(name string, setup bool) {
 	if name == "" {
 		logs.LogFatal(fmt.Errorf("set editor: %w", ErrNoName))
 	}
 	v := prompt.String()
 	switch v {
 	case "-":
-		save(name, "")
+		save(name, setup, "")
 		return
 	case "":
 		return
@@ -443,10 +443,10 @@ func setEditor(name string) {
 		fmt.Printf("%s this editor choice is not accessible by RetroTxt\n%s\n",
 			str.Info(), err.Error())
 	}
-	save(name, v)
+	save(name, setup, v)
 }
 
-func setFont(value string) {
+func setFont(value string, setup bool) {
 	var (
 		b bytes.Buffer
 		f = create.Family(value)
@@ -462,10 +462,10 @@ func setFont(value string) {
 	fmt.Println(str.Cf("About font families: https://developer.mozilla.org/en-US/docs/Web/CSS/font-family"))
 	fmt.Println("Choose a font (recommend: automatic):")
 	fmt.Println(str.UnderlineKeys(create.Fonts()...))
-	setShortStrings("html.font.family", create.Fonts()...)
+	setShortStrings("html.font.family", setup, create.Fonts()...)
 }
 
-func setFontEmbed(value bool) {
+func setFontEmbed(value, setup bool) {
 	var name = "html.font.embed"
 	elm := `@font-face{
   font-family: vga8;
@@ -478,7 +478,7 @@ Embed the font as base64 data in the HTML`
 		q = "Keep the embedded font option"
 	}
 	v := prompt.YesNo(q, viper.GetBool(name))
-	save(name, v)
+	save(name, setup, v)
 }
 
 func setGenerator(value bool) {
@@ -496,7 +496,7 @@ func setGenerator(value bool) {
 	}
 }
 
-func setIndex(name string, data ...string) {
+func setIndex(name string, setup bool, data ...string) {
 	if name == "" {
 		logs.LogFatal(fmt.Errorf("set index: %w", ErrNoName))
 	}
@@ -507,10 +507,10 @@ func setIndex(name string, data ...string) {
 	case "":
 		return
 	}
-	save(name, p)
+	save(name, setup, p)
 }
 
-func setNoTranslate(value bool) {
+func setNoTranslate(value, setup bool) {
 	var name = "html.meta.notranslate"
 	elm := "<html translate=\"no\">\n  <head>\n    <meta name=\"google\" content=\"notranslate\">"
 	fmt.Println(ColorHTML(elm))
@@ -519,18 +519,18 @@ func setNoTranslate(value bool) {
 		q = "Keep the translate option"
 	}
 	v := prompt.YesNo(q, viper.GetBool(name))
-	save(name, v)
+	save(name, setup, v)
 }
 
-func setPort(name string) {
+func setPort(name string, setup bool) {
 	if name == "" {
 		logs.LogFatal(fmt.Errorf("set port: %w", ErrNoName))
 	}
 	v := prompt.Port(true)
-	if setupMode && v == 0 {
+	if setup && v == 0 {
 		return
 	}
-	save(name, v)
+	save(name, setup, v)
 }
 
 func setRetrotxt(value bool) {
@@ -547,7 +547,7 @@ func setRetrotxt(value bool) {
 	}
 }
 
-func setShortStrings(name string, data ...string) {
+func setShortStrings(name string, setup bool, data ...string) {
 	v := prompt.ShortStrings(&data)
 	switch v {
 	case "-":
@@ -555,10 +555,10 @@ func setShortStrings(name string, data ...string) {
 	case "":
 		return
 	}
-	save(name, v)
+	save(name, setup, v)
 }
 
-func setString(name string) {
+func setString(name string, setup bool) {
 	if name == "" {
 		logs.LogFatal(fmt.Errorf("set string: %w", ErrNoName))
 	}
@@ -569,10 +569,10 @@ func setString(name string) {
 	case "":
 		return
 	}
-	save(name, v)
+	save(name, setup, v)
 }
 
-func setStrings(name string, data ...string) {
+func setStrings(name string, setup bool, data ...string) {
 	if name == "" {
 		logs.LogFatal(fmt.Errorf("set strings: %w", ErrNoName))
 	}
@@ -583,5 +583,5 @@ func setStrings(name string, data ...string) {
 	case "":
 		return
 	}
-	save(name, v)
+	save(name, setup, v)
 }

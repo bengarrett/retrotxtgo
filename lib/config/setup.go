@@ -17,13 +17,11 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
-var setupMode = false
-
 var ErrLogo = errors.New("retrotxt logo is missing")
 
 // Setup walks through all the settings and saves them to the configuration file.
 func Setup() {
-	setupMode, prompt.SetupMode = true, true
+	prompt.SetupMode = true
 	keys := Keys()
 	logo()
 	PrintLocation()
@@ -39,7 +37,7 @@ func Setup() {
 			fmt.Println(hr(w))
 		}
 		fmt.Println(h)
-		Update(key)
+		Update(key, true)
 		fmt.Println(hr(w))
 	}
 	fmt.Println(Info(viper.GetString("style.info")))
