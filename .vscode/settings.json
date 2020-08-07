@@ -1,7 +1,4 @@
 {
-    "cSpell.words": [
-        "lexer",
-        "retrotxt",
-        "retrotxtgo"
-    ]
+  "cSpell.words": ["lexer", "retrotxt", "retrotxtgo"],
+  "go.formatFlags": ["-local \"retrotxt.com/retrotxt\""]
 }

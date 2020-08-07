@@ -10,6 +10,7 @@ import (
 	"syscall"
 
 	"github.com/spf13/viper"
+
 	"retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/prompt"

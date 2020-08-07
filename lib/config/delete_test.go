@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/spf13/viper"
+
 	"retrotxt.com/retrotxt/lib/logs"
 )
 

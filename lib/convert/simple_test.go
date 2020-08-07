@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"golang.org/x/text/encoding/charmap"
+
 	"retrotxt.com/retrotxt/lib/filesystem"
 )
 
