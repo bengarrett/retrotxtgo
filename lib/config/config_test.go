@@ -27,8 +27,6 @@ func Test_getBool(t *testing.T) {
 		key  string
 		want bool
 	}{
-		//{"empty", "", false},
-		//{"error", "invalid", false},
 		{"bool", "html.meta.generator", true},
 	}
 	for _, tt := range tests {

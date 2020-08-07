@@ -35,7 +35,6 @@ func TestSetConfig(t *testing.T) {
 		wantErr bool
 	}{
 		{"default", "", false},
-		//{"temp", tmpFile.Name(), true}, // not a config file
 		{"invalid", "this-file-doesnt-exist", true},
 	}
 	for _, tt := range tests {

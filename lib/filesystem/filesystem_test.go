@@ -73,28 +73,31 @@ func filler(sizeMB float64) (length int, random string) {
 
 func BenchmarkReadLarge(b *testing.B) {
 	large := largeExample()
-	defer Clean(large)
 	_, err := Read(large)
 	if err != nil {
+		Clean(large)
 		log.Fatal(err)
 	}
+	Clean(large)
 }
 
 func BenchmarkReadMega(b *testing.B) {
 	mega := megaExample()
-	defer Clean(mega)
 	_, err := Read(mega)
 	if err != nil {
+		Clean(mega)
 		log.Fatal(err)
 	}
+	Clean(mega)
 }
 
 func ExampleSave() {
 	path, err := SaveTemp("examplesave.txt", []byte("hello world")...)
 	if err != nil {
+		Clean(path)
 		log.Fatal(err)
 	}
-	defer Clean(path)
+	Clean(path)
 	// Output:
 }
 
@@ -285,7 +288,7 @@ func TestReadChunk(t *testing.T) {
 			}
 		})
 	}
-	//Clean(f1)
+	Clean(f1)
 	Clean(f2)
 	Clean(f3)
 	Clean(f4)

@@ -103,13 +103,13 @@ type Settings struct {
 			Author      string `yaml:"author"`
 			ColorScheme string `yaml:"color-scheme"`
 			Description string `yaml:"description"`
-			Generator   bool   `yaml:"generator"`
 			Keywords    string `yaml:"keywords"`
-			Notranslate bool   `yaml:"notranslate"`
 			Referrer    string `yaml:"referrer"`
-			RetroTxt    bool   `yaml:"retrotxt"`
 			Robots      string `yaml:"robots"`
 			ThemeColor  string `yaml:"theme-color"`
+			Generator   bool   `yaml:"generator"`
+			Notranslate bool   `yaml:"notranslate"`
+			RetroTxt    bool   `yaml:"retrotxt"`
 		}
 		Title string `yaml:"title"`
 	}

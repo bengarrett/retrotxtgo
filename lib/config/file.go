@@ -29,7 +29,7 @@ func InitDefaults() {
 }
 
 // configMissing prints an error notice and exits.
-func configMissing(name string, suffix string) {
+func configMissing(name, suffix string) {
 	cmd := strings.TrimSuffix(name, suffix) + " create"
 	fmt.Printf("%s no config file is in use\n create it: %s\n",
 		str.Info(), str.Cp(cmd))
@@ -71,7 +71,6 @@ func SetConfig(flag string) (err error) {
 		path = Path()
 	}
 	viper.SetConfigFile(path)
-	// viper.ConfigFileUsed()
 	if err = viper.ReadInConfig(); err != nil {
 		if flag == "" {
 			if errors.Is(err, os.ErrNotExist) {
@@ -111,7 +110,7 @@ func SetConfig(flag string) (err error) {
 }
 
 // UpdateConfig saves all viper settings to the named file.
-func UpdateConfig(name string, print bool) (err error) {
+func UpdateConfig(name string, stdout bool) (err error) {
 	if name == "" {
 		name = viper.ConfigFileUsed()
 	}
@@ -129,7 +128,7 @@ func UpdateConfig(name string, print bool) (err error) {
 	if err = ioutil.WriteFile(name, out, filemode); err != nil {
 		return fmt.Errorf("config update saving data to the file failed: %q: %w", name, err)
 	}
-	if print {
+	if stdout {
 		fmt.Println("The change is saved")
 	}
 	return nil

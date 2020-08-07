@@ -96,6 +96,11 @@ const (
 	std  = "standard"
 )
 
+var (
+	ErrName = errors.New("font name is not known")
+	ErrPack = errors.New("font pack is not found")
+)
+
 // ColorScheme values for the content attribute of <meta name="color-scheme">.
 func ColorScheme() [3]string {
 	return [...]string{"normal", "dark light", "only light"}
@@ -232,7 +237,7 @@ func (args *Args) destination(name string) (string, error) {
 }
 
 // savecss creates and saves the styles stylesheet to the Destination argument.
-func (args Args) savecss(c chan error) {
+func (args *Args) savecss(c chan error) {
 	switch args.Layout {
 	case std, "s":
 	default:
@@ -254,7 +259,7 @@ func (args Args) savecss(c chan error) {
 	c <- nil
 }
 
-func (args Args) savefavicon(c chan error) {
+func (args *Args) savefavicon(c chan error) {
 	switch args.Layout {
 	case std, "s":
 	default:
@@ -277,7 +282,7 @@ func (args Args) savefavicon(c chan error) {
 }
 
 // savefont unpacks and saves the font binary to the Destination argument.
-func (args Args) savefont(c chan error) {
+func (args *Args) savefont(c chan error) {
 	if !args.FontEmbedVal {
 		f := Family(args.FontFamilyVal)
 		if f.String() == "" {
@@ -297,7 +302,7 @@ func (args Args) savefont(c chan error) {
 	c <- nil
 }
 
-func (args Args) savefontcss(name string) error {
+func (args *Args) savefontcss(name string) error {
 	name, err := args.destination(name)
 	if err != nil {
 		return err
@@ -317,7 +322,7 @@ func (args Args) savefontcss(name string) error {
 	return nil
 }
 
-func (args Args) savefontwoff2(name, packName string) error {
+func (args *Args) savefontwoff2(name, packName string) error {
 	name, err := args.destination(name)
 	if err != nil {
 		return err
@@ -333,7 +338,7 @@ func (args Args) savefontwoff2(name, packName string) error {
 	return nil
 }
 
-func (args Args) savejs(c chan error) {
+func (args *Args) savejs(c chan error) {
 	switch args.Layout {
 	case std, "s":
 	default:
@@ -356,7 +361,7 @@ func (args Args) savejs(c chan error) {
 }
 
 // SaveHTML creates and saves the html template to the Destination argument.
-func (args Args) savehtml(b *[]byte, c chan error) {
+func (args *Args) savehtml(b *[]byte, c chan error) {
 	name, err := args.destination("index.html")
 	if err != nil {
 		c <- err
@@ -384,7 +389,7 @@ func (args Args) savehtml(b *[]byte, c chan error) {
 }
 
 // Stdout creates and prints the html template.
-func (args Args) Stdout(b *[]byte) error {
+func (args *Args) Stdout(b *[]byte) error {
 	tmpl, err := args.newTemplate()
 	if err != nil {
 		return fmt.Errorf("stdout new template failure: %w", err)
@@ -450,7 +455,7 @@ func dirs(dir string) (path string, err error) {
 
 // newTemplate creates and parses a new template file.
 // The argument test is used internally.
-func (args Args) newTemplate() (*template.Template, error) {
+func (args *Args) newTemplate() (*template.Template, error) {
 	if err := args.templateCache(); err != nil {
 		return nil, fmt.Errorf("using existing template cache: %w", err)
 	}
@@ -512,7 +517,7 @@ func (args *Args) templatePack() error {
 	return nil
 }
 
-func (args Args) templateData() (*[]byte, error) {
+func (args *Args) templateData() (*[]byte, error) {
 	b := pack.Get(args.pack)
 	if len(b) == 0 {
 		return nil, fmt.Errorf("template data %q: %w", args.pack, ErrPackGet)
@@ -520,7 +525,7 @@ func (args Args) templateData() (*[]byte, error) {
 	return &b, nil
 }
 
-func (args Args) templateSave() error {
+func (args *Args) templateSave() error {
 	err := args.templatePack()
 	if err != nil {
 		return fmt.Errorf("template save pack error: %w", err)
@@ -550,7 +555,7 @@ func layout(name string) Layout {
 }
 
 // pagedata creates the meta and page template data.
-func (args Args) pagedata(b *[]byte) (p PageData, err error) {
+func (args *Args) pagedata(b *[]byte) (p PageData, err error) {
 	if b == nil {
 		return PageData{}, fmt.Errorf("pagedata: %w", ErrNilByte)
 	}
@@ -578,12 +583,12 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 			return p, fmt.Errorf("pagedata minify css: %w", err)
 		}
 		p.CSSEmbed = template.CSS(string(b))
-		js := pack.Get("js/scripts.js")
-		js, err = m.Bytes("application/javascript", js)
+		jsp := pack.Get("js/scripts.js")
+		jsp, err = m.Bytes("application/javascript", jsp)
 		if err != nil {
 			return p, fmt.Errorf("pagedata minify javascript: %w", err)
 		}
-		p.ScriptEmbed = template.JS(string(js))
+		p.ScriptEmbed = template.JS(string(jsp))
 		fallthrough
 	case Standard:
 		p.FontEmbed = args.FontEmbedVal
@@ -628,13 +633,13 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 	return p, nil
 }
 
-func (args Args) comment(c convert.Args, old *[]byte, new ...rune) string {
+func (args *Args) comment(c convert.Args, old *[]byte, replace ...rune) string {
 	e, nl, l, w, f := "", "", 0, 0, "n/a"
-	b := []byte(string(new))
+	b := []byte(string(replace))
 	// to handle EBCDIC cases, both raw bytes and utf8 runes need newline scans.
 	nlr := filesystem.Newlines(false, []rune(string(*old))...)
 	nl = filesystem.Newline(nlr, false)
-	nnl := filesystem.Newlines(true, new...)
+	nnl := filesystem.Newlines(true, replace...)
 	e = convert.Humanize(c.Encoding)
 	l, err := filesystem.Lines(bytes.NewReader(b), nnl)
 	if err != nil {
@@ -650,63 +655,63 @@ func (args Args) comment(c convert.Args, old *[]byte, new ...rune) string {
 	return fmt.Sprintf("encoding: %s; newline: %s; length: %d; width: %d; name: %s", e, nl, l, w, f)
 }
 
-func (args Args) fontFamily() string {
+func (args *Args) fontFamily() string {
 	if args.FontFamily {
 		return args.FontFamilyVal
 	}
 	return viper.GetString("html.font.family")
 }
 
-func (args Args) metaAuthor() string {
+func (args *Args) metaAuthor() string {
 	if args.MetaAuthor {
 		return args.MetaAuthorVal
 	}
 	return viper.GetString("html.meta.author")
 }
 
-func (args Args) metaColorScheme() string {
+func (args *Args) metaColorScheme() string {
 	if args.MetaColorScheme {
 		return args.MetaColorSchemeVal
 	}
 	return viper.GetString("html.meta.color-scheme")
 }
 
-func (args Args) metaDesc() string {
+func (args *Args) metaDesc() string {
 	if args.MetaDescription {
 		return args.MetaDescriptionVal
 	}
 	return viper.GetString("html.meta.description")
 }
 
-func (args Args) metaKeywords() string {
+func (args *Args) metaKeywords() string {
 	if args.MetaKeywords {
 		return args.MetaKeywordsVal
 	}
 	return viper.GetString("html.meta.keywords")
 }
 
-func (args Args) metaReferrer() string {
+func (args *Args) metaReferrer() string {
 	if args.MetaReferrer {
 		return args.MetaReferrerVal
 	}
 	return viper.GetString("html.meta.referrer")
 }
 
-func (args Args) metaRobots() string {
+func (args *Args) metaRobots() string {
 	if args.MetaRobots {
 		return args.MetaRobotsVal
 	}
 	return viper.GetString("html.meta.robots")
 }
 
-func (args Args) metaThemeColor() string {
+func (args *Args) metaThemeColor() string {
 	if args.MetaThemeColor {
 		return args.MetaThemeColorVal
 	}
 	return viper.GetString("html.meta.theme-color")
 }
 
-func (args Args) pageTitle() string {
+func (args *Args) pageTitle() string {
 	if args.Title {
 		return args.TitleVal
 	}

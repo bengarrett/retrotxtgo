@@ -166,7 +166,7 @@ func Test_destination(t *testing.T) {
 	home, _ := os.UserHomeDir()
 	spaces := filepath.Join(home, "some directory", "some file.html")
 	root, _ := filepath.Abs("/")
-	sub := filepath.Clean(filepath.Join(home, "/html/example.htm"))
+	sub := filepath.Clean(filepath.Join(home, "html", "example.htm"))
 	winI, winO := "/", "/"
 	if runtime.GOOS == "windows" {
 		winI = "c:\\"

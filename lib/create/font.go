@@ -3,7 +3,6 @@ package create
 import (
 	"bytes"
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"html/template"
 
@@ -21,11 +20,6 @@ const (
 	Mona
 	// VGA is an all-purpose 8 pixel IBM/MS-DOS era VGA font.
 	VGA
-)
-
-var (
-	ErrName = errors.New("font name is not known")
-	ErrPack = errors.New("font pack is not found")
 )
 
 func (f Font) String() string {
@@ -47,8 +41,7 @@ func (f Font) File() string {
 
 // AutoFont applies the automatic font-family setting to suggest a font based on the given encoding.
 func AutoFont(e encoding.Encoding) Font {
-	switch e {
-	case japanese.ShiftJIS:
+	if e == japanese.ShiftJIS {
 		return Mona
 	}
 	return VGA

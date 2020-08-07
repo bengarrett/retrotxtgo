@@ -284,10 +284,13 @@ func (c *Convert) Swap() *Convert {
 	if c.len == 0 {
 		return nil
 	}
+	const debug = false
 	if c.newline {
 		c.Newlines()
 	}
-	//println(fmt.Sprintf("newline detected: %+v", c.newlines))
+	if debug {
+		println(fmt.Sprintf("newline detected: %+v", c.newlines))
+	}
 	switch c.encode {
 	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
 		c.RunesEBCDIC()
@@ -373,8 +376,7 @@ func (c *Convert) RunesControls() {
 			i++
 			continue
 		}
-		switch {
-		case r >= NUL && r <= US:
+		if r >= NUL && r <= US {
 			c.Runes[i] = decode(byte(rune(z) + r))
 		}
 	}
@@ -437,7 +439,6 @@ func (c *Convert) RunesEBCDIC() {
 	for i := 0; i < c.len; i++ {
 		r := c.Runes[i]
 		if c.skipIgnores(i) {
-			//i++
 			continue
 		}
 		switch r {
@@ -482,7 +483,7 @@ func (c *Convert) RunesEBCDIC() {
 			// shared controls with ASCII C0+C1
 			c.Runes[i] = decode(row8 + byte(r))
 		case EOT, InvertedExclamation:
-			//unprintable controls
+			// unprintable controls
 			c.Runes[i] = rune(SP)
 		case Cent, Negation, PlusMinus:
 			// keep these symbols
@@ -572,8 +573,7 @@ func (c *Convert) RunesMacintosh() {
 		case Replacement:
 			c.Runes[i] = rune(SP)
 		default:
-			switch {
-			case r >= NUL && r <= US:
+			if r >= NUL && r <= US {
 				c.Runes[i] = decode(byte(rune(z) + r))
 			}
 		}
@@ -638,7 +638,7 @@ func decode(b byte) (r rune) {
 }
 
 // equalNL reports whether r matches the single or multi-byte, newline character runes.
-func equalNL(r [2]rune, nl [2]rune) bool {
+func equalNL(r, nl [2]rune) bool {
 	// single-byte newline
 	if nl[1] == 0 {
 		return nl[0] == r[0]
@@ -648,7 +648,7 @@ func equalNL(r [2]rune, nl [2]rune) bool {
 		[]byte{byte(nl[0]), byte(nl[1])})
 }
 
-func (c Convert) skipNewlines(i int) bool {
+func (c *Convert) skipNewlines(i int) bool {
 	if !c.newline {
 		return false
 	}
@@ -663,7 +663,7 @@ func (c Convert) skipNewlines(i int) bool {
 	return false
 }
 
-func (c Convert) runeSwap(r rune) rune {
+func (c *Convert) runeSwap(r rune) rune {
 	if !c.swap(r) {
 		return -1
 	}
@@ -684,7 +684,7 @@ func (c Convert) runeSwap(r rune) rune {
 	return -1
 }
 
-func (c Convert) skipIgnores(i int) bool {
+func (c *Convert) skipIgnores(i int) bool {
 	for _, ign := range c.ignores {
 		if c.Runes[i] == ign {
 			return true
@@ -693,7 +693,7 @@ func (c Convert) skipIgnores(i int) bool {
 	return false
 }
 
-func (c Convert) swap(r rune) bool {
+func (c *Convert) swap(r rune) bool {
 	chk := NUL
 	switch r {
 	case VerticalBar:

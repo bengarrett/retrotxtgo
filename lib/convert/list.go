@@ -38,7 +38,7 @@ func Encodings() (e []encoding.Encoding) {
 // List returns a tabled list of supported IANA character set encodings.
 func List() *bytes.Buffer {
 	var buf bytes.Buffer
-	var flags uint = tabwriter.Debug //tabwriter.AlignRight | tabwriter.Debug
+	flags := tabwriter.Debug // tabwriter.AlignRight | tabwriter.Debug
 	w := tabwriter.NewWriter(&buf, 0, 0, 2, ' ', flags)
 	header := "formal name\targument value\tnumeric value\talias value\t"
 	fmt.Fprintln(w, str.Cp(" Supported legacy code pages and character encodings"))

@@ -36,7 +36,7 @@ func Create(name string, ow bool) (err error) {
 	return nil
 }
 
-func configDoesExist(name string, suffix string) {
+func configDoesExist(name, suffix string) {
 	cmd := strings.TrimSuffix(name, suffix)
 	fmt.Printf("%s a config file exists: %s\n",
 		str.Info(), str.Cf(viper.ConfigFileUsed()))

@@ -94,12 +94,12 @@ func Center(text string, width int) string {
 }
 
 // Highlight and print the syntax of the source string except when piped to stdout.
-func Highlight(source, lexer, style string, color bool) (err error) {
-	return HighlightWriter(os.Stdout, source, lexer, style, color)
+func Highlight(source, lexer, style string, ansi bool) (err error) {
+	return HighlightWriter(os.Stdout, source, lexer, style, ansi)
 }
 
 // HighlightWriter writes the highlight syntax of the source string except when piped to stdout.
-func HighlightWriter(w io.Writer, source, lexer, style string, color bool) (err error) {
+func HighlightWriter(w io.Writer, source, lexer, style string, ansi bool) (err error) {
 	var term = Term()
 	// detect piping for text output or ansi for printing
 	// source: https://stackoverflow.com/questions/43947363/detect-if-a-command-is-piped-or-not
@@ -110,7 +110,7 @@ func HighlightWriter(w io.Writer, source, lexer, style string, color bool) (err 
 	if term == "none" {
 		// user disabled color output, but it doesn't disable ANSI output
 		fmt.Fprintln(w, source)
-	} else if !color && (fo.Mode()&os.ModeCharDevice) == 0 {
+	} else if !ansi && (fo.Mode()&os.ModeCharDevice) == 0 {
 		// disable colour when piping or running unit tests
 		fmt.Fprintln(w, source)
 	} else if err := quick.Highlight(w, source, lexer, term, style); err != nil {
@@ -263,12 +263,12 @@ func (s JSONExample) String(flag string) {
 // JSONStyles prints out a list of available YAML color styles.
 func JSONStyles(cmd string) {
 	for i, s := range styles.Names() {
-		var styles JSONExample
-		styles.Style.Name, styles.Style.Count = s, i
+		var example JSONExample
+		example.Style.Name, example.Style.Count = s, i
 		if s == "dracula" {
-			styles.Style.Default = true
+			example.Style.Default = true
 		}
-		styles.String(cmd)
+		example.String(cmd)
 	}
 	fmt.Println()
 }

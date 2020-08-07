@@ -22,7 +22,7 @@ func TestTable(t *testing.T) {
 				t.Errorf("Table() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !(got != nil) != tt.wantNil {
+			if got == nil != tt.wantNil {
 				t.Errorf("Table() = %v, want %v", got, tt.wantNil)
 			}
 		})

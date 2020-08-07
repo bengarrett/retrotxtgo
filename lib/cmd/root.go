@@ -176,7 +176,7 @@ func examples() *bytes.Buffer {
 	}
 	sort.Strings(keys)
 	var buf bytes.Buffer
-	var flags uint = 0 //tabwriter.AlignRight | tabwriter.Debug
+	var flags uint = 0 // tabwriter.AlignRight | tabwriter.Debug
 	w := tabwriter.NewWriter(&buf, 0, 0, 2, ' ', flags)
 	fmt.Fprintln(w, str.Cp(" Packaged example text and ANSI files to test and play with RetroTxt"))
 	fmt.Fprintln(w, strings.Repeat("-", 69))

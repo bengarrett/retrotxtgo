@@ -25,8 +25,7 @@ func Delete() (err logs.Generic) {
 		}
 	}
 	PrintLocation()
-	switch prompt.YesNo("Confirm the configuration file deletion", false) {
-	case true:
+	if prompt.YesNo("Confirm the configuration file deletion", false) {
 		if err := os.Remove(cfg); err != nil {
 			return logs.Generic{
 				Issue: "failed to remove config file",

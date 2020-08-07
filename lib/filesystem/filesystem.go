@@ -1,4 +1,4 @@
-//Package filesystem to handle the opening and reading of text files.
+// Package filesystem to handle the opening and reading of text files.
 package filesystem
 
 import (
@@ -117,7 +117,6 @@ func Save(name string, b ...byte) (path string, err error) {
 	if err = writer.Flush(); err != nil {
 		return path, fmt.Errorf("save could not flush the writer: %w", err)
 	}
-	//ioutil.WriteFile(filename,data,perm)
 	path, err = filepath.Abs(file.Name())
 	if err != nil {
 		return path, fmt.Errorf("save could not find the absolute filename: %w", err)
@@ -183,7 +182,7 @@ func addTar(name string, w *tar.Writer) error {
 		Mode:    int64(s.Mode()),
 		ModTime: s.ModTime(),
 	}
-	if err = w.WriteHeader(h); err != nil {
+	if err := w.WriteHeader(h); err != nil {
 		return err
 	}
 	_, err = io.Copy(w, f)

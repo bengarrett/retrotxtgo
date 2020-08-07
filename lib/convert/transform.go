@@ -36,7 +36,7 @@ type Args struct {
 }
 
 // Chars transforms legacy encoded characters and text control codes into UTF-8 characters.
-func (a Args) Chars(b *[]byte) (utf8 []rune, err error) {
+func (a Args) Chars(b *[]byte) (utf []rune, err error) {
 	var c = Convert{
 		Source:    *b,
 		swapChars: a.Swap,
@@ -52,7 +52,7 @@ func (a Args) Chars(b *[]byte) (utf8 []rune, err error) {
 
 // Dump transforms legacy encoded text or ANSI into modern UTF-8 text
 // including all text contained after any MS-DOS end-of-file markers.
-func (a Args) Dump(b *[]byte) (utf8 []rune, err error) {
+func (a Args) Dump(b *[]byte) (utf []rune, err error) {
 	var c = Convert{
 		Source:    *b,
 		newline:   true,
@@ -68,7 +68,7 @@ func (a Args) Dump(b *[]byte) (utf8 []rune, err error) {
 }
 
 // Text transforms legacy encoded text or ANSI into modern UTF-8 text.
-func (a Args) Text(b *[]byte) (utf8 []rune, err error) {
+func (a Args) Text(b *[]byte) (utf []rune, err error) {
 	var c = Convert{
 		Source:    *b,
 		newline:   true,
@@ -106,11 +106,7 @@ func (c *Convert) Transform(name string) error {
 		return nil
 	}
 	// blank invalid shiftjis characters when printing 8-bit tables
-	switch c.encode {
-	case japanese.ShiftJIS:
-		if !c.table {
-			break
-		}
+	if c.encode == japanese.ShiftJIS && c.table {
 		// this is only for the table command,
 		// it will break normal shift-jis encode text
 		for i, b := range c.Source {

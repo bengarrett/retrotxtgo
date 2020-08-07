@@ -171,7 +171,7 @@ func toDecode(name string, r ...rune) ([]rune, error) {
 	}
 	cp, err := encode.NewEncoder().String(string(r))
 	if err != nil {
-		if len(cp) == 0 {
+		if cp == "" {
 			return r, fmt.Errorf("encoder could not convert runes to %s: %w", encode, err)
 		}
 		return []rune(cp), nil

@@ -209,7 +209,7 @@ func TestRunesControls(t *testing.T) {
 		text string
 		want string
 	}{
-		//{"empty", "", ""},
+		// {"empty", "", ""}, // returns two different empty values?
 		{"hi", "hello world", "hello world"},
 		{"nul", "\x00", "␀"},
 		{"us", "\x1f", "␟"},

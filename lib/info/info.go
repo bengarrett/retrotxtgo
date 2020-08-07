@@ -136,11 +136,11 @@ func (d *Detail) ctrls(filename string) (err error) {
 		return err
 	}
 	defer f.Close()
-	var c int
-	if c, err = filesystem.Controls(f); err != nil {
+	var cnt int
+	if cnt, err = filesystem.Controls(f); err != nil {
 		return err
 	}
-	d.CtrlCount = c
+	d.CtrlCount = cnt
 	return f.Close()
 }
 
@@ -191,7 +191,7 @@ func (d *Detail) words(filename string) (err error) {
 // Stdin parses piped data and prints out the details in a specific syntax.
 func Stdin(format string, b ...byte) (err error) {
 	var d Detail
-	if err = d.parse(nil, b...); err != nil {
+	if err := d.parse(nil, b...); err != nil {
 		return err
 	}
 	if IsText(d.Mime) {
@@ -214,7 +214,7 @@ func Stdin(format string, b ...byte) (err error) {
 	return d.format(format)
 }
 
-func (d Detail) format(format string) error {
+func (d *Detail) format(format string) error {
 	switch format {
 	case "color", "c", "":
 		fmt.Printf("%s", d.Text(true))
@@ -313,8 +313,8 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 		ch <- true
 	}()
 	go func() {
-		sha256 := sha256.Sum256(data)
-		d.SHA256 = fmt.Sprintf("%x", sha256)
+		shasum := sha256.Sum256(data)
+		d.SHA256 = fmt.Sprintf("%x", shasum)
 		ch <- true
 	}()
 	go func() {
@@ -326,7 +326,7 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 }
 
 // JSON format and returns the details of a file.
-func (d Detail) JSON(indent bool) (js []byte) {
+func (d *Detail) JSON(indent bool) (js []byte) {
 	var err error
 	switch indent {
 	case true:
@@ -341,7 +341,7 @@ func (d Detail) JSON(indent bool) (js []byte) {
 }
 
 // Text format and returns the details of a file.
-func (d Detail) Text(color bool) string {
+func (d *Detail) Text(color bool) string {
 	p := message.NewPrinter(Language())
 	c.Enable = color
 	var info = func(t string) string {
@@ -390,7 +390,7 @@ func (d Detail) Text(color bool) string {
 }
 
 // XML formats and returns the details of a file.
-func (d Detail) XML() ([]byte, error) {
+func (d *Detail) XML() ([]byte, error) {
 	v := File{
 		Bytes:     d.Bytes,
 		CharCount: d.CharCount,

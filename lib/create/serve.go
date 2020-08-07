@@ -31,7 +31,7 @@ func Port(port uint) bool {
 	if err != nil {
 		return true
 	}
-	defer conn.Close()
+	conn.Close()
 	return false
 }
 
@@ -71,7 +71,7 @@ func (args *Args) createDir(b *[]byte) (err error) {
 }
 
 // serveDir creates and serves b over an internal HTTP server.
-func (args Args) serveDir() (err error) {
+func (args *Args) serveDir() (err error) {
 	http.Handle("/", http.FileServer(http.Dir(args.Destination)))
 	const timeout = 15
 	srv := &http.Server{
@@ -90,7 +90,7 @@ func (args Args) serveDir() (err error) {
 }
 
 // watch intercepts Ctrl-C exit key combination.
-func (args Args) watch() {
+func (args *Args) watch() {
 	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {

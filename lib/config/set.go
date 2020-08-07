@@ -96,6 +96,8 @@ func Update(name string, setup bool) {
 		// avoid potential panics from missing settings by implementing the default value
 		viper.Set(name, Reset()[name])
 		value = viper.Get(name)
+	default:
+		// everything ok
 	}
 	if b, ok := value.(bool); ok {
 		switch b {
@@ -368,8 +370,7 @@ func previewTitle(value string) {
 
 func previewPrompt(name, value string) (p string) {
 	p = "Set a new value"
-	switch name {
-	case "html.meta.keywords":
+	if name == "html.meta.keywords" {
 		p = "Set some comma-separated keywords"
 		if value != "" {
 			p = "Replace the current keywords"
@@ -434,19 +435,19 @@ func setEditor(name string, setup bool) {
 	if name == "" {
 		logs.LogFatal(fmt.Errorf("set editor: %w", ErrNoName))
 	}
-	v := prompt.String(setup)
-	switch v {
+	val := prompt.String(setup)
+	switch val {
 	case "-":
 		save(name, setup, "")
 		return
 	case "":
 		return
 	}
-	if _, err := exec.LookPath(v); err != nil {
+	if _, err := exec.LookPath(val); err != nil {
 		fmt.Printf("%s this editor choice is not accessible by RetroTxt\n%s\n",
 			str.Info(), err.Error())
 	}
-	save(name, setup, v)
+	save(name, setup, val)
 }
 
 func setFont(value string, setup bool) {
@@ -480,8 +481,8 @@ Embed the font as base64 data in the HTML`
 	if value {
 		q = "Keep the embedded font option"
 	}
-	v := prompt.YesNo(q, viper.GetBool(name))
-	save(name, setup, v)
+	val := prompt.YesNo(q, viper.GetBool(name))
+	save(name, setup, val)
 }
 
 func setGenerator(value bool) {
@@ -521,19 +522,19 @@ func setNoTranslate(value, setup bool) {
 	if value {
 		q = "Keep the translate option"
 	}
-	v := prompt.YesNo(q, viper.GetBool(name))
-	save(name, setup, v)
+	val := prompt.YesNo(q, viper.GetBool(name))
+	save(name, setup, val)
 }
 
 func setPort(name string, setup bool) {
 	if name == "" {
 		logs.LogFatal(fmt.Errorf("set port: %w", ErrNoName))
 	}
-	v := prompt.Port(true, setup)
-	if setup && v == 0 {
+	val := prompt.Port(true, setup)
+	if setup && val == 0 {
 		return
 	}
-	save(name, setup, v)
+	save(name, setup, val)
 }
 
 func setRetrotxt(value bool) {
@@ -551,40 +552,40 @@ func setRetrotxt(value bool) {
 }
 
 func setShortStrings(name string, setup bool, data ...string) {
-	v := prompt.ShortStrings(&data)
-	switch v {
+	val := prompt.ShortStrings(&data)
+	switch val {
 	case "-":
-		v = ""
+		val = ""
 	case "":
 		return
 	}
-	save(name, setup, v)
+	save(name, setup, val)
 }
 
 func setString(name string, setup bool) {
 	if name == "" {
 		logs.LogFatal(fmt.Errorf("set string: %w", ErrNoName))
 	}
-	v := prompt.String(setup)
-	switch v {
+	val := prompt.String(setup)
+	switch val {
 	case "-":
-		v = ""
+		val = ""
 	case "":
 		return
 	}
-	save(name, setup, v)
+	save(name, setup, val)
 }
 
 func setStrings(name string, setup bool, data ...string) {
 	if name == "" {
 		logs.LogFatal(fmt.Errorf("set strings: %w", ErrNoName))
 	}
-	v := prompt.Strings(&data, setup)
-	switch v {
+	val := prompt.Strings(&data, setup)
+	switch val {
 	case "-":
-		v = ""
+		val = ""
 	case "":
 		return
 	}
-	save(name, setup, v)
+	save(name, setup, val)
 }

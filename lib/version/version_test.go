@@ -151,7 +151,7 @@ func TestSprint(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotText := Sprint(tt.color); (len(gotText) == 0) != tt.empty {
+			if gotText := Sprint(tt.color); (gotText == "") != tt.empty {
 				t.Errorf("Sprint() = %v, want %v", gotText, tt.empty)
 			}
 		})

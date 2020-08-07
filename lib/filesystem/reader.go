@@ -86,7 +86,6 @@ func Lines(r io.Reader, nl [2]rune) (count int, err error) {
 		var pos int
 		for {
 			i := bytes.Index(buf[pos:], lineBreak)
-			//fmt.Println("i", i, count, pos)
 			if size == pos {
 				break
 			}
@@ -112,7 +111,7 @@ func Lines(r io.Reader, nl [2]rune) (count int, err error) {
 
 // Newlines will try to guess the newline representation as a 2 byte value.
 // A guess of Unix will return [10, 0], Windows [13, 10], otherwise a [0, 0] value is returned.
-func Newlines(utf8 bool, runes ...rune) [2]rune {
+func Newlines(utf bool, runes ...rune) [2]rune {
 	const (
 		lf     = 10
 		cr     = 13
@@ -148,7 +147,7 @@ func Newlines(utf8 bool, runes ...rune) [2]rune {
 			// todo: add flag or change behaviour to replace CR (\r) with NL (\n)
 			c[1].count++
 		case nl, nlutf8:
-			if utf8 && r == nlutf8 {
+			if utf && r == nlutf8 {
 				c[4].count++ // NL as utf8
 			} else if r == nl {
 				c[4].count++ // NL as ebcdic
@@ -159,7 +158,7 @@ func Newlines(utf8 bool, runes ...rune) [2]rune {
 	sort.SliceStable(c, func(i, j int) bool {
 		return c[i].count > c[j].count
 	})
-	return abbr(utf8, c[0].abbr)
+	return abbr(utf, c[0].abbr)
 }
 
 func lfCnt(c, i, l int, runes ...rune) int {
@@ -176,7 +175,7 @@ func lfCnt(c, i, l int, runes ...rune) int {
 	return c
 }
 
-func abbr(utf8 bool, s string) [2]rune {
+func abbr(utf bool, s string) [2]rune {
 	switch s {
 	case "lf":
 		return [2]rune{10}
@@ -187,7 +186,7 @@ func abbr(utf8 bool, s string) [2]rune {
 	case "lfcr":
 		return [2]rune{10, 13}
 	case "nl":
-		if utf8 {
+		if utf {
 			return [2]rune{133}
 		}
 		return [2]rune{21}
@@ -272,7 +271,7 @@ func Words(r io.Reader) (count int, err error) {
 // letters or punctuation and if discovered returns false.
 // If a space or newline is encountered the scan will end.
 func word(s string) bool {
-	if len(s) == 0 {
+	if s == "" {
 		return false
 	}
 	for len(s) > 0 {

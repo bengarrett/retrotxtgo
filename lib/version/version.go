@@ -64,17 +64,17 @@ func CacheGet() (etag, ver string) {
 	if err != nil {
 		logs.Log(err)
 	}
-	var c Cache
-	if err = yaml.Unmarshal(f, &c); err != nil {
+	var cache Cache
+	if err = yaml.Unmarshal(f, &cache); err != nil {
 		logs.Log(err)
 	}
 	// if either value is missing, delete the broken cache
-	if c.Etag == "" || c.Ver == "" {
+	if cache.Etag == "" || cache.Ver == "" {
 		err = os.Remove(cf)
 		logs.Log(err)
 		return "", ""
 	}
-	return c.Etag, c.Ver
+	return cache.Etag, cache.Ver
 }
 
 // CacheSet saves the Github API ETag HTTP header and release version.
@@ -82,11 +82,11 @@ func CacheSet(etag, ver string) error {
 	if etag == "" || ver == "" {
 		return nil
 	}
-	c := Cache{
+	cache := Cache{
 		Etag: etag,
 		Ver:  ver,
 	}
-	out, err := yaml.Marshal(&c)
+	out, err := yaml.Marshal(&cache)
 	if err != nil {
 		return fmt.Errorf("cache set yaml marshal error: %w", err)
 	}
@@ -143,8 +143,7 @@ func NewRelease() (ok bool, ver string) {
 		if ver == "" {
 			return false, ver
 		}
-		switch data["etag"].(type) {
-		case string:
+		if fmt.Sprintf("%T", data["etag"]) == "string" {
 			if data["etag"].(string) != "" {
 				if err = CacheSet(data["etag"].(string), ver); err != nil {
 					logs.Log(err)
@@ -152,7 +151,7 @@ func NewRelease() (ok bool, ver string) {
 			}
 		}
 	}
-	if c := compare(B.Version, ver); c {
+	if comp := compare(B.Version, ver); comp {
 		return true, ver
 	}
 	return false, ver
@@ -225,11 +224,11 @@ func (v Version) Valid() bool {
 func Sprint(color bool) (text string) {
 	c.Enable = color
 	i := information()
-	new, ver := NewRelease()
+	update, ver := NewRelease()
 	var b bytes.Buffer
 	fmt.Fprintf(&b, str.Cp("RetroTxt\t%s [%s]\n"), i["copyright"], i["url"])
 	fmt.Fprintf(&b, str.Cinf("Version:\t%s"), i["app ver"])
-	if new {
+	if update {
 		fmt.Fprintf(&b, str.Cinf("  current: %s"), ver)
 	}
 	fmt.Fprintf(&b, "\nGo version:\t%s\n", i["go ver"])
@@ -237,7 +236,7 @@ func Sprint(color bool) (text string) {
 	fmt.Fprintf(&b, "OS/Arch:\t%s\n", i["os"])
 	fmt.Fprintf(&b, "Build commit:\t%s\n", i["git"])
 	fmt.Fprintf(&b, "Build date:\t%s\n", i["date"])
-	if new {
+	if update {
 		fmt.Fprint(&b, newRelease())
 	}
 	return b.String()
@@ -265,21 +264,21 @@ func binary() string {
 }
 
 func compare(current, fetched string) bool {
-	c := Semantic(current)
-	if !c.Valid() {
+	cur := Semantic(current)
+	if !cur.Valid() {
 		return false
 	}
 	f := Semantic(fetched)
 	if !f.Valid() {
 		return false
 	}
-	if c.Major < f.Major {
+	if cur.Major < f.Major {
 		return true
 	}
-	if c.Minor < f.Minor {
+	if cur.Minor < f.Minor {
 		return true
 	}
-	if c.Patch < f.Patch {
+	if cur.Patch < f.Patch {
 		return true
 	}
 	return false

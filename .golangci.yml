@@ -113,7 +113,7 @@ linters:
     - gci
     - gochecknoglobals
     - goconst
-    - gocritic # TODO
+    - gocritic
     - godot
     #- gofmt
     #- gofumpt

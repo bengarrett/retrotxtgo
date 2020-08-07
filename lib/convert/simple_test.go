@@ -99,7 +99,7 @@ func TestDString(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotResult, err := DString(tt.args.s, tt.args.cp)
+			gotResult, err := DString(tt.args.s, &tt.args.cp)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("DString() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -128,7 +128,7 @@ func TestEString(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotResult, err := EString(tt.args.s, tt.args.cp)
+			gotResult, err := EString(tt.args.s, &tt.args.cp)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("EString() error = %v, wantErr %v", err, tt.wantErr)
 				return
