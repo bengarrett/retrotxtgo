@@ -128,7 +128,7 @@ func promptRead(stdin io.Reader) (input string, err error) {
 	input, err = reader.ReadString('\n')
 	input = strings.TrimSpace(input)
 	if err != nil && err != io.EOF {
-		return input, fmt.Errorf("prompt string reader error: %s", err)
+		return input, fmt.Errorf("prompt string reader error: %w", err)
 	}
 	return input, nil
 }

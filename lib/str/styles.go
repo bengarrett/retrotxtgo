@@ -106,7 +106,7 @@ func HighlightWriter(w io.Writer, source, lexer, style string) (err error) {
 	// source: https://stackoverflow.com/questions/43947363/detect-if-a-command-is-piped-or-not
 	fo, err := os.Stdout.Stat()
 	if err != nil {
-		return fmt.Errorf("highlight writer stdout error: %s", err)
+		return fmt.Errorf("highlight writer stdout error: %w", err)
 	}
 	if term == "none" {
 		// user disabled color output, but it doesn't disable ANSI output
@@ -115,7 +115,7 @@ func HighlightWriter(w io.Writer, source, lexer, style string) (err error) {
 		// disable colour when piping, this will also trigger with go test
 		fmt.Fprintln(w, source)
 	} else if err := quick.Highlight(w, source, lexer, term, style); err != nil {
-		return fmt.Errorf("highlight writer: %s", err)
+		return fmt.Errorf("highlight writer: %w", err)
 	}
 	return nil
 }
@@ -192,10 +192,10 @@ func UnderlineChar(c string) (s string, err error) {
 	r, _ := utf8.DecodeRuneInString(c)
 	t, err := template.New("underline").Parse("{{define \"TEXT\"}}\033[0m\033[4m{{.}}\033[0m{{end}}")
 	if err != nil {
-		return s, fmt.Errorf("underlinechar new template: %s", err)
+		return s, fmt.Errorf("underlinechar new template: %w", err)
 	}
 	if err = t.ExecuteTemplate(&buf, "TEXT", string(r)); err != nil {
-		return s, fmt.Errorf("underlinechar execute template: %s", err)
+		return s, fmt.Errorf("underlinechar execute template: %w", err)
 	}
 	return buf.String(), nil
 }

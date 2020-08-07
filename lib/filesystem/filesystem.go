@@ -4,6 +4,7 @@ package filesystem
 import (
 	"archive/tar"
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -38,11 +39,13 @@ const (
 	dirmode os.FileMode = 0700
 )
 
+var ErrStdErr = errors.New("failed to print to stderr")
+
 // Clean removes the named file or directory.
 func Clean(name string) {
 	if err := os.RemoveAll(name); err != nil {
-		if _, err := fmt.Fprintf(os.Stderr, "failed to clean: %q: %s", name, err); err != nil {
-			logs.LogFatal(fmt.Errorf("failed to print to stderr and to clean: %s", name))
+		if _, err := fmt.Fprintf(os.Stderr, "failed to clean %q: %s", name, err); err != nil {
+			logs.LogFatal(fmt.Errorf("clean %s: %w", name, ErrStdErr))
 		}
 	}
 }
@@ -110,28 +113,28 @@ func DirExpansion(name string) (dir string) {
 func Save(name string, b ...byte) (path string, err error) {
 	path, err = dir(name)
 	if err != nil {
-		return path, fmt.Errorf("save could not open directory: %q: %s", name, err)
+		return path, fmt.Errorf("save could not open directory %q: %w", name, err)
 	}
 	path = name
 	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, filemode)
 	if err != nil {
-		return path, fmt.Errorf("save could not open file: %q: %s", path, err)
+		return path, fmt.Errorf("save could not open file %q: %w", path, err)
 	}
 	defer file.Close()
 	// bufio is the most performant
 	writer := bufio.NewWriter(file)
 	for _, c := range b {
 		if err = writer.WriteByte(c); err != nil {
-			return path, fmt.Errorf("save could not write bytes: %s", err)
+			return path, fmt.Errorf("save could not write bytes: %w", err)
 		}
 	}
 	if err = writer.Flush(); err != nil {
-		return path, fmt.Errorf("save could not flush the writer: %s", err)
+		return path, fmt.Errorf("save could not flush the writer: %w", err)
 	}
 	//ioutil.WriteFile(filename,data,perm)
 	path, err = filepath.Abs(file.Name())
 	if err != nil {
-		return path, fmt.Errorf("save could not find the absolute filename: %s", err)
+		return path, fmt.Errorf("save could not find the absolute filename: %w", err)
 	}
 	return path, file.Close()
 }
@@ -140,7 +143,7 @@ func Save(name string, b ...byte) (path string, err error) {
 func SaveTemp(filename string, b ...byte) (path string, err error) {
 	path, err = Save(tempFile(filename), b...)
 	if err != nil {
-		return path, fmt.Errorf("could not save the temporary file: %s", err)
+		return path, fmt.Errorf("could not save the temporary file: %w", err)
 	}
 	return path, nil
 }
@@ -192,7 +195,7 @@ func addTar(name string, w *tar.Writer) error {
 func Touch(name string) (path string, err error) {
 	path, err = Save(name, nil...)
 	if err != nil {
-		return path, fmt.Errorf("could not touch a new file: %s", err)
+		return path, fmt.Errorf("could not touch a new file: %w", err)
 	}
 	return path, nil
 }
@@ -201,7 +204,7 @@ func dir(name string) (path string, err error) {
 	path = filepath.Dir(name)
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		if err = os.MkdirAll(path, dirmode); err != nil {
-			return "", fmt.Errorf("dir could not make the directory: %s %s: %s", dirmode, path, err)
+			return "", fmt.Errorf("dir could not make the directory: %s %s: %w", dirmode, path, err)
 		}
 	}
 	return path, err

@@ -122,7 +122,7 @@ func Test_templateSave(t *testing.T) {
 		tmpl:   tmpFile.Name(),
 	}
 	if err = a.templateSave(); err != nil {
-		t.Errorf("templateSave() created an error: %s", err)
+		t.Errorf("templateSave() created an error: %w", err)
 	}
 }
 

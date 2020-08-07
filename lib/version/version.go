@@ -90,14 +90,14 @@ func CacheSet(etag, ver string) error {
 	}
 	out, err := yaml.Marshal(&c)
 	if err != nil {
-		return fmt.Errorf("cache set yaml marshal error: %s", err)
+		return fmt.Errorf("cache set yaml marshal error: %w", err)
 	}
 	f, err := scope.DataPath(cacheFile)
 	if err != nil {
-		return fmt.Errorf("cache set data path error: %q: %s", cacheFile, err)
+		return fmt.Errorf("cache set data path error: %q: %w", cacheFile, err)
 	}
 	if _, err := filesystem.Save(f, out...); err != nil {
-		return fmt.Errorf("cache set save error: %s", err)
+		return fmt.Errorf("cache set save error: %w", err)
 	}
 	return nil
 }

@@ -17,7 +17,7 @@ import (
 func Table(name string) (*bytes.Buffer, error) {
 	cp, err := Encoding(name)
 	if err != nil {
-		return nil, fmt.Errorf("table encoding error: %s", err)
+		return nil, fmt.Errorf("table encoding error: %w", err)
 	}
 	h := fmt.Sprintf("%s", cp)
 	switch cp {
@@ -50,7 +50,7 @@ func Table(name string) (*bytes.Buffer, error) {
 	var b, row = MakeBytes(), 0
 	runes, err := conv.Chars(&b)
 	if err != nil {
-		return nil, fmt.Errorf("table convert bytes error: %s", err)
+		return nil, fmt.Errorf("table convert bytes error: %w", err)
 	}
 	for i, r := range runes {
 		char := string(r)
@@ -77,7 +77,7 @@ func Table(name string) (*bytes.Buffer, error) {
 	}
 	fmt.Fprint(w, "\n")
 	if err = w.Flush(); err != nil {
-		return nil, fmt.Errorf("table tab writer failed to flush data: %s", err)
+		return nil, fmt.Errorf("table tab writer failed to flush data: %w", err)
 	}
 	return &buf, nil
 }
