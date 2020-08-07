@@ -117,7 +117,7 @@ linters:
     - godot
     #- gofmt
     #- gofumpt
-    - goerr113 # TODO
+    - goerr113
     - goheader
     #- goimports
     - golint
@@ -130,7 +130,7 @@ linters:
     - ineffassign
     - interfacer
     #- lll # TODO
-    #- maligned # TODO
+    - maligned
     - misspell
     - nakedret
     - noctx
@@ -164,6 +164,9 @@ issues:
   max-same-issues: 0
   # Excluding configuration per-path, per-linter, per-text and per-source
   exclude-rules:
+    - path: lib/config/config\.go
+      linters:
+        - maligned
     - path: lib/cmd/
       linters:
         - gochecknoglobals

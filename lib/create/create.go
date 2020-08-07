@@ -28,56 +28,40 @@ import (
 
 // Args holds arguments and options sourced from user flags or the config file.
 type Args struct {
-	// Destination HTML destination either a directory or file
-	Destination string
-	// Encoding text encoding of the source input
-	Encoding string
-	// Body text content
-	Body string
-	// Cache when false will always unpack a new .gohtml template
-	Cache bool
-	// Layout of the HTML
-	Layout string
-	// Syntax and color theming printing HTML
-	Syntax string
-	// Port for HTTP server
-	Port uint
-	// Test mode
-	Test bool
-	// SaveToFile save to a file or print to stdout
-	SaveToFile bool
-	// OW overwrite any existing files when saving
-	OW bool
-	// Compress and store all files into an archive
-	Compress bool
-	// template filename
-	tmpl string
-	// template package name
-	pack string
-
-	// Flag values, command arguments and change state
-
+	Destination        string // Destination HTML destination either a directory or file
+	Encoding           string // Encoding text encoding of the source input
+	Body               string // Body text content
+	Layout             string // Layout of the HTML
+	Syntax             string // Syntax and color theming printing HTML
+	tmpl               string // template filename
+	pack               string // template package name
 	FilenameVal        string
 	TitleVal           string
-	Title              bool
 	MetaAuthorVal      string
-	MetaAuthor         bool
 	MetaDescriptionVal string
+	MetaColorSchemeVal string
+	MetaKeywordsVal    string
+	MetaReferrerVal    string
+	MetaRobotsVal      string
+	MetaThemeColorVal  string
+	FontFamilyVal      string
+	Port               uint // Port for HTTP server
+	Cache              bool // Cache when false will always unpack a new .gohtml template
+	Test               bool // Test mode
+	SaveToFile         bool // SaveToFile save to a file or print to stdout
+	OW                 bool // OW overwrite any existing files when saving
+	Compress           bool // Compress and store all files into an archive
+	Title              bool
+	MetaAuthor         bool
 	MetaDescription    bool
 	MetaGeneratorVal   bool
-	MetaColorSchemeVal string
 	MetaColorScheme    bool
-	MetaKeywordsVal    string
 	MetaKeywords       bool
 	MetaNoTranslateVal bool
-	MetaReferrerVal    string
 	MetaReferrer       bool
 	MetaRetroTxtVal    bool
-	MetaRobotsVal      string
 	MetaRobots         bool
-	MetaThemeColorVal  string
 	MetaThemeColor     bool
-	FontFamilyVal      string
 	FontFamily         bool
 	FontEmbedVal       bool
 }
