@@ -23,6 +23,11 @@ const (
 	VGA
 )
 
+var (
+	ErrName = errors.New("font name is not known")
+	ErrPack = errors.New("font pack is not found")
+)
+
 func (f Font) String() string {
 	fonts := [...]string{"automatic", "mona", "vga"}
 	if f < Automatic || f > VGA {
@@ -71,7 +76,7 @@ func Fonts() []string {
 func FontCSS(name string, embed bool) (b []byte, err error) {
 	f := Family(name).String()
 	if f == "" {
-		return nil, errors.New("unknown fontcss name: " + name)
+		return nil, fmt.Errorf("font css %q: %w", name, ErrName)
 	}
 	const css = `@font-face {
   font-family: '{{.Name}}';
@@ -100,7 +105,7 @@ main pre {
 	if embed {
 		url, err := fontBase64(f)
 		if err != nil {
-			return nil, fmt.Errorf("binary font to base64 failed: %s", err)
+			return nil, fmt.Errorf("binary font to base64 failed: %w", err)
 		}
 		data.URL = template.HTML(url)
 	} else {
@@ -109,11 +114,11 @@ main pre {
 	var out bytes.Buffer
 	t, err := template.New("fontface").Parse(css)
 	if err != nil {
-		return nil, fmt.Errorf("fontface new template failed: %s", err)
+		return nil, fmt.Errorf("fontface new template failed: %w", err)
 	}
 	err = t.Execute(&out, data)
 	if err != nil {
-		return nil, fmt.Errorf("fontface execute template failed: %s", err)
+		return nil, fmt.Errorf("fontface execute template failed: %w", err)
 	}
 	return out.Bytes(), nil
 }
@@ -121,17 +126,17 @@ main pre {
 func fontBase64(name string) (string, error) {
 	f := Family(name).File()
 	if f == "" {
-		return "", fmt.Errorf("font name is not known: %q", name)
+		return "", fmt.Errorf("font base64 %q: %w", name, ErrName)
 	}
 	b := pack.Get(fmt.Sprintf("font/%s", f))
 	if len(b) == 0 {
-		return "", fmt.Errorf("font pack name is not known: %q", f)
+		return "", fmt.Errorf("font base64 %q: %w", f, ErrPack)
 	}
 	var s bytes.Buffer
 	encoder := base64.NewEncoder(base64.StdEncoding, &s)
 	defer encoder.Close()
 	if _, err := encoder.Write(b); err != nil {
-		return "", fmt.Errorf("could not write base64 font: %s", err)
+		return "", fmt.Errorf("font base64 failed to write b: %w", err)
 	}
 	return fmt.Sprintf("data:application/font-woff2;charset=utf-8;base64,%s", &s), encoder.Close()
 }

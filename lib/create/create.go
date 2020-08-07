@@ -206,19 +206,28 @@ func (args *Args) Create(b *[]byte) {
 	}
 }
 
+var (
+	ErrReqOW     = errors.New("include an -o flag to overwrite")
+	ErrPackGet   = errors.New("pack.get name is invalid")
+	ErrUnknownFF = errors.New("unknown font family")
+	ErrNilByte   = errors.New("cannot convert a nil byte value")
+	ErrTmplDir   = errors.New("the path to the template file is a directory")
+	ErrNoLayout  = errors.New("layout does not exist")
+)
+
 func (args *Args) destination(name string) (string, error) {
 	dir := filesystem.DirExpansion(args.Destination)
 	path := dir
 	stat, err := os.Stat(dir)
 	if err != nil {
-		return "", fmt.Errorf("args destination directory failed %q: %s", dir, err)
+		return "", fmt.Errorf("args destination directory failed %q: %w", dir, err)
 	}
 	if stat.IsDir() {
 		path = filepath.Join(dir, name)
 	}
 	_, err = os.Stat(path)
 	if err != nil {
-		return "", fmt.Errorf("args destination path failed %q: %s", path, err)
+		return "", fmt.Errorf("args destination path failed %q: %w", path, err)
 	}
 	if !args.OW && !os.IsNotExist(err) {
 		switch name {
@@ -227,7 +236,7 @@ func (args *Args) destination(name string) (string, error) {
 			// existing static files can be ignored
 			return path, nil
 		}
-		logs.Println("file exists", path, errors.New("include an -o flag to overwrite"))
+		logs.Println("file exists", path, ErrReqOW)
 	} else {
 		color.OpFuzzy.Printf("saving to %s\n", path)
 	}
@@ -248,7 +257,7 @@ func (args Args) savecss(c chan error) {
 	}
 	b := pack.Get("css/styles.css")
 	if len(b) == 0 {
-		c <- fmt.Errorf("create.savecss: pack.get name is invalid: %q", args.pack)
+		c <- fmt.Errorf("create.savecss %q: %w", args.pack, ErrPackGet)
 	}
 	_, err = filesystem.Save(name, b...)
 	if err != nil {
@@ -270,7 +279,7 @@ func (args Args) savefavicon(c chan error) {
 	}
 	b := pack.Get("img/retrotxt_16.png")
 	if len(b) == 0 {
-		c <- fmt.Errorf("create.savefavicon: pack.get name is invalid: %q", args.pack)
+		c <- fmt.Errorf("create.savefavicon %q: %w", args.pack, ErrPackGet)
 	}
 	_, err = filesystem.Save(name, b...)
 	if err != nil {
@@ -284,7 +293,7 @@ func (args Args) savefont(c chan error) {
 	if !args.FontEmbedVal {
 		f := Family(args.FontFamilyVal)
 		if f.String() == "" {
-			c <- fmt.Errorf("could not save this unknown font family %q", args.FontFamilyVal)
+			c <- fmt.Errorf("save font, could not save %q: %w", args.FontFamilyVal, ErrUnknownFF)
 			return
 		}
 		if err := args.savefontwoff2(f.File(), "font/"+f.File()); err != nil {
@@ -307,7 +316,7 @@ func (args Args) savefontcss(name string) error {
 	}
 	f := Family(args.FontFamilyVal).String()
 	if f == "" {
-		return fmt.Errorf("create.savefontcss: unknown font name: %s", name)
+		return fmt.Errorf("create.savefontcss %q: %w", name, ErrUnknownFF)
 	}
 	b, err := FontCSS(f, args.FontEmbedVal)
 	if err != nil {
@@ -327,7 +336,7 @@ func (args Args) savefontwoff2(name, packName string) error {
 	}
 	b := pack.Get(packName)
 	if len(b) == 0 {
-		return fmt.Errorf("create.savefontwoff2: pack.get name is invalid: %q", args.pack)
+		return fmt.Errorf("create.savefontwoff2 %q: %w", args.pack, ErrPackGet)
 	}
 	_, err = filesystem.Save(name, b...)
 	if err != nil {
@@ -349,7 +358,7 @@ func (args Args) savejs(c chan error) {
 	}
 	b := pack.Get("js/scripts.js")
 	if len(b) == 0 {
-		c <- fmt.Errorf("create.savejs: pack.get name is invalid: %q", args.pack)
+		c <- fmt.Errorf("create.savejs %q: %w", args.pack, ErrPackGet)
 	}
 	_, err = filesystem.Save(name, b...)
 	if err != nil {
@@ -390,15 +399,15 @@ func (args Args) savehtml(b *[]byte, c chan error) {
 func (args Args) Stdout(b *[]byte) error {
 	tmpl, err := args.newTemplate()
 	if err != nil {
-		return fmt.Errorf("stdout new template failure: %s", err)
+		return fmt.Errorf("stdout new template failure: %w", err)
 	}
 	d, err := args.pagedata(b)
 	if err != nil {
-		return fmt.Errorf("stdout meta and pagedata failure: %s", err)
+		return fmt.Errorf("stdout meta and pagedata failure: %w", err)
 	}
 	var buf bytes.Buffer
 	if err = tmpl.Execute(&buf, d); err != nil {
-		return fmt.Errorf("stdout template execute failure: %s", err)
+		return fmt.Errorf("stdout template execute failure: %w", err)
 	}
 	switch args.Syntax {
 	case "", none:
@@ -410,7 +419,7 @@ func (args Args) Stdout(b *[]byte) error {
 			return nil
 		}
 		if err = str.Highlight(buf.String(), "html", args.Syntax); err != nil {
-			return fmt.Errorf("stdout html highlight: %s", err)
+			return fmt.Errorf("stdout html highlight: %w", err)
 		}
 	}
 	return nil
@@ -430,7 +439,7 @@ func destination(args ...string) (path string, err error) {
 	if len(part) > 1 {
 		part[0], err = dirs(part[0])
 		if err != nil {
-			return path, fmt.Errorf("destination arguments: %s", err)
+			return path, fmt.Errorf("destination arguments: %w", err)
 		}
 	}
 	return strings.Join(part, string(os.PathSeparator)), nil
@@ -446,7 +455,7 @@ func dirs(dir string) (path string, err error) {
 		path, err = filepath.Abs(dir)
 	}
 	if err != nil {
-		return "", fmt.Errorf("parse directory error: %q: %s", dir, err)
+		return "", fmt.Errorf("parse directory error: %q: %w", dir, err)
 	}
 	return path, nil
 }
@@ -455,38 +464,38 @@ func dirs(dir string) (path string, err error) {
 // The argument test is used internally.
 func (args Args) newTemplate() (*template.Template, error) {
 	if err := args.templateCache(); err != nil {
-		return nil, fmt.Errorf("using existing template cache: %s", err)
+		return nil, fmt.Errorf("using existing template cache: %w", err)
 	}
 	if !args.Cache {
 		if err := args.templateSave(); err != nil {
-			return nil, fmt.Errorf("creating a new template: %s", err)
+			return nil, fmt.Errorf("creating a new template: %w", err)
 		}
 	} else {
 		if s, err := os.Stat(args.tmpl); os.IsNotExist(err) {
 			if err := args.templateSave(); err != nil {
-				return nil, fmt.Errorf("saving to the template: %s", err)
+				return nil, fmt.Errorf("saving to the template: %w", err)
 			}
 		} else if err != nil {
 			return nil, err
 		} else if s.IsDir() {
-			return nil, fmt.Errorf("the path to the template file is a directory: %q", args.tmpl)
+			return nil, fmt.Errorf("new template %q: %w", args.tmpl, ErrTmplDir)
 		}
 	}
 	// to avoid a potential panic, Stat again in case os.IsNotExist() is true
 	s, err := os.Stat(args.tmpl)
 	if err != nil {
-		return nil, fmt.Errorf("could not access file: %q: %s", args.tmpl, err)
+		return nil, fmt.Errorf("could not access file: %q: %w", args.tmpl, err)
 	}
 	if err = args.templatePack(); err != nil {
-		return nil, fmt.Errorf("template pack: %s", err)
+		return nil, fmt.Errorf("template pack: %w", err)
 	}
 	b, err := args.templateData()
 	if s.Size() != int64(len(*b)) {
 		if err != nil {
-			return nil, fmt.Errorf("template data: %s", err)
+			return nil, fmt.Errorf("template data: %w", err)
 		}
 		if _, err := filesystem.Save(args.tmpl, *b...); err != nil {
-			return nil, fmt.Errorf("saving template: %q: %s", args.tmpl, err)
+			return nil, fmt.Errorf("saving template: %q: %w", args.tmpl, err)
 		}
 	}
 	t := template.Must(template.ParseFiles(args.tmpl))
@@ -497,11 +506,11 @@ func (args Args) newTemplate() (*template.Template, error) {
 func (args *Args) templateCache() (err error) {
 	l := layout(args.Layout).Pack()
 	if l == "" {
-		return fmt.Errorf("template cache layout does not exist: %q", args.Layout)
+		return fmt.Errorf("template cache %q: %w", args.Layout, ErrNoLayout)
 	}
 	args.tmpl, err = scope.DataPath(l + ".gohtml")
 	if err != nil {
-		return fmt.Errorf("template cache path: %q: %s", args.tmpl, err)
+		return fmt.Errorf("template cache path: %q: %w", args.tmpl, err)
 	}
 	return nil
 }
@@ -509,7 +518,7 @@ func (args *Args) templateCache() (err error) {
 func (args *Args) templatePack() error {
 	l := layout(args.Layout).Pack()
 	if l == "" {
-		return fmt.Errorf("template pack and layout does not exist: %q", args.Layout)
+		return fmt.Errorf("template pack %q: %w", args.Layout, ErrNoLayout)
 	}
 	args.pack = fmt.Sprintf("html/%s.gohtml", l)
 	return nil
@@ -518,7 +527,7 @@ func (args *Args) templatePack() error {
 func (args Args) templateData() (*[]byte, error) {
 	b := pack.Get(args.pack)
 	if len(b) == 0 {
-		return nil, fmt.Errorf("template data pack name is invalid: %q", args.pack)
+		return nil, fmt.Errorf("template data %q: %w", args.pack, ErrPackGet)
 	}
 	return &b, nil
 }
@@ -526,14 +535,14 @@ func (args Args) templateData() (*[]byte, error) {
 func (args Args) templateSave() error {
 	err := args.templatePack()
 	if err != nil {
-		return fmt.Errorf("template save pack error: %s", err)
+		return fmt.Errorf("template save pack error: %w", err)
 	}
 	b, err := args.templateData()
 	if err != nil {
-		return fmt.Errorf("template save data error: %s", err)
+		return fmt.Errorf("template save data error: %w", err)
 	}
 	if _, err := filesystem.Save(args.tmpl, *b...); err != nil {
-		return fmt.Errorf("template save error: %s", err)
+		return fmt.Errorf("template save error: %w", err)
 	}
 	return nil
 }
@@ -555,7 +564,7 @@ func layout(name string) Layout {
 // pagedata creates the meta and page template data.
 func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 	if b == nil {
-		return PageData{}, errors.New("pagedata cannot convert a nil byte value")
+		return PageData{}, fmt.Errorf("pagedata: %w", ErrNilByte)
 	}
 	// templates are found in the dir static/html/*.gohtml
 	switch layout(args.Layout) {
@@ -569,7 +578,7 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 		// font
 		f, err := FontCSS(args.FontFamilyVal, args.FontEmbedVal)
 		if err != nil {
-			return p, fmt.Errorf("pagedata font error: %s", err)
+			return p, fmt.Errorf("pagedata font error: %w", err)
 		}
 		f = bytes.TrimSpace(f)
 		// merge
@@ -578,13 +587,13 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 		// compress & embed
 		b, err = m.Bytes("text/css", b)
 		if err != nil {
-			return p, fmt.Errorf("pagedata minify css: %s", err)
+			return p, fmt.Errorf("pagedata minify css: %w", err)
 		}
 		p.CSSEmbed = template.CSS(string(b))
 		js := pack.Get("js/scripts.js")
 		js, err = m.Bytes("application/javascript", js)
 		if err != nil {
-			return p, fmt.Errorf("pagedata minify javascript: %s", err)
+			return p, fmt.Errorf("pagedata minify javascript: %w", err)
 		}
 		p.ScriptEmbed = template.JS(string(js))
 		fallthrough
@@ -612,7 +621,7 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 	case None:
 		// do nothing
 	default:
-		return PageData{}, fmt.Errorf("unknown pagedata layout: %s", args.Layout)
+		return PageData{}, fmt.Errorf("pagedata %s: %w", args.Layout, ErrNoLayout)
 	}
 	// check encoding
 	var conv = convert.Args{Encoding: args.Encoding}
@@ -622,7 +631,7 @@ func (args Args) pagedata(b *[]byte) (p PageData, err error) {
 	// convert bytes into utf8
 	runes, err := conv.Text(b)
 	if err != nil {
-		return p, fmt.Errorf("pagedata convert text bytes to utf8 failure: %s", err)
+		return p, fmt.Errorf("pagedata convert text bytes to utf8 failure: %w", err)
 	}
 	if p.MetaRetroTxt {
 		p.Comment = args.comment(conv, b, runes...)

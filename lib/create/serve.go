@@ -20,6 +20,8 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
+var ErrPort = errors.New("tried and failed to serve using these ports")
+
 // Port checks the TCP port is available on the local machine.
 func Port(port uint) bool {
 	var d net.Dialer
@@ -44,8 +46,7 @@ func (args *Args) Serve(b *[]byte) {
 		if !Port(port) {
 			port++
 		} else if tries >= max {
-			logs.Fatal("http ports", fmt.Sprintf("%d-%d", args.Port, port),
-				errors.New("tried and failed to serve using these ports"))
+			logs.Fatal("http ports", fmt.Sprintf("%d-%d", args.Port, port), ErrPort)
 		} else {
 			args.Port = port
 			break
@@ -63,7 +64,7 @@ func (args *Args) createDir(b *[]byte) (err error) {
 	args.SaveToFile, args.OW = true, true
 	args.Destination, err = ioutil.TempDir(os.TempDir(), "*-serve")
 	if err != nil {
-		return fmt.Errorf("failed to make a temporary serve directory: %s", err)
+		return fmt.Errorf("failed to make a temporary serve directory: %w", err)
 	}
 	args.Create(b)
 	return nil
@@ -83,7 +84,7 @@ func (args Args) serveDir() (err error) {
 	fmt.Println(str.Cinf("Press Ctrl+C to stop"))
 	args.watch()
 	if err = srv.ListenAndServe(); err != nil {
-		return fmt.Errorf("tcp listen and serve failed: %s", err)
+		return fmt.Errorf("tcp listen and serve failed: %w", err)
 	}
 	return nil
 }
