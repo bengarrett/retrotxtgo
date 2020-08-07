@@ -140,9 +140,12 @@ func NewRelease() (ok bool, ver string) {
 		if ver == "" {
 			return false, ver
 		}
-		if etag := data["etag"].(string); etag != "" {
-			if err = CacheSet(etag, ver); err != nil {
-				logs.Log(err)
+		switch data["etag"].(type) {
+		case string:
+			if data["etag"].(string) != "" {
+				if err = CacheSet(data["etag"].(string), ver); err != nil {
+					logs.Log(err)
+				}
 			}
 		}
 	}
