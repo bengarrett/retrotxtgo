@@ -56,7 +56,10 @@ func LogFatal(err error) {
 func Path() string {
 	fp, err := scope.LogPath(filename)
 	if err != nil {
-		h, _ := os.UserHomeDir()
+		h, err := os.UserHomeDir()
+		if err != nil {
+			log.Fatal(fmt.Errorf("log path userhomedir: %w", err))
+		}
 		return path.Join(h, filename)
 	}
 	return fp

@@ -249,13 +249,16 @@ type JSONExample struct {
 func (s JSONExample) String(flag string) {
 	fmt.Println()
 	// config is stored as YAML but printed as JSON
-	out, _ := json.MarshalIndent(s, "", "  ")
+	out, err := json.MarshalIndent(s, "", "  ")
+	if err != nil {
+		log.Fatalln(fmt.Errorf("json example marshal indent: %w", err))
+	}
 	if flag != "" {
 		fmt.Println("\n" + color.Secondary.Sprintf("%s=%q", flag, s.Style.Name))
 	}
 	if err := Highlight(string(out), "json", s.Style.Name); err != nil {
 		// cannot use the logs package as it causes an import cycle error
-		log.Fatalln(fmt.Errorf("json example highlight syntax error: %s", err))
+		log.Fatalln(fmt.Errorf("json example highlight syntax error: %w", err))
 	}
 }
 

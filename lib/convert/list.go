@@ -3,6 +3,7 @@ package convert
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"text/tabwriter"
@@ -70,9 +71,15 @@ func cells(e encoding.Encoding) (n, v, d, a string) {
 	n = fmt.Sprint(e)
 	var err error
 	if v, err = htmlindex.Name(e); err == nil {
-		a, _ = ianaindex.MIME.Name(e)
+		a, err = ianaindex.MIME.Name(e)
+		if err != nil {
+			log.Fatal(fmt.Errorf("list cells html index mime name: %w", err))
+		}
 	} else {
-		v, _ = ianaindex.MIME.Name(e)
+		v, err = ianaindex.MIME.Name(e)
+		if err != nil {
+			log.Fatal(fmt.Errorf("list cells mime name: %w", err))
+		}
 	}
 	v = strings.ToLower(uniform(v))
 	s1 := strings.Split(n, " ")
@@ -102,7 +109,10 @@ func alias(s, val string, e encoding.Encoding) string {
 		case "macintosh":
 			return "mac"
 		}
-		a, _ = ianaindex.MIB.Name(e)
+		a, err := ianaindex.MIB.Name(e)
+		if err != nil {
+			return ""
+		}
 		a = strings.ToLower(a)
 		if a == val {
 			return ""

@@ -216,7 +216,10 @@ func (d Detail) format(format string) error {
 	case "text", "t":
 		fmt.Printf("%s", d.Text(false))
 	case "xml", "x":
-		data, _ := d.XML()
+		data, err := d.XML()
+		if err != nil {
+			return fmt.Errorf("detail xml format: %w", err)
+		}
 		fmt.Printf("%s\n", data)
 	default:
 		return errors.New("format invalid: " + format)
