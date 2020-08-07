@@ -18,6 +18,7 @@ var listCmd = &cobra.Command{
 	Example: "  retrotxt list codepages\n  retrotxt list examples\n  retrotxt list table cp437 cp1252 \n  retrotxt list tables",
 	Run: func(cmd *cobra.Command, args []string) {
 		checkUse(cmd, args...)
+		logs.ArgFatal(args...)
 	},
 }
 
