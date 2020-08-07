@@ -467,9 +467,13 @@ func setFont(value string) {
 
 func setFontEmbed(value bool) {
 	var name = "html.font.embed"
-	elm := "@font-face{\n  font-family: vga8;\n  src: url(data:font/woff2;base64,[a large font binary will be embedded here]...) format('woff2');\n}"
+	elm := `@font-face{
+  font-family: vga8;
+  src: url(data:font/woff2;base64,[a large font binary will be embedded here]...) format('woff2');
+}`
 	fmt.Println(ColorCSS(elm))
-	q := "This is not recommended unless you need to create self-contained HTML files for offline distribution.\nEmbed the font as base64 data in the HTML"
+	q := `This is not recommended unless you need to create self-contained HTML files for offline distribution.
+Embed the font as base64 data in the HTML`
 	if value {
 		q = "Keep the embedded font option"
 	}

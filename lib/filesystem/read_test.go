@@ -48,7 +48,8 @@ func TestReadControls(t *testing.T) {
 	tmp0 := fileExample("\x1B\x5b0mhello world\n", 0)
 	tmp1 := fileExample("\x1B\x5b1mhello world\x1B\x5b0m\n", 1)
 	tmp2 := fileExample("hello \x1B\x5b1m😄😄😄\x1B\x5b0m\n", 2)
-	tmp3 := fileExample("\x1B\x5b0m\x1B\x5b34mH\x1B\x5b1me\x1B\x5b32ml\x1B\x5b0;32ml\x1B\x5b1;36mo\x1B\x5b37m w\x1B\x5b0mo\x1B\x5b33mr\x1B\x5b1ml\x1B\x5b35md\x1B\x5b0;35m!\x1B\x5b37m\n", 3)
+	tmp3 := fileExample("\x1B\x5b0m\x1B\x5b34mH\x1B\x5b1me\x1B\x5b32ml\x1B\x5b0;32ml\x1B\x5b1;36mo\x1B\x5b37m "+
+		"w\x1B\x5b0mo\x1B\x5b33mr\x1B\x5b1ml\x1B\x5b35md\x1B\x5b0;35m!\x1B\x5b37m\n", 3)
 	tests := []struct {
 		name      string
 		wantCount int

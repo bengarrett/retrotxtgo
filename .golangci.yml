@@ -129,7 +129,7 @@ linters:
     - govet
     - ineffassign
     - interfacer
-    #- lll # TODO
+    - lll
     - maligned
     - misspell
     - nakedret
