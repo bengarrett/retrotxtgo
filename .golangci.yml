@@ -23,7 +23,7 @@ linters-settings:
     lines: 100
     statements: 50
   gci:
-    local-prefixes: github.com/golangci/golangci-lint
+    local-prefixes: retrotxt.com/retrotxt
   goconst:
     # minimal length of string constant, 3 by default
     min-len: 3
@@ -46,13 +46,13 @@ linters-settings:
     min-complexity: 15
   gofmt:
     # simplify code: gofmt with `-s` option, true by default
-    simplify: true
+    simplify: false
   gofumpt:
     # Choose whether or not to use the extra rules that are disabled
     # by default
     extra-rules: false
   goimports:
-    local-prefixes: github.com/golangci/golangci-lint
+    local-prefixes: retrotxt.com/retrotxt
   golint:
     # minimal confidence for issues, default is 0.8
     min-confidence: 0
@@ -106,10 +106,10 @@ linters:
     - goconst
     # - gocritic
     - gocyclo
-    - gofmt
-    - gofumpt
+    #- gofmt
+    #- gofumpt
     - goheader
-    - goimports
+    #- goimports
     - golint
     # - gomnd
     # - goprintffuncname
@@ -119,7 +119,7 @@ linters:
     - ineffassign
     - interfacer
     # - lll
-    - maligned
+    #- maligned
     # - misspell
     # - nakedret
     - noctx
@@ -156,18 +156,24 @@ issues:
         - dupl
         - gosec
         - unused
-    - path: sauce\.go
+    - path: filesystem/read\.go
       linters:
         - unused
         #     # https://github.com/go-critic/go-critic/issues/926
-#     - linters:
-#         - gocritic
-#       text: "unnecessaryDefer:"
-
-# run:
-#   skip-dirs:
-#     - internal
-#     - static
+    #     - linters:
+    #         - gocritic
+    #       text: "unnecessaryDefer:"
+    # Exclude known linters from partially hard-vendored code,
+    # which is impossible to exclude via "nolint" comments.
+    - path: info/info\.go
+      text: "weak cryptographic primitive"
+      linters:
+        - gosec
+run:
+  skip-dirs:
+    - internal
+    - lib/sauce
+    - static
 # golangci.com configuration
 # https://github.com/golangci/golangci/wiki/Configuration
 # service:
