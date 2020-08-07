@@ -11,7 +11,7 @@ func HexDecode(hexadecimal string) (result []byte, err error) {
 	result = make([]byte, hex.DecodedLen(len(src)))
 	_, err = hex.Decode(result, src)
 	if err != nil {
-		return nil, fmt.Errorf("could not decode hexadecimal string: %q: %s", hexadecimal, err)
+		return nil, fmt.Errorf("could not decode hexadecimal string: %q: %w", hexadecimal, err)
 	}
 	return result, err
 }

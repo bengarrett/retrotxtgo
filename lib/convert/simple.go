@@ -11,13 +11,15 @@ import (
 	"golang.org/x/text/transform"
 )
 
+var ErrNoUTF8 = errors.New("string is not encoded as utf8")
+
 // DString decodes simple character encoding text.
 func DString(s string, c charmap.Charmap) (result []byte, err error) {
 	decoder := c.NewDecoder()
 	reader := transform.NewReader(strings.NewReader(s), decoder)
 	result, err = ioutil.ReadAll(reader)
 	if err != nil {
-		return nil, fmt.Errorf("dstring ioutil readall error: %s", err)
+		return nil, fmt.Errorf("dstring ioutil readall error: %w", err)
 	}
 	return result, nil
 }
@@ -25,13 +27,13 @@ func DString(s string, c charmap.Charmap) (result []byte, err error) {
 // EString encodes text into a simple character encoding.
 func EString(s string, c charmap.Charmap) (result []byte, err error) {
 	if !utf8.Valid([]byte(s)) {
-		return result, errors.New("estring string is not encoded as utf8")
+		return result, fmt.Errorf("estring: %w", ErrNoUTF8)
 	}
 	encoder := c.NewEncoder()
 	reader := transform.NewReader(strings.NewReader(s), encoder)
 	result, err = ioutil.ReadAll(reader)
 	if err != nil {
-		return nil, fmt.Errorf("estring ioutil readall error: %s", err)
+		return nil, fmt.Errorf("estring ioutil readall error: %w", err)
 	}
 	return result, nil
 }
@@ -40,7 +42,7 @@ func EString(s string, c charmap.Charmap) (result []byte, err error) {
 func D437(s string) (result []byte, err error) {
 	result, err = DString(s, *charmap.CodePage437)
 	if err != nil {
-		return nil, fmt.Errorf("decode code page 437: %s", err)
+		return nil, fmt.Errorf("decode code page 437: %w", err)
 	}
 	return result, nil
 }
@@ -49,7 +51,7 @@ func D437(s string) (result []byte, err error) {
 func E437(s string) (result []byte, err error) {
 	result, err = EString(s, *charmap.CodePage437)
 	if err != nil {
-		return nil, fmt.Errorf("encode code page 437: %s", err)
+		return nil, fmt.Errorf("encode code page 437: %w", err)
 	}
 	return result, nil
 }

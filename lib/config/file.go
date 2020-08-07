@@ -14,6 +14,11 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
+var (
+	ErrMissing = errors.New("config does not exist")
+	ErrRxt     = errors.New("not a retrotxt config file")
+)
+
 // InitDefaults initialises flag and configuration defaults.
 func InitDefaults() {
 	for key, val := range Defaults {
@@ -85,13 +90,13 @@ func SetConfig(flag string) (err error) {
 					return nil
 				}
 			}
-			return fmt.Errorf("does not exist\n\t use the command:retrotxt config create --config=%s", flag)
+			return fmt.Errorf("set config: %w\nuse the command, retrotxt config create --config=%s", ErrMissing, flag)
 		}
 		// user config file fail
 		return nil
 	} else if flag != "" {
 		if len(viper.AllKeys()) == 0 {
-			return errors.New("is not a retrotxt config file")
+			return fmt.Errorf("set config: %w", ErrRxt)
 		}
 		// always print the config location when the --config flag is used
 		if len(os.Args) > 0 && os.Args[1] == "config" {
@@ -111,17 +116,17 @@ func UpdateConfig(name string, print bool) (err error) {
 	}
 	data, err := Marshal()
 	if err != nil {
-		return fmt.Errorf("config update marshal failed: %s", err)
+		return fmt.Errorf("config update marshal failed: %w", err)
 	}
 	out, err := yaml.Marshal(&data)
 	if err != nil {
-		return fmt.Errorf("config update marshal data failed: %s", err)
+		return fmt.Errorf("config update marshal data failed: %w", err)
 	}
 	// prepend comments
 	cmt := []byte("# RetroTxt configuration file")
 	out = bytes.Join([][]byte{cmt, out}, []byte("\n"))
 	if err = ioutil.WriteFile(name, out, filemode); err != nil {
-		return fmt.Errorf("config update saving data to the file failed: %q: %s", name, err)
+		return fmt.Errorf("config update saving data to the file failed: %q: %w", name, err)
 	}
 	if print {
 		fmt.Println("The change is saved")

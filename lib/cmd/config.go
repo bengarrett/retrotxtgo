@@ -163,9 +163,9 @@ var configShellCmd = &cobra.Command{
 				logs.Fatal("shell", "zsh", err)
 			}
 		default:
-			logs.Fatal("the interpreter is not supported:",
+			logs.Fatal(fmt.Sprintf("options: %s", config.Format.Shell[:]),
 				configFlag.shell,
-				fmt.Errorf("options: %s", config.Format.Shell[:]))
+				ErrIntpr)
 		}
 		if err := str.Highlight(buf.String(), lexer, style); err != nil {
 			logs.Fatal("config", "shell", err)

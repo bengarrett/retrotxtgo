@@ -2,7 +2,6 @@ package config
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -78,9 +77,9 @@ func Update(name string) {
 	if !Validate(name) {
 		h := logs.Hint{
 			Error: logs.Generic{
-				Issue: "invalid setting name",
+				Issue: "invalid name",
 				Arg:   fmt.Sprintf("%q for config", name),
-				Err:   errors.New(("to see a list of setting names")),
+				Err:   ErrCFG,
 			},
 			Hint: "config set --list",
 		}
@@ -338,10 +337,10 @@ func portInfo() string {
 
 func previewMeta(name, value string) {
 	if name == "" {
-		logs.LogFatal(errors.New("preview meta name cannot be empty"))
+		logs.LogFatal(fmt.Errorf("preview meta: %w", ErrNoName))
 	}
 	if !Validate(name) {
-		logs.LogFatal(fmt.Errorf("preview meta setting name is not known: %q", name))
+		logs.LogFatal(fmt.Errorf("preview meta %q: %w", name, ErrSetting))
 	}
 	s := strings.Split(name, ".")
 	const req = 3
@@ -383,10 +382,10 @@ func previewPrompt(name, value string) (p string) {
 
 func save(name string, value interface{}) {
 	if name == "" {
-		logs.LogFatal(errors.New("save name value cannot be empty"))
+		logs.LogFatal(fmt.Errorf("save: %w", ErrNoName))
 	}
 	if !Validate(name) {
-		logs.LogFatal(fmt.Errorf("save name is not known: %q", name))
+		logs.LogFatal(fmt.Errorf("save %q: %w", name, ErrSetting))
 	}
 	// don't save unchanged input values
 	if viper.Get(name) == fmt.Sprint(value) {
@@ -408,7 +407,7 @@ func save(name string, value interface{}) {
 
 func setDirectory(name string) {
 	if name == "" {
-		logs.LogFatal(errors.New("set directory name cannot be empty"))
+		logs.LogFatal(fmt.Errorf("set directory: %w", ErrNoName))
 	}
 	dir := dirExpansion(prompt.String())
 	if setupMode && dir == "" {
@@ -430,7 +429,7 @@ func setDirectory(name string) {
 
 func setEditor(name string) {
 	if name == "" {
-		logs.LogFatal(errors.New("set editor name cannot be empty"))
+		logs.LogFatal(fmt.Errorf("set editor: %w", ErrNoName))
 	}
 	v := prompt.String()
 	switch v {
@@ -495,7 +494,7 @@ func setGenerator(value bool) {
 
 func setIndex(name string, data ...string) {
 	if name == "" {
-		logs.LogFatal(errors.New("setindex name string is empty"))
+		logs.LogFatal(fmt.Errorf("set index: %w", ErrNoName))
 	}
 	p := prompt.IndexStrings(&data)
 	switch p {
@@ -521,7 +520,7 @@ func setNoTranslate(value bool) {
 
 func setPort(name string) {
 	if name == "" {
-		logs.LogFatal(errors.New("set port name cannot be empty"))
+		logs.LogFatal(fmt.Errorf("set port: %w", ErrNoName))
 	}
 	v := prompt.Port(true)
 	if setupMode && v == 0 {
@@ -557,7 +556,7 @@ func setShortStrings(name string, data ...string) {
 
 func setString(name string) {
 	if name == "" {
-		logs.LogFatal(errors.New("set string name cannot be empty"))
+		logs.LogFatal(fmt.Errorf("set string: %w", ErrNoName))
 	}
 	v := prompt.String()
 	switch v {
@@ -571,7 +570,7 @@ func setString(name string) {
 
 func setStrings(name string, data ...string) {
 	if name == "" {
-		logs.LogFatal(errors.New("set strings name cannot be empty"))
+		logs.LogFatal(fmt.Errorf("set strings: %w", ErrNoName))
 	}
 	v := prompt.Strings(&data)
 	switch v {

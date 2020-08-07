@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -22,7 +21,7 @@ func Edit() (err logs.Generic) {
 	if edit == "" {
 		return logs.Generic{
 			Issue: "no suitable editor could be found",
-			Err:   errors.New("set one by creating an $EDITOR environment variable in your shell configuration"),
+			Err:   ErrEnv,
 		}
 	}
 	// credit: https://stackoverflow.com/questions/21513321/how-to-start-vim-from-go

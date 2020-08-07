@@ -19,6 +19,8 @@ import (
 
 var setupMode = false
 
+var ErrLogo = errors.New("retrotxt logo is missing")
+
 // Setup walks through all the settings and saves them to the configuration file.
 func Setup() {
 	setupMode, prompt.SetupMode = true, true
@@ -58,7 +60,7 @@ func logo() {
 	n := "text/retrotxt.utf8ans"
 	b := pack.Get(n)
 	if b == nil {
-		logs.Fatal("unknown pack name", n, errors.New("retrotxt logo is missing"))
+		logs.Fatal("unknown pack name", n, ErrLogo)
 	}
 	// convert and print
 	fmt.Println(string(b))

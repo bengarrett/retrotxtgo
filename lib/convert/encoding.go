@@ -98,6 +98,8 @@ var Characters = map[int]rune{
 	SquareRoot:    CheckMark,         // ✓
 }
 
+var ErrChainANSI = errors.New("ansi() is a chain method that is to be used in conjunction with swap: c.swap().ansi()")
+
 // Encoding returns the named character set encoding.
 func Encoding(name string) (encoding.Encoding, error) {
 	// use charmap string
@@ -127,7 +129,7 @@ func Encoding(name string) (encoding.Encoding, error) {
 		enc, err = ianaindex.IANA.Encoding(n)
 	}
 	if err != nil {
-		return enc, fmt.Errorf("encoding could not match name %q or alias %q: %s",
+		return enc, fmt.Errorf("encoding could not match name %q or alias %q: %w",
 			name, a, err)
 	}
 	return enc, nil
@@ -330,7 +332,7 @@ func (c *Convert) ANSI() {
 		return
 	}
 	if c.len == 0 {
-		log.Fatal(errors.New("ansi() is a chain method that is to be used in conjunction with swap: c.swap().ansi()"))
+		log.Fatal(ErrChainANSI)
 	}
 	for i, r := range c.Runes {
 		if i+1 >= c.len {

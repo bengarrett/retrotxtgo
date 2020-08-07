@@ -133,7 +133,7 @@ func viewPackage(cmd *cobra.Command, conv convert.Args, name string) (ok bool, e
 	}
 	b := pack.Get(pkg.name)
 	if b == nil {
-		return false, fmt.Errorf("pack name is unknown: %q", pkg.name)
+		return false, fmt.Errorf("view package %q: %w", pkg.name, ErrPackGet)
 	}
 	// encode defaults
 	if cp := cmd.Flags().Lookup("encode"); !cp.Changed {
@@ -167,12 +167,12 @@ func viewPackage(cmd *cobra.Command, conv convert.Args, name string) (ok bool, e
 func toDecode(name string, r ...rune) ([]rune, error) {
 	encode, err := convert.Encoding(name)
 	if err != nil {
-		return r, fmt.Errorf("encoding not known or supported %s: %s", encode, err)
+		return r, fmt.Errorf("encoding not known or supported %s: %w", encode, err)
 	}
 	cp, err := encode.NewEncoder().String(string(r))
 	if err != nil {
 		if len(cp) == 0 {
-			return r, fmt.Errorf("encoder could not convert runes to %s. %s", encode, err)
+			return r, fmt.Errorf("encoder could not convert runes to %s: %w", encode, err)
 		}
 		return []rune(cp), nil
 	}

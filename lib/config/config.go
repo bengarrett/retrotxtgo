@@ -13,8 +13,7 @@ import (
 )
 
 const (
-	missingKey      = "key does not exist or is not a bool value"
-	httpPort   uint = 8080
+	httpPort uint = 8080
 
 	editor   = "editor"
 	fontEmb  = "html.font.embed"
@@ -125,6 +124,15 @@ const (
 
 var scope = gap.NewScope(gap.User, "retrotxt")
 
+var (
+	ErrCFG     = errors.New("unknown configuration name")
+	ErrEnv     = errors.New("set one by creating an $EDITOR environment variable in your shell configuration")
+	ErrKey     = errors.New("key does not exist or is not a bool value")
+	ErrNoName  = errors.New("name cannot be empty")
+	ErrNoFName = errors.New("filename cannot be empty")
+	ErrSetting = errors.New("configuration setting name is not known")
+)
+
 // Formats choices for flags.
 type Formats struct {
 	Info    [5]string
@@ -207,7 +215,7 @@ func Marshal() (interface{}, error) {
 		case styleh:
 			sc.Style.HTML = getString(key)
 		default:
-			return sc, fmt.Errorf("unknown configuration name: %q", key)
+			return sc, fmt.Errorf("mashal %q: %w", key, ErrCFG)
 		}
 	}
 	return sc, nil
@@ -221,7 +229,7 @@ func getBool(key string) bool {
 	case bool:
 		return Defaults[key].(bool)
 	default:
-		logs.Fatal("getbool", key, errors.New(missingKey))
+		logs.Fatal("getbool", key, ErrKey)
 	}
 	return false
 }
@@ -234,7 +242,7 @@ func getUint(key string) uint {
 	case uint:
 		return Defaults[key].(uint)
 	default:
-		logs.Fatal("getunit", key, errors.New(missingKey))
+		logs.Fatal("getunit", key, ErrKey)
 	}
 	return 0
 }
@@ -247,7 +255,7 @@ func getString(key string) string {
 	case string:
 		return Defaults[key].(string)
 	default:
-		logs.Fatal("getstring", key, errors.New(missingKey))
+		logs.Fatal("getstring", key, ErrKey)
 	}
 	return ""
 }

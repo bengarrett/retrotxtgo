@@ -3,6 +3,7 @@ package online
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -12,6 +13,11 @@ import (
 const (
 	userAgent   = "retrotxt version ping"
 	httpTimeout = time.Second * 3
+)
+
+var (
+	ErrJSON = errors.New("response body data is not valid json")
+	ErrMash = errors.New("response body json could not unmarshal")
 )
 
 // API interface to store the JSON results from GitHub.
@@ -28,7 +34,7 @@ func Endpoint(url, etag string) (useCache bool, data API, err error) {
 	useCache = false
 	resp, body, err := Get(url, etag)
 	if err != nil {
-		return useCache, data, fmt.Errorf("endpoint get failed: %s", err)
+		return useCache, data, fmt.Errorf("endpoint get failed: %w", err)
 	}
 	defer resp.Body.Close()
 	if etag != "" {
@@ -39,10 +45,10 @@ func Endpoint(url, etag string) (useCache bool, data API, err error) {
 		}
 	}
 	if ok := json.Valid(body); !ok {
-		return useCache, data, fmt.Errorf("the endpoint response is not valid json: %s", url)
+		return useCache, data, fmt.Errorf("endpoint %s: %w", url, ErrJSON)
 	}
 	if err = json.Unmarshal(body, &data); err != nil {
-		return useCache, data, fmt.Errorf("could not unmarshal the endpoint: %s", url)
+		return useCache, data, fmt.Errorf("endpoint %s: %w", url, ErrMash)
 	}
 	data["etag"] = resp.Header.Get("Etag")
 	return useCache, data, nil
@@ -59,7 +65,7 @@ func Get(url, etag string) (resp *http.Response, body []byte, err error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	defer cancel()
 	if err != nil {
-		return nil, body, fmt.Errorf("getting a new request error: %s", err)
+		return nil, body, fmt.Errorf("getting a new request error: %w", err)
 	}
 	if etag != "" {
 		req.Header.Set("If-None-Match", etag)
@@ -67,12 +73,12 @@ func Get(url, etag string) (resp *http.Response, body []byte, err error) {
 	req.Header.Set("User-Agent", userAgent)
 	resp, err = client.Do(req)
 	if err != nil {
-		return nil, body, fmt.Errorf("requesting to set the get user-agent header: %s", err)
+		return nil, body, fmt.Errorf("requesting to set the get user-agent header: %w", err)
 	}
 	defer resp.Body.Close()
 	body, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, body, fmt.Errorf("reading the response body failed: %s", err)
+		return nil, body, fmt.Errorf("reading the response body failed: %w", err)
 	}
 	return resp, body, resp.Body.Close()
 }
@@ -88,12 +94,12 @@ func Ping(url string) (ok bool, err error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodHead, url, nil)
 	defer cancel()
 	if err != nil {
-		return ok, fmt.Errorf("pinging a new request error: %s", err)
+		return ok, fmt.Errorf("pinging a new request error: %w", err)
 	}
 	req.Header.Set("User-Agent", userAgent)
 	resp, err := client.Do(req)
 	if err != nil {
-		return ok, fmt.Errorf("requesting to set the ping user-agent header: %s", err)
+		return ok, fmt.Errorf("requesting to set the ping user-agent header: %w", err)
 	}
 	return (resp.StatusCode >= 200 && resp.StatusCode <= 299), resp.Body.Close()
 }

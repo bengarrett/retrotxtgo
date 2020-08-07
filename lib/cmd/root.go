@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"sort"
@@ -19,6 +20,11 @@ import (
 type rootFlags struct {
 	config string
 }
+
+var (
+	ErrIntpr   = errors.New("the interpreter is not supported")
+	ErrPackGet = errors.New("pack.get name is invalid")
+)
 
 var rootFlag = rootFlags{}
 

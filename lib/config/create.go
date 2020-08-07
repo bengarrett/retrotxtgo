@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -15,24 +14,24 @@ import (
 // Create a named configuration file.
 func Create(name string, ow bool) (err error) {
 	if name == "" {
-		return errors.New("the configuration filename cannot be empty")
+		return fmt.Errorf("create configuration: %w", ErrNoFName)
 	}
 	if _, err := os.Stat(name); !os.IsNotExist(err) && !ow {
 		configDoesExist(cmdPath, "create")
 	} else if os.IsNotExist(err) {
 		// a missing named file is okay
 	} else if err != nil {
-		return fmt.Errorf("could not access the configuration file: %q: %s", name, err)
+		return fmt.Errorf("could not access the configuration file: %q: %w", name, err)
 	}
 	// create a new config file
 	path, err := filesystem.Touch(name)
 	if err != nil {
-		return fmt.Errorf("could not create the configuration file: %q: %s", name, err)
+		return fmt.Errorf("could not create the configuration file: %q: %w", name, err)
 	}
 	InitDefaults()
 	err = UpdateConfig(path, false)
 	if err != nil {
-		return fmt.Errorf("could not update the configuration file: %q: %s", name, err)
+		return fmt.Errorf("could not update the configuration file: %q: %w", name, err)
 	}
 	return nil
 }
