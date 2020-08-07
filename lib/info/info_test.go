@@ -29,7 +29,7 @@ func ExampleDetail_XML() {
 }
 
 var sampleFile = func() string {
-	b := []byte(filesystem.T["Tabs"]) // Tabs and Unicode glyphs
+	b := []byte(filesystem.T()["Tabs"]) // Tabs and Unicode glyphs
 	path, err := filesystem.SaveTemp("info_test.txt", b...)
 	if err != nil {
 		log.Fatal(err)

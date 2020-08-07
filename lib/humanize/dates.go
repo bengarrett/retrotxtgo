@@ -15,20 +15,23 @@ const (
 	H24 = "15:04"
 )
 
-var (
-	// DMY12 12-hour day month year.
-	DMY12 = fmt.Sprintf("%s %s", DMY, H12)
-	// DMY24 24-hour day month year.
-	DMY24 = fmt.Sprintf("%s %s", DMY, H24)
-	// YMD12 12-hour year month day.
-	YMD12 = fmt.Sprintf("%s %s", YMD, H12)
-	// YMD24 24-hour year month day.
-	YMD24 = fmt.Sprintf("%s %s", YMD, H24)
-	// MDY12 12-hour month day year.
-	MDY12 = fmt.Sprintf("%s %s", MDY, H12)
-	// MDY24 24-hour month day year.
-	MDY24 = fmt.Sprintf("%s %s", MDY, H24)
-)
+// DMY12 12-hour day month year.
+func DMY12() string { return fmt.Sprintf("%s %s", DMY, H12) }
+
+// DMY24 24-hour day month year.
+func DMY24() string { return fmt.Sprintf("%s %s", DMY, H24) }
+
+// YMD12 12-hour year month day.
+func YMD12() string { return fmt.Sprintf("%s %s", YMD, H12) }
+
+// YMD24 24-hour year month day.
+func YMD24() string { return fmt.Sprintf("%s %s", YMD, H24) }
+
+// MDY12 12-hour month day year.
+func MDY12() string { return fmt.Sprintf("%s %s", MDY, H12) }
+
+// MDY24 24-hour month day year.
+func MDY24() string { return fmt.Sprintf("%s %s", MDY, H24) }
 
 // Date returns a formatted date string.
 func Date(format string, t time.Time) string {
@@ -70,17 +73,17 @@ func Datetime(format string, t time.Time) string {
 	}
 	switch format {
 	case "DMY12":
-		return t.Format(DMY12)
+		return t.Format(DMY12())
 	case "YMD12":
-		return t.Format(YMD12)
+		return t.Format(YMD12())
 	case "MDY12":
-		return t.Format(MDY12)
+		return t.Format(MDY12())
 	case "DMY24":
-		return t.Format(DMY24)
+		return t.Format(DMY24())
 	case "YMD24":
-		return t.Format(YMD24)
+		return t.Format(YMD24())
 	case "MDY24":
-		return t.Format(MDY24)
+		return t.Format(MDY24())
 	}
 	return ""
 }

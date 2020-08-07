@@ -13,7 +13,6 @@ import (
 
 	"retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/logs"
-	"retrotxt.com/retrotxt/lib/prompt"
 	"retrotxt.com/retrotxt/lib/str"
 )
 
@@ -21,7 +20,6 @@ var ErrLogo = errors.New("retrotxt logo is missing")
 
 // Setup walks through all the settings and saves them to the configuration file.
 func Setup() {
-	prompt.SetupMode = true
 	keys := Keys()
 	logo()
 	PrintLocation()

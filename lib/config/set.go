@@ -25,13 +25,13 @@ import (
 // ColorCSS prints colored CSS syntax highlighting.
 func ColorCSS(elm string) string {
 	style := viper.GetString("style.html")
-	return colorElm(elm, "css", style)
+	return colorElm(elm, "css", style, true)
 }
 
 // ColorHTML prints colored syntax highlighting to HTML elements.
 func ColorHTML(elm string) string {
 	style := viper.GetString("style.html")
-	return colorElm(elm, "html", style)
+	return colorElm(elm, "html", style, true)
 }
 
 // List and print all the available configurations.
@@ -162,22 +162,25 @@ func updatePrompt(name string, setup bool, value interface{}) {
 		setString(name, setup)
 	case "html.meta.color-scheme":
 		previewMeta(name, value.(string))
-		var prints = make([]string, len(create.ColorScheme[:]))
-		copy(prints, create.ColorScheme[:])
+		ccc := create.ColorScheme()
+		var prints = make([]string, len(ccc[:]))
+		copy(prints, ccc[:])
 		fmt.Println(str.UnderlineKeys(prints...))
-		setShortStrings(name, setup, create.ColorScheme[:]...)
+		setShortStrings(name, setup, ccc[:]...)
 	case "html.meta.generator":
 		setGenerator(value.(bool))
 	case "html.meta.notranslate":
 		setNoTranslate(value.(bool), setup)
 	case "html.meta.referrer":
 		previewMeta(name, value.(string))
-		fmt.Println(str.NumberizeKeys(create.Referrer[:]...))
-		setIndex(name, setup, create.Referrer[:]...)
+		cr := create.Referrer()
+		fmt.Println(str.NumberizeKeys(cr[:]...))
+		setIndex(name, setup, cr[:]...)
 	case "html.meta.robots":
 		previewMeta(name, value.(string))
-		fmt.Println(str.NumberizeKeys(create.Robots[:]...))
-		setIndex(name, setup, create.Robots[:]...)
+		cr := create.Robots()
+		fmt.Println(str.NumberizeKeys(cr[:]...))
+		setIndex(name, setup, cr[:]...)
 	case "html.meta.retrotxt":
 		setRetrotxt(value.(bool))
 	case "html.title":
@@ -225,13 +228,13 @@ func Validate(key string) (ok bool) {
 	return true
 }
 
-func colorElm(elm, lexer, style string) string {
+func colorElm(elm, lexer, style string, color bool) string {
 	if elm == "" {
 		return ""
 	}
 	var b bytes.Buffer
 	_ = io.Writer(&b)
-	if err := str.HighlightWriter(&b, elm, lexer, style); err != nil {
+	if err := str.HighlightWriter(&b, elm, lexer, style, color); err != nil {
 		logs.Fatal("logs", "colorhtml", err)
 	}
 	return fmt.Sprintf("\n%s\n", b.String())
@@ -263,7 +266,7 @@ func (n names) string(theme bool) string {
 			break
 		}
 		var b bytes.Buffer
-		if err := str.HighlightWriter(&b, t, "yaml", name); err != nil {
+		if err := str.HighlightWriter(&b, t, "yaml", name, true); err != nil {
 			logs.Println("yaml highlight writer failed", name, err)
 		}
 		s = append(s, b.String())
@@ -409,7 +412,7 @@ func setDirectory(name string, setup bool) {
 	if name == "" {
 		logs.LogFatal(fmt.Errorf("set directory: %w", ErrNoName))
 	}
-	dir := dirExpansion(prompt.String())
+	dir := dirExpansion(prompt.String(setup))
 	if setup && dir == "" {
 		return
 	}
@@ -431,7 +434,7 @@ func setEditor(name string, setup bool) {
 	if name == "" {
 		logs.LogFatal(fmt.Errorf("set editor: %w", ErrNoName))
 	}
-	v := prompt.String()
+	v := prompt.String(setup)
 	switch v {
 	case "-":
 		save(name, setup, "")
@@ -500,7 +503,7 @@ func setIndex(name string, setup bool, data ...string) {
 	if name == "" {
 		logs.LogFatal(fmt.Errorf("set index: %w", ErrNoName))
 	}
-	p := prompt.IndexStrings(&data)
+	p := prompt.IndexStrings(&data, setup)
 	switch p {
 	case "-":
 		p = ""
@@ -526,7 +529,7 @@ func setPort(name string, setup bool) {
 	if name == "" {
 		logs.LogFatal(fmt.Errorf("set port: %w", ErrNoName))
 	}
-	v := prompt.Port(true)
+	v := prompt.Port(true, setup)
 	if setup && v == 0 {
 		return
 	}
@@ -562,7 +565,7 @@ func setString(name string, setup bool) {
 	if name == "" {
 		logs.LogFatal(fmt.Errorf("set string: %w", ErrNoName))
 	}
-	v := prompt.String()
+	v := prompt.String(setup)
 	switch v {
 	case "-":
 		v = ""
@@ -576,7 +579,7 @@ func setStrings(name string, setup bool, data ...string) {
 	if name == "" {
 		logs.LogFatal(fmt.Errorf("set strings: %w", ErrNoName))
 	}
-	v := prompt.Strings(&data)
+	v := prompt.Strings(&data, setup)
 	switch v {
 	case "-":
 		v = ""

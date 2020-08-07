@@ -15,20 +15,6 @@ import (
 	"retrotxt.com/retrotxt/lib/logs"
 )
 
-// T are short strings shared between various app tests.
-var T = map[string]string{
-	// Newline sample using yjr operating system defaults
-	"Newline": "a\nb\nc...\n",
-	// Symbols for Unicode Wingdings
-	"Symbols": `[☠|☮|♺]`,
-	// Tabs and Unicode glyphs
-	"Tabs": "☠\tSkull and crossbones\n\n☮\tPeace symbol\n\n♺\tRecycling",
-	// Escapes and control codes.
-	"Escapes": "bell:\a,back:\b,tab:\t,form:\f,vertical:\v,quote:\"",
-	// Digits in various formats
-	"Digits": "\xb0\260\u0170\U00000170",
-}
-
 const (
 	win = "windows"
 	cr  = "\x0d"
@@ -146,6 +132,22 @@ func SaveTemp(filename string, b ...byte) (path string, err error) {
 		return path, fmt.Errorf("could not save the temporary file: %w", err)
 	}
 	return path, nil
+}
+
+// T are short strings shared between various app tests.
+func T() map[string]string {
+	return map[string]string{
+		// Newline sample using yjr operating system defaults
+		"Newline": "a\nb\nc...\n",
+		// Symbols for Unicode Wingdings
+		"Symbols": `[☠|☮|♺]`,
+		// Tabs and Unicode glyphs
+		"Tabs": "☠\tSkull and crossbones\n\n☮\tPeace symbol\n\n♺\tRecycling",
+		// Escapes and control codes.
+		"Escapes": "bell:\a,back:\b,tab:\t,form:\f,vertical:\v,quote:\"",
+		// Digits in various formats
+		"Digits": "\xb0\260\u0170\U00000170",
+	}
 }
 
 // Tar addes files to a named tar file archive.

@@ -64,9 +64,6 @@ type File struct {
 	Modified  time.Time `xml:"modified"`
 }
 
-// Language tag used for numeric syntax formatting.
-var Language = language.English
-
 // DTFormat is the datetime format.
 // DMY12, YMD12, MDY12, DMY24, YMD24, MDY24.
 const DTFormat = "DMY24"
@@ -99,6 +96,11 @@ func Info(name, format string) logs.Generic {
 		gen.Err = err
 	}
 	return gen
+}
+
+// Language tag used for numeric syntax formatting.
+func Language() language.Tag {
+	return language.English
 }
 
 // Print the meta and operating system details of a file.
@@ -267,7 +269,7 @@ func (d *Detail) Read(name string) (err error) {
 
 // parse fileinfo and file content.
 func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
-	p := message.NewPrinter(Language)
+	p := message.NewPrinter(Language())
 	ms := mimesniffer.Sniff(data)
 	if strings.Contains(ms, ";") {
 		d.Mime = strings.Split(ms, ";")[0]
@@ -289,7 +291,7 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 		if stat.Size() < kB {
 			d.Size = p.Sprintf("%v bytes", p.Sprint(stat.Size()))
 		} else {
-			d.Size = p.Sprintf("%v (%v bytes)", humanize.Bytes(stat.Size(), Language), p.Sprint(stat.Size()))
+			d.Size = p.Sprintf("%v (%v bytes)", humanize.Bytes(stat.Size(), Language()), p.Sprint(stat.Size()))
 		}
 	} else {
 		d.Bytes = int64(len(data))
@@ -300,7 +302,7 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 		if l < kB {
 			d.Size = p.Sprintf("%v bytes", p.Sprint(l))
 		} else {
-			d.Size = p.Sprintf("%v (%v bytes)", humanize.Bytes(l, Language), p.Sprint(l))
+			d.Size = p.Sprintf("%v (%v bytes)", humanize.Bytes(l, Language()), p.Sprint(l))
 		}
 	}
 	const channels = 3
@@ -340,7 +342,7 @@ func (d Detail) JSON(indent bool) (js []byte) {
 
 // Text format and returns the details of a file.
 func (d Detail) Text(color bool) string {
-	p := message.NewPrinter(Language)
+	p := message.NewPrinter(Language())
 	c.Enable = color
 	var info = func(t string) string {
 		return str.Cinf(fmt.Sprintf("%s\t", t))

@@ -30,7 +30,7 @@ func Info(style string) (err logs.Generic) {
 			fmt.Println(string(out))
 			break
 		}
-		e = str.Highlight(string(out), "json", style)
+		e = str.Highlight(string(out), "json", style, true)
 		if e != nil {
 			return logs.Generic{
 				Issue: "failed to run highligher",

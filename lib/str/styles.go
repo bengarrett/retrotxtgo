@@ -23,9 +23,6 @@ import (
 
 var ErrRune = errors.New("invalid encoded rune")
 
-// TestMode disables piping detection which conflicts with go test.
-var TestMode = false
-
 type terminal int
 
 const (
@@ -97,12 +94,12 @@ func Center(text string, width int) string {
 }
 
 // Highlight and print the syntax of the source string except when piped to stdout.
-func Highlight(source, lexer, style string) (err error) {
-	return HighlightWriter(os.Stdout, source, lexer, style)
+func Highlight(source, lexer, style string, color bool) (err error) {
+	return HighlightWriter(os.Stdout, source, lexer, style, color)
 }
 
 // HighlightWriter writes the highlight syntax of the source string except when piped to stdout.
-func HighlightWriter(w io.Writer, source, lexer, style string) (err error) {
+func HighlightWriter(w io.Writer, source, lexer, style string, color bool) (err error) {
 	var term = Term()
 	// detect piping for text output or ansi for printing
 	// source: https://stackoverflow.com/questions/43947363/detect-if-a-command-is-piped-or-not
@@ -113,8 +110,8 @@ func HighlightWriter(w io.Writer, source, lexer, style string) (err error) {
 	if term == "none" {
 		// user disabled color output, but it doesn't disable ANSI output
 		fmt.Fprintln(w, source)
-	} else if !TestMode && (fo.Mode()&os.ModeCharDevice) == 0 {
-		// disable colour when piping, this will also trigger with go test
+	} else if !color && (fo.Mode()&os.ModeCharDevice) == 0 {
+		// disable colour when piping or running unit tests
 		fmt.Fprintln(w, source)
 	} else if err := quick.Highlight(w, source, lexer, term, style); err != nil {
 		return fmt.Errorf("highlight writer: %w", err)
@@ -257,7 +254,7 @@ func (s JSONExample) String(flag string) {
 	if flag != "" {
 		fmt.Println("\n" + color.Secondary.Sprintf("%s=%q", flag, s.Style.Name))
 	}
-	if err := Highlight(string(out), "json", s.Style.Name); err != nil {
+	if err := Highlight(string(out), "json", s.Style.Name, true); err != nil {
 		// cannot use the logs package as it causes an import cycle error
 		log.Fatalln(fmt.Errorf("json example highlight syntax error: %w", err))
 	}

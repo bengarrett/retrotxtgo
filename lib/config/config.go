@@ -146,10 +146,12 @@ type Formats struct {
 }
 
 // Format flag choices for info, shell and version commands.
-var Format = Formats{
-	Info:    [5]string{"color", "json", "json.min", "text", "xml"},
-	Shell:   [3]string{"bash", "powershell", "zsh"},
-	Version: [4]string{"color", "json", "json.min", "text"},
+func Format() Formats {
+	return Formats{
+		Info:    [5]string{"color", "json", "json.min", "text", "xml"},
+		Shell:   [3]string{"bash", "powershell", "zsh"},
+		Version: [4]string{"color", "json", "json.min", "text"},
+	}
 }
 
 // Enabled returns all the Viper keys holding a value that are used by RetroTxt.

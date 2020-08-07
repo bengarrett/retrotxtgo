@@ -3,8 +3,6 @@ package config
 import (
 	"os"
 	"testing"
-
-	"retrotxt.com/retrotxt/lib/str"
 )
 
 func TestList(t *testing.T) {
@@ -87,7 +85,6 @@ func Test_dirExpansion(t *testing.T) {
 
 func Test_colorElm(t *testing.T) {
 	// set test mode for str.HighlightWriter()
-	str.TestMode = true
 	tests := []struct {
 		name string
 		elm  string
@@ -99,7 +96,7 @@ func Test_colorElm(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := colorElm(tt.elm, "html", "bw"); got != tt.want {
+			if got := colorElm(tt.elm, "html", "bw", false); got != tt.want {
 				t.Errorf("colorhtml() = %v, want %v", got, tt.want)
 			}
 		})

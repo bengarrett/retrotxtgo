@@ -9,12 +9,12 @@ import (
 )
 
 // Alert prints "problem:" in Error color.
-var Alert = func() string {
+func Alert() string {
 	return color.Error.Sprint("problem:")
 }
 
 // Info prints "info:" in Info color.
-var Info = func() string {
+func Info() string {
 	return color.Info.Sprint("info:")
 }
 

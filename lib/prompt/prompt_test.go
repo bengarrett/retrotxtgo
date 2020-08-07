@@ -24,7 +24,7 @@ func Test_pport(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			stdin.Write([]byte(tt.input + "\n")) // \n is a requirement
-			if gotPort := pport(&stdin, tt.validate); gotPort != tt.wantPort {
+			if gotPort := pport(&stdin, tt.validate, false); gotPort != tt.wantPort {
 				t.Errorf("pport() = %v, want %v", gotPort, tt.wantPort)
 			}
 		})
@@ -94,7 +94,7 @@ func Test_keys_prompt(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			stdin.Write([]byte(tt.input + "\n")) // \n is a requirement
-			if gotKey := tt.k.prompt(&stdin); gotKey != tt.wantKey {
+			if gotKey := tt.k.prompt(&stdin, false); gotKey != tt.wantKey {
 				t.Errorf("keys.prompt() = %v, want %v", gotKey, tt.wantKey)
 			}
 		})

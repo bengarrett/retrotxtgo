@@ -163,11 +163,12 @@ var configShellCmd = &cobra.Command{
 				logs.Fatal("shell", "zsh", err)
 			}
 		default:
-			logs.Fatal(fmt.Sprintf("options: %s", config.Format.Shell[:]),
+			s := config.Format().Shell
+			logs.Fatal(fmt.Sprintf("options: %s", s[:]),
 				configFlag.shell,
 				ErrIntpr)
 		}
-		if err := str.Highlight(buf.String(), lexer, style); err != nil {
+		if err := str.Highlight(buf.String(), lexer, style, true); err != nil {
 			logs.Fatal("config", "shell", err)
 		}
 	},
@@ -200,9 +201,10 @@ func init() {
 	configSetCmd.Flags().BoolVarP(&configFlag.configs, "list", "l", false,
 		"list all the available setting names")
 	// shell
+	s := config.Format().Shell
 	configShellCmd.Flags().StringVarP(&configFlag.shell, "interpreter", "i", "",
 		str.Required("user shell to receive retrotxt auto-completions")+
-			str.Options("", true, config.Format.Shell[:]...))
+			str.Options("", true, s[:]...))
 	if err = configShellCmd.MarkFlagRequired("interpreter"); err != nil {
 		logs.Fatal("interpreter flag", "", err)
 	}

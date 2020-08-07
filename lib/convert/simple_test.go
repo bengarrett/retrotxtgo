@@ -43,10 +43,10 @@ func TestCP437Decode(t *testing.T) {
 	}{
 		{"empty", "", "", false},
 		{"hex", cp437hex, "═╣▓╠═", false},
-		{"nl", filesystem.T["Newline"], filesystem.T["Newline"], false},
-		{"utf", filesystem.T["Symbols"], "[Γÿá|Γÿ«|ΓÖ║]", false},
-		{"escapes", filesystem.T["Escapes"], "bell:\a,back:\b,tab:\t,form:\f,vertical:\v,quote:\"", false},
-		{"digits", filesystem.T["Digits"], "░░┼░┼░", false},
+		{"nl", filesystem.T()["Newline"], filesystem.T()["Newline"], false},
+		{"utf", filesystem.T()["Symbols"], "[Γÿá|Γÿ«|ΓÖ║]", false},
+		{"escapes", filesystem.T()["Escapes"], "bell:\a,back:\b,tab:\t,form:\f,vertical:\v,quote:\"", false},
+		{"digits", filesystem.T()["Digits"], "░░┼░┼░", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -97,14 +97,20 @@ const (
 )
 
 // ColorScheme values for the content attribute of <meta name="color-scheme">.
-var ColorScheme = [...]string{"normal", "dark light", "only light"}
+func ColorScheme() [3]string {
+	return [...]string{"normal", "dark light", "only light"}
+}
 
 // Referrer values for the content attribute of <meta name="referrer">.
-var Referrer = [...]string{"no-referrer", "origin", "no-referrer-when-downgrade",
-	"origin-when-cross-origin", "same-origin", "strict-origin", "strict-origin-when-cross-origin", "unsafe-URL"}
+func Referrer() [8]string {
+	return [...]string{"no-referrer", "origin", "no-referrer-when-downgrade",
+		"origin-when-cross-origin", "same-origin", "strict-origin", "strict-origin-when-cross-origin", "unsafe-URL"}
+}
 
 // Robots values for the content attribute of <meta name="robots">.
-var Robots = [...]string{"index", "noindex", "follow", "nofollow", none, "noarchive", "nosnippet", "noimageindex", "nocache"}
+func Robots() [9]string {
+	return [...]string{"index", "noindex", "follow", "nofollow", none, "noarchive", "nosnippet", "noimageindex", "nocache"}
+}
 
 // Layout are HTML template variations.
 type Layout int
@@ -400,7 +406,7 @@ func (args Args) Stdout(b *[]byte) error {
 			fmt.Printf("%s", buf.String())
 			return nil
 		}
-		if err = str.Highlight(buf.String(), "html", args.Syntax); err != nil {
+		if err = str.Highlight(buf.String(), "html", args.Syntax, true); err != nil {
 			return fmt.Errorf("stdout html highlight: %w", err)
 		}
 	}

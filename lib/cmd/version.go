@@ -38,7 +38,8 @@ The shown ` + str.Cc("RetroTxt URL") + ` is the weblink to the application Githu
 if it is launched through an operating system symlink.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if ok := version.Print(versionFlag.format); !ok {
-			logs.FlagFatal("format", versionFlag.format, config.Format.Version[:]...)
+			v := config.Format().Version
+			logs.FlagFatal("format", versionFlag.format, v[:]...)
 		}
 	},
 }
@@ -46,6 +47,7 @@ if it is launched through an operating system symlink.`,
 func init() {
 	// cmds and flags
 	rootCmd.AddCommand(versionCmd)
+	v := config.Format().Version
 	versionCmd.Flags().StringVarP(&versionFlag.format, "format", "f", versionFlag.format,
-		str.Options("output format", true, config.Format.Version[:]...))
+		str.Options("output format", true, v[:]...))
 }

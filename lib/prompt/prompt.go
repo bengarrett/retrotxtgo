@@ -23,18 +23,15 @@ const (
 	PortRec uint = 8080
 )
 
-// SetupMode changes the behavor of prompts to exit on empty inputs.
-var SetupMode = false
-
 // IndexStrings asks for a numeric index position and returns a single choice from a string of keys.
-func IndexStrings(options *[]string) (key string) {
+func IndexStrings(options *[]string, setup bool) (key string) {
 	var k keys = *options
-	return k.prompt(os.Stdin)
+	return k.prompt(os.Stdin, setup)
 }
 
 // Port asks for and returns a HTTP port value.
-func Port(validate bool) (port uint) {
-	return pport(os.Stdin, validate)
+func Port(validate, setup bool) (port uint) {
+	return pport(os.Stdin, validate, setup)
 }
 
 // PortValid checks if the network port is within range to serve HTTP.
@@ -55,14 +52,14 @@ func ShortStrings(options *[]string) (key string) {
 // String asks for and returns a multi-word string.
 // Inputting ⏎ the Enter/Return key exits the program,
 // or returns an empty value when in SetupMode.
-func String() (words string) {
-	return pstring(os.Stdin)
+func String(setup bool) (words string) {
+	return pstring(os.Stdin, setup)
 }
 
 // Strings asks for and returns a single choice from a string of keys.
-func Strings(options *[]string) (key string) {
+func Strings(options *[]string, setup bool) (key string) {
 	var k keys = *options
-	return k.prompt(os.Stdin)
+	return k.prompt(os.Stdin, setup)
 }
 
 // YesNo asks for a yes or no input.
@@ -91,13 +88,13 @@ func check(prompts int) {
 	}
 }
 
-func pport(r io.Reader, validate bool) (port uint) {
+func pport(r io.Reader, validate, setup bool) (port uint) {
 	input, prompts := "", 0
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		prompts++
 		input = scanner.Text()
-		if SetupMode && input == "" {
+		if setup && input == "" {
 			break
 		}
 		if input == "" {
@@ -145,7 +142,7 @@ func parseYN(input string, yesDefault bool) bool {
 	return false
 }
 
-func pstring(r io.Reader) (words string) {
+func pstring(r io.Reader, setup bool) (words string) {
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		words := scanner.Text()
@@ -153,7 +150,7 @@ func pstring(r io.Reader) (words string) {
 		case "-":
 			return "-"
 		case "":
-			if SetupMode {
+			if setup {
 				return ""
 			}
 			os.Exit(0)
@@ -183,7 +180,7 @@ func (k keys) numeric(input string) (key string) {
 	return k[i]
 }
 
-func (k keys) prompt(r io.Reader) (key string) {
+func (k keys) prompt(r io.Reader, setup bool) (key string) {
 	prompts := 0
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
@@ -193,7 +190,7 @@ func (k keys) prompt(r io.Reader) (key string) {
 			fmt.Println("OKAY")
 			return ""
 		}
-		if SetupMode && key == "" {
+		if setup && key == "" {
 			return ""
 		}
 		if n := k.numeric(key); n != "" {
