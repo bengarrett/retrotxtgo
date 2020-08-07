@@ -27,28 +27,28 @@ var TestMode = false
 type terminal int
 
 const (
-	// TerminalMono no colour.
-	TerminalMono terminal = iota
-	// Terminal16 ANSI standard 16 colour.
-	Terminal16
-	// Terminal88 XTerm 88 colour.
-	Terminal88
-	// Terminal256 XTerm 256 colour.
-	Terminal256
-	// Terminal16M ANSI high-colour.
-	Terminal16M
+	// TermMono no colour.
+	TermMono terminal = iota
+	// Term16 ANSI standard 16 colour.
+	Term16
+	// Term88 XTerm 88 colour.
+	Term88
+	// Term256 XTerm 256 colour.
+	Term256
+	// Term16M ANSI high-colour.
+	Term16M
 )
 
 // Formatter takes a terminal value and returns the quick.Highlight formatter value.
 func (t terminal) Formatter() string {
 	switch t {
-	case TerminalMono:
+	case TermMono:
 		return "none"
-	case Terminal16, Terminal88:
+	case Term16, Term88:
 		return "terminal"
-	case Terminal256:
+	case Term256:
 		return "terminal256"
-	case Terminal16M:
+	case Term16M:
 		return "terminal16m"
 	}
 	return ""
@@ -148,7 +148,7 @@ func Term() string {
 	c := strings.TrimSpace(strings.ToLower(os.Getenv("COLORTERM")))
 	switch c {
 	case "24bit", "truecolor":
-		t = Terminal16M
+		t = Term16M
 		return t.Formatter()
 	}
 	// then fallback to the -color suffix in TERM variable values
@@ -157,26 +157,26 @@ func Term() string {
 	if len(s) > 1 {
 		switch s[len(s)-1] {
 		case "mono":
-			t = TerminalMono
+			t = TermMono
 			return t.Formatter()
 		case "color", "16color", "88color":
-			t = Terminal16
+			t = Term16
 			return t.Formatter()
 		case "256color":
-			t = Terminal256
+			t = Term256
 			return t.Formatter()
 		}
 	}
 	// otherwise do a direct match of the TERM variable value
 	switch env {
 	case "linux":
-		t = TerminalMono
+		t = TermMono
 		return t.Formatter()
 	case "konsole", "rxvt", "xterm", "vt100":
-		t = Terminal16
+		t = Term16
 		return t.Formatter()
 	}
-	t = Terminal256
+	t = Term256
 	return t.Formatter()
 }
 
