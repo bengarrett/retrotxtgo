@@ -189,11 +189,16 @@ func updatePrompt(name string, value interface{}) {
 		fmt.Println("Choose a new " + Hints[name] + ":")
 		setDirectory(name)
 	case "serve":
-		p := Defaults["serve"].(uint)
-		if u, ok := value.(uint); ok {
-			p = u
-		} else if i, ok := value.(int); ok {
-			p = uint(i)
+		var p uint
+		switch Defaults["serve"].(type) {
+		case uint:
+			if u, ok := value.(uint); ok {
+				p = u
+			}
+		case int:
+			if i, ok := value.(int); ok {
+				p = uint(i)
+			}
 		}
 		fmt.Printf("\n%slocalhost%s%d %s\n", str.Cb("http://"),
 			str.Cb(":"), p, str.Bool(create.Port(p)))

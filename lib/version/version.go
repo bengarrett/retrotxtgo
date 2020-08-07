@@ -114,11 +114,14 @@ func JSON(indent bool) (data []byte) {
 	switch indent {
 	case true:
 		data, err = json.MarshalIndent(information(), "", "    ")
+		if err != nil {
+			logs.Fatal("version could not marshal", "json", err)
+		}
 	default:
 		data, err = json.Marshal(information())
-	}
-	if err != nil {
-		logs.Fatal("version could not marshal", "json", err)
+		if err != nil {
+			logs.Fatal("version could not marshal", "json", err)
+		}
 	}
 	return data
 }
