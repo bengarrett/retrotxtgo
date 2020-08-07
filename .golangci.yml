@@ -170,6 +170,10 @@ issues:
       text: "weak cryptographic primitive"
       linters:
         - gosec
+    # Exclude some staticcheck messages
+    - linters:
+        - gosec
+      text: "G203:"
 run:
   skip-dirs:
     - internal
