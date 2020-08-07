@@ -167,7 +167,6 @@ func shorten(name string) (n string) {
 		n = "iso-8859-" + n[7:]
 	case len(n) > 9 && n[:9] == "iso 8859-":
 		n = "iso-8859-" + n[9:]
-
 	}
 	return n
 }

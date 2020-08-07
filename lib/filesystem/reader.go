@@ -134,15 +134,7 @@ func Newlines(utf8 bool, runes ...rune) [2]rune {
 	for i, r := range runes {
 		switch r {
 		case lf:
-			if i < l && runes[i+1] == cr {
-				c[3].count++ // lfcr
-				continue
-			}
-			if i != 0 && runes[i-1] == cr {
-				// crlf (already counted)
-				continue
-			}
-			c[0].count++
+			c[0].count = lfCnt(c[0].count, i, l, runes...)
 		case cr:
 			if i < l && runes[i+1] == lf {
 				c[2].count++ // crlf
@@ -168,6 +160,20 @@ func Newlines(utf8 bool, runes ...rune) [2]rune {
 		return c[i].count > c[j].count
 	})
 	return abbr(utf8, c[0].abbr)
+}
+
+func lfCnt(c, i, l int, runes ...rune) int {
+	const cr = 13
+	if i < l && runes[i+1] == cr {
+		c++ // lfcr
+		return c
+	}
+	if i != 0 && runes[i-1] == cr {
+		// crlf (already counted)
+		return c
+	}
+	c++
+	return c
 }
 
 func abbr(utf8 bool, s string) [2]rune {
