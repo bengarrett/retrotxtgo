@@ -43,14 +43,14 @@ linters-settings:
     check-all: true
   golint:
     # minimal confidence for issues, default is 0.8
-    min-confidence: 0
+    min-confidence: 0.8
   gomnd:
     settings:
       mnd:
-        # don't include the "operation" and "assign"
-        checks: argument,case,condition,return
+        # default: don't include the "operation" and "assign"
+        checks: argument,assign,case,condition,operation,return
   govet:
-    check-shadowing: false # todo enable and fix in code
+    check-shadowing: true
     settings:
       printf:
         funcs:
@@ -69,11 +69,28 @@ linters-settings:
     #locale: UK
     ignore-words:
       - someword
+  nakedret:
+    # make an issue if func has more lines of code than this setting and it has naked returns; default is 30
+    max-func-lines: 5 # default 5
+  prealloc:
+    # XXX: we don't recommend using this linter before doing performance profiling.
+    # For most programs usage of prealloc will be a premature optimization.
+    # Report preallocation suggestions only on simple loops that have no returns/breaks/continues/gotos in them.
+    # True by default.
+    simple: true
+    range-loops: true # Report preallocation suggestions on range loops, true by default
+    for-loops: false # Report preallocation suggestions on for loops, false by default
   nolintlint:
     allow-leading-space: true # don't require machine-readable nolint directives (i.e. with no leading space)
     allow-unused: false # report any unused nolint directives
     require-explanation: false # don't require an explanation for nolint directives
     require-specific: false # don't require nolint directives to be specific about which linter is being skipped
+  unparam:
+    # Inspect exported functions, default is false. Set to true if no external program/library imports your code.
+    # XXX: if you enable this setting, unparam will report a lot of false-positives in text editors:
+    # if it's called for subdir of a project it can't find external interfaces. All text editor integrations
+    # with golangci-lint call it on a directory with the changed file.
+    check-exported: true
   unused:
     # treat code as a program (not a library) and report unused exported identifiers; default is false.
     # XXX: if you enable this setting, unused will report a lot of false-positives in text editors:
