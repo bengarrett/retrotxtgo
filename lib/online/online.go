@@ -29,6 +29,7 @@ func Endpoint(url, etag string) (useCache bool, data API, err error) {
 	if err != nil {
 		return useCache, data, fmt.Errorf("endpoint get failed: %s", err)
 	}
+	defer resp.Body.Close()
 	if etag != "" {
 		s := resp.StatusCode
 		if s == 304 || (s == 200 && body == nil) {
