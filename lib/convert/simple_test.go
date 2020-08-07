@@ -91,7 +91,9 @@ func TestDString(t *testing.T) {
 		wantResult []byte
 		wantErr    bool
 	}{
-		// TODO: Add test cases.
+		{"empty", args{}, []byte{}, false},
+		{"hello", args{"hello world", *charmap.CodePage437}, []byte("hello world"), false},
+		{"mainframe", args{string([]byte{136, 133, 147, 147, 150, 64, 166, 150, 153, 147, 132}), *charmap.CodePage037}, []byte("hello world"), false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -118,7 +120,9 @@ func TestEString(t *testing.T) {
 		wantResult []byte
 		wantErr    bool
 	}{
-		// TODO: Add test cases.
+		{"empty", args{}, []byte{}, false},
+		{"hello", args{"hello world", *charmap.CodePage437}, []byte("hello world"), false},
+		{"mainframe", args{"hello world", *charmap.CodePage037}, []byte{136, 133, 147, 147, 150, 64, 166, 150, 153, 147, 132}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -135,46 +139,46 @@ func TestEString(t *testing.T) {
 }
 
 func TestD437(t *testing.T) {
-	type args struct {
-		s string
-	}
 	tests := []struct {
 		name       string
-		args       args
+		s          string
 		wantResult []byte
 		wantErr    bool
 	}{
-		// TODO: Add test cases.
+		{"empty", "", []byte{}, false},
+		{"hello", "hello world", []byte("hello world"), false},
+		{"hex", "\xe0 alpha \xe1 beta", []byte("α alpha ß beta"), false},
+		{"octal", "\253 half \254 quarter", []byte("½ half ¼ quarter"), false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotResult, err := D437(tt.args.s)
+			gotResult, err := D437(tt.s)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("D437() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(gotResult, tt.wantResult) {
-				t.Errorf("D437() = %v, want %v", gotResult, tt.wantResult)
+				t.Errorf("D437() = %s, want %v", gotResult, tt.wantResult)
 			}
 		})
 	}
 }
 
 func TestE437(t *testing.T) {
-	type args struct {
-		s string
-	}
 	tests := []struct {
 		name       string
-		args       args
+		s          string
 		wantResult []byte
 		wantErr    bool
 	}{
-		// TODO: Add test cases.
+		{"empty", "", []byte{}, false},
+		{"hello", "hello world", []byte("hello world"), false},
+		{"hex", "α alpha ß beta", []byte("\xe0 alpha \xe1 beta"), false},
+		{"octal", "½ half ¼ quarter", []byte("\253 half \254 quarter"), false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotResult, err := E437(tt.args.s)
+			gotResult, err := E437(tt.s)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("E437() error = %v, wantErr %v", err, tt.wantErr)
 				return
