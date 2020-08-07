@@ -22,7 +22,7 @@ import (
 
 var html create.Args
 
-// createCmd makes create usage examples
+// createCmd makes create usage examples.
 var exampleCmd = func() string {
 	var b bytes.Buffer
 	tmpl := `  retrotxt create file.txt -t "A text file" -d "Some text goes here"
@@ -38,7 +38,7 @@ var exampleCmd = func() string {
 	return str.Cinf(b.String())
 }
 
-// createCmd represents the create command
+// createCmd represents the create command.
 var createCmd = &cobra.Command{
 	Use:     "create [filenames]",
 	Aliases: []string{"c", "html"},

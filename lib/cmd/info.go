@@ -16,7 +16,7 @@ var infoFlag struct {
 	format string
 }
 
-// infoCmd represents the info command
+// infoCmd represents the info command.
 var infoCmd = &cobra.Command{
 	Use:     "info [filenames]",
 	Aliases: []string{"i"},
