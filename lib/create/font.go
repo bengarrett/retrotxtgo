@@ -12,7 +12,6 @@ import (
 	"retrotxt.com/retrotxt/internal/pack"
 )
 
-// Font blah
 type Font int
 
 const (

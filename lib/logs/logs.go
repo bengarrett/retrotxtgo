@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	// default error log
+	// default error log.
 	filename = "errors.log"
 	// posix permissions for the configuration file and directory.
 	filemode os.FileMode = 0600

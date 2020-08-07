@@ -25,7 +25,7 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
-// Detail of a file
+// Detail of a file.
 type Detail struct {
 	Bytes     int64
 	CharCount int
@@ -45,7 +45,7 @@ type Detail struct {
 	WordCount int
 }
 
-// File data for XML encoding
+// File data for XML encoding.
 type File struct {
 	XMLName   xml.Name  `xml:"file"`
 	ID        string    `xml:"id,attr"`
@@ -64,11 +64,11 @@ type File struct {
 	Modified  time.Time `xml:"modified"`
 }
 
-// Language tag used for numeric syntax formatting
+// Language tag used for numeric syntax formatting.
 var Language = language.English
 
-// DTFormat is the datetime format
-// DMY12, YMD12, MDY12, DMY24, YMD24, MDY24
+// DTFormat is the datetime format.
+// DMY12, YMD12, MDY12, DMY24, YMD24, MDY24.
 const DTFormat = "DMY24"
 
 // Info parses the named file and prints out its details in a specific syntax.

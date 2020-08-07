@@ -18,7 +18,7 @@ var Info = func() string {
 	return color.Info.Sprint("info:")
 }
 
-// color aliases
+// color aliases.
 
 // Cb secondary.
 func Cb(t string) string {

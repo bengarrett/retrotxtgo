@@ -52,30 +52,6 @@ func TestPortValid(t *testing.T) {
 	}
 }
 
-// os.Exit(0) breaks test
-// func Test_pstring(t *testing.T) {
-// 	var stdin bytes.Buffer
-// 	tests := []struct {
-// 		name      string
-// 		input     string
-// 		wantWords string
-// 	}{
-// 		{"empty", "", ""},
-// 		{"reset", "-", ""},
-// 		{"hi", "hello", "hello"},
-// 		{"hw", "hello world", "hello world"},
-// 		{"emoji", "hi 😃", "hi 😃"},
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			stdin.Write([]byte(tt.input + "\n")) // \n is a requirement
-// 			if gotWords := pstring(&stdin); gotWords != tt.wantWords {
-// 				t.Errorf("pstring() = %v, want %v", gotWords, tt.wantWords)
-// 			}
-// 		})
-// 	}
-// }
-
 func Test_keys_validate(t *testing.T) {
 	var opt keys = []string{"hello", "world", "hi"}
 	tests := []struct {

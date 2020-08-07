@@ -1,4 +1,4 @@
-//Package filesystem to handle the opening and reading of text files
+//Package filesystem to handle the opening and reading of text files.
 package filesystem
 
 import (
@@ -32,9 +32,9 @@ const (
 	win = "windows"
 	cr  = "\x0d"
 	lf  = "\x0a"
-	// posix permission bits for files
+	// posix permission bits for files.
 	filemode os.FileMode = 0660
-	// posix permission bits for directories
+	// posix permission bits for directories.
 	dirmode os.FileMode = 0700
 )
 

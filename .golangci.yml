@@ -45,6 +45,9 @@ linters-settings:
   gocyclo:
     # minimal code complexity to report, 30 by default (but we recommend 10-20)
     min-complexity: 30
+  godot:
+    # check all top-level comments, not only declarations
+    check-all: true
   gofmt:
     # simplify code: gofmt with `-s` option, true by default
     simplify: false
@@ -94,26 +97,29 @@ linters:
   # inverted configuration with `enable-all` and `disable` is not scalable during updates of golangci-lint
   disable-all: true
   enable:
+    - asciicheck
     - bodyclose
     - deadcode
     # - depguard
     # - dogsled
-    #- dupl # this breaks the linter
     - errcheck
-    # - exhaustive
-    # - funlen
-    # - gochecknoinits
+    - exhaustive
+    - exportloopref
+    - gochecknoinits
     - gci
+    #- gochecknoglobals # TODO
     - goconst
     # - gocritic
-    - gocyclo
+    - godot
     #- gofmt
     #- gofumpt
+    #- goerr113 # TODO
     - goheader
     #- goimports
     - golint
-    # - gomnd
-    # - goprintffuncname
+    - gomodguard
+    - gomnd
+    - goprintffuncname
     - gosec
     - gosimple
     - govet
@@ -123,10 +129,12 @@ linters:
     #- maligned
     # - misspell
     # - nakedret
+    #- nlreturn # don't use
     - noctx
-    # - nolintlint
+    - nolintlint
     - rowserrcheck
     # - scopelint
+    - sqlclosecheck
     - staticcheck
     - structcheck
     - stylecheck
@@ -135,21 +143,26 @@ linters:
     # - unparam
     #- unused
     - varcheck
-    # - whitespace
+    - whitespace
     # don't enable:
-    - asciicheck
-    # - gochecknoglobals
-    - gocognit
-  # - godot
-  # - godox
-  # - goerr113
-  # - nestif
-  # - prealloc
-  # - testpackage
-  # - wsl
+    # - dupl # this breaks the linter
+    # - funlen
+    # - gocognit
+    # - gocyclo
+    # - godox
+    # - goerr113
+    # - nestif
+    # - prealloc
+    # - testpackage
+    # - wsl
 issues:
+  max-same-issues: 0
   # Excluding configuration per-path, per-linter, per-text and per-source
   exclude-rules:
+    - path: lib/cmd/
+      linters:
+        - gochecknoglobals
+        - gochecknoinits
     - path: _test\.go
       linters:
         - gocyclo
@@ -179,9 +192,3 @@ run:
     - internal
     - lib/sauce
     - static
-# golangci.com configuration
-# https://github.com/golangci/golangci/wiki/Configuration
-# service:
-#   golangci-lint-version: 1.23.x # use the fixed version to not introduce new linters unexpectedly
-#   prepare:
-#     - echo "here I can run custom commands, but no preparation needed for this repo"

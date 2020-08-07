@@ -39,7 +39,6 @@ func Path() (dir string) {
 			return ""
 		}
 		return filepath.Join(h, namedFile)
-
 	}
 	return dir
 }

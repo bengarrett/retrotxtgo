@@ -11,20 +11,17 @@ import (
 	"golang.org/x/text/message"
 )
 
-type (
-	// B struct
-	B struct{}
-)
+type B struct{}
 
 const (
 	_ = 1.0 << (10 * iota) // ignore first value by assigning to blank identifier
-	// KiB kibibyte
+	// KiB kibibyte.
 	KiB
-	// MiB mebibyte
+	// MiB mebibyte.
 	MiB
-	// GiB gibibyte
+	// GiB gibibyte.
 	GiB
-	// TiB Tebibyte
+	// TiB Tebibyte.
 	TiB
 )
 

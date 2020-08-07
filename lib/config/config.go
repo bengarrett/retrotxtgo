@@ -115,7 +115,7 @@ type Settings struct {
 	}
 }
 
-// filemode is posix permission bits for files
+// filemode is posix permission bits for files.
 const filemode os.FileMode = 0660
 
 const (

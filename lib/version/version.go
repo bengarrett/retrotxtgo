@@ -21,7 +21,7 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
-// Build and version information
+// Build and version information.
 type Build struct {
 	// Commit git SHA
 	Commit string
@@ -33,7 +33,7 @@ type Build struct {
 	Version string
 }
 
-// Version details in semantic syntax
+// Version details in semantic syntax.
 type Version struct {
 	Major int
 	Minor int
@@ -42,7 +42,7 @@ type Version struct {
 
 type versionInfo map[string]string
 
-// Cache of version data
+// Cache of version data.
 type Cache struct {
 	Etag string `yaml:"etag"`
 	Ver  string `yaml:"version"`

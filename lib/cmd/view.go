@@ -29,7 +29,7 @@ var viewFlag = viewFlags{
 	width:    0,
 }
 
-// viewCmd represents the view command
+// viewCmd represents the view command.
 var viewCmd = &cobra.Command{
 	Use:     "view [filenames]",
 	Aliases: []string{"v"},

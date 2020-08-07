@@ -22,7 +22,7 @@ type rootFlags struct {
 
 var rootFlag = rootFlags{}
 
-// rootCmd represents the base command when called without any subcommands
+// rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
 	Use:   "retrotxt",
 	Short: "RetroTxt is the tool that turns ANSI, ASCII, NFO text into browser ready HTML",

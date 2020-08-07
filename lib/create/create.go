@@ -112,14 +112,14 @@ const (
 	std  = "standard"
 )
 
-// ColorScheme values for the content attribute of <meta name="color-scheme">
+// ColorScheme values for the content attribute of <meta name="color-scheme">.
 var ColorScheme = [...]string{"normal", "dark light", "only light"}
 
-// Referrer values for the content attribute of <meta name="referrer">
+// Referrer values for the content attribute of <meta name="referrer">.
 var Referrer = [...]string{"no-referrer", "origin", "no-referrer-when-downgrade",
 	"origin-when-cross-origin", "same-origin", "strict-origin", "strict-origin-when-cross-origin", "unsafe-URL"}
 
-// Robots values for the content attribute of <meta name="robots">
+// Robots values for the content attribute of <meta name="robots">.
 var Robots = [...]string{"index", "noindex", "follow", "nofollow", none, "noarchive", "nosnippet", "noimageindex", "nocache"}
 
 var scope = gap.NewScope(gap.User, "retrotxt")
@@ -128,13 +128,13 @@ var scope = gap.NewScope(gap.User, "retrotxt")
 type Layout int
 
 const (
-	// Standard template with external CSS, JS, fonts
+	// Standard template with external CSS, JS, fonts.
 	Standard Layout = iota
-	// Inline template with CSS and JS embedded
+	// Inline template with CSS and JS embedded.
 	Inline
-	// Compact template with external CSS, JS, fonts and no meta-tags
+	// Compact template with external CSS, JS, fonts and no meta-tags.
 	Compact
-	// None template, just print the generated HTML
+	// None template, just print the generated HTML.
 	None
 )
 

@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// 2 Jan 15:04 2006
+// 2 Jan 15:04 2006.
 const (
 	DMY = "2 Jan 2006"
 	YMD = "2006 Jan 2"
@@ -16,17 +16,17 @@ const (
 )
 
 var (
-	// DMY12 12-hour day month year
+	// DMY12 12-hour day month year.
 	DMY12 = fmt.Sprintf("%s %s", DMY, H12)
-	// DMY24 24-hour day month year
+	// DMY24 24-hour day month year.
 	DMY24 = fmt.Sprintf("%s %s", DMY, H24)
-	// YMD12 12-hour year month day
+	// YMD12 12-hour year month day.
 	YMD12 = fmt.Sprintf("%s %s", YMD, H12)
-	// YMD24 24-hour year month day
+	// YMD24 24-hour year month day.
 	YMD24 = fmt.Sprintf("%s %s", YMD, H24)
-	// MDY12 12-hour month day year
+	// MDY12 12-hour month day year.
 	MDY12 = fmt.Sprintf("%s %s", MDY, H12)
-	// MDY24 24-hour month day year
+	// MDY24 24-hour month day year.
 	MDY24 = fmt.Sprintf("%s %s", MDY, H24)
 )
 

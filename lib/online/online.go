@@ -14,10 +14,10 @@ const (
 	httpTimeout = time.Second * 3
 )
 
-// API interface to store the JSON results from GitHub
+// API interface to store the JSON results from GitHub.
 type API map[string]interface{}
 
-// ReleaseAPI GitHub API v3 releases endpoint
+// ReleaseAPI GitHub API v3 releases endpoint.
 // See: https://developer.github.com/v3/repos/releases/
 const ReleaseAPI = "https://api.github.com/repos/bengarrett/retrotxtgo/releases/latest"
 

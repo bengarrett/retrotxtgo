@@ -488,7 +488,6 @@ func (c *Convert) RunesEBCDIC() {
 				r >= row8 && r <= row8f,
 				r >= row9 && r <= row9f:
 				c.Runes[i] = rune(SP)
-
 			}
 		}
 	}

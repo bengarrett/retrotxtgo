@@ -21,19 +21,19 @@ import (
 	"github.com/gookit/color"
 )
 
-// TestMode disables piping detection which conflicts with go test
+// TestMode disables piping detection which conflicts with go test.
 var TestMode = false
 
 const (
-	// TerminalMono no colour
+	// TerminalMono no colour.
 	TerminalMono = iota
-	// Terminal16 ANSI standard 16 colour
+	// Terminal16 ANSI standard 16 colour.
 	Terminal16
-	// Terminal88 XTerm 88 colour
+	// Terminal88 XTerm 88 colour.
 	Terminal88
-	// Terminal256 XTerm 256 colour
+	// Terminal256 XTerm 256 colour.
 	Terminal256
-	// Terminal16M ANSI high-colour
+	// Terminal16M ANSI high-colour.
 	Terminal16M
 )
 
@@ -237,7 +237,7 @@ func UnderlineKeys(keys ...string) string {
 	return strings.Join(keys, ", ")
 }
 
-// JSONExample is used for previewing color themes
+// JSONExample is used for previewing color themes.
 type JSONExample struct {
 	Style struct {
 		Name    string `json:"name"`
