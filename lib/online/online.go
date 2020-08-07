@@ -1,6 +1,7 @@
 package online
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -53,7 +54,10 @@ func Get(url, etag string) (resp *http.Response, body []byte, err error) {
 	client := &http.Client{
 		Timeout: httpTimeout,
 	}
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, httpTimeout)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	defer cancel()
 	if err != nil {
 		return nil, body, fmt.Errorf("getting a new request error: %s", err)
 	}
@@ -79,7 +83,10 @@ func Ping(url string) (ok bool, err error) {
 	client := &http.Client{
 		Timeout: httpTimeout,
 	}
-	req, err := http.NewRequest(http.MethodHead, url, nil)
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, httpTimeout)
+	req, err := http.NewRequestWithContext(ctx, http.MethodHead, url, nil)
+	defer cancel()
 	if err != nil {
 		return ok, fmt.Errorf("pinging a new request error: %s", err)
 	}
