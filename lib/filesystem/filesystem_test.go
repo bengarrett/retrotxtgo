@@ -12,6 +12,8 @@ import (
 	"testing"
 )
 
+const large = "large"
+
 // fileExample the string to a text file.
 func fileExample(s string, i int) (path string) {
 	var name = fmt.Sprintf("rt_fs_save%d.txt", i)
@@ -268,7 +270,7 @@ func TestReadChunk(t *testing.T) {
 		{"utf8", args{f2, 4}, []byte("[☠|☮"), false},
 		{"tabs", args{f3, 7}, []byte("☠\tSkull"), false},
 		{"escs", args{f4, 13}, []byte("bell:\a,back:\b"), false},
-		{"large", args{large, 100}, nil, false},
+		{large, args{large, 100}, nil, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -277,10 +279,10 @@ func TestReadChunk(t *testing.T) {
 				t.Errorf("ReadChunk() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if tt.name == "large" && len(gotData) != 100 {
+			if tt.name == large && len(gotData) != 100 {
 				t.Errorf("ReadChunk() length = %v, want %v", len(gotData), 100)
 			}
-			if tt.name != "large" && !reflect.DeepEqual(gotData, tt.wantData) {
+			if tt.name != large && !reflect.DeepEqual(gotData, tt.wantData) {
 				t.Errorf("ReadChunk() = %v, want %v", gotData, tt.wantData)
 			}
 		})
@@ -315,7 +317,7 @@ func TestReadTail(t *testing.T) {
 		{"utf8", args{f2, 4}, []byte("☮|♺]"), false},
 		{"tabs", args{f3, 11}, []byte("♺\tRecycling"), false},
 		{"escs", args{f4, 9}, []byte("\v,quote:\""), false},
-		{"large", args{large, 100}, nil, false},
+		{large, args{large, 100}, nil, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -324,10 +326,10 @@ func TestReadTail(t *testing.T) {
 				t.Errorf("ReadTail() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if tt.name == "large" && len(gotData) != 100 {
+			if tt.name == large && len(gotData) != 100 {
 				t.Errorf("ReadChunk() length = %v, want %v", len(gotData), 100)
 			}
-			if tt.name != "large" && !reflect.DeepEqual(gotData, tt.wantData) {
+			if tt.name != large && !reflect.DeepEqual(gotData, tt.wantData) {
 				t.Errorf("ReadTail() = %q, want %q", string(gotData), string(tt.wantData))
 			}
 		})

@@ -107,6 +107,11 @@ type PageData struct {
 	ScriptEmbed     template.JS
 }
 
+const (
+	none = "none"
+	std  = "standard"
+)
+
 // ColorScheme values for the content attribute of <meta name="color-scheme">
 var ColorScheme = [...]string{"normal", "dark light", "only light"}
 
@@ -115,7 +120,7 @@ var Referrer = [...]string{"no-referrer", "origin", "no-referrer-when-downgrade"
 	"origin-when-cross-origin", "same-origin", "strict-origin", "strict-origin-when-cross-origin", "unsafe-URL"}
 
 // Robots values for the content attribute of <meta name="robots">
-var Robots = [...]string{"index", "noindex", "follow", "nofollow", "none", "noarchive", "nosnippet", "noimageindex", "nocache"}
+var Robots = [...]string{"index", "noindex", "follow", "nofollow", none, "noarchive", "nosnippet", "noimageindex", "nocache"}
 
 var scope = gap.NewScope(gap.User, "retrotxt")
 
@@ -134,7 +139,7 @@ const (
 )
 
 func (l Layout) String() string {
-	layouts := [...]string{"standard", "inline", "compact", "none"}
+	layouts := [...]string{std, "inline", "compact", none}
 	if l < Standard || l > None {
 		return ""
 	}
@@ -148,7 +153,7 @@ func Layouts() []string {
 
 // Pack is the packed name of the HTML template.
 func (l Layout) Pack() string {
-	packs := [...]string{"standard", "standard", "standard", "none"}
+	packs := [...]string{std, std, std, none}
 	if l < Standard || l > None {
 		return ""
 	}
@@ -232,7 +237,7 @@ func (args *Args) destination(name string) (string, error) {
 // savecss creates and saves the styles stylesheet to the Destination argument.
 func (args Args) savecss(c chan error) {
 	switch args.Layout {
-	case "standard", "s":
+	case std, "s":
 	default:
 		c <- nil
 		return
@@ -254,7 +259,7 @@ func (args Args) savecss(c chan error) {
 
 func (args Args) savefavicon(c chan error) {
 	switch args.Layout {
-	case "standard", "s":
+	case std, "s":
 	default:
 		c <- nil
 		return
@@ -287,7 +292,7 @@ func (args Args) savefont(c chan error) {
 		}
 	}
 	switch args.Layout {
-	case "standard", "s":
+	case std, "s":
 		if err := args.savefontcss("font.css"); err != nil {
 			c <- err
 		}
@@ -333,7 +338,7 @@ func (args Args) savefontwoff2(name, packName string) error {
 
 func (args Args) savejs(c chan error) {
 	switch args.Layout {
-	case "standard", "s":
+	case std, "s":
 	default:
 		c <- nil
 		return
@@ -396,7 +401,7 @@ func (args Args) Stdout(b *[]byte) error {
 		return fmt.Errorf("stdout template execute failure: %s", err)
 	}
 	switch args.Syntax {
-	case "", "none":
+	case "", none:
 		fmt.Printf("%s", buf.String())
 	default:
 		if !str.Valid(args.Syntax) {
@@ -535,13 +540,13 @@ func (args Args) templateSave() error {
 
 func layout(name string) Layout {
 	switch name {
-	case "standard", "s":
+	case std, "s":
 		return Standard
 	case "inline", "i":
 		return Inline
 	case "compact", "c":
 		return Compact
-	case "none", "n":
+	case none, "n":
 		return None
 	}
 	return -1

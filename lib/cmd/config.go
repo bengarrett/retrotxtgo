@@ -13,6 +13,10 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
+const (
+	bash = "bash"
+)
+
 type configFlags struct {
 	configs bool
 	ow      bool
@@ -142,10 +146,10 @@ var configShellCmd = &cobra.Command{
 		)
 		lexer, style := "", viper.GetString("style.html")
 		switch configFlag.shell {
-		case "bash", "bsh", "b":
-			lexer = "bash"
+		case bash, "bsh", "b":
+			lexer = bash
 			if err = cmd.GenBashCompletion(&buf); err != nil {
-				logs.Fatal("shell", "bash", err)
+				logs.Fatal("shell", bash, err)
 			}
 		case "powershell", "posh", "ps", "p":
 			lexer = "powershell"
@@ -153,7 +157,7 @@ var configShellCmd = &cobra.Command{
 				logs.Fatal("shell", "powershell", err)
 			}
 		case "zsh", "z":
-			lexer = "bash"
+			lexer = bash
 			if err = cmd.GenZshCompletion(&buf); err != nil {
 				logs.Fatal("shell", "zsh", err)
 			}

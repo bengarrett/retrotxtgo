@@ -29,8 +29,9 @@ var T = map[string]string{
 }
 
 const (
-	cr = "\x0d"
-	lf = "\x0a"
+	win = "windows"
+	cr  = "\x0d"
+	lf  = "\x0a"
 	// posix permission bits for files
 	filemode os.FileMode = 0660
 	// posix permission bits for directories
@@ -88,7 +89,7 @@ func DirExpansion(name string) (dir string) {
 		default:
 			p = s
 		}
-		if runtime.GOOS == "windows" {
+		if runtime.GOOS == win {
 			if len(p) == 2 && p[1:] == ":" {
 				dir = strings.ToUpper(p) + "\\"
 				continue
@@ -209,7 +210,7 @@ func dir(name string) (path string, err error) {
 // nl returns a platform's newline character.
 func nl(platform string) string {
 	switch platform {
-	case "dos", "windows":
+	case "dos", win:
 		return cr + lf
 	case "c64", "darwin", "mac":
 		return cr
