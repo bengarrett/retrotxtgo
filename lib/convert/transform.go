@@ -27,7 +27,7 @@ type Convert struct {
 	Source    []byte // Source legacy encoded text.
 }
 
-// Args are user supplied flag values
+// Args are user supplied flag values.
 type Args struct {
 	Controls []string
 	Encoding string

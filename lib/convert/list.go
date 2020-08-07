@@ -35,7 +35,7 @@ func Encodings() (e []encoding.Encoding) {
 	return e
 }
 
-// List returns a tabled list of supported IANA character set encodings
+// List returns a tabled list of supported IANA character set encodings.
 func List() *bytes.Buffer {
 	var buf bytes.Buffer
 	var flags uint = tabwriter.Debug //tabwriter.AlignRight | tabwriter.Debug

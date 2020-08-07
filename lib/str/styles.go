@@ -24,9 +24,11 @@ import (
 // TestMode disables piping detection which conflicts with go test.
 var TestMode = false
 
+type terminal int
+
 const (
 	// TerminalMono no colour.
-	TerminalMono = iota
+	TerminalMono terminal = iota
 	// Terminal16 ANSI standard 16 colour.
 	Terminal16
 	// Terminal88 XTerm 88 colour.
@@ -36,9 +38,6 @@ const (
 	// Terminal16M ANSI high-colour.
 	Terminal16M
 )
-
-// terminal type
-type terminal int
 
 // Formatter takes a terminal value and returns the quick.Highlight formatter value.
 func (t terminal) Formatter() string {

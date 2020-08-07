@@ -89,7 +89,7 @@ const (
 	rowE  = 224
 )
 
-// Characters map code page 437 characters with alternative runes
+// Characters map code page 437 characters with alternative runes.
 var Characters = map[int]rune{
 	NUL:           SP,
 	VerticalBar:   BrokenBar,
@@ -141,7 +141,7 @@ func Humanize(name string) string {
 	return encodingAlias(shorten(name))
 }
 
-// shorten name to a custom/common names or aliases
+// shorten name to a custom/common names or aliases.
 func shorten(name string) (n string) {
 	n = strings.ToLower(name)
 	switch {
@@ -626,7 +626,6 @@ func (c *Convert) ignore(r rune) {
 	c.ignores = append(c.ignores, r)
 }
 
-// utf8.DecodeRune([]byte{0xe2, 0x90, b})
 func decode(b byte) (r rune) {
 	r, _ = utf8.DecodeRune([]byte{0xe2, 0x90, b})
 	return r
