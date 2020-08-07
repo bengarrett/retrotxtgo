@@ -125,7 +125,7 @@ const (
 
 var scope = gap.NewScope(gap.User, "retrotxt")
 
-// Formats choices for flags
+// Formats choices for flags.
 type Formats struct {
 	Info    [5]string
 	Shell   [3]string

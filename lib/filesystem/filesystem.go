@@ -145,7 +145,7 @@ func SaveTemp(filename string, b ...byte) (path string, err error) {
 	return path, nil
 }
 
-// Tar blah
+// Tar addes files to a named tar file archive.
 func Tar(name string, files ...string) error {
 	f, err := os.Create(name)
 	if err != nil {

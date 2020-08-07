@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// Cmd is a command error type to handle command arguments and flags
+// Cmd is a command error type to handle command arguments and flags.
 type Cmd struct {
 	Args []string // Command line arguments
 	Err  error    // rootCmd.Execute output
