@@ -15,52 +15,72 @@ import (
 const (
 	missingKey      = "key does not exist or is not a bool value"
 	httpPort   uint = 8080
+
+	editor   = "editor"
+	fontEmb  = "html.font.embed"
+	fontFam  = "html.font.family"
+	layout   = "html.layout"
+	author   = "html.meta.author"
+	scheme   = "html.meta.color-scheme"
+	desc     = "html.meta.description"
+	genr     = "html.meta.generator"
+	keywords = "html.meta.keywords"
+	notlate  = "html.meta.notranslate"
+	referr   = "html.meta.referrer"
+	rtx      = "html.meta.retrotxt"
+	bot      = "html.meta.robots"
+	theme    = "html.meta.theme-color"
+	title    = "html.title"
+	saveDir  = "save-directory"
+	serve    = "serve"
+	stylei   = "style.info"
+	styleh   = "style.html"
 )
 
 // Defaults for configuration keys and values.
 var Defaults = map[string]interface{}{
-	"editor":                 "",
-	"html.font.embed":        false,
-	"html.font.family":       "vga",
-	"html.layout":            "standard",
-	"html.meta.author":       "",
-	"html.meta.color-scheme": "",
-	"html.meta.description":  "An example",
-	"html.meta.generator":    true,
-	"html.meta.keywords":     "",
-	"html.meta.notranslate":  false,
-	"html.meta.referrer":     "",
-	"html.meta.retrotxt":     true,
-	"html.meta.robots":       "index",
-	"html.meta.theme-color":  "",
-	"html.title":             "RetroTxt | example",
-	"save-directory":         home(),
-	"serve":                  httpPort,
-	"style.info":             "dracula",
-	"style.html":             "lovelace",
+	editor:   "",
+	fontEmb:  false,
+	fontFam:  "vga",
+	layout:   "standard",
+	author:   "",
+	scheme:   "",
+	desc:     "An example",
+	genr:     true,
+	keywords: "",
+	notlate:  false,
+	referr:   "",
+	rtx:      true,
+	bot:      "index",
+	theme:    "",
+	title:    "RetroTxt | example",
+	saveDir:  home(),
+	serve:    httpPort,
+	stylei:   "dracula",
+	styleh:   "lovelace",
 }
 
 // Hints provide brief help on the config file configurations.
 var Hints = map[string]string{
-	"editor":                 "text editor to launch when using " + str.Example("config edit"),
-	"html.font.embed":        "encode and embed the font as Base64 binary-to-text within the CSS",
-	"html.font.family":       "specifies the font to use with the HTML",
-	"html.layout":            "HTML template for the layout of CSS, JS and fonts",
-	"html.meta.author":       "defines the name of the page authors",
-	"html.meta.color-scheme": "specifies one or more color schemes with which the page is compatible",
-	"html.meta.description":  "a short and accurate summary of the content of the page",
-	"html.meta.generator":    "include the RetroTxt version and page generation date?",
-	"html.meta.keywords":     "words relevant to the page content",
-	"html.meta.notranslate":  "used to declare that the page should not be translated by Google Translate",
-	"html.meta.referrer":     "controls the Referer HTTP header attached to requests sent from the page",
-	"html.meta.retrotxt":     "include a custom tag containing the meta information of the source textfile",
-	"html.meta.robots":       "behaviour that crawlers from Google, Bing and other engines should use with the page",
-	"html.meta.theme-color":  "indicates a suggested color that user agents should use to customize the display of the page",
-	"html.title":             "page title that is shown in a browser title bar or tab",
-	"save-directory":         "directory to store RetroTxt created HTML files",
-	"serve":                  "serve HTML over an internal web server using this port",
-	"style.info":             "syntax highlighter for the config info output",
-	"style.html":             "syntax highlighter for html previews",
+	editor:        "text editor to launch when using " + str.Example("config edit"),
+	fontEmb:       "encode and embed the font as Base64 binary-to-text within the CSS",
+	fontFam:       "specifies the font to use with the HTML",
+	"html.layout": "HTML template for the layout of CSS, JS and fonts",
+	author:        "defines the name of the page authors",
+	scheme:        "specifies one or more color schemes with which the page is compatible",
+	desc:          "a short and accurate summary of the content of the page",
+	genr:          "include the RetroTxt version and page generation date?",
+	keywords:      "words relevant to the page content",
+	notlate:       "used to declare that the page should not be translated by Google Translate",
+	referr:        "controls the Referer HTTP header attached to requests sent from the page",
+	rtx:           "include a custom tag containing the meta information of the source textfile",
+	bot:           "behaviour that crawlers from Google, Bing and other engines should use with the page",
+	theme:         "indicates a suggested color that user agents should use to customize the display of the page",
+	title:         "page title that is shown in a browser title bar or tab",
+	saveDir:       "directory to store RetroTxt created HTML files",
+	serve:         "serve HTML over an internal web server using this port",
+	stylei:        "syntax highlighter for the config info output",
+	styleh:        "syntax highlighter for html previews",
 }
 
 // Settings types and names to be saved in YAML.
@@ -148,43 +168,43 @@ func Marshal() (interface{}, error) {
 	var sc = Settings{}
 	for key := range Defaults {
 		switch key {
-		case "editor":
+		case editor:
 			sc.Editor = getString(key)
-		case "html.font.embed":
+		case fontEmb:
 			sc.HTML.Font.Embed = getBool(key)
-		case "html.font.family":
+		case fontFam:
 			sc.HTML.Font.Family = getString(key)
-		case "html.layout":
+		case layout:
 			sc.HTML.Layout = getString(key)
-		case "html.meta.author":
+		case author:
 			sc.HTML.Meta.Author = getString(key)
-		case "html.meta.color-scheme":
+		case scheme:
 			sc.HTML.Meta.ColorScheme = getString(key)
-		case "html.meta.description":
+		case desc:
 			sc.HTML.Meta.Description = getString(key)
-		case "html.meta.generator":
+		case genr:
 			sc.HTML.Meta.Generator = getBool(key)
-		case "html.meta.keywords":
+		case keywords:
 			sc.HTML.Meta.Keywords = getString(key)
-		case "html.meta.notranslate":
+		case notlate:
 			sc.HTML.Meta.Notranslate = getBool(key)
-		case "html.meta.referrer":
+		case referr:
 			sc.HTML.Meta.Referrer = getString(key)
-		case "html.meta.retrotxt":
+		case rtx:
 			sc.HTML.Meta.RetroTxt = getBool(key)
-		case "html.meta.robots":
+		case bot:
 			sc.HTML.Meta.Robots = getString(key)
-		case "html.meta.theme-color":
+		case theme:
 			sc.HTML.Meta.ThemeColor = getString(key)
-		case "html.title":
+		case title:
 			sc.HTML.Title = getString(key)
-		case "save-directory":
+		case saveDir:
 			sc.SaveDirectory = getString(key)
-		case "serve":
+		case serve:
 			sc.ServerPort = getUint(key)
-		case "style.info":
+		case stylei:
 			sc.Style.Info = getString(key)
-		case "style.html":
+		case styleh:
 			sc.Style.HTML = getString(key)
 		default:
 			return sc, fmt.Errorf("unknown configuration name: %q", key)
