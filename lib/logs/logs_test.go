@@ -7,8 +7,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	//"retrotxt.com/retrotxt/lib/filesystem"
-
 	"github.com/gookit/color"
 )
 
@@ -20,7 +18,7 @@ func TestErr_String(t *testing.T) {
 		want string
 	}{
 		{"empty", Generic{}, ""},
-		{"abc", Generic{Issue: "A", Arg: "B", Err: errors.New("C")}, "problem: A B, C"},
+		{"abc", Generic{Issue: "A", Arg: "B", Err: errors.New("c")}, "problem: A B, c"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
