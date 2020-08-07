@@ -21,6 +21,8 @@ import (
 	"github.com/gookit/color"
 )
 
+var ErrRune = errors.New("invalid encoded rune")
+
 // TestMode disables piping detection which conflicts with go test.
 var TestMode = false
 
@@ -186,7 +188,7 @@ func UnderlineChar(c string) (s string, err error) {
 		return "", nil
 	}
 	if !utf8.ValidString(c) {
-		return s, errors.New("invalid underlinechar encoded rune")
+		return s, fmt.Errorf("underlinechar %q: %w", c, ErrRune)
 	}
 	var buf bytes.Buffer
 	r, _ := utf8.DecodeRuneInString(c)

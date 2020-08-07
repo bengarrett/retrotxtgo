@@ -22,6 +22,8 @@ const (
 	Panic = false
 )
 
+var ErrNil = errors.New("error value cannot be nil")
+
 var scope = gap.NewScope(gap.User, "df2")
 
 // Log saves the error and continues the program.
@@ -68,7 +70,7 @@ func Path() string {
 // save an error to the log directory, an optional named file is available for unit tests.
 func save(err error, name string) error {
 	if err == nil || fmt.Sprintf("%v", err) == "" {
-		return errors.New("logs save: err value is nil")
+		return fmt.Errorf("logs save: %w", ErrNil)
 	}
 	// use UTC date and times in the log file
 	log.SetFlags(log.Ldate | log.Ltime | log.LUTC)

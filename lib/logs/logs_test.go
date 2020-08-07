@@ -10,6 +10,11 @@ import (
 	"github.com/gookit/color"
 )
 
+var (
+	ErrC      = errors.New("c")
+	ErrRandom = errors.New("some problem")
+)
+
 func TestErr_String(t *testing.T) {
 	color.Disable()
 	tests := []struct {
@@ -18,7 +23,7 @@ func TestErr_String(t *testing.T) {
 		want string
 	}{
 		{"empty", Generic{}, ""},
-		{"abc", Generic{Issue: "A", Arg: "B", Err: errors.New("c")}, "problem: A B, c"},
+		{"abc", Generic{Issue: "a", Arg: "b", Err: ErrC}, "problem: a b, c"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -46,7 +51,7 @@ func Test_save(t *testing.T) {
 	}{
 		{"empty", args{}, true},
 		{"empty+file", args{nil, file}, true},
-		{"ok", args{errors.New("some problem"), file}, false},
+		{"ok", args{ErrRandom, file}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

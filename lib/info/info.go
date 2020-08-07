@@ -71,21 +71,28 @@ var Language = language.English
 // DMY12, YMD12, MDY12, DMY24, YMD24, MDY24.
 const DTFormat = "DMY24"
 
+var (
+	ErrFmt    = errors.New("format is not known")
+	ErrNoName = errors.New("name cannot be empty")
+	ErrNoDir  = errors.New("directories are not usable with this command")
+	ErrNoFile = errors.New("file does not exist")
+)
+
 // Info parses the named file and prints out its details in a specific syntax.
 func Info(name, format string) logs.Generic {
 	gen := logs.Generic{Issue: "info", Arg: name}
 	if name == "" {
 		gen.Issue = "name"
-		gen.Err = errors.New("value cannot be empty")
+		gen.Err = ErrNoName
 		return gen
 	}
 	if s, err := os.Stat(name); os.IsNotExist(err) {
-		gen.Err = errors.New("file does not exist")
+		gen.Err = ErrNoFile
 	} else if err != nil {
 		gen.Err = err
 	} else if s.IsDir() {
 		gen.Issue = "info"
-		gen.Err = errors.New("directories are not usable with this command")
+		gen.Err = ErrNoDir
 	} else if err := Print(name, format); err != nil {
 		gen.Issue = "info.print"
 		gen.Arg = format
@@ -222,7 +229,7 @@ func (d Detail) format(format string) error {
 		}
 		fmt.Printf("%s\n", data)
 	default:
-		return errors.New("format invalid: " + format)
+		return fmt.Errorf("detail format %q: %w", format, ErrFmt)
 	}
 	return nil
 }
