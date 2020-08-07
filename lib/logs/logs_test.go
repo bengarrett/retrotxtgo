@@ -70,23 +70,3 @@ func TestPath(t *testing.T) {
 		t.Errorf("Path() is empty or not an absolute path, it should return a directory")
 	}
 }
-
-func Test_unknownFlag(t *testing.T) {
-	tests := []struct {
-		name string
-		s    string
-		want bool
-	}{
-		{"empty", "", false},
-		{"random", "the quick brown fox", false},
-		{"ok long", "unknown shorthand flag --test", true},
-		{"ok short", "unknown flag --test", true},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// if got := unknownFlag(tt.s); got != tt.want {
-			// 	t.Errorf("unknownFlag() = %v, want %v", got, tt.want)
-			// }
-		})
-	}
-}

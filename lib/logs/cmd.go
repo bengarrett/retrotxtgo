@@ -105,6 +105,5 @@ func (c Cmd) error() Generic {
 			Arg: s[5],
 			Err: ErrFlag}
 	}
-	//fmt.Printf("DEBUG: %+v\n", c.Err)
 	return Generic{Issue: "command", Arg: "execute", Err: c.Err}
 }

@@ -111,9 +111,9 @@ linters:
     - exportloopref
     - gochecknoinits
     - gci
-    - gochecknoglobals # TODO
+    - gochecknoglobals
     - goconst
-    #- gocritic # TODO
+    - gocritic # TODO
     - godot
     #- gofmt
     #- gofumpt
@@ -144,7 +144,7 @@ linters:
     - typecheck
     - unconvert
     - unparam
-    #- unused # do not use until version is in beta
+    #- unused # TODO do not use until version is in beta
     - varcheck
     - whitespace
     # don't enable:
