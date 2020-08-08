@@ -57,7 +57,7 @@ func CacheGet() (etag, ver string) {
 		logs.Log(err)
 		return
 	}
-	if _, err := os.Stat(cf); os.IsNotExist(err) {
+	if _, err = os.Stat(cf); os.IsNotExist(err) {
 		return
 	}
 	f, err := ioutil.ReadFile(cf)

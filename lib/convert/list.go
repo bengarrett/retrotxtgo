@@ -110,7 +110,8 @@ func alias(s, val string, e encoding.Encoding) string {
 		case "macintosh":
 			return "mac"
 		}
-		a, err := ianaindex.MIB.Name(e)
+		var err error
+		a, err = ianaindex.MIB.Name(e)
 		if err != nil {
 			return ""
 		}

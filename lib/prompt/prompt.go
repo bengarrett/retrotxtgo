@@ -145,7 +145,7 @@ func parseYN(input string, yesDefault bool) bool {
 func pstring(r io.Reader, setup bool) (words string) {
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
-		words := scanner.Text()
+		words = scanner.Text()
 		switch words {
 		case "-":
 			return "-"

@@ -62,12 +62,14 @@ func Names() string {
 // Set edits and saves a named setting within a configuration file.
 // It also accepts numeric index values printed by List().
 func Set(name string) {
-	if i, err := strconv.Atoi(name); err != nil {
+	i, err := strconv.Atoi(name)
+	switch {
+	case err != nil:
 		Update(name, false)
-	} else if i >= 0 && i <= (len(Reset())-1) {
+	case i >= 0 && i <= (len(Reset())-1):
 		k := Keys()
 		Update(k[i], false)
-	} else {
+	default:
 		Update(name, false)
 	}
 }
@@ -368,8 +370,8 @@ func previewTitle(value string) {
 	fmt.Println()
 }
 
-func previewPrompt(name, value string) (p string) {
-	p = "Set a new value"
+func previewPrompt(name, value string) string {
+	p := "Set a new value"
 	if name == "html.meta.keywords" {
 		p = "Set some comma-separated keywords"
 		if value != "" {
@@ -381,7 +383,7 @@ func previewPrompt(name, value string) (p string) {
 	} else {
 		p += " or leave blank to keep it unused:"
 	}
-	return
+	return p
 }
 
 func save(name string, setup bool, value interface{}) {

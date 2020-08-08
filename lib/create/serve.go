@@ -43,14 +43,17 @@ func (args *Args) Serve(b *[]byte) {
 	}
 	max := 10
 	for tries := 0; tries <= max; tries++ {
-		if !Port(port) {
+		switch {
+		case !Port(port):
 			port++
-		} else if tries >= max {
+			continue
+		case tries >= max:
 			logs.Fatal("http ports", fmt.Sprintf("%d-%d", args.Port, port), ErrPort)
-		} else {
+			continue
+		default:
 			args.Port = port
-			break
 		}
+		break
 	}
 	if err := args.createDir(b); err != nil {
 		logs.Fatal("serve create directory", "", err)

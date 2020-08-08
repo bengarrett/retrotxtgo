@@ -28,7 +28,7 @@ var ErrNil = errors.New("error value cannot be nil")
 func Log(err error) {
 	if err != nil {
 		// save error to log file
-		if err := save(err, ""); err != nil {
+		if err = save(err, ""); err != nil {
 			log.Fatalf("%s %s", color.Danger.Sprint("!"), err)
 		}
 	}
@@ -38,7 +38,7 @@ func Log(err error) {
 func LogFatal(err error) {
 	if err != nil {
 		// save error to log file
-		if err := save(err, ""); err != nil {
+		if err = save(err, ""); err != nil {
 			log.Fatalf("%s %s", color.Danger.Sprint("!"), err)
 		}
 		// print error

@@ -184,6 +184,7 @@ issues:
         - unused
         - scopelint
         - gochecknoglobals
+        - unparam
     - path: filesystem/read\.go
       linters:
         - unused

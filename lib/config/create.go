@@ -16,11 +16,13 @@ func Create(name string, ow bool) (err error) {
 	if name == "" {
 		return fmt.Errorf("create configuration: %w", ErrNoFName)
 	}
-	if _, err := os.Stat(name); !os.IsNotExist(err) && !ow {
+	_, err = os.Stat(name)
+	switch {
+	case !os.IsNotExist(err) && !ow:
 		configDoesExist(cmdPath, "create")
-	} else if os.IsNotExist(err) {
+	case os.IsNotExist(err):
 		// a missing named file is okay
-	} else if err != nil {
+	case err != nil:
 		return fmt.Errorf("could not access the configuration file: %q: %w", name, err)
 	}
 	// create a new config file

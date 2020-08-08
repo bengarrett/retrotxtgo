@@ -104,12 +104,13 @@ func Language() language.Tag {
 }
 
 // Print the meta and operating system details of a file.
-func Print(filename, format string) (err error) {
+func Print(filename, format string) error {
 	var d Detail
 	if err := d.Read(filename); err != nil {
 		return err
 	}
 	if IsText(d.Mime) {
+		var err error
 		d.Newline, err = filesystem.ReadNewlines(filename)
 		if err != nil {
 			return err
@@ -189,12 +190,13 @@ func (d *Detail) words(filename string) (err error) {
 }
 
 // Stdin parses piped data and prints out the details in a specific syntax.
-func Stdin(format string, b ...byte) (err error) {
+func Stdin(format string, b ...byte) error {
 	var d Detail
 	if err := d.parse(nil, b...); err != nil {
 		return err
 	}
 	if IsText(d.Mime) {
+		var err error
 		d.Newline = filesystem.Newlines(true, []rune(string(b))...)
 		if d.CtrlCount, err = filesystem.Controls(bytes.NewReader(b)); err != nil {
 			return err

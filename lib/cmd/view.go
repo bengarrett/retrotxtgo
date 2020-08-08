@@ -124,7 +124,7 @@ func init() {
 
 func viewPackage(cmd *cobra.Command, conv convert.Args, name string) (ok bool, err error) {
 	var s = strings.ToLower(name)
-	if _, err := os.Stat(s); !os.IsNotExist(err) {
+	if _, err = os.Stat(s); !os.IsNotExist(err) {
 		return false, nil
 	}
 	pkg, exist := internalPacks[s]

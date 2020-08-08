@@ -21,12 +21,8 @@ func IsPipe() bool {
 }
 
 // Read opens and returns the content of the named file.
-func Read(name string) (data []byte, err error) {
-	data, err = ReadAllBytes(name)
-	if err != nil {
-		return nil, fmt.Errorf("read file failed: %q: %w", name, err)
-	}
-	return data, nil
+func Read(name string) ([]byte, error) {
+	return ReadAllBytes(name)
 }
 
 // ReadAllBytes reads the named file and returns the content as a byte array.

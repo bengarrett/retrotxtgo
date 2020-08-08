@@ -464,13 +464,15 @@ func (args *Args) newTemplate() (*template.Template, error) {
 			return nil, fmt.Errorf("creating a new template: %w", err)
 		}
 	} else {
-		if s, err := os.Stat(args.tmpl); os.IsNotExist(err) {
-			if err := args.templateSave(); err != nil {
-				return nil, fmt.Errorf("saving to the template: %w", err)
+		s, err := os.Stat(args.tmpl)
+		switch {
+		case os.IsNotExist(err):
+			if err2 := args.templateSave(); err2 != nil {
+				return nil, fmt.Errorf("saving to the template: %w", err2)
 			}
-		} else if err != nil {
+		case err != nil:
 			return nil, err
-		} else if s.IsDir() {
+		case s.IsDir():
 			return nil, fmt.Errorf("new template %q: %w", args.tmpl, ErrTmplDir)
 		}
 	}
@@ -569,7 +571,8 @@ func (args *Args) pagedata(b *[]byte) (p PageData, err error) {
 		// styles
 		s := bytes.TrimSpace(pack.Get("css/styles.css"))
 		// font
-		f, err := FontCSS(args.FontFamilyVal, args.FontEmbedVal)
+		var f []byte
+		f, err = FontCSS(args.FontFamilyVal, args.FontEmbedVal)
 		if err != nil {
 			return p, fmt.Errorf("pagedata font error: %w", err)
 		}

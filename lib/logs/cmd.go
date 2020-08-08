@@ -16,7 +16,7 @@ var (
 	ErrSyntax  = errors.New("flags can only be in -s (short) or --long (long) form")
 	ErrNoFlag  = errors.New("cannot be empty and requires a value")
 	ErrReqFlag = errors.New("you must include this flag in your command")
-	ErrSlice   = errors.New("invalid slice")
+	ErrSlice   = errors.New("invalid option choice")
 	ErrShort   = errors.New("word count is too short, less than 3")
 	ErrVal     = errors.New("value is not a valid choice")
 )
@@ -42,7 +42,7 @@ func ArgFatal(args ...string) {
 
 // FlagFatal returns flag options when an invalid choice is used.
 func FlagFatal(name, value string, args ...string) {
-	cmd := Cmd{Args: args, Err: fmt.Errorf("%q: %w", name, ErrSlice)}
+	cmd := Cmd{Args: args, Err: fmt.Errorf("--%s=%q: %w", name, value, ErrSlice)}
 	fmt.Println(cmd.error().String())
 	fmt.Printf("         choices: %s\n", strings.Join(args, ", "))
 	os.Exit(1)

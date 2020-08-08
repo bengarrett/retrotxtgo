@@ -45,8 +45,8 @@ func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		const minArgs = 2
 		if len(os.Args) < minArgs {
-			if err := rootCmd.Usage(); err != nil {
-				logs.Fatal("rootcmd", "usage", err)
+			if err1 := rootCmd.Usage(); err1 != nil {
+				logs.Fatal("rootcmd", "usage", err1)
 			}
 		}
 		logs.Execute(err, os.Args[1:]...)

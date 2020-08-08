@@ -96,7 +96,8 @@ main pre {
 		Name: f,
 	}
 	if embed {
-		url, err := fontBase64(f)
+		url := ""
+		url, err = fontBase64(f)
 		if err != nil {
 			return nil, fmt.Errorf("binary font to base64 failed: %w", err)
 		}

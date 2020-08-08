@@ -30,7 +30,7 @@ var ErrStdErr = errors.New("failed to print to stderr")
 // Clean removes the named file or directory.
 func Clean(name string) {
 	if err := os.RemoveAll(name); err != nil {
-		if _, err := fmt.Fprintf(os.Stderr, "failed to clean %q: %s", name, err); err != nil {
+		if _, err = fmt.Fprintf(os.Stderr, "failed to clean %q: %s", name, err); err != nil {
 			logs.LogFatal(fmt.Errorf("clean %s: %w", name, ErrStdErr))
 		}
 	}
@@ -182,8 +182,8 @@ func addTar(name string, w *tar.Writer) error {
 		Mode:    int64(s.Mode()),
 		ModTime: s.ModTime(),
 	}
-	if err := w.WriteHeader(h); err != nil {
-		return err
+	if err1 := w.WriteHeader(h); err1 != nil {
+		return err1
 	}
 	_, err = io.Copy(w, f)
 	if err != nil {
@@ -203,7 +203,7 @@ func Touch(name string) (path string, err error) {
 
 func dir(name string) (path string, err error) {
 	path = filepath.Dir(name)
-	if _, err := os.Stat(path); os.IsNotExist(err) {
+	if _, err = os.Stat(path); os.IsNotExist(err) {
 		if err = os.MkdirAll(path, dirmode); err != nil {
 			return "", fmt.Errorf("dir could not make the directory: %s %s: %w", dirmode, path, err)
 		}
