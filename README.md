@@ -1,4 +1,4 @@
-![Build](https://github.com/bengarrett/retrotxtgo/workflows/Go/badge.svg) ![Tests](https://github.com/bengarrett/retrotxtgo/workflows/Go%20tests/badge.svg)
+![Build](https://github.com/bengarrett/retrotxtgo/workflows/Go/badge.svg) ![Tests](https://github.com/bengarrett/retrotxtgo/workflows/Go%20tests/badge.svg) ![Lint](https://github.com/bengarrett/retrotxtgo/workflows/golangci-lint/badge.svg)
 
 # RetroTxt on Go
 
