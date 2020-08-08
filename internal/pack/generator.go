@@ -94,5 +94,5 @@ func main() {
 	if err = ioutil.WriteFile(name, code, os.ModePerm); err != nil {
 		log.Fatal("error writing file:", name, err)
 	}
-	return f.Close()
+	f.Close()
 }

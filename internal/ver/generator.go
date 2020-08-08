@@ -36,7 +36,7 @@ var (
 
 // B holds the build and version information.
 var B = Build{
-	Commit:  "n/a",
+	Commit:  "go build",
 	Date:    "{{.Date}}",
 	Domain:  "retrotxt.com",
 	Version: "{{.Version}}",
@@ -78,5 +78,5 @@ func main() {
 	if err = ioutil.WriteFile(p, code, os.ModePerm); err != nil {
 		log.Fatal("error writing file:", p, err)
 	}
-	return f.Close()
+	f.Close()
 }

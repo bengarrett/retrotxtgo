@@ -8,7 +8,7 @@ release:
 before:
   hooks:
     - go mod download
-    #- gosec ./...
+    #- golangci-lint run
     #- go generate ./... # this will create a dirty state
 env:
   - CGO_ENABLED=0
