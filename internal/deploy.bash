@@ -5,7 +5,7 @@
 file=~/.tokens/goreleaser.txt
 if [ -f $FILE ]; then
     token=$(<$file) && export GITHUB_TOKEN="$token" &&
-        goreleaser --release-notes ../changelog.md --rm-dist &&
+        goreleaser --release-notes ../docs/changelog.md --rm-dist &&
         exit 0
 else
     echo "The Github token file '$file' could not be found."
