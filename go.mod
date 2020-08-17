@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/alecthomas/chroma v0.8.0
-	github.com/aofei/mimesniffer v1.1.4
+	github.com/aofei/mimesniffer v1.1.5
 	github.com/gookit/color v1.2.7
 	github.com/mozillazg/go-slugify v0.2.0
 	github.com/mozillazg/go-unidecode v0.1.1 // indirect
