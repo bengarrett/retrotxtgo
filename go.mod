@@ -3,7 +3,7 @@ module retrotxt.com/retrotxt
 go 1.13
 
 require (
-	github.com/alecthomas/chroma v0.8.0
+	github.com/alecthomas/chroma v0.8.1
 	github.com/aofei/mimesniffer v1.1.4
 	github.com/gookit/color v1.2.7
 	github.com/mozillazg/go-slugify v0.2.0
