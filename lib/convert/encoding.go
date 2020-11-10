@@ -390,7 +390,7 @@ func (c *Convert) RunesDOS() {
 		return
 	}
 	// ASCII C0 = row 1, C1 = row 2
-	var ctrls = [32]string{"\u0000", "\u263A", "\u263B", "\u2665", "\u2666", "\u2663", "\u2660", "\u2022", "\u25D8", "\u25CB",
+	var ctrls = [32]string{string(decode(row8 + byte(0))), "\u263A", "\u263B", "\u2665", "\u2666", "\u2663", "\u2660", "\u2022", "\u25D8", "\u25CB",
 		"\u25D9", "\u2642", "\u2640", "\u266A", "\u266B", "\u263C", "\u25BA", "\u25C4", "\u2195", "\u203C", "\u00B6", "\u00A7",
 		"\u25AC", "\u21A8", "\u2191", "\u2193", "\u2192", "\u2190", "\u221F", "\u2194", "\u25B2", "\u25BC"}
 	for i := 0; i < c.len; i++ {
@@ -406,7 +406,7 @@ func (c *Convert) RunesDOS() {
 			continue
 		}
 		switch {
-		case r > NUL && r <= US:
+		case r >= NUL && r <= US:
 			c.Runes[i], _ = utf8.DecodeRuneInString(ctrls[r]) // c0, c1 controllers
 		case r == DEL:
 			c.Runes[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0x82}) // ⌂
