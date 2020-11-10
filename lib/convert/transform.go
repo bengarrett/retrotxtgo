@@ -96,12 +96,10 @@ func (c *Convert) Transform(name string) error {
 	if len(c.Source) == 0 {
 		return nil
 	}
-	// don't transform unicode encoded strings
+	// don't transform, instead copy unicode encoded strings
 	switch c.encode {
 	case unicode.UTF8, unicode.UTF8BOM:
-		for _, b := range c.Source {
-			c.Runes = append(c.Runes, rune(b))
-		}
+		c.Runes = []rune(string(c.Source))
 		c.len = len(c.Runes)
 		return nil
 	}
