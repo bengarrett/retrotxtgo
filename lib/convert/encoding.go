@@ -394,6 +394,9 @@ func (c *Convert) RunesDOS() {
 		"\u25AC", "\u21A8", "\u2191", "\u2193", "\u2192", "\u2190", "\u221F", "\u2194", "\u25B2", "\u25BC"}
 	for i := 0; i < c.len; i++ {
 		r := c.Runes[i]
+		if c.skipIgnores(i) {
+			continue
+		}
 		if c.skipNewlines(i) {
 			if c.newlines == [2]rune{13, 0} {
 				c.Runes[i] = LF // swap CR with LF
