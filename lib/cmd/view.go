@@ -53,29 +53,12 @@ var viewCmd = &cobra.Command{
 		}
 		// piped input from other programs
 		if filesystem.IsPipe() {
-			b, err := filesystem.ReadPipe()
-			if err != nil {
-				logs.Fatal("view", "stdin read", err)
-			}
-			r, err := conv.Text(&b)
-			if err != nil {
-				logs.Fatal("view", "stdin convert", err)
-			}
-			// to flag
-			if to := cmd.Flags().Lookup("to"); to.Changed {
-				r, err = toDecode(viewFlag.to, r...)
-				if err != nil {
-					logs.Println("using utf8 encoding and not", viewFlag.to, err)
-				}
-				fmt.Println(string(r))
-				os.Exit(0)
-			}
-			fmt.Println(string(r))
-			os.Exit(0)
+			viewPipe(cmd, conv)
 		}
 		// user arguments
 		checkUse(cmd, args...)
 		for i, arg := range args {
+			// internal, packed example file
 			if ok, err := viewPackage(cmd, conv, arg); err != nil {
 				logs.Println("pack", arg, err)
 				continue
@@ -162,6 +145,28 @@ func viewPackage(cmd *cobra.Command, conv convert.Args, name string) (ok bool, e
 	}
 	fmt.Println(string(r))
 	return true, nil
+}
+
+func viewPipe(cmd *cobra.Command, conv convert.Args) {
+	b, err := filesystem.ReadPipe()
+	if err != nil {
+		logs.Fatal("view", "stdin read", err)
+	}
+	r, err := conv.Text(&b)
+	if err != nil {
+		logs.Fatal("view", "stdin convert", err)
+	}
+	// to flag
+	if to := cmd.Flags().Lookup("to"); to.Changed {
+		r, err = toDecode(viewFlag.to, r...)
+		if err != nil {
+			logs.Println("using utf8 encoding and not", viewFlag.to, err)
+		}
+		fmt.Println(string(r))
+		os.Exit(0)
+	}
+	fmt.Println(string(r))
+	os.Exit(0)
 }
 
 func toDecode(name string, r ...rune) ([]rune, error) {
