@@ -292,8 +292,9 @@ func (c *Convert) Swap() *Convert {
 		println(fmt.Sprintf("newline detected: %+v", c.newlines))
 	}
 	switch c.encode {
-	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
-		c.RunesEBCDIC()
+	// TODO: check tables
+	// case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
+	// 	c.RunesEBCDIC()
 	case charmap.CodePage437, charmap.CodePage850, charmap.CodePage852, charmap.CodePage855,
 		charmap.CodePage858, charmap.CodePage860, charmap.CodePage862, charmap.CodePage863,
 		charmap.CodePage865, charmap.CodePage866:
