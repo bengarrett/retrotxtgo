@@ -79,11 +79,11 @@ var viewCmd = &cobra.Command{
 			}
 			// to flag
 			if to := cmd.Flags().Lookup("to"); to.Changed {
-				r, err = toDecode(viewFlag.to, r...)
+				b, err := toDecode(viewFlag.to, r...)
 				if err != nil {
 					logs.Println("using utf8 encoding and not", viewFlag.to, err)
 				}
-				fmt.Println(string(r))
+				fmt.Println(string(b))
 				continue
 			}
 			fmt.Println(string(r))
@@ -136,11 +136,11 @@ func viewPackage(cmd *cobra.Command, conv convert.Args, name string) (ok bool, e
 	}
 	// to flag
 	if to := cmd.Flags().Lookup("to"); to.Changed {
-		r, err = toDecode(viewFlag.to, r...)
+		b, err := toDecode(viewFlag.to, r...)
 		if err != nil {
 			logs.Println("using utf8 encoding and not", viewFlag.to, err)
 		}
-		fmt.Println(string(r))
+		fmt.Println(string(b))
 		return true, nil
 	}
 	fmt.Println(string(r))
@@ -158,28 +158,28 @@ func viewPipe(cmd *cobra.Command, conv convert.Args) {
 	}
 	// to flag
 	if to := cmd.Flags().Lookup("to"); to.Changed {
-		r, err = toDecode(viewFlag.to, r...)
+		b, err := toDecode(viewFlag.to, r...)
 		if err != nil {
 			logs.Println("using utf8 encoding and not", viewFlag.to, err)
 		}
-		fmt.Println(string(r))
+		fmt.Println(string(b))
 		os.Exit(0)
 	}
 	fmt.Println(string(r))
 	os.Exit(0)
 }
 
-func toDecode(name string, r ...rune) ([]rune, error) {
+func toDecode(name string, r ...rune) ([]byte, error) {
 	encode, err := convert.Encoding(name)
 	if err != nil {
-		return r, fmt.Errorf("encoding not known or supported %s: %w", encode, err)
+		return []byte(string(r)), fmt.Errorf("encoding not known or supported %s: %w", encode, err)
 	}
 	cp, err := encode.NewEncoder().String(string(r))
 	if err != nil {
 		if cp == "" {
-			return r, fmt.Errorf("encoder could not convert runes to %s: %w", encode, err)
+			return []byte(string(r)), fmt.Errorf("encoder could not convert runes to %s: %w", encode, err)
 		}
-		return []rune(cp), nil
+		return []byte(cp), nil
 	}
-	return []rune(cp), nil
+	return []byte(cp), nil
 }
