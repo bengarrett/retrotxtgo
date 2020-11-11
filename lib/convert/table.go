@@ -107,7 +107,7 @@ func character(i int, r rune, cp encoding.Encoding) string {
 		case i >= PAD && i < NBSP:
 			return " "
 		case i >= NBSP:
-			return string(i)
+			return string(rune(i))
 		}
 	}
 	// rune to string
