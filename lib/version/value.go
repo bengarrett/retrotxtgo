@@ -5,7 +5,7 @@ package version
 // B holds the build and version information.
 var B = Build{
 	Commit:  "go build",
-	Date:    "2020-08-08T11:32:41+10:00",
+	Date:    "2020-11-11T18:14:38+11:00",
 	Domain:  "retrotxt.com",
-	Version: "0.0.23",
+	Version: "v0.0.24",
 }
