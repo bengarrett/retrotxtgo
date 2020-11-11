@@ -43,6 +43,8 @@ type Detail struct {
 	Mime      string    `json:"mime"`
 	Slug      string    `json:"slug"`
 	//Newlines  string    `json:"newlines"` // todo: required?
+	index  int
+	length int
 }
 
 // File data for XML encoding.
@@ -64,19 +66,29 @@ type File struct {
 	Modified  time.Time `xml:"modified"`
 }
 
+// Names index and totals
+type Names struct {
+	Index  int
+	Length int
+}
+
 // DTFormat is the datetime format.
 // DMY12, YMD12, MDY12, DMY24, YMD24, MDY24.
 const DTFormat = "DMY24"
 
 var (
-	ErrFmt    = errors.New("format is not known")
+	// ErrFmt format error
+	ErrFmt = errors.New("format is not known")
+	// ErrNoName name cannot be empty
 	ErrNoName = errors.New("name cannot be empty")
-	ErrNoDir  = errors.New("directories are not usable with this command")
+	// ErrNoDir directories not usable with command
+	ErrNoDir = errors.New("directories are not usable with this command")
+	// ErrNoFile file does not exist
 	ErrNoFile = errors.New("file does not exist")
 )
 
 // Info parses the named file and prints out its details in a specific syntax.
-func Info(name, format string) logs.Generic {
+func (n Names) Info(name, format string) logs.Generic {
 	gen := logs.Generic{Issue: "info", Arg: name}
 	if name == "" {
 		gen.Issue = "name"
@@ -90,7 +102,7 @@ func Info(name, format string) logs.Generic {
 	} else if s.IsDir() {
 		gen.Issue = "info"
 		gen.Err = ErrNoDir
-	} else if err := Print(name, format); err != nil {
+	} else if err := Print(name, format, n.Index, n.Length); err != nil {
 		gen.Issue = "info.print"
 		gen.Arg = format
 		gen.Err = err
@@ -104,11 +116,12 @@ func Language() language.Tag {
 }
 
 // Print the meta and operating system details of a file.
-func Print(filename, format string) error {
+func Print(filename, format string, i, length int) error {
 	var d Detail
 	if err := d.Read(filename); err != nil {
 		return err
 	}
+	d.index, d.length = i, length
 	if IsText(d.Mime) {
 		var err error
 		d.Newline, err = filesystem.ReadNewlines(filename)
@@ -384,7 +397,9 @@ func (d *Detail) Text(color bool) string {
 		}
 		fmt.Fprintf(w, "\t %s\t  %s\n", x.k, info(x.v))
 	}
-	fmt.Fprint(w, hr(l))
+	if d.index == d.length {
+		fmt.Fprint(w, hr(l))
+	}
 	if err := w.Flush(); err != nil {
 		logs.Fatal("flush of tab writer failed", "", err)
 	}
