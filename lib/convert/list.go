@@ -40,7 +40,7 @@ func List() *bytes.Buffer {
 	var buf bytes.Buffer
 	flags := tabwriter.Debug // tabwriter.AlignRight | tabwriter.Debug
 	w := tabwriter.NewWriter(&buf, 0, 0, 2, ' ', flags)
-	header := "formal name\targument value\tnumeric value\talias value\t"
+	header := "Formal name\tArgument value\tNumeric value\tAlias value\t"
 	fmt.Fprintln(w, str.Cp(" Supported legacy code pages and character encodings"))
 	fmt.Fprintln(w, header)
 	for _, e := range Encodings() {
