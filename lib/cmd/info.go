@@ -37,6 +37,9 @@ var infoCmd = &cobra.Command{
 		checkUse(cmd, args...)
 		for _, arg := range args {
 			if err := info.Info(arg, infoFlag.format); err.Err != nil {
+				if err.Err == info.ErrNoFile {
+					err.Fatal()
+				}
 				if err := cmd.Usage(); err != nil {
 					logs.Println("command", "usage", err)
 				}
