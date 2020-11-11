@@ -6,10 +6,11 @@ import (
 	"math"
 	"strings"
 	"text/tabwriter"
+	"unicode"
 
 	"github.com/gookit/color"
 	"golang.org/x/text/encoding/charmap"
-	"golang.org/x/text/encoding/unicode"
+	uni "golang.org/x/text/encoding/unicode"
 	"retrotxt.com/retrotxt/lib/str"
 )
 
@@ -23,10 +24,10 @@ func Table(name string) (*bytes.Buffer, error) {
 	switch cp {
 	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
 		h += " - EBCDIC"
-	case unicode.UTF8, unicode.UTF8BOM,
-		unicode.UTF16(unicode.BigEndian, unicode.UseBOM),
-		unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM),
-		unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM):
+	case uni.UTF8, uni.UTF8BOM,
+		uni.UTF16(uni.BigEndian, uni.UseBOM),
+		uni.UTF16(uni.BigEndian, uni.IgnoreBOM),
+		uni.UTF16(uni.LittleEndian, uni.IgnoreBOM):
 		h += " - Unicode"
 	default:
 		h += " - Extended ASCII"
@@ -54,6 +55,19 @@ func Table(name string) (*bytes.Buffer, error) {
 	}
 	for i, r := range runes {
 		char := string(r)
+		// non-spacing mark characters require an additional space
+		if unicode.In(r, unicode.Mn) {
+			char = fmt.Sprintf(" %s", string(r))
+		}
+		// format, other
+		if unicode.In(r, unicode.Cf) {
+			const ZWNJ, ZWJ, LRM, RLM = 8204, 8205, 8206, 8207
+			switch r {
+			case ZWNJ, ZWJ, LRM, RLM:
+				// no suitable control character symbols exist
+				char = " "
+			}
+		}
 		switch {
 		case i == 0:
 			fmt.Fprintf(w, " %s %s %s %s",
