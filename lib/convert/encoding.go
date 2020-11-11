@@ -18,66 +18,123 @@ import (
 )
 
 const (
+	// NUL Null control code
 	NUL = iota
+	// SOH Start of heading
 	SOH
+	// STX Start of text
 	STX
+	// ETX End of text
 	ETX
+	// EOT End of transmission
 	EOT
+	// ENQ Enquiry
 	ENQ
+	// ACK Acknowledge
 	ACK
+	// BEL Bell or alert
 	BEL
+	// BS Backspace
 	BS
+	// HT Horizontal tabulation
 	HT
+	// LF Line feed
 	LF
+	// VT Vertical tabulation
 	VT
+	// FF Form feed
 	FF
+	// CR Carriage return
 	CR
+	// SO Shift out
 	SO
+	// SI Shift in
 	SI
+	// DLE Data Link Escape
 	DLE
+	// DC1 Device control one
 	DC1
+	// DC2 Device control two
 	DC2
+	// DC3 Device control three
 	DC3
+	// DC4 Device control four
 	DC4
+	// NAK Negative acknowledge
 	NAK
+	// SYN Synchronous idle
 	SYN
+	// ETB End of transmission block
 	ETB
+	// CAN Cancel
 	CAN
+	// EM End of medium
 	EM
+	// SUB Substitute
 	SUB
+	// ESC Escape
 	ESC
+	// FS File separator
 	FS
+	// GS Group separator
 	GS
+	// RS Record separator
 	RS
+	// US Unit separator
 	US
+	// SP Space
 	SP
 )
 
 const (
-	LeftSquareBracket   = 91
-	VerticalBar         = 124
-	DEL                 = 127
-	Dash                = 150
-	Nbsp                = 160
+	// LeftSquareBracket [
+	LeftSquareBracket = 91
+	// VerticalBar |
+	VerticalBar = 124
+	// DEL Delete
+	DEL = 127
+	// Dash Hyphen -
+	Dash = 150
+	// Nbsp Non-breaking space
+	Nbsp = 160
+	// InvertedExclamation ¡
 	InvertedExclamation = 161
-	Cent                = 162
-	BrokenBar           = 166
-	Negation            = 172
-	PlusMinus           = 177
-	LightVertical       = 179 // TODO: test 178 vs 179
-	SquareRoot          = 251
-	NBSP                = 255
-	Delta               = 916
-	LeftwardsArrow      = 8592
-	SquareRootU         = 8730
-	House               = 8962
-	IntegralExtension   = 9134
-	SymbolNUL           = 9216
-	SymbolESC           = 9243
-	SymbolDEL           = 9249
-	LightVerticalU      = 9474
-	CheckMark           = 10003
-	Replacement         = 65533
+	// Cent ¢
+	Cent = 162
+	// BrokenBar ¦
+	BrokenBar = 166
+	// Negation ¬
+	Negation = 172
+	// PlusMinus ±
+	PlusMinus = 177
+	// LightVertical light vertical │
+	LightVertical = 179 // TODO: test 178 vs 179
+	// SquareRoot Square root √
+	SquareRoot = 251
+	// NBSP Non-breaking space
+	NBSP = 255
+	// Delta Δ
+	Delta = 916
+	// LeftwardsArrow ←
+	LeftwardsArrow = 8592
+	// SquareRootU Unicode square root √
+	SquareRootU = 8730
+	// House ⌂
+	House = 8962
+	// IntegralExtension ⎮
+	IntegralExtension = 9134
+	// SymbolNUL ␀
+	SymbolNUL = 9216
+	// SymbolESC ␛
+	SymbolESC = 9243
+	// SymbolDEL ␡
+	SymbolDEL = 9249
+	// LightVerticalU Box drawing light vertical │
+	LightVerticalU = 9474
+	// CheckMark ✓
+	CheckMark = 10003
+	// Replacement character �
+	Replacement = 65533
 )
 
 const (
@@ -89,7 +146,12 @@ const (
 	rowE  = 224
 )
 
+// Chars are characters with alternative runes
 type Chars map[int]rune
+
+var (
+	ErrChainANSI = errors.New("ansi() is a chain method that is to be used in conjunction with swap: c.swap().ansi()")
+)
 
 // Characters map code page 437 characters with alternative runes.
 func Characters() Chars {
@@ -101,8 +163,6 @@ func Characters() Chars {
 		SquareRoot:    CheckMark,         // ✓
 	}
 }
-
-var ErrChainANSI = errors.New("ansi() is a chain method that is to be used in conjunction with swap: c.swap().ansi()")
 
 // Encoding returns the named character set encoding.
 func Encoding(name string) (encoding.Encoding, error) {
