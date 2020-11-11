@@ -27,22 +27,22 @@ import (
 
 // Detail of a file.
 type Detail struct {
-	Bytes     int64
-	CharCount int
-	CtrlCount int
-	Lines     int
-	Name      string
-	MD5       string
-	Mime      string
-	Modified  time.Time
-	Newline   [2]rune
-	Newlines  string
-	SHA256    string
-	Slug      string
-	Size      string
-	Utf8      bool
-	Width     int
-	WordCount int
+	Name      string    `json:"filename"`
+	Utf8      bool      `json:"utf8"`
+	Newline   [2]rune   `json:"newline"`
+	CharCount int       `json:"characters"`
+	CtrlCount int       `json:"ansiControls"`
+	WordCount int       `json:"words"`
+	Size      string    `json:"size"`
+	Bytes     int64     `json:"bytes"`
+	Lines     int       `json:"lines"`
+	Width     int       `json:"width"`
+	Modified  time.Time `json:"modified"`
+	MD5       string    `json:"checksumMD5"`
+	SHA256    string    `json:"checksumSHA256"`
+	Mime      string    `json:"mime"`
+	Slug      string    `json:"slug"`
+	//Newlines  string    `json:"newlines"` // todo: required?
 }
 
 // File data for XML encoding.
