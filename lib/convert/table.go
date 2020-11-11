@@ -9,6 +9,7 @@ import (
 	"unicode"
 
 	"github.com/gookit/color"
+	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	uni "golang.org/x/text/encoding/unicode"
 	"retrotxt.com/retrotxt/lib/str"
@@ -55,30 +56,7 @@ func Table(name string) (*bytes.Buffer, error) {
 		return nil, fmt.Errorf("table convert bytes error: %w", err)
 	}
 	for i, r := range runes {
-		char := string(r)
-		// non-spacing mark characters require an additional space
-		if unicode.In(r, unicode.Mn) {
-			char = fmt.Sprintf(" %s", string(r))
-		}
-		// format, other
-		if unicode.In(r, unicode.Cf) {
-			const ZWNJ, ZWJ, LRM, RLM = 8204, 8205, 8206, 8207
-			switch r {
-			case ZWNJ, ZWJ, LRM, RLM:
-				// no suitable control character symbols exist
-				char = " "
-			}
-		}
-		// Latin-1 Supplement
-		if cp == uni.UTF8 || cp == uni.UTF8BOM {
-			const PAD, NBSP = 128, 160
-			switch {
-			case i >= PAD && i < NBSP:
-				char = " "
-			case i >= NBSP:
-				char = string(i)
-			}
-		}
+		char := character(i, r, cp)
 		switch {
 		case i == 0:
 			fmt.Fprintf(w, " %s %s %s %s",
@@ -105,4 +83,33 @@ func Table(name string) (*bytes.Buffer, error) {
 		return nil, fmt.Errorf("table tab writer failed to flush data: %w", err)
 	}
 	return &buf, nil
+}
+
+func character(i int, r rune, cp encoding.Encoding) string {
+	// non-spacing mark characters
+	if unicode.In(r, unicode.Mn) {
+		// these require an additional monospace
+		return fmt.Sprintf(" %s", string(r))
+	}
+	// format, other
+	if unicode.In(r, unicode.Cf) {
+		const ZWNJ, ZWJ, LRM, RLM = 8204, 8205, 8206, 8207
+		switch r {
+		case ZWNJ, ZWJ, LRM, RLM:
+			// no suitable control character symbols exist
+			return " "
+		}
+	}
+	// unicode latin-1 supplement
+	if cp == uni.UTF8 || cp == uni.UTF8BOM {
+		const PAD, NBSP = 128, 160
+		switch {
+		case i >= PAD && i < NBSP:
+			return " "
+		case i >= NBSP:
+			return string(i)
+		}
+	}
+	// rune to string
+	return string(r)
 }
