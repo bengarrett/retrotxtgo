@@ -110,7 +110,7 @@ var configSetCmd = &cobra.Command{
 	Example: str.Example("  retrotxt config set html.meta.description") +
 		" # to change the meta description setting\n" +
 		str.Example("  retrotxt config set style.info style.html") +
-		"   # to set the color styles",
+		" # to set the color styles",
 	Run: func(cmd *cobra.Command, args []string) {
 		if configFlag.configs {
 			if err := config.List(); err != nil {
