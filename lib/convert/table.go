@@ -22,12 +22,13 @@ func Table(name string) (*bytes.Buffer, error) {
 	}
 	h := fmt.Sprintf("%s", cp)
 	switch cp {
-	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
-		h += " - EBCDIC"
-	case uni.UTF8, uni.UTF8BOM,
-		uni.UTF16(uni.BigEndian, uni.UseBOM),
+	case uni.UTF16(uni.BigEndian, uni.UseBOM),
 		uni.UTF16(uni.BigEndian, uni.IgnoreBOM),
 		uni.UTF16(uni.LittleEndian, uni.IgnoreBOM):
+		return nil, fmt.Errorf("utf-16 table encodings are not supported")
+	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
+		h += " - EBCDIC"
+	case uni.UTF8, uni.UTF8BOM:
 		h += " - Unicode"
 	default:
 		h += " - Extended ASCII"
@@ -66,6 +67,16 @@ func Table(name string) (*bytes.Buffer, error) {
 			case ZWNJ, ZWJ, LRM, RLM:
 				// no suitable control character symbols exist
 				char = " "
+			}
+		}
+		// Latin-1 Supplement
+		if cp == uni.UTF8 || cp == uni.UTF8BOM {
+			const PAD, NBSP = 128, 160
+			switch {
+			case i >= PAD && i < NBSP:
+				char = " "
+			case i >= NBSP:
+				char = string(i)
 			}
 		}
 		switch {
