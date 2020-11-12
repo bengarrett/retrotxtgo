@@ -275,8 +275,8 @@ func Missing() (list []string) {
 	if d == l {
 		return list
 	}
-	list = make([]string, l)
 	for key := range Reset() {
+		//fmt.Println("key", key, viper.IsSet(key))
 		if !viper.IsSet(key) {
 			list = append(list, key)
 		}
