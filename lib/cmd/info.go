@@ -81,7 +81,7 @@ func infoPackage(cmd *cobra.Command, name string) (filename string, err error) {
 	if b == nil {
 		return "", fmt.Errorf("view package %q: %w", pkg.name, ErrPackGet)
 	}
-	file, err := ioutil.TempFile("", "retrotxt_pack.*.txt")
+	file, err := ioutil.TempFile("", fmt.Sprintf("retrotxt_%s.*.txt", s))
 	if err != nil {
 		return "", fmt.Errorf("view package %q: %w", pkg.name, ErrTempOpen)
 	}
