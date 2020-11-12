@@ -31,8 +31,14 @@ func InitDefaults() {
 // configMissing prints an error notice and exits.
 func configMissing(name, suffix string) {
 	cmd := strings.TrimSuffix(name, suffix) + " create"
-	fmt.Printf("%s no config file is in use\n create it: %s\n",
-		str.Info(), str.Cp(cmd))
+	used := viper.ConfigFileUsed()
+	if used != "" {
+		fmt.Printf("%s %q config file is missing\ncreate it: %s\n",
+			str.Info(), used, str.Cp(cmd+" --config="+used))
+	} else {
+		fmt.Printf("%s no config file is in use\ncreate it: %s\n",
+			str.Info(), str.Cp(cmd))
+	}
 	os.Exit(1)
 }
 
