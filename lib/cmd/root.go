@@ -181,8 +181,9 @@ func examples() *bytes.Buffer {
 	var buf bytes.Buffer
 	var flags uint = 0 // tabwriter.AlignRight | tabwriter.Debug
 	w := tabwriter.NewWriter(&buf, 0, 0, 2, ' ', flags)
-	fmt.Fprintln(w, str.Cp(" Packaged example text and ANSI files to test and play with RetroTxt"))
-	fmt.Fprintln(w, strings.Repeat("-", 69))
+	const title = " Packaged example text and ANSI files to test and play with RetroTxt "
+	fmt.Fprintln(w, str.Cp(title))
+	fmt.Fprintln(w, strings.Repeat("-", len(title)))
 	for _, k := range keys {
 		fmt.Fprintf(w, "%s\t%s\t\n", k, internalPacks[k].description)
 	}
