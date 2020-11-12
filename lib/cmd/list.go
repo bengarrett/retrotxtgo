@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/text/encoding/ianaindex"
@@ -69,11 +70,12 @@ var listCmdTables = &cobra.Command{
 				logs.Println("list.tables.ianaindex", "", err)
 				continue
 			}
-			// keep 0F,1F controls. blank other ?
-			// tables -> Macintosh to list alt. names Mac OS Roman
-			// Windows 874 is not showing different chars from ISO-11
+			switch strings.ToLower(name) {
+			case "utf-16", "utf-16be", "utf-16le":
+				continue
+			}
+			// todo: Windows 874 is not showing different chars from ISO-11
 			// https://en.wikipedia.org/wiki/ISO/IEC_8859-11#Vendor_extensions
-			// japanese needs fixing
 			table, err := convert.Table(name)
 			if err != nil {
 				logs.Println("list.tables", "", err)
