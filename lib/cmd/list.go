@@ -35,7 +35,7 @@ var listCmdExamples = &cobra.Command{
 	Use:     "examples",
 	Aliases: []string{"e"},
 	Short: "List pre-packaged text files for use with the " +
-		str.Example("create") + ", " + str.Example("save") + " and " + str.Example("view") + " commands",
+		str.Example("create") + ", " + str.Example("save") + ", " + str.Example("info") + " and " + str.Example("view") + " commands",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(examples())
 	},
