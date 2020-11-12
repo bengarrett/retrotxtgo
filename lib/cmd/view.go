@@ -122,7 +122,7 @@ func viewPackage(cmd *cobra.Command, conv convert.Args, name string) (ok bool, e
 	if to := cmd.Flags().Lookup("to"); to.Changed {
 		// example exceptions that break the NewEncoder
 		switch s {
-		case "shiftjis", "utf16.be", "utf16.le":
+		case "037", "shiftjis", "utf16.be", "utf16.le":
 			fmt.Println(string(b))
 			return true, nil
 		}
