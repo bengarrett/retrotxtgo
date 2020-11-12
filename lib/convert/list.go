@@ -37,11 +37,13 @@ func Encodings() (e []encoding.Encoding) {
 
 // List returns a tabled list of supported IANA character set encodings.
 func List() *bytes.Buffer {
+	const header, title = "Formal name\tArgument value\tNumeric value\tAlias value\t",
+		" Supported legacy code pages and character encodings "
 	var buf bytes.Buffer
 	flags := tabwriter.Debug // tabwriter.AlignRight | tabwriter.Debug
 	w := tabwriter.NewWriter(&buf, 0, 0, 2, ' ', flags)
-	header := "Formal name\tArgument value\tNumeric value\tAlias value\t"
-	fmt.Fprintln(w, str.Cp(" Supported legacy code pages and character encodings"))
+	fmt.Fprintln(w, str.Cp(title))
+	fmt.Fprintln(w, strings.Repeat("-", len(title)))
 	fmt.Fprintln(w, header)
 	for _, e := range Encodings() {
 		n, v, d, a := cells(e)
@@ -50,7 +52,7 @@ func List() *bytes.Buffer {
 	}
 	fmt.Fprintln(w, "\nEither argument, numeric or alias values are valid codepage arguments")
 	fmt.Fprintln(w, "All these codepage arguments will match ISO 8859-1")
-	fmt.Fprintln(w, str.Example("retrotxt list table iso-8859-1"))
+	fmt.Fprintln(w, "\n"+str.Example("retrotxt list table iso-8859-1"))
 	fmt.Fprintln(w, str.Example("retrotxt list table 1"))
 	fmt.Fprintln(w, str.Example("retrotxt list table latin1"))
 	fmt.Fprintln(w, "\n"+str.Cinf("*")+" IBM Code Page 437 ("+str.Cc("cp437")+") is commonly used on MS-DOS and with ANSI art")
