@@ -132,7 +132,7 @@ func flagWidth(p *int, cc *cobra.Command) {
 }
 
 type internalPack struct {
-	// convert type, choices: d convert.Dump, t convert.Text (default when blank)
+	// convert type, d convert.Dump, t convert.Text (default when blank)
 	convert string
 	// font choice or leave blank for vga
 	font string
@@ -164,12 +164,12 @@ var internalPacks = map[string]internalPack{
 	"iso-1":         {"", "", "1", "text/iso-8859-1.txt", "ISO 8859-1 select characters"},                             //
 	"iso-15":        {"", "", "15", "text/iso-8859-15.txt", "ISO 8859-15 select characters"},                          //
 	"sauce":         {"", "", "", "text/sauce.txt", "SAUCE metadata test"},                                            // TODO
-	"shiftjis":      {"", "mona", "shift-jis", "text/shiftjis.txt", "Shift-JIS and Mona font test"},                   // TODO
-	"us-ascii":      {"", "", "cp1252", "text/us-ascii.txt", "US-ASCII controls test"},                                //
+	"shiftjis":      {"d", "mona", "shiftjis", "text/shiftjis.txt", "Shift-JIS and Mona font test"},                   // this outputs to UTF8 .. ??
+	"us-ascii":      {"d", "", "ascii", "text/us-ascii.txt", "US-ASCII controls test"},                                // this outputs to UTF8 because the control codes fail with the 8-bit codepages
 	"utf8":          {"", "", "", "text/utf-8.txt", "UTF-8 test with no Byte Order Mark"},                             //
 	"utf8.bom":      {"", "", "", "text/utf-8-bom.txt", "UTF-8 test with a Byte Order Mark"},                          //
-	"utf16.be":      {"", "", "utf-16be", "text/utf-16-be.txt", "UTF-16 Big Endian test"},                             //
-	"utf16.le":      {"", "", "utf-16le", "text/utf-16-le.txt", "UTF-16 Little Endian test"},                          //
+	"utf16.be":      {"", "", "utf16be", "text/utf-16-be.txt", "UTF-16 Big Endian test"},                              //
+	"utf16.le":      {"", "", "utf16le", "text/utf-16-le.txt", "UTF-16 Little Endian test"},                           //
 }
 
 func examples() *bytes.Buffer {

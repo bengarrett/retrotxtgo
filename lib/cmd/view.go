@@ -71,19 +71,15 @@ var viewCmd = &cobra.Command{
 				logs.Println("read file", arg, err)
 				continue
 			}
+			// to flag
+			if to := cmd.Flags().Lookup("to"); to.Changed {
+				viewToFlag(b...)
+				continue
+			}
 			// convert text
 			r, err := conv.Text(&b)
 			if err != nil {
 				logs.Println("convert text", arg, err)
-				continue
-			}
-			// to flag
-			if to := cmd.Flags().Lookup("to"); to.Changed {
-				b, err := toDecode(viewFlag.to, r...)
-				if err != nil {
-					logs.Println("using utf8 encoding and not", viewFlag.to, err)
-				}
-				fmt.Println(string(b))
 				continue
 			}
 			fmt.Println(string(r))
@@ -122,7 +118,18 @@ func viewPackage(cmd *cobra.Command, conv convert.Args, name string) (ok bool, e
 	if cp := cmd.Flags().Lookup("encode"); !cp.Changed {
 		conv.Encoding = pkg.encoding
 	}
-	// convert and print
+	// to flag
+	if to := cmd.Flags().Lookup("to"); to.Changed {
+		// example exceptions that break the NewEncoder
+		switch s {
+		case "shiftjis":
+			fmt.Println(string(b))
+			return true, nil
+		}
+		viewToFlag(b...)
+		return true, nil
+	}
+	// convert to runes and print
 	var r []rune
 	switch pkg.convert {
 	case "d":
@@ -133,15 +140,8 @@ func viewPackage(cmd *cobra.Command, conv convert.Args, name string) (ok bool, e
 		if r, err = conv.Text(&b); err != nil {
 			return false, err
 		}
-	}
-	// to flag
-	if to := cmd.Flags().Lookup("to"); to.Changed {
-		b, err := toDecode(viewFlag.to, r...)
-		if err != nil {
-			logs.Println("using utf8 encoding and not", viewFlag.to, err)
-		}
-		fmt.Println(string(b))
-		return true, nil
+	default:
+		return false, fmt.Errorf("unknown package convert value: %q", pkg.convert)
 	}
 	fmt.Println(string(r))
 	return true, nil
@@ -152,34 +152,38 @@ func viewPipe(cmd *cobra.Command, conv convert.Args) {
 	if err != nil {
 		logs.Fatal("view", "stdin read", err)
 	}
+	// to flag
+	if to := cmd.Flags().Lookup("to"); to.Changed {
+		viewToFlag(b...)
+		os.Exit(0)
+	}
 	r, err := conv.Text(&b)
 	if err != nil {
 		logs.Fatal("view", "stdin convert", err)
-	}
-	// to flag
-	if to := cmd.Flags().Lookup("to"); to.Changed {
-		b, err := toDecode(viewFlag.to, r...)
-		if err != nil {
-			logs.Println("using utf8 encoding and not", viewFlag.to, err)
-		}
-		fmt.Println(string(b))
-		os.Exit(0)
 	}
 	fmt.Println(string(r))
 	os.Exit(0)
 }
 
-func toDecode(name string, r ...rune) ([]byte, error) {
+func viewToFlag(b ...byte) {
+	b, err := viewEncode(viewFlag.to, b...)
+	if err != nil {
+		logs.Println("using the original encoding and not", viewFlag.to, err)
+	}
+	fmt.Println(string(b))
+}
+
+func viewEncode(name string, b ...byte) ([]byte, error) {
 	encode, err := convert.Encoding(name)
 	if err != nil {
-		return []byte(string(r)), fmt.Errorf("encoding not known or supported %s: %w", encode, err)
+		return b, fmt.Errorf("encoding not known or supported %s: %w", encode, err)
 	}
-	cp, err := encode.NewEncoder().String(string(r))
+	new, err := encode.NewEncoder().Bytes(b)
 	if err != nil {
-		if cp == "" {
-			return []byte(string(r)), fmt.Errorf("encoder could not convert runes to %s: %w", encode, err)
+		if len(new) == 0 {
+			return b, fmt.Errorf("encoder could not convert bytes to %s: %w", encode, err)
 		}
-		return []byte(cp), nil
+		return new, nil
 	}
-	return []byte(cp), nil
+	return new, nil
 }
