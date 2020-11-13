@@ -187,11 +187,11 @@ func (k keys) numeric(input string) (key string) {
 func (k keys) prompt(r io.Reader, setup bool) (key string) {
 	prompts := 0
 	scanner := bufio.NewScanner(r)
+	watch()
 	for scanner.Scan() {
 		prompts++
 		key = scanner.Text()
 		if key == "-" {
-			fmt.Println("OKAY")
 			return ""
 		}
 		if setup && key == "" {
