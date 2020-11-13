@@ -15,6 +15,8 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
+var iso8859_11 = charmap.XUserDefined
+
 // Table prints out all the characters in the named 8-bit character set.
 func Table(name string) (*bytes.Buffer, error) {
 	cp, err := Encoding(name)
@@ -32,6 +34,10 @@ func Table(name string) (*bytes.Buffer, error) {
 	case uni.UTF8, uni.UTF8BOM:
 		h += " - Unicode"
 	default:
+		if a := encodingAlias(shorten(name)); a == "iso-8859-11" {
+			h = "ISO 8859-11"
+			cp = iso8859_11
+		}
 		h += " - Extended ASCII"
 	}
 	var buf bytes.Buffer
@@ -86,6 +92,13 @@ func Table(name string) (*bytes.Buffer, error) {
 }
 
 func character(i int, r rune, cp encoding.Encoding) string {
+	if cp == iso8859_11 {
+		const PAD, NBSP = 128, 160
+		switch {
+		case i >= PAD && i < NBSP:
+			return " "
+		}
+	}
 	// non-spacing mark characters
 	if unicode.In(r, unicode.Mn) {
 		// these require an additional monospace

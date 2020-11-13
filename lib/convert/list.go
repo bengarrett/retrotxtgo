@@ -26,8 +26,7 @@ func Encodings() (e []encoding.Encoding) {
 	for _, m := range a {
 		switch m {
 		case japanese.EUCJP, japanese.ISO2022JP,
-			charmap.MacintoshCyrillic,
-			charmap.XUserDefined:
+			charmap.MacintoshCyrillic:
 			continue
 		}
 		e = append(e, m)

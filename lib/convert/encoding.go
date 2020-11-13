@@ -191,6 +191,12 @@ func Encoding(name string) (encoding.Encoding, error) {
 	if enc == nil {
 		enc, _ = ianaindex.IANA.Encoding(n)
 	}
+	if a == "iso-8859-11" {
+		// ISO-8859-11 uses the same characters as Windows 847
+		// except for 9 characters in rows 8 and 9.
+		// https://en.wikipedia.org/wiki/ISO/IEC_8859-11#Code_page_874_(IBM)_/_9066
+		return charmap.Windows874, nil
+	}
 	if enc == nil {
 		return enc, fmt.Errorf("encoding could not match name %q or alias %q",
 			name, a)
@@ -288,9 +294,8 @@ func encodingAlias(name string) (n string) {
 		n = "ISO-8859-9"
 	case "10", "919", "28600":
 		n = "ISO-8859-10"
-	case "11", "874", "iso-8859-11":
+	case "11", "iso-8859-11":
 		n = "iso-8859-11"
-		//		n = "Windows-874" // "iso-8859-11" causes a panic
 	case "13", "921", "28603":
 		n = "ISO-8859-13"
 	case "14", "28604":
@@ -305,6 +310,8 @@ func encodingAlias(name string) (n string) {
 		n = "KOI8-U"
 	case "10000", "macroman", "mac-roman", "mac os roman":
 		n = "Macintosh"
+	case "874":
+		n = "Windows-874"
 	case "1250":
 		n = "Windows-1250"
 	case "1251":

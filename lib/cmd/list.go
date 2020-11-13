@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/ianaindex"
 
 	"retrotxt.com/retrotxt/lib/convert"
@@ -65,17 +66,23 @@ var listCmdTables = &cobra.Command{
 	Short: "Display tables showing known codepages and characters",
 	Run: func(cmd *cobra.Command, args []string) {
 		for _, e := range convert.Encodings() {
-			name, err := ianaindex.MIME.Name(e)
-			if err != nil {
-				logs.Println("list.tables.ianaindex", "", err)
-				continue
+			var (
+				err  error
+				name string
+			)
+			if e == charmap.XUserDefined {
+				name = "iso-8859-11"
+			} else {
+				name, err = ianaindex.MIME.Name(e)
+				if err != nil {
+					logs.Println("list.tables.ianaindex", "", err)
+					continue
+				}
 			}
 			switch strings.ToLower(name) {
 			case "utf-16", "utf-16be", "utf-16le":
 				continue
 			}
-			// todo: Windows 874 is not showing different chars from ISO-11
-			// https://en.wikipedia.org/wiki/ISO/IEC_8859-11#Vendor_extensions
 			table, err := convert.Table(name)
 			if err != nil {
 				logs.Println("list.tables", "", err)
