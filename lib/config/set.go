@@ -155,6 +155,8 @@ func updatePrompt(name string, setup bool, value interface{}) {
 		s := fmt.Sprint("Set a " + Tip()[name])
 		if value.(string) != "" {
 			s = fmt.Sprint(s, " or use a dash [-] to remove")
+		} else if Editor() != "" {
+			fmt.Printf("instead the %s editor will be run\n\n", str.Cp(Editor()))
 		}
 		fmt.Printf("%s:\n", s)
 		setEditor(name, setup)
@@ -518,12 +520,6 @@ func setIndex(name string, setup bool, data ...string) {
 		logs.LogFatal(fmt.Errorf("set index: %w", ErrNoName))
 	}
 	p := prompt.IndexStrings(&data, setup)
-	switch p {
-	case "-":
-		p = ""
-	case "":
-		return
-	}
 	save(name, setup, p)
 }
 
