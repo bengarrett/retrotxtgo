@@ -11,6 +11,7 @@ import (
 	"github.com/gookit/color"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
+	"golang.org/x/text/encoding/japanese"
 	uni "golang.org/x/text/encoding/unicode"
 	"retrotxt.com/retrotxt/lib/str"
 )
@@ -189,6 +190,8 @@ func charmapAlias(cp encoding.Encoding) string {
 		return " (Mac OS Roman)"
 	case charmap.Windows1258:
 		return " (Vietnamese)"
+	case japanese.ShiftJIS:
+		return " (Japanese)"
 	}
 	return ""
 }
