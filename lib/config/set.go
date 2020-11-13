@@ -215,6 +215,13 @@ func updatePrompt(name string, setup bool, value interface{}) {
 		setString(name, setup)
 	case "save-directory":
 		fmt.Println("Choose a new " + Tip()[name] + ":")
+		if home, err := os.UserHomeDir(); err == nil {
+			fmt.Printf("\nUse %s to save the home directory %s", str.Example("~"), str.Cb(home))
+		}
+		if wd, err := os.Getwd(); err == nil {
+			fmt.Printf("\nUse %s to save this current directory %s", str.Example("."), str.Cb(wd))
+		}
+		fmt.Printf("\nUse %s to disable and always use the user's active directory\n\n", str.Example("-"))
 		setDirectory(name, setup)
 	case "serve":
 		var p uint
