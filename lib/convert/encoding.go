@@ -198,8 +198,10 @@ func Encoding(name string) (encoding.Encoding, error) {
 		return charmap.Windows874, nil
 	}
 	if enc == nil {
-		return enc, fmt.Errorf("encoding could not match name %q or alias %q",
-			name, a)
+		if a == "" {
+			return enc, fmt.Errorf("encoding could not match name or alias %q", name)
+		}
+		return enc, fmt.Errorf("encoding could not match name %q or alias %q", name, a)
 	}
 	return enc, nil
 }
