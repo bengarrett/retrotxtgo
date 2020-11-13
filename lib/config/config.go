@@ -35,10 +35,13 @@ const (
 	styleh   = "style.html"
 )
 
+// Defaults for setting keys.
 type Defaults map[string]interface{}
 
 // Reset configuration values.
 func Reset() Defaults {
+	// these will be the default values when a setting is deleted
+	// or when a new config file is created
 	return Defaults{
 		editor:   "",
 		fontEmb:  false,
@@ -46,7 +49,7 @@ func Reset() Defaults {
 		layout:   "standard",
 		author:   "",
 		scheme:   "",
-		desc:     "An example",
+		desc:     "",
 		genr:     true,
 		keywords: "",
 		notlate:  false,
@@ -54,7 +57,7 @@ func Reset() Defaults {
 		rtx:      true,
 		bot:      "index",
 		theme:    "",
-		title:    "RetroTxt | example",
+		title:    "RetroTxt",
 		saveDir:  home(),
 		serve:    httpPort,
 		stylei:   "dracula",
@@ -62,6 +65,7 @@ func Reset() Defaults {
 	}
 }
 
+// Hints for configuration values.
 type Hints map[string]string
 
 // Tip provides a brief help on the config file configurations.
