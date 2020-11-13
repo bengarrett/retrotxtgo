@@ -221,7 +221,7 @@ func updatePrompt(name string, setup bool, value interface{}) {
 		if wd, err := os.Getwd(); err == nil {
 			fmt.Printf("\nUse %s to save this current directory %s", str.Example("."), str.Cb(wd))
 		}
-		fmt.Printf("\nUse %s to disable and always use the user's active directory\n\n", str.Example("-"))
+		fmt.Printf("\nUse %s to disable and always use the user's current directory\n\n", str.Example("-"))
 		setDirectory(name, setup)
 	case "serve":
 		var p uint
