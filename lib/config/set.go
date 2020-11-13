@@ -468,6 +468,8 @@ func setDirectory(name string, setup bool) {
 	}
 	if dir == "-" {
 		dir = ""
+		save(name, setup, dir)
+		return
 	}
 	if _, err := os.Stat(dir); err != nil {
 		es := fmt.Sprint(err)

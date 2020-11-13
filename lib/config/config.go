@@ -58,7 +58,7 @@ func Reset() Defaults {
 		bot:      "",
 		theme:    "",
 		title:    "RetroTxt",
-		saveDir:  home(),
+		saveDir:  "",
 		serve:    httpPort,
 		stylei:   "dracula",
 		styleh:   "lovelace",
