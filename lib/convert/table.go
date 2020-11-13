@@ -23,23 +23,19 @@ func Table(name string) (*bytes.Buffer, error) {
 	if err != nil {
 		return nil, fmt.Errorf("table encoding error: %w", err)
 	}
-	h := fmt.Sprintf("%s", cp)
 	switch cp {
 	case uni.UTF16(uni.BigEndian, uni.UseBOM),
 		uni.UTF16(uni.BigEndian, uni.IgnoreBOM),
 		uni.UTF16(uni.LittleEndian, uni.IgnoreBOM):
 		return nil, fmt.Errorf("utf-16 table encodings are not supported")
-	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
-		h += " - EBCDIC"
-	case uni.UTF8, uni.UTF8BOM:
-		h += " - Unicode"
-	default:
-		if a := encodingAlias(shorten(name)); a == "iso-8859-11" {
-			h = "ISO 8859-11"
-			cp = iso8859_11
-		}
-		h += " - Extended ASCII"
 	}
+	h := fmt.Sprintf("%s", cp)
+	if a := encodingAlias(shorten(name)); a == "iso-8859-11" {
+		h = "ISO 8859-11"
+		cp = iso8859_11
+	}
+	h += charmapAlias(cp)
+	h += charmapStandard(cp)
 	var buf bytes.Buffer
 	w := new(tabwriter.Writer).Init(&buf, 0, 8, 0, '\t', 0)
 	fmt.Fprintln(w, " "+color.OpFuzzy.Sprint(strings.Repeat("\u2015", 67)))
@@ -125,4 +121,85 @@ func character(i int, r rune, cp encoding.Encoding) string {
 	}
 	// rune to string
 	return string(r)
+}
+
+func charmapAlias(cp encoding.Encoding) string {
+	switch cp {
+	case charmap.CodePage037:
+		return " (US/Canada Latin 1)"
+	case charmap.CodePage437:
+		return " (DOS, OEM-US)"
+	case charmap.CodePage850:
+		return " (DOS, Latin 1)"
+	case charmap.CodePage852:
+		return " (DOS, Latin 2)"
+	case charmap.CodePage855:
+		return " (DOS, Cyrillic)"
+	case charmap.CodePage858:
+		return " (DOS, Western Europe)"
+	case charmap.CodePage860:
+		return " (DOS, Portuguese)"
+	case charmap.CodePage862:
+		return " (DOS, Hebrew)"
+	case charmap.CodePage863:
+		return " (DOS, French Canada)"
+	case charmap.CodePage865:
+		return " (DOS, Nordic)"
+	case charmap.CodePage866:
+		return " (DOS, Cyrillic Russian)"
+	case charmap.CodePage1047:
+		return " (C programming language)"
+	case charmap.CodePage1140:
+		return " (US/Canada Latin 1 plus €)"
+	case charmap.ISO8859_1, charmap.Windows1252:
+		return " (Western European)"
+	case charmap.ISO8859_2, charmap.Windows1250:
+		return " (Central European)"
+	case charmap.ISO8859_3:
+		return " (South European)"
+	case charmap.ISO8859_4:
+		return " (North European)"
+	case charmap.ISO8859_5, charmap.Windows1251:
+		return " (Cyrillic)"
+	case charmap.ISO8859_6, charmap.Windows1256:
+		return " (Arabic)"
+	case charmap.ISO8859_7, charmap.Windows1253:
+		return " (Greek)"
+	case charmap.ISO8859_8, charmap.Windows1255:
+		return " (Hebrew)"
+	case charmap.ISO8859_9, charmap.Windows1254:
+		return " (Turkish)"
+	case charmap.ISO8859_10:
+		return " (Nordic)"
+	case charmap.Windows874, charmap.XUserDefined:
+		return " (Thai)"
+	case charmap.ISO8859_13, charmap.Windows1257:
+		return " (Baltic Rim)"
+	case charmap.ISO8859_14:
+		return " (Celtic)"
+	case charmap.ISO8859_15:
+		return " (Western European, 1999)"
+	case charmap.ISO8859_16:
+		return " (South-Eastern European)"
+	case charmap.KOI8R:
+		return " (Russian)"
+	case charmap.KOI8U:
+		return " (Ukrainian)"
+	case charmap.Macintosh:
+		return " (Mac OS Roman)"
+	case charmap.Windows1258:
+		return " (Vietnamese)"
+	}
+	return ""
+}
+
+func charmapStandard(cp encoding.Encoding) string {
+	switch cp {
+	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
+		return " - EBCDIC"
+	case uni.UTF8, uni.UTF8BOM:
+		return " - Unicode"
+	default:
+		return " - Extended ASCII"
+	}
 }
