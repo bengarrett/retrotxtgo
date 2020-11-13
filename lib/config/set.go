@@ -148,6 +148,13 @@ func Update(name string, setup bool) {
 	updatePrompt(name, setup, value)
 }
 
+func recommend(s string) string {
+	if s == "" {
+		return " (recommend: do not use)"
+	}
+	return fmt.Sprintf(" (recommend: %s)", str.Cp(s))
+}
+
 func updatePrompt(name string, setup bool, value interface{}) {
 	// print the setting user input prompt
 	switch name {
@@ -173,28 +180,30 @@ func updatePrompt(name string, setup bool, value interface{}) {
 		setShortStrings(name, setup, create.Layouts()...)
 	case "html.meta.author",
 		"html.meta.description",
-		"html.meta.keywords",
-		"html.meta.theme-color":
+		"html.meta.keywords":
 		previewMeta(name, value.(string))
+		setString(name, setup)
+	case "html.meta.theme-color":
+		recommendMeta(name, value.(string), "")
 		setString(name, setup)
 	case "html.meta.color-scheme":
 		previewMeta(name, value.(string))
 		ccc := create.ColorScheme()
 		var prints = make([]string, len(ccc[:]))
 		copy(prints, ccc[:])
-		fmt.Println(str.UnderlineKeys(prints...))
+		fmt.Println(str.UnderlineKeys(prints...) + recommend(""))
 		setShortStrings(name, setup, ccc[:]...)
 	case "html.meta.generator":
 		setGenerator(value.(bool))
 	case "html.meta.notranslate":
 		setNoTranslate(value.(bool), setup)
 	case "html.meta.referrer":
-		previewMeta(name, value.(string))
+		recommendMeta(name, value.(string), "")
 		cr := create.Referrer()
 		fmt.Println(str.NumberizeKeys(cr[:]...))
 		setIndex(name, setup, cr[:]...)
 	case "html.meta.robots":
-		previewMeta(name, value.(string))
+		recommendMeta(name, value.(string), "")
 		cr := create.Robots()
 		fmt.Println(str.NumberizeKeys(cr[:]...))
 		setIndex(name, setup, cr[:]...)
@@ -356,6 +365,11 @@ func portInfo() string {
 }
 
 func previewMeta(name, value string) {
+	previewMetaPrint(name, value)
+	fmt.Printf("\n%s \n", previewPrompt(name, value))
+}
+
+func previewMetaPrint(name, value string) {
 	if name == "" {
 		logs.LogFatal(fmt.Errorf("preview meta: %w", ErrNoName))
 	}
@@ -373,7 +387,6 @@ func previewMeta(name, value string) {
 	h := strings.Split(Tip()[name], " ")
 	fmt.Println(str.Cf("\nAbout this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name"))
 	fmt.Printf("\n%s %s.", strings.Title(h[0]), strings.Join(h[1:], " "))
-	fmt.Printf("\n%s \n", previewPrompt(name, value))
 }
 
 func previewTitle(value string) {
@@ -384,7 +397,11 @@ func previewTitle(value string) {
 }
 
 func previewPrompt(name, value string) string {
-	p := "Set a new value"
+	return fmt.Sprintf("%s:", previewPromptPrint(name, value))
+}
+
+func previewPromptPrint(name, value string) (p string) {
+	p = "Set a new value"
 	if name == "html.meta.keywords" {
 		p = "Set some comma-separated keywords"
 		if value != "" {
@@ -392,11 +409,21 @@ func previewPrompt(name, value string) string {
 		}
 	}
 	if value != "" {
-		p += ", leave blank to keep as-is or use a dash [-] to remove:"
+		p += ", leave blank to keep as-is or use a dash [-] to remove"
 	} else {
-		p += " or leave blank to keep it unused:"
+		p += " or leave blank to keep it unused"
 	}
 	return p
+}
+
+func recommendMeta(name, value, suggest string) {
+	previewMetaPrint(name, value)
+	fmt.Printf("\n%s \n", recommendPrompt(name, value, suggest))
+}
+
+func recommendPrompt(name, value, suggest string) string {
+	p := previewPromptPrint(name, value)
+	return fmt.Sprintf("%s%s:", p, recommend(suggest))
 }
 
 func save(name string, setup bool, value interface{}) {
@@ -509,6 +536,7 @@ func setGenerator(value bool) {
 	if value {
 		p = "Keep the generator element"
 	}
+	p += recommend("yes")
 	viper.Set(name, prompt.YesNo(p, viper.GetBool(name)))
 	if err := UpdateConfig("", false); err != nil {
 		logs.LogFatal(err)
@@ -531,6 +559,7 @@ func setNoTranslate(value, setup bool) {
 	if value {
 		q = "Keep the translate option"
 	}
+	q += recommend("no")
 	val := prompt.YesNo(q, viper.GetBool(name))
 	save(name, setup, val)
 }
@@ -554,6 +583,7 @@ func setRetrotxt(value bool) {
 	if value {
 		p = "Keep the retrotxt element"
 	}
+	p += recommend("yes")
 	viper.Set(name, prompt.YesNo(p, viper.GetBool(name)))
 	if err := UpdateConfig("", false); err != nil {
 		logs.LogFatal(err)

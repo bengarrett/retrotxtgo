@@ -55,7 +55,7 @@ func Reset() Defaults {
 		notlate:  false,
 		referr:   "",
 		rtx:      true,
-		bot:      "index",
+		bot:      "",
 		theme:    "",
 		title:    "RetroTxt",
 		saveDir:  home(),

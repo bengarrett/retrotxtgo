@@ -133,7 +133,7 @@ func NumberizeKeys(keys ...string) string {
 		}
 		s[i] = fmt.Sprintf("%s)\u00a0%s", n, key)
 	}
-	return strings.Join(s, ", ")
+	return strings.Join(s, "\n")
 }
 
 // Term determines the terminal type based on the COLORTERM and TERM environment variables.
