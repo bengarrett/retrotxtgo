@@ -184,16 +184,16 @@ func Encoding(name string) (encoding.Encoding, error) {
 	s := shorten(name)
 	a := encodingAlias(s)
 	n := encodingAlias(name)
-	enc, err := ianaindex.IANA.Encoding(s)
+	enc, _ := ianaindex.IANA.Encoding(s)
 	if enc == nil {
-		enc, err = ianaindex.IANA.Encoding(a)
+		enc, _ = ianaindex.IANA.Encoding(a)
 	}
 	if enc == nil {
-		enc, err = ianaindex.IANA.Encoding(n)
+		enc, _ = ianaindex.IANA.Encoding(n)
 	}
-	if err != nil {
-		return enc, fmt.Errorf("encoding could not match name %q or alias %q: %w",
-			name, a, err)
+	if enc == nil {
+		return enc, fmt.Errorf("encoding could not match name %q or alias %q",
+			name, a)
 	}
 	return enc, nil
 }
@@ -289,7 +289,8 @@ func encodingAlias(name string) (n string) {
 	case "10", "919", "28600":
 		n = "ISO-8859-10"
 	case "11", "874", "iso-8859-11":
-		n = "Windows-874" // "iso-8859-11" causes a panic
+		n = "iso-8859-11"
+		//		n = "Windows-874" // "iso-8859-11" causes a panic
 	case "13", "921", "28603":
 		n = "ISO-8859-13"
 	case "14", "28604":
