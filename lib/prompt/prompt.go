@@ -6,9 +6,11 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/signal"
 	"sort"
 	"strconv"
 	"strings"
+	"syscall"
 
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/str"
@@ -18,9 +20,10 @@ type keys []string
 
 // the lowest, largest and recommended network ports to serve HTTP.
 const (
-	PortMin uint = 0
-	PortMax uint = 65535
-	PortRec uint = 8080
+	PortMin  uint = 0
+	PortMax  uint = 65535
+	PortRec  uint = 8080
+	NoChange      = "no changes applied"
 )
 
 // IndexStrings asks for a numeric index position and returns a single choice from a string of keys.
@@ -84,7 +87,8 @@ func check(prompts int) {
 			log.Fatalf("prompt check println at %dB: %s", i, err)
 		}
 	case prompts >= max:
-		os.Exit(1)
+		fmt.Println(NoChange)
+		os.Exit(0)
 	}
 }
 
@@ -208,6 +212,7 @@ func (k keys) prompt(r io.Reader, setup bool) (key string) {
 func (k keys) shortPrompt(r io.Reader) (key string) {
 	prompts := 0
 	scanner := bufio.NewScanner(r)
+	watch()
 	for scanner.Scan() {
 		prompts++
 		key = scanner.Text()
@@ -268,4 +273,15 @@ func (k keys) validate(key string) (ok bool) {
 		return false
 	}
 	return true
+}
+
+// watch intercepts Ctrl-C exit key combination.
+func watch() {
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		fmt.Printf("\n\n%s\n", NoChange)
+		os.Exit(0)
+	}()
 }

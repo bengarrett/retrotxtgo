@@ -163,7 +163,7 @@ func updatePrompt(name string, setup bool, value interface{}) {
 	case "html.font.family":
 		setFont(value.(string), setup)
 	case "html.layout":
-		fmt.Println("\nChoose a new " + str.Options(Tip()[name], true, create.Layouts()...))
+		fmt.Println("\nChoose a " + str.Options(Tip()[name], true, create.Layouts()...) + " (recommend: " + str.Cp("standard") + ")")
 		fmt.Println("\n  standard: uses external CSS, JS and woff2 fonts and is the recommended layout for web servers")
 		fmt.Println("  inline:   includes both the CSS and JS as inline elements but is not recommended")
 		fmt.Println("  compact:  is the same as the standard layout but without any <meta> tags")
@@ -369,8 +369,8 @@ func previewMeta(name, value string) {
 	elm := fmt.Sprintf("<head>\n  <meta name=\"%s\" value=\"%s\">", s[2], value)
 	fmt.Print(ColorHTML(elm))
 	h := strings.Split(Tip()[name], " ")
-	fmt.Printf("\n%s %s.", strings.Title(h[0]), strings.Join(h[1:], " "))
 	fmt.Println(str.Cf("\nAbout this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name"))
+	fmt.Printf("\n%s %s.", strings.Title(h[0]), strings.Join(h[1:], " "))
 	fmt.Printf("\n%s \n", previewPrompt(name, value))
 }
 
@@ -476,9 +476,9 @@ func setFont(value string, setup bool) {
 	fmt.Fprintf(&b, "  src: url(\"%s.woff2\") format(\"woff2\");\n", f.String())
 	fmt.Fprintln(&b, "  font-display: swap;\n}")
 	fmt.Print(ColorCSS(b.String()))
-	fmt.Println(str.Cf("About font families: https://developer.mozilla.org/en-US/docs/Web/CSS/font-family"))
-	fmt.Println("Choose a font (recommend: automatic):")
-	fmt.Println(str.UnderlineKeys(create.Fonts()...))
+	fmt.Println(str.Cf("About font families: https://developer.mozilla.org/en-US/docs/Web/CSS/font-family") + "\n")
+	fmt.Println("Choose a font:")
+	fmt.Println(str.UnderlineKeys(create.Fonts()...) + " (recommend: " + str.Cp("automatic") + ")")
 	setShortStrings("html.font.family", setup, create.Fonts()...)
 }
 
@@ -489,7 +489,7 @@ func setFontEmbed(value, setup bool) {
   src: url(data:font/woff2;base64,[a large font binary will be embedded here]...) format('woff2');
 }`
 	fmt.Println(ColorCSS(elm))
-	q := `This is not recommended unless you need to create self-contained HTML files for offline distribution.
+	q := `This is not recommended, unless you need self-contained files for distribution.
 Embed the font as base64 data in the HTML`
 	if value {
 		q = "Keep the embedded font option"
@@ -570,6 +570,9 @@ func setShortStrings(name string, setup bool, data ...string) {
 	case "-":
 		val = ""
 	case "":
+		if !setup {
+			fmt.Println(prompt.NoChange)
+		}
 		return
 	}
 	save(name, setup, val)
