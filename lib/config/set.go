@@ -225,7 +225,11 @@ func updatePrompt(name string, setup bool, value interface{}) {
 		setDirectory(name, setup)
 	case "serve":
 		var p uint
-		switch Reset()["serve"].(type) {
+		var reset = func() {
+			p = Reset()["serve"].(uint)
+			save(name, false, p)
+		}
+		switch value.(type) {
 		case uint:
 			if u, ok := value.(uint); ok {
 				p = u
@@ -234,10 +238,17 @@ func updatePrompt(name string, setup bool, value interface{}) {
 			if i, ok := value.(int); ok {
 				p = uint(i)
 			}
+		default:
+			reset()
 		}
-		fmt.Printf("\n%slocalhost%s%d %s\n", str.Cb("http://"),
+		if p > prompt.PortMax {
+			reset()
+		}
+		fmt.Printf("\n%slocalhost%s%d %s\n", "http://",
 			str.Cb(":"), p, str.Bool(create.Port(p)))
-		fmt.Printf("\nSet a new port value, to %s\nChoices %s:\n", Tip()[name], portInfo())
+		fmt.Printf("\nPort %s is usually reserved, ", str.Example("0"))
+		fmt.Printf("while the ports below %s are normally restricted by the operating system and are not recommended\n", str.Example("1024"))
+		fmt.Printf("\nSet a HTTP port value, to %s\nChoices %s:\n", Tip()[name], portInfo())
 		setPort(name, setup)
 	case "style.html":
 		fmt.Printf("Set a new HTML syntax style:\n%s\n", str.Ci(Names()))
@@ -578,9 +589,9 @@ func setPort(name string, setup bool) {
 		logs.LogFatal(fmt.Errorf("set port: %w", ErrNoName))
 	}
 	val := prompt.Port(true, setup)
-	if setup && val == 0 {
-		return
-	}
+	// if setup && val == 0 {
+	// 	return
+	// }
 	save(name, setup, val)
 }
 

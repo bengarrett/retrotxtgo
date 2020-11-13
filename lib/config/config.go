@@ -87,7 +87,7 @@ func Tip() Hints {
 		theme:         "indicates a suggested color that user agents should use to customize the display of the page",
 		title:         "page title that is shown in a browser title bar or tab",
 		saveDir:       "directory to store RetroTxt created HTML files",
-		serve:         "serve HTML over an internal web server using this port",
+		serve:         "serve files using an internal web server with this port",
 		stylei:        "syntax highlighter for the config info output",
 		styleh:        "syntax highlighter for html previews",
 	}

@@ -95,6 +95,7 @@ func check(prompts int) {
 func pport(r io.Reader, validate, setup bool) (port uint) {
 	input, prompts := "", 0
 	scanner := bufio.NewScanner(r)
+	watch()
 	for scanner.Scan() {
 		prompts++
 		input = scanner.Text()
