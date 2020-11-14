@@ -65,9 +65,9 @@ func List() (err error) {
 }
 
 // Names lists the names of chroma styles.
-func Names() string {
+func Names(lexer string) string {
 	var s names = styles.Names()
-	return s.string(true)
+	return s.string(true, lexer)
 }
 
 // Set edits and saves a named setting within a configuration file.
@@ -251,10 +251,12 @@ func updatePrompt(name string, setup bool, value interface{}) {
 		fmt.Printf("\nSet a HTTP port value, to %s\nChoices %s:\n", Tip()[name], portInfo())
 		setPort(name, setup)
 	case "style.html":
-		fmt.Printf("Set a new HTML syntax style:\n%s\n", str.Ci(Names()))
+		d := Reset()[name].(string)
+		fmt.Printf("\n%s\nSet a new HTML syntax style%s:\n", str.Ci(Names("css")), recommend(d))
 		setStrings(name, setup, styles.Names()...)
 	case "style.info":
-		fmt.Printf("Set a new %s syntax style:\n%s\n", str.Example("config info"), str.Ci(Names()))
+		d := Reset()[name].(string)
+		fmt.Printf("\n%s\nSet a new %s syntax style%s:\n", str.Ci(Names("json")), str.Example("config info"), recommend(d))
 		setStrings(name, setup, styles.Names()...)
 	default:
 		log.Fatalln("config is not configured:", name)
@@ -286,7 +288,8 @@ func colorElm(elm, lexer, style string, color bool) string {
 
 type names []string
 
-func (n names) string(theme bool) string {
+// ----------------------------------------------------------------------------
+func (n names) string(theme bool, lexer string) string {
 	maxWidth := 0
 	for _, s := range n {
 		if l := len(fmt.Sprintf("%s=%q", s, s)); l > maxWidth {
@@ -300,20 +303,37 @@ func (n names) string(theme bool) string {
 	split := (len(n) / 2)
 	const space = 2
 	for i, name := range n {
-		var t string
+		var (
+			b bytes.Buffer
+			t string
+		)
 		pad := maxWidth - len(fmt.Sprintf("%s=%q", name, name))
 		// prints a sequential list of styles
-		t = fmt.Sprintf(" %2d) %s=%q%s", i, name, name, strings.Repeat(" ", pad+space))
-		if split+i < len(n) {
-			t += fmt.Sprintf("%2d) %s=%q\n", split+i, n[split+i], n[split+i])
+		if lexer == "json" {
+			b = bytes.Buffer{}
+			t = fmt.Sprintf("{ %q:%q }%s", name, name, strings.Repeat(" ", pad+space))
+			if err := str.HighlightWriter(&b, t, lexer, name, true); err != nil {
+				logs.Println("highlight writer failed", name, err)
+			}
+			s = append(s, fmt.Sprintf("%2d %s", i, b.String()))
+			if split+i < len(n) {
+				b = bytes.Buffer{}
+				t = fmt.Sprintf("{ %q:%q }\n", n[split+i], n[split+i])
+				if err := str.HighlightWriter(&b, t, lexer, name, true); err != nil {
+					logs.Println("highlight writer failed", name, err)
+				}
+				s = append(s, fmt.Sprintf("%2d %s", split+i, b.String()))
+			} else {
+				break
+			}
 		} else {
-			break
+			t = fmt.Sprintf(" %2d) %s=%q%s", i, name, name, strings.Repeat(" ", pad+space))
+			if split+i < len(n) {
+				t += fmt.Sprintf("%2d) %s=%q\n", split+i, n[split+i], n[split+i])
+			} else {
+				break
+			}
 		}
-		var b bytes.Buffer
-		if err := str.HighlightWriter(&b, t, "yaml", name, true); err != nil {
-			logs.Println("yaml highlight writer failed", name, err)
-		}
-		s = append(s, b.String())
 	}
 	return strings.Join(s, "")
 }
