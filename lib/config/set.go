@@ -327,9 +327,19 @@ func (n names) string(theme bool, lexer string) string {
 				break
 			}
 		} else {
-			t = fmt.Sprintf(" %2d) %s=%q%s", i, name, name, strings.Repeat(" ", pad+space))
+			b = bytes.Buffer{}
+			t = fmt.Sprintf("<%s=%q>%s", name, name, strings.Repeat(" ", pad+space))
+			if err := str.HighlightWriter(&b, t, lexer, name, true); err != nil {
+				logs.Println("highlight writer failed", name, err)
+			}
+			s = append(s, fmt.Sprintf("%2d %s", i, b.String()))
 			if split+i < len(n) {
-				t += fmt.Sprintf("%2d) %s=%q\n", split+i, n[split+i], n[split+i])
+				b = bytes.Buffer{}
+				t = fmt.Sprintf("<%s=%q>\n", n[split+i], n[split+i])
+				if err := str.HighlightWriter(&b, t, lexer, name, true); err != nil {
+					logs.Println("highlight writer failed", name, err)
+				}
+				s = append(s, fmt.Sprintf("%2d %s", split+i, b.String()))
 			} else {
 				break
 			}
@@ -563,6 +573,7 @@ Embed the font as base64 data in the HTML`
 	if value {
 		q = "Keep the embedded font option"
 	}
+	q += recommend("no")
 	val := prompt.YesNo(q, viper.GetBool(name))
 	save(name, setup, val)
 }
