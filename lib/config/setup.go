@@ -16,6 +16,7 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
+// ErrLogo missing logo
 var ErrLogo = errors.New("retrotxt logo is missing")
 
 // Setup walks through all the settings and saves them to the configuration file.
@@ -53,13 +54,13 @@ func hr(w uint) string {
 }
 
 func logo() {
-	n := "text/retrotxt.utf8ans"
+	const clear, reset, n = "\033c", "\033[0m", "text/retrotxt.utf8ans"
 	b := pack.Get(n)
 	if b == nil {
 		logs.Fatal("unknown pack name", n, ErrLogo)
 	}
-	// convert and print
-	fmt.Println(string(b))
+	// the terminal screen needs to be cleared if the logo is to display correctly
+	fmt.Println(clear + string(b) + reset)
 }
 
 // watch intercepts Ctrl-C exit key combination.
