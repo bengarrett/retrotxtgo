@@ -99,7 +99,14 @@ var configInfoCmd = &cobra.Command{
 			str.JSONStyles("retrotxt info --style")
 			os.Exit(0)
 		}
-		if err := config.Info(configFlag.style); err.Err != nil {
+		style := viper.GetString("style.info")
+		if configFlag.style != "" {
+			style = configFlag.style
+		}
+		if style == "" {
+			style = "dracula"
+		}
+		if err := config.Info(style); err.Err != nil {
 			err.Fatal()
 		}
 	},
@@ -195,7 +202,7 @@ func init() {
 	// info
 	configInfoCmd.Flags().BoolVarP(&configFlag.configs, "configs", "c", false,
 		"list all the available configuration setting names")
-	configInfoCmd.Flags().StringVarP(&configFlag.style, "style", "s", "dracula",
+	configInfoCmd.Flags().StringVarP(&configFlag.style, "style", "s", "",
 		"choose a syntax highligher")
 	configInfoCmd.Flags().BoolVar(&configFlag.styles, "styles", false,
 		"list and preview the available syntax highlighers")
