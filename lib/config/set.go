@@ -246,17 +246,17 @@ func updatePrompt(name string, setup bool, value interface{}) {
 		}
 		fmt.Printf("\n%slocalhost%s%d %s\n", "http://",
 			str.Cb(":"), p, str.Bool(create.Port(p)))
-		fmt.Printf("\nPort %s is usually reserved, ", str.Example("0"))
+		fmt.Printf("\nPort %s is reserved, ", str.Example("0"))
 		fmt.Printf("while the ports below %s are normally restricted by the operating system and are not recommended\n", str.Example("1024"))
 		fmt.Printf("\nSet a HTTP port value, to %s\nChoices %s:\n", Tip()[name], portInfo())
 		setPort(name, setup)
 	case "style.html":
 		d := Reset()[name].(string)
-		fmt.Printf("\n%s\nSet a new HTML syntax style%s:\n", str.Ci(Names("css")), recommend(d))
+		fmt.Printf("\n%s\n\nSet a new HTML syntax style%s:\n", str.Ci(Names("css")), recommend(d))
 		setStrings(name, setup, styles.Names()...)
 	case "style.info":
 		d := Reset()[name].(string)
-		fmt.Printf("\n%s\nSet a new %s syntax style%s:\n", str.Ci(Names("json")), str.Example("config info"), recommend(d))
+		fmt.Printf("\n%s\n\nSet a new %s syntax style%s:\n", str.Ci(Names("json")), str.Example("config info"), recommend(d))
 		setStrings(name, setup, styles.Names()...)
 	default:
 		log.Fatalln("config is not configured:", name)
@@ -288,7 +288,7 @@ func colorElm(elm, lexer, style string, color bool) string {
 
 type names []string
 
-// ----------------------------------------------------------------------------
+// lists and applies the named themes for the HighlightWriter
 func (n names) string(theme bool, lexer string) string {
 	maxWidth := 0
 	for _, s := range n {
@@ -609,9 +609,6 @@ func setPort(name string, setup bool) {
 		logs.LogFatal(fmt.Errorf("set port: %w", ErrNoName))
 	}
 	val := prompt.Port(true, setup)
-	// if setup && val == 0 {
-	// 	return
-	// }
 	save(name, setup, val)
 }
 
@@ -667,6 +664,9 @@ func setStrings(name string, setup bool, data ...string) {
 	case "-":
 		val = ""
 	case "":
+		if !setup {
+			fmt.Println(prompt.NoChange)
+		}
 		return
 	}
 	save(name, setup, val)

@@ -20,7 +20,7 @@ type keys []string
 
 // the lowest, largest and recommended network ports to serve HTTP.
 const (
-	PortMin  uint = 0
+	PortMin  uint = 1 // port 0 is not valid as viper treats it as a null value
 	PortMax  uint = 65535
 	PortRec  uint = 8080
 	NoChange      = "no changes applied"
@@ -93,6 +93,7 @@ func check(prompts int) {
 }
 
 func pport(r io.Reader, validate, setup bool) (port uint) {
+	const reset uint = 0
 	input, prompts := "", 0
 	scanner := bufio.NewScanner(r)
 	watch()
@@ -122,7 +123,7 @@ func pport(r io.Reader, validate, setup bool) (port uint) {
 		}
 		return port
 	}
-	return 0
+	return reset
 }
 
 func promptRead(stdin io.Reader) (input string, err error) {
