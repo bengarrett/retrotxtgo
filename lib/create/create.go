@@ -101,6 +101,8 @@ var (
 	ErrName = errors.New("font name is not known")
 	// ErrPack font not found
 	ErrPack = errors.New("font pack is not found")
+	// ErrEmptyName filename is empty
+	ErrEmptyName = errors.New("filename is empty")
 )
 
 // ColorScheme values for the content attribute of <meta name="color-scheme">.
@@ -373,6 +375,9 @@ func (args *Args) savehtml(b *[]byte, c chan error) {
 	name, err := args.destination("index.html")
 	if err != nil {
 		c <- err
+	}
+	if name == "" {
+		c <- ErrEmptyName
 	}
 	file, err := os.Create(name)
 	if err != nil {
