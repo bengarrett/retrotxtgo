@@ -44,7 +44,12 @@ func List() *bytes.Buffer {
 	fmt.Fprintln(w, str.Cp(title))
 	fmt.Fprintln(w, strings.Repeat("-", len(title)))
 	fmt.Fprintln(w, header)
+	fmt.Println(Encodings())
 	for _, e := range Encodings() {
+		if e == charmap.XUserDefined {
+			fmt.Fprintf(w, " %s\t %s\t %s\t %s\t\n", "ISO 8895-11", "iso-8895-11", "11", "iso889511")
+			continue
+		}
 		n, v, d, a := cells(e)
 		// do not use ANSI colors in cells as it will break the table layout
 		fmt.Fprintf(w, " %s\t %s\t %s\t %s\t\n", n, v, d, a) // name, value, numeric, alias
