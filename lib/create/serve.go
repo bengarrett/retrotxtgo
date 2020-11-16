@@ -20,6 +20,7 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
+// ErrPort port failed
 var ErrPort = errors.New("tried and failed to serve using these ports")
 
 // Port checks the TCP port is available on the local machine.

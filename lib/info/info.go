@@ -15,8 +15,11 @@ import (
 	"unicode/utf8"
 
 	"github.com/aofei/mimesniffer"
+	"github.com/gabriel-vasile/mimetype"
 	c "github.com/gookit/color"
+	"github.com/h2non/filetype"
 	"github.com/mozillazg/go-slugify"
+	"github.com/zRedShift/mimemagic"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 	"retrotxt.com/retrotxt/lib/filesystem"
@@ -291,6 +294,15 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 	} else {
 		d.Mime = ms
 	}
+
+	fmt.Println(ms)
+	mime := mimetype.Detect(data)
+	fmt.Println(mime.String(), mime.Extension())
+	z := mimemagic.MatchMagic(data)
+	fmt.Println(z)
+	xx, _ := filetype.Match(data)
+	fmt.Println(xx)
+
 	if IsText(d.Mime) {
 		if d.CharCount, err = filesystem.Runes(bytes.NewBuffer(data)); err != nil {
 			return err

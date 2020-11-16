@@ -11,6 +11,7 @@ import (
 	"retrotxt.com/retrotxt/internal/pack"
 )
 
+// Font enum
 type Font int
 
 const (

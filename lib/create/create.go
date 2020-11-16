@@ -97,7 +97,9 @@ const (
 )
 
 var (
+	// ErrName unknown font
 	ErrName = errors.New("font name is not known")
+	// ErrPack font not found
 	ErrPack = errors.New("font pack is not found")
 )
 
@@ -200,12 +202,18 @@ func (args *Args) Create(b *[]byte) {
 }
 
 var (
-	ErrReqOW     = errors.New("include an -o flag to overwrite")
-	ErrPackGet   = errors.New("pack.get name is invalid")
+	// ErrReqOW require overwrite flag
+	ErrReqOW = errors.New("include an -o flag to overwrite")
+	// ErrPackGet invalid pack name
+	ErrPackGet = errors.New("pack.get name is invalid")
+	// ErrUnknownFF unknown font family
 	ErrUnknownFF = errors.New("unknown font family")
-	ErrNilByte   = errors.New("cannot convert a nil byte value")
-	ErrTmplDir   = errors.New("the path to the template file is a directory")
-	ErrNoLayout  = errors.New("layout does not exist")
+	// ErrNilByte nil byte value
+	ErrNilByte = errors.New("cannot convert a nil byte value")
+	// ErrTmplDir temp file is a dir
+	ErrTmplDir = errors.New("the path to the template file is a directory")
+	// ErrNoLayout layout missing
+	ErrNoLayout = errors.New("layout does not exist")
 )
 
 func (args *Args) destination(name string) (string, error) {
