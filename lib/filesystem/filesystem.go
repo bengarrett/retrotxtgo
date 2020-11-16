@@ -25,6 +25,7 @@ const (
 	dirmode os.FileMode = 0700
 )
 
+// ErrStdErr could not print to stderr
 var ErrStdErr = errors.New("failed to print to stderr")
 
 // Clean removes the named file or directory.
