@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"os"
 	"testing"
 
 	"github.com/spf13/viper"
@@ -10,10 +9,6 @@ import (
 )
 
 func TestInitDefaults(t *testing.T) {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		t.Error(err)
-	}
 	tests := []struct {
 		name string
 		key  string
@@ -21,7 +16,7 @@ func TestInitDefaults(t *testing.T) {
 	}{
 		{"empty", "", ""},
 		{"layout", "html.layout", "standard"},
-		{"save dir", "save-directory", home},
+		{"save dir", "save-directory", ""},
 		{"style", "style.html", "lovelace"},
 	}
 	config.InitDefaults()
