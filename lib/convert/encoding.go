@@ -150,6 +150,7 @@ const (
 type Chars map[int]rune
 
 var (
+	// ErrChainANSI ansi() is a chain method
 	ErrChainANSI = errors.New("ansi() is a chain method that is to be used in conjunction with swap: c.swap().ansi()")
 )
 

@@ -11,7 +11,8 @@ import (
 	"golang.org/x/text/transform"
 )
 
-var ErrNoUTF8 = errors.New("string is not encoded as utf8")
+// ErrNoUTF8 string is not utf-8
+var ErrNoUTF8 = errors.New("string is not encoded as utf-8")
 
 // DString decodes simple character encoding text.
 func DString(s string, c *charmap.Charmap) (result []byte, err error) {
