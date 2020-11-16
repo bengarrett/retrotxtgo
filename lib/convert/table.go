@@ -2,6 +2,7 @@ package convert
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"math"
 	"strings"
@@ -16,7 +17,11 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
-var iso8859_11 = charmap.XUserDefined
+var (
+	// ErrUTF16 UTF-16 unsupported
+	ErrUTF16   = errors.New("utf-16 table encodings are not supported")
+	iso8859_11 = charmap.XUserDefined
+)
 
 // Table prints out all the characters in the named 8-bit character set.
 func Table(name string) (*bytes.Buffer, error) {
@@ -28,7 +33,7 @@ func Table(name string) (*bytes.Buffer, error) {
 	case uni.UTF16(uni.BigEndian, uni.UseBOM),
 		uni.UTF16(uni.BigEndian, uni.IgnoreBOM),
 		uni.UTF16(uni.LittleEndian, uni.IgnoreBOM):
-		return nil, fmt.Errorf("utf-16 table encodings are not supported")
+		return nil, ErrUTF16
 	}
 	h := fmt.Sprintf("%s", cp)
 	if a := encodingAlias(shorten(name)); a == "iso-8859-11" {
@@ -91,8 +96,7 @@ func Table(name string) (*bytes.Buffer, error) {
 func character(i int, r rune, cp encoding.Encoding) string {
 	if cp == iso8859_11 {
 		const PAD, NBSP = 128, 160
-		switch {
-		case i >= PAD && i < NBSP:
+		if i >= PAD && i < NBSP {
 			return " "
 		}
 	}

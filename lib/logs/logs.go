@@ -22,7 +22,7 @@ const (
 	Panic = false
 )
 
-// ErrNil cannot be nil
+// ErrNil cannot be nil.
 var ErrNil = errors.New("error value cannot be nil")
 
 // Log saves the error and continues the program.

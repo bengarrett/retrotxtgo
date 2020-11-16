@@ -18,122 +18,122 @@ import (
 )
 
 const (
-	// NUL Null control code
+	// NUL Null control code.
 	NUL = iota
-	// SOH Start of heading
+	// SOH Start of heading.
 	SOH
-	// STX Start of text
+	// STX Start of text.
 	STX
-	// ETX End of text
+	// ETX End of text.
 	ETX
-	// EOT End of transmission
+	// EOT End of transmission.
 	EOT
-	// ENQ Enquiry
+	// ENQ Enquiry.
 	ENQ
-	// ACK Acknowledge
+	// ACK Acknowledge.
 	ACK
-	// BEL Bell or alert
+	// BEL Bell or alert.
 	BEL
-	// BS Backspace
+	// BS Backspace.
 	BS
-	// HT Horizontal tabulation
+	// HT Horizontal tabulation.
 	HT
-	// LF Line feed
+	// LF Line feed.
 	LF
-	// VT Vertical tabulation
+	// VT Vertical tabulation.
 	VT
-	// FF Form feed
+	// FF Form feed.
 	FF
-	// CR Carriage return
+	// CR Carriage return.
 	CR
-	// SO Shift out
+	// SO Shift out.
 	SO
-	// SI Shift in
+	// SI Shift in.
 	SI
-	// DLE Data Link Escape
+	// DLE Data Link Escape.
 	DLE
-	// DC1 Device control one
+	// DC1 Device control one.
 	DC1
-	// DC2 Device control two
+	// DC2 Device control two.
 	DC2
-	// DC3 Device control three
+	// DC3 Device control three.
 	DC3
-	// DC4 Device control four
+	// DC4 Device control four.
 	DC4
-	// NAK Negative acknowledge
+	// NAK Negative acknowledge.
 	NAK
-	// SYN Synchronous idle
+	// SYN Synchronous idle.
 	SYN
-	// ETB End of transmission block
+	// ETB End of transmission block.
 	ETB
-	// CAN Cancel
+	// CAN Cancel.
 	CAN
-	// EM End of medium
+	// EM End of medium.
 	EM
-	// SUB Substitute
+	// SUB Substitute.
 	SUB
-	// ESC Escape
+	// ESC Escape.
 	ESC
-	// FS File separator
+	// FS File separator.
 	FS
-	// GS Group separator
+	// GS Group separator.
 	GS
-	// RS Record separator
+	// RS Record separator.
 	RS
-	// US Unit separator
+	// US Unit separator.
 	US
-	// SP Space
+	// SP Space.
 	SP
 )
 
 const (
-	// LeftSquareBracket [
+	// LeftSquareBracket [.
 	LeftSquareBracket = 91
-	// VerticalBar |
+	// VerticalBar |.
 	VerticalBar = 124
-	// DEL Delete
+	// DEL Delete.
 	DEL = 127
-	// Dash Hyphen -
+	// Dash Hyphen -.
 	Dash = 150
-	// Nbsp Non-breaking space
+	// Nbsp Non-breaking space.
 	Nbsp = 160
-	// InvertedExclamation ¡
+	// InvertedExclamation ¡.
 	InvertedExclamation = 161
-	// Cent ¢
+	// Cent ¢.
 	Cent = 162
-	// BrokenBar ¦
+	// BrokenBar ¦.
 	BrokenBar = 166
-	// Negation ¬
+	// Negation ¬.
 	Negation = 172
-	// PlusMinus ±
+	// PlusMinus ±.
 	PlusMinus = 177
-	// LightVertical light vertical │
+	// LightVertical light vertical │.
 	LightVertical = 179 // TODO: test 178 vs 179
-	// SquareRoot Square root √
+	// SquareRoot Square root √.
 	SquareRoot = 251
-	// NBSP Non-breaking space
+	// NBSP Non-breaking space.
 	NBSP = 255
-	// Delta Δ
+	// Delta Δ.
 	Delta = 916
-	// LeftwardsArrow ←
+	// LeftwardsArrow ←.
 	LeftwardsArrow = 8592
-	// SquareRootU Unicode square root √
+	// SquareRootU Unicode square root √.
 	SquareRootU = 8730
-	// House ⌂
+	// House ⌂.
 	House = 8962
-	// IntegralExtension ⎮
+	// IntegralExtension ⎮.
 	IntegralExtension = 9134
-	// SymbolNUL ␀
+	// SymbolNUL ␀.
 	SymbolNUL = 9216
-	// SymbolESC ␛
+	// SymbolESC ␛.
 	SymbolESC = 9243
-	// SymbolDEL ␡
+	// SymbolDEL ␡.
 	SymbolDEL = 9249
-	// LightVerticalU Box drawing light vertical │
+	// LightVerticalU Box drawing light vertical │.
 	LightVerticalU = 9474
-	// CheckMark ✓
+	// CheckMark ✓.
 	CheckMark = 10003
-	// Replacement character �
+	// Replacement character �.
 	Replacement = 65533
 )
 
@@ -144,13 +144,14 @@ const (
 	row9f = 159
 	rowA  = 160
 	rowE  = 224
+	iso11 = "iso-8859-11"
 )
 
-// Chars are characters with alternative runes
+// Chars are characters with alternative runes.
 type Chars map[int]rune
 
 var (
-	// ErrChainANSI ansi() is a chain method
+	// ErrChainANSI ansi() is a chain method.
 	ErrChainANSI = errors.New("ansi() is a chain method that is to be used in conjunction with swap: c.swap().ansi()")
 )
 
@@ -192,7 +193,7 @@ func Encoding(name string) (encoding.Encoding, error) {
 	if enc == nil {
 		enc, _ = ianaindex.IANA.Encoding(n)
 	}
-	if a == "iso-8859-11" {
+	if a == iso11 {
 		// ISO-8859-11 uses the same characters as Windows 847
 		// except for 9 characters in rows 8 and 9.
 		// https://en.wikipedia.org/wiki/ISO/IEC_8859-11#Code_page_874_(IBM)_/_9066
@@ -297,8 +298,8 @@ func encodingAlias(name string) (n string) {
 		n = "ISO-8859-9"
 	case "10", "919", "28600":
 		n = "ISO-8859-10"
-	case "11", "iso-8859-11":
-		n = "iso-8859-11"
+	case "11", iso11:
+		n = strings.ToUpper(iso11)
 	case "13", "921", "28603":
 		n = "ISO-8859-13"
 	case "14", "28604":

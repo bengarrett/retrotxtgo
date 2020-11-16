@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	// EOF end of file character
+	// EOF end of file character.
 	EOF = 26
 )
 

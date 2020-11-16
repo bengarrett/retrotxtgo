@@ -8,27 +8,27 @@ import (
 )
 
 var (
-	// ErrCmd choose a cmd
+	// ErrCmd choose a cmd.
 	ErrCmd = errors.New("choose a command from the list available")
-	// ErrNewCmd choose another cmd
+	// ErrNewCmd choose another cmd.
 	ErrNewCmd = errors.New("choose another command from the available commands")
-	// ErrNoCmd invalid cmd
+	// ErrNoCmd invalid cmd.
 	ErrNoCmd = errors.New("invalid command")
-	// ErrEmpty empty value
+	// ErrEmpty empty value.
 	ErrEmpty = errors.New("value is empty")
-	// ErrFlag unknown flag
+	// ErrFlag unknown flag.
 	ErrFlag = errors.New("use a flag from the list of flags")
-	// ErrSyntax flag syntax
+	// ErrSyntax flag syntax.
 	ErrSyntax = errors.New("flags can only be in -s (short) or --long (long) form")
-	// ErrNoFlag value cannot be empty
+	// ErrNoFlag value cannot be empty.
 	ErrNoFlag = errors.New("cannot be empty and requires a value")
-	// ErrReqFlag cmd requires a flag
+	// ErrReqFlag cmd requires a flag.
 	ErrReqFlag = errors.New("you must include this flag in your command")
-	// ErrSlice invalid option
+	// ErrSlice invalid option.
 	ErrSlice = errors.New("invalid option choice")
-	// ErrShort too few words
+	// ErrShort too few words.
 	ErrShort = errors.New("word count is too short, less than 3")
-	// ErrVal value is invalid
+	// ErrVal value is invalid.
 	ErrVal = errors.New("value is not a valid choice")
 )
 

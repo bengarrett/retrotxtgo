@@ -16,9 +16,9 @@ const (
 )
 
 var (
-	// ErrJSON body is not valid json
+	// ErrJSON body is not valid json.
 	ErrJSON = errors.New("response body data is not valid json")
-	// ErrMash body is not able to unmarshal
+	// ErrMash body is not able to unmarshal.
 	ErrMash = errors.New("response body json could not unmarshal")
 )
 

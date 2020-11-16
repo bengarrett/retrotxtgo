@@ -97,11 +97,11 @@ const (
 )
 
 var (
-	// ErrName unknown font
+	// ErrName unknown font.
 	ErrName = errors.New("font name is not known")
-	// ErrPack font not found
+	// ErrPack font not found.
 	ErrPack = errors.New("font pack is not found")
-	// ErrEmptyName filename is empty
+	// ErrEmptyName filename is empty.
 	ErrEmptyName = errors.New("filename is empty")
 )
 
@@ -204,17 +204,17 @@ func (args *Args) Create(b *[]byte) {
 }
 
 var (
-	// ErrReqOW require overwrite flag
+	// ErrReqOW require overwrite flag.
 	ErrReqOW = errors.New("include an -o flag to overwrite")
-	// ErrPackGet invalid pack name
+	// ErrPackGet invalid pack name.
 	ErrPackGet = errors.New("pack.get name is invalid")
-	// ErrUnknownFF unknown font family
+	// ErrUnknownFF unknown font family.
 	ErrUnknownFF = errors.New("unknown font family")
-	// ErrNilByte nil byte value
+	// ErrNilByte nil byte value.
 	ErrNilByte = errors.New("cannot convert a nil byte value")
-	// ErrTmplDir temp file is a dir
+	// ErrTmplDir temp file is a dir.
 	ErrTmplDir = errors.New("the path to the template file is a directory")
-	// ErrNoLayout layout missing
+	// ErrNoLayout layout missing.
 	ErrNoLayout = errors.New("layout does not exist")
 )
 

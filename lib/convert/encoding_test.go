@@ -108,7 +108,7 @@ func TestEncoding(t *testing.T) {
 		{"CP437", charmap.CodePage437, false},
 		{"IBM Code Page 437", charmap.CodePage437, false},
 		{"CP-437", charmap.CodePage437, false},
-		//{"oem-us", charmap.CodePage437, false}, // US-ASCII
+		// {"oem-us", charmap.CodePage437, false}, // US-ASCII
 		{"ibm-37", charmap.CodePage037, false},
 		{"858", charmap.CodePage858, false},
 		{"mac", charmap.Macintosh, false},
@@ -116,7 +116,7 @@ func TestEncoding(t *testing.T) {
 		{"latin1", charmap.ISO8859_1, false},
 		{"ISO-8859-1", charmap.ISO8859_1, false},
 		{"latin1", charmap.ISO8859_1, false},
-		//{"ansi_x3.4-1968", charmap.Windows1252, false}, // US-ASCII
+		// {"ansi_x3.4-1968", charmap.Windows1252, false}, // US-ASCII
 		{"oem-850", charmap.CodePage850, false},
 		{"oem-852", charmap.CodePage852, false},
 		{"oem-855", charmap.CodePage855, false},

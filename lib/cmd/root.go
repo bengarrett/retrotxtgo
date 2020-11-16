@@ -22,15 +22,15 @@ type rootFlags struct {
 }
 
 var (
-	// ErrIntpr no interpreter
+	// ErrIntpr no interpreter.
 	ErrIntpr = errors.New("the interpreter is not supported")
-	// ErrPackGet invalid pack name
+	// ErrPackGet invalid pack name.
 	ErrPackGet = errors.New("pack.get name is invalid")
-	// ErrTempClose close temp file
+	// ErrTempClose close temp file.
 	ErrTempClose = errors.New("could not close temporary file")
-	// ErrTempOpen open temp file
+	// ErrTempOpen open temp file.
 	ErrTempOpen = errors.New("could not create temporary file")
-	// ErrTempWrite write temp file
+	// ErrTempWrite write temp file.
 	ErrTempWrite = errors.New("could not write to temporary file")
 )
 

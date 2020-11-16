@@ -134,17 +134,17 @@ const (
 )
 
 var (
-	// ErrCFG unknown config name
+	// ErrCFG unknown config name.
 	ErrCFG = errors.New("unknown configuration name")
-	// ErrEnv $editor env error
+	// ErrEnv $editor env error.
 	ErrEnv = errors.New("set one by creating an $EDITOR environment variable in your shell configuration")
-	// ErrKey no bool key
+	// ErrKey no bool key.
 	ErrKey = errors.New("key does not exist or is not a bool value")
-	// ErrNoName empty name
+	// ErrNoName empty name.
 	ErrNoName = errors.New("name cannot be empty")
-	// ErrNoFName empty filename
+	// ErrNoFName empty filename.
 	ErrNoFName = errors.New("filename cannot be empty")
-	// ErrSetting unknown setting name
+	// ErrSetting unknown setting name.
 	ErrSetting = errors.New("configuration setting name is not known")
 )
 
@@ -292,13 +292,4 @@ func Missing() (list []string) {
 		}
 	}
 	return list
-}
-
-func home() string {
-	dir, err := os.UserHomeDir()
-	if err != nil {
-		logs.Log(err)
-		return ""
-	}
-	return dir
 }

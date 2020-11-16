@@ -15,11 +15,11 @@ import (
 	"unicode/utf8"
 
 	"github.com/aofei/mimesniffer"
-	//"github.com/gabriel-vasile/mimetype"
+	// "github.com/gabriel-vasile/mimetype".
 	c "github.com/gookit/color"
 	"github.com/mozillazg/go-slugify"
 
-	//"github.com/zRedShift/mimemagic"
+	// "github.com/zRedShift/mimemagic".
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 	"retrotxt.com/retrotxt/lib/filesystem"
@@ -45,9 +45,8 @@ type Detail struct {
 	SHA256    string    `json:"checksumSHA256"`
 	Mime      string    `json:"mime"`
 	Slug      string    `json:"slug"`
-	//Newlines  string    `json:"newlines"` // todo: required?
-	index  int
-	length int
+	index     int
+	length    int
 }
 
 // File data for XML encoding.
@@ -69,7 +68,7 @@ type File struct {
 	Modified  time.Time `xml:"modified"`
 }
 
-// Names index and totals
+// Names index and totals.
 type Names struct {
 	Index  int
 	Length int
@@ -80,13 +79,13 @@ type Names struct {
 const DTFormat = "DMY24"
 
 var (
-	// ErrFmt format error
+	// ErrFmt format error.
 	ErrFmt = errors.New("format is not known")
-	// ErrNoName name cannot be empty
+	// ErrNoName name cannot be empty.
 	ErrNoName = errors.New("name cannot be empty")
-	// ErrNoDir directories not usable with command
+	// ErrNoDir directories not usable with command.
 	ErrNoDir = errors.New("directories are not usable with this command")
-	// ErrNoFile file does not exist
+	// ErrNoFile file does not exist.
 	ErrNoFile = errors.New("file does not exist")
 )
 
