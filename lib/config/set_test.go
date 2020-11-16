@@ -91,8 +91,8 @@ func Test_colorElm(t *testing.T) {
 		want string
 	}{
 		{"empty", "", ""},
-		{"str", "hello", "\nhello\n"},
-		{"basic", "<h1>hello</h1>", "\n<\x1b[1mh1\x1b[0m>hello</\x1b[1mh1\x1b[0m>\n"},
+		{"str", "hello", "\nhello\n\n"},
+		{"basic", "<h1>hello</h1>", "\n<h1>hello</h1>\n\n"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

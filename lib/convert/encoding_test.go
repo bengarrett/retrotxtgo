@@ -18,8 +18,8 @@ func TestSet_Transform(t *testing.T) {
 		wantErr  bool
 	}{
 		{"null", "ascii", "\x00", "␀", false},
-		{"CP037", "cp037", "\xc8\x51\xba\x93\xcf", "H [l ", false},
-		{"bell", "cp037", "ring a \x07", "ring a ␇", false},
+		{"CP037", "cp037", "\xc8\x51\xba\x93\xcf", "Hé[lõ", false},
+		{"bell", "cp037", "ring a \x07", "ring a \u0007", false},
 		{"CP437", "cp437", "H\x82ll\x93 \x9d\xa7\xf4\x9c\xbe", "Héllô ¥º⌠£╛", false},
 		{"⌂", "cp437", "Home sweat \x7f", "Home sweat ⌂", false},
 		{"mac", "macintosh", "\x11 command + \x12 shift.", "⌘ command + ⇧ shift.", false},
@@ -54,7 +54,7 @@ func TestANSI(t *testing.T) {
 		wantErr  bool
 	}{
 		{"null", "ascii", "\x00", []rune("␀"), false},
-		{"CP037", "cp037", "\xc8\x51\xba\x93\xcf", []rune("H [l "), false},
+		{"CP037", "cp037", "\xc8\x51\xba\x93\xcf", []rune("Hé[lõ"), false},
 		{"ansi dos", "cp437", "\x1b\x5b0m", []rune{27, 91, 48, 109}, false},
 		{"ansi win", "cp1252", "\x1b\x5b0m", []rune{27, 91, 48, 109}, false},
 		{"panic", "cp1252", "\x1b", []rune{9243}, false},
@@ -108,7 +108,7 @@ func TestEncoding(t *testing.T) {
 		{"CP437", charmap.CodePage437, false},
 		{"IBM Code Page 437", charmap.CodePage437, false},
 		{"CP-437", charmap.CodePage437, false},
-		{"oem-us", charmap.CodePage437, false},
+		//{"oem-us", charmap.CodePage437, false}, // US-ASCII
 		{"ibm-37", charmap.CodePage037, false},
 		{"858", charmap.CodePage858, false},
 		{"mac", charmap.Macintosh, false},
@@ -116,7 +116,7 @@ func TestEncoding(t *testing.T) {
 		{"latin1", charmap.ISO8859_1, false},
 		{"ISO-8859-1", charmap.ISO8859_1, false},
 		{"latin1", charmap.ISO8859_1, false},
-		{"ansi_x3.4-1968", charmap.Windows1252, false},
+		//{"ansi_x3.4-1968", charmap.Windows1252, false}, // US-ASCII
 		{"oem-850", charmap.CodePage850, false},
 		{"oem-852", charmap.CodePage852, false},
 		{"oem-855", charmap.CodePage855, false},

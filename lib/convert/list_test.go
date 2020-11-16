@@ -8,16 +8,16 @@ import (
 )
 
 func TestEncodings(t *testing.T) {
-	got, want := len(Encodings()), 49
+	const totalEncodings = 50
+	got, want := len(Encodings()), totalEncodings
 	if got != want {
 		t.Errorf("Encodings() count = %v, want %v", got, want)
 	}
 }
 
 func TestList(t *testing.T) {
-	got := List()
-	if got == nil {
-		t.Errorf("List()  do not want %v", got)
+	if got := List(); got == nil {
+		t.Errorf("List() do not want %v", got)
 	}
 }
 
