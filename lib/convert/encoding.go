@@ -187,21 +187,21 @@ func Encoding(name string) (encoding.Encoding, error) {
 	}
 	s := shorten(name)
 	a := encodingAlias(s)
-	n := encodingAlias(name)
-	enc, _ := ianaindex.IANA.Encoding(s)
-	if enc == nil {
-		enc, _ = ianaindex.IANA.Encoding(a)
-	}
-	if enc == nil {
-		enc, _ = ianaindex.IANA.Encoding(n)
-	}
 	if a == iso11 {
 		// ISO-8859-11 uses the same characters as Windows 847
 		// except for 9 characters in rows 8 and 9.
 		// https://en.wikipedia.org/wiki/ISO/IEC_8859-11#Code_page_874_(IBM)_/_9066
 		return charmap.Windows874, nil
 	}
-	if enc == nil {
+	n := encodingAlias(name)
+	enc, err := ianaindex.IANA.Encoding(s)
+	if err != nil {
+		enc, err = ianaindex.IANA.Encoding(a)
+	}
+	if err != nil {
+		enc, err = ianaindex.IANA.Encoding(n)
+	}
+	if err != nil || enc == nil {
 		if a == "" {
 			return enc, fmt.Errorf("%q: %w", name, ErrName)
 		}
