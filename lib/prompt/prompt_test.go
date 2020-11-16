@@ -37,7 +37,7 @@ func TestPortValid(t *testing.T) {
 		port   uint
 		wantOk bool
 	}{
-		{"0", 0, true},
+		{"0", 0, false},
 		{"80", 80, true},
 		{"8080", 8080, true},
 		{"8888", 8888, true},
