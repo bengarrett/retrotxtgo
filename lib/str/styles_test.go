@@ -140,7 +140,7 @@ func TestNumberizeKeys(t *testing.T) {
 	}{
 		{"empty", nil, ""},
 		{"three", []string{"alpha", "bravo", "charlie"},
-			"\x1b[0m\x1b[4m0\x1b[0m) alpha, \x1b[0m\x1b[4m1\x1b[0m) bravo, \x1b[0m\x1b[4m2\x1b[0m) charlie"},
+			"\x1b[0m\x1b[4m0\x1b[0m) alpha\n\x1b[0m\x1b[4m1\x1b[0m) bravo\n\x1b[0m\x1b[4m2\x1b[0m) charlie"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

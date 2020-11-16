@@ -21,6 +21,7 @@ import (
 	"github.com/gookit/color"
 )
 
+// ErrRune invalid rune
 var ErrRune = errors.New("invalid encoded rune")
 
 type terminal int
