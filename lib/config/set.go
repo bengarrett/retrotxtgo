@@ -224,20 +224,19 @@ func updatePrompt(name string, setup bool, value interface{}) {
 		fmt.Printf("\nUse %s to disable and always use the user's current directory\n\n", str.Example("-"))
 		setDirectory(name, setup)
 	case "serve":
-		var p uint
 		var reset = func() {
-			p = Reset()["serve"].(uint)
-			save(name, false, p)
-		}
-		switch value.(type) {
-		case uint:
-			if u, ok := value.(uint); ok {
+			var p uint
+			if u, ok := Reset()["serve"].(uint); ok {
 				p = u
 			}
+			save(name, false, p)
+		}
+		var p uint
+		switch v := value.(type) {
+		case uint:
+			p = v
 		case int:
-			if i, ok := value.(int); ok {
-				p = uint(i)
-			}
+			p = uint(v)
 		default:
 			reset()
 		}
@@ -251,11 +250,17 @@ func updatePrompt(name string, setup bool, value interface{}) {
 		fmt.Printf("\nSet a HTTP port value, to %s\nChoices %s:\n", Tip()[name], portInfo())
 		setPort(name, setup)
 	case "style.html":
-		d := Reset()[name].(string)
+		var d string
+		if s, ok := Reset()[name].(string); ok {
+			d = s
+		}
 		fmt.Printf("\n%s\n\nSet a new HTML syntax style%s:\n", str.Ci(Names("css")), recommend(d))
 		setStrings(name, setup, styles.Names()...)
 	case "style.info":
-		d := Reset()[name].(string)
+		var d string
+		if s, ok := Reset()[name].(string); ok {
+			d = s
+		}
 		fmt.Printf("\n%s\n\nSet a new %s syntax style%s:\n", str.Ci(Names("json")), str.Example("config info"), recommend(d))
 		setStrings(name, setup, styles.Names()...)
 	default:
