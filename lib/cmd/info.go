@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -29,7 +30,7 @@ var infoCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// piped input from other programs
 		if filesystem.IsPipe() {
-			infoPipe(cmd)
+			infoPipe()
 		}
 		checkUse(cmd, args...)
 		var n info.Names
@@ -37,7 +38,7 @@ var infoCmd = &cobra.Command{
 		for i, arg := range args {
 			n.Index = i + 1
 			// internal, packed example file
-			if filename, err := infoPackage(cmd, arg); err != nil {
+			if filename, err := infoPackage(arg); err != nil {
 				logs.Println("pack", arg, err)
 				continue
 			} else if filename != "" {
@@ -45,7 +46,7 @@ var infoCmd = &cobra.Command{
 				arg = filename
 			}
 			if err := n.Info(arg, infoFlag.format); err.Err != nil {
-				if err.Err == info.ErrNoFile {
+				if errors.Is(err.Err, info.ErrNoFile) {
 					if n.Length <= 1 {
 						err.Fatal()
 					}
@@ -68,7 +69,7 @@ func init() {
 		str.Options("output format", true, i[:]...))
 }
 
-func infoPackage(cmd *cobra.Command, name string) (filename string, err error) {
+func infoPackage(name string) (filename string, err error) {
 	var s = strings.ToLower(name)
 	if _, err = os.Stat(s); !os.IsNotExist(err) {
 		return "", nil
@@ -94,7 +95,7 @@ func infoPackage(cmd *cobra.Command, name string) (filename string, err error) {
 	return file.Name(), nil
 }
 
-func infoPipe(cmd *cobra.Command) {
+func infoPipe() {
 	b, err := filesystem.ReadPipe()
 	if err != nil {
 		logs.Fatal("info", "read stdin", err)

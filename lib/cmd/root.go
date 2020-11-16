@@ -26,6 +26,8 @@ var (
 	ErrIntpr = errors.New("the interpreter is not supported")
 	// ErrPackGet invalid pack name.
 	ErrPackGet = errors.New("pack.get name is invalid")
+	// ErrPackValue unknown pack value.
+	ErrPackValue = errors.New("unknown package convert value")
 	// ErrTempClose close temp file.
 	ErrTempClose = errors.New("could not close temporary file")
 	// ErrTempOpen open temp file.
@@ -167,14 +169,16 @@ var internalPacks = map[string]internalPack{
 	"ansi.rgb":      {"", "", "cp437", "text/ansi-rgb.ans", "ANSI RGB 24-bit color sheet"},                            //
 	"ansi.setmodes": {"", "", "cp437", "text/ansi-setmodes.ans", "MS-DOS ANSI.SYS Set Mode examples"},                 //
 	"iso-1":         {"", "", "1", "text/iso-8859-1.txt", "ISO 8859-1 select characters"},                             //
-	"iso-15":        {"", "", "15", "text/iso-8859-15.txt", "ISO 8859-15 select characters"},                          //
-	"sauce":         {"", "", "", "text/sauce.txt", "SAUCE metadata test"},                                            // TODO
-	"shiftjis":      {"d", "mona", "shiftjis", "text/shiftjis.txt", "Shift-JIS and Mona font test"},                   // this outputs to UTF8 .. ??
-	"us-ascii":      {"d", "", "ascii", "text/us-ascii.txt", "US-ASCII controls test"},                                // this outputs to UTF8 because the control codes fail with the 8-bit codepages
-	"utf8":          {"", "", "", "text/utf-8.txt", "UTF-8 test with no Byte Order Mark"},                             //
-	"utf8.bom":      {"", "", "", "text/utf-8-bom.txt", "UTF-8 test with a Byte Order Mark"},                          //
-	"utf16.be":      {"", "", "utf16be", "text/utf-16-be.txt", "UTF-16 Big Endian test"},                              //
-	"utf16.le":      {"", "", "utf16le", "text/utf-16-le.txt", "UTF-16 Little Endian test"},                           //
+	"iso-15":        {"", "", "15", "text/iso-8859-15.txt", "ISO 8859-15 select characters"},
+	"sauce":         {"", "", "", "text/sauce.txt", "SAUCE metadata test"}, // TODO
+	// shiftjis outputs to UTF8 .. ??
+	"shiftjis": {"d", "mona", "shiftjis", "text/shiftjis.txt", "Shift-JIS and Mona font test"},
+	// us-ascii outputs to UTF8 because the control codes fail with the 8-bit codepages
+	"us-ascii": {"d", "", "ascii", "text/us-ascii.txt", "US-ASCII controls test"},
+	"utf8":     {"", "", "", "text/utf-8.txt", "UTF-8 test with no Byte Order Mark"},    //
+	"utf8.bom": {"", "", "", "text/utf-8-bom.txt", "UTF-8 test with a Byte Order Mark"}, //
+	"utf16.be": {"", "", "utf16be", "text/utf-16-be.txt", "UTF-16 Big Endian test"},     //
+	"utf16.le": {"", "", "utf16le", "text/utf-16-le.txt", "UTF-16 Little Endian test"},  //
 }
 
 func examples() *bytes.Buffer {

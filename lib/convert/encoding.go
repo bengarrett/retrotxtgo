@@ -153,6 +153,8 @@ type Chars map[int]rune
 var (
 	// ErrChainANSI ansi() is a chain method.
 	ErrChainANSI = errors.New("ansi() is a chain method that is to be used in conjunction with swap: c.swap().ansi()")
+	// ErrName unknown encoding.
+	ErrName = errors.New("encoding could not match name or alias")
 )
 
 // Characters map code page 437 characters with alternative runes.
@@ -201,9 +203,9 @@ func Encoding(name string) (encoding.Encoding, error) {
 	}
 	if enc == nil {
 		if a == "" {
-			return enc, fmt.Errorf("encoding could not match name or alias %q", name)
+			return enc, fmt.Errorf("%q: %w", name, ErrName)
 		}
-		return enc, fmt.Errorf("encoding could not match name %q or alias %q", name, a)
+		return enc, fmt.Errorf("name %q or alias %q: %w", name, a, ErrName)
 	}
 	return enc, nil
 }
@@ -462,9 +464,12 @@ func (c *Convert) RunesDOS() {
 		return
 	}
 	// ASCII C0 = row 1, C1 = row 2
-	var ctrls = [32]string{string(decode(row8 + byte(0))), "\u263A", "\u263B", "\u2665", "\u2666", "\u2663", "\u2660", "\u2022", "\u25D8", "\u25CB",
-		"\u25D9", "\u2642", "\u2640", "\u266A", "\u266B", "\u263C", "\u25BA", "\u25C4", "\u2195", "\u203C", "\u00B6", "\u00A7",
-		"\u25AC", "\u21A8", "\u2191", "\u2193", "\u2192", "\u2190", "\u221F", "\u2194", "\u25B2", "\u25BC"}
+	var ctrls = [32]string{string(decode(row8 + byte(0))),
+		"\u263A", "\u263B", "\u2665", "\u2666", "\u2663", "\u2660",
+		"\u2022", "\u25D8", "\u25CB", "\u25D9", "\u2642", "\u2640",
+		"\u266A", "\u266B", "\u263C", "\u25BA", "\u25C4", "\u2195",
+		"\u203C", "\u00B6", "\u00A7", "\u25AC", "\u21A8", "\u2191",
+		"\u2193", "\u2192", "\u2190", "\u221F", "\u2194", "\u25B2", "\u25BC"}
 	for i := 0; i < c.len; i++ {
 		r := c.Runes[i]
 		if c.skipIgnores(i) {

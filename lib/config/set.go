@@ -288,7 +288,7 @@ func colorElm(elm, lexer, style string, color bool) string {
 
 type names []string
 
-// lists and applies the named themes for the HighlightWriter
+// lists and applies the named themes for the HighlightWriter.
 func (n names) string(theme bool, lexer string) string {
 	maxWidth := 0
 	for _, s := range n {

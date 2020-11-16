@@ -16,7 +16,7 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
-// ErrLogo missing logo
+// ErrLogo missing logo.
 var ErrLogo = errors.New("retrotxt logo is missing")
 
 // Setup walks through all the settings and saves them to the configuration file.

@@ -18,9 +18,8 @@ import (
 )
 
 var (
-	// ErrUTF16 UTF-16 unsupported
-	ErrUTF16   = errors.New("utf-16 table encodings are not supported")
-	iso8859_11 = charmap.XUserDefined
+	// ErrUTF16 UTF-16 unsupported.
+	ErrUTF16 = errors.New("utf-16 table encodings are not supported")
 )
 
 // Table prints out all the characters in the named 8-bit character set.
@@ -38,7 +37,7 @@ func Table(name string) (*bytes.Buffer, error) {
 	h := fmt.Sprintf("%s", cp)
 	if a := encodingAlias(shorten(name)); a == "iso-8859-11" {
 		h = "ISO 8859-11"
-		cp = iso8859_11
+		cp = charmap.XUserDefined
 	}
 	h += charmapAlias(cp)
 	h += charmapStandard(cp)
@@ -94,6 +93,8 @@ func Table(name string) (*bytes.Buffer, error) {
 }
 
 func character(i int, r rune, cp encoding.Encoding) string {
+	// ISO-8859-11 is not included in Go so a user defined charmap is used.
+	var iso8859_11 = charmap.XUserDefined
 	if cp == iso8859_11 {
 		const PAD, NBSP = 128, 160
 		if i >= PAD && i < NBSP {

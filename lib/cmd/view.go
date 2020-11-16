@@ -141,7 +141,7 @@ func viewPackage(cmd *cobra.Command, conv convert.Args, name string) (ok bool, e
 			return false, err
 		}
 	default:
-		return false, fmt.Errorf("unknown package convert value: %q", pkg.convert)
+		return false, fmt.Errorf("view package %q: %w", pkg.convert, ErrPackValue)
 	}
 	fmt.Println(string(r))
 	return true, nil
@@ -178,12 +178,12 @@ func viewEncode(name string, b ...byte) ([]byte, error) {
 	if err != nil {
 		return b, fmt.Errorf("encoding not known or supported %s: %w", encode, err)
 	}
-	new, err := encode.NewEncoder().Bytes(b)
+	newer, err := encode.NewEncoder().Bytes(b)
 	if err != nil {
-		if len(new) == 0 {
+		if len(newer) == 0 {
 			return b, fmt.Errorf("encoder could not convert bytes to %s: %w", encode, err)
 		}
-		return new, nil
+		return newer, nil
 	}
-	return new, nil
+	return newer, nil
 }

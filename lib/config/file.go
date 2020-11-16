@@ -16,9 +16,9 @@ import (
 )
 
 var (
-	// ErrMissing config missing
+	// ErrMissing config missing.
 	ErrMissing = errors.New("config does not exist")
-	// ErrRxt not a retrotxt config file
+	// ErrRxt not a retrotxt config file.
 	ErrRxt = errors.New("not a retrotxt config file")
 )
 
