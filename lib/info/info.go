@@ -23,6 +23,7 @@ import (
 	"retrotxt.com/retrotxt/lib/filesystem"
 	"retrotxt.com/retrotxt/lib/humanize"
 	"retrotxt.com/retrotxt/lib/logs"
+	"retrotxt.com/retrotxt/lib/sauce"
 	"retrotxt.com/retrotxt/lib/str"
 )
 
@@ -289,6 +290,9 @@ func (d *Detail) Read(name string) (err error) {
 	if err != nil {
 		return err
 	}
+
+	sauce.Print(data)
+
 	return d.parse(stat, data...)
 }
 
