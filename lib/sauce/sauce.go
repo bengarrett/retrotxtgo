@@ -333,7 +333,7 @@ type (
 	comment  [64]byte
 	tFlags   [1]byte
 	tInfoS   [22]byte
-
+	// ansiflags
 	aspectRatio   [2]string
 	letterSpacing [2]string
 	nonBlinkMode  [1]string
@@ -401,6 +401,9 @@ func (d *data) fileType() string {
 		return none.String()
 	case character:
 		c := Character(file)
+		if s := strings.TrimSpace(fmt.Sprintf("%s", d.tInfoS)); s != "" {
+			return fmt.Sprintf("%s, %s", s, c.String())
+		}
 		return c.String()
 	case bitmap:
 		b := Bitmap(file)
@@ -412,6 +415,9 @@ func (d *data) fileType() string {
 		a := Audio(file)
 		return a.String()
 	case binaryText:
+		if s := strings.TrimSpace(fmt.Sprintf("%s", d.tInfoS)); s != "" {
+			return fmt.Sprintf("%s, %s", s, binaryText.String())
+		}
 		return binaryText.String()
 	case xBin:
 		return xBin.String()
@@ -460,14 +466,11 @@ func (d *data) lsDate() string {
 func (d *data) typeInfo() string {
 	dt, ft := unsignedBinary1(d.datatype), unsignedBinary1(d.filetype)
 	t1, t2, t3 := unsignedBinary2(d.tinfo1), unsignedBinary2(d.tinfo2), unsignedBinary2(d.tinfo3)
-	s := d.tInfoS
-	fmt.Println("zString", s)
 	switch DataType(dt) {
 	case none:
 		return ""
 	case character:
 		c, extra := Character(ft), d.ansiFlags()
-		// todo: font name
 		return c.info(t1, t2, t3, extra)
 	case bitmap:
 		return fmt.Sprintf("pixel width: %d, height: %d, depth: %d", t1, t2, t3)
@@ -483,7 +486,6 @@ func (d *data) typeInfo() string {
 		}
 		return "audio error"
 	case binaryText:
-		// todo: font name
 		return d.ansiFlags()
 	case xBin:
 		return fmt.Sprintf("character width: %d, lines: %d", t1, t2)
@@ -515,6 +517,7 @@ func (r record) extract() data {
 		tinfo4:   r.tInfo4(i),
 		comments: r.comments(i),
 		tFlags:   r.tFlags(i),
+		tInfoS:   r.tInfoS(i),
 	}
 }
 
