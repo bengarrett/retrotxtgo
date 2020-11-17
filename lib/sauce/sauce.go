@@ -625,49 +625,15 @@ func (r record) tInfoS(i int) tInfoS {
 	return s
 }
 
-// Scan returns the position of the SAUCE00 ID or -1 if no ID exists.
-func Scan(b []byte) (index int) {
-	const sauceSize, offset = 128, 16
-	index = bytes.LastIndexAny(b, sauceID)
-	if index < 0 {
-		return -1
-	}
-	if !bytes.Equal(b[index:index+len(sauceID)], []byte(sauceID)) {
-		index = index + offset - sauceSize
-	}
-	if (len(b) - index - sauceSize) < 0 {
-		// sauce data is expected to be at least 128 bytes
-		return -1
-	}
-	return index
-}
-
-// Get and extract the record data.
-func Get(r record) Record {
-	d := r.extract()
-	return Record{
-		ID:       fmt.Sprintf("%s", d.id),
-		Version:  fmt.Sprintf("%s", d.version),
-		Title:    fmt.Sprintf("%s", d.title),
-		Author:   fmt.Sprintf("%s", d.author),
-		Group:    fmt.Sprintf("%s", d.group),
-		Date:     fmt.Sprintf("%s", d.date),
-		LSDate:   d.lsDate(),
-		FileSize: d.fileSize(),
-		DataType: d.dataType(),
-		FileType: d.fileType(),
-		TypeInfo: d.typeInfo(),
-	}
-}
-
 // Print and format the record data.
 func Print(b []byte) {
 	var info = func(t string) string {
 		return str.Cinf(fmt.Sprintf("%s\t", t))
 	}
-
-	s := Get(b)
-
+	s := parse(b)
+	if s.ID != "SAUCE" {
+		return
+	}
 	var data = []struct {
 		k, v string
 	}{
@@ -692,7 +658,62 @@ func Print(b []byte) {
 	if err := w.Flush(); err != nil {
 		logs.Fatal("flush of tab writer failed", "", err)
 	}
-	fmt.Println(buf.String())
+	fmt.Print(buf.String())
+}
+
+// Scan returns the position of the SAUCE00 ID or -1 if no ID exists.
+func Scan(b []byte) (index int) {
+	const sauceSize = 128
+	id, l := []byte(sauceID), len(b)
+	// search for the id sequence in b
+	for i := range b {
+		i = l - 1 - i // loop in reverse
+		if i < sauceSize {
+			break
+		}
+		// do matching in reverse
+		if b[i] != id[6] {
+			continue // 0
+		}
+		if b[i-1] != id[5] {
+			continue // 0
+		}
+		if b[i-2] != id[4] {
+			continue // E
+		}
+		if b[i-3] != id[3] {
+			continue // C
+		}
+		if b[i-4] != id[2] {
+			continue // U
+		}
+		if b[i-5] != id[1] {
+			continue // A
+		}
+		if b[i-6] != id[0] {
+			continue // S
+		}
+		return i - 6
+	}
+	return -1
+}
+
+// parse and extract the record data.
+func parse(r record) Record {
+	d := r.extract()
+	return Record{
+		ID:       fmt.Sprintf("%s", d.id),
+		Version:  fmt.Sprintf("%s", d.version),
+		Title:    fmt.Sprintf("%s", d.title),
+		Author:   fmt.Sprintf("%s", d.author),
+		Group:    fmt.Sprintf("%s", d.group),
+		Date:     fmt.Sprintf("%s", d.date),
+		LSDate:   d.lsDate(),
+		FileSize: d.fileSize(),
+		DataType: d.dataType(),
+		FileType: d.fileType(),
+		TypeInfo: d.typeInfo(),
+	}
 }
 
 func unsignedBinary1(b [1]byte) (value uint8) {

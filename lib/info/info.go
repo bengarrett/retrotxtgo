@@ -290,9 +290,6 @@ func (d *Detail) Read(name string) (err error) {
 	if err != nil {
 		return err
 	}
-
-	sauce.Print(data)
-
 	return d.parse(stat, data...)
 }
 
@@ -338,7 +335,7 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 			d.Size = p.Sprintf("%v (%v bytes)", humanize.Bytes(l, Language()), p.Sprint(l))
 		}
 	}
-	const channels = 3
+	const channels = 4
 	ch := make(chan bool, channels)
 	go func() {
 		md5sum := md5.Sum(data)
@@ -354,7 +351,11 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 		d.Utf8 = utf8.Valid(data)
 		ch <- true
 	}()
-	_, _, _ = <-ch, <-ch, <-ch
+	go func() {
+		sauce.Print(data)
+		ch <- true
+	}()
+	_, _, _, _ = <-ch, <-ch, <-ch, <-ch
 	return err
 }
 
