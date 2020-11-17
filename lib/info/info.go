@@ -430,7 +430,7 @@ func (d *Detail) Text(color bool) string {
 	return buf.String()
 }
 
-func (d Detail) comment() string {
+func (d *Detail) comment() string {
 	if d.MimeCommt != "unknown" {
 		return d.MimeCommt
 	}

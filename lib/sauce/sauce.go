@@ -1,4 +1,4 @@
-//Package sauce to handle the opening and reading of text files
+// Package sauce to handle the opening and reading of text files.
 package sauce
 
 import (
@@ -10,15 +10,32 @@ import (
 	"text/tabwriter"
 	"time"
 
+	"golang.org/x/text/language"
+	"retrotxt.com/retrotxt/lib/humanize"
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/str"
 )
 
 const sauceID = "SAUCE00"
 
+// Record layout for printing.
+type Record struct {
+	ID       string
+	Version  string
+	Title    string
+	Author   string
+	Group    string
+	Date     string
+	LSDate   string
+	FileSize string
+	DataType string
+	FileType string
+	TypeInfo string
+}
+
 type (
-	// None undefined filetype.
-	None uint
+	// DataType is the type of data.
+	DataType uint
 	// Character based files.
 	Character uint
 	// Bitmap graphic and animation files.
@@ -36,6 +53,26 @@ type (
 	// Executable program files.
 	Executable uint
 )
+
+const (
+	none DataType = iota
+	character
+	bitmap
+	vector
+	audio
+	binaryText
+	xBin
+	archive
+	executable
+)
+
+func (d DataType) String() string {
+	s := [...]string{
+		"undefined", "text", "bitmap graphic or animation", "vector graphic",
+		"audio or music", "binary text", "extended binary text", "archive", "executable",
+	}[d]
+	return fmt.Sprintf("%s file", s)
+}
 
 const (
 	// ASCII text file with no formatting codes or color codes.
@@ -58,14 +95,46 @@ const (
 	TundraDraw
 )
 
+func (c Character) String() string {
+	return [...]string{
+		"ASCII text",
+		"ANSI color text",
+		"ANSIMation",
+		"RIPScript",
+		"PCBoard color text",
+		"Avatar color text",
+		"HTML markup",
+		"Programming source code",
+		"TundraDraw color text",
+	}[c]
+}
+
+func (c Character) info(t1, t2, t3 uint16, x string) string {
+	switch c {
+	case ASCII, ANSI, ANSIMation:
+		s := fmt.Sprintf("character width: %d, lines: %d", t1, t2)
+		if x != "" {
+			return fmt.Sprintf("%s; %s", s, x)
+		}
+		return s
+	case RIPScript:
+		return fmt.Sprintf("pixel width: %d, height: %d, colors: %d", t1, t2, t3)
+	case PCBoard, Avatar, TundraDraw:
+		return fmt.Sprintf("character width: %d, lines: %d", t1, t2)
+	case HTML, Source:
+		return ""
+	}
+	return "charcter error"
+}
+
 const (
-	// GIF CompuServe Graphics Interchange Format.
+	// GIF Graphics Interchange Format.
 	GIF Bitmap = iota
 	// PCX ZSoft Paintbrush.
 	PCX
 	// LBM DeluxePaint LBM/IFF.
 	LBM
-	// TGA Targa truecolor.
+	// TGA Targa true color.
 	TGA
 	// FLI Autodesk animation.
 	FLI
@@ -77,7 +146,7 @@ const (
 	GL
 	// DL animation.
 	DL
-	// WPG Wordperfect Bitmap.
+	// WPG WordPerfect Bitmap.
 	WPG
 	// PNG Portable Network Graphics.
 	PNG
@@ -88,6 +157,25 @@ const (
 	// AVI Audio Video Interleave.
 	AVI
 )
+
+func (b Bitmap) String() string {
+	return [...]string{
+		"GIF image",
+		"ZSoft Paintbrush image",
+		"Targa true color image",
+		"Autodesk Animator animation",
+		"Autodesk Animator animation",
+		"BMP Windows/OS2 bitmap",
+		"Grasp GL animation",
+		"DL animation",
+		"WordPerfect graphic",
+		"PNG image",
+		"Jpeg photo",
+		"MPEG video",
+		"AVI video",
+	}[b]
+}
+
 const (
 	// DXF Drawing Exchange Format for AutoCAD and AutoDRAW CAD.
 	DXF Vector = iota
@@ -98,6 +186,14 @@ const (
 	// Kinetix 3D Studio and 3D Studio MAX product line (3DS).
 	Kinetix
 )
+
+func (v Vector) String() string {
+	return [...]string{
+		"AutoDesk CAD vector graphic",
+		"WordPerfect vector graphic",
+		"3D Studio vector graphic",
+	}[v]
+}
 
 const (
 	// MOD NoiseTracker 4, 6 or 8 channels.
@@ -112,13 +208,13 @@ const (
 	MTM
 	// FAR Farandole composer.
 	FAR
-	// ULT UltraTracker.
+	// ULT Ultra Tracker.
 	ULT
 	// AMF DMP/DSMI Advanced Module Format.
 	AMF
-	// DMF Delusion Digital Music Format (XTracker).
+	// DMF Delusion Digital Music Format (X-Tracker).
 	DMF
-	// OKT Oktalyser.
+	// OKT Oktalyzer.
 	OKT
 	// ROL AdLib ROL file (FM audio).
 	ROL
@@ -152,6 +248,34 @@ const (
 	IT
 )
 
+func (a Audio) String() string {
+	return [...]string{
+		"NoiseTracker module",
+		"ScreamTracker module",
+		"ScreamTracker 3 module",
+		"MultiTracker module",
+		"Farandole Composer module",
+		"Ultra Tracker module",
+		"Dual Module Player module",
+		"X-Tracker module",
+		"Oktalyzer module",
+		"AdLib Visual Composer FM audio",
+		"MIDI audio",
+		"SAdT composer FM audio",
+		"Creative Voice File",
+		"Waveform audio",
+		"single channel 8-bit sample",
+		"stereo 8-bit sample",
+		"single channel 16-bit sample",
+		"stereo 16-bit sample",
+		"8-bit patch file",
+		"16-bit patch file",
+		"Extended Module",
+		"Hannes Seifert Composition FM audio",
+		"Impulse Tracker module",
+	}[a]
+}
+
 const (
 	// ZIP originally from PKWare but now an open format.
 	ZIP Archive = iota
@@ -175,6 +299,21 @@ const (
 	SQZ
 )
 
+func (a Archive) String() string {
+	return [...]string{
+		"ZIP compressed archive",
+		"ARJ compressed archive",
+		"LHA compressed archive",
+		"ARC compressed archive",
+		"Tarball tape archive",
+		"ZOO compressed archive",
+		"RAR compressed archive",
+		"UltraCompressor II compressed archive",
+		"PAK ARC compressed archive",
+		"Squeeze It compressed archive",
+	}[a]
+}
+
 type (
 	record   []byte
 	id       [5]byte
@@ -194,6 +333,10 @@ type (
 	comment  [64]byte
 	tFlags   [1]byte
 	tInfoS   [22]byte
+
+	aspectRatio   [2]string
+	letterSpacing [2]string
+	nonBlinkMode  [1]string
 )
 
 type data struct {
@@ -210,45 +353,168 @@ type data struct {
 	tinfo2   tInfo2
 	tinfo3   tInfo3
 	tinfo4   tInfo4
+	comments comments
+	tFlags   tFlags
+	tInfoS   tInfoS
 }
 
-//Record blah
-type Record struct {
-	ID       string
-	Version  string
-	Title    string
-	Author   string
-	Group    string
-	Date     string
-	LSDate   string
-	FileSize string
-	DataType string
-	FileType string
-	TypeInfo string
+func (d *data) ansiFlags() (s string) {
+	var (
+		highIntensityColor = nonBlinkMode{"1"}
+		font8px            = letterSpacing{"0", "1"}
+		font9px            = letterSpacing{"1", "0"}
+		stretch            = aspectRatio{"0", "1"}
+		square             = aspectRatio{"1", "0"}
+	)
+	bin := fmt.Sprintf("%05b", unsignedBinary1(d.tFlags))
+	v := strings.Split(bin, "")
+	ar, ls, b := aspectRatio{v[0], v[1]}, letterSpacing{v[2], v[3]}, nonBlinkMode{v[4]}
+	var desc []string
+	if b == highIntensityColor {
+		desc = append(desc, "non-blink iCE color")
+	}
+	switch ls {
+	case font8px:
+		desc = append(desc, "8 pixel font")
+	case font9px:
+		desc = append(desc, "9 pixel font")
+	}
+	switch ar {
+	case stretch:
+		desc = append(desc, "stretched pixels")
+	case square:
+		desc = append(desc, "square pixels")
+	}
+	return strings.Join(desc, ", ")
 }
 
-//var datatypes = make(map[uint8]string)
+func (d *data) dataType() string {
+	val := unsignedBinary1(d.datatype)
+	dt := DataType(val)
+	return fmt.Sprintf("%v", dt.String())
+}
 
-//Get sauce
-func slice(b record) data {
-	i := Scan(b)
+func (d *data) fileType() string {
+	data, file := unsignedBinary1(d.datatype), unsignedBinary1(d.filetype)
+	switch DataType(data) {
+	case none:
+		return none.String()
+	case character:
+		c := Character(file)
+		return c.String()
+	case bitmap:
+		b := Bitmap(file)
+		return b.String()
+	case vector:
+		v := Vector(file)
+		return v.String()
+	case audio:
+		a := Audio(file)
+		return a.String()
+	case binaryText:
+		return binaryText.String()
+	case xBin:
+		return xBin.String()
+	case archive:
+		a := Archive(file)
+		return a.String()
+	case executable:
+		return executable.String()
+	default:
+		return "type error"
+	}
+}
+
+func (d *data) fileSize() string {
+	const kB = 1000
+	value := unsignedBinary4(d.filesize)
+	if value < kB {
+		return fmt.Sprintf("%d bytes", value)
+	}
+	h := humanize.Bytes(int64(value), language.AmericanEnglish)
+	return fmt.Sprintf("%s (%d bytes)", h, value)
+}
+
+func (d *data) lsDate() string {
+	da := d.date
+	dy, err := strconv.Atoi(string(da[0:4]))
+	if err != nil {
+		fmt.Println("day conversion failed:", err)
+		return fmt.Sprintf("%s", da)
+	}
+	dm, err := strconv.Atoi(string(da[4:6]))
+	if err != nil {
+		fmt.Println("month conversion failed:", err)
+		return fmt.Sprintf("%s", da)
+	}
+	dd, err := strconv.Atoi(string(da[6:8]))
+	if err != nil {
+		fmt.Println("year conversion failed:", err)
+		return fmt.Sprintf("%s", da)
+	}
+	t := time.Date(dy, time.Month(dm), dd, 0, 0, 0, 0, time.UTC)
+	year, month, day := t.Date()
+	return fmt.Sprintf("%v-%v-%v", year, month, day)
+}
+
+func (d *data) typeInfo() string {
+	dt, ft := unsignedBinary1(d.datatype), unsignedBinary1(d.filetype)
+	t1, t2, t3 := unsignedBinary2(d.tinfo1), unsignedBinary2(d.tinfo2), unsignedBinary2(d.tinfo3)
+	s := d.tInfoS
+	fmt.Println("zString", s)
+	switch DataType(dt) {
+	case none:
+		return ""
+	case character:
+		c, extra := Character(ft), d.ansiFlags()
+		// todo: font name
+		return c.info(t1, t2, t3, extra)
+	case bitmap:
+		return fmt.Sprintf("pixel width: %d, height: %d, depth: %d", t1, t2, t3)
+	case vector:
+		return ""
+	case audio:
+		switch Audio(ft) {
+		case SMP8, SMP8S, SMP16, SMP16S:
+			return fmt.Sprintf("sample rate: %d", t1)
+		case MOD, Composer669, STM, S3M, MTM, FAR, ULT, AMF, DMF, OKT, ROL, CMF, MID,
+			SADT, VOC, WAV, PATCH8, PATCH16, XM, HSC, IT:
+			return ""
+		}
+		return "audio error"
+	case binaryText:
+		// todo: font name
+		return d.ansiFlags()
+	case xBin:
+		return fmt.Sprintf("character width: %d, lines: %d", t1, t2)
+	case archive, executable:
+		return ""
+	}
+	return "info error"
+}
+
+// extract sauce record.
+func (r record) extract() data {
+	i := Scan(r)
 	if i == -1 {
 		return data{}
 	}
 	return data{
-		id:       b.id(i),
-		version:  b.version(i),
-		title:    b.title(i),
-		author:   b.author(i),
-		group:    b.group(i),
-		date:     b.date(i),
-		filesize: b.fileSize(i),
-		datatype: b.dataType(i),
-		filetype: b.fileType(i),
-		tinfo1:   b.tInfo1(i),
-		tinfo2:   b.tInfo2(i),
-		tinfo3:   b.tInfo3(i),
-		tinfo4:   b.tInfo4(i),
+		id:       r.id(i),
+		version:  r.version(i),
+		title:    r.title(i),
+		author:   r.author(i),
+		group:    r.group(i),
+		date:     r.date(i),
+		filesize: r.fileSize(i),
+		datatype: r.dataType(i),
+		filetype: r.fileType(i),
+		tinfo1:   r.tInfo1(i),
+		tinfo2:   r.tInfo2(i),
+		tinfo3:   r.tInfo3(i),
+		tinfo4:   r.tInfo4(i),
+		comments: r.comments(i),
+		tFlags:   r.tFlags(i),
 	}
 }
 
@@ -333,143 +599,38 @@ func (r record) tInfo3(i int) tInfo3 {
 }
 
 func (r record) tInfo4(i int) tInfo4 {
-	return tInfo4{r[i+102], r[i+102]}
+	return tInfo4{r[i+102], r[i+103]}
 }
 
-func getID(d data) string {
-	return fmt.Sprintf("%s", d.id)
-}
-func getVersion(d data) string {
-	return fmt.Sprintf("%s", d.version)
-}
-func getTitle(d data) string {
-	s := strings.TrimSpace(fmt.Sprintf("%s", d.title))
-	return fmt.Sprintf("%v", s)
-}
-func getAuthor(d data) string {
-	s := strings.TrimSpace(fmt.Sprintf("%s", d.author))
-	return fmt.Sprintf("%v", s)
-}
-func getGroup(d data) string {
-	s := strings.TrimSpace(fmt.Sprintf("%s", d.group))
-	return fmt.Sprintf("%v", s)
-}
-func getDate(d data) string {
-	return fmt.Sprintf("%s", d.date)
-}
-func lsdate(d data) string {
-	da := d.date
-	dy, _ := strconv.Atoi(string(da[0:4]))
-	dm, _ := strconv.Atoi(string(da[4:6]))
-	dd, _ := strconv.Atoi(string(da[6:8]))
-	t := time.Date(dy, time.Month(dm), dd, 0, 0, 0, 0, time.UTC)
-	year, month, day := t.Date()
-	return fmt.Sprintf("%v-%v-%v", year, month, day)
+func (r record) comments(i int) comments {
+	return comments{r[i+104]}
 }
 
-func unsignedBinary(b []byte) (value uint16) {
-	buf := bytes.NewReader(b)
-	err := binary.Read(buf, binary.LittleEndian, &value)
-	if err != nil {
-		fmt.Println("binary.Read failed:", err)
+func (r record) tFlags(i int) tFlags {
+	return tFlags{r[i+105]}
+}
+
+func (r record) tInfoS(i int) tInfoS {
+	var s tInfoS
+	const (
+		start = 106
+		end   = start + len(s)
+	)
+	for j, c := range r[start+i : end+i] {
+		s[j] = c
 	}
-	return value
+	return s
 }
 
-func unsignedBinary8(b []byte) (value uint8) {
-	buf := bytes.NewReader(b)
-	err := binary.Read(buf, binary.LittleEndian, &value)
-	if err != nil {
-		fmt.Println("binary.Read failed:", err)
-	}
-	return value
-}
-
-func filesize(d data) string {
-	value := unsignedBinary(d.filesize[:])
-	return fmt.Sprintf("%d", value)
-}
-func datatype(d data) string {
-	types := [9]string{"None", "Character", "Graphics", "Vector", "Sound", "BinaryText", "XBin", "Archive", "Executable"}
-
-	fmt.Println(d.datatype[:])
-	val := unsignedBinary8(d.datatype[:])
-
-	fmt.Println("ti1", d.tinfo1, unsignedBinary(d.tinfo1[:]))
-	fmt.Println("ti2", d.tinfo2, unsignedBinary(d.tinfo2[:]))
-
-	return fmt.Sprintf("%v", types[val])
-}
-func filetype(d data) string {
-	dt := unsignedBinary8(d.datatype[:])
-	ft := unsignedBinary8(d.filetype[:])
-	fmt.Println("dt", dt, "ft", ft)
-	type filetypes struct {
-		data  uint8
-		types []string
-	}
-	// these values were copied from tehmaze/sauce
-	// https://github.com/tehmaze/sauce
-	var fts = filetypes{0, []string{"-"}}
-	fts = filetypes{1, []string{"ASCII", "ANSi", "ANSiMation", "RIP", "PCBoard", "Avatar", "HTML", "Source"}}
-	fts = filetypes{2, []string{"GIF", "PCX", "LBM/IFF", "TGA", "FLI", "FLC", "BMP", "GL", "DL", "WPG", "PNG", "JPG", "MPG", "AVI"}}
-	fts = filetypes{3, []string{"DX", "DWG", "WPG", "3DS"}}
-	fts = filetypes{4, []string{"MOD", "669", "STM", "S3M", "MTM", "FAR", "ULT", "AMF", "DMF", "OKT", "ROL", "CMF", "MIDI", "SADT", "VOC", "WAV", "SMP8", "SMP8S", "SMP16", "SMP16S", "PATCH8", "PATCH16", "XM", "HSC", "IT"}}
-	fts = filetypes{5, []string{"-"}}
-	fts = filetypes{6, []string{"-"}}
-	fts = filetypes{7, []string{"ZIP", "ARJ", "LZH", "ARC", "TAR", "ZOO", "RAR", "UC2", "PAK", "SQZ"}}
-	fts = filetypes{8, []string{"-"}}
-	fts.data = dt
-	return fmt.Sprintf("%v", fts.types[ft])
-}
-func typeinfo(d data) string {
-	dt := unsignedBinary(d.filesize[:])
-	ft := unsignedBinary(d.datatype[:])
-	t1 := unsignedBinary(d.tinfo1[:])
-	t2 := unsignedBinary(d.tinfo2[:])
-	switch dt {
-	case 0:
-	case 3:
-	case 5:
-	case 7:
-	case 8:
-		return ""
-	case 1:
-		return characterinfo(ft)
-	case 2:
-		return bitmapinfo(ft)
-	case 4:
-		return audioinfo(ft)
-	case 6:
-		return xbininfo(ft, t1, t2)
-	}
-	return ""
-}
-func characterinfo(i uint16) string {
-	return ""
-}
-func bitmapinfo(i uint16) string {
-	return ""
-}
-func audioinfo(i uint16) string {
-	return ""
-}
-func xbininfo(i uint16, t1 uint16, t2 uint16) string {
-	if t1 == 0 {
-		t1 = 80
-	}
-	return fmt.Sprintf("Width: %v Line height: %v", t1, t2)
-}
-
-//Scan blah blah
+// Scan returns the position of the SAUCE00 ID or -1 if no ID exists.
 func Scan(b []byte) (index int) {
-	const sauceSize = 128
+	const sauceSize, offset = 128, 16
 	index = bytes.LastIndexAny(b, sauceID)
 	if index < 0 {
 		return -1
 	}
 	if !bytes.Equal(b[index:index+len(sauceID)], []byte(sauceID)) {
-		index = index + 16 - sauceSize
+		index = index + offset - sauceSize
 	}
 	if (len(b) - index - sauceSize) < 0 {
 		// sauce data is expected to be at least 128 bytes
@@ -478,27 +639,25 @@ func Scan(b []byte) (index int) {
 	return index
 }
 
-//Get sauce oof
-func Get(b []byte) Record {
-	d := slice(b)
-	// do checks
-	r := Record{
-		ID:       getID(d),
-		Version:  getVersion(d),
-		Title:    getTitle(d),
-		Author:   getAuthor(d),
-		Group:    getGroup(d),
-		Date:     getDate(d),
-		LSDate:   lsdate(d),
-		FileSize: filesize(d),
-		DataType: datatype(d),
-		FileType: filetype(d),
-		TypeInfo: typeinfo(d),
+// Get and extract the record data.
+func Get(r record) Record {
+	d := r.extract()
+	return Record{
+		ID:       fmt.Sprintf("%s", d.id),
+		Version:  fmt.Sprintf("%s", d.version),
+		Title:    fmt.Sprintf("%s", d.title),
+		Author:   fmt.Sprintf("%s", d.author),
+		Group:    fmt.Sprintf("%s", d.group),
+		Date:     fmt.Sprintf("%s", d.date),
+		LSDate:   d.lsDate(),
+		FileSize: d.fileSize(),
+		DataType: d.dataType(),
+		FileType: d.fileType(),
+		TypeInfo: d.typeInfo(),
 	}
-	return r
 }
 
-//Print sauce
+// Print and format the record data.
 func Print(b []byte) {
 	var info = func(t string) string {
 		return str.Cinf(fmt.Sprintf("%s\t", t))
@@ -531,13 +690,31 @@ func Print(b []byte) {
 		logs.Fatal("flush of tab writer failed", "", err)
 	}
 	fmt.Println(buf.String())
+}
 
-	// fmt.Printf("\nversion:\t\t%v\ntitle:\t\t%q\nauthor:\t\t%q\n", s.Version, s.Title, s.Author)
-	// fmt.Printf("group:\t\t%q\ndate:\t\t%s\nlsd:\t\t%s\n", s.Group, s.Date, s.LSDate)
-	// fmt.Printf("file size:\t%v\n", s.FileSize)
-	// fmt.Printf("data type:\t%q\n", s.DataType)
-	// fmt.Printf("file type:\t%q\n", s.FileType)
-	// fmt.Printf("type info:\t%v\n", s.TypeInfo)
-	// se := sauce.Exists(path)
-	// fmt.Printf("\n\nexists?:\t%v\n", se)
+func unsignedBinary1(b [1]byte) (value uint8) {
+	buf := bytes.NewReader(b[:])
+	err := binary.Read(buf, binary.LittleEndian, &value)
+	if err != nil {
+		fmt.Println("binary.Read failed:", err)
+	}
+	return value
+}
+
+func unsignedBinary2(b [2]byte) (value uint16) {
+	buf := bytes.NewReader(b[:])
+	err := binary.Read(buf, binary.LittleEndian, &value)
+	if err != nil {
+		fmt.Println("binary.Read failed:", err)
+	}
+	return value
+}
+
+func unsignedBinary4(b [4]byte) (value uint16) {
+	buf := bytes.NewReader(b[:])
+	err := binary.Read(buf, binary.LittleEndian, &value)
+	if err != nil {
+		fmt.Println("binary.Read failed:", err)
+	}
+	return value
 }

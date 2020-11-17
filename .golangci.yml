@@ -201,5 +201,5 @@ issues:
 run:
   skip-dirs:
     - internal
-    - lib/sauce
+    #- lib/sauce
     - static
