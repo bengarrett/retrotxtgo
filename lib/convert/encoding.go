@@ -193,13 +193,12 @@ func Encoding(name string) (encoding.Encoding, error) {
 		// https://en.wikipedia.org/wiki/ISO/IEC_8859-11#Code_page_874_(IBM)_/_9066
 		return charmap.Windows874, nil
 	}
-	n := encodingAlias(name)
 	enc, err := ianaindex.IANA.Encoding(s)
 	if err != nil {
 		enc, err = ianaindex.IANA.Encoding(a)
 	}
 	if err != nil {
-		enc, err = ianaindex.IANA.Encoding(n)
+		enc, err = ianaindex.IANA.Encoding(encodingAlias(name))
 	}
 	if err != nil || enc == nil {
 		if a == "" {
