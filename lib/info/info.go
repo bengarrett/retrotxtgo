@@ -15,11 +15,9 @@ import (
 	"unicode/utf8"
 
 	"github.com/aofei/mimesniffer"
-	// "github.com/gabriel-vasile/mimetype".
 	c "github.com/gookit/color"
 	"github.com/mozillazg/go-slugify"
-
-	// "github.com/zRedShift/mimemagic".
+	"github.com/zRedShift/mimemagic"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 	"retrotxt.com/retrotxt/lib/filesystem"
@@ -44,6 +42,9 @@ type Detail struct {
 	MD5       string    `json:"checksumMD5"`
 	SHA256    string    `json:"checksumSHA256"`
 	Mime      string    `json:"mime"`
+	MimeMedia string    `json:"-"`
+	MimeSub   string    `json:"-"`
+	MimeCommt string    `json:"-"`
 	Slug      string    `json:"slug"`
 	index     int
 	length    int
@@ -197,8 +198,15 @@ func (d *Detail) words(filename string) (err error) {
 	}
 	defer f.Close()
 	var w int
-	if w, err = filesystem.Words(f); err != nil {
-		return err
+	switch d.Newline {
+	case [2]rune{21}, [2]rune{133}:
+		if w, err = filesystem.WordsEBCDIC(f); err != nil {
+			return err
+		}
+	default:
+		if w, err = filesystem.Words(f); err != nil {
+			return err
+		}
 	}
 	d.WordCount = w
 	return f.Close()
@@ -293,15 +301,10 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 	} else {
 		d.Mime = ms
 	}
-
-	// fmt.Println(ms)
-	// mime := mimetype.Detect(data)
-	// fmt.Println(mime.String(), mime.Extension())
-	// z := mimemagic.MatchMagic(data)
-	// fmt.Println(z)
-	// xx, _ := filetype.Match(data)
-	// fmt.Println(xx)
-
+	mm := mimemagic.MatchMagic(data)
+	d.MimeMedia = mm.Media
+	d.MimeSub = mm.Subtype
+	d.MimeCommt = mm.Comment
 	if IsText(d.Mime) {
 		if d.CharCount, err = filesystem.Runes(bytes.NewBuffer(data)); err != nil {
 			return err
@@ -380,6 +383,7 @@ func (d *Detail) Text(color bool) string {
 		k, v string
 	}{
 		{k: "filename", v: d.Name},
+		{k: "filetype", v: d.comment()},
 		{k: "UTF-8", v: str.Bool(d.Utf8)},
 		{k: "newline", v: filesystem.Newline(d.Newline, true)},
 		{k: "characters", v: p.Sprint(d.CharCount)},
@@ -391,7 +395,8 @@ func (d *Detail) Text(color bool) string {
 		{k: "modified", v: humanize.Datetime(DTFormat, d.Modified.UTC())},
 		{k: "MD5 checksum", v: d.MD5},
 		{k: "SHA256 checksum", v: d.SHA256},
-		{k: "MIME type", v: d.Mime},
+		{k: "media type", v: d.MimeMedia},
+		{k: "media subtype", v: d.MimeSub},
 		{k: "slug", v: d.Slug},
 	}
 	var buf bytes.Buffer
@@ -402,7 +407,11 @@ func (d *Detail) Text(color bool) string {
 	for _, x := range data {
 		if !IsText(d.Mime) {
 			switch x.k {
-			case "UTF-8", "characters", "words", "lines", "width":
+			case "UTF-8", "newline", "characters", "ANSI controls", "words", "lines", "width":
+				continue
+			}
+		} else if x.k == "ANSI controls" {
+			if d.CtrlCount == 0 {
 				continue
 			}
 		}
@@ -415,6 +424,25 @@ func (d *Detail) Text(color bool) string {
 		logs.Fatal("flush of tab writer failed", "", err)
 	}
 	return buf.String()
+}
+
+func (d Detail) comment() string {
+	if d.MimeCommt != "unknown" {
+		return d.MimeCommt
+	}
+	if d.CtrlCount > 0 {
+		return "ANSI encoded text document"
+	}
+	switch d.Newline {
+	case [2]rune{21}, [2]rune{133}:
+		return "EBCDIC encoded text document"
+	}
+	if d.Mime == "application/octet-stream" {
+		if d.WordCount > 0 {
+			return "US-ASCII encoded text document"
+		}
+	}
+	return d.MimeCommt
 }
 
 // XML formats and returns the details of a file.

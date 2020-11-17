@@ -15,6 +15,7 @@ require (
 	github.com/tdewolff/minify v2.3.6+incompatible
 	github.com/tdewolff/parse v2.3.4+incompatible // indirect
 	github.com/tdewolff/test v1.0.6 // indirect
+	github.com/zRedShift/mimemagic v1.1.0
 	golang.org/x/text v0.3.4
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
 )

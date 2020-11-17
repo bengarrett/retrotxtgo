@@ -8,6 +8,9 @@ import (
 	"sort"
 	"unicode"
 	"unicode/utf8"
+
+	"golang.org/x/text/encoding/charmap"
+	"golang.org/x/text/transform"
 )
 
 // Columns counts the number of characters used per line in the reader interface.
@@ -265,6 +268,13 @@ func Words(r io.Reader) (count int, err error) {
 		return -1, fmt.Errorf("words could not scan reader: %w", err)
 	}
 	return count, nil
+}
+
+// WordsEBCDIC counts the number of spaced words in the EBCDIC encoded reader interface.
+func WordsEBCDIC(r io.Reader) (count int, err error) {
+	// for the purposes of counting words, any EBCDIC codepage is fine
+	c := transform.NewReader(r, charmap.CodePage037.NewDecoder())
+	return Words(c)
 }
 
 // isWord scans the content of a word for characters that are not digits,
