@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 	"retrotxt.com/retrotxt/lib/humanize"
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/str"
@@ -112,14 +113,23 @@ func (c Character) String() string {
 func (c Character) info(t1, t2, t3 uint16, x string) string {
 	switch c {
 	case ASCII, ANSI, ANSIMation:
+		if t1 == 0 && t2 == 0 {
+			return ""
+		}
 		s := fmt.Sprintf("character width: %d, lines: %d", t1, t2)
 		if x != "" {
 			return fmt.Sprintf("%s; %s", s, x)
 		}
 		return s
 	case RIPScript:
+		if t1 == 0 && t2 == 0 && t3 == 0 {
+			return ""
+		}
 		return fmt.Sprintf("pixel width: %d, height: %d, colors: %d", t1, t2, t3)
 	case PCBoard, Avatar, TundraDraw:
+		if t1 == 0 && t2 == 0 {
+			return ""
+		}
 		return fmt.Sprintf("character width: %d, lines: %d", t1, t2)
 	case HTML, Source:
 		return ""
@@ -433,12 +443,12 @@ func (d *data) fileType() string {
 
 func (d *data) fileSize() string {
 	const kB = 1000
-	value := unsignedBinary4(d.filesize)
+	value, p := unsignedBinary4(d.filesize), message.NewPrinter(language.English)
 	if value < kB {
-		return fmt.Sprintf("%d bytes", value)
+		return p.Sprintf("%d bytes", value)
 	}
 	h := humanize.Bytes(int64(value), language.AmericanEnglish)
-	return fmt.Sprintf("%s (%d bytes)", h, value)
+	return p.Sprintf("%s (%d bytes)", h, value)
 }
 
 func (d *data) lsDate() string {
@@ -459,8 +469,7 @@ func (d *data) lsDate() string {
 		return fmt.Sprintf("%s", da)
 	}
 	t := time.Date(dy, time.Month(dm), dd, 0, 0, 0, 0, time.UTC)
-	year, month, day := t.Date()
-	return fmt.Sprintf("%v-%v-%v", year, month, day)
+	return fmt.Sprintf("%s", t.Format("2 Jan 2006"))
 }
 
 func (d *data) typeInfo() string {
@@ -473,12 +482,18 @@ func (d *data) typeInfo() string {
 		c, extra := Character(ft), d.ansiFlags()
 		return c.info(t1, t2, t3, extra)
 	case bitmap:
+		if t1 == 0 && t2 == 0 && t3 == 0 {
+			return ""
+		}
 		return fmt.Sprintf("pixel width: %d, height: %d, depth: %d", t1, t2, t3)
 	case vector:
 		return ""
 	case audio:
 		switch Audio(ft) {
 		case SMP8, SMP8S, SMP16, SMP16S:
+			if t1 == 0 {
+				return ""
+			}
 			return fmt.Sprintf("sample rate: %d", t1)
 		case MOD, Composer669, STM, S3M, MTM, FAR, ULT, AMF, DMF, OKT, ROL, CMF, MID,
 			SADT, VOC, WAV, PATCH8, PATCH16, XM, HSC, IT:
@@ -488,6 +503,9 @@ func (d *data) typeInfo() string {
 	case binaryText:
 		return d.ansiFlags()
 	case xBin:
+		if t1 == 0 && t2 == 0 {
+			return ""
+		}
 		return fmt.Sprintf("character width: %d, lines: %d", t1, t2)
 	case archive, executable:
 		return ""
@@ -651,6 +669,9 @@ func Print(b []byte) {
 	w.Init(&buf, 0, 8, 0, '\t', 0)
 	for _, x := range data {
 		if x.k == "filesize" && s.FileSize == "0" {
+			continue
+		}
+		if x.k == "info" && s.TypeInfo == "" {
 			continue
 		}
 		fmt.Fprintf(w, "\t %s\t  %s\n", x.k, info(x.v))
