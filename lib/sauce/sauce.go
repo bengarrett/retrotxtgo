@@ -724,8 +724,9 @@ func Scan(b []byte) (index int) {
 
 // parse and extract the record data.
 func parse(r record) Record {
+	const empty = "\x00\x00"
 	d := r.extract()
-	if string(d.version[:]) != "" {
+	if string(d.version[:]) == empty {
 		return Record{}
 	}
 	return Record{
