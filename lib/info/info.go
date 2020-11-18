@@ -29,26 +29,27 @@ import (
 
 // Detail of a file.
 type Detail struct {
-	Name      string    `json:"filename"`
-	Utf8      bool      `json:"utf8"`
-	Newline   [2]rune   `json:"newline"`
-	CharCount int       `json:"characters"`
-	CtrlCount int       `json:"ansiControls"`
-	WordCount int       `json:"words"`
-	Size      string    `json:"size"`
-	Bytes     int64     `json:"bytes"`
-	Lines     int       `json:"lines"`
-	Width     int       `json:"width"`
-	Modified  time.Time `json:"modified"`
-	MD5       string    `json:"checksumMD5"`
-	SHA256    string    `json:"checksumSHA256"`
-	Mime      string    `json:"mime"`
-	MimeMedia string    `json:"-"`
-	MimeSub   string    `json:"-"`
-	MimeCommt string    `json:"-"`
-	Slug      string    `json:"slug"`
-	index     int
-	length    int
+	Name       string    `json:"filename"`
+	Utf8       bool      `json:"utf8"`
+	Newline    [2]rune   `json:"newline"`
+	CharCount  int       `json:"characters"`
+	CtrlCount  int       `json:"ansiControls"`
+	WordCount  int       `json:"words"`
+	Size       string    `json:"size"`
+	Bytes      int64     `json:"bytes"`
+	Lines      int       `json:"lines"`
+	Width      int       `json:"width"`
+	Modified   time.Time `json:"modified"`
+	MD5        string    `json:"checksumMD5"`
+	SHA256     string    `json:"checksumSHA256"`
+	Mime       string    `json:"mime"`
+	MimeMedia  string    `json:"-"`
+	MimeSub    string    `json:"-"`
+	MimeCommt  string    `json:"-"`
+	Slug       string    `json:"slug"`
+	index      int
+	length     int
+	sauceIndex int
 }
 
 // File data for XML encoding.
@@ -125,6 +126,8 @@ func Print(filename, format string, i, length int) error {
 	if err := d.Read(filename); err != nil {
 		return err
 	}
+	// s := sauce.Names{Index: i, Length: length}
+	// s.Sauce(filename, format)
 	d.index, d.length = i, length
 	if IsText(d.Mime) {
 		var err error
@@ -295,48 +298,64 @@ func (d *Detail) Read(name string) (err error) {
 
 // parse fileinfo and file content.
 func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
-	p := message.NewPrinter(Language())
-	ms := mimesniffer.Sniff(data)
-	if strings.Contains(ms, ";") {
-		d.Mime = strings.Split(ms, ";")[0]
-	} else {
-		d.Mime = ms
-	}
-	mm := mimemagic.MatchMagic(data)
-	d.MimeMedia = mm.Media
-	d.MimeSub = mm.Subtype
-	d.MimeCommt = mm.Comment
-	if IsText(d.Mime) {
-		if d.CharCount, err = filesystem.Runes(bytes.NewBuffer(data)); err != nil {
-			return err
-		}
-	}
-	const kB = 1000
-	// create a table of data
-	if stat != nil {
-		d.Bytes = stat.Size()
-		d.Name = stat.Name()
-		d.Modified = stat.ModTime().UTC()
-		d.Slug = slugify.Slugify(stat.Name())
-		if stat.Size() < kB {
-			d.Size = p.Sprintf("%v bytes", p.Sprint(stat.Size()))
-		} else {
-			d.Size = p.Sprintf("%v (%v bytes)", humanize.Bytes(stat.Size(), Language()), p.Sprint(stat.Size()))
-		}
-	} else {
-		d.Bytes = int64(len(data))
-		d.Name = "n/a (stdin)"
-		d.Slug = "n/a"
-		d.Modified = time.Now()
-		l := d.Bytes
-		if l < kB {
-			d.Size = p.Sprintf("%v bytes", p.Sprint(l))
-		} else {
-			d.Size = p.Sprintf("%v (%v bytes)", humanize.Bytes(l, Language()), p.Sprint(l))
-		}
-	}
-	const channels = 4
+	const channels = 7
 	ch := make(chan bool, channels)
+	go func() {
+		d.sauceIndex = sauce.Scan(data)
+		if d.sauceIndex > 0 {
+			fmt.Println("SAUCE DATA FOUND!!")
+		}
+		ch <- true
+	}()
+	go func() {
+		ms := mimesniffer.Sniff(data)
+		if strings.Contains(ms, ";") {
+			d.Mime = strings.Split(ms, ";")[0]
+		} else {
+			d.Mime = ms
+		}
+		if IsText(d.Mime) {
+			if d.CharCount, err = filesystem.Runes(bytes.NewBuffer(data)); err != nil {
+				fmt.Printf("minesniffer errored, %s\n", err)
+			}
+		}
+		ch <- true
+	}()
+	go func() {
+		mm := mimemagic.MatchMagic(data)
+		d.MimeMedia = mm.Media
+		d.MimeSub = mm.Subtype
+		d.MimeCommt = mm.Comment
+		ch <- true
+	}()
+	go func() {
+		const kB = 1000
+		p := message.NewPrinter(Language())
+		// create a table of data
+		if stat != nil {
+			d.Bytes = stat.Size()
+			d.Name = stat.Name()
+			d.Modified = stat.ModTime().UTC()
+			d.Slug = slugify.Slugify(stat.Name())
+			if stat.Size() < kB {
+				d.Size = p.Sprintf("%v bytes", p.Sprint(stat.Size()))
+			} else {
+				d.Size = p.Sprintf("%v (%v bytes)", humanize.Bytes(stat.Size(), Language()), p.Sprint(stat.Size()))
+			}
+		} else {
+			d.Bytes = int64(len(data))
+			d.Name = "n/a (stdin)"
+			d.Slug = "n/a"
+			d.Modified = time.Now()
+			l := d.Bytes
+			if l < kB {
+				d.Size = p.Sprintf("%v bytes", p.Sprint(l))
+			} else {
+				d.Size = p.Sprintf("%v (%v bytes)", humanize.Bytes(l, Language()), p.Sprint(l))
+			}
+		}
+		ch <- true
+	}()
 	go func() {
 		md5sum := md5.Sum(data)
 		d.MD5 = fmt.Sprintf("%x", md5sum)
@@ -351,11 +370,7 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 		d.Utf8 = utf8.Valid(data)
 		ch <- true
 	}()
-	go func() {
-		sauce.Print(data)
-		ch <- true
-	}()
-	_, _, _, _ = <-ch, <-ch, <-ch, <-ch
+	_, _, _, _, _, _, _ = <-ch, <-ch, <-ch, <-ch, <-ch, <-ch, <-ch
 	return err
 }
 
