@@ -684,10 +684,13 @@ func Print(b []byte) {
 
 // Scan returns the position of the SAUCE00 ID or -1 if no ID exists.
 func Scan(b []byte) (index int) {
-	const sauceSize = 128
+	const sauceSize, maximum = 128, 512
 	id, l := []byte(sauceID), len(b)
 	// search for the id sequence in b
 	for i := range b {
+		if i > maximum {
+			break
+		}
 		i = l - 1 - i // loop in reverse
 		if i < sauceSize {
 			break
@@ -722,6 +725,9 @@ func Scan(b []byte) (index int) {
 // parse and extract the record data.
 func parse(r record) Record {
 	d := r.extract()
+	if string(d.version[:]) != "" {
+		return Record{}
+	}
 	return Record{
 		ID:       fmt.Sprintf("%s", d.id),
 		Version:  fmt.Sprintf("%s", d.version),
