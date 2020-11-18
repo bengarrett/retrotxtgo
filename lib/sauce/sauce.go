@@ -686,12 +686,15 @@ func Print(b []byte) {
 func Scan(b []byte) (index int) {
 	const sauceSize, maximum = 128, 512
 	id, l := []byte(sauceID), len(b)
+	var backwardsLoop = func(i int) int {
+		return l - 1 - i
+	}
 	// search for the id sequence in b
 	for i := range b {
 		if i > maximum {
 			break
 		}
-		i = l - 1 - i // loop in reverse
+		i = backwardsLoop(i)
 		if i < sauceSize {
 			break
 		}
