@@ -134,6 +134,20 @@ func (a *ANSIFlags) String() (s string) {
 // Flags is the SAUCE Flags field.
 type Flags uint8
 
+func (f Flags) parse() ANSIFlags {
+	const binary5Bits = "%05b"
+	bin := fmt.Sprintf(binary5Bits, f)
+	r := []rune(bin)
+	b, ls, ar := string(r[0]), string(r[1:3]), string(r[3:5])
+	return ANSIFlags{
+		Decimal: f,
+		Binary:  bin,
+		B:       ANSIFlagB{Flag: bBit(b), Info: bBit(b).String()},
+		LS:      ANSIFlagLS{Flag: lsBit(ls), Info: lsBit(ls).String()},
+		AR:      ANSIFlagAR{Flag: arBit(ar), Info: arBit(ar).String()},
+	}
+}
+
 // ANSIFlagB is the interpretation of the SAUCE Flags non-blink mode binary bit.
 type ANSIFlagB struct {
 	Flag bBit   `json:"flag" xml:"flag"`
@@ -461,12 +475,47 @@ type data struct {
 	tInfoS   tInfoS
 }
 
+func (r record) date(i int) date {
+	var d date
+	const (
+		start = 82
+		end   = start + len(d)
+	)
+	for j, c := range r[start+i : end+i] {
+		d[j] = c
+	}
+	return d
+}
+
+func (d *data) dates() Dates {
+	t := d.parseDate()
+	u := t.Unix()
+	return Dates{
+		Value: fmt.Sprintf("%s", d.date),
+		Time:  t,
+		Epoch: u,
+	}
+}
+
 func (d *data) dataType() DataTypes {
 	dt := DataType(unsignedBinary1(d.datatype))
 	return DataTypes{
 		Type: dt,
 		Name: fmt.Sprintf("%v", dt.String()),
 	}
+}
+
+func (d *data) description() (s string) {
+	dt, ft := unsignedBinary1(d.datatype), unsignedBinary1(d.filetype)
+	c := Character(ft)
+	if DataType(dt) != character {
+		return s
+	}
+	switch c {
+	case ascii, ansi, ansiMation, ripScript, pcBoard, avatar, html, source, tundraDraw:
+		return c.Desc()
+	}
+	return s
 }
 
 func (d *data) fileType() FileTypes {
@@ -500,26 +549,6 @@ func (d *data) fileType() FileTypes {
 	}
 }
 
-func (d *data) sizes() Sizes {
-	value := unsignedBinary4(d.filesize)
-	en := language.English
-	return Sizes{
-		Bytes:   value,
-		Decimal: humanize.Decimal(int64(value), en),
-		Binary:  humanize.Binary(int64(value), en),
-	}
-}
-
-func (d *data) dates() Dates {
-	t := d.parseDate()
-	u := t.Unix()
-	return Dates{
-		Value: fmt.Sprintf("%s", d.date),
-		Time:  t,
-		Epoch: u,
-	}
-}
-
 func (d *data) parseDate() (t time.Time) {
 	da := d.date
 	dy, err := strconv.Atoi(string(da[0:4]))
@@ -540,17 +569,14 @@ func (d *data) parseDate() (t time.Time) {
 	return time.Date(dy, time.Month(dm), dd, 0, 0, 0, 0, time.UTC)
 }
 
-func (d *data) description() (s string) {
-	dt, ft := unsignedBinary1(d.datatype), unsignedBinary1(d.filetype)
-	c := Character(ft)
-	if DataType(dt) != character {
-		return s
+func (d *data) sizes() Sizes {
+	value := unsignedBinary4(d.filesize)
+	en := language.English
+	return Sizes{
+		Bytes:   value,
+		Decimal: humanize.Decimal(int64(value), en),
+		Binary:  humanize.Binary(int64(value), en),
 	}
-	switch c {
-	case ascii, ansi, ansiMation, ripScript, pcBoard, avatar, html, source, tundraDraw:
-		return c.Desc()
-	}
-	return s
 }
 
 func (d *data) typeInfo() TypeInfos {
@@ -615,21 +641,26 @@ func (d *data) typeInfo() TypeInfos {
 	return ti
 }
 
-func (f Flags) parse() ANSIFlags {
-	const binary5Bits = "%05b"
-	bin := fmt.Sprintf(binary5Bits, f)
-	r := []rune(bin)
-	b, ls, ar := string(r[0]), string(r[1:3]), string(r[3:5])
-	return ANSIFlags{
-		Decimal: f,
-		Binary:  bin,
-		B:       ANSIFlagB{Flag: bBit(b), Info: bBit(b).String()},
-		LS:      ANSIFlagLS{Flag: lsBit(ls), Info: lsBit(ls).String()},
-		AR:      ANSIFlagAR{Flag: arBit(ar), Info: arBit(ar).String()},
+func (r record) author(i int) author {
+	var a author
+	const (
+		start = 42
+		end   = start + len(a)
+	)
+	for j, c := range r[start+i : end+i] {
+		a[j] = c
 	}
+	return a
 }
 
-// extract sauce record.
+func (r record) comments(i int) comments {
+	return comments{r[i+104]}
+}
+
+func (r record) dataType(i int) dataType {
+	return dataType{r[i+94]}
+}
+
 func (r record) extract() data {
 	i := Scan(r...)
 	if i == -1 {
@@ -655,36 +686,12 @@ func (r record) extract() data {
 	}
 }
 
-func (r record) id(i int) id {
-	return id{r[i+0], r[i+1], r[i+2], r[i+3], r[i+4]}
+func (r record) fileSize(i int) fileSize {
+	return fileSize{r[i+90], r[i+91], r[i+92], r[i+93]}
 }
 
-func (r record) version(i int) version {
-	return version{r[i+5], r[i+6]}
-}
-
-func (r record) title(i int) title {
-	var t title
-	const (
-		start = 7
-		end   = start + len(t)
-	)
-	for j, c := range r[start+i : end+i] {
-		t[j] = c
-	}
-	return t
-}
-
-func (r record) author(i int) author {
-	var a author
-	const (
-		start = 42
-		end   = start + len(a)
-	)
-	for j, c := range r[start+i : end+i] {
-		a[j] = c
-	}
-	return a
+func (r record) fileType(i int) fileType {
+	return fileType{r[i+95]}
 }
 
 func (r record) group(i int) group {
@@ -699,28 +706,24 @@ func (r record) group(i int) group {
 	return g
 }
 
-func (r record) date(i int) date {
-	var d date
+func (r record) id(i int) id {
+	return id{r[i+0], r[i+1], r[i+2], r[i+3], r[i+4]}
+}
+
+func (r record) tFlags(i int) tFlags {
+	return tFlags{r[i+105]}
+}
+
+func (r record) title(i int) title {
+	var t title
 	const (
-		start = 82
-		end   = start + len(d)
+		start = 7
+		end   = start + len(t)
 	)
 	for j, c := range r[start+i : end+i] {
-		d[j] = c
+		t[j] = c
 	}
-	return d
-}
-
-func (r record) fileSize(i int) fileSize {
-	return fileSize{r[i+90], r[i+91], r[i+92], r[i+93]}
-}
-
-func (r record) dataType(i int) dataType {
-	return dataType{r[i+94]}
-}
-
-func (r record) fileType(i int) fileType {
-	return fileType{r[i+95]}
+	return t
 }
 
 func (r record) tInfo1(i int) tInfo1 {
@@ -739,14 +742,6 @@ func (r record) tInfo4(i int) tInfo4 {
 	return tInfo4{r[i+102], r[i+103]}
 }
 
-func (r record) comments(i int) comments {
-	return comments{r[i+104]}
-}
-
-func (r record) tFlags(i int) tFlags {
-	return tFlags{r[i+105]}
-}
-
 func (r record) tInfoS(i int) tInfoS {
 	var s tInfoS
 	const (
@@ -760,6 +755,10 @@ func (r record) tInfoS(i int) tInfoS {
 		s[j] = c
 	}
 	return s
+}
+
+func (r record) version(i int) version {
+	return version{r[i+5], r[i+6]}
 }
 
 // Scan returns the position of the SAUCE00 ID or -1 if no ID exists.
