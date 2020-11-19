@@ -92,7 +92,9 @@ const (
 	// DTFormat is the date-time format.
 	DTFormat = "DMY24"
 	// DFormat is the date format.
-	DFormat = "DMY"
+	DFormat     = "DMY"
+	octetStream = "application/octet-stream"
+	text        = "text"
 )
 
 var (
@@ -167,7 +169,7 @@ func (d *Detail) marshal(format string) (b []byte, err error) {
 	switch format {
 	case "color", "c", "":
 		return d.printMarshal(true), nil
-	case "text", "t":
+	case text, "t":
 		return d.printMarshal(false), nil
 	case "json", "j":
 		b, err = json.MarshalIndent(d, "", "    ")
@@ -201,7 +203,7 @@ func (d *Detail) mimeUnknown() {
 			d.Mime.Commt = "EBCDIC encoded text document"
 			return
 		}
-		if d.Mime.Type == "application/octet-stream" {
+		if d.Mime.Type == octetStream {
 			if !d.Utf8 && d.Count.Words > 0 {
 				d.Mime.Commt = "US-ASCII encoded text document"
 				return
@@ -276,15 +278,74 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 }
 
 func (d *Detail) printMarshal(color bool) []byte {
-	p := message.NewPrinter(lang())
 	c.Enable = color
-	var info = func(t string) string {
-		return str.Cinf(fmt.Sprintf("%s\t", t))
+	var (
+		buf  bytes.Buffer
+		info = func(t string) string {
+			return str.Cinf(fmt.Sprintf("%s\t", t))
+		}
+		hr = func(l int) string {
+			return fmt.Sprintf("\t%s\n", str.Cb(strings.Repeat("\u2500", l)))
+		}
+		data = d.printMarshalData()
+		w    = new(tabwriter.Writer)
+		l    = len(fmt.Sprintf(" filename%s%s", strings.Repeat(" ", 10), data[0].v))
+	)
+	w.Init(&buf, 0, 8, 0, '\t', 0)
+	fmt.Fprint(w, hr(l))
+	for _, x := range data {
+		if !d.marshalDataValid(x.k, x.v) {
+			continue
+		}
+		fmt.Fprintf(w, "\t %s\t  %s\n", x.k, info(x.v))
+		if x.k == "slug" {
+			if d.sauceIndex <= 0 {
+				break
+			}
+			fmt.Fprint(w, "\t \t   -───-\n")
+		}
 	}
-	var hr = func(l int) string {
-		return fmt.Sprintf("\t%s\n", str.Cb(strings.Repeat("\u2500", l)))
+	if d.index == d.length {
+		fmt.Fprint(w, hr(l))
 	}
-	var data = []struct {
+	if err := w.Flush(); err != nil {
+		logs.Fatal("flush of tab writer failed", "", err)
+	}
+	return buf.Bytes()
+}
+
+func (d *Detail) marshalDataValid(k, v string) bool {
+	if !d.validText() {
+		switch k {
+		case "UTF-8", "newline", "characters", "ANSI controls", "words", "lines", "width":
+			return false
+		}
+	} else if k == "ANSI controls" {
+		if d.Count.Controls == 0 {
+			return false
+		}
+	}
+	if k == "description" && v == "" {
+		return false
+	}
+	if k == d.Sauce.Info.Info1.Info && d.Sauce.Info.Info1.Value == 0 {
+		return false
+	}
+	if k == d.Sauce.Info.Info2.Info && d.Sauce.Info.Info2.Value == 0 {
+		return false
+	}
+	if k == d.Sauce.Info.Info3.Info && d.Sauce.Info.Info3.Value == 0 {
+		return false
+	}
+	if k == "interpretation" && v == "" {
+		return false
+	}
+	return true
+}
+
+func (d *Detail) printMarshalData() (data []struct{ k, v string }) {
+	p := message.NewPrinter(lang())
+	data = []struct {
 		k, v string
 	}{
 		{k: "filename", v: d.Name},
@@ -316,52 +377,7 @@ func (d *Detail) printMarshal(color bool) []byte {
 		{k: d.Sauce.Info.Info3.Info, v: fmt.Sprint(d.Sauce.Info.Info3.Value)},
 		{k: "interpretation", v: d.Sauce.Info.Flags.String()},
 	}
-	var buf bytes.Buffer
-	w := new(tabwriter.Writer)
-	w.Init(&buf, 0, 8, 0, '\t', 0)
-	l := len(fmt.Sprintf(" filename%s%s", strings.Repeat(" ", 10), data[0].v))
-	fmt.Fprint(w, hr(l))
-	for _, x := range data {
-		if !d.validText() {
-			switch x.k {
-			case "UTF-8", "newline", "characters", "ANSI controls", "words", "lines", "width":
-				continue
-			}
-		} else if x.k == "ANSI controls" {
-			if d.Count.Controls == 0 {
-				continue
-			}
-		}
-		if x.k == "description" && x.v == "" {
-			continue
-		}
-		if x.k == d.Sauce.Info.Info1.Info && d.Sauce.Info.Info1.Value == 0 {
-			continue
-		}
-		if x.k == d.Sauce.Info.Info2.Info && d.Sauce.Info.Info2.Value == 0 {
-			continue
-		}
-		if x.k == d.Sauce.Info.Info3.Info && d.Sauce.Info.Info3.Value == 0 {
-			continue
-		}
-		if x.k == "interpretation" && x.v == "" {
-			continue
-		}
-		fmt.Fprintf(w, "\t %s\t  %s\n", x.k, info(x.v))
-		if x.k == "slug" {
-			if d.sauceIndex <= 0 {
-				break
-			}
-			fmt.Fprint(w, "\t \t   -───-\n")
-		}
-	}
-	if d.index == d.length {
-		fmt.Fprint(w, hr(l))
-	}
-	if err := w.Flush(); err != nil {
-		logs.Fatal("flush of tab writer failed", "", err)
-	}
-	return buf.Bytes()
+	return data
 }
 
 func (d *Detail) read(name string) (err error) {
@@ -385,10 +401,10 @@ func (d *Detail) validText() bool {
 	if len(s) != req {
 		return false
 	}
-	if s[0] == "text" {
+	if s[0] == text {
 		return true
 	}
-	if d.Mime.Type == "application/octet-stream" {
+	if d.Mime.Type == octetStream {
 		return true
 	}
 	return false
@@ -432,7 +448,7 @@ func (d *Detail) words(filename string) (err error) {
 }
 
 // Marshal the meta and operating system details of a file.
-func Marshal(filename, format string, i, length int) (err error) {
+func Marshal(filename, format string, i, length int) error {
 	var d Detail
 	if err := d.read(filename); err != nil {
 		return err
@@ -477,12 +493,15 @@ func Marshal(filename, format string, i, length int) (err error) {
 			}
 			return nil
 		})
-		if err = g.Wait(); err != nil {
+		if err := g.Wait(); err != nil {
 			return err
 		}
 		d.mimeUnknown()
 	}
-	var m []byte
+	var (
+		m   []byte
+		err error
+	)
 	if m, err = d.marshal(format); err != nil {
 		return err
 	}
@@ -491,7 +510,7 @@ func Marshal(filename, format string, i, length int) (err error) {
 }
 
 // Stdin parses piped data and prints out the details in a specific syntax.
-func Stdin(format string, b ...byte) (err error) {
+func Stdin(format string, b ...byte) error {
 	var d Detail
 	if err := d.parse(nil, b...); err != nil {
 		return err
@@ -544,7 +563,10 @@ func Stdin(format string, b ...byte) (err error) {
 		}
 		d.mimeUnknown()
 	}
-	var m []byte
+	var (
+		m   []byte
+		err error
+	)
 	if m, err = d.marshal(format); err != nil {
 		return err
 	}
@@ -554,7 +576,7 @@ func Stdin(format string, b ...byte) (err error) {
 
 func print(format string, b ...byte) {
 	switch format {
-	case "color", "c", "", "text", "t":
+	case "color", "c", "", text, "t":
 		fmt.Printf("%s", b)
 	default:
 		fmt.Printf("%s\n", b)

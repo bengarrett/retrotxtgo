@@ -76,7 +76,7 @@ func (d DataType) String() string {
 		"undefined", "text or character stream", "bitmap graphic or animation", "vector graphic",
 		"audio or music", "binary text", "extended binary text", "archive", "executable",
 	}[d]
-	return fmt.Sprintf("%s", s)
+	return s
 }
 
 // FileTypes includes both the SAUCE FileType value and name.
@@ -113,7 +113,7 @@ type ANSIFlags struct {
 	Interpretations string     `json:"-" xml:"-"`
 }
 
-func (a ANSIFlags) String() (s string) {
+func (a *ANSIFlags) String() (s string) {
 	if a.Decimal == 0 {
 		return s
 	}
@@ -540,17 +540,17 @@ func (d *data) parseDate() (t time.Time) {
 	return time.Date(dy, time.Month(dm), dd, 0, 0, 0, 0, time.UTC)
 }
 
-func (d data) description() string {
+func (d *data) description() (s string) {
 	dt, ft := unsignedBinary1(d.datatype), unsignedBinary1(d.filetype)
 	c := Character(ft)
-	switch DataType(dt) {
-	case character:
-		switch c {
-		case ascii, ansi, ansiMation, ripScript, pcBoard, avatar, html, source, tundraDraw:
-			return c.Desc()
-		}
+	if DataType(dt) != character {
+		return s
 	}
-	return ""
+	switch c {
+	case ascii, ansi, ansiMation, ripScript, pcBoard, avatar, html, source, tundraDraw:
+		return c.Desc()
+	}
+	return s
 }
 
 func (d *data) typeInfo() TypeInfos {
