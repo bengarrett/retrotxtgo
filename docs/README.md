@@ -36,13 +36,13 @@ retrotxt view ascii-logos.txt
 ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝   ╚═╝
 ```
 
-#### Save it to a file.
+#### Or save it to a file.
 
 ```sh
 retrotxt view ascii-logos.txt > ascii-logos-utf8.txt
 ```
 
-#### And turn the text into a static website with accurate fonts and colours.
+#### Then turn the text into a static website with accurate fonts and colours.
 
 ```sh
 retrotxt create --layout=compact ascii-logos.txt
@@ -160,19 +160,19 @@ There are [downloads](https://github.com/bengarrett/retrotxtgo/releases/latest/)
 [Windows](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_windows.zip),
 [macOS (intel)](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_macos.zip),
 [Linux](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_linux.tar.gz),
-[FreeBSD](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_freebsd.tar.gz) as well as for the
+[FreeBSD](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_freebsd.tar.gz) and for the
 [Raspberry Pi](https://github.com/bengarrett/retrotxtgo/releases/latest/).
 
 Otherwise these operating system specific install methods are available.
 
 ### Windows
 
-#### ~~[Chocolatey](https://chocolatey.org/)~~ \*
+<!-- #### ~~[Chocolatey](https://chocolatey.org/)~~ \*
 
 ```ps
 choco install retrotxt
 retrotxt version
-```
+``` -->
 
 #### [Scoop](https://scoop.sh/)
 
@@ -193,12 +193,12 @@ retrotxt version
 
 ### Linux
 
-#### ~~[Linux Snap](https://snapcraft.io/)~~ \*
+<!-- #### ~~[Linux Snap](https://snapcraft.io/)~~ \*
 
 ```sh
 snap install retrotxt
 retrotxt version
-```
+``` -->
 
 #### Raspberry Pi, Linux ARM
 
