@@ -4,39 +4,90 @@ package sauce
 import (
 	"bytes"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
-	"text/tabwriter"
 	"time"
 
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 	"retrotxt.com/retrotxt/lib/humanize"
-	"retrotxt.com/retrotxt/lib/logs"
-	"retrotxt.com/retrotxt/lib/str"
 )
+
+// TODO: handle comments!!
 
 const sauceID = "SAUCE00"
 
+var (
+	// ErrFmt format error.
+	ErrFmt = errors.New("format is not known")
+	// ErrNoName name cannot be empty.
+	ErrNoName = errors.New("name cannot be empty")
+	// ErrNoDir directories not usable with command.
+	ErrNoDir = errors.New("directories are not usable with this command")
+	// ErrNoFile file does not exist.
+	ErrNoFile = errors.New("file does not exist")
+)
+
 // Record layout for printing.
 type Record struct {
-	ID       string
-	Version  string
-	Title    string
-	Author   string
-	Group    string
-	Date     string
-	LSDate   string
-	FileSize string
-	DataType string
-	FileType string
-	TypeInfo string
+	ID       string    `json:"id"`
+	Version  string    `json:"version"`
+	Title    string    `json:"title"`
+	Author   string    `json:"author"`
+	Group    string    `json:"group"`
+	Date     string    `json:"date"`
+	LSDate   string    `json:"lsdate"`
+	FileSize string    `json:"filesize"`
+	Data     DataTypes `json:"dataType"`
+	File     FileTypes `json:"fileType"`
+	Info     TypeInfos `json:"typeInfo"`
+}
+
+type DataTypes struct {
+	Type DataType `json:"type"`
+	Name string   `json:"name"`
+}
+
+type FileTypes struct {
+	Type FileType `json:"type"`
+	Name string   `json:"name"`
+}
+
+type TypeInfos struct {
+	Info1 TypeInfo  `json:"1"`
+	Info2 TypeInfo  `json:"2"`
+	Info3 TypeInfo  `json:"3"`
+	Flags ANSIFlags `json:"flags"`
+	Font  string    `json:"fontName"`
+}
+
+type TypeInfo struct {
+	Value uint16 `json:"value"`
+	Info  string `json:"info"`
+}
+
+type ANSIFlags struct {
+	Decimal Flags    `json:"decimal"`
+	Binary  string   `json:"binary"`
+	B       ANSIFlag `json:"nonBlinkMode"`
+	LS      ANSIFlag `json:"letterSpacing"`
+	AR      ANSIFlag `json:"aspectRatio"`
+}
+
+type Flags uint8
+
+type ANSIFlag struct {
+	Flag string `json:"flag"`
+	Info string `json:"interpretation"`
 }
 
 type (
 	// DataType is the type of data.
 	DataType uint
+	// FileType is the type of file.
+	FileType uint
 	// Character based files.
 	Character uint
 	// Bitmap graphic and animation files.
@@ -368,76 +419,48 @@ type data struct {
 	tInfoS   tInfoS
 }
 
-func (d *data) ansiFlags() (s string) {
-	var (
-		highIntensityColor = nonBlinkMode{"1"}
-		font8px            = letterSpacing{"0", "1"}
-		font9px            = letterSpacing{"1", "0"}
-		stretch            = aspectRatio{"0", "1"}
-		square             = aspectRatio{"1", "0"}
-	)
-	bin := fmt.Sprintf("%05b", unsignedBinary1(d.tFlags))
-	v := strings.Split(bin, "")
-	ar, ls, b := aspectRatio{v[0], v[1]}, letterSpacing{v[2], v[3]}, nonBlinkMode{v[4]}
-	var desc []string
-	if b == highIntensityColor {
-		desc = append(desc, "non-blink iCE color")
+func (d *data) dataType() DataTypes {
+	dt := DataType(unsignedBinary1(d.datatype))
+	return DataTypes{
+		Type: dt,
+		Name: fmt.Sprintf("%v", dt.String()),
 	}
-	switch ls {
-	case font8px:
-		desc = append(desc, "8 pixel font")
-	case font9px:
-		desc = append(desc, "9 pixel font")
-	}
-	switch ar {
-	case stretch:
-		desc = append(desc, "stretched pixels")
-	case square:
-		desc = append(desc, "square pixels")
-	}
-	return strings.Join(desc, ", ")
 }
 
-func (d *data) dataType() string {
-	val := unsignedBinary1(d.datatype)
-	dt := DataType(val)
-	return fmt.Sprintf("%v", dt.String())
-}
-
-func (d *data) fileType() string {
+func (d *data) fileType() FileTypes {
 	data, file := unsignedBinary1(d.datatype), unsignedBinary1(d.filetype)
 	switch DataType(data) {
 	case none:
-		return none.String()
+		return FileTypes{FileType(none), none.String()}
 	case character:
 		c := Character(file)
-		if s := strings.TrimSpace(fmt.Sprintf("%s", d.tInfoS)); s != "" {
-			return fmt.Sprintf("%s, %s", s, c.String())
-		}
-		return c.String()
+		// if s := strings.TrimSpace(fmt.Sprintf("%s", d.tInfoS)); s != "" {
+		// 	return fmt.Sprintf("%s, %s", s, c.String())
+		// }
+		return FileTypes{FileType(c), c.String()}
 	case bitmap:
 		b := Bitmap(file)
-		return b.String()
+		return FileTypes{FileType(b), b.String()}
 	case vector:
 		v := Vector(file)
-		return v.String()
+		return FileTypes{FileType(v), v.String()}
 	case audio:
 		a := Audio(file)
-		return a.String()
+		return FileTypes{FileType(a), a.String()}
 	case binaryText:
-		if s := strings.TrimSpace(fmt.Sprintf("%s", d.tInfoS)); s != "" {
-			return fmt.Sprintf("%s, %s", s, binaryText.String())
-		}
-		return binaryText.String()
+		// if s := strings.TrimSpace(fmt.Sprintf("%s", d.tInfoS)); s != "" {
+		// 	return fmt.Sprintf("%s, %s", s, binaryText.String())
+		// }
+		return FileTypes{FileType(binaryText), binaryText.String()}
 	case xBin:
-		return xBin.String()
+		return FileTypes{FileType(xBin), xBin.String()}
 	case archive:
 		a := Archive(file)
-		return a.String()
+		return FileTypes{FileType(a), a.String()}
 	case executable:
-		return executable.String()
+		return FileTypes{FileType(executable), executable.String()}
 	default:
-		return "type error"
+		return FileTypes{FileType(0), "error"}
 	}
 }
 
@@ -472,45 +495,109 @@ func (d *data) lsDate() string {
 	return fmt.Sprintf("%s", t.Format("2 Jan 2006"))
 }
 
-func (d *data) typeInfo() string {
+func (d *data) typeInfo() TypeInfos {
 	dt, ft := unsignedBinary1(d.datatype), unsignedBinary1(d.filetype)
 	t1, t2, t3 := unsignedBinary2(d.tinfo1), unsignedBinary2(d.tinfo2), unsignedBinary2(d.tinfo3)
+	flag := unsignedBinary1(d.tFlags)
+	font := fmt.Sprintf("%v", d.tInfoS)
+	ti := TypeInfos{
+		TypeInfo{t1, ""},
+		TypeInfo{t2, ""},
+		TypeInfo{t3, ""},
+		ansiFlags(Flags(flag)),
+		font,
+	}
 	switch DataType(dt) {
 	case none:
-		return ""
 	case character:
-		c, extra := Character(ft), d.ansiFlags()
-		return c.info(t1, t2, t3, extra)
-	case bitmap:
-		if t1 == 0 && t2 == 0 && t3 == 0 {
-			return ""
+		switch Character(ft) {
+		case ASCII, ANSI, ANSIMation, PCBoard, Avatar, TundraDraw:
+			ti.Info1.Info = "character width"
+			ti.Info2.Info = "number of lines"
+		case RIPScript:
+			ti.Info1.Info = "pixel width"
+			ti.Info2.Info = "character screen height"
+			ti.Info3.Info = "number of colors"
 		}
-		return fmt.Sprintf("pixel width: %d, height: %d, depth: %d", t1, t2, t3)
+	case bitmap:
+		ti.Info1.Info = "pixel width"
+		ti.Info2.Info = "pixel height"
+		ti.Info3.Info = "pixel depth"
 	case vector:
-		return ""
 	case audio:
 		switch Audio(ft) {
 		case SMP8, SMP8S, SMP16, SMP16S:
-			if t1 == 0 {
-				return ""
-			}
-			return fmt.Sprintf("sample rate: %d", t1)
+			ti.Info1.Info = "sample rate"
 		case MOD, Composer669, STM, S3M, MTM, FAR, ULT, AMF, DMF, OKT, ROL, CMF, MID,
 			SADT, VOC, WAV, PATCH8, PATCH16, XM, HSC, IT:
-			return ""
 		}
-		return "audio error"
 	case binaryText:
-		return d.ansiFlags()
 	case xBin:
-		if t1 == 0 && t2 == 0 {
-			return ""
-		}
-		return fmt.Sprintf("character width: %d, lines: %d", t1, t2)
+		ti.Info1.Info = "character width"
+		ti.Info2.Info = "number of lines"
 	case archive, executable:
-		return ""
 	}
-	return "info error"
+	return ti
+}
+
+func ansiFlags(f Flags) ANSIFlags {
+	bin := fmt.Sprintf("%05b", f)
+	r := []rune(bin)
+	b, ls, ar := string(r[0]), string(r[1:3]), string(r[3:5])
+	a := ANSIFlags{
+		Decimal: f,
+		Binary:  bin,
+		B: ANSIFlag{
+			Flag: b,
+			Info: ansiB(b),
+		},
+		LS: ANSIFlag{
+			Flag: ls,
+			Info: ansiLS(ls),
+		},
+		AR: ANSIFlag{
+			Flag: ar,
+			Info: ansiAR(ar),
+		},
+	}
+	return a
+}
+
+func ansiB(b string) string {
+	switch b {
+	case "0":
+		return "blink mode"
+	case "1":
+		return "non-blink mode"
+	default:
+		return "invalid value"
+	}
+}
+
+func ansiLS(ls string) string {
+	switch ls {
+	case "00":
+		return "no preference"
+	case "01":
+		return "select 8 pixel font"
+	case "10":
+		return "select 9 pixel font"
+	default:
+		return "invalid value"
+	}
+}
+
+func ansiAR(ar string) string {
+	switch ar {
+	case "00":
+		return "no preference"
+	case "01":
+		return "stretch pixels"
+	case "10":
+		return "square pixels"
+	default:
+		return "invalid value"
+	}
 }
 
 // extract sauce record.
@@ -638,49 +725,53 @@ func (r record) tInfoS(i int) tInfoS {
 		end   = start + len(s)
 	)
 	for j, c := range r[start+i : end+i] {
+		fmt.Printf("%v\n", c)
+		if c == 0 {
+			continue
+		}
 		s[j] = c
 	}
 	return s
 }
 
-// Print and format the record data.
-func Print(b []byte) {
-	var info = func(t string) string {
-		return str.Cinf(fmt.Sprintf("%s\t", t))
-	}
-	s := parse(b)
-	if s.ID != "SAUCE" {
-		return
-	}
-	var data = []struct {
-		k, v string
-	}{
-		{k: "title", v: s.Title},
-		{k: "author", v: s.Author},
-		{k: "group", v: s.Group},
-		{k: "date", v: s.LSDate},
-		{k: "filesize", v: s.FileSize},
-		{k: "type", v: s.DataType},
-		{k: "file", v: s.FileType},
-		{k: "info", v: s.TypeInfo},
-	}
-	var buf bytes.Buffer
-	w := new(tabwriter.Writer)
-	w.Init(&buf, 0, 8, 0, '\t', 0)
-	for _, x := range data {
-		if x.k == "filesize" && s.FileSize == "0" {
-			continue
-		}
-		if x.k == "info" && s.TypeInfo == "" {
-			continue
-		}
-		fmt.Fprintf(w, "\t %s\t  %s\n", x.k, info(x.v))
-	}
-	if err := w.Flush(); err != nil {
-		logs.Fatal("flush of tab writer failed", "", err)
-	}
-	fmt.Print(buf.String())
-}
+// Text format the record data.
+// func Text(b []byte) {
+// 	var info = func(t string) string {
+// 		return str.Cinf(fmt.Sprintf("%s\t", t))
+// 	}
+// 	s := Parse(b...)
+// 	if s.ID != "SAUCE" {
+// 		return
+// 	}
+// 	var data = []struct {
+// 		k, v string
+// 	}{
+// 		{k: "title", v: s.Title},
+// 		{k: "author", v: s.Author},
+// 		{k: "group", v: s.Group},
+// 		{k: "date", v: s.LSDate},
+// 		{k: "filesize", v: s.FileSize},
+// 		{k: "type", v: s.DataType},
+// 		{k: "file", v: s.FileType},
+// 		{k: "info", v: s.TypeInfo},
+// 	}
+// 	var buf bytes.Buffer
+// 	w := new(tabwriter.Writer)
+// 	w.Init(&buf, 0, 8, 0, '\t', 0)
+// 	for _, x := range data {
+// 		if x.k == "filesize" && s.FileSize == "0" {
+// 			continue
+// 		}
+// 		if x.k == "info" && s.TypeInfo == "" {
+// 			continue
+// 		}
+// 		fmt.Fprintf(w, "\t %s\t  %s\n", x.k, info(x.v))
+// 	}
+// 	if err := w.Flush(); err != nil {
+// 		logs.Fatal("flush of tab writer failed", "", err)
+// 	}
+// 	fmt.Print(buf.String())
+// }
 
 // Scan returns the position of the SAUCE00 ID or -1 if no ID exists.
 func Scan(b []byte) (index int) {
@@ -725,9 +816,10 @@ func Scan(b []byte) (index int) {
 	return -1
 }
 
-// parse and extract the record data.
-func parse(r record) Record {
+// Parse and extract the record data.
+func Parse(data ...byte) Record {
 	const empty = "\x00\x00"
+	r := record(data)
 	d := r.extract()
 	if string(d.version[:]) == empty {
 		return Record{}
@@ -735,15 +827,16 @@ func parse(r record) Record {
 	return Record{
 		ID:       fmt.Sprintf("%s", d.id),
 		Version:  fmt.Sprintf("%s", d.version),
-		Title:    fmt.Sprintf("%s", d.title),
-		Author:   fmt.Sprintf("%s", d.author),
-		Group:    fmt.Sprintf("%s", d.group),
+		Title:    strings.TrimSpace(fmt.Sprintf("%s", d.title)),
+		Author:   strings.TrimSpace(fmt.Sprintf("%s", d.author)),
+		Group:    strings.TrimSpace(fmt.Sprintf("%s", d.group)),
 		Date:     fmt.Sprintf("%s", d.date),
-		LSDate:   d.lsDate(),
+		LSDate:   d.lsDate(), // todo: change to time type
 		FileSize: d.fileSize(),
-		DataType: d.dataType(),
-		FileType: d.fileType(),
-		TypeInfo: d.typeInfo(),
+		Data:     d.dataType(),
+		File:     d.fileType(),
+		Info:     d.typeInfo(),
+		//
 	}
 }
 

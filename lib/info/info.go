@@ -29,24 +29,25 @@ import (
 
 // Detail of a file.
 type Detail struct {
-	Name       string    `json:"filename"`
-	Utf8       bool      `json:"utf8"`
-	Newline    [2]rune   `json:"newline"`
-	CharCount  int       `json:"characters"`
-	CtrlCount  int       `json:"ansiControls"`
-	WordCount  int       `json:"words"`
-	Size       string    `json:"size"`
-	Bytes      int64     `json:"bytes"`
-	Lines      int       `json:"lines"`
-	Width      int       `json:"width"`
-	Modified   time.Time `json:"modified"`
-	MD5        string    `json:"checksumMD5"`
-	SHA256     string    `json:"checksumSHA256"`
-	Mime       string    `json:"mime"`
-	MimeMedia  string    `json:"-"`
-	MimeSub    string    `json:"-"`
-	MimeCommt  string    `json:"-"`
-	Slug       string    `json:"slug"`
+	Name       string       `json:"filename"`
+	Utf8       bool         `json:"utf8"`
+	Newline    [2]rune      `json:"newline"`
+	CharCount  int          `json:"characters"`
+	CtrlCount  int          `json:"ansiControls"`
+	WordCount  int          `json:"words"`
+	Size       string       `json:"size"`
+	Bytes      int64        `json:"bytes"`
+	Lines      int          `json:"lines"`
+	Width      int          `json:"width"`
+	Modified   time.Time    `json:"modified"`
+	MD5        string       `json:"checksumMD5"`
+	SHA256     string       `json:"checksumSHA256"`
+	Mime       string       `json:"mime"`
+	MimeMedia  string       `json:"-"`
+	MimeSub    string       `json:"-"`
+	MimeCommt  string       `json:"-"`
+	Slug       string       `json:"slug"`
+	Sauce      sauce.Record `json:"sauce"`
 	index      int
 	length     int
 	sauceIndex int
@@ -303,7 +304,7 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 	go func() {
 		d.sauceIndex = sauce.Scan(data)
 		if d.sauceIndex > 0 {
-			fmt.Println("SAUCE DATA FOUND!!")
+			d.Sauce = sauce.Parse(data...)
 		}
 		ch <- true
 	}()
