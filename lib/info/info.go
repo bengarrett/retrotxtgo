@@ -122,7 +122,7 @@ func (n Names) Info(name, format string) logs.Generic {
 		// todo: directory walk
 		gen.Issue = "info"
 		gen.Err = ErrNoDir
-	} else if err := Print(name, format, n.Index, n.Length); err != nil {
+	} else if err := Marshal(name, format, n.Index, n.Length); err != nil {
 		gen.Issue = "info.print"
 		gen.Arg = format
 		gen.Err = err
@@ -131,18 +131,319 @@ func (n Names) Info(name, format string) logs.Generic {
 }
 
 // Language tag used for numeric syntax formatting.
-func Language() language.Tag {
+func lang() language.Tag {
 	return language.English
 }
 
-// Print the meta and operating system details of a file.
-func Print(filename, format string, i, length int) error {
+func (d *Detail) ctrls(filename string) (err error) {
+	f, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	var cnt int
+	if cnt, err = filesystem.Controls(f); err != nil {
+		return err
+	}
+	d.Count.Controls = cnt
+	return f.Close()
+}
+
+func (d *Detail) lines(filename string) (err error) {
+	f, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	var l int
+	if l, err = filesystem.Lines(f, d.Newline); err != nil {
+		return err
+	}
+	d.Lines = l
+	return f.Close()
+}
+
+func (d *Detail) marshal(format string) error {
+	var (
+		b   []byte
+		err error
+	)
+	switch format {
+	case "color", "c", "":
+		b = d.printMarshal(true)
+	case "text", "t":
+		b = d.printMarshal(false)
+	case "json", "j":
+		b, err = json.MarshalIndent(d, "", "    ")
+		if err != nil {
+			return fmt.Errorf("detail json indent marshal: %w", err)
+		}
+	case "json.min", "jm":
+		b, err = json.Marshal(d)
+		if err != nil {
+			return fmt.Errorf("detail json marshal: %w", err)
+		}
+	case "xml", "x":
+		b, err = xml.MarshalIndent(d, "", "\t")
+		if err != nil {
+			return fmt.Errorf("detail xml marshal: %w", err)
+		}
+	default:
+		return fmt.Errorf("detail marshal %q: %w", format, ErrFmt)
+	}
+	fmt.Printf("%s\n", b)
+	return nil
+}
+
+func (d *Detail) mimeUnknown() {
+	if d.Mime.Commt == "unknown" {
+		if d.Count.Controls > 0 {
+			d.Mime.Commt = "Text document with ANSI controls"
+			return
+		}
+		switch d.Newline {
+		case [2]rune{21}, [2]rune{133}:
+			d.Mime.Commt = "EBCDIC encoded text document"
+			return
+		}
+		if d.Mime.Type == "application/octet-stream" {
+			if !d.Utf8 && d.Count.Words > 0 {
+				d.Mime.Commt = "US-ASCII encoded text document"
+				return
+			}
+		}
+	}
+}
+
+func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
+	const routines = 6
+	var wg sync.WaitGroup
+	wg.Add(routines)
+	go func() {
+		defer wg.Done()
+		d.sauceIndex = sauce.Scan(data...)
+		if d.sauceIndex > 0 {
+			d.Sauce = sauce.Parse(data...)
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		mm := mimemagic.MatchMagic(data)
+		d.Mime.Media = mm.Media
+		d.Mime.Sub = mm.Subtype
+		d.Mime.Type = fmt.Sprintf("%s/%s", mm.Media, mm.Subtype)
+		d.Mime.Commt = mm.Comment
+		if d.validText() {
+			if d.Count.Chars, err = filesystem.Runes(bytes.NewBuffer(data)); err != nil {
+				fmt.Printf("minesniffer errored, %s\n", err)
+			}
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		var standardInput os.FileInfo = nil
+		if stat != standardInput {
+			b := stat.Size()
+			d.Size.Bytes = b
+			d.Size.Binary = humanize.Binary(b, lang())
+			d.Size.Decimal = humanize.Decimal(b, lang())
+			d.Name = stat.Name()
+			d.Modified.Time = stat.ModTime().UTC()
+			d.Modified.Epoch = stat.ModTime().Unix()
+			d.Slug = slugify.Slugify(stat.Name())
+		} else {
+			b := int64(len(data))
+			d.Size.Bytes = b
+			d.Size.Binary = humanize.Binary(b, lang())
+			d.Size.Decimal = humanize.Decimal(b, lang())
+			d.Name = "n/a (stdin)"
+			d.Slug = "n/a"
+			d.Modified.Time = time.Now()
+			d.Modified.Epoch = time.Now().Unix()
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		md5sum := md5.Sum(data)
+		d.Sums.MD5 = fmt.Sprintf("%x", md5sum)
+	}()
+	go func() {
+		defer wg.Done()
+		shasum := sha256.Sum256(data)
+		d.Sums.SHA256 = fmt.Sprintf("%x", shasum)
+	}()
+	go func() {
+		defer wg.Done()
+		d.Utf8 = utf8.Valid(data)
+	}()
+	wg.Wait()
+	return err
+}
+
+func (d *Detail) printMarshal(color bool) []byte {
+	p := message.NewPrinter(lang())
+	c.Enable = color
+	var info = func(t string) string {
+		return str.Cinf(fmt.Sprintf("%s\t", t))
+	}
+	var hr = func(l int) string {
+		return fmt.Sprintf("\t%s\n", str.Cb(strings.Repeat("\u2500", l)))
+	}
+	var data = []struct {
+		k, v string
+	}{
+		{k: "filename", v: d.Name},
+		{k: "filetype", v: d.Mime.Commt},
+		{k: "UTF-8", v: str.Bool(d.Utf8)},
+		{k: "newline", v: filesystem.Newline(d.Newline, true)},
+		{k: "characters", v: p.Sprint(d.Count.Chars)},
+		{k: "ANSI controls", v: p.Sprint(d.Count.Controls)},
+		{k: "words", v: p.Sprint(d.Count.Words)},
+		{k: "size", v: d.Size.Decimal},
+		{k: "lines", v: p.Sprint(d.Lines)},
+		{k: "width", v: p.Sprint(d.Width)},
+		{k: "modified", v: humanize.Datetime(DTFormat, d.Modified.Time.UTC())},
+		{k: "MD5 checksum", v: d.Sums.MD5},
+		{k: "SHA256 checksum", v: d.Sums.SHA256},
+		{k: "media mime type", v: d.Mime.Type},
+		{k: "slug", v: d.Slug},
+		// sauce data
+		{k: "title", v: d.Sauce.Title},
+		{k: "author", v: d.Sauce.Author},
+		{k: "group", v: d.Sauce.Group},
+		{k: "date", v: humanize.Date(DFormat, d.Sauce.Date.Time.UTC())},
+		{k: "original size", v: d.Sauce.FileSize.Decimal},
+		{k: "file type", v: d.Sauce.File.Name},
+		{k: "data type", v: d.Sauce.Data.Name},
+		{k: "description", v: d.Sauce.Desc},
+		{k: d.Sauce.Info.Info1.Info, v: fmt.Sprint(d.Sauce.Info.Info1.Value)},
+		{k: d.Sauce.Info.Info2.Info, v: fmt.Sprint(d.Sauce.Info.Info2.Value)},
+		{k: d.Sauce.Info.Info3.Info, v: fmt.Sprint(d.Sauce.Info.Info3.Value)},
+		{k: "interpretation", v: d.Sauce.Info.Flags.String()},
+	}
+	var buf bytes.Buffer
+	w := new(tabwriter.Writer)
+	w.Init(&buf, 0, 8, 0, '\t', 0)
+	l := len(fmt.Sprintf(" filename%s%s", strings.Repeat(" ", 10), data[0].v))
+	fmt.Fprint(w, hr(l))
+	for _, x := range data {
+		if !d.validText() {
+			switch x.k {
+			case "UTF-8", "newline", "characters", "ANSI controls", "words", "lines", "width":
+				continue
+			}
+		} else if x.k == "ANSI controls" {
+			if d.Count.Controls == 0 {
+				continue
+			}
+		}
+		if x.k == "description" && x.v == "" {
+			continue
+		}
+		if x.k == d.Sauce.Info.Info1.Info && d.Sauce.Info.Info1.Value == 0 {
+			continue
+		}
+		if x.k == d.Sauce.Info.Info2.Info && d.Sauce.Info.Info2.Value == 0 {
+			continue
+		}
+		if x.k == d.Sauce.Info.Info3.Info && d.Sauce.Info.Info3.Value == 0 {
+			continue
+		}
+		if x.k == "interpretation" && x.v == "" {
+			continue
+		}
+		fmt.Fprintf(w, "\t %s\t  %s\n", x.k, info(x.v))
+		if x.k == "slug" {
+			if d.sauceIndex <= 0 {
+				break
+			}
+			fmt.Fprint(w, "\t \t   -───-\n")
+		}
+	}
+	if d.index == d.length {
+		fmt.Fprint(w, hr(l))
+	}
+	if err := w.Flush(); err != nil {
+		logs.Fatal("flush of tab writer failed", "", err)
+	}
+	return buf.Bytes()
+}
+
+func (d *Detail) read(name string) (err error) {
+	// Get the file details
+	stat, err := os.Stat(name)
+	if err != nil {
+		return err
+	}
+	// Read file content
+	data, err := filesystem.ReadAllBytes(name)
+	if err != nil {
+		return err
+	}
+	return d.parse(stat, data...)
+}
+
+// validText checks the MIME content-type value for valid text files.
+func (d *Detail) validText() bool {
+	s := strings.Split(d.Mime.Type, "/")
+	const req = 2
+	if len(s) != req {
+		return false
+	}
+	if s[0] == "text" {
+		return true
+	}
+	if d.Mime.Type == "application/octet-stream" {
+		return true
+	}
+	return false
+}
+
+func (d *Detail) width(filename string) (err error) {
+	f, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	var w int
+	if w, err = filesystem.Columns(f, d.Newline); err != nil {
+		return err
+	} else if w < 0 {
+		w = d.Count.Chars
+	}
+	d.Width = w
+	return f.Close()
+}
+
+func (d *Detail) words(filename string) (err error) {
+	f, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	var w int
+	switch d.Newline {
+	case [2]rune{21}, [2]rune{133}:
+		if w, err = filesystem.WordsEBCDIC(f); err != nil {
+			return err
+		}
+	default:
+		if w, err = filesystem.Words(f); err != nil {
+			return err
+		}
+	}
+	d.Count.Words = w
+	return f.Close()
+}
+
+// Marshal the meta and operating system details of a file.
+func Marshal(filename, format string, i, length int) error {
 	var d Detail
-	if err := d.Read(filename); err != nil {
+	if err := d.read(filename); err != nil {
 		return err
 	}
 	d.index, d.length = i, length
-	if IsText(d.Mime.Type) {
+	if d.validText() {
 		var g errgroup.Group
 		g.Go(func() error {
 			var err error
@@ -184,73 +485,9 @@ func Print(filename, format string, i, length int) error {
 		if err := g.Wait(); err != nil {
 			return err
 		}
+		d.mimeUnknown()
 	}
-	return d.format(format)
-}
-
-func (d *Detail) ctrls(filename string) (err error) {
-	f, err := os.Open(filename)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	var cnt int
-	if cnt, err = filesystem.Controls(f); err != nil {
-		return err
-	}
-	d.Count.Controls = cnt
-	return f.Close()
-}
-
-func (d *Detail) lines(filename string) (err error) {
-	f, err := os.Open(filename)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	var l int
-	if l, err = filesystem.Lines(f, d.Newline); err != nil {
-		return err
-	}
-	d.Lines = l
-	return f.Close()
-}
-
-func (d *Detail) width(filename string) (err error) {
-	f, err := os.Open(filename)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	var w int
-	if w, err = filesystem.Columns(f, d.Newline); err != nil {
-		return err
-	} else if w < 0 {
-		w = d.Count.Chars
-	}
-	d.Width = w
-	return f.Close()
-}
-
-func (d *Detail) words(filename string) (err error) {
-	f, err := os.Open(filename)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	var w int
-	switch d.Newline {
-	case [2]rune{21}, [2]rune{133}:
-		if w, err = filesystem.WordsEBCDIC(f); err != nil {
-			return err
-		}
-	default:
-		if w, err = filesystem.Words(f); err != nil {
-			return err
-		}
-	}
-	d.Count.Words = w
-	return f.Close()
+	return d.marshal(format)
 }
 
 // Stdin parses piped data and prints out the details in a specific syntax.
@@ -259,7 +496,7 @@ func Stdin(format string, b ...byte) error {
 	if err := d.parse(nil, b...); err != nil {
 		return err
 	}
-	if IsText(d.Mime.Type) {
+	if d.validText() {
 		var g errgroup.Group
 		g.Go(func() error {
 			d.Newline = filesystem.Newlines(true, []rune(string(b))...)
@@ -305,245 +542,7 @@ func Stdin(format string, b ...byte) error {
 		if err := g.Wait(); err != nil {
 			return err
 		}
-
+		d.mimeUnknown()
 	}
-	return d.format(format)
-}
-
-func (d *Detail) format(format string) error {
-	switch format {
-	case "color", "c", "":
-		fmt.Printf("%s", d.Text(true))
-	case "json", "j":
-		b, err := json.MarshalIndent(d, "", "    ")
-		if err != nil {
-			return fmt.Errorf("detail json indent format: %w", err)
-		}
-		fmt.Printf("%s\n", b)
-	case "json.min", "jm":
-		b, err := json.Marshal(d)
-		if err != nil {
-			return fmt.Errorf("detail json format: %w", err)
-		}
-		fmt.Printf("%s\n", b)
-	case "text", "t":
-		fmt.Printf("%s", d.Text(false))
-	case "xml", "x":
-		b, err := xml.MarshalIndent(d, "", "\t")
-		if err != nil {
-			return fmt.Errorf("detail xml format: %w", err)
-		}
-		fmt.Printf("%s\n", b)
-	default:
-		return fmt.Errorf("detail format %q: %w", format, ErrFmt)
-	}
-	return nil
-}
-
-// IsText checks the MIME content-type value for valid text files.
-func IsText(contentType string) bool {
-	s := strings.Split(contentType, "/")
-	const req = 2
-	if len(s) != req {
-		return false
-	}
-	if s[0] == "text" {
-		return true
-	}
-	if contentType == "application/octet-stream" {
-		return true
-	}
-	return false
-}
-
-// Read returns the operating system and meta detail of a named file.
-func (d *Detail) Read(name string) (err error) {
-	// Get the file details
-	stat, err := os.Stat(name)
-	if err != nil {
-		return err
-	}
-	// Read file content
-	data, err := filesystem.ReadAllBytes(name)
-	if err != nil {
-		return err
-	}
-	return d.parse(stat, data...)
-}
-
-// parse fileinfo and file content.
-func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
-	const routines = 6
-	var wg sync.WaitGroup
-	wg.Add(routines)
-	go func() {
-		defer wg.Done()
-		d.sauceIndex = sauce.Scan(data...)
-		if d.sauceIndex > 0 {
-			d.Sauce = sauce.Parse(data...)
-		}
-	}()
-	go func() {
-		defer wg.Done()
-		mm := mimemagic.MatchMagic(data)
-		d.Mime.Media = mm.Media
-		d.Mime.Sub = mm.Subtype
-		d.Mime.Type = fmt.Sprintf("%s/%s", mm.Media, mm.Subtype)
-		d.Mime.Commt = mm.Comment
-		if IsText(d.Mime.Type) {
-			if d.Count.Chars, err = filesystem.Runes(bytes.NewBuffer(data)); err != nil {
-				fmt.Printf("minesniffer errored, %s\n", err)
-			}
-		}
-	}()
-	go func() {
-		defer wg.Done()
-		var standardInput os.FileInfo = nil
-		if stat != standardInput {
-			b := stat.Size()
-			d.Size.Bytes = b
-			d.Size.Binary = humanize.Binary(b, Language())
-			d.Size.Decimal = humanize.Decimal(b, Language())
-			d.Name = stat.Name()
-			d.Modified.Time = stat.ModTime().UTC()
-			d.Modified.Epoch = stat.ModTime().Unix()
-			d.Slug = slugify.Slugify(stat.Name())
-		} else {
-			b := int64(len(data))
-			d.Size.Bytes = b
-			d.Size.Binary = humanize.Binary(b, Language())
-			d.Size.Decimal = humanize.Decimal(b, Language())
-			d.Name = "n/a (stdin)"
-			d.Slug = "n/a"
-			d.Modified.Time = time.Now()
-			d.Modified.Epoch = time.Now().Unix()
-		}
-	}()
-	go func() {
-		defer wg.Done()
-		md5sum := md5.Sum(data)
-		d.Sums.MD5 = fmt.Sprintf("%x", md5sum)
-	}()
-	go func() {
-		defer wg.Done()
-		shasum := sha256.Sum256(data)
-		d.Sums.SHA256 = fmt.Sprintf("%x", shasum)
-	}()
-	go func() {
-		defer wg.Done()
-		d.Utf8 = utf8.Valid(data)
-	}()
-	wg.Wait()
-	return err
-}
-
-// Text format and returns the details of a file.
-func (d *Detail) Text(color bool) string {
-	p := message.NewPrinter(Language())
-	c.Enable = color
-	var info = func(t string) string {
-		return str.Cinf(fmt.Sprintf("%s\t", t))
-	}
-	var hr = func(l int) string {
-		return fmt.Sprintf("\t%s\n", str.Cb(strings.Repeat("\u2500", l)))
-	}
-	var data = []struct {
-		k, v string
-	}{
-		{k: "filename", v: d.Name},
-		{k: "filetype", v: d.comment()},
-		{k: "UTF-8", v: str.Bool(d.Utf8)},
-		{k: "newline", v: filesystem.Newline(d.Newline, true)},
-		{k: "characters", v: p.Sprint(d.Count.Chars)},
-		{k: "ANSI controls", v: p.Sprint(d.Count.Controls)},
-		{k: "words", v: p.Sprint(d.Count.Words)},
-		{k: "size", v: d.Size.Decimal},
-		{k: "lines", v: p.Sprint(d.Lines)},
-		{k: "width", v: p.Sprint(d.Width)},
-		{k: "modified", v: humanize.Datetime(DTFormat, d.Modified.Time.UTC())},
-		{k: "MD5 checksum", v: d.Sums.MD5},
-		{k: "SHA256 checksum", v: d.Sums.SHA256},
-		{k: "media mime type", v: d.Mime.Type},
-		{k: "slug", v: d.Slug},
-		// sauce data
-		{k: "title", v: d.Sauce.Title},
-		{k: "author", v: d.Sauce.Author},
-		{k: "group", v: d.Sauce.Group},
-		{k: "date", v: humanize.Date(DFormat, d.Sauce.Date.Time.UTC())},
-		{k: "original size", v: d.Sauce.FileSize.Decimal},
-		{k: "file type", v: d.Sauce.File.Name},
-		{k: "data type", v: d.Sauce.Data.Name},
-		{k: "description", v: d.Sauce.Desc},
-		{k: d.Sauce.Info.Info1.Info, v: fmt.Sprint(d.Sauce.Info.Info1.Value)},
-		{k: d.Sauce.Info.Info2.Info, v: fmt.Sprint(d.Sauce.Info.Info2.Value)},
-		{k: d.Sauce.Info.Info3.Info, v: fmt.Sprint(d.Sauce.Info.Info3.Value)},
-		{k: "interpretation", v: d.Sauce.Info.Flags.String()},
-	}
-	var buf bytes.Buffer
-	w := new(tabwriter.Writer)
-	w.Init(&buf, 0, 8, 0, '\t', 0)
-	l := len(fmt.Sprintf(" filename%s%s", strings.Repeat(" ", 10), data[0].v))
-	fmt.Fprint(w, hr(l))
-	for _, x := range data {
-		if !IsText(d.Mime.Type) {
-			switch x.k {
-			case "UTF-8", "newline", "characters", "ANSI controls", "words", "lines", "width":
-				continue
-			}
-		} else if x.k == "ANSI controls" {
-			if d.Count.Controls == 0 {
-				continue
-			}
-		}
-		if x.k == "description" && x.v == "" {
-			continue
-		}
-		if x.k == d.Sauce.Info.Info1.Info && d.Sauce.Info.Info1.Value == 0 {
-			continue
-		}
-		if x.k == d.Sauce.Info.Info2.Info && d.Sauce.Info.Info2.Value == 0 {
-			continue
-		}
-		if x.k == d.Sauce.Info.Info3.Info && d.Sauce.Info.Info3.Value == 0 {
-			continue
-		}
-		if x.k == "interpretation" && x.v == "" {
-			continue
-		}
-		fmt.Fprintf(w, "\t %s\t  %s\n", x.k, info(x.v))
-		if x.k == "slug" {
-			if d.sauceIndex <= 0 {
-				break
-			}
-			fmt.Fprint(w, "\t \t   -───-\n")
-		}
-	}
-	if d.index == d.length {
-		fmt.Fprint(w, hr(l))
-	}
-	if err := w.Flush(); err != nil {
-		logs.Fatal("flush of tab writer failed", "", err)
-	}
-	return buf.String()
-}
-
-// todo: update d.Mime.Cmmt
-func (d *Detail) comment() string {
-	if d.Mime.Commt != "unknown" {
-		return d.Mime.Commt
-	}
-	if d.Count.Controls > 0 {
-		return "ANSI encoded text document"
-	}
-	switch d.Newline {
-	case [2]rune{21}, [2]rune{133}:
-		return "EBCDIC encoded text document"
-	}
-	if d.Mime.Type == "application/octet-stream" {
-		if d.Count.Words > 0 {
-			// todo !utf8 check
-			return "US-ASCII encoded text document"
-		}
-	}
-	return d.Mime.Commt
+	return d.marshal(format)
 }
