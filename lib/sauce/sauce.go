@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"golang.org/x/text/language"
-	"golang.org/x/text/message"
 	"retrotxt.com/retrotxt/lib/humanize"
 )
 
@@ -25,12 +24,25 @@ type Record struct {
 	Title    string    `json:"title"`
 	Author   string    `json:"author"`
 	Group    string    `json:"group"`
-	Date     string    `json:"date"`
-	LSDate   string    `json:"lsdate"`
-	FileSize string    `json:"filesize"`
+	Date     Dates     `json:"date"`
+	FileSize Sizes     `json:"filesize"`
 	Data     DataTypes `json:"dataType"`
 	File     FileTypes `json:"fileType"`
 	Info     TypeInfos `json:"typeInfo"`
+}
+
+// Dates in multiple output formats.
+type Dates struct {
+	Value string    `json:"value"`
+	Time  time.Time `json:"iso"`
+	Epoch int64     `json:"epoch"`
+}
+
+// Sizes of the file data in multiples.
+type Sizes struct {
+	Bytes   uint16 `json:"bytes"`
+	Decimal string `json:"decimal"`
+	Binary  string `json:"binary"`
 }
 
 // DataTypes includes both the SAUCE DataType value and name.
@@ -88,20 +100,75 @@ type TypeInfo struct {
 
 // ANSIFlags are the interpretation of the SAUCE Flags field.
 type ANSIFlags struct {
-	Decimal Flags    `json:"decimal"`
-	Binary  string   `json:"binary"`
-	B       ANSIFlag `json:"nonBlinkMode"`
-	LS      ANSIFlag `json:"letterSpacing"`
-	AR      ANSIFlag `json:"aspectRatio"`
+	Decimal Flags      `json:"decimal"`
+	Binary  string     `json:"binary"`
+	B       ANSIFlagB  `json:"nonBlinkMode"`
+	LS      ANSIFlagLS `json:"letterSpacing"`
+	AR      ANSIFlagAR `json:"aspectRatio"`
 }
 
 // Flags is the SAUCE Flags field.
 type Flags uint8
 
-// ANSIFlag is the interpretion of the SAUCE Flags binary bits.
-type ANSIFlag struct {
-	Flag string `json:"flag"`
+// ANSIFlagB is the interpretion of the SAUCE Flags non-blink mode binary bit.
+type ANSIFlagB struct {
+	Flag bBit   `json:"flag"`
 	Info string `json:"interpretation"`
+}
+
+type bBit string
+
+func (b bBit) String() string {
+	switch b {
+	case "0":
+		return "blink mode"
+	case "1":
+		return "non-blink mode"
+	default:
+		return "invalid value"
+	}
+}
+
+// ANSIFlagLS is the interpretion of the SAUCE Flags letter spacing binary bits.
+type ANSIFlagLS struct {
+	Flag lsBit  `json:"flag"`
+	Info string `json:"interpretation"`
+}
+
+type lsBit string
+
+func (ls lsBit) String() string {
+	switch ls {
+	case "00":
+		return "no preference"
+	case "01":
+		return "select 8 pixel font"
+	case "10":
+		return "select 9 pixel font"
+	default:
+		return "invalid value"
+	}
+}
+
+// ANSIFlagAR is the interpretion of the SAUCE Flags aspect ratio binary bits.
+type ANSIFlagAR struct {
+	Flag arBit  `json:"flag"`
+	Info string `json:"interpretation"`
+}
+
+type arBit string
+
+func (ar arBit) String() string {
+	switch ar {
+	case "00":
+		return "no preference"
+	case "01":
+		return "stretch pixels"
+	case "10":
+		return "square pixels"
+	default:
+		return "invalid value"
+	}
 }
 
 // Character based files.
@@ -436,46 +503,55 @@ func (d *data) fileType() FileTypes {
 	}
 }
 
-func (d *data) fileSize() string {
-	const kB = 1000
-	value, p := unsignedBinary4(d.filesize), message.NewPrinter(language.English)
-	if value < kB {
-		return p.Sprintf("%d bytes", value)
+func (d *data) sizes() Sizes {
+	value := unsignedBinary4(d.filesize)
+	en := language.English
+	return Sizes{
+		Bytes:   value,
+		Decimal: humanize.Decimal(int64(value), en),
+		Binary:  humanize.Binary(int64(value), en),
 	}
-	h := humanize.Bytes(int64(value), language.AmericanEnglish)
-	return p.Sprintf("%s (%d bytes)", h, value)
 }
 
-func (d *data) lsDate() string {
+func (d *data) dates() Dates {
+	t := d.parseDate()
+	u := t.Unix()
+	return Dates{
+		Value: fmt.Sprintf("%s", d.date),
+		Time:  t,
+		Epoch: u,
+	}
+}
+
+func (d *data) parseDate() (t time.Time) {
 	da := d.date
 	dy, err := strconv.Atoi(string(da[0:4]))
 	if err != nil {
 		fmt.Println("day conversion failed:", err)
-		return fmt.Sprintf("%s", da)
+		return t
 	}
 	dm, err := strconv.Atoi(string(da[4:6]))
 	if err != nil {
 		fmt.Println("month conversion failed:", err)
-		return fmt.Sprintf("%s", da)
+		return t
 	}
 	dd, err := strconv.Atoi(string(da[6:8]))
 	if err != nil {
 		fmt.Println("year conversion failed:", err)
-		return fmt.Sprintf("%s", da)
+		return t
 	}
-	t := time.Date(dy, time.Month(dm), dd, 0, 0, 0, 0, time.UTC)
-	return fmt.Sprintf("%s", t.Format("2 Jan 2006"))
+	return time.Date(dy, time.Month(dm), dd, 0, 0, 0, 0, time.UTC)
 }
 
 func (d *data) typeInfo() TypeInfos {
 	dt, ft := unsignedBinary1(d.datatype), unsignedBinary1(d.filetype)
 	t1, t2, t3 := unsignedBinary2(d.tinfo1), unsignedBinary2(d.tinfo2), unsignedBinary2(d.tinfo3)
-	flag := unsignedBinary1(d.tFlags)
+	flag := Flags(unsignedBinary1(d.tFlags))
 	ti := TypeInfos{
 		TypeInfo{t1, ""},
 		TypeInfo{t2, ""},
 		TypeInfo{t3, ""},
-		ansiFlags(Flags(flag)),
+		flag.parse(),
 		d.tInfoS.String(),
 	}
 	switch DataType(dt) {
@@ -511,69 +587,23 @@ func (d *data) typeInfo() TypeInfos {
 	return ti
 }
 
-func ansiFlags(f Flags) ANSIFlags {
-	bin := fmt.Sprintf("%05b", f)
+func (f Flags) parse() ANSIFlags {
+	const binary5Bits = "%05b"
+	bin := fmt.Sprintf(binary5Bits, f)
 	r := []rune(bin)
 	b, ls, ar := string(r[0]), string(r[1:3]), string(r[3:5])
-	a := ANSIFlags{
+	return ANSIFlags{
 		Decimal: f,
 		Binary:  bin,
-		B: ANSIFlag{
-			Flag: b,
-			Info: ansiB(b),
-		},
-		LS: ANSIFlag{
-			Flag: ls,
-			Info: ansiLS(ls),
-		},
-		AR: ANSIFlag{
-			Flag: ar,
-			Info: ansiAR(ar),
-		},
-	}
-	return a
-}
-
-func ansiB(b string) string {
-	switch b {
-	case "0":
-		return "blink mode"
-	case "1":
-		return "non-blink mode"
-	default:
-		return "invalid value"
-	}
-}
-
-func ansiLS(ls string) string {
-	switch ls {
-	case "00":
-		return "no preference"
-	case "01":
-		return "select 8 pixel font"
-	case "10":
-		return "select 9 pixel font"
-	default:
-		return "invalid value"
-	}
-}
-
-func ansiAR(ar string) string {
-	switch ar {
-	case "00":
-		return "no preference"
-	case "01":
-		return "stretch pixels"
-	case "10":
-		return "square pixels"
-	default:
-		return "invalid value"
+		B:       ANSIFlagB{Flag: bBit(b), Info: bBit(b).String()},
+		LS:      ANSIFlagLS{Flag: lsBit(ls), Info: lsBit(ls).String()},
+		AR:      ANSIFlagAR{Flag: arBit(ar), Info: arBit(ar).String()},
 	}
 }
 
 // extract sauce record.
 func (r record) extract() data {
-	i := Scan(r)
+	i := Scan(r...)
 	if i == -1 {
 		return data{}
 	}
@@ -745,7 +775,7 @@ func (r record) tInfoS(i int) tInfoS {
 // }
 
 // Scan returns the position of the SAUCE00 ID or -1 if no ID exists.
-func Scan(b []byte) (index int) {
+func Scan(b ...byte) (index int) {
 	const sauceSize, maximum = 128, 512
 	id, l := []byte(sauceID), len(b)
 	var backwardsLoop = func(i int) int {
@@ -801,13 +831,11 @@ func Parse(data ...byte) Record {
 		Title:    strings.TrimSpace(fmt.Sprintf("%s", d.title)),
 		Author:   strings.TrimSpace(fmt.Sprintf("%s", d.author)),
 		Group:    strings.TrimSpace(fmt.Sprintf("%s", d.group)),
-		Date:     fmt.Sprintf("%s", d.date),
-		LSDate:   d.lsDate(), // todo: change to time type
-		FileSize: d.fileSize(),
+		Date:     d.dates(),
+		FileSize: d.sizes(),
 		Data:     d.dataType(),
 		File:     d.fileType(),
 		Info:     d.typeInfo(),
-		//
 	}
 }
 

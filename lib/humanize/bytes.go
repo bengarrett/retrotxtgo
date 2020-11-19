@@ -14,11 +14,19 @@ import (
 type B struct{}
 
 const (
-	_   = 1.0 << (10 * iota) // ignore first value by assigning to blank identifier
-	KiB                      // KiB kibibyte.
-	MiB                      // MiB mebibyte.
-	GiB                      // GiB gibibyte.
-	TiB                      // TiB Tebibyte.
+	_ = 1.0 << (10 * iota) // ignore first value by assigning to blank identifier
+	kiB
+	miB
+	giB
+	tiB
+)
+
+const (
+	byte = 1
+	kB   = 1000 * byte
+	mB   = kB * kB
+	gB   = mB * kB
+	tB   = gB * kB
 )
 
 // New creates a B instance.
@@ -26,24 +34,48 @@ func New() *B {
 	return &B{}
 }
 
-// Bytes formats bytes integer to localized readable string.
-// For example, 31323 bytes will return 30.59KB with language.AmericanEnglish.
-func (*B) Bytes(b int64, t language.Tag) string {
+// Binary formats bytes integer to localized readable string.
+func (*B) Binary(b int64, t language.Tag) string {
 	p := message.NewPrinter(t)
 	multiple, value := "", float64(b)
 	switch {
-	case b >= TiB:
-		value /= TiB
+	case b >= tiB:
+		value /= tiB
 		multiple = "TiB"
-	case b >= GiB:
-		value /= GiB
+	case b >= giB:
+		value /= giB
 		multiple = "GiB"
-	case b >= MiB:
-		value /= MiB
+	case b >= miB:
+		value /= miB
 		multiple = "MiB"
-	case b >= KiB:
-		value /= KiB
-		multiple = "KiB"
+	case b >= kiB:
+		value /= kiB
+		return p.Sprintf("%.1f %s", value, "KiB")
+	case b == 0:
+		return "0"
+	default:
+		return p.Sprintf("%dB", b)
+	}
+	return p.Sprintf("%.2f %s", value, multiple)
+}
+
+// Decimal formats bytes integer to localized readable string.
+func (*B) Decimal(b int64, t language.Tag) string {
+	p := message.NewPrinter(t)
+	multiple, value := "", float64(b)
+	switch {
+	case b >= tB:
+		value /= tB
+		multiple = "TB"
+	case b >= gB:
+		value /= gB
+		multiple = "GB"
+	case b >= mB:
+		value /= mB
+		multiple = "MB"
+	case b >= kB:
+		value /= kB
+		return p.Sprintf("%.1f %s", value, "KB")
 	case b == 0:
 		return "0"
 	default:
@@ -53,7 +85,16 @@ func (*B) Bytes(b int64, t language.Tag) string {
 }
 
 // Bytes formats bytes integer to localized readable string.
-// For example, 31323 bytes will return 30.59KB with language.AmericanEnglish.
 func Bytes(b int64, t language.Tag) string {
-	return New().Bytes(b, t)
+	return New().Binary(b, t)
+}
+
+// Binary formats bytes integer to localized readable string.
+func Binary(b int64, t language.Tag) string {
+	return New().Binary(b, t)
+}
+
+// Decimal formats bytes integer to localized readable string.
+func Decimal(b int64, t language.Tag) string {
+	return New().Decimal(b, t)
 }

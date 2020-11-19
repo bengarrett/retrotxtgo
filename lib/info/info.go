@@ -302,7 +302,7 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 	const channels = 7
 	ch := make(chan bool, channels)
 	go func() {
-		d.sauceIndex = sauce.Scan(data)
+		d.sauceIndex = sauce.Scan(data...)
 		if d.sauceIndex > 0 {
 			d.Sauce = sauce.Parse(data...)
 		}
