@@ -144,7 +144,7 @@ retrotxt create --layout=inline --font-embed
 - [ ] Convert ANSI text to HTML.
 - [ ] Convert BBS text to HTML.
 - [x] List or export (json, text, xml) meta details of a text file.
-- [ ] List or export SAUCE metadata of a file.
+- [x] List or export SAUCE metadata of a file.
 - [x] Transform the encoding of a text file. CP437 -> UTF8, UTF8 -> ISO8859-1 ...
 - [x] View any legacy encoded text file in a UTF8 terminal by converting on the fly.
 - [x] Extensive customisations through command flags or a configuration file with a setup.
@@ -158,10 +158,10 @@ retrotxt create --layout=inline --font-embed
 
 There are [downloads](https://github.com/bengarrett/retrotxtgo/releases/latest/) available for
 [Windows](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_windows.zip),
-[macOS](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_macos.zip),
+[macOS (intel)](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_macos.zip),
 [Linux](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_linux.tar.gz),
 [FreeBSD](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_freebsd.tar.gz) as well as for the
-[Raspberry Pi/ARM family](https://github.com/bengarrett/retrotxtgo/releases/latest/).
+[Raspberry Pi](https://github.com/bengarrett/retrotxtgo/releases/latest/).
 
 Otherwise these operating system specific install methods are available.
 
@@ -200,7 +200,7 @@ snap install retrotxt
 retrotxt version
 ```
 
-#### Raspberry Pi, Raspbian, ARM
+#### Raspberry Pi, Linux ARM
 
 Download the **deb** package for either the
 [Raspberry Pi](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_raspberry_pi.deb) <small>(ARMv7)</small>
@@ -214,7 +214,9 @@ dpkg -i retrotxt_raspberry_pi.deb
 retrotxt version
 ```
 
-#### Deb - Ubuntu, Mint, Debian
+#### Deb packager
+
+Used by, but not limited to Ubuntu, Mint, Debian
 
 ```sh
 wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_linux.deb
@@ -222,7 +224,9 @@ dpkg -i retrotxt_linux.deb
 retrotxt version
 ```
 
-#### RPM - Fedora, OpenSUSE, CentOS, RHEL
+#### RPM packager
+
+Used by, but not limited to Fedora, OpenSUSE, CentOS, RHEL
 
 ```sh
 wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_linux.rpm
@@ -277,94 +281,3 @@ file retrotxt.exe
 - [wide OS and CPU support](https://gist.github.com/asukakenji/f15ba7e588ac42795f421b48b8aede63)
 - simple, compact standard library and fast compiling
 - it is a language I know 😉
-
----
-
-### From here onwards the following text are developer notes that will eventually be removed
-
-### Shrink the binary
-
-```sh
-# strip the DWARF debugging information
-go build -ldflags '-w'
-
-# strip the symbol table
-go build -ldflags '-d'
-
-go build --race .
-# on Ubuntu in Go v1.14 results in a 29MB binary
-
-go build .
-# on Ubuntu in Go v1.14 results in a 21MB binary
-
-go build -ldflags '-w -d' .
-# on Ubuntu in Go v1.14 results in a 17MB binary
-```
-
-[UPX compression](https://upx.github.io/)
-
-```sh
-# upx 3.94 on ubuntu 18.04
-upx retrotxtgo # 17 -> 6.5MB file
-upx --best retrotxtgo # (slow) 17MB --> 6.45MB file (not worth the saving)
-upx --brute retrotxtgo # (very slow) 17MB --> 4.8MB file
-```
-
-#### References
-
-- [SAUCE](http://www.acid.org/info/sauce/sauce.htm)
-- packages: [Cobra](https://pkg.go.dev/github.com/spf13/cobra)/[Viper](https://pkg.go.dev/mod/github.com/spf13/viper)
-- go pkg: [utf8](https://golang.org/pkg/unicode/utf8/)/[unicode](https://golang.org/pkg/unicode/),
-  [x-text](https://pkg.go.dev/golang.org/x/text@v0.3.2?tab=subdirectories), [x-charmap](https://pkg.go.dev/golang.org/x/text@v0.3.2/encoding/charmap?tab=doc), [x-encoding](https://pkg.go.dev/golang.org/x/text@v0.3.2/encoding?tab=doc)
-
-### Go libraries
-
-- [Package xstrings: A collection of useful string functions in Go](https://github.com/huandu/xstrings)
-  includes center, capitalize, justify, reverse text.
-
-- [A collection of common regular expressions for Go](https://github.com/mingrammer/commonregex)
-  use for dynamically hyperlinking emails, links. wrap hash values around `<code>` tags. parse known ports.
-
-- [Devd - A local webserver for developers](https://github.com/cortesi/devd)
-  replacement for the current internal webserver?
-
----
-
-### Future CLI commands
-
-- [ ] add optional argument for destination (dir or file) that overrides the dir configuration.
-- - `retrotxt create somefile.txt . # would create index.html in the current directory`
-- - `retrotxt create somefile.txt somefile.html # create sometfile.htm`
-- [ ] add a flag to --export `create` command results to a tar or zip archive.
-- [ ] option for generated HTML naming convention, either use index.html ... index_1.html, index_2.html etc.
-      or filename.html, another-file-1.html, etc. When generating multiple HTML files, an index.html proof-sheet
-      should be created with hyperlinks to all the other files. Maybe list their file/sauce details and a screenshot.
-- [ ] both the `create/view` commands should support walking both directories and file archives.
-
----
-
-### TODOs - changes to the existing code
-
-- [ ] config shell should have a `--append/source/or` flag to save shell auto-completion?
-- [ ] scan for supported but current shell configuration.
-- [ ] scan for unique color codes like 24-bit, xterm and aix colors.
-- [ ] scan and linkify any http/s, ftp, mailto links in HTML.
-
-```sh
-// TODO: env
-// Indicates which language, character set, and sort order to use for messages, datatype conversions, and datetime formats.
-// 1. LC_NUMERIC="en_GB.UTF-8"
-// 1. LC_TIME="en_GB.UTF-8"
-// 2. LC_ALL=""
-// 3. LANG=""
-// 4. LANGUAGE=""
-// 4. US
-```
-
----
-
-### Submission to distribution package managers
-
-[Chocolatey](https://chocolatey.org/docs/createpackages)
-
-Snap [snapcraft](https://snapcraft.io/first-snap#go), flathub is not for terminal apps.
