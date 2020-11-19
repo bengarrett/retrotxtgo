@@ -42,6 +42,18 @@ type DataTypes struct {
 // DataType is the type of data.
 type DataType uint
 
+const (
+	none DataType = iota
+	character
+	bitmap
+	vector
+	audio
+	binaryText
+	xBin
+	archive
+	executable
+)
+
 func (d DataType) String() string {
 	s := [...]string{
 		"undefined", "text", "bitmap graphic or animation", "vector graphic",
@@ -92,20 +104,20 @@ type ANSIFlag struct {
 	Info string `json:"interpretation"`
 }
 
-const (
-	none DataType = iota
-	character
-	bitmap
-	vector
-	audio
-	binaryText
-	xBin
-	archive
-	executable
-)
-
 // Character based files.
 type Character uint
+
+const (
+	ascii Character = iota
+	ansi
+	ansiMation
+	ripScript
+	pcBoard
+	avatar
+	html
+	source
+	tundraDraw
+)
 
 func (c Character) String() string {
 	return [...]string{
@@ -120,18 +132,6 @@ func (c Character) String() string {
 		"TundraDraw color text",
 	}[c]
 }
-
-const (
-	ascii Character = iota
-	ansi
-	ansiMation
-	ripScript
-	pcBoard
-	avatar
-	html
-	source
-	tundraDraw
-)
 
 // Desc is the character description.
 func (c Character) Desc() string {
@@ -178,6 +178,23 @@ func (c Character) info(t1, t2, t3 uint16, x string) string {
 // Bitmap graphic and animation files.
 type Bitmap uint
 
+const (
+	gif Bitmap = iota
+	pcx
+	lbm
+	tga
+	fli
+	flc
+	bmp
+	gl
+	dl
+	wpg
+	png
+	jpg
+	mpg
+	avi
+)
+
 func (b Bitmap) String() string {
 	return [...]string{
 		"GIF image",
@@ -195,23 +212,6 @@ func (b Bitmap) String() string {
 		"AVI video",
 	}[b]
 }
-
-const (
-	gif Bitmap = iota
-	pcx
-	lbm
-	tga
-	fli
-	flc
-	bmp
-	gl
-	dl
-	wpg
-	png
-	jpg
-	mpg
-	avi
-)
 
 // Vector graphic files.
 type Vector uint
@@ -294,32 +294,30 @@ func (a Audio) String() string {
 // BinaryText is a raw memory copy of a text mode screen.
 type BinaryText uint
 
+func (b BinaryText) String() string {
+	return "Binary text or a .BIN file"
+}
+
 // XBin or eXtended BinaryText files.
 type XBin uint
+
+func (x XBin) String() string {
+	return "Extended binary text or a XBin file"
+}
 
 // Archive and compressed files.
 type Archive uint
 
 const (
-	// ZIP originally from PKWare but now an open format.
 	zip Archive = iota
-	// ARJ Archive by Robert Jung.
 	arj
-	// LZH by Yoshizaki Haruyasu, also known as LHA.
 	lzh
-	// ARC by System Enhancement Associates.
 	arc
-	// TAR or a tarball is an open archive format.
 	tar
-	// ZOO format using LZW compression by Rahul Dhesi.
 	zoo
-	// RAR Roshal Archive by Eugene Roshal.
 	rar
-	// UC2 UltraCompressor II.
 	uc2
-	// PAK format is an extension of ARC also known as GSARC.
 	pak
-	// SQZ Squeeze It by Jonas Hammarberg.
 	sqz
 )
 
@@ -340,6 +338,10 @@ func (a Archive) String() string {
 
 // Executable program files.
 type Executable uint
+
+func (e Executable) String() string {
+	return "Executable program file"
+}
 
 type (
 	record   []byte
@@ -374,6 +376,8 @@ func (t tInfoS) String() string {
 	return s
 }
 
+// this sauce data struct intentionally shares the key names with the type key names.
+// so the `data.version` item uses the type named `version` which is a [2]byte value.
 type data struct {
 	id       id
 	version  version
@@ -565,16 +569,6 @@ func ansiAR(ar string) string {
 	default:
 		return "invalid value"
 	}
-}
-
-func fontName(t tInfoS) string {
-	const nul, space = 0, 32
-	for i, b := range t {
-		if b == nul {
-			t[i] = space
-		}
-	}
-	return strings.TrimSpace(fmt.Sprintf("%s", t))
 }
 
 // extract sauce record.
