@@ -127,8 +127,6 @@ func Print(filename, format string, i, length int) error {
 	if err := d.Read(filename); err != nil {
 		return err
 	}
-	// s := sauce.Names{Index: i, Length: length}
-	// s.Sauce(filename, format)
 	d.index, d.length = i, length
 	if IsText(d.Mime) {
 		var err error

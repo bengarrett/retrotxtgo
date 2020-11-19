@@ -15,7 +15,10 @@ import (
 
 // TODO: handle comments!!
 
-const sauceID = "SAUCE00"
+const (
+	sauceID = "SAUCE00"
+	invalid = "invalid value"
+)
 
 // Record layout for the SAUCE metadata.
 type Record struct {
@@ -110,7 +113,7 @@ type ANSIFlags struct {
 // Flags is the SAUCE Flags field.
 type Flags uint8
 
-// ANSIFlagB is the interpretion of the SAUCE Flags non-blink mode binary bit.
+// ANSIFlagB is the interpretation of the SAUCE Flags non-blink mode binary bit.
 type ANSIFlagB struct {
 	Flag bBit   `json:"flag"`
 	Info string `json:"interpretation"`
@@ -125,11 +128,11 @@ func (b bBit) String() string {
 	case "1":
 		return "non-blink mode"
 	default:
-		return "invalid value"
+		return invalid
 	}
 }
 
-// ANSIFlagLS is the interpretion of the SAUCE Flags letter spacing binary bits.
+// ANSIFlagLS is the interpretation of the SAUCE Flags letter spacing binary bits.
 type ANSIFlagLS struct {
 	Flag lsBit  `json:"flag"`
 	Info string `json:"interpretation"`
@@ -146,11 +149,11 @@ func (ls lsBit) String() string {
 	case "10":
 		return "select 9 pixel font"
 	default:
-		return "invalid value"
+		return invalid
 	}
 }
 
-// ANSIFlagAR is the interpretion of the SAUCE Flags aspect ratio binary bits.
+// ANSIFlagAR is the interpretation of the SAUCE Flags aspect ratio binary bits.
 type ANSIFlagAR struct {
 	Flag arBit  `json:"flag"`
 	Info string `json:"interpretation"`
@@ -167,7 +170,7 @@ func (ar arBit) String() string {
 	case "10":
 		return "square pixels"
 	default:
-		return "invalid value"
+		return invalid
 	}
 }
 
@@ -556,6 +559,7 @@ func (d *data) typeInfo() TypeInfos {
 	}
 	switch DataType(dt) {
 	case none:
+		return ti // golangci-lint deadcode placeholder
 	case character:
 		switch Character(ft) {
 		case ascii, ansi, ansiMation, pcBoard, avatar, tundraDraw:
@@ -565,24 +569,41 @@ func (d *data) typeInfo() TypeInfos {
 			ti.Info1.Info = "pixel width"
 			ti.Info2.Info = "character screen height"
 			ti.Info3.Info = "number of colors"
+		case html, source:
+			return ti
 		}
 	case bitmap:
-		ti.Info1.Info = "pixel width"
-		ti.Info2.Info = "pixel height"
-		ti.Info3.Info = "pixel depth"
+		switch Bitmap(ft) {
+		case gif, pcx, lbm, tga, fli, flc, bmp, gl, dl, wpg, png, jpg, mpg, avi:
+			ti.Info1.Info = "pixel width"
+			ti.Info2.Info = "pixel height"
+			ti.Info3.Info = "pixel depth"
+		}
 	case vector:
+		switch Vector(ft) {
+		case dxf, dwg, wpvg, kinetix:
+			return ti
+		}
 	case audio:
 		switch Audio(ft) {
 		case smp8, smp8s, smp16, smp16s:
 			ti.Info1.Info = "sample rate"
 		case mod, composer669, stm, s3m, mtm, far, ult, amf, dmf, okt, rol, cmf, midi,
 			sadt, voc, wave, patch8, patch16, xm, hsc, it:
+			return ti
 		}
 	case binaryText:
+		return ti
 	case xBin:
 		ti.Info1.Info = "character width"
 		ti.Info2.Info = "number of lines"
-	case archive, executable:
+	case archive:
+		switch Archive(ft) {
+		case zip, arj, lzh, arc, tar, zoo, rar, uc2, pak, sqz:
+			return ti
+		}
+	case executable:
+		return ti
 	}
 	return ti
 }
@@ -772,7 +793,7 @@ func (r record) tInfoS(i int) tInfoS {
 // 		logs.Fatal("flush of tab writer failed", "", err)
 // 	}
 // 	fmt.Print(buf.String())
-// }
+// }.
 
 // Scan returns the position of the SAUCE00 ID or -1 if no ID exists.
 func Scan(b ...byte) (index int) {
