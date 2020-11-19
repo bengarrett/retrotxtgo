@@ -163,11 +163,8 @@ func (d *Detail) lines(filename string) (err error) {
 	return f.Close()
 }
 
-func (d *Detail) marshal(format string) error {
-	var (
-		b   []byte
-		err error
-	)
+func (d *Detail) marshal(format string) (err error) {
+	var b []byte
 	switch format {
 	case "color", "c", "":
 		b = d.printMarshal(true)
@@ -437,7 +434,7 @@ func (d *Detail) words(filename string) (err error) {
 }
 
 // Marshal the meta and operating system details of a file.
-func Marshal(filename, format string, i, length int) error {
+func Marshal(filename, format string, i, length int) (err error) {
 	var d Detail
 	if err := d.read(filename); err != nil {
 		return err
@@ -482,7 +479,7 @@ func Marshal(filename, format string, i, length int) error {
 			}
 			return nil
 		})
-		if err := g.Wait(); err != nil {
+		if err = g.Wait(); err != nil {
 			return err
 		}
 		d.mimeUnknown()
