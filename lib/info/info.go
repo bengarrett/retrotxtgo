@@ -32,25 +32,53 @@ type Detail struct {
 	Name       string       `json:"filename"`
 	Utf8       bool         `json:"utf8"`
 	Newline    [2]rune      `json:"newline"`
-	CharCount  int          `json:"characters"`
-	CtrlCount  int          `json:"ansiControls"`
-	WordCount  int          `json:"words"`
-	Size       string       `json:"size"`
-	Bytes      int64        `json:"bytes"`
+	Count      Stats        `json:"counts"`
+	Size       Sizes        `json:"size"`
 	Lines      int          `json:"lines"`
 	Width      int          `json:"width"`
-	Modified   time.Time    `json:"modified"`
-	MD5        string       `json:"checksumMD5"`
-	SHA256     string       `json:"checksumSHA256"`
-	Mime       string       `json:"mime"`
-	MimeMedia  string       `json:"-"`
-	MimeSub    string       `json:"-"`
-	MimeCommt  string       `json:"-"`
+	Modified   ModDates     `json:"modified"`
+	Sums       Checksums    `json:"checksums"`
+	Mime       Content      `json:"mime"`
 	Slug       string       `json:"slug"`
 	Sauce      sauce.Record `json:"sauce"`
 	index      int
 	length     int
 	sauceIndex int
+	//Mime       string       `json:"mime"`
+}
+
+// Stats are the text file content statistics and counts.
+type Stats struct {
+	CharCount int `json:"characters"`
+	CtrlCount int `json:"ansiControls"`
+	WordCount int `json:"words"`
+}
+
+// ModDates is the file last modified dates in multiple output formats.
+type ModDates struct {
+	Time  time.Time `json:"iso"`
+	Epoch int64     `json:"epoch"`
+}
+
+// Checksums and hashes of the file.
+type Checksums struct {
+	MD5    string `json:"MD5"`
+	SHA256 string `json:"SHA256"`
+}
+
+// Content metadata from either MIME content type and magic file data.
+type Content struct {
+	Type  string `json:"-"`
+	Media string `json:"media"`
+	Sub   string `json:"subMedia"`
+	Commt string `json:"comment"`
+}
+
+// Sizes of the file in multiples.
+type Sizes struct {
+	Bytes   int64  `json:"bytes"`
+	Decimal string `json:"decimal"`
+	Binary  string `json:"binary"`
 }
 
 // File data for XML encoding.
@@ -128,7 +156,7 @@ func Print(filename, format string, i, length int) error {
 		return err
 	}
 	d.index, d.length = i, length
-	if IsText(d.Mime) {
+	if IsText(d.Mime.Type) {
 		var err error
 		d.Newline, err = filesystem.ReadNewlines(filename)
 		if err != nil {
@@ -160,7 +188,7 @@ func (d *Detail) ctrls(filename string) (err error) {
 	if cnt, err = filesystem.Controls(f); err != nil {
 		return err
 	}
-	d.CtrlCount = cnt
+	d.Count.CtrlCount = cnt
 	return f.Close()
 }
 
@@ -188,7 +216,7 @@ func (d *Detail) width(filename string) (err error) {
 	if w, err = filesystem.Columns(f, d.Newline); err != nil {
 		return err
 	} else if w < 0 {
-		w = d.CharCount
+		w = d.Count.CharCount
 	}
 	d.Width = w
 	return f.Close()
@@ -211,7 +239,7 @@ func (d *Detail) words(filename string) (err error) {
 			return err
 		}
 	}
-	d.WordCount = w
+	d.Count.WordCount = w
 	return f.Close()
 }
 
@@ -221,10 +249,10 @@ func Stdin(format string, b ...byte) error {
 	if err := d.parse(nil, b...); err != nil {
 		return err
 	}
-	if IsText(d.Mime) {
+	if IsText(d.Mime.Type) {
 		var err error
 		d.Newline = filesystem.Newlines(true, []rune(string(b))...)
-		if d.CtrlCount, err = filesystem.Controls(bytes.NewReader(b)); err != nil {
+		if d.Count.CtrlCount, err = filesystem.Controls(bytes.NewReader(b)); err != nil {
 			return err
 		}
 		if d.Lines, err = filesystem.Lines(bytes.NewReader(b), d.Newline); err != nil {
@@ -233,9 +261,9 @@ func Stdin(format string, b ...byte) error {
 		if d.Width, err = filesystem.Columns(bytes.NewReader(b), d.Newline); err != nil {
 			return err
 		} else if d.Width < 0 {
-			d.Width = d.CharCount
+			d.Width = d.Count.CharCount
 		}
-		if d.WordCount, err = filesystem.Words(bytes.NewReader(b)); err != nil {
+		if d.Count.WordCount, err = filesystem.Words(bytes.NewReader(b)); err != nil {
 			return err
 		}
 	}
@@ -309,12 +337,12 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 	go func() {
 		ms := mimesniffer.Sniff(data)
 		if strings.Contains(ms, ";") {
-			d.Mime = strings.Split(ms, ";")[0]
+			d.Mime.Type = strings.Split(ms, ";")[0]
 		} else {
-			d.Mime = ms
+			d.Mime.Type = ms
 		}
-		if IsText(d.Mime) {
-			if d.CharCount, err = filesystem.Runes(bytes.NewBuffer(data)); err != nil {
+		if IsText(d.Mime.Type) {
+			if d.Count.CharCount, err = filesystem.Runes(bytes.NewBuffer(data)); err != nil {
 				fmt.Printf("minesniffer errored, %s\n", err)
 			}
 		}
@@ -322,47 +350,42 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 	}()
 	go func() {
 		mm := mimemagic.MatchMagic(data)
-		d.MimeMedia = mm.Media
-		d.MimeSub = mm.Subtype
-		d.MimeCommt = mm.Comment
+		d.Mime.Media = mm.Media
+		d.Mime.Sub = mm.Subtype
+		d.Mime.Commt = mm.Comment
 		ch <- true
 	}()
 	go func() {
-		const kB = 1000
-		p := message.NewPrinter(Language())
-		// create a table of data
-		if stat != nil {
-			d.Bytes = stat.Size()
+		var standardInput os.FileInfo = nil
+		if stat != standardInput {
+			b := stat.Size()
+			d.Size.Bytes = b
+			d.Size.Binary = humanize.Binary(b, Language())
+			d.Size.Decimal = humanize.Decimal(b, Language())
 			d.Name = stat.Name()
-			d.Modified = stat.ModTime().UTC()
+			d.Modified.Time = stat.ModTime().UTC()
+			d.Modified.Epoch = stat.ModTime().Unix()
 			d.Slug = slugify.Slugify(stat.Name())
-			if stat.Size() < kB {
-				d.Size = p.Sprintf("%v bytes", p.Sprint(stat.Size()))
-			} else {
-				d.Size = p.Sprintf("%v (%v bytes)", humanize.Decimal(stat.Size(), Language()), p.Sprint(stat.Size()))
-			}
 		} else {
-			d.Bytes = int64(len(data))
+			b := int64(len(data))
+			d.Size.Bytes = b
+			d.Size.Binary = humanize.Binary(b, Language())
+			d.Size.Decimal = humanize.Decimal(b, Language())
 			d.Name = "n/a (stdin)"
 			d.Slug = "n/a"
-			d.Modified = time.Now()
-			l := d.Bytes
-			if l < kB {
-				d.Size = p.Sprintf("%v bytes", p.Sprint(l))
-			} else {
-				d.Size = p.Sprintf("%v (%v bytes)", humanize.Decimal(l, Language()), p.Sprint(l))
-			}
+			d.Modified.Time = time.Now()
+			d.Modified.Epoch = time.Now().Unix()
 		}
 		ch <- true
 	}()
 	go func() {
 		md5sum := md5.Sum(data)
-		d.MD5 = fmt.Sprintf("%x", md5sum)
+		d.Sums.MD5 = fmt.Sprintf("%x", md5sum)
 		ch <- true
 	}()
 	go func() {
 		shasum := sha256.Sum256(data)
-		d.SHA256 = fmt.Sprintf("%x", shasum)
+		d.Sums.SHA256 = fmt.Sprintf("%x", shasum)
 		ch <- true
 	}()
 	go func() {
@@ -405,17 +428,17 @@ func (d *Detail) Text(color bool) string {
 		{k: "filetype", v: d.comment()},
 		{k: "UTF-8", v: str.Bool(d.Utf8)},
 		{k: "newline", v: filesystem.Newline(d.Newline, true)},
-		{k: "characters", v: p.Sprint(d.CharCount)},
-		{k: "ANSI controls", v: p.Sprint(d.CtrlCount)},
-		{k: "words", v: p.Sprint(d.WordCount)},
-		{k: "size", v: d.Size},
+		{k: "characters", v: p.Sprint(d.Count.CharCount)},
+		{k: "ANSI controls", v: p.Sprint(d.Count.CtrlCount)},
+		{k: "words", v: p.Sprint(d.Count.WordCount)},
+		{k: "size", v: d.Size.Decimal},
 		{k: "lines", v: p.Sprint(d.Lines)},
 		{k: "width", v: p.Sprint(d.Width)},
-		{k: "modified", v: humanize.Datetime(DTFormat, d.Modified.UTC())},
-		{k: "MD5 checksum", v: d.MD5},
-		{k: "SHA256 checksum", v: d.SHA256},
-		{k: "media type", v: d.MimeMedia},
-		{k: "media subtype", v: d.MimeSub},
+		{k: "modified", v: humanize.Datetime(DTFormat, d.Modified.Time.UTC())},
+		{k: "MD5 checksum", v: d.Sums.MD5},
+		{k: "SHA256 checksum", v: d.Sums.SHA256},
+		{k: "media type", v: d.Mime.Media},
+		{k: "media subtype", v: d.Mime.Sub},
 		{k: "slug", v: d.Slug},
 	}
 	var buf bytes.Buffer
@@ -424,13 +447,13 @@ func (d *Detail) Text(color bool) string {
 	l := len(fmt.Sprintf(" filename%s%s", strings.Repeat(" ", 10), data[0].v))
 	fmt.Fprint(w, hr(l))
 	for _, x := range data {
-		if !IsText(d.Mime) {
+		if !IsText(d.Mime.Type) {
 			switch x.k {
 			case "UTF-8", "newline", "characters", "ANSI controls", "words", "lines", "width":
 				continue
 			}
 		} else if x.k == "ANSI controls" {
-			if d.CtrlCount == 0 {
+			if d.Count.CtrlCount == 0 {
 				continue
 			}
 		}
@@ -445,42 +468,44 @@ func (d *Detail) Text(color bool) string {
 	return buf.String()
 }
 
+// todo: update d.Mime.Cmmt
 func (d *Detail) comment() string {
-	if d.MimeCommt != "unknown" {
-		return d.MimeCommt
+	if d.Mime.Commt != "unknown" {
+		return d.Mime.Commt
 	}
-	if d.CtrlCount > 0 {
+	if d.Count.CtrlCount > 0 {
 		return "ANSI encoded text document"
 	}
 	switch d.Newline {
 	case [2]rune{21}, [2]rune{133}:
 		return "EBCDIC encoded text document"
 	}
-	if d.Mime == "application/octet-stream" {
-		if d.WordCount > 0 {
+	if d.Mime.Type == "application/octet-stream" {
+		if d.Count.WordCount > 0 {
+			// todo !utf8 check
 			return "US-ASCII encoded text document"
 		}
 	}
-	return d.MimeCommt
+	return d.Mime.Commt
 }
 
 // XML formats and returns the details of a file.
 func (d *Detail) XML() ([]byte, error) {
 	v := File{
-		Bytes:     d.Bytes,
-		CharCount: d.CharCount,
-		CtrlCount: d.CtrlCount,
+		Bytes:     d.Size.Bytes,
+		CharCount: d.Count.CharCount,
+		CtrlCount: d.Count.CtrlCount,
 		ID:        d.Slug,
 		Lines:     d.Lines,
-		MD5:       d.MD5,
-		Mime:      d.Mime,
-		Modified:  d.Modified,
+		MD5:       d.Sums.MD5,
+		Mime:      d.Mime.Type,
+		Modified:  d.Modified.Time,
 		Name:      d.Name,
-		SHA256:    d.SHA256,
-		Size:      d.Size,
+		SHA256:    d.Sums.SHA256,
+		Size:      d.Size.Decimal,
 		Utf8:      d.Utf8,
 		Width:     d.Width,
-		WordCount: d.WordCount,
+		WordCount: d.Count.WordCount,
 	}
 	return xml.MarshalIndent(v, "", "\t")
 }
