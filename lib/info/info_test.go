@@ -13,19 +13,11 @@ import (
 	"retrotxt.com/retrotxt/lib/filesystem"
 )
 
-func ExampleDetail_XML() {
-	tmp := sampleFile()
-	millennia(tmp)
-	var file Detail
-	if err := file.Read(tmp); err != nil {
+func millennia(name string) {
+	mtime := time.Date(2000, time.January, 1, 0, 0, 0, 0, time.UTC)
+	if err := os.Chtimes(name, mtime, mtime); err != nil {
 		log.Fatal(err)
 	}
-	data, _ := file.XML()
-	filesystem.Clean(tmp)
-	s := strings.ReplaceAll(string(data), "\t", "")
-	ln := strings.Split(s, "\n")
-	fmt.Println(ln[0])
-	// Output: <file id="info-test-txt">
 }
 
 var sampleFile = func() string {
@@ -37,7 +29,22 @@ var sampleFile = func() string {
 	return path
 }
 
-func TestIsText(t *testing.T) {
+func ExampleText() {
+	var file Detail
+	tmp := sampleFile()
+	millennia(tmp)
+	if err := file.read(tmp); err != nil {
+		log.Fatal(err)
+	}
+	data, _ := file.marshal("xml")
+	filesystem.Clean(tmp)
+	s := strings.ReplaceAll(string(data), "\t", "")
+	ln := strings.Split(s, "\n")
+	fmt.Println(ln[0])
+	// Output: <file utf8="true" id="info-test-txt">
+}
+
+func TestValidText(t *testing.T) {
 	tests := []struct {
 		name        string
 		contentType string
@@ -49,16 +56,18 @@ func TestIsText(t *testing.T) {
 		{"text", "text/plain", true},
 		{"js", "text/javascript", true},
 	}
+	var d Detail
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := IsText(tt.contentType); got != tt.want {
+			d.Mime.Type = tt.contentType
+			if got := d.validText(); got != tt.want {
 				t.Errorf("IsText() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_Print(t *testing.T) {
+func Test_Marshal(t *testing.T) {
 	tmp := sampleFile()
 	type args struct {
 		filename string
@@ -80,7 +89,7 @@ func Test_Print(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := Print(tt.args.filename, tt.args.format, 0, 0); (err != nil) != tt.wantErr {
+			if err := Marshal(tt.args.filename, tt.args.format, 0, 0); (err != nil) != tt.wantErr {
 				t.Errorf("Print() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -88,32 +97,32 @@ func Test_Print(t *testing.T) {
 	filesystem.Clean(tmp)
 }
 
-func Test_File(t *testing.T) {
+func Test_read(t *testing.T) {
 	tmp := sampleFile()
 	fmt.Println("path:", tmp)
 	var got Detail
-	err := got.Read(tmp)
+	err := got.read(tmp)
 	if err != nil {
-		t.Errorf("Read() = %v, want %v", err, nil)
+		t.Errorf("read() = %v, want %v", err, nil)
 	}
 	if got.Size.Bytes != 57 {
-		t.Errorf("Read() = %v, want %v", got.Size.Bytes, 57)
+		t.Errorf("read() = %v, want %v", got.Size.Bytes, 57)
 	}
 	if got.Name != "info_test.txt" {
-		t.Errorf("Read() = %v, want %v", got.Name, "info_test.txt")
+		t.Errorf("read() = %v, want %v", got.Name, "info_test.txt")
 	}
 	if got.Slug != "info-test-txt" {
-		t.Errorf("Read() = %v, want %v", got.Slug, "info-test-txt")
+		t.Errorf("read() = %v, want %v", got.Slug, "info-test-txt")
 	}
-	if got.Mime != "text/plain" {
-		t.Errorf("Read() = %v, want %v", got.Mime, "text/plain")
+	if got.Mime.Type != "text/plain" {
+		t.Errorf("read() = %v, want %v", got.Mime, "text/plain")
 	}
 	if got.Utf8 != true {
-		t.Errorf("Read() = %v, want %v", got.Utf8, true)
+		t.Errorf("read() = %v, want %v", got.Utf8, true)
 	}
 	const want = "883643f5e9ed278732c92d9b6f834b96"
 	if got.Sums.MD5 != want {
-		t.Errorf("Read() = %v, want %v", got.Sums.MD5, want)
+		t.Errorf("read() = %v, want %v", got.Sums.MD5, want)
 	}
 	filesystem.Clean(tmp)
 }
@@ -147,52 +156,47 @@ func Test_parse(t *testing.T) {
 				t.Errorf("parse() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got.CharCount, tt.want) {
-				t.Errorf("parse() = %v, want %v", got.CharCount, tt.want)
+			if !reflect.DeepEqual(got.Count.Chars, tt.want) {
+				t.Errorf("parse() = %v, want %v", got.Count.Chars, tt.want)
 			}
 		})
 	}
 	filesystem.Clean(tmp)
 }
 
-func Test_JSON(t *testing.T) {
+func Test_marshal_json(t *testing.T) {
 	tests := []struct {
 		name   string
 		d      Detail
-		indent bool
+		format string
 		want   bool
 	}{
-		{"no indent", Detail{}, false, true},
-		{"indent", Detail{}, true, true},
+		{"no indent", Detail{}, "jm", true},
+		{"indent", Detail{}, "json", true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := json.Valid(tt.d.JSON(tt.indent)); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("JSON() = %v, want %v", got, tt.want)
+			j, _ := tt.d.marshal(tt.format)
+			if got := json.Valid(j); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("marshal() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_Text(t *testing.T) {
-	const want = 655
+func Test_marshal_text(t *testing.T) {
+	const want = 667
 	var d Detail
 	tmp := sampleFile()
-	err := d.Read(tmp)
+	err := d.read(tmp)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	if got := len(d.Text(false)); got != want {
+	b, _ := d.marshal("text")
+	if got := len(b); got != want {
 		fmt.Printf("%+v\n", tmp)
-		t.Errorf("Text() = %v, want %v", got, want)
+		t.Errorf("marshal() = %v, want %v", got, want)
 	}
 	filesystem.Clean(tmp)
-}
-
-func millennia(name string) {
-	mtime := time.Date(2000, time.January, 1, 0, 0, 0, 0, time.UTC)
-	if err := os.Chtimes(name, mtime, mtime); err != nil {
-		log.Fatal(err)
-	}
 }
