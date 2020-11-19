@@ -33,6 +33,7 @@ type Record struct {
 	Data     DataTypes `json:"dataType"  xml:"data_type"`
 	File     FileTypes `json:"fileType" xml:"file_type"`
 	Info     TypeInfos `json:"typeInfo"  xml:"type_info"`
+	Desc     string    `json:"-" xml:"-"`
 }
 
 // Dates in multiple output formats.
@@ -72,10 +73,10 @@ const (
 
 func (d DataType) String() string {
 	s := [...]string{
-		"undefined", "text", "bitmap graphic or animation", "vector graphic",
+		"undefined", "text or character stream", "bitmap graphic or animation", "vector graphic",
 		"audio or music", "binary text", "extended binary text", "archive", "executable",
 	}[d]
-	return fmt.Sprintf("%s file", s)
+	return fmt.Sprintf("%s", s)
 }
 
 // FileTypes includes both the SAUCE FileType value and name.
@@ -236,33 +237,6 @@ func (c Character) Desc() string {
 		"Source code for a programming language.",
 		"TundraDraw files, like ANSI, but with a custom palette.",
 	}[c]
-}
-
-func (c Character) info(t1, t2, t3 uint16, x string) string {
-	switch c {
-	case ascii, ansi, ansiMation:
-		if t1 == 0 && t2 == 0 {
-			return ""
-		}
-		s := fmt.Sprintf("character width: %d, lines: %d", t1, t2)
-		if x != "" {
-			return fmt.Sprintf("%s; %s", s, x)
-		}
-		return s
-	case ripScript:
-		if t1 == 0 && t2 == 0 && t3 == 0 {
-			return ""
-		}
-		return fmt.Sprintf("pixel width: %d, height: %d, colors: %d", t1, t2, t3)
-	case pcBoard, avatar, tundraDraw:
-		if t1 == 0 && t2 == 0 {
-			return ""
-		}
-		return fmt.Sprintf("character width: %d, lines: %d", t1, t2)
-	case html, source:
-		return ""
-	}
-	return "charcter error"
 }
 
 // Bitmap graphic and animation files.
@@ -566,6 +540,19 @@ func (d *data) parseDate() (t time.Time) {
 	return time.Date(dy, time.Month(dm), dd, 0, 0, 0, 0, time.UTC)
 }
 
+func (d data) description() string {
+	dt, ft := unsignedBinary1(d.datatype), unsignedBinary1(d.filetype)
+	c := Character(ft)
+	switch DataType(dt) {
+	case character:
+		switch c {
+		case ascii, ansi, ansiMation, ripScript, pcBoard, avatar, html, source, tundraDraw:
+			return c.Desc()
+		}
+	}
+	return ""
+}
+
 func (d *data) typeInfo() TypeInfos {
 	dt, ft := unsignedBinary1(d.datatype), unsignedBinary1(d.filetype)
 	t1, t2, t3 := unsignedBinary2(d.tinfo1), unsignedBinary2(d.tinfo2), unsignedBinary2(d.tinfo3)
@@ -837,6 +824,7 @@ func Parse(data ...byte) Record {
 		Data:     d.dataType(),
 		File:     d.fileType(),
 		Info:     d.typeInfo(),
+		Desc:     d.description(),
 	}
 }
 

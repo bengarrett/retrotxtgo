@@ -420,6 +420,7 @@ func (d *Detail) Text(color bool) string {
 		{k: "original size", v: d.Sauce.FileSize.Decimal},
 		{k: "file type", v: d.Sauce.File.Name},
 		{k: "data type", v: d.Sauce.Data.Name},
+		{k: "description", v: d.Sauce.Desc},
 		{k: d.Sauce.Info.Info1.Info, v: fmt.Sprint(d.Sauce.Info.Info1.Value)},
 		{k: d.Sauce.Info.Info2.Info, v: fmt.Sprint(d.Sauce.Info.Info2.Value)},
 		{k: d.Sauce.Info.Info3.Info, v: fmt.Sprint(d.Sauce.Info.Info3.Value)},
@@ -440,6 +441,9 @@ func (d *Detail) Text(color bool) string {
 			if d.Count.CtrlCount == 0 {
 				continue
 			}
+		}
+		if x.k == "description" && x.v == "" {
+			continue
 		}
 		if x.k == d.Sauce.Info.Info1.Info && d.Sauce.Info.Info1.Value == 0 {
 			continue
