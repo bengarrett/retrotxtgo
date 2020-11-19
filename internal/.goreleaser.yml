@@ -18,7 +18,7 @@ snapshot:
 changelog:
   skip: true
 builds:
-  # upx compressed binaries
+  # windows and linux compressed binaries
   - main: ../main.go
     id: retrotxt
     binary: retrotxt
@@ -27,27 +27,26 @@ builds:
       - windows
     goarch:
       - amd64
+    hooks:
+      post:
+        # for quick build speed avoid using upx compression flags (https://upx.github.io/)
+        # --best (compress a further 500kB) or --brute (compress a further 1.2MB)
+        - upx -qq "{{ .Path }}"
+  # raspberry pi
+  - main: ../main.go
+    id: pi
+    binary: retrotxt
+    goos:
+      - linux
+    goarch:
       - arm
     goarm:
       - 6
       - 7
-    ignore:
-      - goos: freebsd
-        goarch: arm
     hooks:
       post:
-        # -qq suppresses errors as freebsd is not supported
         - upx -qq "{{ .Path }}"
-  # no upx compression
-  - main: ../main.go
-    id: uncompressed
-    binary: retrotxt
-    goos:
-      - darwin
-      - freebsd
-    goarch:
-      - amd64
-  # linux for rpm
+  # linux for rpm and apk alpine linux
   - main: ../main.go
     id: rpm
     binary: retrotxt
@@ -57,20 +56,35 @@ builds:
       - amd64
     hooks:
       post:
-        # -qq suppresses errors as freebsd is not supported
         - upx -qq "{{ .Path }}"
+  # freebsd with no upx compression
+  - main: ../main.go
+    id: uncompressed
+    binary: retrotxt
+    goos:
+      - freebsd
+    goarch:
+      - amd64
+  # macos with no upx compression
+  - main: ../main.go
+    id: macos
+    binary: retrotxt
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64 # Go v1.60 should have M1 support?
 archives:
   - name_template: "retrotxt_{{ if .Arm }}raspberry{{ .Arm }}{{ else }}{{ .Os }}{{ end }}"
     builds:
       - retrotxt
       - uncompressed
+      - macos
     replacements:
       darwin: macos
       freebsd: freebsd
       linux: linux
       windows: windows
-      6: "_pi-zero" # VFPv1
-      7: "_pi" # VFPv3
       386: ""
       amd64: ""
     format_overrides:
@@ -80,7 +94,7 @@ archives:
         format: zip
 brews:
   - skip_upload: auto
-    github:
+    tap:
       owner: bengarrett
       name: homebrew-tap
     folder: Formula
@@ -91,6 +105,7 @@ nfpms:
     file_name_template: "retrotxt_{{ if .Arm }}raspberry{{ .Arm }}{{ else }}{{ .Os }}{{ end }}"
     builds:
       - retrotxt
+      - pi
     vendor: Ben Garrett
     homepage: https://retrotxt.com/go
     maintainer: Ben Garrett <code.by.ben@gmail.com>
@@ -111,6 +126,7 @@ nfpms:
     description: RetroTxt is the tool that turns ANSI, ASCII, NFO text into in-browser HTML.
     license: LGPL 3.0
     formats:
+      - apk
       - rpm
 scoop:
   bucket:
