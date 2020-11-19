@@ -4,7 +4,6 @@ package sauce
 import (
 	"bytes"
 	"encoding/binary"
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -19,18 +18,7 @@ import (
 
 const sauceID = "SAUCE00"
 
-var (
-	// ErrFmt format error.
-	ErrFmt = errors.New("format is not known")
-	// ErrNoName name cannot be empty.
-	ErrNoName = errors.New("name cannot be empty")
-	// ErrNoDir directories not usable with command.
-	ErrNoDir = errors.New("directories are not usable with this command")
-	// ErrNoFile file does not exist.
-	ErrNoFile = errors.New("file does not exist")
-)
-
-// Record layout for printing.
+// Record layout for the SAUCE metadata.
 type Record struct {
 	ID       string    `json:"id"`
 	Version  string    `json:"version"`
@@ -45,16 +33,33 @@ type Record struct {
 	Info     TypeInfos `json:"typeInfo"`
 }
 
+// DataTypes includes both the SAUCE DataType value and name.
 type DataTypes struct {
 	Type DataType `json:"type"`
 	Name string   `json:"name"`
 }
 
+// DataType is the type of data.
+type DataType uint
+
+func (d DataType) String() string {
+	s := [...]string{
+		"undefined", "text", "bitmap graphic or animation", "vector graphic",
+		"audio or music", "binary text", "extended binary text", "archive", "executable",
+	}[d]
+	return fmt.Sprintf("%s file", s)
+}
+
+// FileTypes includes both the SAUCE FileType value and name.
 type FileTypes struct {
 	Type FileType `json:"type"`
 	Name string   `json:"name"`
 }
 
+// FileType is the type of file.
+type FileType uint
+
+// TypeInfos includes the SAUCE fields dependant on DataType and FileType.
 type TypeInfos struct {
 	Info1 TypeInfo  `json:"1"`
 	Info2 TypeInfo  `json:"2"`
@@ -63,11 +68,13 @@ type TypeInfos struct {
 	Font  string    `json:"fontName"`
 }
 
+// TypeInfo includes the SAUCE TInfo value and meaning.
 type TypeInfo struct {
 	Value uint16 `json:"value"`
 	Info  string `json:"info"`
 }
 
+// ANSIFlags are the interpretation of the SAUCE Flags field.
 type ANSIFlags struct {
 	Decimal Flags    `json:"decimal"`
 	Binary  string   `json:"binary"`
@@ -76,35 +83,14 @@ type ANSIFlags struct {
 	AR      ANSIFlag `json:"aspectRatio"`
 }
 
+// Flags is the SAUCE Flags field.
 type Flags uint8
 
+// ANSIFlag is the interpretion of the SAUCE Flags binary bits.
 type ANSIFlag struct {
 	Flag string `json:"flag"`
 	Info string `json:"interpretation"`
 }
-
-type (
-	// DataType is the type of data.
-	DataType uint
-	// FileType is the type of file.
-	FileType uint
-	// Character based files.
-	Character uint
-	// Bitmap graphic and animation files.
-	Bitmap uint
-	// Vector graphic files.
-	Vector uint
-	// Audio or music files.
-	Audio uint
-	// BinaryText is a raw memory copy of a text mode screen.
-	BinaryText uint
-	// XBin or eXtended BinaryText files.
-	XBin uint
-	// Archive and compressed files.
-	Archive uint
-	// Executable program files.
-	Executable uint
-)
 
 const (
 	none DataType = iota
@@ -118,34 +104,8 @@ const (
 	executable
 )
 
-func (d DataType) String() string {
-	s := [...]string{
-		"undefined", "text", "bitmap graphic or animation", "vector graphic",
-		"audio or music", "binary text", "extended binary text", "archive", "executable",
-	}[d]
-	return fmt.Sprintf("%s file", s)
-}
-
-const (
-	// ASCII text file with no formatting codes or color codes.
-	ASCII Character = iota
-	// ANSI text file with coloring codes and cursor positioning.
-	ANSI
-	// ANSIMation are ANSI text files that rely on fixed screen sizes.
-	ANSIMation
-	// RIPScript are Remote Imaging Protocol graphics.
-	RIPScript
-	// PCBoard color codes and macros, and ANSI codes.
-	PCBoard
-	// Avatar color codes, and ANSi codes.
-	Avatar
-	// HTML markup files.
-	HTML
-	// Source code for a programming language.
-	Source
-	// TundraDraw files, like ANSI, but with a custom palette.
-	TundraDraw
-)
+// Character based files.
+type Character uint
 
 func (c Character) String() string {
 	return [...]string{
@@ -161,9 +121,36 @@ func (c Character) String() string {
 	}[c]
 }
 
+const (
+	ascii Character = iota
+	ansi
+	ansiMation
+	ripScript
+	pcBoard
+	avatar
+	html
+	source
+	tundraDraw
+)
+
+// Desc is the character description.
+func (c Character) Desc() string {
+	return [...]string{
+		"ASCII text file with no formatting codes or color codes.",
+		"ANSI text file with coloring codes and cursor positioning.",
+		"ANSIMation are ANSI text files that rely on fixed screen sizes.",
+		"RIPScript are Remote Imaging Protocol graphics.",
+		"PCBoard color codes and macros, and ANSI codes.",
+		"Avatar color codes, and ANSi codes.",
+		"HTML markup files.",
+		"Source code for a programming language.",
+		"TundraDraw files, like ANSI, but with a custom palette.",
+	}[c]
+}
+
 func (c Character) info(t1, t2, t3 uint16, x string) string {
 	switch c {
-	case ASCII, ANSI, ANSIMation:
+	case ascii, ansi, ansiMation:
 		if t1 == 0 && t2 == 0 {
 			return ""
 		}
@@ -172,52 +159,24 @@ func (c Character) info(t1, t2, t3 uint16, x string) string {
 			return fmt.Sprintf("%s; %s", s, x)
 		}
 		return s
-	case RIPScript:
+	case ripScript:
 		if t1 == 0 && t2 == 0 && t3 == 0 {
 			return ""
 		}
 		return fmt.Sprintf("pixel width: %d, height: %d, colors: %d", t1, t2, t3)
-	case PCBoard, Avatar, TundraDraw:
+	case pcBoard, avatar, tundraDraw:
 		if t1 == 0 && t2 == 0 {
 			return ""
 		}
 		return fmt.Sprintf("character width: %d, lines: %d", t1, t2)
-	case HTML, Source:
+	case html, source:
 		return ""
 	}
 	return "charcter error"
 }
 
-const (
-	// GIF Graphics Interchange Format.
-	GIF Bitmap = iota
-	// PCX ZSoft Paintbrush.
-	PCX
-	// LBM DeluxePaint LBM/IFF.
-	LBM
-	// TGA Targa true color.
-	TGA
-	// FLI Autodesk animation.
-	FLI
-	// FLC Autodesk animation.
-	FLC
-	// BMP Windows or OS/2 Bitmap.
-	BMP
-	// GL Grasp GL animation.
-	GL
-	// DL animation.
-	DL
-	// WPG WordPerfect Bitmap.
-	WPG
-	// PNG Portable Network Graphics.
-	PNG
-	// JPG JPEG File Interchange Format.
-	JPG
-	// MPG Moving Picture Experts Group.
-	MPG
-	// AVI Audio Video Interleave.
-	AVI
-)
+// Bitmap graphic and animation files.
+type Bitmap uint
 
 func (b Bitmap) String() string {
 	return [...]string{
@@ -238,75 +197,70 @@ func (b Bitmap) String() string {
 }
 
 const (
-	// DXF Drawing Exchange Format for AutoCAD and AutoDRAW CAD.
-	DXF Vector = iota
-	// DWG AutoCAD Drawing is the native binary format for AutoDesk CAD products.
-	DWG
-	// WPVG WordPerfect Graphics vector graphics (WPG).
-	WPVG
-	// Kinetix 3D Studio and 3D Studio MAX product line (3DS).
-	Kinetix
+	gif Bitmap = iota
+	pcx
+	lbm
+	tga
+	fli
+	flc
+	bmp
+	gl
+	dl
+	wpg
+	png
+	jpg
+	mpg
+	avi
+)
+
+// Vector graphic files.
+type Vector uint
+
+const (
+	dxf Vector = iota
+	dwg
+	wpvg
+	kinetix
 )
 
 func (v Vector) String() string {
 	return [...]string{
+		"AutoDesk CAD vector graphic",
 		"AutoDesk CAD vector graphic",
 		"WordPerfect vector graphic",
 		"3D Studio vector graphic",
 	}[v]
 }
 
+// Audio or music files.
+type Audio uint
+
 const (
-	// MOD NoiseTracker 4, 6 or 8 channels.
-	MOD Audio = iota
-	// Composer669 an 8 channel module by Renaissance (669).
-	Composer669
-	// STM Future Crew 4 channel ScreamTracker.
-	STM
-	// S3M Future Crew variable channel ScreamTracker 3.
-	S3M
-	// MTM Renaissance variable channel MultiTracker.
-	MTM
-	// FAR Farandole composer.
-	FAR
-	// ULT Ultra Tracker.
-	ULT
-	// AMF DMP/DSMI Advanced Module Format.
-	AMF
-	// DMF Delusion Digital Music Format (X-Tracker).
-	DMF
-	// OKT Oktalyzer.
-	OKT
-	// ROL AdLib ROL file (FM audio).
-	ROL
-	// CMF Creative Music File (FM audio).
-	CMF
-	// MID aka MIDI (Musical Instrument Digital Interface).
-	MID
-	// SADT SAdT composer (FM audio).
-	SADT
-	// VOC Creative Voice file.
-	VOC
-	// WAV Waveform Audio file format.
-	WAV
-	// SMP8 Raw, single channel 8-bit sample.
-	SMP8
-	// SMP8S Raw, stereo 8-bit sample.
-	SMP8S
-	// SMP16 Raw, single channel 16-bit sample.
-	SMP16
-	// SMP16S Raw, stereo 16-bit sample.
-	SMP16S
-	// PATCH8 8-bit patch file.
-	PATCH8
-	// PATCH16 16-bit patch file.
-	PATCH16
-	// XM FastTracker ][ module.
-	XM
-	// HSC Tracker (FM audio).
-	HSC
-	// IT Impulse Tracker.
-	IT
+	mod Audio = iota
+	composer669
+	stm
+	s3m
+	mtm
+	far
+	ult
+	amf
+	dmf
+	okt
+	rol
+	cmf
+	midi
+	sadt
+	voc
+	wave
+	smp8
+	smp8s
+	smp16
+	smp16s
+	patch8
+	patch16
+	xm
+	hsc
+	it
 )
 
 func (a Audio) String() string {
@@ -337,27 +291,36 @@ func (a Audio) String() string {
 	}[a]
 }
 
+// BinaryText is a raw memory copy of a text mode screen.
+type BinaryText uint
+
+// XBin or eXtended BinaryText files.
+type XBin uint
+
+// Archive and compressed files.
+type Archive uint
+
 const (
 	// ZIP originally from PKWare but now an open format.
-	ZIP Archive = iota
+	zip Archive = iota
 	// ARJ Archive by Robert Jung.
-	ARJ
+	arj
 	// LZH by Yoshizaki Haruyasu, also known as LHA.
-	LZH
+	lzh
 	// ARC by System Enhancement Associates.
-	ARC
+	arc
 	// TAR or a tarball is an open archive format.
-	TAR
+	tar
 	// ZOO format using LZW compression by Rahul Dhesi.
-	ZOO
+	zoo
 	// RAR Roshal Archive by Eugene Roshal.
-	RAR
+	rar
 	// UC2 UltraCompressor II.
-	UC2
+	uc2
 	// PAK format is an extension of ARC also known as GSARC.
-	PAK
+	pak
 	// SQZ Squeeze It by Jonas Hammarberg.
-	SQZ
+	sqz
 )
 
 func (a Archive) String() string {
@@ -374,6 +337,9 @@ func (a Archive) String() string {
 		"Squeeze It compressed archive",
 	}[a]
 }
+
+// Executable program files.
+type Executable uint
 
 type (
 	record   []byte
@@ -394,11 +360,19 @@ type (
 	comment  [64]byte
 	tFlags   [1]byte
 	tInfoS   [22]byte
-	// ansiflags
-	aspectRatio   [2]string
-	letterSpacing [2]string
-	nonBlinkMode  [1]string
 )
+
+func (t tInfoS) String() string {
+	const nul = 0
+	s := ""
+	for _, b := range t {
+		if b == nul {
+			continue
+		}
+		s += string(b)
+	}
+	return s
+}
 
 type data struct {
 	id       id
@@ -434,9 +408,6 @@ func (d *data) fileType() FileTypes {
 		return FileTypes{FileType(none), none.String()}
 	case character:
 		c := Character(file)
-		// if s := strings.TrimSpace(fmt.Sprintf("%s", d.tInfoS)); s != "" {
-		// 	return fmt.Sprintf("%s, %s", s, c.String())
-		// }
 		return FileTypes{FileType(c), c.String()}
 	case bitmap:
 		b := Bitmap(file)
@@ -448,9 +419,6 @@ func (d *data) fileType() FileTypes {
 		a := Audio(file)
 		return FileTypes{FileType(a), a.String()}
 	case binaryText:
-		// if s := strings.TrimSpace(fmt.Sprintf("%s", d.tInfoS)); s != "" {
-		// 	return fmt.Sprintf("%s, %s", s, binaryText.String())
-		// }
 		return FileTypes{FileType(binaryText), binaryText.String()}
 	case xBin:
 		return FileTypes{FileType(xBin), xBin.String()}
@@ -499,22 +467,21 @@ func (d *data) typeInfo() TypeInfos {
 	dt, ft := unsignedBinary1(d.datatype), unsignedBinary1(d.filetype)
 	t1, t2, t3 := unsignedBinary2(d.tinfo1), unsignedBinary2(d.tinfo2), unsignedBinary2(d.tinfo3)
 	flag := unsignedBinary1(d.tFlags)
-	font := fmt.Sprintf("%v", d.tInfoS)
 	ti := TypeInfos{
 		TypeInfo{t1, ""},
 		TypeInfo{t2, ""},
 		TypeInfo{t3, ""},
 		ansiFlags(Flags(flag)),
-		font,
+		d.tInfoS.String(),
 	}
 	switch DataType(dt) {
 	case none:
 	case character:
 		switch Character(ft) {
-		case ASCII, ANSI, ANSIMation, PCBoard, Avatar, TundraDraw:
+		case ascii, ansi, ansiMation, pcBoard, avatar, tundraDraw:
 			ti.Info1.Info = "character width"
 			ti.Info2.Info = "number of lines"
-		case RIPScript:
+		case ripScript:
 			ti.Info1.Info = "pixel width"
 			ti.Info2.Info = "character screen height"
 			ti.Info3.Info = "number of colors"
@@ -526,10 +493,10 @@ func (d *data) typeInfo() TypeInfos {
 	case vector:
 	case audio:
 		switch Audio(ft) {
-		case SMP8, SMP8S, SMP16, SMP16S:
+		case smp8, smp8s, smp16, smp16s:
 			ti.Info1.Info = "sample rate"
-		case MOD, Composer669, STM, S3M, MTM, FAR, ULT, AMF, DMF, OKT, ROL, CMF, MID,
-			SADT, VOC, WAV, PATCH8, PATCH16, XM, HSC, IT:
+		case mod, composer669, stm, s3m, mtm, far, ult, amf, dmf, okt, rol, cmf, midi,
+			sadt, voc, wave, patch8, patch16, xm, hsc, it:
 		}
 	case binaryText:
 	case xBin:
@@ -598,6 +565,16 @@ func ansiAR(ar string) string {
 	default:
 		return "invalid value"
 	}
+}
+
+func fontName(t tInfoS) string {
+	const nul, space = 0, 32
+	for i, b := range t {
+		if b == nul {
+			t[i] = space
+		}
+	}
+	return strings.TrimSpace(fmt.Sprintf("%s", t))
 }
 
 // extract sauce record.
