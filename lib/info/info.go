@@ -14,7 +14,6 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/aofei/mimesniffer"
 	c "github.com/gookit/color"
 	"github.com/mozillazg/go-slugify"
 	"github.com/zRedShift/mimemagic"
@@ -81,34 +80,18 @@ type Sizes struct {
 	Binary  string `json:"binary" xml:"binary,attr"`
 }
 
-// File data for XML encoding.
-type File struct {
-	XMLName   xml.Name  `xml:"file"`
-	ID        string    `xml:"id,attr"`
-	Name      string    `xml:"name"`
-	Mime      string    `xml:"content>mime"`
-	Utf8      bool      `xml:"content>utf8"`
-	Bytes     int64     `xml:"size>bytes"`
-	Size      string    `xml:"size>value"`
-	Lines     int       `xml:"size>lines"`
-	Width     int       `xml:"size>width"`
-	CharCount int       `xml:"size>character-count"`
-	CtrlCount int       `xml:"size>ansi-control-count"`
-	WordCount int       `xml:"size>word-count"`
-	MD5       string    `xml:"checksum>md5"`
-	SHA256    string    `xml:"checksum>sha256"`
-	Modified  time.Time `xml:"modified"`
-}
-
 // Names index and totals.
 type Names struct {
 	Index  int
 	Length int
 }
 
-// DTFormat is the datetime format.
-// DMY12, YMD12, MDY12, DMY24, YMD24, MDY24.
-const DTFormat = "DMY24"
+const (
+	// DTFormat is the date-time format.
+	DTFormat = "DMY24"
+	// DFormat is the date format.
+	DFormat = "DMY"
+)
 
 var (
 	// ErrFmt format error.
@@ -162,18 +145,23 @@ func Print(filename, format string, i, length int) error {
 		if err != nil {
 			return err
 		}
+
 		if err := d.ctrls(filename); err != nil {
 			return err
 		}
+
 		if err := d.lines(filename); err != nil {
 			return err
 		}
+
 		if err := d.width(filename); err != nil {
 			return err
 		}
+
 		if err := d.words(filename); err != nil {
 			return err
 		}
+
 	}
 	return d.format(format)
 }
@@ -333,7 +321,7 @@ func (d *Detail) Read(name string) (err error) {
 
 // parse fileinfo and file content.
 func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
-	const channels = 7
+	const channels = 6
 	ch := make(chan bool, channels)
 	go func() {
 		d.sauceIndex = sauce.Scan(data...)
@@ -343,24 +331,16 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 		ch <- true
 	}()
 	go func() {
-		ms := mimesniffer.Sniff(data)
-		if strings.Contains(ms, ";") {
-			d.Mime.Type = strings.Split(ms, ";")[0]
-		} else {
-			d.Mime.Type = ms
-		}
+		mm := mimemagic.MatchMagic(data)
+		d.Mime.Media = mm.Media
+		d.Mime.Sub = mm.Subtype
+		d.Mime.Type = fmt.Sprintf("%s/%s", mm.Media, mm.Subtype)
+		d.Mime.Commt = mm.Comment
 		if IsText(d.Mime.Type) {
 			if d.Count.CharCount, err = filesystem.Runes(bytes.NewBuffer(data)); err != nil {
 				fmt.Printf("minesniffer errored, %s\n", err)
 			}
 		}
-		ch <- true
-	}()
-	go func() {
-		mm := mimemagic.MatchMagic(data)
-		d.Mime.Media = mm.Media
-		d.Mime.Sub = mm.Subtype
-		d.Mime.Commt = mm.Comment
 		ch <- true
 	}()
 	go func() {
@@ -400,7 +380,7 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 		d.Utf8 = utf8.Valid(data)
 		ch <- true
 	}()
-	_, _, _, _, _, _, _ = <-ch, <-ch, <-ch, <-ch, <-ch, <-ch, <-ch
+	_, _, _, _, _, _ = <-ch, <-ch, <-ch, <-ch, <-ch, <-ch
 	return err
 }
 
@@ -430,9 +410,20 @@ func (d *Detail) Text(color bool) string {
 		{k: "modified", v: humanize.Datetime(DTFormat, d.Modified.Time.UTC())},
 		{k: "MD5 checksum", v: d.Sums.MD5},
 		{k: "SHA256 checksum", v: d.Sums.SHA256},
-		{k: "media type", v: d.Mime.Media},
-		{k: "media subtype", v: d.Mime.Sub},
+		{k: "media mime type", v: d.Mime.Type},
 		{k: "slug", v: d.Slug},
+		// sauce data
+		{k: "title", v: d.Sauce.Title},
+		{k: "author", v: d.Sauce.Author},
+		{k: "group", v: d.Sauce.Group},
+		{k: "date", v: humanize.Date(DFormat, d.Sauce.Date.Time.UTC())},
+		{k: "original size", v: d.Sauce.FileSize.Decimal},
+		{k: "file type", v: d.Sauce.File.Name},
+		{k: "data type", v: d.Sauce.Data.Name},
+		{k: d.Sauce.Info.Info1.Info, v: fmt.Sprint(d.Sauce.Info.Info1.Value)},
+		{k: d.Sauce.Info.Info2.Info, v: fmt.Sprint(d.Sauce.Info.Info2.Value)},
+		{k: d.Sauce.Info.Info3.Info, v: fmt.Sprint(d.Sauce.Info.Info3.Value)},
+		{k: "interpretation", v: d.Sauce.Info.Flags.String()},
 	}
 	var buf bytes.Buffer
 	w := new(tabwriter.Writer)
@@ -450,7 +441,25 @@ func (d *Detail) Text(color bool) string {
 				continue
 			}
 		}
+		if x.k == d.Sauce.Info.Info1.Info && d.Sauce.Info.Info1.Value == 0 {
+			continue
+		}
+		if x.k == d.Sauce.Info.Info2.Info && d.Sauce.Info.Info2.Value == 0 {
+			continue
+		}
+		if x.k == d.Sauce.Info.Info3.Info && d.Sauce.Info.Info3.Value == 0 {
+			continue
+		}
+		if x.k == "interpretation" && x.v == "" {
+			continue
+		}
 		fmt.Fprintf(w, "\t %s\t  %s\n", x.k, info(x.v))
+		if x.k == "slug" {
+			if d.sauceIndex <= 0 {
+				break
+			}
+			fmt.Fprint(w, "\t \t   -───-\n")
+		}
 	}
 	if d.index == d.length {
 		fmt.Fprint(w, hr(l))
