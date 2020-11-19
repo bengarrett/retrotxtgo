@@ -29,56 +29,56 @@ import (
 
 // Detail of a file.
 type Detail struct {
-	Name       string       `json:"filename"`
-	Utf8       bool         `json:"utf8"`
-	Newline    [2]rune      `json:"newline"`
-	Count      Stats        `json:"counts"`
-	Size       Sizes        `json:"size"`
-	Lines      int          `json:"lines"`
-	Width      int          `json:"width"`
-	Modified   ModDates     `json:"modified"`
-	Sums       Checksums    `json:"checksums"`
-	Mime       Content      `json:"mime"`
-	Slug       string       `json:"slug"`
-	Sauce      sauce.Record `json:"sauce"`
+	XMLName    xml.Name     `json:"-" xml:"file"`
+	Name       string       `json:"filename" xml:"name"`
+	Utf8       bool         `json:"utf8" xml:"utf8,attr"`
+	Newline    [2]rune      `json:"newline" xml:"newline"` // TODO: improve xml handling
+	Count      Stats        `json:"counts" xml:"counts"`
+	Size       Sizes        `json:"size" xml:"size"`
+	Lines      int          `json:"lines" xml:"lines"`
+	Width      int          `json:"width" xml:"width"`
+	Modified   ModDates     `json:"modified" xml:"last_modified"`
+	Sums       Checksums    `json:"checksums" xml:"checksums"`
+	Mime       Content      `json:"mime" xml:"mime"`
+	Slug       string       `json:"slug" xml:"id,attr"`
+	Sauce      sauce.Record `json:"sauce" xml:"sauce"`
 	index      int
 	length     int
 	sauceIndex int
-	//Mime       string       `json:"mime"`
 }
 
 // Stats are the text file content statistics and counts.
 type Stats struct {
-	CharCount int `json:"characters"`
-	CtrlCount int `json:"ansiControls"`
-	WordCount int `json:"words"`
+	CharCount int `json:"characters" xml:"characters"`
+	CtrlCount int `json:"ansiControls" xml:"ansi_controls"`
+	WordCount int `json:"words" xml:"words"`
 }
 
 // ModDates is the file last modified dates in multiple output formats.
 type ModDates struct {
-	Time  time.Time `json:"iso"`
-	Epoch int64     `json:"epoch"`
+	Time  time.Time `json:"iso" xml:"date"`
+	Epoch int64     `json:"epoch" xml:"epoch,attr"`
 }
 
 // Checksums and hashes of the file.
 type Checksums struct {
-	MD5    string `json:"MD5"`
-	SHA256 string `json:"SHA256"`
+	MD5    string `json:"MD5" xml:"md5"`
+	SHA256 string `json:"SHA256" xml:"sha256"`
 }
 
 // Content metadata from either MIME content type and magic file data.
 type Content struct {
-	Type  string `json:"-"`
-	Media string `json:"media"`
-	Sub   string `json:"subMedia"`
-	Commt string `json:"comment"`
+	Type  string `json:"-" xml:"-"`
+	Media string `json:"media" xml:"media"`
+	Sub   string `json:"subMedia" xml:"sub_media"`
+	Commt string `json:"comment" xml:"comment"`
 }
 
 // Sizes of the file in multiples.
 type Sizes struct {
-	Bytes   int64  `json:"bytes"`
-	Decimal string `json:"decimal"`
-	Binary  string `json:"binary"`
+	Bytes   int64  `json:"bytes" xml:"bytes"`
+	Decimal string `json:"decimal" xml:"decimal,attr"`
+	Binary  string `json:"binary" xml:"binary,attr"`
 }
 
 // File data for XML encoding.
@@ -275,17 +275,25 @@ func (d *Detail) format(format string) error {
 	case "color", "c", "":
 		fmt.Printf("%s", d.Text(true))
 	case "json", "j":
-		fmt.Printf("%s\n", d.JSON(true))
+		b, err := json.MarshalIndent(d, "", "    ")
+		if err != nil {
+			return fmt.Errorf("detail json indent format: %w", err)
+		}
+		fmt.Printf("%s\n", b)
 	case "json.min", "jm":
-		fmt.Printf("%s\n", d.JSON(false))
+		b, err := json.Marshal(d)
+		if err != nil {
+			return fmt.Errorf("detail json format: %w", err)
+		}
+		fmt.Printf("%s\n", b)
 	case "text", "t":
 		fmt.Printf("%s", d.Text(false))
 	case "xml", "x":
-		data, err := d.XML()
+		b, err := xml.MarshalIndent(d, "", "\t")
 		if err != nil {
 			return fmt.Errorf("detail xml format: %w", err)
 		}
-		fmt.Printf("%s\n", data)
+		fmt.Printf("%s\n", b)
 	default:
 		return fmt.Errorf("detail format %q: %w", format, ErrFmt)
 	}
@@ -396,21 +404,6 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 	return err
 }
 
-// JSON format and returns the details of a file.
-func (d *Detail) JSON(indent bool) (js []byte) {
-	var err error
-	switch indent {
-	case true:
-		js, err = json.MarshalIndent(d, "", "    ")
-	default:
-		js, err = json.Marshal(d)
-	}
-	if err != nil {
-		logs.Fatal("info could not marshal", "json", err)
-	}
-	return js
-}
-
 // Text format and returns the details of a file.
 func (d *Detail) Text(color bool) string {
 	p := message.NewPrinter(Language())
@@ -487,25 +480,4 @@ func (d *Detail) comment() string {
 		}
 	}
 	return d.Mime.Commt
-}
-
-// XML formats and returns the details of a file.
-func (d *Detail) XML() ([]byte, error) {
-	v := File{
-		Bytes:     d.Size.Bytes,
-		CharCount: d.Count.CharCount,
-		CtrlCount: d.Count.CtrlCount,
-		ID:        d.Slug,
-		Lines:     d.Lines,
-		MD5:       d.Sums.MD5,
-		Mime:      d.Mime.Type,
-		Modified:  d.Modified.Time,
-		Name:      d.Name,
-		SHA256:    d.Sums.SHA256,
-		Size:      d.Size.Decimal,
-		Utf8:      d.Utf8,
-		Width:     d.Width,
-		WordCount: d.Count.WordCount,
-	}
-	return xml.MarshalIndent(v, "", "\t")
 }

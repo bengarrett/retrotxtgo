@@ -22,36 +22,36 @@ const (
 
 // Record layout for the SAUCE metadata.
 type Record struct {
-	ID       string    `json:"id"`
-	Version  string    `json:"version"`
-	Title    string    `json:"title"`
-	Author   string    `json:"author"`
-	Group    string    `json:"group"`
-	Date     Dates     `json:"date"`
-	FileSize Sizes     `json:"filesize"`
-	Data     DataTypes `json:"dataType"`
-	File     FileTypes `json:"fileType"`
-	Info     TypeInfos `json:"typeInfo"`
+	ID       string    `json:"id" xml:"id,attr"`
+	Version  string    `json:"version" xml:"version,attr"`
+	Title    string    `json:"title" xml:"title"`
+	Author   string    `json:"author" xml:"author"`
+	Group    string    `json:"group" xml:"group"`
+	Date     Dates     `json:"date" xml:"date"`
+	FileSize Sizes     `json:"filesize" xml:"filesize"`
+	Data     DataTypes `json:"dataType"  xml:"data_type"`
+	File     FileTypes `json:"fileType" xml:"file_type"`
+	Info     TypeInfos `json:"typeInfo"  xml:"type_info"`
 }
 
 // Dates in multiple output formats.
 type Dates struct {
-	Value string    `json:"value"`
-	Time  time.Time `json:"iso"`
-	Epoch int64     `json:"epoch"`
+	Value string    `json:"value" xml:"value"`
+	Time  time.Time `json:"iso" xml:"date"`
+	Epoch int64     `json:"epoch" xml:"epoch,attr"`
 }
 
 // Sizes of the file data in multiples.
 type Sizes struct {
-	Bytes   uint16 `json:"bytes"`
-	Decimal string `json:"decimal"`
-	Binary  string `json:"binary"`
+	Bytes   uint16 `json:"bytes" xml:"bytes"`
+	Decimal string `json:"decimal" xml:"decimal,attr"`
+	Binary  string `json:"binary" xml:"binary,attr"`
 }
 
 // DataTypes includes both the SAUCE DataType value and name.
 type DataTypes struct {
-	Type DataType `json:"type"`
-	Name string   `json:"name"`
+	Type DataType `json:"type" xml:"type"`
+	Name string   `json:"name" xml:"name"`
 }
 
 // DataType is the type of data.
@@ -79,8 +79,8 @@ func (d DataType) String() string {
 
 // FileTypes includes both the SAUCE FileType value and name.
 type FileTypes struct {
-	Type FileType `json:"type"`
-	Name string   `json:"name"`
+	Type FileType `json:"type" xml:"type"`
+	Name string   `json:"name" xml:"name"`
 }
 
 // FileType is the type of file.
@@ -88,26 +88,26 @@ type FileType uint
 
 // TypeInfos includes the SAUCE fields dependant on DataType and FileType.
 type TypeInfos struct {
-	Info1 TypeInfo  `json:"1"`
-	Info2 TypeInfo  `json:"2"`
-	Info3 TypeInfo  `json:"3"`
-	Flags ANSIFlags `json:"flags"`
-	Font  string    `json:"fontName"`
+	Info1 TypeInfo  `json:"1" xml:"1"`
+	Info2 TypeInfo  `json:"2" xml:"2"`
+	Info3 TypeInfo  `json:"3" xml:"3"`
+	Flags ANSIFlags `json:"flags" xml:"flags"`
+	Font  string    `json:"fontName" xml:"fontname"`
 }
 
 // TypeInfo includes the SAUCE TInfo value and meaning.
 type TypeInfo struct {
-	Value uint16 `json:"value"`
-	Info  string `json:"info"`
+	Value uint16 `json:"value" xml:"value"`
+	Info  string `json:"info" xml:"info,attr"`
 }
 
 // ANSIFlags are the interpretation of the SAUCE Flags field.
 type ANSIFlags struct {
-	Decimal Flags      `json:"decimal"`
-	Binary  string     `json:"binary"`
-	B       ANSIFlagB  `json:"nonBlinkMode"`
-	LS      ANSIFlagLS `json:"letterSpacing"`
-	AR      ANSIFlagAR `json:"aspectRatio"`
+	Decimal Flags      `json:"decimal" xml:"decimal,attr"`
+	Binary  string     `json:"binary" xml:"binary,attr"`
+	B       ANSIFlagB  `json:"nonBlinkMode" xml:"non_blink_mode"`
+	LS      ANSIFlagLS `json:"letterSpacing" xml:"letter_spacing"`
+	AR      ANSIFlagAR `json:"aspectRatio" xml:"aspect_ratio"`
 }
 
 // Flags is the SAUCE Flags field.
@@ -115,8 +115,8 @@ type Flags uint8
 
 // ANSIFlagB is the interpretation of the SAUCE Flags non-blink mode binary bit.
 type ANSIFlagB struct {
-	Flag bBit   `json:"flag"`
-	Info string `json:"interpretation"`
+	Flag bBit   `json:"flag" xml:"flag"`
+	Info string `json:"interpretation" xml:"interpretation,attr"`
 }
 
 type bBit string
@@ -134,8 +134,8 @@ func (b bBit) String() string {
 
 // ANSIFlagLS is the interpretation of the SAUCE Flags letter spacing binary bits.
 type ANSIFlagLS struct {
-	Flag lsBit  `json:"flag"`
-	Info string `json:"interpretation"`
+	Flag lsBit  `json:"flag" xml:"flag"`
+	Info string `json:"interpretation" xml:"interpretation,attr"`
 }
 
 type lsBit string
@@ -155,8 +155,8 @@ func (ls lsBit) String() string {
 
 // ANSIFlagAR is the interpretation of the SAUCE Flags aspect ratio binary bits.
 type ANSIFlagAR struct {
-	Flag arBit  `json:"flag"`
-	Info string `json:"interpretation"`
+	Flag arBit  `json:"flag" xml:"flag"`
+	Info string `json:"interpretation" xml:"interpretation,attr"`
 }
 
 type arBit string
