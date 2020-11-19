@@ -163,33 +163,31 @@ func (d *Detail) lines(filename string) (err error) {
 	return f.Close()
 }
 
-func (d *Detail) marshal(format string) (err error) {
-	var b []byte
+func (d *Detail) marshal(format string) (b []byte, err error) {
 	switch format {
 	case "color", "c", "":
-		b = d.printMarshal(true)
+		return d.printMarshal(true), nil
 	case "text", "t":
-		b = d.printMarshal(false)
+		return d.printMarshal(false), nil
 	case "json", "j":
 		b, err = json.MarshalIndent(d, "", "    ")
 		if err != nil {
-			return fmt.Errorf("detail json indent marshal: %w", err)
+			return nil, fmt.Errorf("detail json indent marshal: %w", err)
 		}
 	case "json.min", "jm":
 		b, err = json.Marshal(d)
 		if err != nil {
-			return fmt.Errorf("detail json marshal: %w", err)
+			return nil, fmt.Errorf("detail json marshal: %w", err)
 		}
 	case "xml", "x":
 		b, err = xml.MarshalIndent(d, "", "\t")
 		if err != nil {
-			return fmt.Errorf("detail xml marshal: %w", err)
+			return nil, fmt.Errorf("detail xml marshal: %w", err)
 		}
 	default:
-		return fmt.Errorf("detail marshal %q: %w", format, ErrFmt)
+		return nil, fmt.Errorf("detail marshal %q: %w", format, ErrFmt)
 	}
-	fmt.Printf("%s\n", b)
-	return nil
+	return b, nil
 }
 
 func (d *Detail) mimeUnknown() {
@@ -484,11 +482,16 @@ func Marshal(filename, format string, i, length int) (err error) {
 		}
 		d.mimeUnknown()
 	}
-	return d.marshal(format)
+	var m []byte
+	if m, err = d.marshal(format); err != nil {
+		return err
+	}
+	print(format, m...)
+	return nil
 }
 
 // Stdin parses piped data and prints out the details in a specific syntax.
-func Stdin(format string, b ...byte) error {
+func Stdin(format string, b ...byte) (err error) {
 	var d Detail
 	if err := d.parse(nil, b...); err != nil {
 		return err
@@ -541,5 +544,19 @@ func Stdin(format string, b ...byte) error {
 		}
 		d.mimeUnknown()
 	}
-	return d.marshal(format)
+	var m []byte
+	if m, err = d.marshal(format); err != nil {
+		return err
+	}
+	print(format, m...)
+	return nil
+}
+
+func print(format string, b ...byte) {
+	switch format {
+	case "color", "c", "", "text", "t":
+		fmt.Printf("%s", b)
+	default:
+		fmt.Printf("%s\n", b)
+	}
 }
