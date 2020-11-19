@@ -11,31 +11,25 @@ import (
 	"golang.org/x/text/message"
 )
 
-type B struct{}
-
 const (
-	_ = 1.0 << (10 * iota) // ignore first value by assigning to blank identifier
+	oneDecimalPoint  = "%.1f %s"
+	twoDecimalPoints = "%.2f %s"
+	binaryBase       = 10
+	kB               = 1000
+	mB               = kB * kB
+	gB               = mB * kB
+	tB               = gB * kB
+)
+const (
+	_ = 1.0 << (binaryBase * iota) // ignore first value by assigning to blank identifier
 	kiB
 	miB
 	giB
 	tiB
 )
 
-const (
-	byte = 1
-	kB   = 1000 * byte
-	mB   = kB * kB
-	gB   = mB * kB
-	tB   = gB * kB
-)
-
-// New creates a B instance.
-func New() *B {
-	return &B{}
-}
-
 // Binary formats bytes integer to localized readable string.
-func (*B) Binary(b int64, t language.Tag) string {
+func binary(b int64, t language.Tag) string {
 	p := message.NewPrinter(t)
 	multiple, value := "", float64(b)
 	switch {
@@ -50,17 +44,17 @@ func (*B) Binary(b int64, t language.Tag) string {
 		multiple = "MiB"
 	case b >= kiB:
 		value /= kiB
-		return p.Sprintf("%.1f %s", value, "KiB")
+		return p.Sprintf(oneDecimalPoint, value, "KiB")
 	case b == 0:
 		return "0"
 	default:
 		return p.Sprintf("%dB", b)
 	}
-	return p.Sprintf("%.2f %s", value, multiple)
+	return p.Sprintf(twoDecimalPoints, value, multiple)
 }
 
 // Decimal formats bytes integer to localized readable string.
-func (*B) Decimal(b int64, t language.Tag) string {
+func decimal(b int64, t language.Tag) string {
 	p := message.NewPrinter(t)
 	multiple, value := "", float64(b)
 	switch {
@@ -75,26 +69,21 @@ func (*B) Decimal(b int64, t language.Tag) string {
 		multiple = "MB"
 	case b >= kB:
 		value /= kB
-		return p.Sprintf("%.1f %s", value, "KB")
+		return p.Sprintf(oneDecimalPoint, value, "kB")
 	case b == 0:
 		return "0"
 	default:
 		return p.Sprintf("%dB", b)
 	}
-	return p.Sprintf("%.2f %s", value, multiple)
-}
-
-// Bytes formats bytes integer to localized readable string.
-func Bytes(b int64, t language.Tag) string {
-	return New().Binary(b, t)
+	return p.Sprintf(twoDecimalPoints, value, multiple)
 }
 
 // Binary formats bytes integer to localized readable string.
 func Binary(b int64, t language.Tag) string {
-	return New().Binary(b, t)
+	return binary(b, t)
 }
 
 // Decimal formats bytes integer to localized readable string.
 func Decimal(b int64, t language.Tag) string {
-	return New().Decimal(b, t)
+	return decimal(b, t)
 }

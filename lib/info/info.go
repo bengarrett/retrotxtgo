@@ -341,7 +341,7 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 			if stat.Size() < kB {
 				d.Size = p.Sprintf("%v bytes", p.Sprint(stat.Size()))
 			} else {
-				d.Size = p.Sprintf("%v (%v bytes)", humanize.Bytes(stat.Size(), Language()), p.Sprint(stat.Size()))
+				d.Size = p.Sprintf("%v (%v bytes)", humanize.Decimal(stat.Size(), Language()), p.Sprint(stat.Size()))
 			}
 		} else {
 			d.Bytes = int64(len(data))
@@ -352,7 +352,7 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 			if l < kB {
 				d.Size = p.Sprintf("%v bytes", p.Sprint(l))
 			} else {
-				d.Size = p.Sprintf("%v (%v bytes)", humanize.Bytes(l, Language()), p.Sprint(l))
+				d.Size = p.Sprintf("%v (%v bytes)", humanize.Decimal(l, Language()), p.Sprint(l))
 			}
 		}
 		ch <- true
