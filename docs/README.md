@@ -330,51 +330,6 @@ upx --brute retrotxtgo # (very slow) 17MB --> 4.8MB file
 
 ---
 
-### SAUCE implementation
-
-`fmt.Sprintf()`
-
-#### Integer
-
-- %b base 2 (binary)
-- %c unicode code point
-- %d base 10
-- %o base 8
-- %0 base 8 with 0o prefix
-- %x base 16 lower-case %X upper-case
-- %U unicode format
-
-```go
-\+ always print a sign (%+q)
-\- pad with spaces to the right rather than the left
-\# alternate formats:
-add leading 0b for binary (%#b)
-add leading 0 for octal (%#o)
-add 0x or 0X for hex (%#x)
-suppress 0x for %p (%#p)
-always print a decimal point for floats (%#f)...
-0 pad with leading zeros rather than spaces (%0d)...
-```
-
-Fprint, Fprintln... `Fprintf(w io.Writer, format, ...inferface{})`
-Formats according to a format specifier and writes to w.
-
-`constant.BitLen(x Value) int`
-... BoolVal(x) Int64Val(x) Uint64Val(x)
-... StringVal(x) string
-
-`constant.Val(x) interface{}`
-
-```go
-b := constant.Make(false)
-fmt.Printf("%v\n", constant.Val(b))
-```
-
-`Shift(x Value, op, s uint)`
-op token list > https://golang.org/pkg/go/token/#Token
-
----
-
 ### Future CLI commands
 
 - [ ] add optional argument for destination (dir or file) that overrides the dir configuration.
@@ -392,7 +347,7 @@ op token list > https://golang.org/pkg/go/token/#Token
 
 - [ ] config shell should have a `--append/source/or` flag to save shell auto-completion?
 - [ ] scan for supported but current shell configuration.
-- [ ] scan for unique color codes like 24-bit colors.
+- [ ] scan for unique color codes like 24-bit, xterm and aix colors.
 - [ ] scan and linkify any http/s, ftp, mailto links in HTML.
 
 ```sh
