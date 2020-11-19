@@ -747,7 +747,6 @@ func (r record) tInfoS(i int) tInfoS {
 		end   = start + len(s)
 	)
 	for j, c := range r[start+i : end+i] {
-		fmt.Printf("%v\n", c)
 		if c == 0 {
 			continue
 		}
@@ -864,7 +863,7 @@ func unsignedBinary1(b [1]byte) (value uint8) {
 	buf := bytes.NewReader(b[:])
 	err := binary.Read(buf, binary.LittleEndian, &value)
 	if err != nil {
-		fmt.Println("binary.Read failed:", err)
+		fmt.Println("unsignedBinary1 failed:", err)
 	}
 	return value
 }
@@ -873,7 +872,7 @@ func unsignedBinary2(b [2]byte) (value uint16) {
 	buf := bytes.NewReader(b[:])
 	err := binary.Read(buf, binary.LittleEndian, &value)
 	if err != nil {
-		fmt.Println("binary.Read failed:", err)
+		fmt.Println("unsignedBinary2 failed:", err)
 	}
 	return value
 }
@@ -882,7 +881,7 @@ func unsignedBinary4(b [4]byte) (value uint16) {
 	buf := bytes.NewReader(b[:])
 	err := binary.Read(buf, binary.LittleEndian, &value)
 	if err != nil {
-		fmt.Println("binary.Read failed:", err)
+		fmt.Println("unsignedBinary4 failed:", err)
 	}
 	return value
 }
