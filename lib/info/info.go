@@ -17,6 +17,7 @@ import (
 	c "github.com/gookit/color"
 	"github.com/mozillazg/go-slugify"
 	"github.com/zRedShift/mimemagic"
+	"golang.org/x/sync/errgroup"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 	"retrotxt.com/retrotxt/lib/filesystem"
@@ -48,9 +49,9 @@ type Detail struct {
 
 // Stats are the text file content statistics and counts.
 type Stats struct {
-	CharCount int `json:"characters" xml:"characters"`
-	CtrlCount int `json:"ansiControls" xml:"ansi_controls"`
-	WordCount int `json:"words" xml:"words"`
+	Chars    int `json:"characters" xml:"characters"`
+	Controls int `json:"ansiControls" xml:"ansi_controls"`
+	Words    int `json:"words" xml:"words"`
 }
 
 // ModDates is the file last modified dates in multiple output formats.
@@ -140,28 +141,47 @@ func Print(filename, format string, i, length int) error {
 	}
 	d.index, d.length = i, length
 	if IsText(d.Mime.Type) {
-		var err error
-		d.Newline, err = filesystem.ReadNewlines(filename)
-		if err != nil {
+		var g errgroup.Group
+		g.Go(func() error {
+			var err error
+			if d.Newline, err = filesystem.ReadNewlines(filename); err != nil {
+				return err
+			}
+			return nil
+		})
+		g.Go(func() error {
+			if err := d.ctrls(filename); err != nil {
+				return err
+			}
+			return nil
+		})
+		g.Go(func() error {
+			if err := d.width(filename); err != nil {
+				return err
+			}
+			return nil
+		})
+		g.Go(func() error {
+			if err := d.lines(filename); err != nil {
+				return err
+			}
+			return nil
+		})
+		g.Go(func() error {
+			if err := d.width(filename); err != nil {
+				return err
+			}
+			return nil
+		})
+		g.Go(func() error {
+			if err := d.words(filename); err != nil {
+				return err
+			}
+			return nil
+		})
+		if err := g.Wait(); err != nil {
 			return err
 		}
-
-		if err := d.ctrls(filename); err != nil {
-			return err
-		}
-
-		if err := d.lines(filename); err != nil {
-			return err
-		}
-
-		if err := d.width(filename); err != nil {
-			return err
-		}
-
-		if err := d.words(filename); err != nil {
-			return err
-		}
-
 	}
 	return d.format(format)
 }
@@ -176,7 +196,7 @@ func (d *Detail) ctrls(filename string) (err error) {
 	if cnt, err = filesystem.Controls(f); err != nil {
 		return err
 	}
-	d.Count.CtrlCount = cnt
+	d.Count.Controls = cnt
 	return f.Close()
 }
 
@@ -204,7 +224,7 @@ func (d *Detail) width(filename string) (err error) {
 	if w, err = filesystem.Columns(f, d.Newline); err != nil {
 		return err
 	} else if w < 0 {
-		w = d.Count.CharCount
+		w = d.Count.Chars
 	}
 	d.Width = w
 	return f.Close()
@@ -227,7 +247,7 @@ func (d *Detail) words(filename string) (err error) {
 			return err
 		}
 	}
-	d.Count.WordCount = w
+	d.Count.Words = w
 	return f.Close()
 }
 
@@ -240,7 +260,7 @@ func Stdin(format string, b ...byte) error {
 	if IsText(d.Mime.Type) {
 		var err error
 		d.Newline = filesystem.Newlines(true, []rune(string(b))...)
-		if d.Count.CtrlCount, err = filesystem.Controls(bytes.NewReader(b)); err != nil {
+		if d.Count.Controls, err = filesystem.Controls(bytes.NewReader(b)); err != nil {
 			return err
 		}
 		if d.Lines, err = filesystem.Lines(bytes.NewReader(b), d.Newline); err != nil {
@@ -249,9 +269,9 @@ func Stdin(format string, b ...byte) error {
 		if d.Width, err = filesystem.Columns(bytes.NewReader(b), d.Newline); err != nil {
 			return err
 		} else if d.Width < 0 {
-			d.Width = d.Count.CharCount
+			d.Width = d.Count.Chars
 		}
-		if d.Count.WordCount, err = filesystem.Words(bytes.NewReader(b)); err != nil {
+		if d.Count.Words, err = filesystem.Words(bytes.NewReader(b)); err != nil {
 			return err
 		}
 	}
@@ -337,7 +357,7 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 		d.Mime.Type = fmt.Sprintf("%s/%s", mm.Media, mm.Subtype)
 		d.Mime.Commt = mm.Comment
 		if IsText(d.Mime.Type) {
-			if d.Count.CharCount, err = filesystem.Runes(bytes.NewBuffer(data)); err != nil {
+			if d.Count.Chars, err = filesystem.Runes(bytes.NewBuffer(data)); err != nil {
 				fmt.Printf("minesniffer errored, %s\n", err)
 			}
 		}
@@ -401,9 +421,9 @@ func (d *Detail) Text(color bool) string {
 		{k: "filetype", v: d.comment()},
 		{k: "UTF-8", v: str.Bool(d.Utf8)},
 		{k: "newline", v: filesystem.Newline(d.Newline, true)},
-		{k: "characters", v: p.Sprint(d.Count.CharCount)},
-		{k: "ANSI controls", v: p.Sprint(d.Count.CtrlCount)},
-		{k: "words", v: p.Sprint(d.Count.WordCount)},
+		{k: "characters", v: p.Sprint(d.Count.Chars)},
+		{k: "ANSI controls", v: p.Sprint(d.Count.Controls)},
+		{k: "words", v: p.Sprint(d.Count.Words)},
 		{k: "size", v: d.Size.Decimal},
 		{k: "lines", v: p.Sprint(d.Lines)},
 		{k: "width", v: p.Sprint(d.Width)},
@@ -438,7 +458,7 @@ func (d *Detail) Text(color bool) string {
 				continue
 			}
 		} else if x.k == "ANSI controls" {
-			if d.Count.CtrlCount == 0 {
+			if d.Count.Controls == 0 {
 				continue
 			}
 		}
@@ -479,7 +499,7 @@ func (d *Detail) comment() string {
 	if d.Mime.Commt != "unknown" {
 		return d.Mime.Commt
 	}
-	if d.Count.CtrlCount > 0 {
+	if d.Count.Controls > 0 {
 		return "ANSI encoded text document"
 	}
 	switch d.Newline {
@@ -487,7 +507,7 @@ func (d *Detail) comment() string {
 		return "EBCDIC encoded text document"
 	}
 	if d.Mime.Type == "application/octet-stream" {
-		if d.Count.WordCount > 0 {
+		if d.Count.Words > 0 {
 			// todo !utf8 check
 			return "US-ASCII encoded text document"
 		}
