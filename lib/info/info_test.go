@@ -96,8 +96,8 @@ func Test_File(t *testing.T) {
 	if err != nil {
 		t.Errorf("Read() = %v, want %v", err, nil)
 	}
-	if got.Bytes != 57 {
-		t.Errorf("Read() = %v, want %v", got.Bytes, 57)
+	if got.Size.Bytes != 57 {
+		t.Errorf("Read() = %v, want %v", got.Size.Bytes, 57)
 	}
 	if got.Name != "info_test.txt" {
 		t.Errorf("Read() = %v, want %v", got.Name, "info_test.txt")
@@ -112,8 +112,8 @@ func Test_File(t *testing.T) {
 		t.Errorf("Read() = %v, want %v", got.Utf8, true)
 	}
 	const want = "883643f5e9ed278732c92d9b6f834b96"
-	if got.MD5 != want {
-		t.Errorf("Read() = %v, want %v", got.MD5, want)
+	if got.Sums.MD5 != want {
+		t.Errorf("Read() = %v, want %v", got.Sums.MD5, want)
 	}
 	filesystem.Clean(tmp)
 }
