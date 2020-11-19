@@ -18,6 +18,7 @@ import (
 const (
 	sauceID = "SAUCE00"
 	invalid = "invalid value"
+	noPref  = "no preference"
 )
 
 // Record layout for the SAUCE metadata.
@@ -103,11 +104,30 @@ type TypeInfo struct {
 
 // ANSIFlags are the interpretation of the SAUCE Flags field.
 type ANSIFlags struct {
-	Decimal Flags      `json:"decimal" xml:"decimal,attr"`
-	Binary  string     `json:"binary" xml:"binary,attr"`
-	B       ANSIFlagB  `json:"nonBlinkMode" xml:"non_blink_mode"`
-	LS      ANSIFlagLS `json:"letterSpacing" xml:"letter_spacing"`
-	AR      ANSIFlagAR `json:"aspectRatio" xml:"aspect_ratio"`
+	Decimal         Flags      `json:"decimal" xml:"decimal,attr"`
+	Binary          string     `json:"binary" xml:"binary,attr"`
+	B               ANSIFlagB  `json:"nonBlinkMode" xml:"non_blink_mode"`
+	LS              ANSIFlagLS `json:"letterSpacing" xml:"letter_spacing"`
+	AR              ANSIFlagAR `json:"aspectRatio" xml:"aspect_ratio"`
+	Interpretations string     `json:"-" xml:"-"`
+}
+
+func (a ANSIFlags) String() (s string) {
+	if a.Decimal == 0 {
+		return s
+	}
+	b, ls, ar := a.B.Info, a.LS.Info, a.AR.Info
+	l := []string{}
+	if b != noPref {
+		l = append(l, b)
+	}
+	if ls != noPref {
+		l = append(l, ls)
+	}
+	if ar != noPref {
+		l = append(l, ar)
+	}
+	return strings.Join(l, ", ")
 }
 
 // Flags is the SAUCE Flags field.
@@ -143,7 +163,7 @@ type lsBit string
 func (ls lsBit) String() string {
 	switch ls {
 	case "00":
-		return "no preference"
+		return noPref
 	case "01":
 		return "select 8 pixel font"
 	case "10":
@@ -164,7 +184,7 @@ type arBit string
 func (ar arBit) String() string {
 	switch ar {
 	case "00":
-		return "no preference"
+		return noPref
 	case "01":
 		return "stretch pixels"
 	case "10":
@@ -754,45 +774,6 @@ func (r record) tInfoS(i int) tInfoS {
 	}
 	return s
 }
-
-// Text format the record data.
-// func Text(b []byte) {
-// 	var info = func(t string) string {
-// 		return str.Cinf(fmt.Sprintf("%s\t", t))
-// 	}
-// 	s := Parse(b...)
-// 	if s.ID != "SAUCE" {
-// 		return
-// 	}
-// 	var data = []struct {
-// 		k, v string
-// 	}{
-// 		{k: "title", v: s.Title},
-// 		{k: "author", v: s.Author},
-// 		{k: "group", v: s.Group},
-// 		{k: "date", v: s.LSDate},
-// 		{k: "filesize", v: s.FileSize},
-// 		{k: "type", v: s.DataType},
-// 		{k: "file", v: s.FileType},
-// 		{k: "info", v: s.TypeInfo},
-// 	}
-// 	var buf bytes.Buffer
-// 	w := new(tabwriter.Writer)
-// 	w.Init(&buf, 0, 8, 0, '\t', 0)
-// 	for _, x := range data {
-// 		if x.k == "filesize" && s.FileSize == "0" {
-// 			continue
-// 		}
-// 		if x.k == "info" && s.TypeInfo == "" {
-// 			continue
-// 		}
-// 		fmt.Fprintf(w, "\t %s\t  %s\n", x.k, info(x.v))
-// 	}
-// 	if err := w.Flush(); err != nil {
-// 		logs.Fatal("flush of tab writer failed", "", err)
-// 	}
-// 	fmt.Print(buf.String())
-// }.
 
 // Scan returns the position of the SAUCE00 ID or -1 if no ID exists.
 func Scan(b ...byte) (index int) {
