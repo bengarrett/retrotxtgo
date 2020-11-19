@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 	"text/tabwriter"
 	"time"
 	"unicode/utf8"
@@ -118,6 +119,7 @@ func (n Names) Info(name, format string) logs.Generic {
 	} else if err != nil {
 		gen.Err = err
 	} else if s.IsDir() {
+		// todo: directory walk
 		gen.Issue = "info"
 		gen.Err = ErrNoDir
 	} else if err := Print(name, format, n.Index, n.Length); err != nil {
@@ -258,22 +260,52 @@ func Stdin(format string, b ...byte) error {
 		return err
 	}
 	if IsText(d.Mime.Type) {
-		var err error
-		d.Newline = filesystem.Newlines(true, []rune(string(b))...)
-		if d.Count.Controls, err = filesystem.Controls(bytes.NewReader(b)); err != nil {
+		var g errgroup.Group
+		g.Go(func() error {
+			d.Newline = filesystem.Newlines(true, []rune(string(b))...)
+			return nil
+		})
+		g.Go(func() error {
+			var err error
+			if d.Count.Controls, err = filesystem.Controls(bytes.NewReader(b)); err != nil {
+				return err
+			}
+			return nil
+		})
+		g.Go(func() error {
+			var err error
+			if d.Count.Controls, err = filesystem.Controls(bytes.NewReader(b)); err != nil {
+				return err
+			}
+			return nil
+		})
+		g.Go(func() error {
+			var err error
+			if d.Lines, err = filesystem.Lines(bytes.NewReader(b), d.Newline); err != nil {
+				return err
+			}
+			return nil
+		})
+		g.Go(func() error {
+			var err error
+			if d.Width, err = filesystem.Columns(bytes.NewReader(b), d.Newline); err != nil {
+				return err
+			} else if d.Width < 0 {
+				d.Width = d.Count.Chars
+			}
+			return nil
+		})
+		g.Go(func() error {
+			var err error
+			if d.Count.Words, err = filesystem.Words(bytes.NewReader(b)); err != nil {
+				return err
+			}
+			return nil
+		})
+		if err := g.Wait(); err != nil {
 			return err
 		}
-		if d.Lines, err = filesystem.Lines(bytes.NewReader(b), d.Newline); err != nil {
-			return err
-		}
-		if d.Width, err = filesystem.Columns(bytes.NewReader(b), d.Newline); err != nil {
-			return err
-		} else if d.Width < 0 {
-			d.Width = d.Count.Chars
-		}
-		if d.Count.Words, err = filesystem.Words(bytes.NewReader(b)); err != nil {
-			return err
-		}
+
 	}
 	return d.format(format)
 }
@@ -341,16 +373,18 @@ func (d *Detail) Read(name string) (err error) {
 
 // parse fileinfo and file content.
 func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
-	const channels = 6
-	ch := make(chan bool, channels)
+	const routines = 6
+	var wg sync.WaitGroup
+	wg.Add(routines)
 	go func() {
+		defer wg.Done()
 		d.sauceIndex = sauce.Scan(data...)
 		if d.sauceIndex > 0 {
 			d.Sauce = sauce.Parse(data...)
 		}
-		ch <- true
 	}()
 	go func() {
+		defer wg.Done()
 		mm := mimemagic.MatchMagic(data)
 		d.Mime.Media = mm.Media
 		d.Mime.Sub = mm.Subtype
@@ -361,9 +395,9 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 				fmt.Printf("minesniffer errored, %s\n", err)
 			}
 		}
-		ch <- true
 	}()
 	go func() {
+		defer wg.Done()
 		var standardInput os.FileInfo = nil
 		if stat != standardInput {
 			b := stat.Size()
@@ -384,23 +418,22 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 			d.Modified.Time = time.Now()
 			d.Modified.Epoch = time.Now().Unix()
 		}
-		ch <- true
 	}()
 	go func() {
+		defer wg.Done()
 		md5sum := md5.Sum(data)
 		d.Sums.MD5 = fmt.Sprintf("%x", md5sum)
-		ch <- true
 	}()
 	go func() {
+		defer wg.Done()
 		shasum := sha256.Sum256(data)
 		d.Sums.SHA256 = fmt.Sprintf("%x", shasum)
-		ch <- true
 	}()
 	go func() {
+		defer wg.Done()
 		d.Utf8 = utf8.Valid(data)
-		ch <- true
 	}()
-	_, _, _, _, _, _ = <-ch, <-ch, <-ch, <-ch, <-ch, <-ch
+	wg.Wait()
 	return err
 }
 
