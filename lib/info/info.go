@@ -33,7 +33,7 @@ type Detail struct {
 	XMLName    xml.Name     `json:"-" xml:"file"`
 	Name       string       `json:"filename" xml:"name"`
 	Utf8       bool         `json:"utf8" xml:"utf8,attr"`
-	Newline    [2]rune      `json:"newline" xml:"newline"` // TODO: improve xml handling
+	Newline    Newlines     `json:"newline" xml:"newline"`
 	Count      Stats        `json:"counts" xml:"counts"`
 	Size       Sizes        `json:"size" xml:"size"`
 	Lines      int          `json:"lines" xml:"lines"`
@@ -46,6 +46,13 @@ type Detail struct {
 	index      int
 	length     int
 	sauceIndex int
+}
+
+// Newlines or line endings.
+type Newlines struct {
+	Abbr     string  `json:"string" xml:"string,attr"`
+	Escape   string  `json:"escape" xml:"-"`
+	Decimals [2]rune `json:"decimals" xml:"decimal"`
 }
 
 // Stats are the text file content statistics and counts.
@@ -158,7 +165,7 @@ func (d *Detail) lines(filename string) (err error) {
 	}
 	defer f.Close()
 	var l int
-	if l, err = filesystem.Lines(f, d.Newline); err != nil {
+	if l, err = filesystem.Lines(f, d.Newline.Decimals); err != nil {
 		return err
 	}
 	d.Lines = l
@@ -198,7 +205,7 @@ func (d *Detail) mimeUnknown() {
 			d.Mime.Commt = "Text document with ANSI controls"
 			return
 		}
-		switch d.Newline {
+		switch d.Newline.Decimals {
 		case [2]rune{21}, [2]rune{133}:
 			d.Mime.Commt = "EBCDIC encoded text document"
 			return
@@ -343,6 +350,30 @@ func (d *Detail) marshalDataValid(k, v string) bool {
 	return true
 }
 
+func (d *Detail) newlines(r [2]rune) {
+	a, e := "", ""
+	switch r {
+	case [2]rune{10}:
+		a = "lf"
+		e = "\n"
+	case [2]rune{13}:
+		a = "cr"
+		e = "\r"
+	case [2]rune{13, 10}:
+		a = "crlf"
+		e = "\r\n"
+	case [2]rune{10, 13}:
+		a = "lfcr"
+		e = "\n\r"
+	case [2]rune{21}, [2]rune{133}:
+		a = "nl"
+		e = "\025"
+	}
+	d.Newline.Decimals = r
+	d.Newline.Abbr = strings.ToUpper(a)
+	d.Newline.Escape = e
+}
+
 func (d *Detail) printMarshalData() (data []struct{ k, v string }) {
 	p := message.NewPrinter(lang())
 	data = []struct {
@@ -351,7 +382,7 @@ func (d *Detail) printMarshalData() (data []struct{ k, v string }) {
 		{k: "filename", v: d.Name},
 		{k: "filetype", v: d.Mime.Commt},
 		{k: "UTF-8", v: str.Bool(d.Utf8)},
-		{k: "newline", v: filesystem.Newline(d.Newline, true)},
+		{k: "newline", v: filesystem.Newline(d.Newline.Decimals, true)},
 		{k: "characters", v: p.Sprint(d.Count.Chars)},
 		{k: "ANSI controls", v: p.Sprint(d.Count.Controls)},
 		{k: "words", v: p.Sprint(d.Count.Words)},
@@ -417,7 +448,7 @@ func (d *Detail) width(filename string) (err error) {
 	}
 	defer f.Close()
 	var w int
-	if w, err = filesystem.Columns(f, d.Newline); err != nil {
+	if w, err = filesystem.Columns(f, d.Newline.Decimals); err != nil {
 		return err
 	} else if w < 0 {
 		w = d.Count.Chars
@@ -433,7 +464,7 @@ func (d *Detail) words(filename string) (err error) {
 	}
 	defer f.Close()
 	var w int
-	switch d.Newline {
+	switch d.Newline.Decimals {
 	case [2]rune{21}, [2]rune{133}:
 		if w, err = filesystem.WordsEBCDIC(f); err != nil {
 			return err
@@ -458,9 +489,10 @@ func Marshal(filename, format string, i, length int) error {
 		var g errgroup.Group
 		g.Go(func() error {
 			var err error
-			if d.Newline, err = filesystem.ReadNewlines(filename); err != nil {
+			if d.Newline.Decimals, err = filesystem.ReadNewlines(filename); err != nil {
 				return err
 			}
+			d.newlines(d.Newline.Decimals)
 			return nil
 		})
 		g.Go(func() error {
@@ -518,7 +550,7 @@ func Stdin(format string, b ...byte) error {
 	if d.validText() {
 		var g errgroup.Group
 		g.Go(func() error {
-			d.Newline = filesystem.Newlines(true, []rune(string(b))...)
+			d.newlines(filesystem.Newlines(true, []rune(string(b))...))
 			return nil
 		})
 		g.Go(func() error {
@@ -537,14 +569,14 @@ func Stdin(format string, b ...byte) error {
 		})
 		g.Go(func() error {
 			var err error
-			if d.Lines, err = filesystem.Lines(bytes.NewReader(b), d.Newline); err != nil {
+			if d.Lines, err = filesystem.Lines(bytes.NewReader(b), d.Newline.Decimals); err != nil {
 				return err
 			}
 			return nil
 		})
 		g.Go(func() error {
 			var err error
-			if d.Width, err = filesystem.Columns(bytes.NewReader(b), d.Newline); err != nil {
+			if d.Width, err = filesystem.Columns(bytes.NewReader(b), d.Newline.Decimals); err != nil {
 				return err
 			} else if d.Width < 0 {
 				d.Width = d.Count.Chars
