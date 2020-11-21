@@ -2,6 +2,7 @@ package info
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -10,7 +11,12 @@ import (
 	"testing"
 	"time"
 
+	"retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/filesystem"
+)
+
+var (
+	rawData = pack.Get("text/sauce.txt")
 )
 
 func millennia(name string) {
@@ -151,7 +157,7 @@ func Test_parse(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var got Detail
-			err := got.parse(tt.args.stat, tt.args.data...)
+			err := got.parse("", tt.args.stat, tt.args.data...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parse() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -199,4 +205,64 @@ func Test_marshal_text(t *testing.T) {
 		t.Errorf("marshal() = %v, want %v", got, want)
 	}
 	filesystem.Clean(tmp)
+}
+
+func TestStdin(t *testing.T) {
+	type args struct {
+		format string
+		b      []byte
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"empty", args{}, false},
+		{"format error", args{format: "xx"}, true},
+		{"empty xml", args{format: "xml"}, false},
+		{"color", args{format: "color", b: rawData}, false},
+		{"text", args{format: "text", b: rawData}, false},
+		{"json", args{format: "json", b: rawData}, false},
+		{"json.min", args{format: "json.min", b: rawData}, false},
+		{"xml", args{format: "xml", b: rawData}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := Stdin(tt.args.format, tt.args.b...); (err != nil) != tt.wantErr {
+				t.Errorf("Stdin() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestNames_Info(t *testing.T) {
+	type fields struct {
+		Index  int
+		Length int
+	}
+	type args struct {
+		name   string
+		format string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr error
+	}{
+		{"empty", fields{}, args{}, ErrNoName},
+		{"bad dir", fields{}, args{name: "some invalid filename"}, ErrNoFile},
+		{"temp dir", fields{}, args{name: os.TempDir(), format: "json.min"}, nil},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			n := Names{
+				Index:  tt.fields.Index,
+				Length: tt.fields.Length,
+			}
+			if got := n.Info(tt.args.name, tt.args.format); !errors.Is(got.Err, tt.wantErr) {
+				t.Errorf("Names.Info() = %v, want %v", got.Err, tt.wantErr)
+			}
+		})
+	}
 }
