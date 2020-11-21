@@ -2,6 +2,7 @@
 package sauce
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/binary"
 	"fmt"
@@ -13,12 +14,13 @@ import (
 	"retrotxt.com/retrotxt/lib/humanize"
 )
 
-// TODO: handle comments!!
-
 const (
-	sauceID = "SAUCE00"
-	invalid = "invalid value"
-	noPref  = "no preference"
+	invalid       = "invalid value"
+	noPref        = "no preference"
+	sauceID       = "SAUCE00"
+	comntID       = "COMNT"
+	comntLineSize = 64
+	comntMaxLines = 255
 )
 
 // Record layout for the SAUCE metadata.
@@ -34,6 +36,7 @@ type Record struct {
 	File     FileTypes `json:"fileType" xml:"file_type"`
 	Info     TypeInfos `json:"typeInfo"  xml:"type_info"`
 	Desc     string    `json:"-" xml:"-"`
+	Comnt    Comments  `json:"comments" xml:"comments"`
 }
 
 // Dates in multiple output formats.
@@ -207,6 +210,13 @@ func (ar arBit) String() string {
 	default:
 		return invalid
 	}
+}
+
+// Comments contain the optional, SAUCE comment block.
+type Comments struct {
+	ID      string   `json:"id" xml:"id,attr"`
+	Count   int      `json:"count" xml:"count,attr"`
+	Comment []string `json:"lines" xml:"line"`
 }
 
 // Character based files.
@@ -437,7 +447,6 @@ type (
 	tInfo3   [2]byte
 	tInfo4   [2]byte
 	comments [1]byte
-	comment  [64]byte
 	tFlags   [1]byte
 	tInfoS   [22]byte
 )
@@ -473,18 +482,53 @@ type data struct {
 	comments comments
 	tFlags   tFlags
 	tInfoS   tInfoS
+	comnt    comnt
 }
 
-func (r record) date(i int) date {
-	var d date
-	const (
-		start = 82
-		end   = start + len(d)
-	)
-	for j, c := range r[start+i : end+i] {
-		d[j] = c
+type comnt struct {
+	index  int
+	length int
+	count  comments
+	lines  []byte
+}
+
+func (d *data) comment() (c Comments) {
+	newlineCount := len(strings.Split(string(d.comnt.lines), "\n"))
+	c.ID = comntID
+	c.Count = int(unsignedBinary1(d.comnt.count))
+	if newlineCount > 0 {
+		// comments with newlines are technically invalid but they exist in the wild.
+		// https://github.com/16colo-rs/16c/issues/67
+		c.Comment = readCommentByNewline(d.comnt.lines)
+		return c
 	}
-	return d
+	c.Comment = readComment(d.comnt.lines)
+	return c
+}
+
+func readCommentByNewline(b []byte) (lines []string) {
+	r := bytes.NewReader(b)
+	scanner := bufio.NewScanner(r)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	return lines
+}
+
+func readComment(b []byte) (lines []string) {
+	s, l := "", 0
+	var resetLine = func() {
+		s, l = "", 0
+	}
+	for _, c := range b {
+		l++
+		s += string(c)
+		if l == comntLineSize {
+			lines = append(lines, s)
+			resetLine()
+		}
+	}
+	return lines
 }
 
 func (d *data) dates() Dates {
@@ -657,16 +701,75 @@ func (r record) comments(i int) comments {
 	return comments{r[i+104]}
 }
 
+func (r record) comnt(count comments, sauceIndex int) (block comnt) {
+	block = comnt{
+		count: count,
+	}
+	if int(unsignedBinary1(count)) == 0 {
+		return block
+	}
+	id, l := []byte(comntID), len(r)
+	var backwardsLoop = func(i int) int {
+		return l - 1 - i
+	}
+	// search for the id sequence in b
+	for i := range r {
+		if i > comntLineSize*comntMaxLines {
+			break
+		}
+		i = backwardsLoop(i)
+		if i < comntLineSize {
+			break
+		}
+		if i >= sauceIndex {
+			continue
+		}
+		// do matching in reverse
+		if r[i-1] != id[4] {
+			continue // T
+		}
+		if r[i-2] != id[3] {
+			continue // N
+		}
+		if r[i-3] != id[2] {
+			continue // M
+		}
+		if r[i-4] != id[1] {
+			continue // O
+		}
+		if r[i-5] != id[0] {
+			continue // C
+		}
+		block.index = i
+		block.length = sauceIndex - block.index
+		block.lines = r[i : i+block.length]
+		return block
+	}
+	return block
+}
+
 func (r record) dataType(i int) dataType {
 	return dataType{r[i+94]}
 }
 
-func (r record) extract() data {
+func (r record) date(i int) date {
+	var d date
+	const (
+		start = 82
+		end   = start + len(d)
+	)
+	for j, c := range r[start+i : end+i] {
+		d[j] = c
+	}
+	return d
+}
+
+func (r record) extract() (d data) {
 	i := Scan(r...)
 	if i == -1 {
-		return data{}
+		return d
 	}
-	return data{
+	d = data{
 		id:       r.id(i),
 		version:  r.version(i),
 		title:    r.title(i),
@@ -680,10 +783,12 @@ func (r record) extract() data {
 		tinfo2:   r.tInfo2(i),
 		tinfo3:   r.tInfo3(i),
 		tinfo4:   r.tInfo4(i),
-		comments: r.comments(i),
 		tFlags:   r.tFlags(i),
 		tInfoS:   r.tInfoS(i),
 	}
+	d.comments = r.comments(i)
+	d.comnt = r.comnt(d.comments, i)
+	return d
 }
 
 func (r record) fileSize(i int) fileSize {
@@ -824,6 +929,7 @@ func Parse(data ...byte) Record {
 		File:     d.fileType(),
 		Info:     d.typeInfo(),
 		Desc:     d.description(),
+		Comnt:    d.comment(),
 	}
 }
 

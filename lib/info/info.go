@@ -311,6 +311,11 @@ func (d *Detail) printMarshal(color bool) []byte {
 			}
 			fmt.Fprint(w, "\t \t   -───-\n")
 		}
+		if x.k == "comment" {
+			if d.Sauce.Comnt.Count <= 0 {
+				break
+			}
+		}
 	}
 	if d.index == d.length {
 		fmt.Fprint(w, hr(l))
@@ -375,6 +380,7 @@ func (d *Detail) newlines(r [2]rune) {
 }
 
 func (d *Detail) printMarshalData() (data []struct{ k, v string }) {
+	const noBreakSpace, symbolForNewline = "\u00a0", "\u2424"
 	p := message.NewPrinter(lang())
 	data = []struct {
 		k, v string
@@ -407,6 +413,16 @@ func (d *Detail) printMarshalData() (data []struct{ k, v string }) {
 		{k: d.Sauce.Info.Info2.Info, v: fmt.Sprint(d.Sauce.Info.Info2.Value)},
 		{k: d.Sauce.Info.Info3.Info, v: fmt.Sprint(d.Sauce.Info.Info3.Value)},
 		{k: "interpretation", v: d.Sauce.Info.Flags.String()},
+	}
+	// sauce comment
+	for i, line := range d.Sauce.Comnt.Comment {
+		comment := struct{ k, v string }{
+			k: noBreakSpace, v: line,
+		}
+		if i == 0 {
+			comment.k = "comment"
+		}
+		data = append(data, comment)
 	}
 	return data
 }
