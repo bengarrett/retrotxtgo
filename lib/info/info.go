@@ -1,6 +1,7 @@
 package info
 
 import (
+	"archive/zip"
 	"bytes"
 	"crypto/md5"
 	"crypto/sha256"
@@ -28,6 +29,16 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
+const (
+	// DTFormat is the date-time format.
+	DTFormat = "DMY24"
+	// DFormat is the date format.
+	DFormat     = "DMY"
+	octetStream = "application/octet-stream"
+	text        = "text"
+	zipType     = "application/zip"
+)
+
 // Detail of a file.
 type Detail struct {
 	XMLName    xml.Name     `json:"-" xml:"file"`
@@ -43,6 +54,7 @@ type Detail struct {
 	Mime       Content      `json:"mime" xml:"mime"`
 	Slug       string       `json:"slug" xml:"id,attr"`
 	Sauce      sauce.Record `json:"sauce" xml:"sauce"`
+	ZipComment string       `json:"zipComment" xml:"zip_comment"`
 	index      int
 	length     int
 	sauceIndex int
@@ -94,15 +106,6 @@ type Names struct {
 	Index  int
 	Length int
 }
-
-const (
-	// DTFormat is the date-time format.
-	DTFormat = "DMY24"
-	// DFormat is the date format.
-	DFormat     = "DMY"
-	octetStream = "application/octet-stream"
-	text        = "text"
-)
 
 var (
 	// ErrFmt format error.
@@ -219,7 +222,7 @@ func (d *Detail) mimeUnknown() {
 	}
 }
 
-func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
+func (d *Detail) parse(name string, stat os.FileInfo, data ...byte) (err error) {
 	const routines = 6
 	var wg sync.WaitGroup
 	wg.Add(routines)
@@ -239,8 +242,17 @@ func (d *Detail) parse(stat os.FileInfo, data ...byte) (err error) {
 		d.Mime.Commt = mm.Comment
 		if d.validText() {
 			if d.Count.Chars, err = filesystem.Runes(bytes.NewBuffer(data)); err != nil {
-				fmt.Printf("minesniffer errored, %s\n", err)
+				fmt.Printf("mine sniffer failure, %s\n", err)
 			}
+			return
+		}
+		if d.Mime.Type == zipType {
+			r, err := zip.OpenReader(name)
+			if err != nil {
+				fmt.Printf("open zip file failure: %s\n", err)
+			}
+			defer r.Close()
+			return
 		}
 	}()
 	go func() {
@@ -304,8 +316,13 @@ func (d *Detail) printMarshal(color bool) []byte {
 		if !d.marshalDataValid(x.k, x.v) {
 			continue
 		}
+		if x.k == "zip comment" {
+			if x.v != "" {
+				x.v = fmt.Sprintf("\n%s", x.v)
+			}
+		}
 		fmt.Fprintf(w, "\t %s\t  %s\n", x.k, info(x.v))
-		if x.k == "slug" {
+		if x.k == "zip comment" || x.k == "slug" {
 			if d.sauceIndex <= 0 {
 				break
 			}
@@ -350,6 +367,9 @@ func (d *Detail) marshalDataValid(k, v string) bool {
 		return false
 	}
 	if k == "interpretation" && v == "" {
+		return false
+	}
+	if k == "zip comment" && v == "" {
 		return false
 	}
 	return true
@@ -400,6 +420,7 @@ func (d *Detail) printMarshalData() (data []struct{ k, v string }) {
 		{k: "SHA256 checksum", v: d.Sums.SHA256},
 		{k: "media mime type", v: d.Mime.Type},
 		{k: "slug", v: d.Slug},
+		{k: "zip comment", v: d.ZipComment},
 		// sauce data
 		{k: "title", v: d.Sauce.Title},
 		{k: "author", v: d.Sauce.Author},
@@ -438,7 +459,7 @@ func (d *Detail) read(name string) (err error) {
 	if err != nil {
 		return err
 	}
-	return d.parse(stat, data...)
+	return d.parse(name, stat, data...)
 }
 
 // validText checks the MIME content-type value for valid text files.
@@ -560,7 +581,7 @@ func Marshal(filename, format string, i, length int) error {
 // Stdin parses piped data and prints out the details in a specific syntax.
 func Stdin(format string, b ...byte) error {
 	var d Detail
-	if err := d.parse(nil, b...); err != nil {
+	if err := d.parse("", nil, b...); err != nil {
 		return err
 	}
 	if d.validText() {
