@@ -2,16 +2,11 @@
 package sauce
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
-
-	"golang.org/x/text/language"
-	"retrotxt.com/retrotxt/lib/humanize"
 )
 
 const (
@@ -434,441 +429,6 @@ func (e Executable) String() string {
 	return "Executable program file"
 }
 
-type (
-	record   []byte
-	id       [5]byte
-	version  [2]byte
-	title    [35]byte
-	author   [20]byte
-	group    [20]byte
-	date     [8]byte
-	fileSize [4]byte
-	dataType [1]byte
-	fileType [1]byte
-	tInfo1   [2]byte
-	tInfo2   [2]byte
-	tInfo3   [2]byte
-	tInfo4   [2]byte
-	comments [1]byte
-	tFlags   [1]byte
-	tInfoS   [22]byte
-)
-
-func (t tInfoS) String() string {
-	const nul = 0
-	s := ""
-	for _, b := range t {
-		if b == nul {
-			continue
-		}
-		s += string(b)
-	}
-	return s
-}
-
-// this sauce data struct intentionally shares the key names with the type key names.
-// so the `data.version` item uses the type named `version` which is a [2]byte value.
-type data struct {
-	id       id
-	version  version
-	title    title
-	author   author
-	group    group
-	date     date
-	filesize fileSize
-	datatype dataType
-	filetype fileType
-	tinfo1   tInfo1
-	tinfo2   tInfo2
-	tinfo3   tInfo3
-	tinfo4   tInfo4
-	comments comments
-	tFlags   tFlags
-	tInfoS   tInfoS
-	comnt    comnt
-}
-
-type comnt struct {
-	index  int
-	length int
-	count  comments
-	lines  []byte
-}
-
-func (d *data) comment() (c Comments) {
-	newlineCount := len(strings.Split(string(d.comnt.lines), "\n"))
-	c.ID = comntID
-	c.Count = int(unsignedBinary1(d.comnt.count))
-	if newlineCount > 0 {
-		// comments with newlines are technically invalid but they exist in the wild.
-		// https://github.com/16colo-rs/16c/issues/67
-		c.Comment = readCommentByNewline(d.comnt.lines)
-		return c
-	}
-	c.Comment = readComment(d.comnt.lines)
-	return c
-}
-
-func readCommentByNewline(b []byte) (lines []string) {
-	r := bytes.NewReader(b)
-	scanner := bufio.NewScanner(r)
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-	return lines
-}
-
-func readComment(b []byte) (lines []string) {
-	s, l := "", 0
-	var resetLine = func() {
-		s, l = "", 0
-	}
-	for _, c := range b {
-		l++
-		s += string(c)
-		if l == comntLineSize {
-			lines = append(lines, s)
-			resetLine()
-		}
-	}
-	return lines
-}
-
-func (d *data) dates() Dates {
-	t := d.parseDate()
-	u := t.Unix()
-	return Dates{
-		Value: fmt.Sprintf("%s", d.date),
-		Time:  t,
-		Epoch: u,
-	}
-}
-
-func (d *data) dataType() DataTypes {
-	dt := DataType(unsignedBinary1(d.datatype))
-	return DataTypes{
-		Type: dt,
-		Name: fmt.Sprintf("%v", dt.String()),
-	}
-}
-
-func (d *data) description() (s string) {
-	dt, ft := unsignedBinary1(d.datatype), unsignedBinary1(d.filetype)
-	c := Character(ft)
-	if DataType(dt) != character {
-		return s
-	}
-	switch c {
-	case ascii, ansi, ansiMation, ripScript, pcBoard, avatar, html, source, tundraDraw:
-		return c.Desc()
-	}
-	return s
-}
-
-func (d *data) fileType() FileTypes {
-	data, file := unsignedBinary1(d.datatype), unsignedBinary1(d.filetype)
-	switch DataType(data) {
-	case none:
-		return FileTypes{FileType(none), none.String()}
-	case character:
-		c := Character(file)
-		return FileTypes{FileType(c), c.String()}
-	case bitmap:
-		b := Bitmap(file)
-		return FileTypes{FileType(b), b.String()}
-	case vector:
-		v := Vector(file)
-		return FileTypes{FileType(v), v.String()}
-	case audio:
-		a := Audio(file)
-		return FileTypes{FileType(a), a.String()}
-	case binaryText:
-		return FileTypes{FileType(binaryText), binaryText.String()}
-	case xBin:
-		return FileTypes{FileType(xBin), xBin.String()}
-	case archive:
-		a := Archive(file)
-		return FileTypes{FileType(a), a.String()}
-	case executable:
-		return FileTypes{FileType(executable), executable.String()}
-	default:
-		return FileTypes{FileType(0), "error"}
-	}
-}
-
-func (d *data) parseDate() (t time.Time) {
-	da := d.date
-	dy, err := strconv.Atoi(string(da[0:4]))
-	if err != nil {
-		fmt.Println("day conversion failed:", err)
-		return t
-	}
-	dm, err := strconv.Atoi(string(da[4:6]))
-	if err != nil {
-		fmt.Println("month conversion failed:", err)
-		return t
-	}
-	dd, err := strconv.Atoi(string(da[6:8]))
-	if err != nil {
-		fmt.Println("year conversion failed:", err)
-		return t
-	}
-	return time.Date(dy, time.Month(dm), dd, 0, 0, 0, 0, time.UTC)
-}
-
-func (d *data) sizes() Sizes {
-	value := unsignedBinary4(d.filesize)
-	en := language.English
-	return Sizes{
-		Bytes:   value,
-		Decimal: humanize.Decimal(int64(value), en),
-		Binary:  humanize.Binary(int64(value), en),
-	}
-}
-
-func (d *data) typeInfo() TypeInfos {
-	dt, ft := unsignedBinary1(d.datatype), unsignedBinary1(d.filetype)
-	t1, t2, t3 := unsignedBinary2(d.tinfo1), unsignedBinary2(d.tinfo2), unsignedBinary2(d.tinfo3)
-	flag := Flags(unsignedBinary1(d.tFlags))
-	ti := TypeInfos{
-		TypeInfo{t1, ""},
-		TypeInfo{t2, ""},
-		TypeInfo{t3, ""},
-		flag.parse(),
-		d.tInfoS.String(),
-	}
-	switch DataType(dt) {
-	case none:
-		return ti // golangci-lint deadcode placeholder
-	case character:
-		switch Character(ft) {
-		case ascii, ansi, ansiMation, pcBoard, avatar, tundraDraw:
-			ti.Info1.Info = "character width"
-			ti.Info2.Info = "number of lines"
-		case ripScript:
-			ti.Info1.Info = "pixel width"
-			ti.Info2.Info = "character screen height"
-			ti.Info3.Info = "number of colors"
-		case html, source:
-			return ti
-		}
-	case bitmap:
-		switch Bitmap(ft) {
-		case gif, pcx, lbm, tga, fli, flc, bmp, gl, dl, wpg, png, jpg, mpg, avi:
-			ti.Info1.Info = "pixel width"
-			ti.Info2.Info = "pixel height"
-			ti.Info3.Info = "pixel depth"
-		}
-	case vector:
-		switch Vector(ft) {
-		case dxf, dwg, wpvg, kinetix:
-			return ti
-		}
-	case audio:
-		switch Audio(ft) {
-		case smp8, smp8s, smp16, smp16s:
-			ti.Info1.Info = "sample rate"
-		case mod, composer669, stm, s3m, mtm, far, ult, amf, dmf, okt, rol, cmf, midi,
-			sadt, voc, wave, patch8, patch16, xm, hsc, it:
-			return ti
-		}
-	case binaryText:
-		return ti
-	case xBin:
-		ti.Info1.Info = "character width"
-		ti.Info2.Info = "number of lines"
-	case archive:
-		switch Archive(ft) {
-		case zip, arj, lzh, arc, tar, zoo, rar, uc2, pak, sqz:
-			return ti
-		}
-	case executable:
-		return ti
-	}
-	return ti
-}
-
-func (r record) author(i int) author {
-	var a author
-	const (
-		start = 42
-		end   = start + len(a)
-	)
-	for j, c := range r[start+i : end+i] {
-		a[j] = c
-	}
-	return a
-}
-
-func (r record) comments(i int) comments {
-	return comments{r[i+104]}
-}
-
-func (r record) comnt(count comments, sauceIndex int) (block comnt) {
-	block = comnt{
-		count: count,
-	}
-	if int(unsignedBinary1(count)) == 0 {
-		return block
-	}
-	id, l := []byte(comntID), len(r)
-	var backwardsLoop = func(i int) int {
-		return l - 1 - i
-	}
-	// search for the id sequence in b
-	for i := range r {
-		if i > comntLineSize*comntMaxLines {
-			break
-		}
-		i = backwardsLoop(i)
-		if i < comntLineSize {
-			break
-		}
-		if i >= sauceIndex {
-			continue
-		}
-		// do matching in reverse
-		if r[i-1] != id[4] {
-			continue // T
-		}
-		if r[i-2] != id[3] {
-			continue // N
-		}
-		if r[i-3] != id[2] {
-			continue // M
-		}
-		if r[i-4] != id[1] {
-			continue // O
-		}
-		if r[i-5] != id[0] {
-			continue // C
-		}
-		block.index = i
-		block.length = sauceIndex - block.index
-		block.lines = r[i : i+block.length]
-		return block
-	}
-	return block
-}
-
-func (r record) dataType(i int) dataType {
-	return dataType{r[i+94]}
-}
-
-func (r record) date(i int) date {
-	var d date
-	const (
-		start = 82
-		end   = start + len(d)
-	)
-	for j, c := range r[start+i : end+i] {
-		d[j] = c
-	}
-	return d
-}
-
-func (r record) extract() (d data) {
-	i := Scan(r...)
-	if i == -1 {
-		return d
-	}
-	d = data{
-		id:       r.id(i),
-		version:  r.version(i),
-		title:    r.title(i),
-		author:   r.author(i),
-		group:    r.group(i),
-		date:     r.date(i),
-		filesize: r.fileSize(i),
-		datatype: r.dataType(i),
-		filetype: r.fileType(i),
-		tinfo1:   r.tInfo1(i),
-		tinfo2:   r.tInfo2(i),
-		tinfo3:   r.tInfo3(i),
-		tinfo4:   r.tInfo4(i),
-		tFlags:   r.tFlags(i),
-		tInfoS:   r.tInfoS(i),
-	}
-	d.comments = r.comments(i)
-	d.comnt = r.comnt(d.comments, i)
-	return d
-}
-
-func (r record) fileSize(i int) fileSize {
-	return fileSize{r[i+90], r[i+91], r[i+92], r[i+93]}
-}
-
-func (r record) fileType(i int) fileType {
-	return fileType{r[i+95]}
-}
-
-func (r record) group(i int) group {
-	var g group
-	const (
-		start = 62
-		end   = start + len(g)
-	)
-	for j, c := range r[start+i : end+i] {
-		g[j] = c
-	}
-	return g
-}
-
-func (r record) id(i int) id {
-	return id{r[i+0], r[i+1], r[i+2], r[i+3], r[i+4]}
-}
-
-func (r record) tFlags(i int) tFlags {
-	return tFlags{r[i+105]}
-}
-
-func (r record) title(i int) title {
-	var t title
-	const (
-		start = 7
-		end   = start + len(t)
-	)
-	for j, c := range r[start+i : end+i] {
-		t[j] = c
-	}
-	return t
-}
-
-func (r record) tInfo1(i int) tInfo1 {
-	return tInfo1{r[i+96], r[i+97]}
-}
-
-func (r record) tInfo2(i int) tInfo2 {
-	return tInfo2{r[i+98], r[i+99]}
-}
-
-func (r record) tInfo3(i int) tInfo3 {
-	return tInfo3{r[i+100], r[i+101]}
-}
-
-func (r record) tInfo4(i int) tInfo4 {
-	return tInfo4{r[i+102], r[i+103]}
-}
-
-func (r record) tInfoS(i int) tInfoS {
-	var s tInfoS
-	const (
-		start = 106
-		end   = start + len(s)
-	)
-	for j, c := range r[start+i : end+i] {
-		if c == 0 {
-			continue
-		}
-		s[j] = c
-	}
-	return s
-}
-
-func (r record) version(i int) version {
-	return version{r[i+5], r[i+6]}
-}
-
 // Scan returns the position of the SAUCE00 ID or -1 if no ID exists.
 func Scan(b ...byte) (index int) {
 	const sauceSize, maximum = 128, 512
@@ -932,7 +492,7 @@ func Parse(data ...byte) Record {
 		File:     d.fileType(),
 		Info:     d.typeInfo(),
 		Desc:     d.description(),
-		Comnt:    d.comment(),
+		Comnt:    d.commentBlock(),
 	}
 }
 
@@ -940,7 +500,7 @@ func unsignedBinary1(b [1]byte) (value uint8) {
 	buf := bytes.NewReader(b[:])
 	err := binary.Read(buf, binary.LittleEndian, &value)
 	if err != nil {
-		fmt.Println("unsignedBinary1 failed:", err)
+		fmt.Println("unsigned 1 byte, LE binary failed:", err)
 	}
 	return value
 }
@@ -949,7 +509,7 @@ func unsignedBinary2(b [2]byte) (value uint16) {
 	buf := bytes.NewReader(b[:])
 	err := binary.Read(buf, binary.LittleEndian, &value)
 	if err != nil {
-		fmt.Println("unsignedBinary2 failed:", err)
+		fmt.Println("unsigned 2 bytes, LE binary failed:", err)
 	}
 	return value
 }
@@ -958,7 +518,7 @@ func unsignedBinary4(b [4]byte) (value uint16) {
 	buf := bytes.NewReader(b[:])
 	err := binary.Read(buf, binary.LittleEndian, &value)
 	if err != nil {
-		fmt.Println("unsignedBinary4 failed:", err)
+		fmt.Println("unsigned 4 byte, LE binary failed:", err)
 	}
 	return value
 }
