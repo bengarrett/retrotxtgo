@@ -1,4 +1,4 @@
-// Package sauce to handle the opening and reading of text files.
+// Package sauce to handle the reading and parsing of embedded SAUCE metadata.
 package sauce
 
 import (
@@ -287,6 +287,7 @@ func (b Bitmap) String() string {
 	return [...]string{
 		"GIF image",
 		"ZSoft Paintbrush image",
+		"DeluxePaint image",
 		"Targa true color image",
 		"Autodesk Animator animation",
 		"Autodesk Animator animation",
@@ -354,6 +355,7 @@ const (
 func (a Audio) String() string {
 	return [...]string{
 		"NoiseTracker module",
+		"Composer 669 module",
 		"ScreamTracker module",
 		"ScreamTracker 3 module",
 		"MultiTracker module",
@@ -363,6 +365,7 @@ func (a Audio) String() string {
 		"X-Tracker module",
 		"Oktalyzer module",
 		"AdLib Visual Composer FM audio",
+		"Creative Music FM audio",
 		"MIDI audio",
 		"SAdT composer FM audio",
 		"Creative Voice File",
