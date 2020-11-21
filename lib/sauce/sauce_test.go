@@ -185,8 +185,8 @@ func Test_data_comment(t *testing.T) {
 				comments: tt.data.comments,
 				comnt:    *c,
 			}
-			if gotC := d.comment(); !reflect.DeepEqual(gotC.Comment, tt.want) {
-				t.Errorf("data.comment() = %v, want %v", gotC.Comment, tt.want)
+			if gotC := d.commentBlock(); !reflect.DeepEqual(gotC.Comment, tt.want) {
+				t.Errorf("data.commentBlock() = %v, want %v", gotC.Comment, tt.want)
 			}
 		})
 	}
@@ -203,8 +203,8 @@ func Test_readCommentByNewline(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotLines := readCommentByNewline(tt.b); !reflect.DeepEqual(gotLines, tt.wantLines) {
-				t.Errorf("readCommentByNewline() = %v, want %v", gotLines, tt.wantLines)
+			if gotLines := commentByNewline(tt.b); !reflect.DeepEqual(gotLines, tt.wantLines) {
+				t.Errorf("commentByNewline() = %v, want %v", gotLines, tt.wantLines)
 			}
 		})
 	}
@@ -221,8 +221,8 @@ func Test_readComment(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotLines := readComment(tt.b); !reflect.DeepEqual(gotLines, tt.wantLines) {
-				t.Errorf("readComment() = %v, want %v", gotLines, tt.wantLines)
+			if gotLines := commentByLine(tt.b); !reflect.DeepEqual(gotLines, tt.wantLines) {
+				t.Errorf("commentByLine() = %v, want %v", gotLines, tt.wantLines)
 			}
 		})
 	}
