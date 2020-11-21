@@ -22,7 +22,6 @@ const (
 	// DFormat is the date format.
 	DFormat     = "DMY"
 	octetStream = "application/octet-stream"
-	text        = "text"
 	zipType     = "application/zip"
 )
 
@@ -94,6 +93,22 @@ type Names struct {
 	Length int
 }
 
+// Format of the text to output.
+type Format uint
+
+const (
+	// ColorText is ANSI colored text.
+	ColorText Format = iota
+	// PlainText is standard text.
+	PlainText
+	// JSON data-interchange format.
+	JSON
+	// JSONMin is JSON data minified.
+	JSONMin
+	// XML markup data.
+	XML
+)
+
 var (
 	// ErrFmt format error.
 	ErrFmt = errors.New("format is not known")
@@ -111,6 +126,11 @@ func (n Names) Info(name, format string) logs.Generic {
 	if name == "" {
 		gen.Issue = "name"
 		gen.Err = ErrNoName
+		return gen
+	}
+	f, err := output(format)
+	if err != nil {
+		gen.Err = ErrFmt
 		return gen
 	}
 	s, err := os.Stat(name)
@@ -132,7 +152,7 @@ func (n Names) Info(name, format string) logs.Generic {
 				} else if skip == true {
 					return nil
 				}
-				return Marshal(osPathname, format, walkMode, walkMode)
+				return Marshal(osPathname, f, walkMode, walkMode)
 			},
 			ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {
 				return godirwalk.SkipNode
@@ -147,7 +167,7 @@ func (n Names) Info(name, format string) logs.Generic {
 		}
 		return logs.Generic{}
 	}
-	if err := Marshal(name, format, n.Index, n.Length); err != nil {
+	if err := Marshal(name, f, n.Index, n.Length); err != nil {
 		gen.Issue = "info.print"
 		gen.Arg = format
 		gen.Err = err
@@ -161,8 +181,25 @@ func lang() language.Tag {
 	return language.English
 }
 
+// output converts the --format argument value to a format type.
+func output(argument string) (f Format, err error) {
+	switch argument {
+	case "color", "c", "":
+		return ColorText, nil
+	case "text", "t":
+		return PlainText, nil
+	case "json", "j":
+		return JSON, nil
+	case "json.min", "jm":
+		return JSONMin, nil
+	case "xml", "x":
+		return XML, nil
+	}
+	return f, ErrFmt
+}
+
 // Marshal the meta and operating system details of a file.
-func Marshal(filename, format string, i, length int) error {
+func Marshal(filename string, f Format, i, length int) error {
 	var d Detail
 	if err := d.read(filename); err != nil {
 		return err
@@ -217,15 +254,15 @@ func Marshal(filename, format string, i, length int) error {
 		m   []byte
 		err error
 	)
-	if m, err = d.marshal(format); err != nil {
+	if m, err = d.marshal(f); err != nil {
 		return err
 	}
-	print(format, m...)
+	print(f, m...)
 	return nil
 }
 
 // Stdin parses piped data and prints out the details in a specific syntax.
-func Stdin(format string, b ...byte) error {
+func Stdin(f Format, b ...byte) error {
 	var d Detail
 	if err := d.parse("", nil, b...); err != nil {
 		return err
@@ -282,16 +319,16 @@ func Stdin(format string, b ...byte) error {
 		m   []byte
 		err error
 	)
-	if m, err = d.marshal(format); err != nil {
+	if m, err = d.marshal(f); err != nil {
 		return err
 	}
-	print(format, m...)
+	print(f, m...)
 	return nil
 }
 
-func print(format string, b ...byte) {
-	switch format {
-	case "color", "c", "", text, "t":
+func print(f Format, b ...byte) {
+	switch f {
+	case ColorText, PlainText:
 		fmt.Printf("%s", b)
 	default:
 		fmt.Printf("%s\n", b)

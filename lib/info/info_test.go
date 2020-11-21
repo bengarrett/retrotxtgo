@@ -42,7 +42,7 @@ func ExampleText() {
 	if err := file.read(tmp); err != nil {
 		log.Fatal(err)
 	}
-	data, _ := file.marshal("xml")
+	data, _ := file.marshal(XML)
 	filesystem.Clean(tmp)
 	s := strings.ReplaceAll(string(data), "\t", "")
 	ln := strings.Split(s, "\n")
@@ -77,21 +77,20 @@ func Test_Marshal(t *testing.T) {
 	tmp := sampleFile()
 	type args struct {
 		filename string
-		format   string
+		format   Format
 	}
 	tests := []struct {
 		name    string
 		args    args
 		wantErr bool
 	}{
-		{"empty", args{"", ""}, true},
-		{"file not exist", args{"notexistingfile", "json"}, true},
-		{"invalid fmt", args{tmp, "yaml"}, true},
-		{"color", args{tmp, ""}, false},
-		{"json", args{tmp, "json"}, false},
-		{"json.min", args{tmp, "jm"}, false},
-		{"text", args{tmp, "t"}, false},
-		{"xml", args{tmp, "xml"}, false},
+		{"empty", args{"", PlainText}, true},
+		{"file not exist", args{"notexistingfile", JSON}, true},
+		{"color", args{tmp, ColorText}, false},
+		{"json", args{tmp, JSON}, false},
+		{"json.min", args{tmp, JSONMin}, false},
+		{"text", args{tmp, PlainText}, false},
+		{"xml", args{tmp, XML}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -174,11 +173,11 @@ func Test_marshal_json(t *testing.T) {
 	tests := []struct {
 		name   string
 		d      Detail
-		format string
+		format Format
 		want   bool
 	}{
-		{"no indent", Detail{}, "jm", true},
-		{"indent", Detail{}, "json", true},
+		{"no indent", Detail{}, JSONMin, true},
+		{"indent", Detail{}, JSON, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -199,7 +198,7 @@ func Test_marshal_text(t *testing.T) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	b, _ := d.marshal("text")
+	b, _ := d.marshal(PlainText)
 	if got := len(b); got != want {
 		fmt.Printf("%+v\n", tmp)
 		t.Errorf("marshal() = %v, want %v", got, want)
@@ -209,7 +208,7 @@ func Test_marshal_text(t *testing.T) {
 
 func TestStdin(t *testing.T) {
 	type args struct {
-		format string
+		format Format
 		b      []byte
 	}
 	tests := []struct {
@@ -218,13 +217,12 @@ func TestStdin(t *testing.T) {
 		wantErr bool
 	}{
 		{"empty", args{}, false},
-		{"format error", args{format: "xx"}, true},
-		{"empty xml", args{format: "xml"}, false},
-		{"color", args{format: "color", b: rawData}, false},
-		{"text", args{format: "text", b: rawData}, false},
-		{"json", args{format: "json", b: rawData}, false},
-		{"json.min", args{format: "json.min", b: rawData}, false},
-		{"xml", args{format: "xml", b: rawData}, false},
+		{"empty xml", args{format: XML}, false},
+		{"color", args{format: ColorText, b: rawData}, false},
+		{"text", args{format: PlainText, b: rawData}, false},
+		{"json", args{format: JSON, b: rawData}, false},
+		{"json.min", args{format: JSONMin, b: rawData}, false},
+		{"xml", args{format: XML, b: rawData}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

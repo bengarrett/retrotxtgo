@@ -54,29 +54,29 @@ func (d *Detail) lines(filename string) (err error) {
 	return f.Close()
 }
 
-func (d *Detail) marshal(format string) (b []byte, err error) {
-	switch format {
-	case "color", "c", "":
+func (d *Detail) marshal(f Format) (b []byte, err error) {
+	switch f {
+	case ColorText:
 		return d.printMarshal(true), nil
-	case text, "t":
+	case PlainText:
 		return d.printMarshal(false), nil
-	case "json", "j":
+	case JSON:
 		b, err = json.MarshalIndent(d, "", "    ")
 		if err != nil {
 			return nil, fmt.Errorf("detail json indent marshal: %w", err)
 		}
-	case "json.min", "jm":
+	case JSONMin:
 		b, err = json.Marshal(d)
 		if err != nil {
 			return nil, fmt.Errorf("detail json marshal: %w", err)
 		}
-	case "xml", "x":
+	case XML:
 		b, err = xml.MarshalIndent(d, "", "\t")
 		if err != nil {
 			return nil, fmt.Errorf("detail xml marshal: %w", err)
 		}
 	default:
-		return nil, fmt.Errorf("detail marshal %q: %w", format, ErrFmt)
+		return nil, fmt.Errorf("detail marshal %q: %w", f, ErrFmt)
 	}
 	return b, nil
 }
@@ -348,7 +348,7 @@ func (d *Detail) validText() bool {
 	if len(s) != req {
 		return false
 	}
-	if s[0] == text {
+	if s[0] == "text" {
 		return true
 	}
 	if d.Mime.Type == octetStream {
