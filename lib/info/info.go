@@ -17,6 +17,7 @@ import (
 	"unicode/utf8"
 
 	c "github.com/gookit/color"
+	"github.com/karrick/godirwalk"
 	"github.com/mozillazg/go-slugify"
 	"github.com/zRedShift/mimemagic"
 	"golang.org/x/sync/errgroup"
@@ -126,18 +127,45 @@ func (n Names) Info(name, format string) logs.Generic {
 		gen.Err = ErrNoName
 		return gen
 	}
-	if s, err := os.Stat(name); os.IsNotExist(err) {
+	s, err := os.Stat(name)
+	if os.IsNotExist(err) {
 		gen.Err = ErrNoFile
-	} else if err != nil {
+		return gen
+	}
+	if err != nil {
 		gen.Err = err
-	} else if s.IsDir() {
-		// todo: directory walk
-		gen.Issue = "info"
-		gen.Err = ErrNoDir
-	} else if err := Marshal(name, format, n.Index, n.Length); err != nil {
+		return gen
+	}
+	if s.IsDir() {
+		const walkMode = -1
+		// godirwalk.Walk is more performant than the standard library filepath.Walk
+		err := godirwalk.Walk(name, &godirwalk.Options{
+			Callback: func(osPathname string, de *godirwalk.Dirent) error {
+				if skip, err := de.IsDirOrSymlinkToDir(); err != nil {
+					return err
+				} else if skip == true {
+					return nil
+				}
+				return Marshal(osPathname, format, walkMode, walkMode)
+			},
+			ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {
+				return godirwalk.SkipNode
+			},
+			Unsorted: true, // set true for faster yet non-deterministic enumeration
+		})
+		if err != nil {
+			gen.Issue = "info.print.directory"
+			gen.Arg = format
+			gen.Err = err
+			return gen
+		}
+		return logs.Generic{}
+	}
+	if err := Marshal(name, format, n.Index, n.Length); err != nil {
 		gen.Issue = "info.print"
 		gen.Arg = format
 		gen.Err = err
+		return gen
 	}
 	return gen
 }
@@ -334,7 +362,7 @@ func (d *Detail) printMarshal(color bool) []byte {
 			}
 		}
 	}
-	if d.index == d.length {
+	if d.length > -1 && d.index == d.length {
 		fmt.Fprint(w, hr(l))
 	}
 	if err := w.Flush(); err != nil {

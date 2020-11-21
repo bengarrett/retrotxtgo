@@ -6,6 +6,7 @@ require (
 	github.com/alecthomas/chroma v0.8.2
 	github.com/dlclark/regexp2 v1.4.0 // indirect
 	github.com/gookit/color v1.3.2
+	github.com/karrick/godirwalk v1.16.1
 	github.com/mozillazg/go-slugify v0.2.0
 	github.com/mozillazg/go-unidecode v0.1.1 // indirect
 	github.com/muesli/go-app-paths v0.2.1
