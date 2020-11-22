@@ -16,20 +16,35 @@ import (
 // NL is the newline represented as 2 bytes.
 type NL [2]rune
 
-var (
-	// LF linefeed.
-	LF = NL{10}
-	// CR carriage return.
-	CR = NL{13}
-	// CRLF carriage return + linefeed.
-	CRLF = NL{13, 10}
-	// LFCR linefeed + carriage return.
-	LFCR = NL{10, 13}
-	// EBCDIC IBM mainframe newline.
-	EBCDIC = NL{21}
-	// UTF8NL UTF-8 newline.
-	UTF8NL = NL{133}
-)
+// LF linefeed.
+func LF() NL {
+	return NL{10}
+}
+
+// CR carriage return.
+func CR() NL {
+	return NL{13}
+}
+
+// CRLF carriage return + linefeed.
+func CRLF() NL {
+	return NL{13, 10}
+}
+
+// LFCR linefeed + carriage return.
+func LFCR() NL {
+	return NL{10, 13}
+}
+
+// EBCDIC IBM mainframe newline.
+func EBCDIC() NL {
+	return NL{21}
+}
+
+// UTF8NL UTF-8 newline.
+func UTF8NL() NL {
+	return NL{133}
+}
 
 // Columns counts the number of characters used per line in the reader interface.
 func Columns(r io.Reader, nl NL) (width int, err error) {
@@ -199,18 +214,18 @@ func lfCnt(c, i, l int, runes ...rune) int {
 func abbr(utf bool, s string) NL {
 	switch s {
 	case "lf":
-		return LF
+		return LF()
 	case "cr":
-		return CR
+		return CR()
 	case "crlf":
-		return CRLF
+		return CRLF()
 	case "lfcr":
-		return LFCR
+		return LFCR()
 	case "nl":
 		if utf {
-			return UTF8NL
+			return UTF8NL()
 		}
-		return EBCDIC
+		return EBCDIC()
 	}
 	return NL{}
 }
@@ -219,28 +234,28 @@ func abbr(utf bool, s string) NL {
 func Newline(r NL, extraInfo bool) string {
 	if !extraInfo {
 		switch r {
-		case LF:
+		case LF():
 			return "LF"
-		case CR:
+		case CR():
 			return "CR"
-		case CRLF:
+		case CRLF():
 			return "CRLF"
-		case LFCR:
+		case LFCR():
 			return "LFCR"
-		case EBCDIC:
+		case EBCDIC():
 			return "NL"
 		}
 	}
 	switch r {
-	case LF:
+	case LF():
 		return "LF (Linux, macOS, Unix)"
-	case CR:
+	case CR():
 		return "CR (8-bit microcomputers)"
-	case CRLF:
+	case CRLF():
 		return "CRLF (Windows, DOS)"
-	case LFCR:
+	case LFCR():
 		return "LFCR (Acorn BBC)"
-	case EBCDIC:
+	case EBCDIC():
 		return "NL (IBM EBCDIC)"
 	}
 	return "??"

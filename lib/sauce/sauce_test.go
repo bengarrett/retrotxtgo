@@ -391,7 +391,7 @@ func Test_record_author(t *testing.T) {
 		i    int
 		want string
 	}{
-		{"example", record(packData), sauceIndex, "Sauce author        "},
+		{"example", packData, sauceIndex, "Sauce author        "},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -413,7 +413,7 @@ func Test_record_comnt(t *testing.T) {
 		args       args
 		wantLength int
 	}{
-		{"example", record(packData), args{count: [1]byte{1}, sauceIndex: sauceIndex}, 1 * comntLineSize},
+		{"example", packData, args{count: [1]byte{1}, sauceIndex: sauceIndex}, 1 * comntLineSize},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

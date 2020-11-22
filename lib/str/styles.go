@@ -172,7 +172,7 @@ func NumberizeKeys(keys ...string) string {
 }
 
 // Term determines the terminal type based on the COLORTERM and TERM environment variables.
-func Term(color, env string) string {
+func Term(colorEnv, env string) string {
 	// 9.11.2 The environment variable TERM
 	// https://www.gnu.org/software/gettext/manual/html_node/The-TERM-variable.html
 	// Terminal Colors
@@ -180,7 +180,7 @@ func Term(color, env string) string {
 	var t terminal = -1
 	// first attempt to detect COLORTERM variable
 
-	switch color {
+	switch colorEnv {
 	case "24bit", "truecolor":
 		t = Term16M
 		return t.Formatter()

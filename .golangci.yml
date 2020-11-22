@@ -165,6 +165,12 @@ issues:
   max-same-issues: 0
   # Excluding configuration per-path, per-linter, per-text and per-source
   exclude-rules:
+    - path: sauce/data\.go
+      linters:
+        - gci
+    - path: info/detail\.go
+      linters:
+        - gci
     - path: main\.go
       linters:
         - gochecknoglobals
@@ -190,7 +196,7 @@ issues:
         - unused
     # Exclude known linters from partially hard-vendored code,
     # which is impossible to exclude via "nolint" comments.
-    - path: info/info\.go
+    - path: info/detail\.go
       text: "weak cryptographic primitive"
       linters:
         - gosec
