@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"strings"
 	"syscall"
 	"time"
 
@@ -38,6 +39,7 @@ func Port(port uint) bool {
 
 // Serve data over an internal HTTP server.
 func (args *Args) Serve(b *[]byte) {
+	args.override()
 	port := args.Port
 	if port == 0 || !prompt.PortValid(port) {
 		port = uint(viper.GetInt("serve"))
@@ -62,6 +64,28 @@ func (args *Args) Serve(b *[]byte) {
 	if err := args.serveDir(); err != nil {
 		logs.Fatal("serve directory", "", err)
 	}
+}
+
+func (args *Args) override() {
+	const layout, embed = "standard", false
+	var s = []string{}
+	if args.Layout != layout {
+		s = append(s, fmt.Sprintf("layout to %q", layout))
+		args.Layout = layout
+	}
+	if args.FontEmbedVal != embed {
+		s = append(s, fmt.Sprintf("font-embed to %v", false))
+		args.FontEmbedVal = embed
+	}
+	l := len(s)
+	if l == 0 {
+		return
+	}
+	if l == 1 {
+		fmt.Println("Replaced this argument:", s[0])
+		return
+	}
+	fmt.Println("Replaced these arguments:", strings.Join(s, ", "))
 }
 
 func (args *Args) createDir(b *[]byte) (err error) {
@@ -99,7 +123,7 @@ func (args *Args) watch() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		fmt.Printf("\n\nServer shutdown and clean up: %s\n", args.Destination)
+		fmt.Printf("\n\nServer shutdown and directory removal of: %s\n", args.Destination)
 		tmp, err := path.Match(fmt.Sprintf("%s%s*",
 			string(os.PathSeparator), os.TempDir()), args.Destination)
 		if err != nil {
