@@ -177,20 +177,21 @@ func (args *Args) Create(b *[]byte) {
 		go args.savejs(ch)
 		go args.savefavicon(ch)
 		err1, err2, err3, err4, err5 := <-ch, <-ch, <-ch, <-ch, <-ch
+		const errS = "could not save file"
 		if err1 != nil {
-			logs.Println("save file 1", "", err1)
+			logs.Println(errS, "", err1)
 		}
 		if err2 != nil {
-			logs.Println("save file 2", "", err2)
+			logs.Println(errS, "", err2)
 		}
 		if err3 != nil {
-			logs.Println("save file 3", "", err3)
+			logs.Println(errS, "", err3)
 		}
 		if err4 != nil {
-			logs.Println("save file 4", "", err4)
+			logs.Println(errS, "", err4)
 		}
 		if err5 != nil {
-			logs.Println("save file 5", "", err5)
+			logs.Println(errS, "", err5)
 		}
 		if err1 != nil || err2 != nil || err3 != nil || err4 != nil || err5 != nil {
 			os.Exit(1)
@@ -228,14 +229,16 @@ func (args *Args) destination(name string) (string, error) {
 	if stat.IsDir() {
 		path = filepath.Join(dir, name)
 	}
-	_, err = os.Stat(path)
-	if err != nil {
-		return "", fmt.Errorf("args destination path failed %q: %w", path, err)
+	if _, err = os.Stat(path); os.IsNotExist(err) {
+		empty := []byte{}
+		if _, err = filesystem.Save(path, empty...); err != nil {
+			return "", fmt.Errorf("args destination path failed %q: %w", path, err)
+		}
 	}
+	// todo: logic failure
 	if !args.OW && !os.IsNotExist(err) {
 		switch name {
-		case "favicon.ico", "scripts.js",
-			"vga.woff2":
+		case "favicon.ico", "scripts.js", "vga.woff2":
 			// existing static files can be ignored
 			return path, nil
 		}
