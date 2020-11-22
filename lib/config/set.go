@@ -22,6 +22,12 @@ import (
 	v "retrotxt.com/retrotxt/lib/version"
 )
 
+type update struct {
+	name  string
+	setup bool
+	value interface{}
+}
+
 // ColorCSS prints colored CSS syntax highlighting.
 func ColorCSS(elm string) string {
 	style := viper.GetString("style.html")
@@ -113,39 +119,47 @@ func Update(name string, setup bool) {
 		// everything ok
 	}
 	if b, ok := value.(bool); ok {
-		switch b {
-		case true:
-			fmt.Printf("\n%s is in use\n", str.Cf(name))
-		default:
-			fmt.Printf("\n%s is currently not in use\n", str.Cf(name))
-		}
+		updateBool(b, name)
 	}
 	if s, ok := value.(string); ok {
-		switch s {
-		case "":
-			fmt.Printf("\n%s is currently not in use\n", str.Cf(name))
-		default:
-			fmt.Printf("\n%s is set to %q", str.Cf(name), value)
-			// print the operating system's ability to use the existing set values
-			// does the 'editor' exist in the env path, does the save-directory exist?
-			switch name {
-			case "editor":
-				_, err := exec.LookPath(value.(string))
-				fmt.Print(" ", str.Bool(err == nil))
-				fmt.Println()
-			case "save-directory":
-				f := false
-				if _, err := os.Stat(value.(string)); !os.IsNotExist(err) {
-					f = true
-				}
-				fmt.Print(" ", str.Bool(f))
-				fmt.Println()
-			default:
-				fmt.Println()
+		updateString(s, name, value.(string))
+	}
+	updatePrompt(update{name, setup, value})
+}
+
+func updateBool(b bool, name string) {
+	switch b {
+	case true:
+		fmt.Printf("\n%s is in use\n", str.Cf(name))
+	default:
+		fmt.Printf("\n%s is currently not in use\n", str.Cf(name))
+	}
+}
+
+func updateString(s, name, value string) {
+	switch s {
+	case "":
+		fmt.Printf("\n%s is currently not in use\n", str.Cf(name))
+	default:
+		fmt.Printf("\n%s is set to %q", str.Cf(name), value)
+		// print the operating system's ability to use the existing set values
+		// does the 'editor' exist in the env path, does the save-directory exist?
+		switch name {
+		case "editor":
+			_, err := exec.LookPath(value)
+			fmt.Print(" ", str.Bool(err == nil))
+			fmt.Println()
+		case "save-directory":
+			f := false
+			if _, err := os.Stat(value); !os.IsNotExist(err) {
+				f = true
 			}
+			fmt.Print(" ", str.Bool(f))
+			fmt.Println()
+		default:
+			fmt.Println()
 		}
 	}
-	updatePrompt(name, setup, value)
 }
 
 func recommend(s string) string {
@@ -155,117 +169,145 @@ func recommend(s string) string {
 	return fmt.Sprintf(" (recommend: %s)", str.Cp(s))
 }
 
-func updatePrompt(name string, setup bool, value interface{}) {
+func updatePrompt(u update) {
 	// print the setting user input prompt
-	switch name {
+	switch u.name {
 	case "editor":
-		s := fmt.Sprint("Set a " + Tip()[name])
-		if value.(string) != "" {
-			s = fmt.Sprint(s, " or use a dash [-] to remove")
-		} else if Editor() != "" {
-			fmt.Printf("instead the %s editor will be run\n\n", str.Cp(Editor()))
-		}
-		fmt.Printf("%s:\n", s)
-		setEditor(name, setup)
+		promptEditor(u)
 	case "html.font.embed":
-		setFontEmbed(value.(bool), setup)
+		setFontEmbed(u.value.(bool), u.setup)
 	case "html.font.family":
-		setFont(value.(string), setup)
+		setFont(u.value.(string), u.setup)
 	case "html.layout":
-		fmt.Println("\nChoose a " + str.Options(Tip()[name], true, create.Layouts()...) + " (recommend: " + str.Cp("standard") + ")")
-		fmt.Println("\n  standard: uses external CSS, JS and woff2 fonts and is the recommended layout for web servers")
-		fmt.Println("  inline:   includes both the CSS and JS as inline elements but is not recommended")
-		fmt.Println("  compact:  is the same as the standard layout but without any <meta> tags")
-		fmt.Println("  none:     no template is used, instead only the generated markup is returned")
-		setShortStrings(name, setup, create.Layouts()...)
+		promptLayout(u)
 	case "html.meta.author",
 		"html.meta.description",
 		"html.meta.keywords":
-		previewMeta(name, value.(string))
-		setString(name, setup)
+		previewMeta(u.name, u.value.(string))
+		setString(u.name, u.setup)
 	case "html.meta.theme-color":
-		recommendMeta(name, value.(string), "")
-		setString(name, setup)
+		recommendMeta(u.name, u.value.(string), "")
+		setString(u.name, u.setup)
 	case "html.meta.color-scheme":
-		previewMeta(name, value.(string))
-		ccc := create.ColorScheme()
-		var prints = make([]string, len(ccc[:]))
-		copy(prints, ccc[:])
-		fmt.Println(str.UnderlineKeys(prints...) + recommend(""))
-		setShortStrings(name, setup, ccc[:]...)
+		promptColorScheme(u)
 	case "html.meta.generator":
-		setGenerator(value.(bool))
+		setGenerator(u.value.(bool))
 	case "html.meta.notranslate":
-		setNoTranslate(value.(bool), setup)
+		setNoTranslate(u.value.(bool), u.setup)
 	case "html.meta.referrer":
-		recommendMeta(name, value.(string), "")
+		recommendMeta(u.name, u.value.(string), "")
 		cr := create.Referrer()
 		fmt.Println(str.NumberizeKeys(cr[:]...))
-		setIndex(name, setup, cr[:]...)
+		setIndex(u.name, u.setup, cr[:]...)
 	case "html.meta.robots":
-		recommendMeta(name, value.(string), "")
+		recommendMeta(u.name, u.value.(string), "")
 		cr := create.Robots()
 		fmt.Println(str.NumberizeKeys(cr[:]...))
-		setIndex(name, setup, cr[:]...)
+		setIndex(u.name, u.setup, cr[:]...)
 	case "html.meta.retrotxt":
-		setRetrotxt(value.(bool))
+		setRetrotxt(u.value.(bool))
 	case "html.title":
-		previewTitle(value.(string))
-		fmt.Println("Choose a new " + Tip()[name] + ":")
-		setString(name, setup)
+		previewTitle(u.value.(string))
+		fmt.Println("Choose a new " + Tip()[u.name] + ":")
+		setString(u.name, u.setup)
 	case "save-directory":
-		fmt.Println("Choose a new " + Tip()[name] + ":")
-		if home, err := os.UserHomeDir(); err == nil {
-			fmt.Printf("\nUse %s to save the home directory %s", str.Example("~"), str.Cb(home))
-		}
-		if wd, err := os.Getwd(); err == nil {
-			fmt.Printf("\nUse %s to save this current directory %s", str.Example("."), str.Cb(wd))
-		}
-		fmt.Printf("\nUse %s to disable and always use the user's current directory\n\n", str.Example("-"))
-		setDirectory(name, setup)
+		promptSaveDir(u)
 	case "serve":
-		var reset = func() {
-			var p uint
-			if u, ok := Reset()["serve"].(uint); ok {
-				p = u
-			}
-			save(name, false, p)
-		}
-		var p uint
-		switch v := value.(type) {
-		case uint:
-			p = v
-		case int:
-			p = uint(v)
-		default:
-			reset()
-		}
-		if p > prompt.PortMax {
-			reset()
-		}
-		fmt.Printf("\n%slocalhost%s%d %s\n", "http://",
-			str.Cb(":"), p, str.Bool(create.Port(p)))
-		fmt.Printf("\nPort %s is reserved, ", str.Example("0"))
-		fmt.Printf("while the ports below %s are normally restricted by the operating system and are not recommended\n", str.Example("1024"))
-		fmt.Printf("\nSet a HTTP port value, to %s\nChoices %s:\n", Tip()[name], portInfo())
-		setPort(name, setup)
+		promptServe(u)
 	case "style.html":
-		var d string
-		if s, ok := Reset()[name].(string); ok {
-			d = s
-		}
-		fmt.Printf("\n%s\n\nSet a new HTML syntax style%s:\n", str.Ci(Names("css")), recommend(d))
-		setStrings(name, setup, styles.Names()...)
+		promptStyleHTML(u)
 	case "style.info":
-		var d string
-		if s, ok := Reset()[name].(string); ok {
-			d = s
-		}
-		fmt.Printf("\n%s\n\nSet a new %s syntax style%s:\n", str.Ci(Names("json")), str.Example("config info"), recommend(d))
-		setStrings(name, setup, styles.Names()...)
+		promptStyleInfo(u)
 	default:
-		log.Fatalln("config is not configured:", name)
+		log.Fatalln("config is not configured:", u.name)
 	}
+}
+
+func promptColorScheme(u update) {
+	previewMeta(u.name, u.value.(string))
+	ccc := create.ColorScheme()
+	var prints = make([]string, len(ccc[:]))
+	copy(prints, ccc[:])
+	fmt.Println(str.UnderlineKeys(prints...) + recommend(""))
+	setShortStrings(u.name, u.setup, ccc[:]...)
+}
+
+func promptEditor(u update) {
+	s := fmt.Sprint("Set a " + Tip()[u.name])
+	if u.value.(string) != "" {
+		s = fmt.Sprint(s, " or use a dash [-] to remove")
+	} else if Editor() != "" {
+		fmt.Printf("instead the %s editor will be run\n\n", str.Cp(Editor()))
+	}
+	fmt.Printf("%s:\n", s)
+	setEditor(u.name, u.setup)
+}
+
+func promptLayout(u update) {
+	fmt.Println("\nChoose a " + str.Options(Tip()[u.name], true, create.Layouts()...) + " (recommend: " + str.Cp("standard") + ")")
+	fmt.Println("\n  standard: uses external CSS, JS and woff2 fonts and is the recommended layout for web servers")
+	fmt.Println("  inline:   includes both the CSS and JS as inline elements but is not recommended")
+	fmt.Println("  compact:  is the same as the standard layout but without any <meta> tags")
+	fmt.Println("  none:     no template is used, instead only the generated markup is returned")
+	setShortStrings(u.name, u.setup, create.Layouts()...)
+}
+
+func promptSaveDir(u update) {
+	fmt.Println("Choose a new " + Tip()[u.name] + ":")
+	if home, err := os.UserHomeDir(); err == nil {
+		fmt.Printf("\nUse %s to save the home directory %s", str.Example("~"), str.Cb(home))
+	}
+	if wd, err := os.Getwd(); err == nil {
+		fmt.Printf("\nUse %s to save this current directory %s", str.Example("."), str.Cb(wd))
+	}
+	fmt.Printf("\nUse %s to disable and always use the user's current directory\n\n", str.Example("-"))
+	setDirectory(u.name, u.setup)
+}
+
+func promptServe(u update) {
+	var reset = func() {
+		var p uint
+		if u, ok := Reset()["serve"].(uint); ok {
+			p = u
+		}
+		save(u.name, false, p)
+	}
+	var p uint
+	switch v := u.value.(type) {
+	case uint:
+		p = v
+	case int:
+		p = uint(v)
+	default:
+		reset()
+	}
+	if p > prompt.PortMax {
+		reset()
+	}
+	fmt.Printf("\n%slocalhost%s%d %s\n", "http://",
+		str.Cb(":"), p, str.Bool(create.Port(p)))
+	fmt.Printf("\nPort %s is reserved, ", str.Example("0"))
+	fmt.Printf("while the ports below %s are normally restricted by the operating system and are not recommended\n", str.Example("1024"))
+	fmt.Printf("\nSet a HTTP port value, to %s\nChoices %s:\n", Tip()[u.name], portInfo())
+	setPort(u.name, u.setup)
+}
+
+func promptStyleHTML(u update) {
+	var d string
+	if s, ok := Reset()[u.name].(string); ok {
+		d = s
+	}
+	fmt.Printf("\n%s\n\nSet a new HTML syntax style%s:\n", str.Ci(Names("css")), recommend(d))
+	setStrings(u.name, u.setup, styles.Names()...)
+}
+
+func promptStyleInfo(u update) {
+	var d string
+	if s, ok := Reset()[u.name].(string); ok {
+		d = s
+	}
+	fmt.Printf("\n%s\n\nSet a new %s syntax style%s:\n", str.Ci(Names("json")), str.Example("config info"), recommend(d))
+	setStrings(u.name, u.setup, styles.Names()...)
 }
 
 // Validate the existence of a setting key name.
