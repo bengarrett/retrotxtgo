@@ -256,6 +256,15 @@ func compare(current, fetched string) bool {
 	return false
 }
 
+// copyrightYear uses the build date as a the year of copyright.
+func copyrightYear(date string) string {
+	t, err := time.Parse(time.RFC3339, date)
+	if err != nil {
+		return date
+	}
+	return t.Local().Format("2006")
+}
+
 // digits returns only the digits and decimal point values from a string.
 func digits(s string) string {
 	reg := regexp.MustCompile("[^0-9/.]+")
@@ -271,7 +280,7 @@ func home() *gap.Scope {
 func information() versionInfo {
 	ver := Semantic(B.Version)
 	v := versionInfo{
-		"copyright": "Copyright © 2020 Ben Garrett", // todo: value.go gen year
+		"copyright": fmt.Sprintf("Copyright © %s Ben Garrett", copyrightYear(B.Date)),
 		"url":       fmt.Sprintf("https://%s/go", B.Domain),
 		"app ver":   ver.String(),
 		"go ver":    semanticGo(),
