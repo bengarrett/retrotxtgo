@@ -26,6 +26,8 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
+const zipComment = "zip comment"
+
 func (d *Detail) ctrls(filename string) (err error) {
 	f, err := os.Open(filename)
 	if err != nil {
@@ -131,7 +133,6 @@ func (d *Detail) parse(name string, stat os.FileInfo, data ...byte) (err error) 
 				fmt.Printf("open zip file failure: %s\n", err)
 			}
 			defer r.Close()
-			return
 		}
 	}()
 	go func() {
@@ -195,13 +196,13 @@ func (d *Detail) printMarshal(color bool) []byte {
 		if !d.marshalDataValid(x.k, x.v) {
 			continue
 		}
-		if x.k == "zip comment" {
+		if x.k == zipComment {
 			if x.v != "" {
 				x.v = fmt.Sprintf("\n%s", x.v)
 			}
 		}
 		fmt.Fprintf(w, "\t %s\t  %s\n", x.k, info(x.v))
-		if x.k == "zip comment" || x.k == "slug" {
+		if x.k == zipComment || x.k == "slug" {
 			if d.sauceIndex <= 0 {
 				break
 			}
@@ -248,7 +249,7 @@ func (d *Detail) marshalDataValid(k, v string) bool {
 	if k == "interpretation" && v == "" {
 		return false
 	}
-	if k == "zip comment" && v == "" {
+	if k == zipComment && v == "" {
 		return false
 	}
 	return true
@@ -299,7 +300,7 @@ func (d *Detail) printMarshalData() (data []struct{ k, v string }) {
 		{k: "SHA256 checksum", v: d.Sums.SHA256},
 		{k: "media mime type", v: d.Mime.Type},
 		{k: "slug", v: d.Slug},
-		{k: "zip comment", v: d.ZipComment},
+		{k: zipComment, v: d.ZipComment},
 		// sauce data
 		{k: "title", v: d.Sauce.Title},
 		{k: "author", v: d.Sauce.Author},
