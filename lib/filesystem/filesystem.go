@@ -43,6 +43,7 @@ func DirExpansion(name string) (dir string) {
 	if name == "" {
 		return dir
 	}
+	const homeDir, currentDir, parentDir = "~", ".", ".."
 	var root = func() bool {
 		return name[:1] == string(os.PathSeparator)
 	}
@@ -52,12 +53,12 @@ func DirExpansion(name string) (dir string) {
 	for i, s := range paths {
 		p := ""
 		switch s {
-		case "~":
+		case homeDir:
 			p, err = os.UserHomeDir()
 			if err != nil {
 				logs.LogFatal(err)
 			}
-		case ".":
+		case currentDir:
 			if i != 0 {
 				continue
 			}
@@ -65,7 +66,7 @@ func DirExpansion(name string) (dir string) {
 			if err != nil {
 				logs.LogFatal(err)
 			}
-		case "..":
+		case parentDir:
 			if i == 0 {
 				wd, err := os.Getwd()
 				if err != nil {

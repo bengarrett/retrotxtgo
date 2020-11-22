@@ -14,7 +14,7 @@ import (
 
 // fileExample the string to a text file.
 func fileExample(s string, i int) (path string) {
-	var name = fmt.Sprintf("rt_fs_save%d.txt", i)
+	name := fmt.Sprintf("rt_fs_save%d.txt", i)
 	path, err := SaveTemp(name, []byte(s)...)
 	if err != nil {
 		log.Fatal(err)

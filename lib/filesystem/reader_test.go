@@ -9,13 +9,13 @@ func TestNewlines(t *testing.T) {
 	tests := []struct {
 		name string
 		text []rune
-		want [2]rune
+		want NL
 	}{
-		{"unix", []rune("hello\x0aworld\x0a"), [2]rune{10}},
-		{"win", []rune("hello\x0d\x0aworld\x0d\x0a\x1a"), [2]rune{13, 10}},
-		{"c64", []rune("hello\x0dworld\x0d"), [2]rune{13}},
-		{"ibm", []rune("hello\x15world\x15"), [2]rune{21}},
-		{"mix", []rune("\x15Windows newline: \x0d\x0a\x15Unix newline: \x0a\x15"), [2]rune{21}},
+		{"unix", []rune("hello\x0aworld\x0a"), LF},
+		{"win", []rune("hello\x0d\x0aworld\x0d\x0a\x1a"), CRLF},
+		{"c64", []rune("hello\x0dworld\x0d"), CR},
+		{"ibm", []rune("hello\x15world\x15"), EBCDIC},
+		{"mix", []rune("\x15Windows newline: \x0d\x0a\x15Unix newline: \x0a\x15"), EBCDIC},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -28,7 +28,7 @@ func TestNewlines(t *testing.T) {
 
 func TestNewline(t *testing.T) {
 	type args struct {
-		r         [2]rune
+		r         NL
 		extraInfo bool
 	}
 	tests := []struct {
@@ -37,8 +37,8 @@ func TestNewline(t *testing.T) {
 		want string
 	}{
 		{"empty", args{}, "??"},
-		{"nl", args{[2]rune{133}, false}, "NL"},
-		{"nl", args{[2]rune{133}, true}, "NL (IBM EBCDIC)"},
+		{"nl", args{EBCDIC, false}, "NL"},
+		{"nl", args{EBCDIC, true}, "NL (IBM EBCDIC)"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

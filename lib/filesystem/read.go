@@ -37,7 +37,8 @@ func ReadAllBytes(name string) (data []byte, err error) {
 	scanner := bufio.NewScanner(file)
 	// optional adjustment to the token size
 	// Go by default will scan 64 * 1024 bytes (64KB) per iteration
-	const max = 64 * 1024
+	const KB = 1024
+	const max = 64 * KB
 	scanner.Buffer(data, max)
 	// required, split scan into Buffer(data, x) sized byte chuncks
 	// otherwise scanner will panic on files larger than 64 * 1024 bytes

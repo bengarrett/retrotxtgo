@@ -13,8 +13,26 @@ import (
 	"golang.org/x/text/transform"
 )
 
+// NL is the newline represented as 2 bytes.
+type NL [2]rune
+
+var (
+	// LF linefeed.
+	LF = NL{10}
+	// CR carriage return.
+	CR = NL{13}
+	// CRLF carriage return + linefeed.
+	CRLF = NL{13, 10}
+	// LFCR linefeed + carriage return.
+	LFCR = NL{10, 13}
+	// EBCDIC IBM mainframe newline.
+	EBCDIC = NL{21}
+	// UTF8NL UTF-8 newline.
+	UTF8NL = NL{133}
+)
+
 // Columns counts the number of characters used per line in the reader interface.
-func Columns(r io.Reader, nl [2]rune) (width int, err error) {
+func Columns(r io.Reader, nl NL) (width int, err error) {
 	var lineBreak = []byte{byte(nl[0]), byte(nl[1])}
 	if nl[1] == 0 {
 		lineBreak = []byte{byte(nl[0])}
@@ -75,7 +93,7 @@ func Controls(r io.Reader) (count int, err error) {
 }
 
 // Lines counts the number of lines in the interface.
-func Lines(r io.Reader, nl [2]rune) (count int, err error) {
+func Lines(r io.Reader, nl NL) (count int, err error) {
 	var lineBreak = []byte{byte(nl[0]), byte(nl[1])}
 	if nl[1] == 0 {
 		lineBreak = []byte{byte(nl[0])}
@@ -114,7 +132,7 @@ func Lines(r io.Reader, nl [2]rune) (count int, err error) {
 
 // Newlines will try to guess the newline representation as a 2 byte value.
 // A guess of Unix will return [10, 0], Windows [13, 10], otherwise a [0, 0] value is returned.
-func Newlines(utf bool, runes ...rune) [2]rune {
+func Newlines(utf bool, runes ...rune) NL {
 	const (
 		lf     = 10
 		cr     = 13
@@ -178,51 +196,51 @@ func lfCnt(c, i, l int, runes ...rune) int {
 	return c
 }
 
-func abbr(utf bool, s string) [2]rune {
+func abbr(utf bool, s string) NL {
 	switch s {
 	case "lf":
-		return [2]rune{10}
+		return LF
 	case "cr":
-		return [2]rune{13}
+		return CR
 	case "crlf":
-		return [2]rune{13, 10}
+		return CRLF
 	case "lfcr":
-		return [2]rune{10, 13}
+		return LFCR
 	case "nl":
 		if utf {
-			return [2]rune{133}
+			return UTF8NL
 		}
-		return [2]rune{21}
+		return EBCDIC
 	}
-	return [2]rune{}
+	return NL{}
 }
 
 // Newline humanizes the value of Newlines().
-func Newline(r [2]rune, extraInfo bool) string {
+func Newline(r NL, extraInfo bool) string {
 	if !extraInfo {
 		switch r {
-		case [2]rune{10}:
+		case LF:
 			return "LF"
-		case [2]rune{13}:
+		case CR:
 			return "CR"
-		case [2]rune{13, 10}:
+		case CRLF:
 			return "CRLF"
-		case [2]rune{10, 13}:
+		case LFCR:
 			return "LFCR"
-		case [2]rune{21}, [2]rune{133}:
+		case EBCDIC:
 			return "NL"
 		}
 	}
 	switch r {
-	case [2]rune{10}:
+	case LF:
 		return "LF (Linux, macOS, Unix)"
-	case [2]rune{13}:
+	case CR:
 		return "CR (8-bit microcomputers)"
-	case [2]rune{13, 10}:
+	case CRLF:
 		return "CRLF (Windows, DOS)"
-	case [2]rune{10, 13}:
+	case LFCR:
 		return "LFCR (Acorn BBC)"
-	case [2]rune{21}, [2]rune{133}:
+	case EBCDIC:
 		return "NL (IBM EBCDIC)"
 	}
 	return "??"
