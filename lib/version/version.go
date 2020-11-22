@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	c "github.com/gookit/color"
+	gookit "github.com/gookit/color"
 	gap "github.com/muesli/go-app-paths"
 	"gopkg.in/yaml.v3"
 	"retrotxt.com/retrotxt/lib/filesystem"
@@ -31,6 +31,55 @@ type Build struct {
 	Domain string
 	// Version of RetroTxt
 	Version string
+}
+
+// Output the version data.
+type Output struct {
+	App       string `json:"version"`
+	Copyright string `json:"copyright"`
+	Date      string `json:"date"`
+	Exe       string `json:"binary"`
+	Git       string `json:"gitCommit"`
+	GoVer     string `json:"goVersion"`
+	License   string `json:"license"`
+	OS        string `json:"os"`
+	URL       string `json:"url"`
+}
+
+func (o Output) String(color bool) string {
+	gookit.Enable = color
+	update, ver := NewRelease()
+	var b bytes.Buffer
+	fmt.Fprintf(&b, str.Cp("RetroTxt\t%s [%s]\n"), o.Copyright, o.URL)
+	fmt.Fprintf(&b, str.Cinf("Version:\t%s"), o.App)
+	if update {
+		fmt.Fprintf(&b, str.Cinf("  current: %s"), ver)
+	}
+	fmt.Fprintf(&b, "\nGo version:\t%s\n", o.GoVer)
+	fmt.Fprintf(&b, "\nBinary:\t\t%s\n", o.Exe)
+	fmt.Fprintf(&b, "OS/Arch:\t%s\n", o.OS)
+	fmt.Fprintf(&b, "Build commit:\t%s\n", o.Git)
+	fmt.Fprintf(&b, "Build date:\t%s\n", o.Date)
+	if update {
+		fmt.Fprint(&b, newRelease())
+	}
+	return b.String()
+}
+
+func (o Output) json() (data []byte) {
+	data, err := json.MarshalIndent(o, "", "    ")
+	if err != nil {
+		logs.Fatal("version could not marshal", "json", err)
+	}
+	return data
+}
+
+func (o Output) jsonMin() (data []byte) {
+	data, err := json.Marshal(o)
+	if err != nil {
+		logs.Fatal("version could not marshal", "json", err)
+	}
+	return data
 }
 
 // Version details in semantic syntax.
@@ -62,8 +111,6 @@ func (v Version) valid() bool {
 	}
 	return true
 }
-
-type versionInfo map[string]string
 
 // Cache of version data.
 type Cache struct {
@@ -103,15 +150,16 @@ func NewRelease() (ok bool, ver string) {
 
 // Print formats and prints the RetroTxt version and binary compile information.
 func Print(format string) (ok bool) {
+	m := marshal()
 	switch format {
 	case "color", "c", "":
-		print(Sprint(true))
+		fmt.Print(m.String(true))
 	case "json", "j":
-		fmt.Printf("%s\n", jsonMarshal(true))
+		fmt.Printf("%s\n", m.json())
 	case "json.min", "jm":
-		fmt.Printf("%s\n", jsonMarshal(false))
+		fmt.Printf("%s\n", m.jsonMin())
 	case "text", "t":
-		print(Sprint(false))
+		fmt.Print(m.String(false))
 	default:
 		return false
 	}
@@ -140,28 +188,6 @@ func Semantic(ver string) Version {
 		Minor: nums[1],
 		Patch: nums[2],
 	}
-}
-
-// Sprint formats the RetroTxt version and binary compile information.
-func Sprint(color bool) (text string) {
-	c.Enable = color
-	i := information()
-	update, ver := NewRelease()
-	var b bytes.Buffer
-	fmt.Fprintf(&b, str.Cp("RetroTxt\t%s [%s]\n"), i["copyright"], i["url"])
-	fmt.Fprintf(&b, str.Cinf("Version:\t%s"), i["app ver"])
-	if update {
-		fmt.Fprintf(&b, str.Cinf("  current: %s"), ver)
-	}
-	fmt.Fprintf(&b, "\nGo version:\t%s\n", i["go ver"])
-	fmt.Fprintf(&b, "\nBinary:\t\t%s\n", i["exe"])
-	fmt.Fprintf(&b, "OS/Arch:\t%s\n", i["os"])
-	fmt.Fprintf(&b, "Build commit:\t%s\n", i["git"])
-	fmt.Fprintf(&b, "Build date:\t%s\n", i["date"])
-	if update {
-		fmt.Fprint(&b, newRelease())
-	}
-	return b.String()
 }
 
 // arch humanises some common Go architecture targets.
@@ -276,48 +302,6 @@ func home() *gap.Scope {
 	return gap.NewScope(gap.User, "retrotxt")
 }
 
-// information and version details of retrotxt.
-func information() versionInfo {
-	ver := Semantic(B.Version)
-	v := versionInfo{
-		"copyright": fmt.Sprintf("Copyright © %s Ben Garrett", copyrightYear(B.Date)),
-		"url":       fmt.Sprintf("https://%s/go", B.Domain),
-		"app ver":   ver.String(),
-		"go ver":    semanticGo(),
-		"os":        fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
-		"exe":       binary(),
-		"date":      localBuild(B.Date),
-		"git":       B.Commit,
-		"license":   "LGPL-3.0 [https://www.gnu.org/licenses/lgpl-3.0.html]",
-	}
-	if a := arch(runtime.GOARCH); a != "" {
-		if runtime.GOOS == "darwin" && runtime.GOARCH == "arm64" {
-			v["os"] += " [Apple M1 CPU]"
-		} else {
-			v["os"] += fmt.Sprintf(" [%s CPU]", a)
-		}
-	}
-	return v
-}
-
-// jsonMarshal formats the RetroTxt version and binary compile information.
-func jsonMarshal(indent bool) (data []byte) {
-	var err error
-	switch indent {
-	case true:
-		data, err = json.MarshalIndent(information(), "", "    ")
-		if err != nil {
-			logs.Fatal("version could not marshal", "json", err)
-		}
-	default:
-		data, err = json.Marshal(information())
-		if err != nil {
-			logs.Fatal("version could not marshal", "json", err)
-		}
-	}
-	return data
-}
-
 // localBuild date of this binary executable.
 func localBuild(date string) string {
 	t, err := time.Parse(time.RFC3339, date)
@@ -325,6 +309,28 @@ func localBuild(date string) string {
 		return date
 	}
 	return t.Local().Format("2006 Jan 2, 15:04 MST")
+}
+
+func marshal() Output {
+	v := Output{
+		Copyright: fmt.Sprintf("Copyright © %s Ben Garrett", copyrightYear(B.Date)),
+		URL:       fmt.Sprintf("https://%s/go", B.Domain),
+		App:       Semantic(B.Version).String(),
+		GoVer:     semanticGo(),
+		OS:        fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
+		Exe:       binary(),
+		Date:      localBuild(B.Date),
+		Git:       B.Commit,
+		License:   "LGPL-3.0 [https://www.gnu.org/licenses/lgpl-3.0.html]",
+	}
+	if a := arch(runtime.GOARCH); a != "" {
+		if runtime.GOOS == "darwin" && runtime.GOARCH == "arm64" {
+			v.OS += " [Apple M1 CPU]"
+		} else {
+			v.OS += fmt.Sprintf(" [%s CPU]", a)
+		}
+	}
+	return v
 }
 
 func newRelease() *bytes.Buffer {

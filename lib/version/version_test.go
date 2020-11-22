@@ -39,12 +39,13 @@ func Example_digits() {
 }
 
 func ExamplejsonMarshal() {
-	fmt.Print(json.Valid(jsonMarshal(true)), json.Valid(jsonMarshal(false)))
+	m := marshal()
+	fmt.Print(json.Valid(m.json()), json.Valid(m.jsonMin()))
 	// Output: true true
 }
 
-func ExampleSprint() {
-	fmt.Print(Sprint(false)[:8])
+func ExamplePrint() {
+	fmt.Print(marshal().String(false)[:8])
 	// Output: RetroTxt
 }
 
@@ -70,23 +71,11 @@ func Test_digits(t *testing.T) {
 }
 
 func Test_JSON(t *testing.T) {
-	type args struct {
-		indent bool
+	if got := json.Valid(marshal().json()); got != true {
+		t.Errorf("marshal().json() = %v, want %v", got, true)
 	}
-	tests := []struct {
-		name string
-		args args
-		want bool
-	}{
-		{"no indent", args{false}, true},
-		{"indent", args{true}, true},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := json.Valid(jsonMarshal(tt.args.indent)); got != tt.want {
-				t.Errorf("json() = %v, want %v", got, tt.want)
-			}
-		})
+	if got := json.Valid(marshal().jsonMin()); got != true {
+		t.Errorf("marshal().jsonMin() = %v, want %v", got, true)
 	}
 }
 
@@ -140,7 +129,7 @@ func TestSemantic(t *testing.T) {
 	}
 }
 
-func TestSprint(t *testing.T) {
+func Test_marshal(t *testing.T) {
 	tests := []struct {
 		name  string
 		color bool
@@ -151,8 +140,8 @@ func TestSprint(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotText := Sprint(tt.color); (gotText == "") != tt.empty {
-				t.Errorf("Sprint() = %v, want %v", gotText, tt.empty)
+			if gotText := marshal().String(tt.color); (gotText == "") != tt.empty {
+				t.Errorf("marshal().String() = %v, want %v", gotText, tt.empty)
 			}
 		})
 	}
@@ -233,7 +222,7 @@ func Test_info(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := information()["os"]; !reflect.DeepEqual(got, tt.want) {
+			if got := marshal().OS; !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("info() = %v, want %v", got, tt.want)
 			}
 		})
