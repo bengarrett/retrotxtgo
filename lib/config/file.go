@@ -32,16 +32,17 @@ func InitDefaults() {
 
 // configMissing prints an error notice and exits.
 func configMissing(name, suffix string) {
+	const existCode = 1
 	cmd := strings.TrimSuffix(name, suffix) + " create"
 	used := viper.ConfigFileUsed()
 	if used != "" {
 		fmt.Printf("%s %q config file is missing\ncreate it: %s\n",
 			str.Info(), used, str.Cp(cmd+" --config="+used))
-	} else {
-		fmt.Printf("%s no config file is in use\ncreate it: %s\n",
-			str.Info(), str.Cp(cmd))
+		os.Exit(existCode)
 	}
-	os.Exit(1)
+	fmt.Printf("%s no config file is in use\ncreate it: %s\n",
+		str.Info(), str.Cp(cmd))
+	os.Exit(existCode)
 }
 
 // Path is the absolute path and filename of the configuration file.
@@ -74,7 +75,7 @@ func PrintLocation() {
 // SetConfig reads and loads a configuration file.
 func SetConfig(flag string) (err error) {
 	viper.SetConfigType("yaml")
-	var path = flag
+	path := flag
 	if flag == "" {
 		path = Path()
 	}
@@ -102,7 +103,8 @@ func SetConfig(flag string) (err error) {
 		}
 		// user config file fail
 		return nil
-	} else if flag != "" {
+	}
+	if flag != "" {
 		if len(viper.AllKeys()) == 0 {
 			return fmt.Errorf("set config: %w", ErrRxt)
 		}
