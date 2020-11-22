@@ -208,7 +208,7 @@ func Test_marshal_text(t *testing.T) {
 
 func TestStdin(t *testing.T) {
 	type args struct {
-		format Format
+		format string
 		b      []byte
 	}
 	tests := []struct {
@@ -217,12 +217,12 @@ func TestStdin(t *testing.T) {
 		wantErr bool
 	}{
 		{"empty", args{}, false},
-		{"empty xml", args{format: XML}, false},
-		{"color", args{format: ColorText, b: rawData}, false},
-		{"text", args{format: PlainText, b: rawData}, false},
-		{"json", args{format: JSON, b: rawData}, false},
-		{"json.min", args{format: JSONMin, b: rawData}, false},
-		{"xml", args{format: XML, b: rawData}, false},
+		{"empty xml", args{format: "xml"}, false},
+		{"color", args{format: "c", b: rawData}, false},
+		{"text", args{format: "text", b: rawData}, false},
+		{"json", args{format: "json", b: rawData}, false},
+		{"json.min", args{format: "jm", b: rawData}, false},
+		{"xml", args{format: "x", b: rawData}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

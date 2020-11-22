@@ -262,8 +262,12 @@ func Marshal(filename string, f Format, i, length int) error {
 }
 
 // Stdin parses piped data and prints out the details in a specific syntax.
-func Stdin(f Format, b ...byte) error {
+func Stdin(format string, b ...byte) error {
 	var d Detail
+	f, err := output(format)
+	if err != nil {
+		return err
+	}
 	if err := d.parse("", nil, b...); err != nil {
 		return err
 	}
@@ -315,10 +319,7 @@ func Stdin(f Format, b ...byte) error {
 		}
 		d.mimeUnknown()
 	}
-	var (
-		m   []byte
-		err error
-	)
+	var m []byte
 	if m, err = d.marshal(f); err != nil {
 		return err
 	}
