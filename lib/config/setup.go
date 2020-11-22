@@ -24,7 +24,7 @@ func Setup() {
 	keys := Keys()
 	logo()
 	PrintLocation()
-	var w uint = 80
+	var width uint = 80
 	watch()
 	for i, key := range keys {
 		if i == 0 {
@@ -33,11 +33,11 @@ func Setup() {
 		h := fmt.Sprintf("  %d/%d. RetroTxt Setup - %s",
 			i+1, len(keys), key)
 		if i == 0 {
-			fmt.Println(hr(w))
+			fmt.Println(hr(width))
 		}
 		fmt.Println(h)
 		Update(key, true)
-		fmt.Println(hr(w))
+		fmt.Println(hr(width))
 	}
 	fmt.Println(Info(viper.GetString("style.info")))
 }
@@ -49,8 +49,8 @@ func enterKey() string {
 	return "Press ⏎ enter to skip the question or Ctrl-c to quit"
 }
 
-func hr(w uint) string {
-	return str.Cb(strings.Repeat("-", int(w)))
+func hr(width uint) string {
+	return str.Cb(strings.Repeat("-", int(width)))
 }
 
 func logo() {
