@@ -45,26 +45,7 @@ var createCmd = &cobra.Command{
 	Short:   "Create a HTML document from a text file",
 	Example: exampleCmd(),
 	Run: func(cmd *cobra.Command, args []string) {
-		var changed = func(key string) bool {
-			l := cmd.Flags().Lookup(key)
-			if l == nil {
-				return false
-			}
-			return l.Changed
-		}
-		// monitor string flag changes to allow three user states.
-		// 1) flag not changed so use viper default.
-		// 2) flag with new value to overwrite viper default.
-		// 3) blank flag value to overwrite viper default with an empty/disable value.
-		html.FontFamily = changed("font-family")
-		html.MetaAuthor = changed("meta-author")
-		html.MetaColorScheme = changed("meta-color-scheme")
-		html.MetaDescription = changed("meta-description")
-		html.MetaKeywords = changed("meta-keywords")
-		html.MetaReferrer = changed("meta-referrer")
-		html.MetaRobots = changed("meta-robots")
-		html.MetaThemeColor = changed("meta-theme-color")
-		html.Title = changed("title")
+		monitorFlags(cmd)
 		// piped input from other programs
 		if filesystem.IsPipe() {
 			b, err := filesystem.ReadPipe()
@@ -142,6 +123,29 @@ func createPackage(name string) (enc, font string, b []byte) {
 	return pkg.encoding, pkg.font, b
 }
 
+func monitorFlags(cmd *cobra.Command) {
+	var changed = func(key string) bool {
+		l := cmd.Flags().Lookup(key)
+		if l == nil {
+			return false
+		}
+		return l.Changed
+	}
+	// monitor string flag changes to allow three user states.
+	// 1) flag not changed so use viper default.
+	// 2) flag with new value to overwrite viper default.
+	// 3) blank flag value to overwrite viper default with an empty/disable value.
+	html.FontFamily = changed("font-family")
+	html.MetaAuthor = changed("meta-author")
+	html.MetaColorScheme = changed("meta-color-scheme")
+	html.MetaDescription = changed("meta-description")
+	html.MetaKeywords = changed("meta-keywords")
+	html.MetaReferrer = changed("meta-referrer")
+	html.MetaRobots = changed("meta-robots")
+	html.MetaThemeColor = changed("meta-theme-color")
+	html.Title = changed("title")
+}
+
 type metaFlag struct {
 	key   string   // configuration name
 	strg  *string  // StringVarP(p) argument value
@@ -157,53 +161,8 @@ func init() {
 	rootCmd.AddCommand(createCmd)
 	// config must be initialized before getting saved default values
 	initConfig()
-
-	const (
-		serve = iota
-		layout
-		style
-		title
-		desc
-		author
-		retro
-		gen
-		cscheme
-		kwords
-		nolang
-		refer
-		bots
-		themec
-		fontf
-		fonte
-		body
-		cache
-	)
-
 	// init flags and their usage
-	var metaCfg = map[int]metaFlag{
-		// output
-		serve: {"serve", nil, nil, &html.Port, "serve", "p", nil},
-		// main tag flags
-		layout: {"html.layout", &html.Layout, nil, nil, "layout", "l", create.Layouts()},
-		style:  {"style.html", &html.Syntax, nil, nil, "syntax-style", "", nil},
-		title:  {"html.title", &html.TitleVal, nil, nil, "title", "t", nil},
-		desc:   {"html.meta.description", &html.MetaDescriptionVal, nil, nil, "meta-description", "d", nil},
-		author: {"html.meta.author", &html.MetaAuthorVal, nil, nil, "meta-author", "a", nil},
-		retro:  {"html.meta.retrotxt", nil, &html.MetaRetroTxtVal, nil, "meta-retrotxt", "r", nil},
-		// minor tag flags
-		gen:     {"html.meta.generator", nil, &html.MetaGeneratorVal, nil, "meta-generator", "g", nil},
-		cscheme: {"html.meta.color-scheme", &html.MetaColorSchemeVal, nil, nil, "meta-color-scheme", "", nil},
-		kwords:  {"html.meta.keywords", &html.MetaKeywordsVal, nil, nil, "meta-keywords", "", nil},
-		nolang:  {"html.meta.notranslate", nil, &html.MetaNoTranslateVal, nil, "meta-notranslate", "", nil},
-		refer:   {"html.meta.referrer", &html.MetaReferrerVal, nil, nil, "meta-referrer", "", nil},
-		bots:    {"html.meta.robots", &html.MetaRobotsVal, nil, nil, "meta-robots", "", nil},
-		themec:  {"html.meta.theme-color", &html.MetaThemeColorVal, nil, nil, "meta-theme-color", "", nil},
-		fontf:   {"html.font.family", &html.FontFamilyVal, nil, nil, "font-family", "f", nil},
-		fonte:   {"html.font.embed", nil, &html.FontEmbedVal, nil, "font-embed", "", nil},
-		// hidden flags
-		body:  {"html.body", &html.Body, nil, nil, "body", "b", nil},
-		cache: {"html.layout.cache", nil, &html.Cache, nil, "cache", "", nil},
-	}
+	var metaCfg = metaConfig()
 	// create an ordered index for the flags
 	var keys = make([]int, len(metaCfg))
 	for i := range metaCfg {
@@ -213,7 +172,7 @@ func init() {
 	// output flags
 	flagEncode(&html.Encoding, createCmd)
 	createCmd.Flags().BoolVarP(&html.SaveToFile, "save", "s", false,
-		`save HTML and static files to a the save directory 
+		`save HTML and static files to a the save directory
 or ignore to print (save directory: `+viper.GetString("save-directory")+")")
 	createCmd.Flags().BoolVarP(&html.Compress, "compress", "c", false, "store and compress all files into an archive when saving")
 	createCmd.Flags().BoolVarP(&html.OW, "overwrite", "o", false, "overwrite any existing files when saving")
@@ -249,4 +208,52 @@ or ignore to print (save directory: `+viper.GetString("save-directory")+")")
 		logs.Fatal("create mark", "cache hidden", err)
 	}
 	createCmd.Flags().SortFlags = false
+}
+
+func metaConfig() map[int]metaFlag {
+	const (
+		serve = iota
+		layout
+		style
+		title
+		desc
+		author
+		retro
+		gen
+		cscheme
+		kwords
+		nolang
+		refer
+		bots
+		themec
+		fontf
+		fonte
+		body
+		cache
+	)
+	// init flags and their usage
+	return map[int]metaFlag{
+		// output
+		serve: {"serve", nil, nil, &html.Port, "serve", "p", nil},
+		// main tag flags
+		layout: {"html.layout", &html.Layout, nil, nil, "layout", "l", create.Layouts()},
+		style:  {"style.html", &html.Syntax, nil, nil, "syntax-style", "", nil},
+		title:  {"html.title", &html.TitleVal, nil, nil, "title", "t", nil},
+		desc:   {"html.meta.description", &html.MetaDescriptionVal, nil, nil, "meta-description", "d", nil},
+		author: {"html.meta.author", &html.MetaAuthorVal, nil, nil, "meta-author", "a", nil},
+		retro:  {"html.meta.retrotxt", nil, &html.MetaRetroTxtVal, nil, "meta-retrotxt", "r", nil},
+		// minor tag flags
+		gen:     {"html.meta.generator", nil, &html.MetaGeneratorVal, nil, "meta-generator", "g", nil},
+		cscheme: {"html.meta.color-scheme", &html.MetaColorSchemeVal, nil, nil, "meta-color-scheme", "", nil},
+		kwords:  {"html.meta.keywords", &html.MetaKeywordsVal, nil, nil, "meta-keywords", "", nil},
+		nolang:  {"html.meta.notranslate", nil, &html.MetaNoTranslateVal, nil, "meta-notranslate", "", nil},
+		refer:   {"html.meta.referrer", &html.MetaReferrerVal, nil, nil, "meta-referrer", "", nil},
+		bots:    {"html.meta.robots", &html.MetaRobotsVal, nil, nil, "meta-robots", "", nil},
+		themec:  {"html.meta.theme-color", &html.MetaThemeColorVal, nil, nil, "meta-theme-color", "", nil},
+		fontf:   {"html.font.family", &html.FontFamilyVal, nil, nil, "font-family", "f", nil},
+		fonte:   {"html.font.embed", nil, &html.FontEmbedVal, nil, "font-embed", "", nil},
+		// hidden flags
+		body:  {"html.body", &html.Body, nil, nil, "body", "b", nil},
+		cache: {"html.layout.cache", nil, &html.Cache, nil, "cache", "", nil},
+	}
 }
