@@ -23,11 +23,11 @@ import (
 )
 
 var (
-	// ErrCacheYaml set cache yaml error
+	// ErrCacheYaml set cache yaml error.
 	ErrCacheYaml = errors.New("set cache cannot marshal yaml")
-	// ErrCacheData set cache data path
+	// ErrCacheData set cache data path.
 	ErrCacheData = errors.New("set cache cannot create a data path")
-	// ErrCacheSave set cache save
+	// ErrCacheSave set cache save.
 	ErrCacheSave = errors.New("set cache cannot save data")
 )
 
@@ -56,7 +56,7 @@ type Output struct {
 	URL       string `json:"url"`
 }
 
-func (o Output) String(color bool) string {
+func (o *Output) String(color bool) string {
 	gookit.Enable = color
 	update, ver := NewRelease()
 	var b bytes.Buffer
@@ -76,16 +76,16 @@ func (o Output) String(color bool) string {
 	return b.String()
 }
 
-func (o Output) json() (data []byte) {
-	data, err := json.MarshalIndent(o, "", "    ")
+func (o *Output) json() (data []byte) {
+	data, err := json.MarshalIndent(&o, "", "    ")
 	if err != nil {
 		logs.Fatal("version could not marshal", "json", err)
 	}
 	return data
 }
 
-func (o Output) jsonMin() (data []byte) {
-	data, err := json.Marshal(o)
+func (o *Output) jsonMin() (data []byte) {
+	data, err := json.Marshal(&o)
 	if err != nil {
 		logs.Fatal("version could not marshal", "json", err)
 	}

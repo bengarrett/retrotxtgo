@@ -45,7 +45,8 @@ func Example_json() {
 }
 
 func ExamplePrint() {
-	fmt.Print(marshal().String(false)[:8])
+	m := marshal()
+	fmt.Print(m.String(false)[:8])
 	// Output: RetroTxt
 }
 
@@ -71,10 +72,11 @@ func Test_digits(t *testing.T) {
 }
 
 func Test_JSON(t *testing.T) {
-	if got := json.Valid(marshal().json()); got != true {
+	m := marshal()
+	if got := json.Valid(m.json()); got != true {
 		t.Errorf("marshal().json() = %v, want %v", got, true)
 	}
-	if got := json.Valid(marshal().jsonMin()); got != true {
+	if got := json.Valid(m.jsonMin()); got != true {
 		t.Errorf("marshal().jsonMin() = %v, want %v", got, true)
 	}
 }
@@ -130,6 +132,7 @@ func TestSemantic(t *testing.T) {
 }
 
 func Test_marshal(t *testing.T) {
+	m := marshal()
 	tests := []struct {
 		name  string
 		color bool
@@ -140,7 +143,7 @@ func Test_marshal(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotText := marshal().String(tt.color); (gotText == "") != tt.empty {
+			if gotText := m.String(tt.color); (gotText == "") != tt.empty {
 				t.Errorf("marshal().String() = %v, want %v", gotText, tt.empty)
 			}
 		})

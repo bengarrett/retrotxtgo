@@ -128,9 +128,9 @@ func (d *Detail) parse(name string, stat os.FileInfo, data ...byte) (err error) 
 			return
 		}
 		if d.Mime.Type == zipType {
-			r, err := zip.OpenReader(name)
-			if err != nil {
-				fmt.Printf("open zip file failure: %s\n", err)
+			r, e := zip.OpenReader(name)
+			if e != nil {
+				fmt.Printf("open zip file failure: %s\n", e)
 			}
 			defer r.Close()
 		}

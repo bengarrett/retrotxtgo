@@ -149,7 +149,7 @@ func (n Names) Info(name, format string) logs.Generic {
 			Callback: func(osPathname string, de *godirwalk.Dirent) error {
 				if skip, err := de.IsDirOrSymlinkToDir(); err != nil {
 					return err
-				} else if skip == true {
+				} else if skip {
 					return nil
 				}
 				return Marshal(osPathname, f, walkMode, walkMode)
@@ -331,7 +331,7 @@ func print(f Format, b ...byte) {
 	switch f {
 	case ColorText, PlainText:
 		fmt.Printf("%s", b)
-	default:
+	case JSON, JSONMin, XML:
 		fmt.Printf("%s\n", b)
 	}
 }
