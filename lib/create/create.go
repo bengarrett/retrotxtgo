@@ -64,6 +64,7 @@ type Args struct {
 	MetaThemeColor     bool
 	FontFamily         bool
 	FontEmbedVal       bool
+	layout             Layout
 }
 
 // PageData temporarily holds template data used for the HTML layout.
@@ -91,9 +92,30 @@ type PageData struct {
 	ScriptEmbed     template.JS
 }
 
+// Layout are HTML template variations.
+type Layout int
+
 const (
-	none = "none"
-	std  = "standard"
+	// use 0 as an error placeholder
+	_ Layout = iota
+	// Standard template with external CSS, JS, fonts.
+	Standard
+	// Inline template with CSS and JS embedded.
+	Inline
+	// Compact template with external CSS, JS, fonts and no meta-tags.
+	Compact
+	// None template, just print the generated HTML.
+	None
+)
+
+func (l Layout) String() string {
+	return [...]string{unknown, standard, "inline", "compact", none}[l]
+}
+
+const (
+	none     = "none"
+	standard = "standard"
+	unknown  = "unknown"
 )
 
 var (
@@ -103,6 +125,18 @@ var (
 	ErrPack = errors.New("font pack is not found")
 	// ErrEmptyName filename is empty.
 	ErrEmptyName = errors.New("filename is empty")
+	// ErrReqOW require overwrite flag.
+	ErrReqOW = errors.New("include an -o flag to overwrite")
+	// ErrPackGet invalid pack name.
+	ErrPackGet = errors.New("pack.get name is invalid")
+	// ErrUnknownFF unknown font family.
+	ErrUnknownFF = errors.New("unknown font family")
+	// ErrNilByte nil byte value.
+	ErrNilByte = errors.New("cannot convert a nil byte value")
+	// ErrTmplDir temp file is a dir.
+	ErrTmplDir = errors.New("the path to the template file is a directory")
+	// ErrNoLayout layout missing.
+	ErrNoLayout = errors.New("layout does not exist")
 )
 
 // ColorScheme values for the content attribute of <meta name="color-scheme">.
@@ -121,28 +155,6 @@ func Robots() [9]string {
 	return [...]string{"index", "noindex", "follow", "nofollow", none, "noarchive", "nosnippet", "noimageindex", "nocache"}
 }
 
-// Layout are HTML template variations.
-type Layout int
-
-const (
-	// Standard template with external CSS, JS, fonts.
-	Standard Layout = iota
-	// Inline template with CSS and JS embedded.
-	Inline
-	// Compact template with external CSS, JS, fonts and no meta-tags.
-	Compact
-	// None template, just print the generated HTML.
-	None
-)
-
-func (l Layout) String() string {
-	layouts := [...]string{std, "inline", "compact", none}
-	if l < Standard || l > None {
-		return ""
-	}
-	return layouts[l]
-}
-
 // Layouts are the names of the HTML templates.
 func Layouts() []string {
 	return []string{Standard.String(), Inline.String(), Compact.String(), None.String()}
@@ -150,16 +162,13 @@ func Layouts() []string {
 
 // Pack is the packed name of the HTML template.
 func (l Layout) Pack() string {
-	packs := [...]string{std, std, std, none}
-	if l < Standard || l > None {
-		return ""
-	}
-	return packs[l]
+	return [...]string{unknown, standard, standard, standard, none}[l]
 }
 
 // Create handles the target output command arguments.
 func (args *Args) Create(b *[]byte) {
 	var err error
+	args.layout = layout(args.Layout)
 	switch {
 	case args.SaveToFile:
 		// use config save directory
@@ -204,21 +213,6 @@ func (args *Args) Create(b *[]byte) {
 	}
 }
 
-var (
-	// ErrReqOW require overwrite flag.
-	ErrReqOW = errors.New("include an -o flag to overwrite")
-	// ErrPackGet invalid pack name.
-	ErrPackGet = errors.New("pack.get name is invalid")
-	// ErrUnknownFF unknown font family.
-	ErrUnknownFF = errors.New("unknown font family")
-	// ErrNilByte nil byte value.
-	ErrNilByte = errors.New("cannot convert a nil byte value")
-	// ErrTmplDir temp file is a dir.
-	ErrTmplDir = errors.New("the path to the template file is a directory")
-	// ErrNoLayout layout missing.
-	ErrNoLayout = errors.New("layout does not exist")
-)
-
 func (args *Args) destination(name string) (string, error) {
 	dir := filesystem.DirExpansion(args.Destination)
 	path := dir
@@ -251,8 +245,8 @@ func (args *Args) destination(name string) (string, error) {
 
 // savecss creates and saves the styles stylesheet to the Destination argument.
 func (args *Args) savecss(c chan error) {
-	switch args.Layout {
-	case std, "s":
+	switch args.layout {
+	case Standard:
 	default:
 		c <- nil
 		return
@@ -273,8 +267,8 @@ func (args *Args) savecss(c chan error) {
 }
 
 func (args *Args) savefavicon(c chan error) {
-	switch args.Layout {
-	case std, "s":
+	switch args.layout {
+	case Standard:
 	default:
 		c <- nil
 		return
@@ -306,8 +300,8 @@ func (args *Args) savefont(c chan error) {
 			c <- err
 		}
 	}
-	switch args.Layout {
-	case std, "s":
+	switch args.layout {
+	case Standard:
 		if err := args.savefontcss("font.css"); err != nil {
 			c <- err
 		}
@@ -352,8 +346,8 @@ func (args *Args) savefontwoff2(name, packName string) error {
 }
 
 func (args *Args) savejs(c chan error) {
-	switch args.Layout {
-	case std, "s":
+	switch args.layout {
+	case Standard:
 	default:
 		c <- nil
 		return
@@ -515,9 +509,9 @@ func (args *Args) newTemplate() (*template.Template, error) {
 
 // filename creates a filepath for the template filenames.
 func (args *Args) templateCache() (err error) {
-	l := layout(args.Layout).Pack()
+	l := args.layout.Pack()
 	if l == "" {
-		return fmt.Errorf("template cache %q: %w", args.Layout, ErrNoLayout)
+		return fmt.Errorf("template cache %q: %w", args.layout, ErrNoLayout)
 	}
 	args.tmpl, err = gap.NewScope(gap.User, "retrotxt").DataPath(l + ".gohtml")
 	if err != nil {
@@ -527,9 +521,9 @@ func (args *Args) templateCache() (err error) {
 }
 
 func (args *Args) templatePack() error {
-	l := layout(args.Layout).Pack()
+	l := args.layout.Pack()
 	if l == "" {
-		return fmt.Errorf("template pack %q: %w", args.Layout, ErrNoLayout)
+		return fmt.Errorf("template pack %q: %w", args.layout, ErrNoLayout)
 	}
 	args.pack = fmt.Sprintf("html/%s.gohtml", l)
 	return nil
@@ -558,9 +552,9 @@ func (args *Args) templateSave() error {
 	return nil
 }
 
-func layout(name string) Layout {
+func layout(name string) (l Layout) {
 	switch name {
-	case std, "s":
+	case standard, "s":
 		return Standard
 	case "inline", "i":
 		return Inline
@@ -569,7 +563,7 @@ func layout(name string) Layout {
 	case none, "n":
 		return None
 	}
-	return -1
+	return l
 }
 
 // pagedata creates the meta and page template data.
@@ -578,7 +572,7 @@ func (args *Args) pagedata(b *[]byte) (p PageData, err error) {
 		return PageData{}, fmt.Errorf("pagedata: %w", ErrNilByte)
 	}
 	// templates are found in the dir static/html/*.gohtml
-	switch layout(args.Layout) {
+	switch args.layout {
 	case Inline:
 		p.ExternalEmbed = true
 		m := minify.New()
