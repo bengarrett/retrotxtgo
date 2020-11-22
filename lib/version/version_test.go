@@ -11,35 +11,35 @@ import (
 
 const etag = `W/"3715383704fac6f3568e9039b347937a`
 
-func ExampleCacheGet() {
-	if err := CacheSet(etag, "0.0.1"); err != nil {
+func ExamplecacheGet() {
+	if err := cacheSet(etag, "0.0.1"); err != nil {
 		fmt.Println(err)
 	}
-	e, v := CacheGet()
+	e, v := cacheGet()
 	fmt.Println("Etag", e)
 	fmt.Println("Version", v)
 	// Output: Etag W/"3715383704fac6f3568e9039b347937a
 	// Version 0.0.1
 }
 
-func ExampleCacheSet() {
-	if err := CacheSet(etag, "0.0.1"); err != nil {
+func ExamplecacheSet() {
+	if err := cacheSet(etag, "0.0.1"); err != nil {
 		fmt.Println(err)
 	}
-	e, v := CacheGet()
+	e, v := cacheGet()
 	fmt.Println("Etag", e)
 	fmt.Println("Version", v)
 	// Output: Etag W/"3715383704fac6f3568e9039b347937a
 	// Version 0.0.1
 }
 
-func ExampleDigits() {
-	fmt.Println(Digits("v1.0 (init release)"))
+func Example_digits() {
+	fmt.Println(digits("v1.0 (init release)"))
 	// Output: 1.0
 }
 
-func ExampleJSON() {
-	fmt.Print(json.Valid(JSON(true)), json.Valid(JSON(false)))
+func ExamplejsonMarshal() {
+	fmt.Print(json.Valid(jsonMarshal(true)), json.Valid(jsonMarshal(false)))
 	// Output: true true
 }
 
@@ -48,7 +48,7 @@ func ExampleSprint() {
 	// Output: RetroTxt
 }
 
-func TestDigits(t *testing.T) {
+func Test_digits(t *testing.T) {
 	tests := []struct {
 		name string
 		s    string
@@ -62,8 +62,8 @@ func TestDigits(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Digits(tt.s); got != tt.want {
-				t.Errorf("Digits() = %v, want %v", got, tt.want)
+			if got := digits(tt.s); got != tt.want {
+				t.Errorf("digits() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -83,8 +83,8 @@ func Test_JSON(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := json.Valid(JSON(tt.args.indent)); got != tt.want {
-				t.Errorf("JSON() = %v, want %v", got, tt.want)
+			if got := json.Valid(jsonMarshal(tt.args.indent)); got != tt.want {
+				t.Errorf("json() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -129,7 +129,7 @@ func TestSemantic(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			gotVersion := Semantic(tt.ver)
-			gotOk := gotVersion.Valid()
+			gotOk := gotVersion.valid()
 			if gotOk != tt.wantOk {
 				t.Errorf("Semantic() gotOk = %v, want %v", gotOk, tt.wantOk)
 			}

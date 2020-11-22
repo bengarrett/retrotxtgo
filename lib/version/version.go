@@ -40,6 +40,29 @@ type Version struct {
 	Patch int
 }
 
+func (v Version) String() string {
+	const alpha, beta = "α", "β"
+	if !v.valid() {
+		return ""
+	}
+	p := ""
+	switch {
+	case v.Major == 0 && v.Minor == 0:
+		p = alpha
+	case v.Major == 0:
+		p = beta
+	}
+	return fmt.Sprintf("%s%d.%d.%d", p, v.Major, v.Minor, v.Patch)
+}
+
+// Valid checks the Version syntax is correct.
+func (v Version) valid() bool {
+	if v.Major < 0 && v.Minor < 0 && v.Patch < 0 {
+		return false
+	}
+	return true
+}
+
 type versionInfo map[string]string
 
 // Cache of version data.
@@ -50,89 +73,10 @@ type Cache struct {
 
 const cacheFile = "api.github.cache"
 
-// CacheGet returns the stored Github API ETag HTTP header and release version.
-func CacheGet() (etag, ver string) {
-	cf, err := Home().DataPath(cacheFile)
-	if err != nil {
-		logs.Log(err)
-		return
-	}
-	if _, err = os.Stat(cf); os.IsNotExist(err) {
-		return
-	}
-	f, err := ioutil.ReadFile(cf)
-	if err != nil {
-		logs.Log(err)
-	}
-	var cache Cache
-	if err = yaml.Unmarshal(f, &cache); err != nil {
-		logs.Log(err)
-	}
-	// if either value is missing, delete the broken cache
-	if cache.Etag == "" || cache.Ver == "" {
-		err = os.Remove(cf)
-		logs.Log(err)
-		return "", ""
-	}
-	return cache.Etag, cache.Ver
-}
-
-// CacheSet saves the Github API ETag HTTP header and release version.
-func CacheSet(etag, ver string) error {
-	if etag == "" || ver == "" {
-		return nil
-	}
-	cache := Cache{
-		Etag: etag,
-		Ver:  ver,
-	}
-	out, err := yaml.Marshal(&cache)
-	if err != nil {
-		return fmt.Errorf("cache set yaml marshal error: %w", err)
-	}
-	f, err := Home().DataPath(cacheFile)
-	if err != nil {
-		return fmt.Errorf("cache set data path error: %q: %w", cacheFile, err)
-	}
-	if _, err := filesystem.Save(f, out...); err != nil {
-		return fmt.Errorf("cache set save error: %w", err)
-	}
-	return nil
-}
-
-// Digits returns only the digits and decimal point values from a string.
-func Digits(s string) string {
-	reg := regexp.MustCompile("[^0-9/.]+")
-	return reg.ReplaceAllString(s, "")
-}
-
-// Home directory path determined by the host operating system.
-func Home() *gap.Scope {
-	return gap.NewScope(gap.User, "retrotxt")
-}
-
-// JSON formats the RetroTxt version and binary compile information.
-func JSON(indent bool) (data []byte) {
-	var err error
-	switch indent {
-	case true:
-		data, err = json.MarshalIndent(information(), "", "    ")
-		if err != nil {
-			logs.Fatal("version could not marshal", "json", err)
-		}
-	default:
-		data, err = json.Marshal(information())
-		if err != nil {
-			logs.Fatal("version could not marshal", "json", err)
-		}
-	}
-	return data
-}
-
 // NewRelease checks to see if the active executable matches the version hosted on GitHub.
 // The ver value contains the result returned from the GitHub releases/latest API.
 func NewRelease() (ok bool, ver string) {
-	etag, ver := CacheGet()
+	etag, ver := cacheGet()
 	cache, data, err := online.Endpoint(online.ReleaseAPI, etag)
 	if err != nil {
 		logs.Log(err)
@@ -145,7 +89,7 @@ func NewRelease() (ok bool, ver string) {
 		}
 		if fmt.Sprintf("%T", data["etag"]) == "string" {
 			if data["etag"].(string) != "" {
-				if err = CacheSet(data["etag"].(string), ver); err != nil {
+				if err = cacheSet(data["etag"].(string), ver); err != nil {
 					logs.Log(err)
 				}
 			}
@@ -163,9 +107,9 @@ func Print(format string) (ok bool) {
 	case "color", "c", "":
 		print(Sprint(true))
 	case "json", "j":
-		fmt.Printf("%s\n", JSON(true))
+		fmt.Printf("%s\n", jsonMarshal(true))
 	case "json.min", "jm":
-		fmt.Printf("%s\n", JSON(false))
+		fmt.Printf("%s\n", jsonMarshal(false))
 	case "text", "t":
 		print(Sprint(false))
 	default:
@@ -185,7 +129,7 @@ func Semantic(ver string) Version {
 		if v == "" {
 			v = "0"
 		}
-		num, err := strconv.Atoi(Digits(v))
+		num, err := strconv.Atoi(digits(v))
 		if err != nil {
 			return invalid
 		}
@@ -196,28 +140,6 @@ func Semantic(ver string) Version {
 		Minor: nums[1],
 		Patch: nums[2],
 	}
-}
-
-func (v Version) String() string {
-	if !v.Valid() {
-		return ""
-	}
-	p := ""
-	switch {
-	case v.Major == 0 && v.Minor == 0:
-		p = "α"
-	case v.Major == 0:
-		p = "β"
-	}
-	return fmt.Sprintf("%s%d.%d.%d", p, v.Major, v.Minor, v.Patch)
-}
-
-// Valid checks the Version syntax is correct.
-func (v Version) Valid() bool {
-	if v.Major < 0 && v.Minor < 0 && v.Patch < 0 {
-		return false
-	}
-	return true
 }
 
 // Sprint formats the RetroTxt version and binary compile information.
@@ -263,13 +185,63 @@ func binary() string {
 	return bin
 }
 
+// cacheGet returns the stored Github API ETag HTTP header and release version.
+func cacheGet() (etag, ver string) {
+	cf, err := home().DataPath(cacheFile)
+	if err != nil {
+		logs.Log(err)
+		return
+	}
+	if _, err = os.Stat(cf); os.IsNotExist(err) {
+		return
+	}
+	f, err := ioutil.ReadFile(cf)
+	if err != nil {
+		logs.Log(err)
+	}
+	var cache Cache
+	if err = yaml.Unmarshal(f, &cache); err != nil {
+		logs.Log(err)
+	}
+	// if either value is missing, delete the broken cache
+	if cache.Etag == "" || cache.Ver == "" {
+		err = os.Remove(cf)
+		logs.Log(err)
+		return "", ""
+	}
+	return cache.Etag, cache.Ver
+}
+
+// cacheSet saves the Github API ETag HTTP header and release version.
+func cacheSet(etag, ver string) error {
+	if etag == "" || ver == "" {
+		return nil
+	}
+	cache := Cache{
+		Etag: etag,
+		Ver:  ver,
+	}
+	out, err := yaml.Marshal(&cache)
+	if err != nil {
+		return fmt.Errorf("cache set yaml marshal error: %w", err)
+	}
+	f, err := home().DataPath(cacheFile)
+	if err != nil {
+		return fmt.Errorf("cache set data path error: %q: %w", cacheFile, err)
+	}
+	if _, err := filesystem.Save(f, out...); err != nil {
+		return fmt.Errorf("cache set save error: %w", err)
+	}
+	return nil
+}
+
 func compare(current, fetched string) bool {
 	cur := Semantic(current)
-	if !cur.Valid() {
+	if !cur.valid() {
 		return false
 	}
 	f := Semantic(fetched)
-	if !f.Valid() {
+	if !f.valid() {
 		return false
 	}
 	if cur.Major < f.Major {
@@ -284,11 +256,22 @@ func compare(current, fetched string) bool {
 	return false
 }
 
+// digits returns only the digits and decimal point values from a string.
+func digits(s string) string {
+	reg := regexp.MustCompile("[^0-9/.]+")
+	return reg.ReplaceAllString(s, "")
+}
+
+// home directory path determined by the host operating system.
+func home() *gap.Scope {
+	return gap.NewScope(gap.User, "retrotxt")
+}
+
 // information and version details of retrotxt.
 func information() versionInfo {
 	ver := Semantic(B.Version)
 	v := versionInfo{
-		"copyright": "Copyright © 2020 Ben Garrett",
+		"copyright": "Copyright © 2020 Ben Garrett", // todo: value.go gen year
 		"url":       fmt.Sprintf("https://%s/go", B.Domain),
 		"app ver":   ver.String(),
 		"go ver":    semanticGo(),
@@ -299,9 +282,31 @@ func information() versionInfo {
 		"license":   "LGPL-3.0 [https://www.gnu.org/licenses/lgpl-3.0.html]",
 	}
 	if a := arch(runtime.GOARCH); a != "" {
-		v["os"] += fmt.Sprintf(" [%s CPU]", a)
+		if runtime.GOOS == "darwin" && runtime.GOARCH == "arm64" {
+			v["os"] += " [Apple M1 CPU]"
+		} else {
+			v["os"] += fmt.Sprintf(" [%s CPU]", a)
+		}
 	}
 	return v
+}
+
+// jsonMarshal formats the RetroTxt version and binary compile information.
+func jsonMarshal(indent bool) (data []byte) {
+	var err error
+	switch indent {
+	case true:
+		data, err = json.MarshalIndent(information(), "", "    ")
+		if err != nil {
+			logs.Fatal("version could not marshal", "json", err)
+		}
+	default:
+		data, err = json.Marshal(information())
+		if err != nil {
+			logs.Fatal("version could not marshal", "json", err)
+		}
+	}
+	return data
 }
 
 // localBuild date of this binary executable.
