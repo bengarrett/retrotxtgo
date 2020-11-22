@@ -19,13 +19,21 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
+type cell struct {
+	name    string
+	value   string
+	numeric string
+	alias   string
+}
+
 // Encodings returns all the supported legacy text encodings.
 func Encodings() (e []encoding.Encoding) {
 	a := append(charmap.All, japanese.All...)
 	a = append(a, unicode.All...)
 	for _, m := range a {
 		switch m {
-		case japanese.EUCJP, japanese.ISO2022JP,
+		case japanese.EUCJP,
+			japanese.ISO2022JP,
 			charmap.MacintoshCyrillic:
 			continue
 		}
@@ -50,9 +58,9 @@ func List() *bytes.Buffer {
 			fmt.Fprintf(w, " %s\t %s\t %s\t %s\t\n", "ISO 8895-11", "iso-8895-11", "11", "iso889511")
 			continue
 		}
-		n, v, d, a := cells(e)
+		c := cells(e)
 		// do not use ANSI colors in cells as it will break the table layout
-		fmt.Fprintf(w, " %s\t %s\t %s\t %s\t\n", n, v, d, a) // name, value, numeric, alias
+		fmt.Fprintf(w, " %s\t %s\t %s\t %s\t\n", c.name, c.value, c.numeric, c.alias)
 	}
 	fmt.Fprintln(w, "\nEither argument, numeric or alias values are valid codepage arguments")
 	fmt.Fprintln(w, "All these codepage arguments will match ISO 8859-1")
@@ -71,33 +79,32 @@ func List() *bytes.Buffer {
 	return &buf
 }
 
-func cells(e encoding.Encoding) (n, v, d, a string) {
+func cells(e encoding.Encoding) (c cell) {
 	if e == nil {
-		return n, d, v, a
+		return cell{}
 	}
-	n = fmt.Sprint(e)
+	c.name = fmt.Sprint(e)
 	var err error
-	if v, err = htmlindex.Name(e); err == nil {
-		a, err = ianaindex.MIME.Name(e)
+	if c.value, err = htmlindex.Name(e); err == nil {
+		c.alias, err = ianaindex.MIME.Name(e)
 		if err != nil {
 			log.Fatal(fmt.Errorf("list cells html index mime name: %w", err))
 		}
 	} else {
-		v, err = ianaindex.MIME.Name(e)
+		c.value, err = ianaindex.MIME.Name(e)
 		if err != nil {
 			log.Fatal(fmt.Errorf("list cells mime name: %w", err))
 		}
 	}
-	v = strings.ToLower(uniform(v))
-	s1 := strings.Split(n, " ")
-	s2 := strings.Split(n, "-")
+	c.value = strings.ToLower(uniform(c.value))
+	s1, s2 := strings.Split(c.name, " "), strings.Split(c.name, "-")
 	if i, err := strconv.Atoi(s1[len(s1)-1]); err == nil {
-		d = fmt.Sprint(i)
+		c.numeric = fmt.Sprint(i)
 	} else if i, err := strconv.Atoi(s2[len(s2)-1]); err == nil {
-		d = fmt.Sprint(i)
+		c.numeric = fmt.Sprint(i)
 	}
-	a = alias(a, v, e)
-	return n, v, d, a
+	c.alias = alias(c.alias, c.value, e)
+	return c
 }
 
 func alias(s, val string, e encoding.Encoding) string {

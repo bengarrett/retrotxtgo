@@ -1,6 +1,7 @@
 package convert
 
 import (
+	"fmt"
 	"testing"
 
 	"golang.org/x/text/encoding"
@@ -26,31 +27,29 @@ func Test_cells(t *testing.T) {
 		e encoding.Encoding
 	}
 	tests := []struct {
-		name  string
-		args  args
-		wantN string
-		wantV string
-		wantD string
-		wantA string
+		name string
+		args args
+		cell cell
 	}{
-		{"unknown", args{}, "", "", "", ""},
-		{"cp437", args{charmap.CodePage437}, "IBM Code Page 437", "cp437", "437", "msdos"},
-		{"latin6", args{charmap.ISO8859_10}, "ISO 8859-10", "iso-8859-10", "10", "latin6"},
+		{"unknown", args{}, cell{"", "", "", ""}},
+		{"cp437", args{charmap.CodePage437}, cell{"IBM Code Page 437", "cp437", "437", "msdos"}},
+		{"latin6", args{charmap.ISO8859_10}, cell{"ISO 8859-10", "iso-8859-10", "10", "latin6"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotN, gotV, gotD, gotA := cells(tt.args.e)
-			if gotN != tt.wantN {
-				t.Errorf("cells() gotN = %v, want %v", gotN, tt.wantN)
+			c := cells(tt.args.e)
+			fmt.Printf("%#v", c)
+			if c.name != tt.cell.name {
+				t.Errorf("cells() gotN = %v, want %v", c.name, tt.cell.name)
 			}
-			if gotV != tt.wantV {
-				t.Errorf("cells() gotV = %v, want %v", gotV, tt.wantV)
+			if c.value != tt.cell.value {
+				t.Errorf("cells() gotV = %v, want %v", c.value, tt.cell.value)
 			}
-			if gotD != tt.wantD {
-				t.Errorf("cells() gotV = %v, want %v", gotD, tt.wantD)
+			if c.numeric != tt.cell.numeric {
+				t.Errorf("cells() gotV = %v, want %v", c.numeric, tt.cell.numeric)
 			}
-			if gotA != tt.wantA {
-				t.Errorf("cells() gotA = %v, want %v", gotA, tt.wantA)
+			if c.alias != tt.cell.alias {
+				t.Errorf("cells() gotA = %v, want %v", c.alias, tt.cell.alias)
 			}
 		})
 	}
