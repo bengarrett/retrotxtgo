@@ -24,19 +24,12 @@ const (
 )
 
 func (f Font) String() string {
-	fonts := [...]string{"automatic", "mona", "vga"}
-	if f < Automatic || f > VGA {
-		return ""
-	}
-	return fonts[f]
+	return [...]string{"automatic", "mona", "vga"}[f]
 }
 
 // File is the packed filename of the font.
 func (f Font) File() string {
 	files := [...]string{"ibm-vga8", "mona", "ibm-vga8"}
-	if f < Automatic || f > VGA {
-		return ""
-	}
 	return fmt.Sprintf("%s.woff2", files[f])
 }
 
@@ -68,10 +61,11 @@ func Fonts() []string {
 
 // FontCSS creates the CSS required for customized fonts.
 func FontCSS(name string, embed bool) (b []byte, err error) {
-	f := Family(name).String()
-	if f == "" {
+	const unknown = -1
+	if Family(name) == unknown {
 		return nil, fmt.Errorf("font css %q: %w", name, ErrName)
 	}
+	f := Family(name).String()
 	const css = `@font-face {
   font-family: '{{.Name}}';
   src: url({{.URL}}) format('woff2');
@@ -119,10 +113,11 @@ main pre {
 }
 
 func fontBase64(name string) (string, error) {
-	f := Family(name).File()
-	if f == "" {
+	const unknown = -1
+	if Family(name) == unknown {
 		return "", fmt.Errorf("font base64 %q: %w", name, ErrName)
 	}
+	f := Family(name).File()
 	b := pack.Get(fmt.Sprintf("font/%s", f))
 	if len(b) == 0 {
 		return "", fmt.Errorf("font base64 %q: %w", f, ErrPack)
