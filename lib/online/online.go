@@ -13,6 +13,9 @@ import (
 const (
 	userAgent   = "retrotxt version ping"
 	httpTimeout = time.Second * 3
+	// ReleaseAPI GitHub API v3 releases endpoint.
+	// See: https://developer.github.com/v3/repos/releases/
+	ReleaseAPI = "https://api.github.com/repos/bengarrett/retrotxtgo/releases/latest"
 )
 
 var (
@@ -24,10 +27,6 @@ var (
 
 // API interface to store the JSON results from GitHub.
 type API map[string]interface{}
-
-// ReleaseAPI GitHub API v3 releases endpoint.
-// See: https://developer.github.com/v3/repos/releases/
-const ReleaseAPI = "https://api.github.com/repos/bengarrett/retrotxtgo/releases/latest"
 
 // Endpoint request an API endpoint from the URL.
 // A HTTP ETag can be provided to validate local data cache against the server.

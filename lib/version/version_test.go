@@ -38,7 +38,7 @@ func Example_digits() {
 	// Output: 1.0
 }
 
-func ExamplejsonMarshal() {
+func Example_json() {
 	m := marshal()
 	fmt.Print(json.Valid(m.json()), json.Valid(m.jsonMin()))
 	// Output: true true

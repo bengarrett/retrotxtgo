@@ -3,6 +3,7 @@ package version
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -19,6 +20,15 @@ import (
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/online"
 	"retrotxt.com/retrotxt/lib/str"
+)
+
+var (
+	// ErrCacheYaml set cache yaml error
+	ErrCacheYaml = errors.New("set cache cannot marshal yaml")
+	// ErrCacheData set cache data path
+	ErrCacheData = errors.New("set cache cannot create a data path")
+	// ErrCacheSave set cache save
+	ErrCacheSave = errors.New("set cache cannot save data")
 )
 
 // Build and version information.
@@ -249,14 +259,14 @@ func cacheSet(etag, ver string) error {
 	}
 	out, err := yaml.Marshal(&cache)
 	if err != nil {
-		return fmt.Errorf("cache set yaml marshal error: %w", err)
+		return fmt.Errorf("%s: %w", err, ErrCacheYaml)
 	}
 	f, err := home().DataPath(cacheFile)
 	if err != nil {
-		return fmt.Errorf("cache set data path error: %q: %w", cacheFile, err)
+		return fmt.Errorf("%q: %w", cacheFile, ErrCacheData)
 	}
 	if _, err := filesystem.Save(f, out...); err != nil {
-		return fmt.Errorf("cache set save error: %w", err)
+		return fmt.Errorf("%s: %w", err, ErrCacheSave)
 	}
 	return nil
 }
