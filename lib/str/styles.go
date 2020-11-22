@@ -111,10 +111,14 @@ func HighlightWriter(w io.Writer, source, lexer, style string, ansi bool) (err e
 	if term == "none" {
 		// user disabled color output, but it doesn't disable ANSI output
 		fmt.Fprintln(w, source)
-	} else if !ansi && (fo.Mode()&os.ModeCharDevice) == 0 {
+		return nil
+	}
+	if !ansi && (fo.Mode()&os.ModeCharDevice) == 0 {
 		// disable colour when piping or running unit tests
 		fmt.Fprintln(w, source)
-	} else if err := quick.Highlight(w, source, lexer, term, style); err != nil {
+		return nil
+	}
+	if err := quick.Highlight(w, source, lexer, term, style); err != nil {
 		return fmt.Errorf("highlight writer: %w", err)
 	}
 	return nil
