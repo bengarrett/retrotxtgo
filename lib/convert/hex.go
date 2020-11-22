@@ -9,8 +9,7 @@ import (
 func HexDecode(hexadecimal string) (result []byte, err error) {
 	src := []byte(hexadecimal)
 	result = make([]byte, hex.DecodedLen(len(src)))
-	_, err = hex.Decode(result, src)
-	if err != nil {
+	if _, err = hex.Decode(result, src); err != nil {
 		return nil, fmt.Errorf("could not decode hexadecimal string: %q: %w", hexadecimal, err)
 	}
 	return result, err
