@@ -2,7 +2,6 @@ package str
 
 import (
 	"fmt"
-	"os"
 	"testing"
 )
 
@@ -25,8 +24,7 @@ func TestTerm(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			os.Setenv("TERM", tt.name)
-			if gotTerm := Term(); gotTerm != tt.wantTerm {
+			if gotTerm := Term("", tt.name); gotTerm != tt.wantTerm {
 				t.Errorf("Term() = %v, want %v", gotTerm, tt.wantTerm)
 			}
 		})
@@ -43,8 +41,7 @@ func TestTerm16M(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			os.Setenv("COLORTERM", tt.name)
-			if gotTerm := Term(); gotTerm != tt.wantTerm {
+			if gotTerm := Term(tt.name, ""); gotTerm != tt.wantTerm {
 				t.Errorf("Term() = %v, want %v", gotTerm, tt.wantTerm)
 			}
 		})

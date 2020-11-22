@@ -119,6 +119,11 @@ func Center(text string, width int) string {
 	return text
 }
 
+// GetEnv gets and formats the value of the environment variable named in the key.
+func GetEnv(key string) string {
+	return strings.TrimSpace(strings.ToLower(os.Getenv(key)))
+}
+
 // Highlight and print the syntax of the source string except when piped to stdout.
 func Highlight(source, lexer, style string, ansi bool) (err error) {
 	return HighlightWriter(os.Stdout, source, lexer, style, ansi)
@@ -126,7 +131,7 @@ func Highlight(source, lexer, style string, ansi bool) (err error) {
 
 // HighlightWriter writes the highlight syntax of the source string except when piped to stdout.
 func HighlightWriter(w io.Writer, source, lexer, style string, ansi bool) (err error) {
-	term := Term()
+	term := Term(GetEnv("COLORTERM"), GetEnv("TERM"))
 	// detect piping for text output or ansi for printing
 	// source: https://stackoverflow.com/questions/43947363/detect-if-a-command-is-piped-or-not
 	fo, err := os.Stdout.Stat()
@@ -167,21 +172,21 @@ func NumberizeKeys(keys ...string) string {
 }
 
 // Term determines the terminal type based on the COLORTERM and TERM environment variables.
-func Term() string {
+func Term(color, env string) string {
 	// 9.11.2 The environment variable TERM
 	// https://www.gnu.org/software/gettext/manual/html_node/The-TERM-variable.html
 	// Terminal Colors
 	// https://gist.github.com/XVilka/8346728
 	var t terminal = -1
 	// first attempt to detect COLORTERM variable
-	c := strings.TrimSpace(strings.ToLower(os.Getenv("COLORTERM")))
-	switch c {
+
+	switch color {
 	case "24bit", "truecolor":
 		t = Term16M
 		return t.Formatter()
 	}
 	// then fallback to the -color suffix in TERM variable values
-	env := strings.TrimSpace(strings.ToLower(os.Getenv("TERM")))
+
 	s := strings.Split(env, "-")
 	if len(s) > 1 {
 		switch s[len(s)-1] {

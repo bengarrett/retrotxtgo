@@ -184,7 +184,7 @@ var configShellCmd = &cobra.Command{
 }
 
 func init() {
-	if str.Term() == "none" {
+	if str.Term(str.GetEnv("COLORTERM"), str.GetEnv("TERM")) == "none" {
 		color.Enable = false
 	}
 	var err error
