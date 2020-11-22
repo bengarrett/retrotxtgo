@@ -398,7 +398,7 @@ func (n names) string(theme bool, lexer string) string {
 // dirExpansion traverses the named directory to apply shell-like expansions.
 // It currently supports limited Bash tilde, shell dot and double dot syntax.
 func dirExpansion(name string) (dir string) {
-	const sep = string(os.PathSeparator)
+	const sep, homeDir, currentDir, parentDir = string(os.PathSeparator), "~", ".", ".."
 	if name == "" || name == sep {
 		return name
 	}
@@ -407,13 +407,13 @@ func dirExpansion(name string) (dir string) {
 	for i, s := range paths {
 		p := ""
 		switch s {
-		case "~":
+		case homeDir:
 			var err error
 			p, err = os.UserHomeDir()
 			if err != nil {
 				logs.LogFatal(err)
 			}
-		case ".":
+		case currentDir:
 			if i != 0 {
 				continue
 			}
@@ -422,7 +422,7 @@ func dirExpansion(name string) (dir string) {
 			if err != nil {
 				logs.LogFatal(err)
 			}
-		case "..":
+		case parentDir:
 			if i == 0 {
 				wd, err := os.Getwd()
 				if err != nil {
@@ -450,7 +450,7 @@ func portInfo() string {
 		min uint
 		rec uint
 	}
-	var port = ports{
+	port := ports{
 		max: prompt.PortMax,
 		min: prompt.PortMin,
 		rec: prompt.PortRec,
@@ -609,7 +609,7 @@ func setFont(value string, setup bool) {
 }
 
 func setFontEmbed(value, setup bool) {
-	var name = "html.font.embed"
+	name := "html.font.embed"
 	elm := `@font-face{
   font-family: vga8;
   src: url(data:font/woff2;base64,[a large font binary will be embedded here]...) format('woff2');
@@ -626,7 +626,7 @@ Embed the font as base64 data in the HTML`
 }
 
 func setGenerator(value bool) {
-	var name, ver = "html.meta.generator", v.Semantic(v.B.Version)
+	name, ver := "html.meta.generator", v.Semantic(v.B.Version)
 	elm := fmt.Sprintf("<head>\n  <meta name=\"generator\" content=\"RetroTxt v%s, %s\">",
 		ver.String(), v.B.Date)
 	fmt.Println(ColorHTML(elm))
@@ -650,7 +650,7 @@ func setIndex(name string, setup bool, data ...string) {
 }
 
 func setNoTranslate(value, setup bool) {
-	var name = "html.meta.notranslate"
+	name := "html.meta.notranslate"
 	elm := "<html translate=\"no\">\n  <head>\n    <meta name=\"google\" content=\"notranslate\">"
 	fmt.Println(ColorHTML(elm))
 	q := "Enable the no translate option"
@@ -671,7 +671,7 @@ func setPort(name string, setup bool) {
 }
 
 func setRetrotxt(value bool) {
-	var name = "html.meta.retrotxt"
+	name := "html.meta.retrotxt"
 	elm := "<head>\n  <meta name=\"retrotxt\" content=\"encoding: IBM437; newline: CRLF; length: 50; width: 80; name: file.txt\">"
 	fmt.Println(ColorHTML(elm))
 	p := "Enable the retrotxt element"
