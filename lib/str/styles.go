@@ -39,6 +39,31 @@ const (
 	Term16M
 )
 
+// JSONExample is used for previewing color themes.
+type JSONExample struct {
+	Style struct {
+		Name    string `json:"name"`
+		Count   int    `json:"count"`
+		Default bool   `json:"default"`
+	}
+}
+
+func (s JSONExample) String(flag string) {
+	fmt.Println()
+	// config is stored as YAML but printed as JSON
+	out, err := json.MarshalIndent(s, "", "  ")
+	if err != nil {
+		log.Fatalln(fmt.Errorf("json example marshal indent: %w", err))
+	}
+	if flag != "" {
+		fmt.Println("\n" + color.Secondary.Sprintf("%s=%q", flag, s.Style.Name))
+	}
+	if err := Highlight(string(out), "json", s.Style.Name, true); err != nil {
+		// cannot use the logs package as it causes an import cycle error
+		log.Fatalln(fmt.Errorf("json example highlight syntax error: %w", err))
+	}
+}
+
 // Formatter takes a terminal value and returns the quick.Highlight formatter value.
 func (t terminal) Formatter() string {
 	switch t {
@@ -101,7 +126,7 @@ func Highlight(source, lexer, style string, ansi bool) (err error) {
 
 // HighlightWriter writes the highlight syntax of the source string except when piped to stdout.
 func HighlightWriter(w io.Writer, source, lexer, style string, ansi bool) (err error) {
-	var term = Term()
+	term := Term()
 	// detect piping for text output or ansi for printing
 	// source: https://stackoverflow.com/questions/43947363/detect-if-a-command-is-piped-or-not
 	fo, err := os.Stdout.Stat()
@@ -238,31 +263,6 @@ func UnderlineKeys(keys ...string) string {
 		}
 	}
 	return strings.Join(keys, ", ")
-}
-
-// JSONExample is used for previewing color themes.
-type JSONExample struct {
-	Style struct {
-		Name    string `json:"name"`
-		Count   int    `json:"count"`
-		Default bool   `json:"default"`
-	}
-}
-
-func (s JSONExample) String(flag string) {
-	fmt.Println()
-	// config is stored as YAML but printed as JSON
-	out, err := json.MarshalIndent(s, "", "  ")
-	if err != nil {
-		log.Fatalln(fmt.Errorf("json example marshal indent: %w", err))
-	}
-	if flag != "" {
-		fmt.Println("\n" + color.Secondary.Sprintf("%s=%q", flag, s.Style.Name))
-	}
-	if err := Highlight(string(out), "json", s.Style.Name, true); err != nil {
-		// cannot use the logs package as it causes an import cycle error
-		log.Fatalln(fmt.Errorf("json example highlight syntax error: %w", err))
-	}
 }
 
 // JSONStyles prints out a list of available YAML color styles.

@@ -60,13 +60,14 @@ func Cs(t string) string {
 	return color.Success.Sprint(t)
 }
 
-// Bool returns a ✓ or ✗.
+// Bool returns a checkmark ✓ or cross ✗.
 func Bool(b bool) string {
+	const check, cross = "✓", "✗"
 	switch b {
 	case true:
-		return color.Success.Sprint("✓")
+		return color.Success.Sprint(check)
 	default:
-		return color.Warn.Sprint("✗")
+		return color.Warn.Sprint(cross)
 	}
 }
 
