@@ -101,15 +101,15 @@ func (args *Args) createDir(b *[]byte) (err error) {
 // serveDir creates and serves b over an internal HTTP server.
 func (args *Args) serveDir() (err error) {
 	http.Handle("/", http.FileServer(http.Dir(args.Destination)))
-	const timeout = 15
+	const timeout, localHost = 15, "127.0.0.1"
 	srv := &http.Server{
-		Addr:         fmt.Sprintf("127.0.0.1:%v", args.Port),
+		Addr:         fmt.Sprintf("%s:%v", localHost, args.Port),
 		WriteTimeout: timeout * time.Second,
 		ReadTimeout:  timeout * time.Second,
 	}
-	fmt.Printf("Web server is available at %s\n",
+	fmt.Printf("\nWeb server is available at %s\n",
 		str.Cp(fmt.Sprintf("http:/%v", srv.Addr)))
-	fmt.Println(str.Cinf("Press Ctrl+C to stop"))
+	fmt.Println(str.Cinf("Press Ctrl+C to stop\n"))
 	args.watch()
 	if err = srv.ListenAndServe(); err != nil {
 		return fmt.Errorf("tcp listen and serve failed: %w", err)
