@@ -98,37 +98,38 @@ func DirExpansion(name string) (dir string) {
 }
 
 // Save bytes to a named file location.
-func Save(name string, b ...byte) (path string, err error) {
+func Save(name string, b ...byte) (nn int, path string, err error) {
 	path, err = dir(name)
 	if err != nil {
-		return path, fmt.Errorf("save could not open directory %q: %w", name, err)
+		return nn, path, fmt.Errorf("save could not open directory %q: %w", name, err)
 	}
 	path = name
 	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, filemode)
 	if err != nil {
-		return path, fmt.Errorf("save could not open file %q: %w", path, err)
+		return nn, path, fmt.Errorf("save could not open file %q: %w", path, err)
 	}
 	defer file.Close()
 	// bufio is the most performant
 	writer := bufio.NewWriter(file)
-	for _, c := range b {
+	for i, c := range b {
+		nn = i
 		if err = writer.WriteByte(c); err != nil {
-			return path, fmt.Errorf("save could not write bytes: %w", err)
+			return nn, path, fmt.Errorf("save could not write bytes: %w", err)
 		}
 	}
 	if err = writer.Flush(); err != nil {
-		return path, fmt.Errorf("save could not flush the writer: %w", err)
+		return nn, path, fmt.Errorf("save could not flush the writer: %w", err)
 	}
 	path, err = filepath.Abs(file.Name())
 	if err != nil {
-		return path, fmt.Errorf("save could not find the absolute filename: %w", err)
+		return nn, path, fmt.Errorf("save could not find the absolute filename: %w", err)
 	}
-	return path, file.Close()
+	return nn, path, file.Close()
 }
 
 // SaveTemp saves bytes to a named temporary file.
 func SaveTemp(filename string, b ...byte) (path string, err error) {
-	path, err = Save(tempFile(filename), b...)
+	_, path, err = Save(tempFile(filename), b...)
 	if err != nil {
 		return path, fmt.Errorf("could not save the temporary file: %w", err)
 	}
@@ -196,7 +197,7 @@ func addTar(name string, w *tar.Writer) error {
 
 // Touch creates an empty file at the named location.
 func Touch(name string) (path string, err error) {
-	path, err = Save(name, nil...)
+	_, path, err = Save(name, nil...)
 	if err != nil {
 		return path, fmt.Errorf("could not touch a new file: %w", err)
 	}
