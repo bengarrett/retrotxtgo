@@ -1,3 +1,4 @@
+// Package online for remote interactions.
 package online
 
 import (

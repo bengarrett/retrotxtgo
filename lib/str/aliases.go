@@ -1,3 +1,4 @@
+// Package str for strings and styles.
 package str
 
 import (

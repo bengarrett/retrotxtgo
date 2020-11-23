@@ -1,3 +1,4 @@
+// Package humanize parses data to a human readable format.
 package humanize
 
 // The code on this page is derived from labstack/gommon, Common packages for Go

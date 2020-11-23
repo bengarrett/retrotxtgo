@@ -1,3 +1,4 @@
+// Package config handles the user configations.
 package config
 
 import (

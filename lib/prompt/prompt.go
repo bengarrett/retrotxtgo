@@ -1,3 +1,4 @@
+// Package prompt inputs for user interactions.
 package prompt
 
 import (

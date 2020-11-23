@@ -120,6 +120,7 @@ func createPackage(name string) (enc, font string, b []byte) {
 	if b == nil {
 		return "", "", nil
 	}
+	fmt.Println("pack:", name, "enc", pkg.encoding, "font", pkg.font)
 	return pkg.encoding, pkg.font, b
 }
 

@@ -1,3 +1,4 @@
+// Package logs for the display of errors.
 package logs
 
 import (

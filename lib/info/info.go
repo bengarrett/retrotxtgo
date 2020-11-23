@@ -1,3 +1,4 @@
+// Package info that extracts file statistics and metadata.
 package info
 
 import (

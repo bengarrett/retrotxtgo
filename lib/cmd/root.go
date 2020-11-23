@@ -1,3 +1,4 @@
+// Package cmd is the terminal, command line interface.
 package cmd
 
 import (

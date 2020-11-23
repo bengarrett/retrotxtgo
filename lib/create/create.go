@@ -1,3 +1,4 @@
+// Package create makes HTML and other web resources from a text file.
 package create
 
 import (
@@ -195,6 +196,10 @@ func (l Layout) Pack() string {
 func (args *Args) Create(b *[]byte) {
 	var err error
 	args.layout = layout(args.Layout)
+
+	// todo: encode text (b).
+	// args.Encoding string
+
 	switch {
 	case args.SaveToFile:
 		// use config save directory
