@@ -31,43 +31,66 @@ import (
 
 // Args holds arguments and options sourced from user flags or the config file.
 type Args struct {
-	Destination        string // Destination HTML destination either a directory or file
-	Encoding           string // Encoding text encoding of the source input
-	Body               string // Body text content
-	Layout             string // Layout of the HTML
-	Syntax             string // Syntax and color theming printing HTML
-	tmpl               string // template filename
-	pack               string // template package name
-	FilenameVal        string
-	TitleVal           string
-	MetaAuthorVal      string
-	MetaDescriptionVal string
-	MetaColorSchemeVal string
-	MetaKeywordsVal    string
-	MetaReferrerVal    string
-	MetaRobotsVal      string
-	MetaThemeColorVal  string
-	FontFamilyVal      string
-	Port               uint // Port for HTTP server
-	Cache              bool // Cache when false will always unpack a new .gohtml template
-	Test               bool // Test mode
-	SaveToFile         bool // SaveToFile save to a file or print to stdout
-	OW                 bool // OW overwrite any existing files when saving
-	Compress           bool // Compress and store all files into an archive
-	Title              bool
-	MetaAuthor         bool
-	MetaDescription    bool
-	MetaGeneratorVal   bool
-	MetaColorScheme    bool
-	MetaKeywords       bool
-	MetaNoTranslateVal bool
-	MetaReferrer       bool
-	MetaRetroTxtVal    bool
-	MetaRobots         bool
-	MetaThemeColor     bool
-	FontFamily         bool
-	FontEmbedVal       bool
-	layout             Layout
+	SourceName  string // Source textfile
+	Destination string // Destination HTML destination either a directory or file
+	Encoding    string // Encoding text encoding of the source input
+	Body        string // Body text content
+	Layout      string // Layout of the HTML
+	Syntax      string // Syntax and color theming printing HTML
+	Port        uint   // Port for HTTP server
+	Cache       bool   // Cache when false will always unpack a new .gohtml template
+	Test        bool   // Test mode
+	SaveToFile  bool   // SaveToFile save to a file or print to stdout
+	OW          bool   // OW overwrite any existing files when saving
+	Compress    bool   // Compress and store all files into an archive
+	Title       struct {
+		Flag  bool
+		Value string
+	}
+	FontEmbed  bool
+	FontFamily struct {
+		Flag  bool
+		Value string
+	}
+	Metadata Meta
+	layout   Layout // layout flag interpretation
+	tmpl     string // template filename
+	pack     string // template package name
+}
+
+// Meta data embedded into the webpage.
+type Meta struct {
+	Author struct {
+		Flag  bool
+		Value string
+	}
+	ColorScheme struct {
+		Flag  bool
+		Value string
+	}
+	Description struct {
+		Flag  bool
+		Value string
+	}
+	Keywords struct {
+		Flag  bool
+		Value string
+	}
+	Referrer struct {
+		Flag  bool
+		Value string
+	}
+	Robots struct {
+		Flag  bool
+		Value string
+	}
+	ThemeColor struct {
+		Flag  bool
+		Value string
+	}
+	Generator   bool
+	NoTranslate bool
+	RetroTxt    bool
 }
 
 // PageData temporarily holds template data used for the HTML layout.
@@ -182,6 +205,7 @@ func (args *Args) Create(b *[]byte) {
 				logs.Fatal("save to directory failure", fmt.Sprintf("%s", dir), err)
 			}
 		}
+
 		ch := make(chan error)
 		go args.saveCSS(ch)
 		go args.saveFont(ch)
@@ -294,10 +318,10 @@ func (args *Args) saveFavIcon(c chan error) {
 
 // saveFont unpacks and saves the font binary to the Destination argument.
 func (args *Args) saveFont(c chan error) {
-	if !args.FontEmbedVal {
-		f := Family(args.FontFamilyVal)
+	if !args.FontEmbed {
+		f := Family(args.FontFamily.Value)
 		if f.String() == "" {
-			c <- fmt.Errorf("save font, could not save %q: %w", args.FontFamilyVal, ErrUnknownFF)
+			c <- fmt.Errorf("save font, could not save %q: %w", args.FontFamily.Value, ErrUnknownFF)
 			return
 		}
 		if err := args.saveFontWoff2(f.File(), "font/"+f.File()); err != nil {
@@ -318,11 +342,11 @@ func (args *Args) saveFontCSS(name string) error {
 	if err != nil {
 		return err
 	}
-	f := Family(args.FontFamilyVal).String()
+	f := Family(args.FontFamily.Value).String()
 	if f == "" {
 		return fmt.Errorf("create.saveFontCSS %q: %w", name, ErrUnknownFF)
 	}
-	b, err := FontCSS(f, args.FontEmbedVal)
+	b, err := FontCSS(f, args.FontEmbed)
 	if err != nil {
 		return err
 	}
@@ -614,7 +638,7 @@ func (args *Args) pagedata(b *[]byte) (p PageData, err error) {
 		s := bytes.TrimSpace(pack.Get("css/styles.css"))
 		// font
 		var f []byte
-		f, err = FontCSS(args.FontFamilyVal, args.FontEmbedVal)
+		f, err = FontCSS(args.FontFamily.Value, args.FontEmbed)
 		if err != nil {
 			return p, fmt.Errorf("pagedata font error: %w", err)
 		}
@@ -636,17 +660,17 @@ func (args *Args) pagedata(b *[]byte) (p PageData, err error) {
 		p.ScriptEmbed = template.JS(string(jsp))
 		fallthrough
 	case Standard:
-		p.FontEmbed = args.FontEmbedVal
+		p.FontEmbed = args.FontEmbed
 		p.FontFamily = args.fontFamily()
 		p.MetaAuthor = args.metaAuthor()
 		p.MetaColorScheme = args.metaColorScheme()
 		p.MetaDesc = args.metaDesc()
-		p.MetaGenerator = args.MetaGeneratorVal
+		p.MetaGenerator = args.Metadata.Generator
 		p.MetaKeywords = args.metaKeywords()
-		p.MetaNoTranslate = args.MetaNoTranslateVal
+		p.MetaNoTranslate = args.Metadata.NoTranslate
 		p.MetaReferrer = args.metaReferrer()
 		p.MetaRobots = args.metaRobots()
-		p.MetaRetroTxt = args.MetaRetroTxtVal
+		p.MetaRetroTxt = args.Metadata.RetroTxt
 		p.MetaThemeColor = args.metaThemeColor()
 		p.PageTitle = args.pageTitle()
 		// generate data
@@ -659,7 +683,7 @@ func (args *Args) pagedata(b *[]byte) (p PageData, err error) {
 	case None:
 		// do nothing
 	default:
-		return PageData{}, fmt.Errorf("pagedata %s: %w", args.Layout, ErrNoLayout)
+		return PageData{}, fmt.Errorf("pagedata %s: %w", args.layout, ErrNoLayout)
 	}
 	// check encoding
 	var conv = convert.Args{Encoding: args.Encoding}
@@ -694,71 +718,71 @@ func (args *Args) comment(c convert.Args, old *[]byte, replace ...rune) string {
 	if err != nil {
 		w = -1
 	}
-	if args.FilenameVal != "" {
-		f = args.FilenameVal
+	if args.SourceName != "" {
+		f = args.SourceName
 	}
 	return fmt.Sprintf("encoding: %s; newline: %s; length: %d; width: %d; name: %s", e, nl, l, w, f)
 }
 
 func (args *Args) fontFamily() string {
-	if args.FontFamily {
-		return args.FontFamilyVal
+	if args.FontFamily.Flag {
+		return args.FontFamily.Value
 	}
 	return viper.GetString("html.font.family")
 }
 
 func (args *Args) metaAuthor() string {
-	if args.MetaAuthor {
-		return args.MetaAuthorVal
+	if args.Metadata.Author.Flag {
+		return args.Metadata.Author.Value
 	}
 	return viper.GetString("html.meta.author")
 }
 
 func (args *Args) metaColorScheme() string {
-	if args.MetaColorScheme {
-		return args.MetaColorSchemeVal
+	if args.Metadata.ColorScheme.Flag {
+		return args.Metadata.ColorScheme.Value
 	}
 	return viper.GetString("html.meta.color-scheme")
 }
 
 func (args *Args) metaDesc() string {
-	if args.MetaDescription {
-		return args.MetaDescriptionVal
+	if args.Metadata.Description.Flag {
+		return args.Metadata.Description.Value
 	}
 	return viper.GetString("html.meta.description")
 }
 
 func (args *Args) metaKeywords() string {
-	if args.MetaKeywords {
-		return args.MetaKeywordsVal
+	if args.Metadata.Keywords.Flag {
+		return args.Metadata.Keywords.Value
 	}
 	return viper.GetString("html.meta.keywords")
 }
 
 func (args *Args) metaReferrer() string {
-	if args.MetaReferrer {
-		return args.MetaReferrerVal
+	if args.Metadata.Referrer.Flag {
+		return args.Metadata.Referrer.Value
 	}
 	return viper.GetString("html.meta.referrer")
 }
 
 func (args *Args) metaRobots() string {
-	if args.MetaRobots {
-		return args.MetaRobotsVal
+	if args.Metadata.Referrer.Flag {
+		return args.Metadata.Referrer.Value
 	}
 	return viper.GetString("html.meta.robots")
 }
 
 func (args *Args) metaThemeColor() string {
-	if args.MetaThemeColor {
-		return args.MetaThemeColorVal
+	if args.Metadata.ThemeColor.Flag {
+		return args.Metadata.ThemeColor.Value
 	}
 	return viper.GetString("html.meta.theme-color")
 }
 
 func (args *Args) pageTitle() string {
-	if args.Title {
-		return args.TitleVal
+	if args.Title.Flag {
+		return args.Title.Value
 	}
 	return viper.GetString("html.title")
 }

@@ -35,7 +35,7 @@ func Test_Save(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ch := make(chan error)
-			a := Args{Layout: "standard", Test: true}
+			a := Args{layout: Standard, Test: true}
 			a.OW = true
 			a.Destination = tt.args.name
 			go a.saveHTML(&tt.args.data, ch)
@@ -133,7 +133,7 @@ func Test_pagedata(t *testing.T) {
 	if got.PreText != w {
 		t.Errorf("pagedata().PreText = %v, want %v", got, w)
 	}
-	args.Layout = "compact"
+	args.layout = Compact
 	w = "RetroTxt | example"
 	got, _ = args.pagedata(&d)
 	if got.PageTitle != w {
@@ -144,13 +144,13 @@ func Test_pagedata(t *testing.T) {
 	if got.MetaDesc != w {
 		t.Errorf("pagedata().MetaDesc = %v, want %v", got, w)
 	}
-	args.Layout = "standard"
+	args.layout = Standard
 	w = ""
 	got, _ = args.pagedata(&d)
 	if got.MetaAuthor != w {
 		t.Errorf("pagedata().MetaAuthor = %v, want %v", got, w)
 	}
-	args.Layout = "inline"
+	args.layout = Inline
 	w = ""
 	got, _ = args.pagedata(&d)
 	if got.MetaAuthor != w {

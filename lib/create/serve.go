@@ -67,15 +67,15 @@ func (args *Args) Serve(b *[]byte) {
 }
 
 func (args *Args) override() {
-	const layout, embed = "standard", false
+	const embed = false
 	var s = []string{}
-	if args.Layout != layout {
-		s = append(s, fmt.Sprintf("layout to %q", layout))
-		args.Layout = layout
+	if args.layout != Standard {
+		s = append(s, fmt.Sprintf("layout to %q", Standard))
+		args.layout = Standard
 	}
-	if args.FontEmbedVal != embed {
+	if args.FontEmbed != embed {
 		s = append(s, fmt.Sprintf("font-embed to %v", false))
-		args.FontEmbedVal = embed
+		args.FontEmbed = embed
 	}
 	l := len(s)
 	if l == 0 {

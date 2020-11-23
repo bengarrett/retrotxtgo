@@ -68,7 +68,7 @@ var createCmd = &cobra.Command{
 		// user arguments
 		checkUse(cmd, args...)
 		for i, arg := range args {
-			html.FilenameVal = arg
+			html.SourceName = arg
 			enc, font, b := createPackage(arg)
 			if b == nil {
 				var err error
@@ -84,7 +84,7 @@ var createCmd = &cobra.Command{
 				if font == "" {
 					font = "vga"
 				}
-				html.FontFamilyVal = font
+				html.FontFamily.Value = font
 			}
 			if h := htmlServe(i, cmd, &b); !h {
 				html.Create(&b)
@@ -135,15 +135,15 @@ func monitorFlags(cmd *cobra.Command) {
 	// 1) flag not changed so use viper default.
 	// 2) flag with new value to overwrite viper default.
 	// 3) blank flag value to overwrite viper default with an empty/disable value.
-	html.FontFamily = changed("font-family")
-	html.MetaAuthor = changed("meta-author")
-	html.MetaColorScheme = changed("meta-color-scheme")
-	html.MetaDescription = changed("meta-description")
-	html.MetaKeywords = changed("meta-keywords")
-	html.MetaReferrer = changed("meta-referrer")
-	html.MetaRobots = changed("meta-robots")
-	html.MetaThemeColor = changed("meta-theme-color")
-	html.Title = changed("title")
+	html.FontFamily.Flag = changed("font-family")
+	html.Metadata.Author.Flag = changed("meta-author")
+	html.Metadata.ColorScheme.Flag = changed("meta-color-scheme")
+	html.Metadata.Description.Flag = changed("meta-description")
+	html.Metadata.Keywords.Flag = changed("meta-keywords")
+	html.Metadata.Referrer.Flag = changed("meta-referrer")
+	html.Metadata.Robots.Flag = changed("meta-robots")
+	html.Metadata.ThemeColor.Flag = changed("meta-theme-color")
+	html.Title.Flag = changed("title")
 }
 
 type metaFlag struct {
@@ -238,20 +238,20 @@ func metaConfig() map[int]metaFlag {
 		// main tag flags
 		layout: {"html.layout", &html.Layout, nil, nil, "layout", "l", create.Layouts()},
 		style:  {"style.html", &html.Syntax, nil, nil, "syntax-style", "", nil},
-		title:  {"html.title", &html.TitleVal, nil, nil, "title", "t", nil},
-		desc:   {"html.meta.description", &html.MetaDescriptionVal, nil, nil, "meta-description", "d", nil},
-		author: {"html.meta.author", &html.MetaAuthorVal, nil, nil, "meta-author", "a", nil},
-		retro:  {"html.meta.retrotxt", nil, &html.MetaRetroTxtVal, nil, "meta-retrotxt", "r", nil},
+		title:  {"html.title", &html.Title.Value, nil, nil, "title", "t", nil},
+		desc:   {"html.meta.description", &html.Metadata.Description.Value, nil, nil, "meta-description", "d", nil},
+		author: {"html.meta.author", &html.Metadata.Author.Value, nil, nil, "meta-author", "a", nil},
+		retro:  {"html.meta.retrotxt", nil, &html.Metadata.RetroTxt, nil, "meta-retrotxt", "r", nil},
 		// minor tag flags
-		gen:     {"html.meta.generator", nil, &html.MetaGeneratorVal, nil, "meta-generator", "g", nil},
-		cscheme: {"html.meta.color-scheme", &html.MetaColorSchemeVal, nil, nil, "meta-color-scheme", "", nil},
-		kwords:  {"html.meta.keywords", &html.MetaKeywordsVal, nil, nil, "meta-keywords", "", nil},
-		nolang:  {"html.meta.notranslate", nil, &html.MetaNoTranslateVal, nil, "meta-notranslate", "", nil},
-		refer:   {"html.meta.referrer", &html.MetaReferrerVal, nil, nil, "meta-referrer", "", nil},
-		bots:    {"html.meta.robots", &html.MetaRobotsVal, nil, nil, "meta-robots", "", nil},
-		themec:  {"html.meta.theme-color", &html.MetaThemeColorVal, nil, nil, "meta-theme-color", "", nil},
-		fontf:   {"html.font.family", &html.FontFamilyVal, nil, nil, "font-family", "f", nil},
-		fonte:   {"html.font.embed", nil, &html.FontEmbedVal, nil, "font-embed", "", nil},
+		gen:     {"html.meta.generator", nil, &html.Metadata.Generator, nil, "meta-generator", "g", nil},
+		cscheme: {"html.meta.color-scheme", &html.Metadata.ColorScheme.Value, nil, nil, "meta-color-scheme", "", nil},
+		kwords:  {"html.meta.keywords", &html.Metadata.Keywords.Value, nil, nil, "meta-keywords", "", nil},
+		nolang:  {"html.meta.notranslate", nil, &html.Metadata.NoTranslate, nil, "meta-notranslate", "", nil},
+		refer:   {"html.meta.referrer", &html.Metadata.Referrer.Value, nil, nil, "meta-referrer", "", nil},
+		bots:    {"html.meta.robots", &html.Metadata.Robots.Value, nil, nil, "meta-robots", "", nil},
+		themec:  {"html.meta.theme-color", &html.Metadata.ThemeColor.Value, nil, nil, "meta-theme-color", "", nil},
+		fontf:   {"html.font.family", &html.FontFamily.Value, nil, nil, "font-family", "f", nil},
+		fonte:   {"html.font.embed", nil, &html.FontEmbed, nil, "font-embed", "", nil},
 		// hidden flags
 		body:  {"html.body", &html.Body, nil, nil, "body", "b", nil},
 		cache: {"html.layout.cache", nil, &html.Cache, nil, "cache", "", nil},
