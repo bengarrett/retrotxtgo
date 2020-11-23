@@ -17,8 +17,6 @@ import (
 
 const (
 	win = "windows"
-	cr  = "\x0d"
-	lf  = "\x0a"
 	// posix permission bits for files.
 	filemode os.FileMode = 0660
 	// posix permission bits for directories.
@@ -214,15 +212,15 @@ func dir(name string) (path string, err error) {
 	return path, err
 }
 
-// nl returns a platform's newline character.
-func nl(platform string) string {
+// lineBreak returns a platform's line break character.
+func lineBreak(platform string) string {
 	switch platform {
 	case "dos", win:
-		return cr + lf
+		return fmt.Sprintf("%x%x", cr, lf)
 	case "c64", "darwin", "mac":
-		return cr
+		return fmt.Sprintf("%x", cr)
 	case "amiga", "linux", "unix":
-		return lf
+		return fmt.Sprintf("%x", lf)
 	default: // use operating system default
 		return "\n"
 	}
