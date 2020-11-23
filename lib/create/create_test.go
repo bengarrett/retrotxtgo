@@ -28,7 +28,7 @@ func Test_Save(t *testing.T) {
 		{"no data", args{[]byte(""), ""}, true},
 		{"invalid", args{[]byte("abc"), "this-is-an-invalid-path"}, true},
 		{"tempDir", args{data: []byte("abc"), name: tmpFile}, true},
-		// {"homeDir", args{[]byte("abc"), "/home/ben"}, false},
+		//{"homeDir", args{[]byte("abc"), "/home/ben"}, false},
 		{"currentDir", args{[]byte("abc"), "."}, true},
 		// {"path as name", args{[]byte("abc"), tmpDir}, false},
 	}
@@ -38,7 +38,7 @@ func Test_Save(t *testing.T) {
 			a := Args{Layout: "standard", Test: true}
 			a.OW = true
 			a.Destination = tt.args.name
-			go a.savehtml(&tt.args.data, ch)
+			go a.saveHTML(&tt.args.data, ch)
 			err := <-ch
 			if (err != nil) != tt.wantErr {
 				fmt.Println("dir:", tmpDir)
@@ -57,9 +57,7 @@ func Test_Save(t *testing.T) {
 
 func TestArgs_Stdout(t *testing.T) {
 	var (
-		a = Args{
-			Layout: "standard",
-		}
+		a  = Args{layout: Standard}
 		b  = []byte("")
 		hi = []byte("hello world")
 	)
@@ -98,7 +96,7 @@ func Test_Templates(t *testing.T) {
 		key  string
 		want string
 	}{
-		{"empty", "", ""},
+		{"empty", "", "unknown"},
 		{"none", "none", "none"},
 		{"standard", "standard", "standard"},
 	}
@@ -118,7 +116,7 @@ func Test_templateSave(t *testing.T) {
 	}
 	defer os.Remove(tmpFile.Name())
 	a := Args{
-		Layout: "standard",
+		layout: Standard,
 		tmpl:   tmpFile.Name(),
 	}
 	if err = a.templateSave(); err != nil {
@@ -128,7 +126,7 @@ func Test_templateSave(t *testing.T) {
 
 func Test_pagedata(t *testing.T) {
 	viper.SetDefault("html.title", "RetroTxt | example")
-	args := Args{Layout: "standard"}
+	args := Args{layout: Standard}
 	w := "hello"
 	d := []byte(w)
 	got, _ := args.pagedata(&d)

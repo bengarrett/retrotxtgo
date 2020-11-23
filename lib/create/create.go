@@ -1,6 +1,7 @@
 package create
 
 import (
+	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
@@ -16,9 +17,11 @@ import (
 	"github.com/tdewolff/minify"
 	"github.com/tdewolff/minify/css"
 	"github.com/tdewolff/minify/js"
+	"golang.org/x/text/language"
 	"retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/convert"
 	"retrotxt.com/retrotxt/lib/filesystem"
+	"retrotxt.com/retrotxt/lib/humanize"
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/str"
 	"retrotxt.com/retrotxt/lib/version"
@@ -180,30 +183,32 @@ func (args *Args) Create(b *[]byte) {
 			}
 		}
 		ch := make(chan error)
-		go args.savecss(ch)
-		go args.savefont(ch)
-		go args.savehtml(b, ch)
-		go args.savejs(ch)
-		go args.savefavicon(ch)
+		go args.saveCSS(ch)
+		go args.saveFont(ch)
+		go args.saveHTML(b, ch) // todo: parse b to match Stdout in a shared func
+		go args.saveJS(ch)
+		go args.saveFavIcon(ch)
 		err1, err2, err3, err4, err5 := <-ch, <-ch, <-ch, <-ch, <-ch
-		const errS = "could not save file"
+		const errS, errCode = "could not save file", 1
 		if err1 != nil {
 			logs.Println(errS, "", err1)
+			os.Exit(errCode)
 		}
 		if err2 != nil {
 			logs.Println(errS, "", err2)
+			os.Exit(errCode)
 		}
 		if err3 != nil {
 			logs.Println(errS, "", err3)
+			os.Exit(errCode)
 		}
 		if err4 != nil {
 			logs.Println(errS, "", err4)
+			os.Exit(errCode)
 		}
 		if err5 != nil {
 			logs.Println(errS, "", err5)
-		}
-		if err1 != nil || err2 != nil || err3 != nil || err4 != nil || err5 != nil {
-			os.Exit(1)
+			os.Exit(errCode)
 		}
 	default:
 		// print to terminal
@@ -223,13 +228,7 @@ func (args *Args) destination(name string) (string, error) {
 	if stat.IsDir() {
 		path = filepath.Join(dir, name)
 	}
-	if _, err = os.Stat(path); os.IsNotExist(err) {
-		empty := []byte{}
-		if _, err = filesystem.Save(path, empty...); err != nil {
-			return "", fmt.Errorf("args destination path failed %q: %w", path, err)
-		}
-	}
-	// todo: logic failure
+	_, err = os.Stat(path)
 	if !args.OW && !os.IsNotExist(err) {
 		switch name {
 		case "favicon.ico", "scripts.js", "vga.woff2":
@@ -237,19 +236,23 @@ func (args *Args) destination(name string) (string, error) {
 			return path, nil
 		}
 		logs.Println("file exists", path, ErrReqOW)
-	} else {
-		color.OpFuzzy.Printf("saving to %s\n", path)
+		return path, nil
+	}
+	if os.IsNotExist(err) {
+		empty := []byte{}
+		if _, _, err = filesystem.Save(path, empty...); err != nil {
+			return "", fmt.Errorf("args destination path failed %q: %w", path, err)
+		}
 	}
 	return path, nil
 }
 
-// savecss creates and saves the styles stylesheet to the Destination argument.
-func (args *Args) savecss(c chan error) {
+// saveCSS creates and saves the styles stylesheet to the Destination argument.
+func (args *Args) saveCSS(c chan error) {
 	switch args.layout {
 	case Standard:
 	default:
 		c <- nil
-		return
 	}
 	name, err := args.destination("styles.css")
 	if err != nil {
@@ -257,21 +260,21 @@ func (args *Args) savecss(c chan error) {
 	}
 	b := pack.Get("css/styles.css")
 	if len(b) == 0 {
-		c <- fmt.Errorf("create.savecss %q: %w", args.pack, ErrPackGet)
+		c <- fmt.Errorf("create.saveCSS %q: %w", args.pack, ErrPackGet)
 	}
-	_, err = filesystem.Save(name, b...)
+	nn, _, err := filesystem.Save(name, b...)
 	if err != nil {
 		c <- err
 	}
+	bytesStats(name, nn)
 	c <- nil
 }
 
-func (args *Args) savefavicon(c chan error) {
+func (args *Args) saveFavIcon(c chan error) {
 	switch args.layout {
 	case Standard:
 	default:
 		c <- nil
-		return
 	}
 	name, err := args.destination("favicon.ico")
 	if err != nil {
@@ -279,73 +282,76 @@ func (args *Args) savefavicon(c chan error) {
 	}
 	b := pack.Get("img/retrotxt_16.png")
 	if len(b) == 0 {
-		c <- fmt.Errorf("create.savefavicon %q: %w", args.pack, ErrPackGet)
+		c <- fmt.Errorf("create.saveFavIcon %q: %w", args.pack, ErrPackGet)
 	}
-	_, err = filesystem.Save(name, b...)
+	nn, _, err := filesystem.Save(name, b...)
 	if err != nil {
 		c <- err
 	}
+	bytesStats(name, nn)
 	c <- nil
 }
 
-// savefont unpacks and saves the font binary to the Destination argument.
-func (args *Args) savefont(c chan error) {
+// saveFont unpacks and saves the font binary to the Destination argument.
+func (args *Args) saveFont(c chan error) {
 	if !args.FontEmbedVal {
 		f := Family(args.FontFamilyVal)
 		if f.String() == "" {
 			c <- fmt.Errorf("save font, could not save %q: %w", args.FontFamilyVal, ErrUnknownFF)
 			return
 		}
-		if err := args.savefontwoff2(f.File(), "font/"+f.File()); err != nil {
+		if err := args.saveFontWoff2(f.File(), "font/"+f.File()); err != nil {
 			c <- err
 		}
 	}
 	switch args.layout {
 	case Standard:
-		if err := args.savefontcss("font.css"); err != nil {
+		if err := args.saveFontCSS("font.css"); err != nil {
 			c <- err
 		}
 	}
 	c <- nil
 }
 
-func (args *Args) savefontcss(name string) error {
+func (args *Args) saveFontCSS(name string) error {
 	name, err := args.destination(name)
 	if err != nil {
 		return err
 	}
 	f := Family(args.FontFamilyVal).String()
 	if f == "" {
-		return fmt.Errorf("create.savefontcss %q: %w", name, ErrUnknownFF)
+		return fmt.Errorf("create.saveFontCSS %q: %w", name, ErrUnknownFF)
 	}
 	b, err := FontCSS(f, args.FontEmbedVal)
 	if err != nil {
 		return err
 	}
-	_, err = filesystem.Save(name, b...)
+	nn, _, err := filesystem.Save(name, b...)
 	if err != nil {
 		return err
 	}
+	bytesStats(name, nn)
 	return nil
 }
 
-func (args *Args) savefontwoff2(name, packName string) error {
+func (args *Args) saveFontWoff2(name, packName string) error {
 	name, err := args.destination(name)
 	if err != nil {
 		return err
 	}
 	b := pack.Get(packName)
 	if len(b) == 0 {
-		return fmt.Errorf("create.savefontwoff2 %q: %w", args.pack, ErrPackGet)
+		return fmt.Errorf("create.saveFontWoff2 %q: %w", args.pack, ErrPackGet)
 	}
-	_, err = filesystem.Save(name, b...)
+	nn, _, err := filesystem.Save(name, b...)
 	if err != nil {
 		return err
 	}
+	bytesStats(name, nn)
 	return nil
 }
 
-func (args *Args) savejs(c chan error) {
+func (args *Args) saveJS(c chan error) {
 	switch args.layout {
 	case Standard:
 	default:
@@ -358,17 +364,18 @@ func (args *Args) savejs(c chan error) {
 	}
 	b := pack.Get("js/scripts.js")
 	if len(b) == 0 {
-		c <- fmt.Errorf("create.savejs %q: %w", args.pack, ErrPackGet)
+		c <- fmt.Errorf("create.saveJS %q: %w", args.pack, ErrPackGet)
 	}
-	_, err = filesystem.Save(name, b...)
+	nn, _, err := filesystem.Save(name, b...)
 	if err != nil {
 		c <- err
 	}
+	bytesStats(name, nn)
 	c <- nil
 }
 
 // SaveHTML creates and saves the html template to the Destination argument.
-func (args *Args) savehtml(b *[]byte, c chan error) {
+func (args *Args) saveHTML(b *[]byte, c chan error) {
 	name, err := args.destination("index.html")
 	if err != nil {
 		c <- err
@@ -384,33 +391,58 @@ func (args *Args) savehtml(b *[]byte, c chan error) {
 		cerr := file.Close()
 		c <- cerr
 	}()
-	tmpl, err := args.newTemplate()
+	// todo: create 037. replace nl char with browser friendly crlf
+	buf, err := args.parseTemplate(b)
 	if err != nil {
 		c <- err
 	}
-	d, err := args.pagedata(b)
+	w := bufio.NewWriter(file)
+	nn, err := w.Write(buf.Bytes())
 	if err != nil {
 		c <- err
 	}
-	if err = tmpl.Execute(file, d); err != nil {
+	bytesStats(name, nn)
+	if err := w.Flush(); err != nil {
 		c <- err
 	}
 	c <- file.Close()
 }
 
-// Stdout creates and prints the html template.
-func (args *Args) Stdout(b *[]byte) error {
+func bytesStats(name string, nn int) {
+	const kB = 1000
+	h := humanize.Decimal(int64(nn), language.AmericanEnglish)
+	color.OpFuzzy.Printf("saved to %s", name)
+	switch {
+	case nn == 0:
+		color.OpFuzzy.Printf("saved to %s (zero-byte file)", name)
+	case nn < kB:
+		color.OpFuzzy.Printf(", %s", h)
+	default:
+		color.OpFuzzy.Printf(", %s (%d)", h, nn)
+	}
+	fmt.Print("\n")
+}
+
+func (args *Args) parseTemplate(b *[]byte) (buf bytes.Buffer, err error) {
 	tmpl, err := args.newTemplate()
 	if err != nil {
-		return fmt.Errorf("stdout new template failure: %w", err)
+		return buf, fmt.Errorf("stdout new template failure: %w", err)
 	}
 	d, err := args.pagedata(b)
 	if err != nil {
-		return fmt.Errorf("stdout meta and pagedata failure: %w", err)
+		return buf, fmt.Errorf("stdout meta and pagedata failure: %w", err)
 	}
-	var buf bytes.Buffer
 	if err = tmpl.Execute(&buf, d); err != nil {
-		return fmt.Errorf("stdout template execute failure: %w", err)
+		return buf, fmt.Errorf("stdout template execute failure: %w", err)
+	}
+	return buf, nil
+}
+
+// Stdout creates and prints the html template.
+func (args *Args) Stdout(b *[]byte) error {
+	buf, err := args.parseTemplate(b)
+	if err != nil {
+		return fmt.Errorf("stdout: %w", err)
 	}
 	switch args.Syntax {
 	case "", none:
@@ -499,7 +531,7 @@ func (args *Args) newTemplate() (*template.Template, error) {
 		if err != nil {
 			return nil, fmt.Errorf("template data: %w", err)
 		}
-		if _, err := filesystem.Save(args.tmpl, *b...); err != nil {
+		if _, _, err := filesystem.Save(args.tmpl, *b...); err != nil {
 			return nil, fmt.Errorf("saving template: %q: %w", args.tmpl, err)
 		}
 	}
@@ -546,7 +578,7 @@ func (args *Args) templateSave() error {
 	if err != nil {
 		return fmt.Errorf("template save data error: %w", err)
 	}
-	if _, err := filesystem.Save(args.tmpl, *b...); err != nil {
+	if _, _, err := filesystem.Save(args.tmpl, *b...); err != nil {
 		return fmt.Errorf("template save error: %w", err)
 	}
 	return nil
