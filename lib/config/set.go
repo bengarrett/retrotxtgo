@@ -672,7 +672,7 @@ func setPort(name string, setup bool) {
 
 func setRetrotxt(value bool) {
 	name := "html.meta.retrotxt"
-	elm := "<head>\n  <meta name=\"retrotxt\" content=\"encoding: IBM437; newline: CRLF; length: 50; width: 80; name: file.txt\">"
+	elm := "<head>\n  <meta name=\"retrotxt\" content=\"encoding: IBM437; linebreak: CRLF; length: 50; width: 80; name: file.txt\">"
 	fmt.Println(ColorHTML(elm))
 	p := "Enable the retrotxt element"
 	if value {

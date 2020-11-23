@@ -427,7 +427,7 @@ func (c *Convert) ANSI() {
 	}
 }
 
-// LineBreaks will try to guess the newline representation as a 2 byte value.
+// LineBreaks will try to guess the line break representation as a 2 byte value.
 // A guess of Unix will return [10, 0], Windows [13, 10], otherwise a [0, 0] value is returned.
 func (c *Convert) LineBreaks() {
 	c.lineBreak = filesystem.LineBreaks(true, c.Runes...)
@@ -718,9 +718,9 @@ func decode(b byte) (r rune) {
 	return r
 }
 
-// equalNL reports whether r matches the single or multi-byte, newline character runes.
-func equalNL(r, nl [2]rune) bool {
-	// single-byte newline
+// equalLB reports whether r matches the single or multi-byte, line break character runes.
+func equalLB(r, nl [2]rune) bool {
+	// single-byte line break
 	if nl[1] == 0 {
 		return nl[0] == r[0]
 	}
@@ -738,7 +738,7 @@ func (c *Convert) skipNewlines(i int) bool {
 		// check for multi-byte line breaks
 		r1 = c.Runes[i+1]
 	}
-	if equalNL([2]rune{r0, r1}, c.lineBreak) {
+	if equalLB([2]rune{r0, r1}, c.lineBreak) {
 		return true
 	}
 	return false

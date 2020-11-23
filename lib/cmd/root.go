@@ -154,22 +154,22 @@ type internalPack struct {
 
 var internalPacks = map[string]internalPack{
 	"037":           {"", "", "cp037", "text/cp037.txt", "EBCDIC 037 IBM mainframe test"},
-	"437.cr":        {"d", "", "cp437", "text/cp437-cr.txt", "CP-437 all characters test using CR (carriage return)"}, //
-	"437.crlf":      {"d", "", "cp437", "text/cp437-crlf.txt", "CP-437 all characters test using Windows newline"},    //
-	"437.lf":        {"d", "", "cp437", "text/cp437-lf.txt", "CP-437 all characters test using LF (line feed)"},       //
-	"865":           {"", "", "ibm865", "text/cp865.txt", "CP-865 and CP-860 Nordic test"},                            //
-	"1252":          {"", "", "cp1252", "text/cp1252.txt", "Windows-1252 English test"},                               //
-	"ascii":         {"", "", "cp437", "text/retrotxt.asc", "RetroTxt ASCII logos"},                                   //
-	"ansi":          {"", "", "cp437", "text/retrotxt.ans", "RetroTxt 256 color ANSI logo"},                           //
-	"ansi.aix":      {"", "", "cp437", "text/ansi-aixterm.ans", "IBM AIX terminal colours"},                           //
-	"ansi.blank":    {"", "", "cp437", "text/ansi-blank.ans", "Empty file test"},                                      //
-	"ansi.cp":       {"", "", "cp437", "text/ansi-cp.ans", "ANSI cursor position tests"},                              //
-	"ansi.cpf":      {"", "", "cp437", "text/ansi-cpf.ans", "ANSI cursor forward tests"},                              //
-	"ansi.hvp":      {"", "", "cp437", "text/ansi-hvp.ans", "ANSI horizontal and vertical cursor positioning"},        //
-	"ansi.proof":    {"", "", "cp437", "text/ansi-proof.ans", "ANSI formatting proof sheet"},                          //
-	"ansi.rgb":      {"", "", "cp437", "text/ansi-rgb.ans", "ANSI RGB 24-bit color sheet"},                            //
-	"ansi.setmodes": {"", "", "cp437", "text/ansi-setmodes.ans", "MS-DOS ANSI.SYS Set Mode examples"},                 //
-	"iso-1":         {"", "", "1", "text/iso-8859-1.txt", "ISO 8859-1 select characters"},                             //
+	"437.cr":        {"d", "", "cp437", "text/cp437-cr.txt", "CP-437 all characters test using CR (carriage return)"},  //
+	"437.crlf":      {"d", "", "cp437", "text/cp437-crlf.txt", "CP-437 all characters test using Windows line breaks"}, //
+	"437.lf":        {"d", "", "cp437", "text/cp437-lf.txt", "CP-437 all characters test using LF (line feed)"},        //
+	"865":           {"", "", "ibm865", "text/cp865.txt", "CP-865 and CP-860 Nordic test"},                             //
+	"1252":          {"", "", "cp1252", "text/cp1252.txt", "Windows-1252 English test"},                                //
+	"ascii":         {"", "", "cp437", "text/retrotxt.asc", "RetroTxt ASCII logos"},                                    //
+	"ansi":          {"", "", "cp437", "text/retrotxt.ans", "RetroTxt 256 color ANSI logo"},                            //
+	"ansi.aix":      {"", "", "cp437", "text/ansi-aixterm.ans", "IBM AIX terminal colours"},                            //
+	"ansi.blank":    {"", "", "cp437", "text/ansi-blank.ans", "Empty file test"},                                       //
+	"ansi.cp":       {"", "", "cp437", "text/ansi-cp.ans", "ANSI cursor position tests"},                               //
+	"ansi.cpf":      {"", "", "cp437", "text/ansi-cpf.ans", "ANSI cursor forward tests"},                               //
+	"ansi.hvp":      {"", "", "cp437", "text/ansi-hvp.ans", "ANSI horizontal and vertical cursor positioning"},         //
+	"ansi.proof":    {"", "", "cp437", "text/ansi-proof.ans", "ANSI formatting proof sheet"},                           //
+	"ansi.rgb":      {"", "", "cp437", "text/ansi-rgb.ans", "ANSI RGB 24-bit color sheet"},                             //
+	"ansi.setmodes": {"", "", "cp437", "text/ansi-setmodes.ans", "MS-DOS ANSI.SYS Set Mode examples"},                  //
+	"iso-1":         {"", "", "1", "text/iso-8859-1.txt", "ISO 8859-1 select characters"},                              //
 	"iso-15":        {"", "", "15", "text/iso-8859-15.txt", "ISO 8859-15 select characters"},
 	"sauce":         {"", "", "", "text/sauce.txt", "SAUCE metadata test"}, // TODO
 	// shiftjis outputs to UTF8 .. ??
