@@ -49,7 +49,7 @@ func (d *Detail) lines(filename string) (err error) {
 	}
 	defer f.Close()
 	var l int
-	if l, err = filesystem.Lines(f, d.Newline.Decimals); err != nil {
+	if l, err = filesystem.Lines(f, d.LineBreak.Decimals); err != nil {
 		return err
 	}
 	d.Lines = l
@@ -89,7 +89,7 @@ func (d *Detail) mimeUnknown() {
 			d.Mime.Commt = "Text document with ANSI controls"
 			return
 		}
-		switch d.Newline.Decimals {
+		switch d.LineBreak.Decimals {
 		case [2]rune{21}, [2]rune{133}:
 			d.Mime.Commt = "EBCDIC encoded text document"
 			return
@@ -226,7 +226,7 @@ func (d *Detail) printMarshal(color bool) []byte {
 func (d *Detail) marshalDataValid(k, v string) bool {
 	if !d.validText() {
 		switch k {
-		case "UTF-8", "newline", "characters", "ANSI controls", "words", "lines", "width":
+		case "UTF-8", "line break", "characters", "ANSI controls", "words", "lines", "width":
 			return false
 		}
 	} else if k == "ANSI controls" {
@@ -274,9 +274,9 @@ func (d *Detail) linebreaks(r [2]rune) {
 		a = "nl"
 		e = "\025"
 	}
-	d.Newline.Decimals = r
-	d.Newline.Abbr = strings.ToUpper(a)
-	d.Newline.Escape = e
+	d.LineBreak.Decimals = r
+	d.LineBreak.Abbr = strings.ToUpper(a)
+	d.LineBreak.Escape = e
 }
 
 func (d *Detail) printMarshalData() (data []struct{ k, v string }) {
@@ -288,7 +288,7 @@ func (d *Detail) printMarshalData() (data []struct{ k, v string }) {
 		{k: "filename", v: d.Name},
 		{k: "filetype", v: d.Mime.Commt},
 		{k: "UTF-8", v: str.Bool(d.Utf8)},
-		{k: "newline", v: filesystem.LineBreak(d.Newline.Decimals, true)},
+		{k: "line break", v: filesystem.LineBreak(d.LineBreak.Decimals, true)},
 		{k: "characters", v: p.Sprint(d.Count.Chars)},
 		{k: "ANSI controls", v: p.Sprint(d.Count.Controls)},
 		{k: "words", v: p.Sprint(d.Count.Words)},
@@ -365,7 +365,7 @@ func (d *Detail) width(filename string) (err error) {
 	}
 	defer f.Close()
 	var w int
-	if w, err = filesystem.Columns(f, d.Newline.Decimals); err != nil {
+	if w, err = filesystem.Columns(f, d.LineBreak.Decimals); err != nil {
 		return err
 	} else if w < 0 {
 		w = d.Count.Chars
@@ -381,7 +381,7 @@ func (d *Detail) words(filename string) (err error) {
 	}
 	defer f.Close()
 	var w int
-	switch d.Newline.Decimals {
+	switch d.LineBreak.Decimals {
 	case [2]rune{21}, [2]rune{133}:
 		if w, err = filesystem.WordsEBCDIC(f); err != nil {
 			return err

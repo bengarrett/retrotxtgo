@@ -82,9 +82,9 @@ func ReadColumns(name string) (count int, err error) {
 		return -1, fmt.Errorf("read columns could not open file: %q: %w", name, err)
 	}
 	defer file.Close()
-	nl, err := ReadNewlines(name)
+	nl, err := ReadLineBreaks(name)
 	if err != nil {
-		return -1, fmt.Errorf("read columns could not find the newline method: %w", err)
+		return -1, fmt.Errorf("read columns could not find the line break method: %w", err)
 	}
 	count, err = Columns(file, nl)
 	if err != nil {
@@ -108,8 +108,8 @@ func ReadControls(name string) (count int, err error) {
 }
 
 // ReadLine reads a named file location or a named temporary file and returns its content.
-func ReadLine(name, newline string) (text string, err error) {
-	var path, n = tempFile(name), lineBreak(newline)
+func ReadLine(name, linebreak string) (text string, err error) {
+	var path, n = tempFile(name), lineBreak(linebreak)
 	file, err := os.OpenFile(path, os.O_RDONLY, filemode)
 	if err != nil {
 		return text, fmt.Errorf("read line could not open file: %q: %w", name, err)
@@ -133,7 +133,7 @@ func ReadLines(name string) (count int, err error) {
 		return -1, fmt.Errorf("read lines could not open file: %q: %w", name, err)
 	}
 	defer file.Close()
-	nl, err := ReadNewlines(name)
+	nl, err := ReadLineBreaks(name)
 	if err != nil {
 		return -1, fmt.Errorf("read lines could not scan the file: %w", err)
 	}
@@ -144,17 +144,17 @@ func ReadLines(name string) (count int, err error) {
 	return count, file.Close()
 }
 
-// ReadNewlines scans the named file for the most commonly used newline method.
-func ReadNewlines(name string) ([2]rune, error) {
+// ReadLineBreaks scans the named file for the most commonly used line break method.
+func ReadLineBreaks(name string) ([2]rune, error) {
 	z := [2]rune{0, 0}
 	file, err := os.Open(name)
 	if err != nil {
-		return z, fmt.Errorf("read new lines could not open file: %q: %w", name, err)
+		return z, fmt.Errorf("read line breaks could not open file: %q: %w", name, err)
 	}
 	defer file.Close()
 	b, err := ioutil.ReadAll(file)
 	if err != nil {
-		return z, fmt.Errorf("read new lines could not read the file: %q: %w", name, err)
+		return z, fmt.Errorf("read line breaks could not read the file: %q: %w", name, err)
 	}
 	return LineBreaks(true, bytes.Runes(b)...), file.Close()
 }

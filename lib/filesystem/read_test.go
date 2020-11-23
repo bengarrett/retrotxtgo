@@ -94,8 +94,8 @@ func TestIsPipe(t *testing.T) {
 func TestReadLine(t *testing.T) {
 	tmp0 := fileExample("hello\nworld\n", 0)
 	type args struct {
-		name    string
-		newline string
+		name      string
+		linebreak string
 	}
 	tests := []struct {
 		name     string
@@ -108,7 +108,7 @@ func TestReadLine(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotText, err := ReadLine(tt.args.name, tt.args.newline)
+			gotText, err := ReadLine(tt.args.name, tt.args.linebreak)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadLine() error = %v, wantErr %v", err, tt.wantErr)
 				return

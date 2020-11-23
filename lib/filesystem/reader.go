@@ -174,7 +174,7 @@ func Lines(r io.Reader, lb LB) (count int, err error) {
 // 	}
 // }
 
-// LineBreaks will try to guess the newline representation as a 2 byte value.
+// LineBreaks will try to guess the line break representation as a 2 byte value.
 // A guess of Unix will return [10, 0], Windows [13, 10], otherwise a [0, 0] value is returned.
 func LineBreaks(utf bool, runes ...rune) LB {
 	// scan data for possible line breaks
@@ -338,7 +338,7 @@ func WordsEBCDIC(r io.Reader) (count int, err error) {
 
 // isWord scans the content of a word for characters that are not digits,
 // letters or punctuation and if discovered returns false.
-// If a space or newline is encountered the scan will end.
+// If a space or line break is encountered the scan will end.
 func word(s string) bool {
 	if s == "" {
 		return false

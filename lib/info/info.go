@@ -31,7 +31,7 @@ type Detail struct {
 	XMLName    xml.Name     `json:"-" xml:"file"`
 	Name       string       `json:"filename" xml:"name"`
 	Utf8       bool         `json:"utf8" xml:"utf8,attr"`
-	Newline    Newlines     `json:"newline" xml:"newline"`
+	LineBreak  LineBreaks   `json:"lineBreak" xml:"line_break"`
 	Count      Stats        `json:"counts" xml:"counts"`
 	Size       Sizes        `json:"size" xml:"size"`
 	Lines      int          `json:"lines" xml:"lines"`
@@ -47,8 +47,8 @@ type Detail struct {
 	sauceIndex int
 }
 
-// Newlines or line endings.
-type Newlines struct {
+// LineBreaks for new line toggles.
+type LineBreaks struct {
 	Abbr     string  `json:"string" xml:"string,attr"`
 	Escape   string  `json:"escape" xml:"-"`
 	Decimals [2]rune `json:"decimals" xml:"decimal"`
@@ -210,10 +210,10 @@ func Marshal(filename string, f Format, i, length int) error {
 		var g errgroup.Group
 		g.Go(func() error {
 			var err error
-			if d.Newline.Decimals, err = filesystem.ReadNewlines(filename); err != nil {
+			if d.LineBreak.Decimals, err = filesystem.ReadLineBreaks(filename); err != nil {
 				return err
 			}
-			d.linebreaks(d.Newline.Decimals)
+			d.linebreaks(d.LineBreak.Decimals)
 			return nil
 		})
 		g.Go(func() error {
@@ -294,14 +294,14 @@ func Stdin(format string, b ...byte) error {
 		})
 		g.Go(func() error {
 			var err error
-			if d.Lines, err = filesystem.Lines(bytes.NewReader(b), d.Newline.Decimals); err != nil {
+			if d.Lines, err = filesystem.Lines(bytes.NewReader(b), d.LineBreak.Decimals); err != nil {
 				return err
 			}
 			return nil
 		})
 		g.Go(func() error {
 			var err error
-			if d.Width, err = filesystem.Columns(bytes.NewReader(b), d.Newline.Decimals); err != nil {
+			if d.Width, err = filesystem.Columns(bytes.NewReader(b), d.LineBreak.Decimals); err != nil {
 				return err
 			} else if d.Width < 0 {
 				d.Width = d.Count.Chars

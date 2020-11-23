@@ -15,7 +15,7 @@ func TestNewlines(t *testing.T) {
 		{"win", []rune("hello\x0d\x0aworld\x0d\x0a\x1a"), CRLF()},
 		{"c64", []rune("hello\x0dworld\x0d"), CR()},
 		{"ibm", []rune("hello\x15world\x15"), NL()},
-		{"mix", []rune("\x15Windows newline: \x0d\x0a\x15Unix newline: \x0a\x15"), NL()},
+		{"mix", []rune("\x15Windows line break: \x0d\x0a\x15Unix line break: \x0a\x15"), NL()},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

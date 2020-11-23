@@ -716,7 +716,7 @@ func (args *Args) pagedata(b *[]byte) (p PageData, err error) {
 func (args *Args) comment(c convert.Args, old *[]byte, replace ...rune) string {
 	e, nl, l, w, f := "", "", 0, 0, "n/a"
 	b := []byte(string(replace))
-	// to handle EBCDIC cases, both raw bytes and utf8 runes need newline scans.
+	// to handle EBCDIC cases, both raw bytes and utf8 runes need line break scans.
 	nlr := filesystem.LineBreaks(false, []rune(string(*old))...)
 	nl = filesystem.LineBreak(nlr, false)
 	nnl := filesystem.LineBreaks(true, replace...)
@@ -732,7 +732,7 @@ func (args *Args) comment(c convert.Args, old *[]byte, replace ...rune) string {
 	if args.SourceName != "" {
 		f = args.SourceName
 	}
-	return fmt.Sprintf("encoding: %s; newline: %s; length: %d; width: %d; name: %s", e, nl, l, w, f)
+	return fmt.Sprintf("encoding: %s; line break: %s; length: %d; width: %d; name: %s", e, nl, l, w, f)
 }
 
 func (args *Args) fontFamily() string {
