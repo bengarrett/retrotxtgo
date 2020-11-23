@@ -13,44 +13,52 @@ import (
 	"golang.org/x/text/transform"
 )
 
-// NL is the newline represented as 2 bytes.
-type NL [2]rune
+// LB is the text line break control represented as 2 runes.
+type LB [2]rune
+
+const (
+	ansiEscape string = "\x1B\x5b" // esc[
+	lf         rune   = 10         // linefeed
+	cr         rune   = 13         // carraige return
+	nl         rune   = 21         // new line
+	nel        rune   = 133        // next line
+)
 
 // LF linefeed.
-func LF() NL {
-	return NL{10}
+func LF() LB {
+	return LB{lf}
 }
 
 // CR carriage return.
-func CR() NL {
-	return NL{13}
+func CR() LB {
+	return LB{cr}
 }
 
 // CRLF carriage return + linefeed.
-func CRLF() NL {
-	return NL{13, 10}
+func CRLF() LB {
+	return LB{cr, lf}
 }
 
 // LFCR linefeed + carriage return.
-func LFCR() NL {
-	return NL{10, 13}
+func LFCR() LB {
+	return LB{lf, cr}
 }
 
-// EBCDIC IBM mainframe newline.
-func EBCDIC() NL {
-	return NL{21}
+// NL new line.
+func NL() LB {
+	return LB{nl}
 }
 
-// UTF8NL UTF-8 newline.
-func UTF8NL() NL {
-	return NL{133}
+// NEL next line.
+func NEL() LB {
+	return LB{nel}
 }
 
 // Columns counts the number of characters used per line in the reader interface.
-func Columns(r io.Reader, nl NL) (width int, err error) {
-	var lineBreak = []byte{byte(nl[0]), byte(nl[1])}
-	if nl[1] == 0 {
-		lineBreak = []byte{byte(nl[0])}
+func Columns(r io.Reader, lb LB) (width int, err error) {
+	var lineBreak = []byte{byte(lb[0]), byte(lb[1])}
+	if lb[1] == 0 {
+		lineBreak = []byte{byte(lb[0])}
 	}
 	buf := make([]byte, bufio.MaxScanTokenSize)
 	for {
@@ -81,7 +89,7 @@ func Columns(r io.Reader, nl NL) (width int, err error) {
 
 // Controls counts the number of ANSI escape controls in the reader interface.
 func Controls(r io.Reader) (count int, err error) {
-	lineBreak := []byte("\x1B\x5b") // esc[
+	lineBreak := []byte(ansiEscape)
 	buf := make([]byte, bufio.MaxScanTokenSize)
 	for {
 		size, err := r.Read(buf)
@@ -108,10 +116,10 @@ func Controls(r io.Reader) (count int, err error) {
 }
 
 // Lines counts the number of lines in the interface.
-func Lines(r io.Reader, nl NL) (count int, err error) {
-	var lineBreak = []byte{byte(nl[0]), byte(nl[1])}
-	if nl[1] == 0 {
-		lineBreak = []byte{byte(nl[0])}
+func Lines(r io.Reader, lb LB) (count int, err error) {
+	var lineBreak = []byte{byte(lb[0]), byte(lb[1])}
+	if lb[1] == 0 {
+		lineBreak = []byte{byte(lb[0])}
 	}
 	buf := make([]byte, bufio.MaxScanTokenSize)
 	for {
@@ -145,15 +153,30 @@ func Lines(r io.Reader, nl NL) (count int, err error) {
 	return count, nil
 }
 
+// NewlinesWeb determs the newlines in use and replaces them with web browser friendly LF.
+// func NewlinesWeb(runes ...rune) []rune {
+// 	guess := Newlines(true, runes...)
+// 	switch guess {
+// 	case LFCR(), NL(), NEL():
+// 		//old, new := fmt.Sprintf("%v", guess), fmt.Sprintf("%v", LF())
+// 		old1, old2 := byte(guess[0]), byte(guess[1])
+// 		new := []byte(string(LF()[0]))
+// 		b := []byte(string(runes))
+// 		if old2 == 0 {
+// 			b = bytes.ReplaceAll(b, []byte{old1}, new)
+// 			return runes
+// 		}
+// 		b = bytes.ReplaceAll(b, []byte{old1, old2}, new)
+// 		fmt.Println("old", []byte{old1, old2}, "new", new)
+// 		return runes
+// 	default:
+// 		return runes
+// 	}
+// }
+
 // Newlines will try to guess the newline representation as a 2 byte value.
 // A guess of Unix will return [10, 0], Windows [13, 10], otherwise a [0, 0] value is returned.
-func Newlines(utf bool, runes ...rune) NL {
-	const (
-		lf     = 10
-		cr     = 13
-		nl     = 21
-		nlutf8 = 133
-	)
+func Newlines(utf bool, runes ...rune) LB {
 	// scan data for possible newlines
 	c := []struct {
 		abbr  string
@@ -182,11 +205,14 @@ func Newlines(utf bool, runes ...rune) NL {
 			// carriage return on modern terminals will overwrite the existing line of text
 			// todo: add flag or change behaviour to replace CR (\r) with NL (\n)
 			c[1].count++
-		case nl, nlutf8:
-			if utf && r == nlutf8 {
-				c[4].count++ // NL as utf8
-			} else if r == nl {
-				c[4].count++ // NL as ebcdic
+		case nl, nel:
+			if utf && r == nel {
+				c[4].count++ // NL
+				continue
+			}
+			if r == nl {
+				c[4].count++ // NEL
+				continue
 			}
 		}
 	}
@@ -211,7 +237,7 @@ func lfCnt(c, i, l int, runes ...rune) int {
 	return c
 }
 
-func abbr(utf bool, s string) NL {
+func abbr(utf bool, s string) LB {
 	switch s {
 	case "lf":
 		return LF()
@@ -223,15 +249,15 @@ func abbr(utf bool, s string) NL {
 		return LFCR()
 	case "nl":
 		if utf {
-			return UTF8NL()
+			return NEL()
 		}
-		return EBCDIC()
+		return NL()
 	}
-	return NL{}
+	return LB{}
 }
 
 // Newline humanizes the value of Newlines().
-func Newline(r NL, extraInfo bool) string {
+func Newline(r LB, extraInfo bool) string {
 	if !extraInfo {
 		switch r {
 		case LF():
@@ -242,7 +268,7 @@ func Newline(r NL, extraInfo bool) string {
 			return "CRLF"
 		case LFCR():
 			return "LFCR"
-		case EBCDIC():
+		case NL():
 			return "NL"
 		}
 	}
@@ -255,7 +281,7 @@ func Newline(r NL, extraInfo bool) string {
 		return "CRLF (Windows, DOS)"
 	case LFCR():
 		return "LFCR (Acorn BBC)"
-	case EBCDIC():
+	case NL():
 		return "NL (IBM EBCDIC)"
 	}
 	return "??"
