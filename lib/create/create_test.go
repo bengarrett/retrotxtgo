@@ -18,6 +18,10 @@ func Test_Save(t *testing.T) {
 		data []byte
 		name string
 	}
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		t.Errorf("Save() user home error: %w", err)
+	}
 	tmpDir := os.TempDir()
 	tmpFile := path.Join(tmpDir, "retrotxt_create_test.txt")
 	tests := []struct {
@@ -28,9 +32,9 @@ func Test_Save(t *testing.T) {
 		{"no data", args{[]byte(""), ""}, true},
 		{"invalid", args{[]byte("abc"), "this-is-an-invalid-path"}, true},
 		{"tempDir", args{data: []byte("abc"), name: tmpFile}, true},
-		//{"homeDir", args{[]byte("abc"), "/home/ben"}, false},
-		{"currentDir", args{[]byte("abc"), "."}, true},
-		// {"path as name", args{[]byte("abc"), tmpDir}, false},
+		{"homeDir", args{[]byte("abc"), homeDir}, false},
+		{"currentDir", args{[]byte("abc"), "."}, false},
+		{"path as name", args{[]byte("abc"), tmpDir}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
