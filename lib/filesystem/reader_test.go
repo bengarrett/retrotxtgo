@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestNewlines(t *testing.T) {
+func TestLineBreaks(t *testing.T) {
 	tests := []struct {
 		name string
 		text []rune
@@ -26,7 +26,7 @@ func TestNewlines(t *testing.T) {
 	}
 }
 
-func TestNewline(t *testing.T) {
+func TestLineBreak(t *testing.T) {
 	type args struct {
 		r         LB
 		extraInfo bool

@@ -444,7 +444,7 @@ func (c *Convert) RunesControls() {
 		if c.skipIgnores(i) {
 			continue
 		}
-		if c.skipNewlines(i) {
+		if c.skipLineBreaks(i) {
 			if c.lineBreak == [2]rune{CR, 0} {
 				c.Runes[i] = LF
 			}
@@ -474,7 +474,7 @@ func (c *Convert) RunesDOS() {
 		if c.skipIgnores(i) {
 			continue
 		}
-		if c.skipNewlines(i) {
+		if c.skipLineBreaks(i) {
 			if c.lineBreak == [2]rune{13, 0} {
 				c.Runes[i] = LF // swap CR with LF
 			}
@@ -588,7 +588,7 @@ func (c *Convert) RunesKOI8() {
 	}
 	for i := 0; i < c.len; i++ {
 		r := c.Runes[i]
-		if c.skipNewlines(i) {
+		if c.skipLineBreaks(i) {
 			i++
 			continue
 		}
@@ -610,7 +610,7 @@ func (c *Convert) RunesLatin() {
 	}
 	for i := 0; i < c.len; i++ {
 		r := c.Runes[i]
-		if c.skipNewlines(i) {
+		if c.skipLineBreaks(i) {
 			i++
 			continue
 		}
@@ -636,7 +636,7 @@ func (c *Convert) RunesMacintosh() {
 	)
 	for i := 0; i < c.len; i++ {
 		r := c.Runes[i]
-		if c.skipNewlines(i) {
+		if c.skipLineBreaks(i) {
 			i++
 			continue
 		}
@@ -729,7 +729,7 @@ func equalLB(r, nl [2]rune) bool {
 		[]byte{byte(nl[0]), byte(nl[1])})
 }
 
-func (c *Convert) skipNewlines(i int) bool {
+func (c *Convert) skipLineBreaks(i int) bool {
 	if !c.useBreaks {
 		return false
 	}

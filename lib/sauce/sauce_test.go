@@ -192,7 +192,7 @@ func Test_data_comment(t *testing.T) {
 	}
 }
 
-func Test_readCommentByNewline(t *testing.T) {
+func Test_commentByBreak(t *testing.T) {
 	tests := []struct {
 		name      string
 		b         []byte
@@ -210,7 +210,7 @@ func Test_readCommentByNewline(t *testing.T) {
 	}
 }
 
-func Test_readComment(t *testing.T) {
+func Test_commentByLine(t *testing.T) {
 	tests := []struct {
 		name      string
 		b         []byte
