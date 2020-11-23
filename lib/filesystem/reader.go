@@ -138,7 +138,7 @@ func Lines(r io.Reader, lb LB) (count int, err error) {
 					return 0, nil // empty file
 				}
 				if count == 0 {
-					return 1, nil // no newlines = 1 line
+					return 1, nil // no line breaks = 1 line
 				}
 				count++
 				return count, nil
@@ -153,7 +153,7 @@ func Lines(r io.Reader, lb LB) (count int, err error) {
 	return count, nil
 }
 
-// NewlinesWeb determs the newlines in use and replaces them with web browser friendly LF.
+// NewlinesWeb determs the line breaks in use and replaces them with web browser friendly LF.
 // func NewlinesWeb(runes ...rune) []rune {
 // 	guess := LineBreaks(true, runes...)
 // 	switch guess {
@@ -177,7 +177,7 @@ func Lines(r io.Reader, lb LB) (count int, err error) {
 // LineBreaks will try to guess the newline representation as a 2 byte value.
 // A guess of Unix will return [10, 0], Windows [13, 10], otherwise a [0, 0] value is returned.
 func LineBreaks(utf bool, runes ...rune) LB {
-	// scan data for possible newlines
+	// scan data for possible line breaks
 	c := []struct {
 		abbr  string
 		count int

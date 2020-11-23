@@ -358,11 +358,11 @@ func (c *Convert) Swap() *Convert {
 		return nil
 	}
 	const debug = false
-	if c.newline {
+	if c.useBreaks {
 		c.LineBreaks()
 	}
 	if debug {
-		println(fmt.Sprintf("newline detected: %+v", c.newlines))
+		println(fmt.Sprintf("line break detected: %+v", c.useBreaks))
 	}
 	switch c.encode {
 	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
@@ -430,7 +430,7 @@ func (c *Convert) ANSI() {
 // LineBreaks will try to guess the newline representation as a 2 byte value.
 // A guess of Unix will return [10, 0], Windows [13, 10], otherwise a [0, 0] value is returned.
 func (c *Convert) LineBreaks() {
-	c.newlines = filesystem.LineBreaks(true, c.Runes...)
+	c.lineBreak = filesystem.LineBreaks(true, c.Runes...)
 }
 
 // RunesControls switches out C0 and C1 ASCII controls with Unicode picture represenations.
@@ -445,7 +445,7 @@ func (c *Convert) RunesControls() {
 			continue
 		}
 		if c.skipNewlines(i) {
-			if c.newlines == [2]rune{CR, 0} {
+			if c.lineBreak == [2]rune{CR, 0} {
 				c.Runes[i] = LF
 			}
 			i++
@@ -475,7 +475,7 @@ func (c *Convert) RunesDOS() {
 			continue
 		}
 		if c.skipNewlines(i) {
-			if c.newlines == [2]rune{13, 0} {
+			if c.lineBreak == [2]rune{13, 0} {
 				c.Runes[i] = LF // swap CR with LF
 			}
 			i++
@@ -528,7 +528,7 @@ func (c *Convert) RunesEBCDIC() {
 		case DEL:
 			c.Runes[i] = decode(del)
 		case nel:
-			if c.newline {
+			if c.useBreaks {
 				// Go will automatically convert this to CRLF on Windows
 				c.Runes[i] = LF
 				continue
@@ -730,15 +730,15 @@ func equalNL(r, nl [2]rune) bool {
 }
 
 func (c *Convert) skipNewlines(i int) bool {
-	if !c.newline {
+	if !c.useBreaks {
 		return false
 	}
 	var l, r0, r1 = c.len - 1, c.Runes[i], rune(0)
 	if i < l {
-		// check for multi-byte newlines
+		// check for multi-byte line breaks
 		r1 = c.Runes[i+1]
 	}
-	if equalNL([2]rune{r0, r1}, c.newlines) {
+	if equalNL([2]rune{r0, r1}, c.lineBreak) {
 		return true
 	}
 	return false

@@ -17,7 +17,7 @@ func TestConvert_controls(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var a, c = Args{}, Convert{newline: true}
+			var a, c = Args{}, Convert{useBreaks: true}
 			a.Controls = tt.ctrl
 			c.controls(a)
 			if got := c.ignores; string(got) != string(tt.want) {

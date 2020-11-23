@@ -213,7 +213,7 @@ func Marshal(filename string, f Format, i, length int) error {
 			if d.Newline.Decimals, err = filesystem.ReadNewlines(filename); err != nil {
 				return err
 			}
-			d.newlines(d.Newline.Decimals)
+			d.linebreaks(d.Newline.Decimals)
 			return nil
 		})
 		g.Go(func() error {
@@ -275,7 +275,7 @@ func Stdin(format string, b ...byte) error {
 	if d.validText() {
 		var g errgroup.Group
 		g.Go(func() error {
-			d.newlines(filesystem.LineBreaks(true, []rune(string(b))...))
+			d.linebreaks(filesystem.LineBreaks(true, []rune(string(b))...))
 			return nil
 		})
 		g.Go(func() error {

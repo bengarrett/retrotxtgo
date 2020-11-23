@@ -255,7 +255,7 @@ func (d *Detail) marshalDataValid(k, v string) bool {
 	return true
 }
 
-func (d *Detail) newlines(r [2]rune) {
+func (d *Detail) linebreaks(r [2]rune) {
 	a, e := "", ""
 	switch r {
 	case [2]rune{10}:

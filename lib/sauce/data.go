@@ -50,7 +50,7 @@ func (d *data) commentBlock() (c Comments) {
 	c.ID = comntID
 	c.Count = int(unsignedBinary1(d.comnt.count))
 	if newlineCount > 0 {
-		// comments with newlines are technically invalid but they exist in the wild.
+		// comments with line breaks are technically invalid but they exist in the wild.
 		// https://github.com/16colo-rs/16c/issues/67
 		c.Comment = commentByNewline(d.comnt.lines)
 		return c

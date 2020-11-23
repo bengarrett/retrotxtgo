@@ -16,15 +16,15 @@ import (
 
 // Convert for the transformation of legacy encoded text to UTF-8.
 type Convert struct {
+	Runes     []rune            // Runes with UTF-8 text
+	Source    []byte            // Source legacy encoded text
 	encode    encoding.Encoding // Source character set encoding
+	ignores   []rune            // these runes will not be transformed
 	len       int               // Runes count
-	newline   bool              // use newline controls
-	table     bool
-	newlines  [2]rune // the newline controls rune values
-	Source    []byte  // Source legacy encoded text.
-	ignores   []rune  // these runes will not be transformed
-	Runes     []rune  // Runes with UTF-8 text.
+	lineBreak [2]rune           // line break controls
 	swapChars []int
+	table     bool
+	useBreaks bool // use line break controls
 }
 
 // Args are user supplied flag values.
@@ -55,7 +55,7 @@ func (a Args) Chars(b *[]byte) (utf []rune, err error) {
 func (a Args) Dump(b *[]byte) (utf []rune, err error) {
 	var c = Convert{
 		Source:    *b,
-		newline:   true,
+		useBreaks: true,
 		swapChars: a.Swap,
 	}
 	c.controls(a)
@@ -71,7 +71,7 @@ func (a Args) Dump(b *[]byte) (utf []rune, err error) {
 func (a Args) Text(b *[]byte) (utf []rune, err error) {
 	var c = Convert{
 		Source:    *b,
-		newline:   true,
+		useBreaks: true,
 		swapChars: a.Swap,
 	}
 	c.controls(a)
@@ -134,7 +134,7 @@ func (c *Convert) width(max int) {
 		return
 	}
 	cnt := len(c.Runes)
-	cols, err := filesystem.Columns(bytes.NewReader(c.Source), c.newlines)
+	cols, err := filesystem.Columns(bytes.NewReader(c.Source), c.lineBreak)
 	if err != nil {
 		logs.Println("ignoring width argument", "",
 			fmt.Errorf("width could not determine the columns: %w", err))
