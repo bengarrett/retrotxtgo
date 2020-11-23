@@ -275,7 +275,7 @@ func Stdin(format string, b ...byte) error {
 	if d.validText() {
 		var g errgroup.Group
 		g.Go(func() error {
-			d.newlines(filesystem.Newlines(true, []rune(string(b))...))
+			d.newlines(filesystem.LineBreaks(true, []rune(string(b))...))
 			return nil
 		})
 		g.Go(func() error {

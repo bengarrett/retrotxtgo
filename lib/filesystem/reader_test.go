@@ -19,8 +19,8 @@ func TestNewlines(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Newlines(false, tt.text...); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Data.Newlines() = %v, want %v", got, tt.want)
+			if got := LineBreaks(false, tt.text...); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Data.LineBreaks() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -42,8 +42,8 @@ func TestNewline(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Newline(tt.args.r, tt.args.extraInfo); got != tt.want {
-				t.Errorf("Newline() = %v, want %v", got, tt.want)
+			if got := LineBreak(tt.args.r, tt.args.extraInfo); got != tt.want {
+				t.Errorf("LineBreak() = %v, want %v", got, tt.want)
 			}
 		})
 	}

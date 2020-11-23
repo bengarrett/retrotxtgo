@@ -359,7 +359,7 @@ func (c *Convert) Swap() *Convert {
 	}
 	const debug = false
 	if c.newline {
-		c.Newlines()
+		c.LineBreaks()
 	}
 	if debug {
 		println(fmt.Sprintf("newline detected: %+v", c.newlines))
@@ -427,10 +427,10 @@ func (c *Convert) ANSI() {
 	}
 }
 
-// Newlines will try to guess the newline representation as a 2 byte value.
+// LineBreaks will try to guess the newline representation as a 2 byte value.
 // A guess of Unix will return [10, 0], Windows [13, 10], otherwise a [0, 0] value is returned.
-func (c *Convert) Newlines() {
-	c.newlines = filesystem.Newlines(true, c.Runes...)
+func (c *Convert) LineBreaks() {
+	c.newlines = filesystem.LineBreaks(true, c.Runes...)
 }
 
 // RunesControls switches out C0 and C1 ASCII controls with Unicode picture represenations.
@@ -499,22 +499,22 @@ func (c *Convert) RunesEBCDIC() {
 		return
 	}
 	const (
-		ht     = 0x89
-		del    = 0xa1
-		nl     = 0xa4
-		bs     = 0x88
-		lf     = 0x8A
-		etb    = 0x97
-		esc    = 0x9B
-		enq    = 0x85
-		ack    = 0x86
-		bel    = 0x87
-		syn    = 0x96
-		eot    = 0x84
-		dc4    = 0x94
-		nak    = 0x95
-		sub    = 0x9A
-		nlutf8 = 133
+		ht  = 0x89
+		del = 0xa1
+		nl  = 0xa4
+		bs  = 0x88
+		lf  = 0x8A
+		etb = 0x97
+		esc = 0x9B
+		enq = 0x85
+		ack = 0x86
+		bel = 0x87
+		syn = 0x96
+		eot = 0x84
+		dc4 = 0x94
+		nak = 0x95
+		sub = 0x9A
+		nel = 133
 	)
 	const skipA, skipB, skipC, skipD = 0xA0, 0xBF, 0xC0, 0xFF
 	for i := 0; i < c.len; i++ {
@@ -527,7 +527,7 @@ func (c *Convert) RunesEBCDIC() {
 			c.Runes[i] = decode(ht)
 		case DEL:
 			c.Runes[i] = decode(del)
-		case nlutf8:
+		case nel:
 			if c.newline {
 				// Go will automatically convert this to CRLF on Windows
 				c.Runes[i] = LF

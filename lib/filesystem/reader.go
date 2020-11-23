@@ -155,7 +155,7 @@ func Lines(r io.Reader, lb LB) (count int, err error) {
 
 // NewlinesWeb determs the newlines in use and replaces them with web browser friendly LF.
 // func NewlinesWeb(runes ...rune) []rune {
-// 	guess := Newlines(true, runes...)
+// 	guess := LineBreaks(true, runes...)
 // 	switch guess {
 // 	case LFCR(), NL(), NEL():
 // 		//old, new := fmt.Sprintf("%v", guess), fmt.Sprintf("%v", LF())
@@ -174,9 +174,9 @@ func Lines(r io.Reader, lb LB) (count int, err error) {
 // 	}
 // }
 
-// Newlines will try to guess the newline representation as a 2 byte value.
+// LineBreaks will try to guess the newline representation as a 2 byte value.
 // A guess of Unix will return [10, 0], Windows [13, 10], otherwise a [0, 0] value is returned.
-func Newlines(utf bool, runes ...rune) LB {
+func LineBreaks(utf bool, runes ...rune) LB {
 	// scan data for possible newlines
 	c := []struct {
 		abbr  string
@@ -256,8 +256,8 @@ func abbr(utf bool, s string) LB {
 	return LB{}
 }
 
-// Newline humanizes the value of Newlines().
-func Newline(r LB, extraInfo bool) string {
+// LineBreak humanizes the value of LineBreaks().
+func LineBreak(r LB, extraInfo bool) string {
 	if !extraInfo {
 		switch r {
 		case LF():

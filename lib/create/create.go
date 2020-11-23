@@ -199,6 +199,12 @@ func (args *Args) Create(b *[]byte) {
 
 	// todo: encode text (b).
 	// args.Encoding string
+	enc, _ := convert.Encoding(args.Encoding)
+	fmt.Printf("%s, %v", args.Encoding, enc)
+
+	s := *b //[]byte(string(filesystem.NewlinesWeb(bytes.Runes(*b)...)))
+
+	//filesystem.LineBreaks(true, c.Runes...)
 
 	switch {
 	case args.SaveToFile:
@@ -214,7 +220,7 @@ func (args *Args) Create(b *[]byte) {
 		ch := make(chan error)
 		go args.saveCSS(ch)
 		go args.saveFont(ch)
-		go args.saveHTML(b, ch) // todo: parse b to match Stdout in a shared func
+		go args.saveHTML(&s, ch) // todo: parse b to match Stdout in a shared func
 		go args.saveJS(ch)
 		go args.saveFavIcon(ch)
 		err1, err2, err3, err4, err5 := <-ch, <-ch, <-ch, <-ch, <-ch
@@ -241,7 +247,7 @@ func (args *Args) Create(b *[]byte) {
 		}
 	default:
 		// print to terminal
-		if err = args.Stdout(b); err != nil {
+		if err = args.Stdout(&s); err != nil {
 			logs.Fatal("print to stdout", "", err)
 		}
 	}
@@ -711,9 +717,9 @@ func (args *Args) comment(c convert.Args, old *[]byte, replace ...rune) string {
 	e, nl, l, w, f := "", "", 0, 0, "n/a"
 	b := []byte(string(replace))
 	// to handle EBCDIC cases, both raw bytes and utf8 runes need newline scans.
-	nlr := filesystem.Newlines(false, []rune(string(*old))...)
-	nl = filesystem.Newline(nlr, false)
-	nnl := filesystem.Newlines(true, replace...)
+	nlr := filesystem.LineBreaks(false, []rune(string(*old))...)
+	nl = filesystem.LineBreak(nlr, false)
+	nnl := filesystem.LineBreaks(true, replace...)
 	e = convert.Humanize(c.Encoding)
 	l, err := filesystem.Lines(bytes.NewReader(b), nnl)
 	if err != nil {

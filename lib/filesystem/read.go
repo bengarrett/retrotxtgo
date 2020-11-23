@@ -156,7 +156,7 @@ func ReadNewlines(name string) ([2]rune, error) {
 	if err != nil {
 		return z, fmt.Errorf("read new lines could not read the file: %q: %w", name, err)
 	}
-	return Newlines(true, bytes.Runes(b)...), file.Close()
+	return LineBreaks(true, bytes.Runes(b)...), file.Close()
 }
 
 // ReadPipe reads data piped by the operating system's STDIN.

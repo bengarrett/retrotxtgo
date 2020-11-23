@@ -288,7 +288,7 @@ func (d *Detail) printMarshalData() (data []struct{ k, v string }) {
 		{k: "filename", v: d.Name},
 		{k: "filetype", v: d.Mime.Commt},
 		{k: "UTF-8", v: str.Bool(d.Utf8)},
-		{k: "newline", v: filesystem.Newline(d.Newline.Decimals, true)},
+		{k: "newline", v: filesystem.LineBreak(d.Newline.Decimals, true)},
 		{k: "characters", v: p.Sprint(d.Count.Chars)},
 		{k: "ANSI controls", v: p.Sprint(d.Count.Controls)},
 		{k: "words", v: p.Sprint(d.Count.Words)},
