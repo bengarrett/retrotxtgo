@@ -203,8 +203,8 @@ func Test_readCommentByNewline(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotLines := commentByNewline(tt.b); !reflect.DeepEqual(gotLines, tt.wantLines) {
-				t.Errorf("commentByNewline() = %v, want %v", gotLines, tt.wantLines)
+			if gotLines := commentByBreak(tt.b); !reflect.DeepEqual(gotLines, tt.wantLines) {
+				t.Errorf("commentByBreak() = %v, want %v", gotLines, tt.wantLines)
 			}
 		})
 	}

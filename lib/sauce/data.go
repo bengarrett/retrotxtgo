@@ -46,20 +46,20 @@ type comnt struct {
 }
 
 func (d *data) commentBlock() (c Comments) {
-	newlineCount := len(strings.Split(string(d.comnt.lines), "\n"))
+	breakCount := len(strings.Split(string(d.comnt.lines), "\n"))
 	c.ID = comntID
 	c.Count = int(unsignedBinary1(d.comnt.count))
-	if newlineCount > 0 {
+	if breakCount > 0 {
 		// comments with line breaks are technically invalid but they exist in the wild.
 		// https://github.com/16colo-rs/16c/issues/67
-		c.Comment = commentByNewline(d.comnt.lines)
+		c.Comment = commentByBreak(d.comnt.lines)
 		return c
 	}
 	c.Comment = commentByLine(d.comnt.lines)
 	return c
 }
 
-func commentByNewline(b []byte) (lines []string) {
+func commentByBreak(b []byte) (lines []string) {
 	r := bytes.NewReader(b)
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
