@@ -274,6 +274,8 @@ func LineBreak(r LB, extraInfo bool) string {
 			return "LFCR"
 		case NL():
 			return "NL"
+		case NEL():
+			return "NEL"
 		}
 	}
 	switch r {
@@ -287,6 +289,8 @@ func LineBreak(r LB, extraInfo bool) string {
 		return "LFCR (Acorn BBC)"
 	case NL():
 		return "NL (IBM EBCDIC)"
+	case NEL():
+		return "NEL (EBCDIC to Unicode)"
 	}
 	return "??"
 }
