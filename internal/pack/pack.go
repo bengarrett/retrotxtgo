@@ -21,6 +21,13 @@ func (e *embed) Get(name string) []byte {
 	return nil
 }
 
+func (e *embed) Valid(name string) bool {
+	if _, ok := e.storage[name]; ok {
+		return true
+	}
+	return false
+}
+
 var pack = new()
 
 // Add a named file to pack.
@@ -31,4 +38,9 @@ func Add(name string, content []byte) {
 // Get a named file from pack.
 func Get(name string) []byte {
 	return pack.Get(name)
+}
+
+// Valid pack.
+func Valid(name string) bool {
+	return pack.Valid(name)
 }
