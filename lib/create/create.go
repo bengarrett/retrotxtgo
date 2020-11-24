@@ -19,8 +19,10 @@ import (
 	"github.com/tdewolff/minify/css"
 	"github.com/tdewolff/minify/js"
 	"golang.org/x/text/encoding"
+	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/language"
 	"golang.org/x/text/runes"
+	"golang.org/x/text/transform"
 	"retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/filesystem"
 	"retrotxt.com/retrotxt/lib/humanize"
@@ -689,7 +691,9 @@ func (args *Args) marshalStandard(p PageData) PageData {
 	return p
 }
 
-// ReplaceNELs placeholder todo
+// TODO: reorder etc
+
+// ReplaceNELs todo: placeholder todo
 func ReplaceNELs() runes.Transformer {
 	return runes.Map(func(r rune) rune {
 		if r == filesystem.NextLine {
@@ -697,6 +701,18 @@ func ReplaceNELs() runes.Transformer {
 		}
 		return r
 	})
+}
+
+// Normalize runes to bytes by making adjustments to text control codes.
+func Normalize(e encoding.Encoding, r ...rune) (b []byte) {
+	s := ""
+	switch e {
+	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
+		s, _, _ = transform.String(ReplaceNELs(), string(r))
+	default:
+		s = string(r)
+	}
+	return []byte(s)
 }
 
 // marshal transforms bytes into UTF-8, creates the page meta and template data.

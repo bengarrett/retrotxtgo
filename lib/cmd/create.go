@@ -11,8 +11,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/text/encoding"
-	"golang.org/x/text/encoding/charmap"
-	"golang.org/x/text/transform"
 
 	//"retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/config"
@@ -105,7 +103,7 @@ var createCmd = &cobra.Command{
 					logs.Println("pack", arg, err)
 					continue
 				}
-				src = stringify(enc, r...)
+				src = create.Normalize(enc, r...)
 			}
 			// read file
 			if src == nil {
@@ -135,18 +133,6 @@ var createCmd = &cobra.Command{
 			}
 		}
 	},
-}
-
-// todo: move to a global
-func stringify(e encoding.Encoding, r ...rune) (b []byte) {
-	s := ""
-	switch e {
-	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
-		s, _, _ = transform.String(create.ReplaceNELs(), string(r))
-	default:
-		s = string(r)
-	}
-	return []byte(s)
 }
 
 func htmlServe(i int, cmd *cobra.Command, b *[]byte) bool {
