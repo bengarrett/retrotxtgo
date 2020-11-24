@@ -216,11 +216,11 @@ func dir(name string) (path string, err error) {
 func lineBreak(platform string) string {
 	switch platform {
 	case "dos", win:
-		return fmt.Sprintf("%x%x", cr, lf)
+		return fmt.Sprintf("%x%x", CarriageReturn, Linefeed)
 	case "c64", "darwin", "mac":
-		return fmt.Sprintf("%x", cr)
+		return fmt.Sprintf("%x", CarriageReturn)
 	case "amiga", "linux", "unix":
-		return fmt.Sprintf("%x", lf)
+		return fmt.Sprintf("%x", Linefeed)
 	default: // use operating system default
 		return "\n"
 	}
