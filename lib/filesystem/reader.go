@@ -18,40 +18,44 @@ type LB [2]rune
 
 const (
 	ansiEscape string = "\x1B\x5b" // esc[
-	lf         rune   = 10         // linefeed
-	cr         rune   = 13         // carraige return
-	nl         rune   = 21         // new line
-	nel        rune   = 133        // next line
+	// Linefeed is a Linux/macOS line break.
+	Linefeed rune = 10
+	// CarriageReturn is a partial line break for Windows/DOS.
+	CarriageReturn rune = 13
+	// NewLine EBCDIC control.
+	NewLine rune = 21
+	// NextLine EBCDIC control in UTF-8 documents.
+	NextLine rune = 133
 )
 
 // LF linefeed.
 func LF() LB {
-	return LB{lf}
+	return LB{Linefeed}
 }
 
 // CR carriage return.
 func CR() LB {
-	return LB{cr}
+	return LB{CarriageReturn}
 }
 
 // CRLF carriage return + linefeed.
 func CRLF() LB {
-	return LB{cr, lf}
+	return LB{CarriageReturn, Linefeed}
 }
 
 // LFCR linefeed + carriage return.
 func LFCR() LB {
-	return LB{lf, cr}
+	return LB{Linefeed, CarriageReturn}
 }
 
 // NL new line.
 func NL() LB {
-	return LB{nl}
+	return LB{NewLine}
 }
 
 // NEL next line.
 func NEL() LB {
-	return LB{nel}
+	return LB{NextLine}
 }
 
 // Columns counts the number of characters used per line in the reader interface.
@@ -191,26 +195,26 @@ func LineBreaks(utf bool, runes ...rune) LB {
 	l := len(runes) - 1 // range limit
 	for i, r := range runes {
 		switch r {
-		case lf:
+		case Linefeed:
 			c[0].count = lfCnt(c[0].count, i, l, runes...)
-		case cr:
-			if i < l && runes[i+1] == lf {
+		case CarriageReturn:
+			if i < l && runes[i+1] == Linefeed {
 				c[2].count++ // crlf
 				continue
 			}
-			if i != 0 && runes[i-1] == lf {
+			if i != 0 && runes[i-1] == Linefeed {
 				// lfcr (already counted)
 				continue
 			}
 			// carriage return on modern terminals will overwrite the existing line of text
 			// todo: add flag or change behaviour to replace CR (\r) with NL (\n)
 			c[1].count++
-		case nl, nel:
-			if utf && r == nel {
+		case NewLine, NextLine:
+			if utf && r == NextLine {
 				c[4].count++ // NL
 				continue
 			}
-			if r == nl {
+			if r == NewLine {
 				c[4].count++ // NEL
 				continue
 			}
