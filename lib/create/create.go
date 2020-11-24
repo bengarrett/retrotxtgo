@@ -18,7 +18,10 @@ import (
 	"github.com/tdewolff/minify"
 	"github.com/tdewolff/minify/css"
 	"github.com/tdewolff/minify/js"
+	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/language"
+	"golang.org/x/text/runes"
+	"golang.org/x/text/transform"
 	"retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/convert"
 	"retrotxt.com/retrotxt/lib/filesystem"
@@ -196,16 +199,6 @@ func (l Layout) Pack() string {
 func (args *Args) Create(b *[]byte) {
 	var err error
 	args.layout = layout(args.Layout)
-
-	// todo: encode text (b).
-	// args.Encoding string
-	enc, _ := convert.Encoding(args.Encoding)
-	fmt.Printf("%s, %v", args.Encoding, enc)
-
-	s := *b //[]byte(string(filesystem.NewlinesWeb(bytes.Runes(*b)...)))
-
-	//filesystem.LineBreaks(true, c.Runes...)
-
 	switch {
 	case args.SaveToFile:
 		// use config save directory
@@ -216,11 +209,10 @@ func (args *Args) Create(b *[]byte) {
 				logs.Fatal("save to directory failure", fmt.Sprintf("%s", dir), err)
 			}
 		}
-
 		ch := make(chan error)
 		go args.saveCSS(ch)
 		go args.saveFont(ch)
-		go args.saveHTML(&s, ch) // todo: parse b to match Stdout in a shared func
+		go args.saveHTML(b, ch)
 		go args.saveJS(ch)
 		go args.saveFavIcon(ch)
 		err1, err2, err3, err4, err5 := <-ch, <-ch, <-ch, <-ch, <-ch
@@ -247,7 +239,7 @@ func (args *Args) Create(b *[]byte) {
 		}
 	default:
 		// print to terminal
-		if err = args.Stdout(&s); err != nil {
+		if err = args.Stdout(b); err != nil {
 			logs.Fatal("print to stdout", "", err)
 		}
 	}
@@ -426,8 +418,7 @@ func (args *Args) saveHTML(b *[]byte, c chan error) {
 		cerr := file.Close()
 		c <- cerr
 	}()
-	// todo: create 037. replace nl char with browser friendly crlf
-	buf, err := args.parseTemplate(b)
+	buf, err := args.marshalTextTransform(b)
 	if err != nil {
 		c <- err
 	}
@@ -458,12 +449,12 @@ func bytesStats(name string, nn int) {
 	fmt.Print("\n")
 }
 
-func (args *Args) parseTemplate(b *[]byte) (buf bytes.Buffer, err error) {
+func (args *Args) marshalTextTransform(b *[]byte) (buf bytes.Buffer, err error) {
 	tmpl, err := args.newTemplate()
 	if err != nil {
 		return buf, fmt.Errorf("stdout new template failure: %w", err)
 	}
-	d, err := args.pagedata(b)
+	d, err := args.marshal(b)
 	if err != nil {
 		return buf, fmt.Errorf("stdout meta and pagedata failure: %w", err)
 	}
@@ -475,7 +466,7 @@ func (args *Args) parseTemplate(b *[]byte) (buf bytes.Buffer, err error) {
 
 // Stdout creates and prints the html template.
 func (args *Args) Stdout(b *[]byte) error {
-	buf, err := args.parseTemplate(b)
+	buf, err := args.marshalTextTransform(b)
 	if err != nil {
 		return fmt.Errorf("stdout: %w", err)
 	}
@@ -633,106 +624,148 @@ func layout(name string) (l Layout) {
 	return l
 }
 
-// pagedata creates the meta and page template data.
-func (args *Args) pagedata(b *[]byte) (p PageData, err error) {
+func (args *Args) marshalCompact(p PageData) PageData {
+	p.PageTitle = args.pageTitle()
+	p.MetaGenerator = false
+	return p
+}
+
+func (args *Args) marshalInline(b *[]byte) (p PageData, err error) {
+	if b == nil {
+		return PageData{}, fmt.Errorf("pagedata: %w", ErrNilByte)
+	}
+	p.ExternalEmbed = true
+	m := minify.New()
+	m.AddFunc("text/css", css.Minify)
+	m.AddFuncRegexp(regexp.MustCompile("^(application|text)/(x-)?(java|ecma)script$"), js.Minify)
+	// styles
+	s := bytes.TrimSpace(pack.Get("css/styles.css"))
+	// font
+	var f []byte
+	f, err = FontCSS(args.FontFamily.Value, args.FontEmbed)
+	if err != nil {
+		return p, fmt.Errorf("pagedata font error: %w", err)
+	}
+	f = bytes.TrimSpace(f)
+	// merge
+	c := [][]byte{s, []byte("/* font */"), f}
+	*b = bytes.Join(c, []byte("\n\n"))
+	// compress & embed
+	*b, err = m.Bytes("text/css", *b)
+	if err != nil {
+		return p, fmt.Errorf("pagedata minify css: %w", err)
+	}
+	p.CSSEmbed = template.CSS(string(*b))
+	jsp := pack.Get("js/scripts.js")
+	jsp, err = m.Bytes("application/javascript", jsp)
+	if err != nil {
+		return p, fmt.Errorf("pagedata minify javascript: %w", err)
+	}
+	p.ScriptEmbed = template.JS(string(jsp))
+	return p, nil
+}
+
+func (args *Args) marshalStandard(p PageData) PageData {
+	p.FontEmbed = args.FontEmbed
+	p.FontFamily = args.fontFamily()
+	p.MetaAuthor = args.metaAuthor()
+	p.MetaColorScheme = args.metaColorScheme()
+	p.MetaDesc = args.metaDesc()
+	p.MetaGenerator = args.Metadata.Generator
+	p.MetaKeywords = args.metaKeywords()
+	p.MetaNoTranslate = args.Metadata.NoTranslate
+	p.MetaReferrer = args.metaReferrer()
+	p.MetaRobots = args.metaRobots()
+	p.MetaRetroTxt = args.Metadata.RetroTxt
+	p.MetaThemeColor = args.metaThemeColor()
+	p.PageTitle = args.pageTitle() + "honk!"
+	// generate data
+	t := time.Now().UTC()
+	p.BuildDate = t.Format(time.RFC3339)
+	p.BuildVersion = version.B.Version
+	return p
+}
+
+func replaceNELs() runes.Transformer {
+	return runes.Map(func(r rune) rune {
+		if r == filesystem.NextLine {
+			return filesystem.Linefeed
+		}
+		return r
+	})
+}
+
+func (args *Args) marshalPRE(p PageData, r ...rune) PageData {
+	s := ""
+	encode, _ := convert.Encoding(args.Encoding)
+	switch encode {
+	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
+		s, _, _ = transform.String(replaceNELs(), string(r))
+	default:
+		s = string(r)
+	}
+	p.PreText = s
+	return p
+}
+
+// marshal transforms bytes into UTF-8, creates the page meta and template data.
+func (args *Args) marshal(b *[]byte) (p PageData, err error) {
 	if b == nil {
 		return PageData{}, fmt.Errorf("pagedata: %w", ErrNilByte)
 	}
 	// templates are found in the dir static/html/*.gohtml
 	switch args.layout {
 	case Inline:
-		p.ExternalEmbed = true
-		m := minify.New()
-		m.AddFunc("text/css", css.Minify)
-		m.AddFuncRegexp(regexp.MustCompile("^(application|text)/(x-)?(java|ecma)script$"), js.Minify)
-		// styles
-		s := bytes.TrimSpace(pack.Get("css/styles.css"))
-		// font
-		var f []byte
-		f, err = FontCSS(args.FontFamily.Value, args.FontEmbed)
-		if err != nil {
-			return p, fmt.Errorf("pagedata font error: %w", err)
+		if p, err = args.marshalInline(b); err != nil {
+			return p, err
 		}
-		f = bytes.TrimSpace(f)
-		// merge
-		c := [][]byte{s, []byte("/* font */"), f}
-		b := bytes.Join(c, []byte("\n\n"))
-		// compress & embed
-		b, err = m.Bytes("text/css", b)
-		if err != nil {
-			return p, fmt.Errorf("pagedata minify css: %w", err)
-		}
-		p.CSSEmbed = template.CSS(string(b))
-		jsp := pack.Get("js/scripts.js")
-		jsp, err = m.Bytes("application/javascript", jsp)
-		if err != nil {
-			return p, fmt.Errorf("pagedata minify javascript: %w", err)
-		}
-		p.ScriptEmbed = template.JS(string(jsp))
-		fallthrough
+		p = args.marshalStandard(p)
 	case Standard:
-		p.FontEmbed = args.FontEmbed
-		p.FontFamily = args.fontFamily()
-		p.MetaAuthor = args.metaAuthor()
-		p.MetaColorScheme = args.metaColorScheme()
-		p.MetaDesc = args.metaDesc()
-		p.MetaGenerator = args.Metadata.Generator
-		p.MetaKeywords = args.metaKeywords()
-		p.MetaNoTranslate = args.Metadata.NoTranslate
-		p.MetaReferrer = args.metaReferrer()
-		p.MetaRobots = args.metaRobots()
-		p.MetaRetroTxt = args.Metadata.RetroTxt
-		p.MetaThemeColor = args.metaThemeColor()
-		p.PageTitle = args.pageTitle()
-		// generate data
-		t := time.Now().UTC()
-		p.BuildDate = t.Format(time.RFC3339)
-		p.BuildVersion = version.B.Version
+		p = args.marshalStandard(p)
 	case Compact: // disables all meta tags
-		p.PageTitle = args.pageTitle()
-		p.MetaGenerator = false
+		p = args.marshalCompact(p)
 	case None:
 		// do nothing
 	default:
 		return PageData{}, fmt.Errorf("pagedata %s: %w", args.layout, ErrNoLayout)
 	}
-	// check encoding
-	var conv = convert.Args{Encoding: args.Encoding}
+	// init encoding
+	var conv = convert.Args{
+		Encoding: args.Encoding,
+	}
 	if args.Encoding == "" {
 		conv.Encoding = "cp437"
 	}
 	// convert bytes into utf8
-	runes, err := conv.Text(b)
+	r, err := conv.Text(b)
 	if err != nil {
 		return p, fmt.Errorf("pagedata convert text bytes to utf8 failure: %w", err)
 	}
+	p = args.marshalPRE(p, r...)
 	if p.MetaRetroTxt {
-		p.Comment = args.comment(conv, b, runes...)
+		lb := filesystem.NEL()
+		p.Comment = args.comment(lb, conv, r...)
 	}
-	p.PreText = string(runes)
 	return p, nil
 }
 
-func (args *Args) comment(c convert.Args, old *[]byte, replace ...rune) string {
-	e, nl, l, w, f := "", "", 0, 0, "n/a"
-	b := []byte(string(replace))
-	// to handle EBCDIC cases, both raw bytes and utf8 runes need line break scans.
-	nlr := filesystem.LineBreaks(false, []rune(string(*old))...)
-	nl = filesystem.LineBreak(nlr, false)
-	nnl := filesystem.LineBreaks(true, replace...)
-	e = convert.Humanize(c.Encoding)
-	l, err := filesystem.Lines(bytes.NewReader(b), nnl)
+func (args *Args) comment(lb filesystem.LB, c convert.Args, r ...rune) string {
+	l, w, f := 0, 0, "n/a"
+	b, lbs, e := []byte(string(r)),
+		filesystem.LineBreak(lb, false),
+		convert.Humanize(c.Encoding)
+	l, err := filesystem.Lines(bytes.NewReader(b), filesystem.NEL())
 	if err != nil {
 		l = -1
 	}
-	w, err = filesystem.Columns(bytes.NewReader(b), nnl)
+	w, err = filesystem.Columns(bytes.NewReader(b), filesystem.NEL())
 	if err != nil {
 		w = -1
 	}
 	if args.SourceName != "" {
 		f = args.SourceName
 	}
-	return fmt.Sprintf("encoding: %s; line break: %s; length: %d; width: %d; name: %s", e, nl, l, w, f)
+	return fmt.Sprintf("encoding: %s; line break: %s; length: %d; width: %d; name: %s", e, lbs, l, w, f)
 }
 
 func (args *Args) fontFamily() string {
