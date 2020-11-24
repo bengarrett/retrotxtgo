@@ -745,6 +745,9 @@ func (c *Convert) skipLineBreaks(i int) bool {
 }
 
 func (c *Convert) runeSwap(r rune) rune {
+	// todo: use transform
+	// https://play.golang.org/p/unix7YjB8Dw
+	// https://pkg.go.dev/golang.org/x/text/runes
 	if !c.swap(r) {
 		return -1
 	}
