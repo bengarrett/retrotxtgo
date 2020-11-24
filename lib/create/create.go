@@ -18,12 +18,10 @@ import (
 	"github.com/tdewolff/minify"
 	"github.com/tdewolff/minify/css"
 	"github.com/tdewolff/minify/js"
-	"golang.org/x/text/encoding/charmap"
+	"golang.org/x/text/encoding"
 	"golang.org/x/text/language"
 	"golang.org/x/text/runes"
-	"golang.org/x/text/transform"
 	"retrotxt.com/retrotxt/internal/pack"
-	"retrotxt.com/retrotxt/lib/convert"
 	"retrotxt.com/retrotxt/lib/filesystem"
 	"retrotxt.com/retrotxt/lib/humanize"
 	"retrotxt.com/retrotxt/lib/logs"
@@ -35,19 +33,23 @@ import (
 
 // Args holds arguments and options sourced from user flags or the config file.
 type Args struct {
-	SourceName  string // Source textfile
-	Destination string // Destination HTML destination either a directory or file
-	Encoding    string // Encoding text encoding of the source input
-	Body        string // Body text content
-	Layout      string // Layout of the HTML
-	Syntax      string // Syntax and color theming printing HTML
-	Port        uint   // Port for HTTP server
-	Cache       bool   // Cache when false will always unpack a new .gohtml template
-	Test        bool   // Test mode
-	SaveToFile  bool   // SaveToFile save to a file or print to stdout
-	OW          bool   // OW overwrite any existing files when saving
-	Compress    bool   // Compress and store all files into an archive
-	Title       struct {
+	Source struct {
+		Encoding   encoding.Encoding // Original encoding of the text source
+		HiddenBody string            // Pre-text content override, accessible by a hidden flag
+		Name       string            // Text source, usually a file or pack name
+	}
+	Output struct {
+		Cache       bool   // Cache, when false will always unpack a new .gohtml template
+		Compress    bool   // TODO: Compress and store all files into an archive
+		Destination string // TODO: Destination HTML destination either a directory or file
+		OW          bool   // OW overwrite any existing files when saving
+		SaveToFile  bool   // TODO: SaveToFile save to a file or print to stdout
+
+	}
+	Layout string // Layout of the HTML
+	Syntax string // Syntax and color theming printing HTML
+	Port   uint   // Port for HTTP server
+	Title  struct {
 		Flag  bool
 		Value string
 	}
@@ -58,6 +60,7 @@ type Args struct {
 	}
 	Metadata Meta
 	layout   Layout // layout flag interpretation
+	test     bool   // unit test mode
 	tmpl     string // template filename
 	pack     string // template package name
 }
@@ -200,12 +203,12 @@ func (args *Args) Create(b *[]byte) {
 	var err error
 	args.layout = layout(args.Layout)
 	switch {
-	case args.SaveToFile:
+	case args.Output.SaveToFile:
 		// use config save directory
 		// otherwise assume Destination path is a temporary --serve location
-		if args.Destination == "" {
+		if args.Output.Destination == "" {
 			dir := []string{viper.GetString("save-directory")}
-			if args.Destination, err = destination(dir...); err != nil {
+			if args.Output.Destination, err = destination(dir...); err != nil {
 				logs.Fatal("save to directory failure", fmt.Sprintf("%s", dir), err)
 			}
 		}
@@ -246,7 +249,7 @@ func (args *Args) Create(b *[]byte) {
 }
 
 func (args *Args) destination(name string) (string, error) {
-	dir := filesystem.DirExpansion(args.Destination)
+	dir := filesystem.DirExpansion(args.Output.Destination)
 	path := dir
 	stat, err := os.Stat(dir)
 	if err != nil {
@@ -256,7 +259,7 @@ func (args *Args) destination(name string) (string, error) {
 		path = filepath.Join(dir, name)
 	}
 	_, err = os.Stat(path)
-	if !args.OW && !os.IsNotExist(err) {
+	if !args.Output.OW && !os.IsNotExist(err) {
 		switch name {
 		case "favicon.ico", "scripts.js", "vga.woff2":
 			// existing static files can be ignored
@@ -527,7 +530,7 @@ func (args *Args) newTemplate() (*template.Template, error) {
 	if err := args.templateCache(); err != nil {
 		return nil, fmt.Errorf("using existing template cache: %w", err)
 	}
-	if !args.Cache {
+	if !args.Output.Cache {
 		if err := args.templateSave(); err != nil {
 			return nil, fmt.Errorf("creating a new template: %w", err)
 		}
@@ -686,26 +689,14 @@ func (args *Args) marshalStandard(p PageData) PageData {
 	return p
 }
 
-func replaceNELs() runes.Transformer {
+// ReplaceNELs placeholder todo
+func ReplaceNELs() runes.Transformer {
 	return runes.Map(func(r rune) rune {
 		if r == filesystem.NextLine {
 			return filesystem.Linefeed
 		}
 		return r
 	})
-}
-
-func (args *Args) marshalPRE(p PageData, r ...rune) PageData {
-	s := ""
-	encode, _ := convert.Encoding(args.Encoding)
-	switch encode {
-	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
-		s, _, _ = transform.String(replaceNELs(), string(r))
-	default:
-		s = string(r)
-	}
-	p.PreText = s
-	return p
 }
 
 // marshal transforms bytes into UTF-8, creates the page meta and template data.
@@ -730,30 +721,31 @@ func (args *Args) marshal(b *[]byte) (p PageData, err error) {
 		return PageData{}, fmt.Errorf("pagedata %s: %w", args.layout, ErrNoLayout)
 	}
 	// init encoding
-	var conv = convert.Args{
-		Encoding: args.Encoding,
-	}
-	if args.Encoding == "" {
-		conv.Encoding = "cp437"
-	}
+	// var conv = convert.Args{
+	// 	Encoding: args.Source.Encoding,
+	// }
+	// if args.Source.Encoding == "" {
+	// 	conv.Encoding = "cp437"
+	// }
+	// fmt.Println("page data", p)
+	// fmt.Println("marshal byte encoding", conv.Encoding)
 	// convert bytes into utf8
-	r, err := conv.Text(b)
-	if err != nil {
-		return p, fmt.Errorf("pagedata convert text bytes to utf8 failure: %w", err)
-	}
-	p = args.marshalPRE(p, r...)
+	r := bytes.Runes(*b)
+	p.PreText = string(r)
 	if p.MetaRetroTxt {
-		lb := filesystem.NEL()
-		p.Comment = args.comment(lb, conv, r...)
+		lb := filesystem.NEL() // TODO: fix
+		p.Comment = args.comment(lb, r...)
 	}
 	return p, nil
 }
 
-func (args *Args) comment(lb filesystem.LB, c convert.Args, r ...rune) string {
+func (args *Args) comment(lb filesystem.LB, r ...rune) string {
+	//enc, err := convert.Encoding()
+	// encode, _ := convert.Encoding(e)
 	l, w, f := 0, 0, "n/a"
 	b, lbs, e := []byte(string(r)),
 		filesystem.LineBreak(lb, false),
-		convert.Humanize(c.Encoding)
+		args.Source.Encoding
 	l, err := filesystem.Lines(bytes.NewReader(b), filesystem.NEL())
 	if err != nil {
 		l = -1
@@ -762,8 +754,8 @@ func (args *Args) comment(lb filesystem.LB, c convert.Args, r ...rune) string {
 	if err != nil {
 		w = -1
 	}
-	if args.SourceName != "" {
-		f = args.SourceName
+	if args.Source.Name != "" {
+		f = args.Source.Name
 	}
 	return fmt.Sprintf("encoding: %s; line break: %s; length: %d; width: %d; name: %s", e, lbs, l, w, f)
 }

@@ -39,9 +39,9 @@ func Test_Save(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ch := make(chan error)
-			a := Args{layout: Standard, Test: true}
-			a.OW = true
-			a.Destination = tt.args.name
+			a := Args{layout: Standard, test: true}
+			a.Output.OW = true
+			a.Output.Destination = tt.args.name
 			go a.saveHTML(&tt.args.data, ch)
 			err := <-ch
 			if (err != nil) != tt.wantErr {
@@ -128,37 +128,37 @@ func Test_templateSave(t *testing.T) {
 	}
 }
 
-func Test_pagedata(t *testing.T) {
+func Test_marshal(t *testing.T) {
 	viper.SetDefault("html.title", "RetroTxt | example")
 	args := Args{layout: Standard}
 	w := "hello"
 	d := []byte(w)
-	got, _ := args.pagedata(&d)
+	got, _ := args.marshal(&d)
 	if got.PreText != w {
-		t.Errorf("pagedata().PreText = %v, want %v", got, w)
+		t.Errorf("marshal().PreText = %v, want %v", got, w)
 	}
 	args.layout = Compact
 	w = "RetroTxt | example"
-	got, _ = args.pagedata(&d)
+	got, _ = args.marshal(&d)
 	if got.PageTitle != w {
-		t.Errorf("pagedata().PageTitle = %v, want %v", got, w)
+		t.Errorf("marshal().PageTitle = %v, want %v", got, w)
 	}
 	w = ""
-	got, _ = args.pagedata(&d)
+	got, _ = args.marshal(&d)
 	if got.MetaDesc != w {
-		t.Errorf("pagedata().MetaDesc = %v, want %v", got, w)
+		t.Errorf("marshal().MetaDesc = %v, want %v", got, w)
 	}
 	args.layout = Standard
 	w = ""
-	got, _ = args.pagedata(&d)
+	got, _ = args.marshal(&d)
 	if got.MetaAuthor != w {
-		t.Errorf("pagedata().MetaAuthor = %v, want %v", got, w)
+		t.Errorf("marshal().MetaAuthor = %v, want %v", got, w)
 	}
 	args.layout = Inline
 	w = ""
-	got, _ = args.pagedata(&d)
+	got, _ = args.marshal(&d)
 	if got.MetaAuthor != w {
-		t.Errorf("pagedata().MetaAuthor = %v, want %v", got, w)
+		t.Errorf("marshal().MetaAuthor = %v, want %v", got, w)
 	}
 }
 
