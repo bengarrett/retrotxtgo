@@ -3,12 +3,11 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
 
-	"retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/convert"
 	"retrotxt.com/retrotxt/lib/filesystem"
 	"retrotxt.com/retrotxt/lib/logs"
+	"retrotxt.com/retrotxt/lib/pack"
 
 	"github.com/spf13/cobra"
 )
@@ -38,12 +37,13 @@ var viewCmd = &cobra.Command{
   retrotxt view file1.txt file2.txt --encode="iso-8859-1"
   cat file.txt | retrotxt view`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var conv = convert.Args{
+		conv := convert.Args{
 			Controls: viewFlag.controls,
 			Encoding: viewFlag.encode,
 			Swap:     viewFlag.swap,
 			Width:    viewFlag.width,
 		}
+		f := pack.Flags{}
 		// handle defaults that are left empty for usage formatting
 		if c := cmd.Flags().Lookup("controls"); !c.Changed {
 			conv.Controls = []string{"tab"}
@@ -57,13 +57,27 @@ var viewCmd = &cobra.Command{
 		}
 		// user arguments
 		checkUse(cmd, args...)
+		var err error
 		for i, arg := range args {
 			// internal, packed example file
-			if ok, err := viewPackage(cmd, conv, arg); err != nil {
-				logs.Println("pack", arg, err)
-				continue
-			} else if ok {
-				continue
+			if ok := pack.Valid(arg); ok {
+				if cp := cmd.Flags().Lookup("encode"); cp.Changed {
+					fmt.Println("cp changed", cp.Value.String())
+					if f.Encode, err = convert.Encoding(cp.Value.String()); err != nil {
+						logs.Fatal("encoding not known or supported", arg, err)
+					}
+				}
+				if to := cmd.Flags().Lookup("to"); to.Changed {
+					fmt.Println("to changed", to.Value.String())
+					f.To = to.Value.String()
+				}
+				if r, _, err := f.Open(conv, arg); err != nil {
+					logs.Println("pack", arg, err)
+					continue
+				} else {
+					fmt.Println(string(r))
+					continue
+				}
 			}
 			// read file
 			b, err := filesystem.Read(arg)
@@ -73,7 +87,7 @@ var viewCmd = &cobra.Command{
 			}
 			// to flag
 			if to := cmd.Flags().Lookup("to"); to.Changed {
-				viewToFlag(b...)
+				viewToFlag(b...) // todo: move to root.go and return a value.
 				continue
 			}
 			// convert text
@@ -99,52 +113,6 @@ func init() {
 	flagTo(&viewFlag.to, viewCmd)
 	flagWidth(&viewFlag.width, viewCmd)
 	viewCmd.Flags().SortFlags = false
-}
-
-func viewPackage(cmd *cobra.Command, conv convert.Args, name string) (ok bool, err error) {
-	var s = strings.ToLower(name)
-	if _, err = os.Stat(s); !os.IsNotExist(err) {
-		return false, nil
-	}
-	pkg, exist := internalPacks[s]
-	if !exist {
-		return false, nil
-	}
-	b := pack.Get(pkg.name)
-	if b == nil {
-		return false, fmt.Errorf("view package %q: %w", pkg.name, ErrPackGet)
-	}
-	// encode defaults
-	if cp := cmd.Flags().Lookup("encode"); !cp.Changed {
-		conv.Encoding = pkg.encoding
-	}
-	// to flag
-	if to := cmd.Flags().Lookup("to"); to.Changed {
-		// example exceptions that break the NewEncoder
-		switch s {
-		case "037", "shiftjis", "utf16.be", "utf16.le":
-			fmt.Println(string(b))
-			return true, nil
-		}
-		viewToFlag(b...)
-		return true, nil
-	}
-	// convert to runes and print
-	var r []rune
-	switch pkg.convert {
-	case "d":
-		if r, err = conv.Dump(&b); err != nil {
-			return false, err
-		}
-	case "", "t":
-		if r, err = conv.Text(&b); err != nil {
-			return false, err
-		}
-	default:
-		return false, fmt.Errorf("view package %q: %w", pkg.convert, ErrPackValue)
-	}
-	fmt.Println(string(r))
-	return true, nil
 }
 
 func viewPipe(cmd *cobra.Command, conv convert.Args) {

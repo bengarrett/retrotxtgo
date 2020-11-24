@@ -6,19 +6,35 @@ import (
 	"log"
 	"os"
 	"sort"
-	"strings"
 	"text/template"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"golang.org/x/text/encoding"
+	"golang.org/x/text/encoding/charmap"
+	"golang.org/x/text/transform"
 
-	"retrotxt.com/retrotxt/internal/pack"
+	//"retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/config"
+	"retrotxt.com/retrotxt/lib/convert"
 	"retrotxt.com/retrotxt/lib/create"
 	"retrotxt.com/retrotxt/lib/filesystem"
 	"retrotxt.com/retrotxt/lib/logs"
+	"retrotxt.com/retrotxt/lib/pack"
 	"retrotxt.com/retrotxt/lib/str"
 )
+
+type createFlags struct {
+	controls []string
+	encode   string
+	swap     []int
+}
+
+var createFlag = createFlags{
+	controls: []string{"tab"},
+	encode:   "CP437",
+	swap:     []int{0, 124},
+}
 
 var html create.Args
 
@@ -45,52 +61,92 @@ var createCmd = &cobra.Command{
 	Short:   "Create a HTML document from a text file",
 	Example: exampleCmd(),
 	Run: func(cmd *cobra.Command, args []string) {
+		conv := convert.Args{
+			Controls: createFlag.controls,
+			Encoding: createFlag.encode,
+			Swap:     createFlag.swap,
+		}
+		f := pack.Flags{}
+		// handle defaults that are left empty for usage formatting
+		if c := cmd.Flags().Lookup("controls"); !c.Changed {
+			conv.Controls = []string{"tab"}
+		}
+		if s := cmd.Flags().Lookup("swap-chars"); !s.Changed {
+			conv.Swap = []int{0, 124}
+		}
 		monitorFlags(cmd)
 		// piped input from other programs
 		if filesystem.IsPipe() {
-			b, err := filesystem.ReadPipe()
-			if err != nil {
-				logs.Fatal("create", "read stdin", err)
-			}
-			if h := htmlServe(0, cmd, &b); !h {
-				html.Create(&b)
-			}
-			os.Exit(0)
+			createPipe(cmd, conv)
 		}
-		// hidden --body flag that ignores all args
+		// hidden --body flag value that ignores args and overrides the pre value.
 		if body := cmd.Flags().Lookup("body"); body.Changed {
-			b := []byte(body.Value.String())
-			if h := htmlServe(0, cmd, &b); !h {
-				html.Create(&b)
-			}
-			os.Exit(0)
+			createBody(cmd)
 		}
 		// user arguments
 		checkUse(cmd, args...)
+		var err error
 		for i, arg := range args {
-			html.SourceName = arg
-			enc, font, b := createPackage(arg)
-			if b == nil {
-				var err error
-				b, err = filesystem.Read(arg)
+			fmt.Println("i", i)
+			// convert source text
+			var src []byte
+			var enc encoding.Encoding
+			// internal, packed example file
+			if ok := pack.Valid(arg); ok {
+				if cp := cmd.Flags().Lookup("encode"); cp.Changed {
+					fmt.Println("cp changed", cp.Value.String())
+					if f.Encode, err = convert.Encoding(cp.Value.String()); err != nil {
+						logs.Fatal("encoding not known or supported", arg, err)
+					}
+				}
+				var r []rune
+				r, enc, err = f.Open(conv, arg)
 				if err != nil {
+					logs.Println("pack", arg, err)
+					continue
+				}
+				src = stringify(enc, r...)
+			}
+			// read file
+			if src == nil {
+				if src, err = filesystem.Read(arg); err != nil {
 					logs.Fatal("file is invalid", arg, err)
 				}
 			}
-			if cp := cmd.Flags().Lookup("encode"); !cp.Changed {
-				html.Encoding = enc
+			// convert text
+			r, err := conv.Text(&src)
+			if err != nil {
+				logs.Println("convert text", arg, err)
+				continue
 			}
+			b := []byte(string(r))
+			// marshal source text as html
+			html.Source.Name = arg
 			if ff := cmd.Flags().Lookup("font-family"); !ff.Changed {
-				if font == "" {
-					font = "vga"
-				}
-				html.FontFamily.Value = font
+				// todo: get pack font
+				html.FontFamily.Value = "vga"
+			} else {
+				html.FontFamily.Value = ff.Value.String()
 			}
+			html.Source.Encoding = enc
+			// serve or print html
 			if h := htmlServe(i, cmd, &b); !h {
 				html.Create(&b)
 			}
 		}
 	},
+}
+
+// todo: move to a global
+func stringify(e encoding.Encoding, r ...rune) (b []byte) {
+	s := ""
+	switch e {
+	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
+		s, _, _ = transform.String(create.ReplaceNELs(), string(r))
+	default:
+		s = string(r)
+	}
+	return []byte(s)
 }
 
 func htmlServe(i int, cmd *cobra.Command, b *[]byte) bool {
@@ -107,21 +163,15 @@ func htmlServe(i int, cmd *cobra.Command, b *[]byte) bool {
 	return false
 }
 
-func createPackage(name string) (enc, font string, b []byte) {
-	var s = strings.ToLower(name)
-	if _, err := os.Stat(s); !os.IsNotExist(err) {
-		return "", "", nil
+func createBody(cmd *cobra.Command) {
+	// hidden --body flag that ignores all args
+	if body := cmd.Flags().Lookup("body"); body.Changed {
+		b := []byte(body.Value.String())
+		if h := htmlServe(0, cmd, &b); !h {
+			html.Create(&b)
+		}
+		os.Exit(0)
 	}
-	pkg, exist := internalPacks[s]
-	if !exist {
-		return "", "", nil
-	}
-	b = pack.Get(pkg.name)
-	if b == nil {
-		return "", "", nil
-	}
-	fmt.Println("pack:", name, "enc", pkg.encoding, "font", pkg.font)
-	return pkg.encoding, pkg.font, b
 }
 
 func monitorFlags(cmd *cobra.Command) {
@@ -145,6 +195,17 @@ func monitorFlags(cmd *cobra.Command) {
 	html.Metadata.Robots.Flag = changed("meta-robots")
 	html.Metadata.ThemeColor.Flag = changed("meta-theme-color")
 	html.Title.Flag = changed("title")
+}
+
+func createPipe(cmd *cobra.Command, conv convert.Args) {
+	b, err := filesystem.ReadPipe()
+	if err != nil {
+		logs.Fatal("create", "read stdin", err)
+	}
+	if h := htmlServe(0, cmd, &b); !h {
+		html.Create(&b)
+	}
+	os.Exit(0)
 }
 
 type metaFlag struct {
@@ -171,12 +232,14 @@ func init() {
 	}
 	sort.Ints(keys)
 	// output flags
-	flagEncode(&html.Encoding, createCmd)
-	createCmd.Flags().BoolVarP(&html.SaveToFile, "save", "s", false,
+	flagEncode(&createFlag.encode, createCmd) // TODO: check purpose and if it has any effects
+	flagControls(&createFlag.controls, createCmd)
+	flagRunes(&createFlag.swap, createCmd)
+	createCmd.Flags().BoolVarP(&html.Output.SaveToFile, "save", "s", false,
 		`save HTML and static files to a the save directory
 or ignore to print (save directory: `+viper.GetString("save-directory")+")")
-	createCmd.Flags().BoolVarP(&html.Compress, "compress", "c", false, "store and compress all files into an archive when saving")
-	createCmd.Flags().BoolVarP(&html.OW, "overwrite", "o", false, "overwrite any existing files when saving")
+	createCmd.Flags().BoolVarP(&html.Output.Compress, "compress", "z", false, "store and compress all files into an archive when saving")
+	createCmd.Flags().BoolVarP(&html.Output.OW, "overwrite", "o", false, "overwrite any existing files when saving")
 	// html flags, the key int value must be used as the index
 	// rather than the loop count, otherwise flags might be skipped
 	for _, i := range keys {
@@ -254,7 +317,7 @@ func metaConfig() map[int]metaFlag {
 		fontf:   {"html.font.family", &html.FontFamily.Value, nil, nil, "font-family", "f", nil},
 		fonte:   {"html.font.embed", nil, &html.FontEmbed, nil, "font-embed", "", nil},
 		// hidden flags
-		body:  {"html.body", &html.Body, nil, nil, "body", "b", nil},
-		cache: {"html.layout.cache", nil, &html.Cache, nil, "cache", "", nil},
+		body:  {"html.body", &html.Source.HiddenBody, nil, nil, "body", "b", nil},
+		cache: {"html.layout.cache", nil, &html.Output.Cache, nil, "cache", "", nil},
 	}
 }
