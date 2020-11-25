@@ -37,7 +37,8 @@ var viewCmd = &cobra.Command{
   retrotxt view file1.txt file2.txt --encode="iso-8859-1"
   cat file.txt | retrotxt view`,
 	Run: func(cmd *cobra.Command, args []string) {
-		conv := convert.Args{
+		var conv = convert.Convert{}
+		conv.Flags = convert.Flags{
 			Controls: viewFlag.controls,
 			Swap:     viewFlag.swap,
 			Width:    viewFlag.width,
@@ -45,10 +46,10 @@ var viewCmd = &cobra.Command{
 		f := pack.Flags{}
 		// handle defaults that are left empty for usage formatting
 		if c := cmd.Flags().Lookup("controls"); !c.Changed {
-			conv.Controls = []string{tab}
+			conv.Flags.Controls = []string{tab}
 		}
 		if s := cmd.Flags().Lookup("swap-chars"); !s.Changed {
-			conv.Swap = []int{null, verticalBar}
+			conv.Flags.Swap = []int{null, verticalBar}
 		}
 		// piped input from other programs
 		if filesystem.IsPipe() {
@@ -64,7 +65,7 @@ var viewCmd = &cobra.Command{
 					if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
 						logs.Fatal("encoding not known or supported", arg, err)
 					}
-					conv.Encoding = f.From
+					conv.Flags.Encoding = f.From
 				}
 				if to := cmd.Flags().Lookup("to"); to.Changed {
 					if f.To, err = convert.Encoding(to.Value.String()); err != nil {
@@ -115,7 +116,7 @@ func init() {
 	viewCmd.Flags().SortFlags = false
 }
 
-func viewPipe(cmd *cobra.Command, conv convert.Args) {
+func viewPipe(cmd *cobra.Command, conv convert.Convert) {
 	b, err := filesystem.ReadPipe()
 	if err != nil {
 		logs.Fatal("view", "stdin read", err)

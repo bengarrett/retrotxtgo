@@ -17,9 +17,10 @@ func TestConvert_controls(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var a, c = Args{}, Convert{useBreaks: true}
-			a.Controls = tt.ctrl
-			c.unicodeControls(a)
+			var c = Convert{}
+			c.useBreaks = true
+			c.Flags.Controls = tt.ctrl
+			c.unicodeControls()
 			if got := c.ignores; string(got) != string(tt.want) {
 				t.Errorf("Convert.unicodeControls() got = %v, want %v", got, tt.want)
 			}
@@ -38,7 +39,7 @@ func TestArgs_Dump(t *testing.T) {
 		{"hi", []byte("hello\nworld"), "hello\nworld", false},
 	}
 	for _, tt := range tests {
-		var a = Args{}
+		var a = Convert{}
 		t.Run(tt.name, func(t *testing.T) {
 			gotUtf8, err := a.Dump(&tt.b)
 			if (err != nil) != tt.wantErr {
@@ -63,7 +64,7 @@ func TestArgs_Text(t *testing.T) {
 		{"hi", []byte("hello\nworld"), "hello\nworld", false},
 	}
 	for _, tt := range tests {
-		var a = Args{}
+		var a = Convert{}
 		t.Run(tt.name, func(t *testing.T) {
 			gotUtf8, err := a.Text(&tt.b)
 			if (err != nil) != tt.wantErr {

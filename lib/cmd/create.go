@@ -67,17 +67,19 @@ var createCmd = &cobra.Command{
 	Short:   "Create a HTML document from a text file",
 	Example: exampleCmd(),
 	Run: func(cmd *cobra.Command, args []string) {
-		conv := convert.Args{
-			Controls: createFlag.controls,
-			// Encoding: createFlag.encode, // TODO
-			Swap: createFlag.swap,
+		conv := convert.Convert{
+			Flags: convert.Flags{
+				Controls: createFlag.controls,
+				// Encoding: createFlag.encode, // TODO
+				Swap: createFlag.swap,
+			},
 		}
 		// handle defaults that are left empty for usage formatting
 		if c := cmd.Flags().Lookup("controls"); !c.Changed {
-			conv.Controls = []string{tab} // todo: hmmmm
+			conv.Flags.Controls = []string{tab}
 		}
 		if s := cmd.Flags().Lookup("swap-chars"); !s.Changed {
-			conv.Swap = []int{null, verticalBar}
+			conv.Flags.Swap = []int{null, verticalBar}
 		}
 		monitorFlags(cmd)
 		if filesystem.IsPipe() {
@@ -106,7 +108,7 @@ func init() {
 	}
 	sort.Ints(keys)
 	// output flags
-	flagEncode(&createFlag.encode, createCmd) // TODO: check purpose and if it has any effects
+	flagEncode(&createFlag.encode, createCmd)
 	flagControls(&createFlag.controls, createCmd)
 	flagRunes(&createFlag.swap, createCmd)
 	createCmd.Flags().BoolVarP(&html.Output.SaveToFile, "save", "s", false,
@@ -159,7 +161,7 @@ func createBody(cmd *cobra.Command) {
 	}
 }
 
-func createFiles(cmd *cobra.Command, conv convert.Args, args ...string) {
+func createFiles(cmd *cobra.Command, conv convert.Convert, args ...string) {
 	var err error
 	f := pack.Flags{}
 	for i, arg := range args {

@@ -127,7 +127,7 @@ func Map() map[string]Packs {
 }
 
 // Open an internal packed example file.
-func (f Flags) Open(conv convert.Args, name string) (p Pack, err error) {
+func (f Flags) Open(conv convert.Convert, name string) (p Pack, err error) {
 	name = strings.ToLower(name)
 	if _, err = os.Stat(name); !os.IsNotExist(err) {
 		return p, nil
@@ -142,7 +142,7 @@ func (f Flags) Open(conv convert.Args, name string) (p Pack, err error) {
 	}
 	p.Src = pkg.encoding
 	if f.From == nil {
-		conv.Encoding = p.Src
+		conv.Flags.Encoding = p.Src
 	}
 	if f.To != nil {
 		// pack items that break the NewEncoder
@@ -156,7 +156,7 @@ func (f Flags) Open(conv convert.Args, name string) (p Pack, err error) {
 	// character default overrides
 	switch name {
 	case "437.cr", "437.crlf", "437.lf":
-		conv.Controls = nil
+		conv.Flags.Controls = nil
 	}
 	// convert to runes and print
 	switch pkg.convert {

@@ -56,7 +56,8 @@ func Table(name string) (*bytes.Buffer, error) {
 			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf(" %X  ", i))
 		}
 	}
-	var conv = Args{Encoding: cp}
+	var conv = Convert{}
+	conv.Flags.Encoding = cp
 	var b, row = MakeBytes(), 0
 	runes, err := conv.Chars(&b)
 	if err != nil {

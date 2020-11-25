@@ -50,7 +50,7 @@ func TestSet_Transform(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			data := Convert{}
-			data.Source = []byte(tt.str)
+			data.Source.B = []byte(tt.str)
 			err := data.Transform(tt.codepage)
 			data.Swap()
 			if (err != nil) != tt.wantErr {
@@ -81,9 +81,9 @@ func TestANSI(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			data := Convert{}
-			data.Source = []byte(tt.str)
+			data.Source.B = []byte(tt.str)
 			err := data.Transform(tt.codepage)
-			data.Swap().ANSI()
+			data.Swap().ANSIControls()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -235,7 +235,8 @@ func TestRunesControls(t *testing.T) {
 		{"device controls", "\x10\x11", "␐␑"},
 	}
 	for _, tt := range tests {
-		d := Convert{Source: []byte(tt.text)}
+		d := Convert{}
+		d.Source.B = []byte(tt.text)
 		if err := d.Transform(cp1252); err != nil {
 			t.Error(err)
 		}
@@ -261,7 +262,8 @@ func TestRunesKOI8(t *testing.T) {
 		{"invalid", "\x00=NULL & \x1f=?", " =NULL &  =?"},
 	}
 	for _, tt := range tests {
-		d := Convert{Source: []byte(tt.text)}
+		d := Convert{}
+		d.Source.B = []byte(tt.text)
 		if err := d.Transform(koi); err != nil {
 			t.Error(err)
 		}
@@ -286,7 +288,8 @@ func TestRunesLatin(t *testing.T) {
 		{"invalid", "\x00=NULL & \x9f=?", " =NULL &  =?"},
 	}
 	for _, tt := range tests {
-		d := Convert{Source: []byte(tt.text)}
+		d := Convert{}
+		d.Source.B = []byte(tt.text)
 		if err := d.Transform(iso1); err != nil {
 			t.Error(err)
 		}
@@ -310,7 +313,8 @@ func TestRunesDOS(t *testing.T) {
 		{"dos pipes", "|!\x7c", "|!|"},
 	}
 	for _, tt := range tests {
-		d := Convert{Source: []byte(tt.text)}
+		d := Convert{}
+		d.Source.B = []byte(tt.text)
 		if err := d.Transform(cp437); err != nil {
 			t.Error(err)
 		}
@@ -334,7 +338,8 @@ func TestRunesMacintosh(t *testing.T) {
 		{"controls", "\x11+\x12+Z", "⌘+⇧+Z"},
 	}
 	for _, tt := range tests {
-		d := Convert{Source: []byte(tt.text)}
+		d := Convert{}
+		d.Source.B = []byte(tt.text)
 		if err := d.Transform(mac); err != nil {
 			t.Error(err)
 		}
@@ -360,7 +365,8 @@ func TestRunesWindows(t *testing.T) {
 		{"invalid", "\x90", " "},
 	}
 	for _, tt := range tests {
-		d := Convert{Source: []byte(tt.text)}
+		d := Convert{}
+		d.Source.B = []byte(tt.text)
 		if err := d.Transform(cp1252); err != nil {
 			t.Error(err)
 		}
@@ -398,9 +404,8 @@ func TestRunesEBCDIC(t *testing.T) {
 	}
 	for _, tt := range tests {
 		c := tt.text
-		d := Convert{
-			Source: c,
-		}
+		d := Convert{}
+		d.Source.B = c
 		if err := d.Transform(charmap.CodePage037); err != nil {
 			t.Error(err)
 		}

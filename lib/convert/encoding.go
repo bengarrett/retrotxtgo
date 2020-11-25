@@ -408,8 +408,8 @@ func (c *Convert) Swap() *Convert {
 	return c
 }
 
-// ANSI replaces out all ←[ and ␛[ character matches with functional ANSI escape controls.
-func (c *Convert) ANSI() {
+// ANSIControls replaces out all ←[ and ␛[ character matches with functional ANSI escape controls.
+func (c *Convert) ANSIControls() {
 	if c == nil {
 		return
 	}
