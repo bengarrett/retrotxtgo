@@ -11,6 +11,7 @@ import (
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/encoding/unicode"
+	"golang.org/x/text/encoding/unicode/utf32"
 	"retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/convert"
 	"retrotxt.com/retrotxt/lib/logs"
@@ -84,8 +85,12 @@ func Map() map[string]Packs {
 		jis    = japanese.ShiftJIS   // shiftjis
 		u8     = unicode.UTF8
 		u8bom  = unicode.UTF8BOM
-		u16be  = unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM)
-		u16le  = unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM)
+		u16    = unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM)
+		u16be  = unicode.UTF16(unicode.BigEndian, unicode.UseBOM)
+		u16le  = unicode.UTF16(unicode.LittleEndian, unicode.UseBOM)
+		u32    = utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM)
+		u32be  = utf32.UTF32(utf32.BigEndian, utf32.UseBOM)
+		u32le  = utf32.UTF32(utf32.LittleEndian, utf32.UseBOM)
 	)
 	m := map[string]Packs{
 		"037":           {text, vga, cp037, "text/cp037.txt", "EBCDIC 037 IBM mainframe test"},
@@ -111,8 +116,12 @@ func Map() map[string]Packs {
 		"us-ascii":      {dump, vga, u8, "text/us-ascii.txt", "US-ASCII controls test"},
 		"utf8":          {text, vga, u8, "text/utf-8.txt", "UTF-8 test with no Byte Order Mark"},
 		"utf8.bom":      {text, vga, u8bom, "text/utf-8-bom.txt", "UTF-8 test with a Byte Order Mark"},
+		"utf16":         {text, vga, u16, "text/utf-16.txt", "UTF-16 test"},
 		"utf16.be":      {text, vga, u16be, "text/utf-16-be.txt", "UTF-16 Big Endian test"},
 		"utf16.le":      {text, vga, u16le, "text/utf-16-le.txt", "UTF-16 Little Endian test"},
+		"utf32":         {text, vga, u32, "text/utf-32.txt", "UTF-32 test"},
+		"utf32.be":      {text, vga, u32be, "text/utf-32-be.txt", "UTF-32 Big Endian test"},
+		"utf32.le":      {text, vga, u32le, "text/utf-32-le.txt", "UTF-32 Little Endian test"},
 	}
 	return m
 }
