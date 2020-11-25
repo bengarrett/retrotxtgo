@@ -364,7 +364,7 @@ func (c *Convert) Swap() *Convert {
 	if debug {
 		println(fmt.Sprintf("line break detected: %+v", c.useBreaks))
 	}
-	switch c.encode {
+	switch c.Source.E {
 	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
 		if c.table {
 			c.RunesEBCDIC()

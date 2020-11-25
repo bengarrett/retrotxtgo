@@ -18,18 +18,20 @@ import (
 type Convert struct {
 	// Source text for conversion.
 	Source struct {
-		B []byte              // Text as bytes
-		E []encoding.Encoding // Encoding
+		B []byte            // Text as bytes
+		E encoding.Encoding // Encoding
+	}
+	// Output UTF-8 text.
+	Output struct {
+		R []rune // Text as runes
 	}
 	// User supplied values.
 	Flags Flags
 	Runes []rune // Runes with UTF-8 text
-	//Source    []byte            // Source legacy encoded text
-	encode    encoding.Encoding // Source character set encoding
-	ignores   []rune            // these runes will not be transformed
-	len       int               // Runes count
-	lineBreak [2]rune           // line break controls
-	//swapChars []int
+	//Xencode   encoding.Encoding // Source character set encoding
+	ignores   []rune  // these runes will not be transformed
+	len       int     // Runes count
+	lineBreak [2]rune // line break controls
 	table     bool
 	useBreaks bool // use line break controls
 
@@ -110,20 +112,20 @@ func (c *Convert) Transform(from encoding.Encoding) error {
 	if from == nil {
 		from = unicode.UTF8
 	}
-	c.encode = from // TODO: check if needed
+	c.Source.E = from // TODO: check if needed
 	var err error
 	if len(c.Source.B) == 0 {
 		return nil
 	}
 	// don't transform, instead copy unicode encoded strings
-	switch c.encode {
+	switch c.Source.E {
 	case unicode.UTF8, unicode.UTF8BOM:
 		c.Runes = []rune(string(c.Source.B))
 		c.len = len(c.Runes)
 		return nil
 	}
 	// blank invalid shiftjis characters when printing 8-bit tables
-	if c.encode == japanese.ShiftJIS && c.table {
+	if c.Source.E == japanese.ShiftJIS && c.table {
 		// this is only for the table command,
 		// it will break normal shift-jis encode text
 		for i, b := range c.Source.B {
@@ -140,7 +142,7 @@ func (c *Convert) Transform(from encoding.Encoding) error {
 		c.len = len(c.Runes)
 		return nil
 	}
-	if c.Source.B, err = c.encode.NewDecoder().Bytes(c.Source.B); err != nil {
+	if c.Source.B, err = c.Source.E.NewDecoder().Bytes(c.Source.B); err != nil {
 		return fmt.Errorf("transform new decoder error: %w", err)
 	}
 	c.Runes = bytes.Runes(c.Source.B)
