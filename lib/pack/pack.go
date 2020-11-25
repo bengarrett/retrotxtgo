@@ -57,7 +57,8 @@ func (f Font) String() string {
 
 const (
 	text output = iota // Obey common text controls.
-	dump               // Ignore and print the common text controls as characters.
+	dump               // Obey common text controls except end-of-file.
+	char               // Ignore and print the common text controls as characters.
 
 	vga  Font = iota // VGA 8px font.
 	mona             // Mona font for shift-jis.
@@ -142,8 +143,17 @@ func (f Flags) Open(conv convert.Args, name string) (p Pack, err error) {
 		transform(f.Encode, b...)
 		return p, nil
 	}
+	// character default overrides
+	switch name {
+	case "437.cr", "437.crlf", "437.lf":
+		conv.Controls = nil
+	}
 	// convert to runes and print
 	switch pkg.convert {
+	case char:
+		if p.Runes, err = conv.Chars(&b); err != nil {
+			return p, err
+		}
 	case dump:
 		if p.Runes, err = conv.Dump(&b); err != nil {
 			return p, err
