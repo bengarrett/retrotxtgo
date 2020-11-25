@@ -69,8 +69,8 @@ var createCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		conv := convert.Args{
 			Controls: createFlag.controls,
-			Encoding: createFlag.encode,
-			Swap:     createFlag.swap,
+			// Encoding: createFlag.encode, // TODO
+			Swap: createFlag.swap,
 		}
 		// handle defaults that are left empty for usage formatting
 		if c := cmd.Flags().Lookup("controls"); !c.Changed {
@@ -169,7 +169,7 @@ func createFiles(cmd *cobra.Command, conv convert.Args, args ...string) {
 		// internal, packed example file
 		if ok := pack.Valid(arg); ok {
 			if cp := cmd.Flags().Lookup("encode"); cp.Changed {
-				if f.Encode, err = convert.Encoding(cp.Value.String()); err != nil {
+				if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
 					logs.Fatal("encoding not known or supported", arg, err)
 				}
 			}
@@ -179,7 +179,7 @@ func createFiles(cmd *cobra.Command, conv convert.Args, args ...string) {
 				logs.Println("pack", arg, err)
 				continue
 			}
-			src = create.Normalize(p.Encoding, p.Runes...)
+			src = create.Normalize(p.Src, p.Runes...)
 			html.FontFamily.Value = p.Font.String()
 		}
 		// read file

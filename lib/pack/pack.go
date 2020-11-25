@@ -18,15 +18,15 @@ import (
 
 // Flags and configuration values by the user.
 type Flags struct {
-	Encode encoding.Encoding
-	To     encoding.Encoding
+	From encoding.Encoding
+	To   encoding.Encoding
 }
 
 // Pack item details.
 type Pack struct {
-	Encoding encoding.Encoding
-	Font     Font
-	Runes    []rune
+	Src   encoding.Encoding
+	Font  Font
+	Runes []rune
 }
 
 // Packs for items.
@@ -107,12 +107,12 @@ func Map() map[string]Packs {
 		"iso-1":         {text, vga, iso1, "text/iso-8859-1.txt", "ISO 8859-1 select characters"},
 		"iso-15":        {text, vga, iso15, "text/iso-8859-15.txt", "ISO 8859-15 select characters"},
 		"sauce":         {text, vga, cp437, "text/sauce.txt", "SAUCE metadata test"},
-		"shiftjis":      {dump, mona, jis, "text/shiftjis.txt", "Shift-JIS and Mona font test"},
+		"shiftjis":      {text, mona, jis, "text/shiftjis.txt", "Shift-JIS and Mona font test"},
 		"us-ascii":      {dump, vga, u8, "text/us-ascii.txt", "US-ASCII controls test"},
 		"utf8":          {text, vga, u8, "text/utf-8.txt", "UTF-8 test with no Byte Order Mark"},
-		"utf8.bom":      {text, vga, u8bom, "text/utf-8-bom.txt", "UTF-8 test with a Byte Order Mark"}, // not working
-		"utf16.be":      {text, vga, u16be, "text/utf-16-be.txt", "UTF-16 Big Endian test"},            //
-		"utf16.le":      {text, vga, u16le, "text/utf-16-le.txt", "UTF-16 Little Endian test"},         //
+		"utf8.bom":      {text, vga, u8bom, "text/utf-8-bom.txt", "UTF-8 test with a Byte Order Mark"},
+		"utf16.be":      {text, vga, u16be, "text/utf-16-be.txt", "UTF-16 Big Endian test"},
+		"utf16.le":      {text, vga, u16le, "text/utf-16-le.txt", "UTF-16 Little Endian test"},
 	}
 	return m
 }
@@ -131,9 +131,9 @@ func (f Flags) Open(conv convert.Args, name string) (p Pack, err error) {
 	if b == nil {
 		return p, fmt.Errorf("view package %q: %w", pkg.Name, ErrPackGet)
 	}
-	p.Encoding = pkg.encoding
-	if f.Encode == nil {
-		conv.Encoding = fmt.Sprint(p.Encoding)
+	p.Src = pkg.encoding
+	if f.From == nil {
+		conv.Encoding = p.Src
 	}
 	if f.To != nil {
 		// pack items that break the NewEncoder
@@ -141,7 +141,7 @@ func (f Flags) Open(conv convert.Args, name string) (p Pack, err error) {
 		case "037", "shiftjis", "utf16.be", "utf16.le":
 			return p, nil
 		}
-		transform(f.Encode, b...)
+		transform(f.From, b...)
 		return p, nil
 	}
 	// character default overrides
