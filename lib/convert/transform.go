@@ -18,17 +18,17 @@ import (
 type Convert struct {
 	// Source text for conversion.
 	Source struct {
-		B []byte            // Text as bytes
-		E encoding.Encoding // Encoding
+		B []byte            // Text as bytes.
+		E encoding.Encoding // Encoding.
 	}
 	// Output UTF-8 text.
 	Output struct {
-		R       []rune // Text as runes
-		ignores []rune // these runes will not be transformed
+		R       []rune // Text as runes.
+		ignores []rune // runes to be ignored.
+		len     int    // R (runes) count.
 	}
 	// User supplied values.
 	Flags     Flags
-	len       int     // Runes count
 	lineBreak [2]rune // line break controls
 	table     bool
 	useBreaks bool // use line break controls
@@ -119,7 +119,7 @@ func (c *Convert) Transform(from encoding.Encoding) error {
 	switch c.Source.E {
 	case unicode.UTF8, unicode.UTF8BOM:
 		c.Output.R = []rune(string(c.Source.B))
-		c.len = len(c.Output.R)
+		c.Output.len = len(c.Output.R)
 		return nil
 	}
 	// blank invalid shiftjis characters when printing 8-bit tables
@@ -137,14 +137,14 @@ func (c *Convert) Transform(from encoding.Encoding) error {
 	// transform source if it is not already UTF-8
 	if utf8.Valid(c.Source.B) {
 		c.Output.R = bytes.Runes(c.Source.B)
-		c.len = len(c.Output.R)
+		c.Output.len = len(c.Output.R)
 		return nil
 	}
 	if c.Source.B, err = c.Source.E.NewDecoder().Bytes(c.Source.B); err != nil {
 		return fmt.Errorf("transform new decoder error: %w", err)
 	}
 	c.Output.R = bytes.Runes(c.Source.B)
-	c.len = len(c.Output.R)
+	c.Output.len = len(c.Output.R)
 	return nil
 }
 

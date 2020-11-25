@@ -354,7 +354,7 @@ func encodingAlias(name string) (n string) {
 
 // Swap transforms character map and control codes into UTF-8 unicode runes.
 func (c *Convert) Swap() *Convert {
-	if c.len == 0 {
+	if c.Output.len == 0 {
 		return nil
 	}
 	const debug = false
@@ -399,7 +399,7 @@ func (c *Convert) Swap() *Convert {
 	default:
 	}
 	if len(c.Flags.SwapChars) > 0 {
-		for i := 0; i < c.len; i++ {
+		for i := 0; i < c.Output.len; i++ {
 			if s := c.runeSwap(c.Output.R[i]); s >= 0 {
 				c.Output.R[i] = s
 			}
@@ -413,11 +413,11 @@ func (c *Convert) ANSIControls() {
 	if c == nil {
 		return
 	}
-	if c.len == 0 {
+	if c.Output.len == 0 {
 		log.Fatal(ErrChainANSI)
 	}
 	for i, r := range c.Output.R {
-		if i+1 >= c.len {
+		if i+1 >= c.Output.len {
 			continue
 		}
 		if r == LeftwardsArrow && c.Output.R[i+1] == LeftSquareBracket {
@@ -440,7 +440,7 @@ func (c *Convert) RunesControls() {
 		return
 	}
 	const z = byte(row8)
-	for i := 0; i < c.len; i++ {
+	for i := 0; i < c.Output.len; i++ {
 		r := c.Output.R[i]
 		if c.skipIgnores(i) {
 			continue
@@ -465,7 +465,7 @@ func (c *Convert) RunesControlsEBCDIC() {
 	}
 	//
 	const z = byte(row8)
-	for i := 0; i < c.len; i++ {
+	for i := 0; i < c.Output.len; i++ {
 		r := c.Output.R[i]
 		if c.skipIgnores(i) {
 			continue
@@ -489,7 +489,7 @@ func (c *Convert) RunesDOS() {
 		"\u266A", "\u266B", "\u263C", "\u25BA", "\u25C4", "\u2195",
 		"\u203C", "\u00B6", "\u00A7", "\u25AC", "\u21A8", "\u2191",
 		"\u2193", "\u2192", "\u2190", "\u221F", "\u2194", "\u25B2", "\u25BC"}
-	for i := 0; i < c.len; i++ {
+	for i := 0; i < c.Output.len; i++ {
 		r := c.Output.R[i]
 		if c.skipIgnores(i) {
 			continue
@@ -537,7 +537,7 @@ func (c *Convert) RunesEBCDIC() {
 		nel = 133
 	)
 	const skipA, skipB, skipC, skipD = 0xA0, 0xBF, 0xC0, 0xFF
-	for i := 0; i < c.len; i++ {
+	for i := 0; i < c.Output.len; i++ {
 		r := c.Output.R[i]
 		if c.skipIgnores(i) {
 			continue
@@ -606,7 +606,7 @@ func (c *Convert) RunesKOI8() {
 	if len(c.Output.R) == 0 {
 		return
 	}
-	for i := 0; i < c.len; i++ {
+	for i := 0; i < c.Output.len; i++ {
 		r := c.Output.R[i]
 		if c.skipLineBreaks(i) {
 			i++
@@ -628,7 +628,7 @@ func (c *Convert) RunesLatin() {
 	if len(c.Output.R) == 0 {
 		return
 	}
-	for i := 0; i < c.len; i++ {
+	for i := 0; i < c.Output.len; i++ {
 		r := c.Output.R[i]
 		if c.skipLineBreaks(i) {
 			i++
@@ -654,7 +654,7 @@ func (c *Convert) RunesMacintosh() {
 		option              // ⌥
 		control             // ⌃
 	)
-	for i := 0; i < c.len; i++ {
+	for i := 0; i < c.Output.len; i++ {
 		r := c.Output.R[i]
 		if c.skipLineBreaks(i) {
 			i++
@@ -749,7 +749,7 @@ func (c *Convert) skipLineBreaks(i int) bool {
 	if !c.useBreaks {
 		return false
 	}
-	var l, r0, r1 = c.len - 1, c.Output.R[i], rune(0)
+	var l, r0, r1 = c.Output.len - 1, c.Output.R[i], rune(0)
 	if i < l {
 		// check for multi-byte line breaks
 		r1 = c.Output.R[i+1]
