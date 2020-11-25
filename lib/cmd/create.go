@@ -174,7 +174,7 @@ func createFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 				}
 			}
 			var p pack.Pack
-			p, err = f.Open(conv, arg)
+			p, err = f.Open(&conv, arg)
 			if err != nil {
 				logs.Println("pack", arg, err)
 				continue

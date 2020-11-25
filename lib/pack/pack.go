@@ -127,7 +127,7 @@ func Map() map[string]Packs {
 }
 
 // Open an internal packed example file.
-func (f Flags) Open(conv convert.Convert, name string) (p Pack, err error) {
+func (f Flags) Open(conv *convert.Convert, name string) (p Pack, err error) {
 	name = strings.ToLower(name)
 	if _, err = os.Stat(name); !os.IsNotExist(err) {
 		return p, nil

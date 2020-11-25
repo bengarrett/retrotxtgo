@@ -53,7 +53,7 @@ var viewCmd = &cobra.Command{
 		}
 		// piped input from other programs
 		if filesystem.IsPipe() {
-			viewPipe(cmd, conv)
+			viewPipe(cmd, &conv)
 		}
 		// user arguments
 		checkUse(cmd, args...)
@@ -73,7 +73,7 @@ var viewCmd = &cobra.Command{
 					}
 				}
 				var p pack.Pack
-				if p, err = f.Open(conv, arg); err != nil {
+				if p, err = f.Open(&conv, arg); err != nil {
 					logs.Println("pack", arg, err)
 					continue
 				}
@@ -116,7 +116,7 @@ func init() {
 	viewCmd.Flags().SortFlags = false
 }
 
-func viewPipe(cmd *cobra.Command, conv convert.Convert) {
+func viewPipe(cmd *cobra.Command, conv *convert.Convert) {
 	b, err := filesystem.ReadPipe()
 	if err != nil {
 		logs.Fatal("view", "stdin read", err)

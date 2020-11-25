@@ -16,7 +16,7 @@ import (
 // ANSI transforms legacy encoded ANSI into modern UTF-8 text.
 // It displays ASCII control codes as characters.
 // It obeys the end of file marker.
-func (c Convert) ANSI(b *[]byte) (utf []rune, err error) {
+func (c *Convert) ANSI(b *[]byte) (utf []rune, err error) {
 	c.Output.lineBreaks = true
 	c.Flags.SwapChars = nil
 	c.Source.B = *b
@@ -33,7 +33,7 @@ func (c Convert) ANSI(b *[]byte) (utf []rune, err error) {
 // Chars transforms legacy encoded characters and text control codes into UTF-8 characters.
 // It displays both ASCII and ANSI control codes as characters.
 // It ignores the end of file marker.
-func (c Convert) Chars(b *[]byte) (utf []rune, err error) {
+func (c *Convert) Chars(b *[]byte) (utf []rune, err error) {
 	c.Source.table = true
 	c.Source.B = *b
 	if err = c.Transform(); err != nil {
@@ -47,7 +47,7 @@ func (c Convert) Chars(b *[]byte) (utf []rune, err error) {
 // Dump transforms legacy encoded text or ANSI into modern UTF-8 text.
 // It obeys common ASCII control codes.
 // It ignores the end of file marker.
-func (c Convert) Dump(b *[]byte) (utf []rune, err error) {
+func (c *Convert) Dump(b *[]byte) (utf []rune, err error) {
 	c.Output.lineBreaks = true
 	c.Source.B = *b
 	c.unicodeControls()
@@ -62,7 +62,7 @@ func (c Convert) Dump(b *[]byte) (utf []rune, err error) {
 // Text transforms legacy encoded text or ANSI into modern UTF-8 text.
 // It obeys common ASCII control codes.
 // It obeys the end of file marker.
-func (c Convert) Text(b *[]byte) (utf []rune, err error) {
+func (c *Convert) Text(b *[]byte) (utf []rune, err error) {
 	c.Output.lineBreaks = true
 	c.Source.B = *b
 	c.unicodeControls()
