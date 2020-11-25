@@ -28,7 +28,6 @@ type Convert struct {
 	}
 	// User supplied values.
 	Flags     Flags
-	Runes     []rune  // Runes with UTF-8 text
 	len       int     // Runes count
 	lineBreak [2]rune // line break controls
 	table     bool
@@ -58,7 +57,7 @@ func (c Convert) ANSI(b *[]byte) (utf []rune, err error) {
 	}
 	c.Swap().ANSIControls()
 	c.width(c.Flags.Width)
-	return c.Runes, nil
+	return c.Output.R, nil
 }
 
 // Chars transforms legacy encoded characters and text control codes into UTF-8 characters.
@@ -72,7 +71,7 @@ func (c Convert) Chars(b *[]byte) (utf []rune, err error) {
 	}
 	c.Swap()
 	c.width(c.Flags.Width)
-	return c.Runes, nil
+	return c.Output.R, nil
 }
 
 // Dump transforms legacy encoded text or ANSI into modern UTF-8 text.
@@ -87,7 +86,7 @@ func (c Convert) Dump(b *[]byte) (utf []rune, err error) {
 	}
 	c.Swap().ANSIControls()
 	c.width(c.Flags.Width)
-	return c.Runes, nil
+	return c.Output.R, nil
 }
 
 // Text transforms legacy encoded text or ANSI into modern UTF-8 text.
@@ -103,7 +102,7 @@ func (c Convert) Text(b *[]byte) (utf []rune, err error) {
 	}
 	c.Swap().ANSIControls()
 	c.width(c.Flags.Width)
-	return c.Runes, nil
+	return c.Output.R, nil
 }
 
 // Transform byte data from named character map encoded text into UTF-8.
@@ -119,8 +118,8 @@ func (c *Convert) Transform(from encoding.Encoding) error {
 	// don't transform, instead copy unicode encoded strings
 	switch c.Source.E {
 	case unicode.UTF8, unicode.UTF8BOM:
-		c.Runes = []rune(string(c.Source.B))
-		c.len = len(c.Runes)
+		c.Output.R = []rune(string(c.Source.B))
+		c.len = len(c.Output.R)
 		return nil
 	}
 	// blank invalid shiftjis characters when printing 8-bit tables
@@ -137,15 +136,15 @@ func (c *Convert) Transform(from encoding.Encoding) error {
 	}
 	// transform source if it is not already UTF-8
 	if utf8.Valid(c.Source.B) {
-		c.Runes = bytes.Runes(c.Source.B)
-		c.len = len(c.Runes)
+		c.Output.R = bytes.Runes(c.Source.B)
+		c.len = len(c.Output.R)
 		return nil
 	}
 	if c.Source.B, err = c.Source.E.NewDecoder().Bytes(c.Source.B); err != nil {
 		return fmt.Errorf("transform new decoder error: %w", err)
 	}
-	c.Runes = bytes.Runes(c.Source.B)
-	c.len = len(c.Runes)
+	c.Output.R = bytes.Runes(c.Source.B)
+	c.len = len(c.Output.R)
 	return nil
 }
 
@@ -153,7 +152,7 @@ func (c *Convert) width(max int) {
 	if max < 1 {
 		return
 	}
-	cnt := len(c.Runes)
+	cnt := len(c.Output.R)
 	cols, err := filesystem.Columns(bytes.NewReader(c.Source.B), c.lineBreak)
 	if err != nil {
 		logs.Println("ignoring width argument", "",
@@ -168,18 +167,18 @@ func (c *Convert) width(max int) {
 	for f := float64(1); f <= limit; f++ {
 		switch f {
 		case 1:
-			fmt.Fprintf(&w, "%s\n", string(c.Runes[0:max]))
+			fmt.Fprintf(&w, "%s\n", string(c.Output.R[0:max]))
 		default:
 			i := int(f)
 			a, b := (i-1)*max, i*max
 			if b >= cnt {
-				fmt.Fprintf(&w, "%s\n", string(c.Runes[a:cnt]))
+				fmt.Fprintf(&w, "%s\n", string(c.Output.R[a:cnt]))
 			} else {
-				fmt.Fprintf(&w, "%s\n", string(c.Runes[a:b]))
+				fmt.Fprintf(&w, "%s\n", string(c.Output.R[a:b]))
 			}
 		}
 	}
-	c.Runes = []rune(w.String())
+	c.Output.R = []rune(w.String())
 }
 
 func (c *Convert) unicodeControls() {

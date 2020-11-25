@@ -57,8 +57,8 @@ func TestSet_Transform(t *testing.T) {
 				t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if string(data.Runes) != tt.want {
-				t.Errorf("Convert.Transform() = %v, want %v", string(data.Runes), tt.want)
+			if string(data.Output.R) != tt.want {
+				t.Errorf("Convert.Transform() = %v, want %v", string(data.Output.R), tt.want)
 			}
 		})
 	}
@@ -88,8 +88,8 @@ func TestANSI(t *testing.T) {
 				t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(data.Runes, tt.want) {
-				t.Errorf("Convert.Transform() = %v %q, want %v", data.Runes, data.Runes, tt.want)
+			if !reflect.DeepEqual(data.Output.R, tt.want) {
+				t.Errorf("Convert.Transform() = %v %q, want %v", data.Output.R, data.Output.R, tt.want)
 			}
 		})
 	}
@@ -242,7 +242,7 @@ func TestRunesControls(t *testing.T) {
 		}
 		d.Swap()
 		t.Run(tt.name, func(t *testing.T) {
-			if got, w := d.Runes, []rune(tt.want); !reflect.DeepEqual(got, w) {
+			if got, w := d.Output.R, []rune(tt.want); !reflect.DeepEqual(got, w) {
 				t.Errorf("TestRunesControls() = %v (%X) [%s], want %v (%X) [%s]",
 					got, got, string(got), w, w, string(w))
 			}
@@ -269,7 +269,7 @@ func TestRunesKOI8(t *testing.T) {
 		}
 		d.RunesKOI8()
 		t.Run(tt.name, func(t *testing.T) {
-			if got := string(d.Runes); got != tt.want {
+			if got := string(d.Output.R); got != tt.want {
 				t.Errorf("TestRunesKOI8() = %s, want %s", got, tt.want)
 			}
 		})
@@ -295,7 +295,7 @@ func TestRunesLatin(t *testing.T) {
 		}
 		d.RunesLatin()
 		t.Run(tt.name, func(t *testing.T) {
-			if got := string(d.Runes); got != tt.want {
+			if got := string(d.Output.R); got != tt.want {
 				t.Errorf("TestRunesLatin() = %s, want %s", got, tt.want)
 			}
 		})
@@ -320,7 +320,7 @@ func TestRunesDOS(t *testing.T) {
 		}
 		d.RunesDOS()
 		t.Run(tt.name, func(t *testing.T) {
-			if got := string(d.Runes); got != tt.want {
+			if got := string(d.Output.R); got != tt.want {
 				t.Errorf("TestRunesDOS() = %s, want %s", got, tt.want)
 			}
 		})
@@ -345,7 +345,7 @@ func TestRunesMacintosh(t *testing.T) {
 		}
 		d.RunesMacintosh()
 		t.Run(tt.name, func(t *testing.T) {
-			if got := string(d.Runes); got != tt.want {
+			if got := string(d.Output.R); got != tt.want {
 				t.Errorf("TestRunesMacintosh() = %s, want %s", got, tt.want)
 			}
 		})
@@ -372,7 +372,7 @@ func TestRunesWindows(t *testing.T) {
 		}
 		d.RunesWindows()
 		t.Run(tt.name, func(t *testing.T) {
-			if got := string(d.Runes); got != tt.want {
+			if got := string(d.Output.R); got != tt.want {
 				t.Errorf("TestRunesWindows() = %s, want %s", got, tt.want)
 			}
 		})
@@ -411,7 +411,7 @@ func TestRunesEBCDIC(t *testing.T) {
 		}
 		d.RunesEBCDIC()
 		t.Run(tt.name, func(t *testing.T) {
-			if got := string(d.Runes); got != tt.want {
+			if got := string(d.Output.R); got != tt.want {
 				fmt.Println(c)
 				t.Errorf("RunesEBCDIC() = '%v' (0x%X), want '%v' (0x%X)", got, got, tt.want, tt.want)
 			}
