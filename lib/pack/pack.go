@@ -19,7 +19,7 @@ import (
 // Flags and configuration values by the user.
 type Flags struct {
 	Encode encoding.Encoding
-	To     string // todo: change to encoding
+	To     encoding.Encoding
 }
 
 // Pack item details.
@@ -130,8 +130,8 @@ func (f Flags) Open(conv convert.Args, name string) (p Pack, err error) {
 	if f.Encode == nil {
 		conv.Encoding = fmt.Sprint(p.Encoding)
 	}
-	if f.To != "" {
-		// example exceptions that break the NewEncoder
+	if f.To != nil {
+		// pack items that break the NewEncoder
 		switch s {
 		case "037", "shiftjis", "utf16.be", "utf16.le":
 			return p, nil

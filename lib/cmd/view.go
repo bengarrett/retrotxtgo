@@ -68,8 +68,9 @@ var viewCmd = &cobra.Command{
 					}
 				}
 				if to := cmd.Flags().Lookup("to"); to.Changed {
-					fmt.Println("to changed", to.Value.String())
-					f.To = to.Value.String()
+					if f.To, err = convert.Encoding(to.Value.String()); err != nil {
+						logs.Fatal("to not known or supported", arg, err)
+					}
 				}
 				if p, err := f.Open(conv, arg); err != nil {
 					logs.Println("pack", arg, err)
