@@ -431,7 +431,7 @@ func (c *Convert) ANSIControls() {
 // LineBreaks will try to guess the line break representation as a 2 byte value.
 // A guess of Unix will return [10, 0], Windows [13, 10], otherwise a [0, 0] value is returned.
 func (c *Convert) LineBreaks() {
-	c.lineBreak = filesystem.LineBreaks(true, c.Output.R...)
+	c.Source.lineBreak = filesystem.LineBreaks(true, c.Output.R...)
 }
 
 // RunesControls switches out C0 and C1 ASCII controls with Unicode picture represenations.
@@ -446,7 +446,7 @@ func (c *Convert) RunesControls() {
 			continue
 		}
 		if c.skipLineBreaks(i) {
-			if c.lineBreak == [2]rune{CR, 0} {
+			if c.Source.lineBreak == [2]rune{CR, 0} {
 				c.Output.R[i] = LF
 			}
 			i++
@@ -495,7 +495,7 @@ func (c *Convert) RunesDOS() {
 			continue
 		}
 		if c.skipLineBreaks(i) {
-			if c.lineBreak == [2]rune{13, 0} {
+			if c.Source.lineBreak == [2]rune{13, 0} {
 				c.Output.R[i] = LF // swap CR with LF
 			}
 			i++
@@ -754,7 +754,7 @@ func (c *Convert) skipLineBreaks(i int) bool {
 		// check for multi-byte line breaks
 		r1 = c.Output.R[i+1]
 	}
-	if equalLB([2]rune{r0, r1}, c.lineBreak) {
+	if equalLB([2]rune{r0, r1}, c.Source.lineBreak) {
 		return true
 	}
 	return false

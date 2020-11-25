@@ -18,20 +18,20 @@ import (
 type Convert struct {
 	// Source text for conversion.
 	Source struct {
-		B     []byte            // Text as bytes.
-		E     encoding.Encoding // Encoding.
-		table bool
+		B         []byte            // source text as bytes.
+		E         encoding.Encoding // text encoding.
+		table     bool              // flag Source.B as text for display as a codepage table.
+		lineBreak [2]rune           // line break controls used by the text.
 	}
 	// Output UTF-8 text.
 	Output struct {
-		R       []rune // Text as runes.
+		R       []rune // output text as runes.
 		ignores []rune // runes to be ignored.
 		len     int    // R (runes) count.
 	}
-	// User supplied values.
+	// User supplied flag values.
 	Flags     Flags
-	lineBreak [2]rune // line break controls
-	useBreaks bool    // use line break controls
+	useBreaks bool // use line break controls
 
 }
 
@@ -153,7 +153,7 @@ func (c *Convert) width(max int) {
 		return
 	}
 	cnt := len(c.Output.R)
-	cols, err := filesystem.Columns(bytes.NewReader(c.Source.B), c.lineBreak)
+	cols, err := filesystem.Columns(bytes.NewReader(c.Source.B), c.Source.lineBreak)
 	if err != nil {
 		logs.Println("ignoring width argument", "",
 			fmt.Errorf("width could not determine the columns: %w", err))
