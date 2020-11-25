@@ -73,7 +73,7 @@ func (args *Args) override() {
 		s = append(s, fmt.Sprintf("layout to %q", Standard))
 		args.layout = Standard
 	}
-	if args.FontEmbed != embed {
+	if args.FontEmbed {
 		s = append(s, fmt.Sprintf("font-embed to %v", false))
 		args.FontEmbed = embed
 	}

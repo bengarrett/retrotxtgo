@@ -157,27 +157,6 @@ func Lines(r io.Reader, lb LB) (count int, err error) {
 	return count, nil
 }
 
-// NewlinesWeb determs the line breaks in use and replaces them with web browser friendly LF.
-// func NewlinesWeb(runes ...rune) []rune {
-// 	guess := LineBreaks(true, runes...)
-// 	switch guess {
-// 	case LFCR(), NL(), NEL():
-// 		//old, new := fmt.Sprintf("%v", guess), fmt.Sprintf("%v", LF())
-// 		old1, old2 := byte(guess[0]), byte(guess[1])
-// 		new := []byte(string(LF()[0]))
-// 		b := []byte(string(runes))
-// 		if old2 == 0 {
-// 			b = bytes.ReplaceAll(b, []byte{old1}, new)
-// 			return runes
-// 		}
-// 		b = bytes.ReplaceAll(b, []byte{old1, old2}, new)
-// 		fmt.Println("old", []byte{old1, old2}, "new", new)
-// 		return runes
-// 	default:
-// 		return runes
-// 	}
-// }
-
 // LineBreaks will try to guess the line break representation as a 2 byte value.
 // A guess of Unix will return [10, 0], Windows [13, 10], otherwise a [0, 0] value is returned.
 func LineBreaks(utf bool, runes ...rune) LB {

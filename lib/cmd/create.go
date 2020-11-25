@@ -81,7 +81,7 @@ var createCmd = &cobra.Command{
 		}
 		monitorFlags(cmd)
 		if filesystem.IsPipe() {
-			createPipe(cmd, conv)
+			createPipe(cmd)
 		}
 		// hidden --body flag value that ignores args and overrides the pre value.
 		if body := cmd.Flags().Lookup("body"); body.Changed {
@@ -210,7 +210,7 @@ func createFiles(cmd *cobra.Command, conv convert.Args, args ...string) {
 	}
 }
 
-func createPipe(cmd *cobra.Command, conv convert.Args) {
+func createPipe(cmd *cobra.Command) {
 	b, err := filesystem.ReadPipe()
 	if err != nil {
 		logs.Fatal("create", "read stdin", err)

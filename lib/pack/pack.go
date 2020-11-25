@@ -145,12 +145,10 @@ func (f Flags) Open(conv convert.Args, name string) (p Pack, err error) {
 	// convert to runes and print
 	switch pkg.convert {
 	case dump:
-		fmt.Println("dumping pack")
 		if p.Runes, err = conv.Dump(&b); err != nil {
 			return p, err
 		}
 	case text:
-		fmt.Println("texting pack")
 		if p.Runes, err = conv.Text(&b); err != nil {
 			return p, err
 		}

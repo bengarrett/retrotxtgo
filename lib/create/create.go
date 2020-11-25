@@ -708,7 +708,11 @@ func Normalize(e encoding.Encoding, r ...rune) (b []byte) {
 	s := ""
 	switch e {
 	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
-		s, _, _ = transform.String(ReplaceNELs(), string(r))
+		var err error
+		s, _, err = transform.String(ReplaceNELs(), string(r))
+		if err != nil {
+			s = string(r)
+		}
 	default:
 		s = string(r)
 	}
