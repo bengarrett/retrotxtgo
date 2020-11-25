@@ -142,7 +142,7 @@ func (f Flags) Open(conv convert.Convert, name string) (p Pack, err error) {
 	}
 	p.Src = pkg.encoding
 	if f.From == nil {
-		conv.Flags.Encoding = p.Src
+		conv.Source.E = p.Src
 	}
 	if f.To != nil {
 		// pack items that break the NewEncoder

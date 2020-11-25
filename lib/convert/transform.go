@@ -7,7 +7,6 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/encoding/unicode"
 	"retrotxt.com/retrotxt/lib/filesystem"
@@ -23,7 +22,7 @@ func (c Convert) ANSI(b *[]byte) (utf []rune, err error) {
 	c.Source.B = *b
 	c.unicodeControls()
 	c.Source.B = EndOfFile(*b...)
-	if err = c.Transform(c.Flags.Encoding); err != nil {
+	if err = c.Transform(); err != nil {
 		return nil, fmt.Errorf("dump transform failed: %w", err)
 	}
 	c.Swap().ANSIControls()
@@ -37,7 +36,7 @@ func (c Convert) ANSI(b *[]byte) (utf []rune, err error) {
 func (c Convert) Chars(b *[]byte) (utf []rune, err error) {
 	c.Source.table = true
 	c.Source.B = *b
-	if err = c.Transform(c.Flags.Encoding); err != nil {
+	if err = c.Transform(); err != nil {
 		return nil, fmt.Errorf("chars transform failed: %w", err)
 	}
 	c.Swap()
@@ -52,7 +51,7 @@ func (c Convert) Dump(b *[]byte) (utf []rune, err error) {
 	c.Output.lineBreaks = true
 	c.Source.B = *b
 	c.unicodeControls()
-	if err = c.Transform(c.Flags.Encoding); err != nil {
+	if err = c.Transform(); err != nil {
 		return nil, fmt.Errorf("dump transform failed: %w", err)
 	}
 	c.Swap().ANSIControls()
@@ -68,7 +67,7 @@ func (c Convert) Text(b *[]byte) (utf []rune, err error) {
 	c.Source.B = *b
 	c.unicodeControls()
 	c.Source.B = EndOfFile(*b...)
-	if err = c.Transform(c.Flags.Encoding); err != nil {
+	if err = c.Transform(); err != nil {
 		return nil, fmt.Errorf("text transform failed: %w", err)
 	}
 	c.Swap().ANSIControls()
@@ -77,11 +76,10 @@ func (c Convert) Text(b *[]byte) (utf []rune, err error) {
 }
 
 // Transform byte data from named character map encoded text into UTF-8.
-func (c *Convert) Transform(from encoding.Encoding) error {
-	if from == nil {
-		from = unicode.UTF8
+func (c *Convert) Transform() error {
+	if c.Source.E == nil {
+		c.Source.E = unicode.UTF8
 	}
-	c.Source.E = from // TODO: check if needed
 	var err error
 	if len(c.Source.B) == 0 {
 		return nil

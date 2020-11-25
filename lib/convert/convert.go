@@ -17,15 +17,15 @@ type Convert struct {
 
 // Source text for conversion.
 type Source struct {
-	B         []byte            // source text as bytes.
-	E         encoding.Encoding // text encoding.
+	B         []byte            // Source text as bytes.
+	E         encoding.Encoding // Text encoding.
 	table     bool              // flag Source.B as text for display as a codepage table.
 	lineBreak [2]rune           // line break controls used by the text.
 }
 
 // Output UTF-8 text.
 type Output struct {
-	R          []rune // output text as runes.
+	R          []rune // Output text as runes.
 	ignores    []rune // runes to be ignored.
 	len        int    // R (runes) count.
 	lineBreaks bool   // use line break controls.
@@ -34,7 +34,6 @@ type Output struct {
 // Flags are the user supplied values.
 type Flags struct {
 	Controls  []string
-	Encoding  encoding.Encoding
 	SwapChars []int
 	Width     int
 }

@@ -65,7 +65,7 @@ var viewCmd = &cobra.Command{
 					if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
 						logs.Fatal("encoding not known or supported", arg, err)
 					}
-					conv.Flags.Encoding = f.From
+					conv.Source.E = f.From
 				}
 				if to := cmd.Flags().Lookup("to"); to.Changed {
 					if f.To, err = convert.Encoding(to.Value.String()); err != nil {

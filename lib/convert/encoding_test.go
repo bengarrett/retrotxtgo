@@ -51,7 +51,8 @@ func TestSet_Transform(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			data := Convert{}
 			data.Source.B = []byte(tt.str)
-			err := data.Transform(tt.codepage)
+			data.Source.E = tt.codepage
+			err := data.Transform()
 			data.Swap()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
@@ -82,7 +83,8 @@ func TestANSI(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			data := Convert{}
 			data.Source.B = []byte(tt.str)
-			err := data.Transform(tt.codepage)
+			data.Source.E = tt.codepage
+			err := data.Transform()
 			data.Swap().ANSIControls()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
@@ -237,7 +239,8 @@ func TestRunesControls(t *testing.T) {
 	for _, tt := range tests {
 		d := Convert{}
 		d.Source.B = []byte(tt.text)
-		if err := d.Transform(cp1252); err != nil {
+		d.Source.E = cp1252
+		if err := d.Transform(); err != nil {
 			t.Error(err)
 		}
 		d.Swap()
@@ -264,7 +267,8 @@ func TestRunesKOI8(t *testing.T) {
 	for _, tt := range tests {
 		d := Convert{}
 		d.Source.B = []byte(tt.text)
-		if err := d.Transform(koi); err != nil {
+		d.Source.E = koi
+		if err := d.Transform(); err != nil {
 			t.Error(err)
 		}
 		d.RunesKOI8()
@@ -290,7 +294,8 @@ func TestRunesLatin(t *testing.T) {
 	for _, tt := range tests {
 		d := Convert{}
 		d.Source.B = []byte(tt.text)
-		if err := d.Transform(iso1); err != nil {
+		d.Source.E = iso1
+		if err := d.Transform(); err != nil {
 			t.Error(err)
 		}
 		d.RunesLatin()
@@ -315,7 +320,8 @@ func TestRunesDOS(t *testing.T) {
 	for _, tt := range tests {
 		d := Convert{}
 		d.Source.B = []byte(tt.text)
-		if err := d.Transform(cp437); err != nil {
+		d.Source.E = cp437
+		if err := d.Transform(); err != nil {
 			t.Error(err)
 		}
 		d.RunesDOS()
@@ -340,7 +346,8 @@ func TestRunesMacintosh(t *testing.T) {
 	for _, tt := range tests {
 		d := Convert{}
 		d.Source.B = []byte(tt.text)
-		if err := d.Transform(mac); err != nil {
+		d.Source.E = mac
+		if err := d.Transform(); err != nil {
 			t.Error(err)
 		}
 		d.RunesMacintosh()
@@ -367,7 +374,8 @@ func TestRunesWindows(t *testing.T) {
 	for _, tt := range tests {
 		d := Convert{}
 		d.Source.B = []byte(tt.text)
-		if err := d.Transform(cp1252); err != nil {
+		d.Source.E = cp1252
+		if err := d.Transform(); err != nil {
 			t.Error(err)
 		}
 		d.RunesWindows()
@@ -406,7 +414,8 @@ func TestRunesEBCDIC(t *testing.T) {
 		c := tt.text
 		d := Convert{}
 		d.Source.B = c
-		if err := d.Transform(charmap.CodePage037); err != nil {
+		d.Source.E = charmap.CodePage037
+		if err := d.Transform(); err != nil {
 			t.Error(err)
 		}
 		d.RunesEBCDIC()
