@@ -1,5 +1,9 @@
 //+build ignore
 
+// To build:
+// In the application root (not internal/pack)
+// go generate ./...
+
 package main
 
 // credit: https://dev.to/koddr/the-easiest-way-to-embed-static-files-into-a-binary-file-in-your-golang-app-no-external-dependencies-43pc
