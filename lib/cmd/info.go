@@ -9,11 +9,12 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"retrotxt.com/retrotxt/internal/pack"
+	internal "retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/config"
 	"retrotxt.com/retrotxt/lib/filesystem"
 	"retrotxt.com/retrotxt/lib/info"
 	"retrotxt.com/retrotxt/lib/logs"
+	"retrotxt.com/retrotxt/lib/pack"
 	"retrotxt.com/retrotxt/lib/str"
 )
 
@@ -74,23 +75,23 @@ func infoPackage(name string) (filename string, err error) {
 	if _, err = os.Stat(s); !os.IsNotExist(err) {
 		return "", nil
 	}
-	pkg, exist := internalPacks[s]
+	pkg, exist := pack.Map()[s]
 	if !exist {
 		return "", nil
 	}
-	b := pack.Get(pkg.name)
+	b := internal.Get(pkg.Name)
 	if b == nil {
-		return "", fmt.Errorf("view package %q: %w", pkg.name, ErrPackGet)
+		return "", fmt.Errorf("view package %q: %w", pkg.Name, ErrPackGet)
 	}
 	file, err := ioutil.TempFile("", fmt.Sprintf("retrotxt_%s.*.txt", s))
 	if err != nil {
-		return "", fmt.Errorf("view package %q: %w", pkg.name, ErrTempOpen)
+		return "", fmt.Errorf("view package %q: %w", pkg.Name, ErrTempOpen)
 	}
 	if _, err = file.Write(b); err != nil {
-		return "", fmt.Errorf("view package %q: %w", pkg.name, ErrTempWrite)
+		return "", fmt.Errorf("view package %q: %w", pkg.Name, ErrTempWrite)
 	}
 	if err := file.Close(); err != nil {
-		return "", fmt.Errorf("view package %q: %w", pkg.name, ErrTempClose)
+		return "", fmt.Errorf("view package %q: %w", pkg.Name, ErrTempClose)
 	}
 	return file.Name(), nil
 }
