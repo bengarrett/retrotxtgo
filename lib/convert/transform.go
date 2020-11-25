@@ -14,34 +14,6 @@ import (
 	"retrotxt.com/retrotxt/lib/logs"
 )
 
-// Convert 8-bit legacy or other Unicode text to UTF-8.
-type Convert struct {
-	// Source text for conversion.
-	Source struct {
-		B         []byte            // source text as bytes.
-		E         encoding.Encoding // text encoding.
-		table     bool              // flag Source.B as text for display as a codepage table.
-		lineBreak [2]rune           // line break controls used by the text.
-	}
-	// Output UTF-8 text.
-	Output struct {
-		R          []rune // output text as runes.
-		ignores    []rune // runes to be ignored.
-		len        int    // R (runes) count.
-		lineBreaks bool   // use line break controls.
-	}
-	// User supplied flag values.
-	Flags Flags
-}
-
-// Flags are the user supplied values.
-type Flags struct {
-	Controls  []string
-	Encoding  encoding.Encoding
-	SwapChars []int
-	Width     int
-}
-
 // ANSI transforms legacy encoded ANSI into modern UTF-8 text.
 // It displays ASCII control codes as characters.
 // It obeys the end of file marker.

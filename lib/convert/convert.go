@@ -4,7 +4,40 @@ package convert
 
 import (
 	"bytes"
+
+	"golang.org/x/text/encoding"
 )
+
+// Convert 8-bit legacy or other Unicode text to UTF-8.
+type Convert struct {
+	Source Source // Source text for conversion.
+	Output Output // Output UTF-8 text.
+	Flags  Flags  // User supplied flag values.
+}
+
+// Source text for conversion.
+type Source struct {
+	B         []byte            // source text as bytes.
+	E         encoding.Encoding // text encoding.
+	table     bool              // flag Source.B as text for display as a codepage table.
+	lineBreak [2]rune           // line break controls used by the text.
+}
+
+// Output UTF-8 text.
+type Output struct {
+	R          []rune // output text as runes.
+	ignores    []rune // runes to be ignored.
+	len        int    // R (runes) count.
+	lineBreaks bool   // use line break controls.
+}
+
+// Flags are the user supplied values.
+type Flags struct {
+	Controls  []string
+	Encoding  encoding.Encoding
+	SwapChars []int
+	Width     int
+}
 
 const (
 	// EOF end of file character.
