@@ -18,7 +18,7 @@ func TestConvert_controls(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var c = Convert{}
-			c.useBreaks = true
+			c.Output.lineBreaks = true
 			c.Flags.Controls = tt.ctrl
 			c.unicodeControls()
 			if got := c.Output.ignores; string(got) != string(tt.want) {

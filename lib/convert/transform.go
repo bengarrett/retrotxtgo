@@ -25,14 +25,13 @@ type Convert struct {
 	}
 	// Output UTF-8 text.
 	Output struct {
-		R       []rune // output text as runes.
-		ignores []rune // runes to be ignored.
-		len     int    // R (runes) count.
+		R          []rune // output text as runes.
+		ignores    []rune // runes to be ignored.
+		len        int    // R (runes) count.
+		lineBreaks bool   // use line break controls.
 	}
 	// User supplied flag values.
-	Flags     Flags
-	useBreaks bool // use line break controls
-
+	Flags Flags
 }
 
 // Flags are the user supplied values.
@@ -47,7 +46,7 @@ type Flags struct {
 // It displays ASCII control codes as characters.
 // It obeys the end of file marker.
 func (c Convert) ANSI(b *[]byte) (utf []rune, err error) {
-	c.useBreaks = true
+	c.Output.lineBreaks = true
 	c.Flags.SwapChars = nil
 	c.Source.B = *b
 	c.unicodeControls()
@@ -78,7 +77,7 @@ func (c Convert) Chars(b *[]byte) (utf []rune, err error) {
 // It obeys common ASCII control codes.
 // It ignores the end of file marker.
 func (c Convert) Dump(b *[]byte) (utf []rune, err error) {
-	c.useBreaks = true
+	c.Output.lineBreaks = true
 	c.Source.B = *b
 	c.unicodeControls()
 	if err = c.Transform(c.Flags.Encoding); err != nil {
@@ -93,7 +92,7 @@ func (c Convert) Dump(b *[]byte) (utf []rune, err error) {
 // It obeys common ASCII control codes.
 // It obeys the end of file marker.
 func (c Convert) Text(b *[]byte) (utf []rune, err error) {
-	c.useBreaks = true
+	c.Output.lineBreaks = true
 	c.Source.B = *b
 	c.unicodeControls()
 	c.Source.B = EndOfFile(*b...)

@@ -358,11 +358,11 @@ func (c *Convert) Swap() *Convert {
 		return nil
 	}
 	const debug = false
-	if c.useBreaks {
+	if c.Output.lineBreaks {
 		c.LineBreaks()
 	}
 	if debug {
-		println(fmt.Sprintf("line break detected: %+v", c.useBreaks))
+		println(fmt.Sprintf("line break detected: %+v", c.Output.lineBreaks))
 	}
 	switch c.Source.E {
 	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
@@ -548,7 +548,7 @@ func (c *Convert) RunesEBCDIC() {
 		case DEL:
 			c.Output.R[i] = decode(del)
 		case nel:
-			if c.useBreaks {
+			if c.Output.lineBreaks {
 				// Go will automatically convert this to CRLF on Windows
 				c.Output.R[i] = LF
 				continue
@@ -746,7 +746,7 @@ func equalLB(r, nl [2]rune) bool {
 }
 
 func (c *Convert) skipLineBreaks(i int) bool {
-	if !c.useBreaks {
+	if !c.Output.lineBreaks {
 		return false
 	}
 	var l, r0, r1 = c.Output.len - 1, c.Output.R[i], rune(0)
