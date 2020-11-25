@@ -38,7 +38,7 @@ func TestSet_Transform(t *testing.T) {
 	}{
 		{"null", u8, "\x00", "␀", false},
 		{"CP037", cp037, "\xc8\x51\xba\x93\xcf", "Hé[lõ", false},
-		{"bell", cp037, "ring a \x07", "ring a \u0007", false},
+		{"bell", cp037, "ring a \x07", "ring a ␇", false},
 		{"CP437", cp437, "H\x82ll\x93 \x9d\xa7\xf4\x9c\xbe", "Héllô ¥º⌠£╛", false},
 		{"⌂", cp437, "Home sweat \x7f", "Home sweat ⌂", false},
 		{"mac", mac, "\x11 command + \x12 shift.", "⌘ command + ⇧ shift.", false},

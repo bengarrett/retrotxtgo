@@ -19,9 +19,9 @@ func TestConvert_controls(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			var a, c = Args{}, Convert{useBreaks: true}
 			a.Controls = tt.ctrl
-			c.controls(a)
+			c.unicodeControls(a)
 			if got := c.ignores; string(got) != string(tt.want) {
-				t.Errorf("Convert.controls() got = %v, want %v", got, tt.want)
+				t.Errorf("Convert.unicodeControls() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
