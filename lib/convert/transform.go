@@ -23,13 +23,12 @@ type Convert struct {
 	}
 	// Output UTF-8 text.
 	Output struct {
-		R []rune // Text as runes
+		R       []rune // Text as runes
+		ignores []rune // these runes will not be transformed
 	}
 	// User supplied values.
-	Flags Flags
-	Runes []rune // Runes with UTF-8 text
-	//Xencode   encoding.Encoding // Source character set encoding
-	ignores   []rune  // these runes will not be transformed
+	Flags     Flags
+	Runes     []rune  // Runes with UTF-8 text
 	len       int     // Runes count
 	lineBreak [2]rune // line break controls
 	table     bool
@@ -221,5 +220,5 @@ func (c *Convert) unicodeControls() {
 }
 
 func (c *Convert) ignore(r rune) {
-	c.ignores = append(c.ignores, r)
+	c.Output.ignores = append(c.Output.ignores, r)
 }

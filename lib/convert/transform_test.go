@@ -21,7 +21,7 @@ func TestConvert_controls(t *testing.T) {
 			c.useBreaks = true
 			c.Flags.Controls = tt.ctrl
 			c.unicodeControls()
-			if got := c.ignores; string(got) != string(tt.want) {
+			if got := c.Output.ignores; string(got) != string(tt.want) {
 				t.Errorf("Convert.unicodeControls() got = %v, want %v", got, tt.want)
 			}
 		})

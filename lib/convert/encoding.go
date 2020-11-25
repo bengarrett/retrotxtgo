@@ -785,7 +785,7 @@ func (c *Convert) runeSwap(r rune) rune {
 }
 
 func (c *Convert) skipIgnores(i int) bool {
-	for _, ign := range c.ignores {
+	for _, ign := range c.Output.ignores {
 		if c.Runes[i] == ign {
 			return true
 		}
