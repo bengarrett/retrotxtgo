@@ -398,7 +398,7 @@ func (c *Convert) Swap() *Convert {
 		c.RunesUTF8()
 	default:
 	}
-	if len(c.swapChars) > 0 {
+	if len(c.Flags.SwapChars) > 0 {
 		for i := 0; i < c.len; i++ {
 			if s := c.runeSwap(c.Runes[i]); s >= 0 {
 				c.Runes[i] = s
@@ -805,7 +805,7 @@ func (c *Convert) swap(r rune) bool {
 	case SquareRootU:
 		chk = SquareRoot
 	}
-	for _, c := range c.swapChars {
+	for _, c := range c.Flags.SwapChars {
 		if c == chk {
 			return true
 		}
