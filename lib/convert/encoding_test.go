@@ -7,26 +7,45 @@ import (
 
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
+	"golang.org/x/text/encoding/japanese"
+	"golang.org/x/text/encoding/unicode"
+)
+
+var (
+	cp037  = charmap.CodePage037
+	cp437  = charmap.CodePage437
+	cp865  = charmap.CodePage865
+	cp1252 = charmap.Windows1252
+	koi    = charmap.KOI8R
+	iso1   = charmap.ISO8859_1
+	iso6e  = charmap.ISO8859_6E
+	iso15  = charmap.ISO8859_15
+	jis    = japanese.ShiftJIS
+	mac    = charmap.Macintosh
+	u8     = unicode.UTF8
+	u8bom  = unicode.UTF8BOM
+	u16be  = unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM)
+	u16le  = unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM)
 )
 
 func TestSet_Transform(t *testing.T) {
 	tests := []struct {
 		name     string
-		codepage string
+		codepage encoding.Encoding
 		str      string
 		want     string
 		wantErr  bool
 	}{
-		{"null", "ascii", "\x00", "␀", false},
-		{"CP037", "cp037", "\xc8\x51\xba\x93\xcf", "Hé[lõ", false},
-		{"bell", "cp037", "ring a \x07", "ring a \u0007", false},
-		{"CP437", "cp437", "H\x82ll\x93 \x9d\xa7\xf4\x9c\xbe", "Héllô ¥º⌠£╛", false},
-		{"⌂", "cp437", "Home sweat \x7f", "Home sweat ⌂", false},
-		{"mac", "macintosh", "\x11 command + \x12 shift.", "⌘ command + ⇧ shift.", false},
-		{"latin1", "latin1", "abcde", "abcde", false},
-		{"6e", "iso-8859-6-e", "ring a \x07", "ring a ␇", false},
-		{"koi8", "koi", "\xf5\xf2\xf3\xf3", "УРСС", false},
-		{"jp", "shiftjis", "abc", "abc", false},
+		{"null", u8, "\x00", "␀", false},
+		{"CP037", cp037, "\xc8\x51\xba\x93\xcf", "Hé[lõ", false},
+		{"bell", cp037, "ring a \x07", "ring a \u0007", false},
+		{"CP437", cp437, "H\x82ll\x93 \x9d\xa7\xf4\x9c\xbe", "Héllô ¥º⌠£╛", false},
+		{"⌂", cp437, "Home sweat \x7f", "Home sweat ⌂", false},
+		{"mac", mac, "\x11 command + \x12 shift.", "⌘ command + ⇧ shift.", false},
+		{"latin1", iso1, "abcde", "abcde", false},
+		{"6e", iso6e, "ring a \x07", "ring a ␇", false},
+		{"koi8", koi, "\xf5\xf2\xf3\xf3", "УРСС", false},
+		{"jp", jis, "abc", "abc", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -48,16 +67,16 @@ func TestSet_Transform(t *testing.T) {
 func TestANSI(t *testing.T) {
 	tests := []struct {
 		name     string
-		codepage string
+		codepage encoding.Encoding
 		str      string
 		want     []rune
 		wantErr  bool
 	}{
-		{"null", "ascii", "\x00", []rune("␀"), false},
-		{"CP037", "cp037", "\xc8\x51\xba\x93\xcf", []rune("Hé[lõ"), false},
-		{"ansi dos", "cp437", "\x1b\x5b0m", []rune{27, 91, 48, 109}, false},
-		{"ansi win", "cp1252", "\x1b\x5b0m", []rune{27, 91, 48, 109}, false},
-		{"panic", "cp1252", "\x1b", []rune{9243}, false},
+		{"null", u8, "\x00", []rune("␀"), false},
+		{"CP037", cp037, "\xc8\x51\xba\x93\xcf", []rune("Hé[lõ"), false},
+		{"ansi dos", cp437, "\x1b\x5b0m", []rune{27, 91, 48, 109}, false},
+		{"ansi win", cp1252, "\x1b\x5b0m", []rune{27, 91, 48, 109}, false},
+		{"panic", cp1252, "\x1b", []rune{9243}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -217,7 +236,7 @@ func TestRunesControls(t *testing.T) {
 	}
 	for _, tt := range tests {
 		d := Convert{Source: []byte(tt.text)}
-		if err := d.Transform("windows-1252"); err != nil {
+		if err := d.Transform(cp1252); err != nil {
 			t.Error(err)
 		}
 		d.Swap()
@@ -243,7 +262,7 @@ func TestRunesKOI8(t *testing.T) {
 	}
 	for _, tt := range tests {
 		d := Convert{Source: []byte(tt.text)}
-		if err := d.Transform("koi8-r"); err != nil {
+		if err := d.Transform(koi); err != nil {
 			t.Error(err)
 		}
 		d.RunesKOI8()
@@ -268,7 +287,7 @@ func TestRunesLatin(t *testing.T) {
 	}
 	for _, tt := range tests {
 		d := Convert{Source: []byte(tt.text)}
-		if err := d.Transform("iso-8859-1"); err != nil {
+		if err := d.Transform(iso1); err != nil {
 			t.Error(err)
 		}
 		d.RunesLatin()
@@ -292,7 +311,7 @@ func TestRunesDOS(t *testing.T) {
 	}
 	for _, tt := range tests {
 		d := Convert{Source: []byte(tt.text)}
-		if err := d.Transform("cp437"); err != nil {
+		if err := d.Transform(cp437); err != nil {
 			t.Error(err)
 		}
 		d.RunesDOS()
@@ -316,7 +335,7 @@ func TestRunesMacintosh(t *testing.T) {
 	}
 	for _, tt := range tests {
 		d := Convert{Source: []byte(tt.text)}
-		if err := d.Transform("mac"); err != nil {
+		if err := d.Transform(mac); err != nil {
 			t.Error(err)
 		}
 		d.RunesMacintosh()
@@ -342,7 +361,7 @@ func TestRunesWindows(t *testing.T) {
 	}
 	for _, tt := range tests {
 		d := Convert{Source: []byte(tt.text)}
-		if err := d.Transform("Windows-1252"); err != nil {
+		if err := d.Transform(cp1252); err != nil {
 			t.Error(err)
 		}
 		d.RunesWindows()
@@ -382,7 +401,7 @@ func TestRunesEBCDIC(t *testing.T) {
 		d := Convert{
 			Source: c,
 		}
-		if err := d.Transform("cp037"); err != nil {
+		if err := d.Transform(charmap.CodePage037); err != nil {
 			t.Error(err)
 		}
 		d.RunesEBCDIC()
