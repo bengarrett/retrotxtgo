@@ -366,7 +366,7 @@ func (c *Convert) Swap() *Convert {
 	}
 	switch c.Source.E {
 	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
-		if c.table {
+		if c.Source.table {
 			c.RunesEBCDIC()
 		}
 		c.RunesControlsEBCDIC()

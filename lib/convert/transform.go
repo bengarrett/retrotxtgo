@@ -18,8 +18,9 @@ import (
 type Convert struct {
 	// Source text for conversion.
 	Source struct {
-		B []byte            // Text as bytes.
-		E encoding.Encoding // Encoding.
+		B     []byte            // Text as bytes.
+		E     encoding.Encoding // Encoding.
+		table bool
 	}
 	// Output UTF-8 text.
 	Output struct {
@@ -30,8 +31,7 @@ type Convert struct {
 	// User supplied values.
 	Flags     Flags
 	lineBreak [2]rune // line break controls
-	table     bool
-	useBreaks bool // use line break controls
+	useBreaks bool    // use line break controls
 
 }
 
@@ -64,7 +64,7 @@ func (c Convert) ANSI(b *[]byte) (utf []rune, err error) {
 // It displays both ASCII and ANSI control codes as characters.
 // It ignores the end of file marker.
 func (c Convert) Chars(b *[]byte) (utf []rune, err error) {
-	c.table = true
+	c.Source.table = true
 	c.Source.B = *b
 	if err = c.Transform(c.Flags.Encoding); err != nil {
 		return nil, fmt.Errorf("chars transform failed: %w", err)
@@ -123,7 +123,7 @@ func (c *Convert) Transform(from encoding.Encoding) error {
 		return nil
 	}
 	// blank invalid shiftjis characters when printing 8-bit tables
-	if c.Source.E == japanese.ShiftJIS && c.table {
+	if c.Source.E == japanese.ShiftJIS && c.Source.table {
 		// this is only for the table command,
 		// it will break normal shift-jis encode text
 		for i, b := range c.Source.B {
