@@ -116,9 +116,9 @@ separate multiple controls with commas
 
 func flagEncode(p *string, cc *cobra.Command) {
 	cc.Flags().StringVarP(p, "encode", "e", "",
-		`character encoding used by the filenames
-when ignored, UTF8 encoding is detected
-if that fails the default is used (default CP437)
+		`character encoding used by the filename(s)
+this flag is silently ignored if Unicode text is detected
+otherwise the default is used (default CP437)
 see the list of encode values `+str.Example("retrotxt list codepages")+"\n")
 }
 
@@ -138,7 +138,7 @@ separate multiple values with commas
 func flagTo(p *string, cc *cobra.Command) {
 	cc.Flags().StringVar(p, "to", "", `alternative character encoding to print to stdout
 modern terminals and RetroTxt use UTF8 encoding
-this alternative option is unreliable and not recommended
+this flag is unreliable and not recommended
 see the list of usable values `+str.Example("retrotxt list codepages")+"\n")
 }
 
