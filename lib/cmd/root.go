@@ -23,6 +23,12 @@ type rootFlags struct {
 	config string
 }
 
+const (
+	tab         = "tab"
+	null        = 0
+	verticalBar = 124
+)
+
 var (
 	// ErrIntpr no interpreter.
 	ErrIntpr = errors.New("the interpreter is not supported")

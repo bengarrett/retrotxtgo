@@ -21,9 +21,9 @@ type viewFlags struct {
 }
 
 var viewFlag = viewFlags{
-	controls: []string{"tab"},
+	controls: []string{tab},
 	encode:   "CP437",
-	swap:     []int{0, 124},
+	swap:     []int{null, verticalBar},
 	to:       "",
 	width:    0,
 }
@@ -46,10 +46,10 @@ var viewCmd = &cobra.Command{
 		f := pack.Flags{}
 		// handle defaults that are left empty for usage formatting
 		if c := cmd.Flags().Lookup("controls"); !c.Changed {
-			conv.Controls = []string{"tab"}
+			conv.Controls = []string{tab}
 		}
 		if s := cmd.Flags().Lookup("swap-chars"); !s.Changed {
-			conv.Swap = []int{0, 124}
+			conv.Swap = []int{null, verticalBar}
 		}
 		// piped input from other programs
 		if filesystem.IsPipe() {

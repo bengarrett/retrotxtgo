@@ -45,9 +45,8 @@ var configCreateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := config.Create(viper.ConfigFileUsed(), configFlag.ow); err != nil {
 			logs.Fatal("config", "create", err)
-		} else {
-			fmt.Println("New config file:", viper.ConfigFileUsed())
 		}
+		fmt.Println("New config file:", viper.ConfigFileUsed())
 	},
 }
 

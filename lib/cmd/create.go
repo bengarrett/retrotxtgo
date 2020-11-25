@@ -37,9 +37,9 @@ type metaFlag struct {
 }
 
 var createFlag = createFlags{
-	controls: []string{"tab"},
+	controls: []string{tab},
 	encode:   "CP437",
-	swap:     []int{0, 124},
+	swap:     []int{null, verticalBar},
 }
 
 var html create.Args
@@ -74,10 +74,10 @@ var createCmd = &cobra.Command{
 		}
 		// handle defaults that are left empty for usage formatting
 		if c := cmd.Flags().Lookup("controls"); !c.Changed {
-			conv.Controls = []string{"tab"} // todo: hmmmm
+			conv.Controls = []string{tab} // todo: hmmmm
 		}
 		if s := cmd.Flags().Lookup("swap-chars"); !s.Changed {
-			conv.Swap = []int{0, 124}
+			conv.Swap = []int{null, verticalBar}
 		}
 		monitorFlags(cmd)
 		if filesystem.IsPipe() {
