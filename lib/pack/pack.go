@@ -56,9 +56,10 @@ func (f Font) String() string {
 }
 
 const (
-	text output = iota // Obey common text controls.
-	dump               // Obey common text controls except end-of-file.
+	ansi output = iota // Only use with ANSI text.
 	char               // Ignore and print the common text controls as characters.
+	text               // Obey common text controls.
+	dump               // Obey common text controls except end-of-file.
 
 	vga  Font = iota // VGA 8px font.
 	mona             // Mona font for shift-jis.
@@ -88,28 +89,28 @@ func Map() map[string]Packs {
 	)
 	m := map[string]Packs{
 		"037":           {text, vga, cp037, "text/cp037.txt", "EBCDIC 037 IBM mainframe test"},
-		"437.cr":        {dump, vga, cp437, "text/cp437-cr.txt", "CP-437 all characters test using CR (carriage return)"},  //
-		"437.crlf":      {dump, vga, cp437, "text/cp437-crlf.txt", "CP-437 all characters test using Windows line breaks"}, //
-		"437.lf":        {dump, vga, cp437, "text/cp437-lf.txt", "CP-437 all characters test using LF (line feed)"},        //
-		"865":           {text, vga, cp865, "text/cp865.txt", "CP-865 and CP-860 Nordic test"},                             //
-		"1252":          {text, vga, cp1252, "text/cp1252.txt", "Windows-1252 English test"},                               //
-		"ascii":         {text, vga, cp437, "text/retrotxt.asc", "RetroTxt ASCII logos"},                                   //
-		"ansi":          {text, vga, cp437, "text/retrotxt.ans", "RetroTxt 256 color ANSI logo"},                           //
-		"ansi.aix":      {text, vga, cp437, "text/ansi-aixterm.ans", "IBM AIX terminal colours"},                           //
-		"ansi.blank":    {text, vga, cp437, "text/ansi-blank.ans", "Empty file test"},                                      //
-		"ansi.cp":       {text, vga, cp437, "text/ansi-cp.ans", "ANSI cursor position tests"},                              //
-		"ansi.cpf":      {text, vga, cp437, "text/ansi-cpf.ans", "ANSI cursor forward tests"},                              //
-		"ansi.hvp":      {text, vga, cp437, "text/ansi-hvp.ans", "ANSI horizontal and vertical cursor positioning"},        //
-		"ansi.proof":    {text, vga, cp437, "text/ansi-proof.ans", "ANSI formatting proof sheet"},                          //
-		"ansi.rgb":      {text, vga, cp437, "text/ansi-rgb.ans", "ANSI RGB 24-bit color sheet"},                            //
-		"ansi.setmodes": {text, vga, cp437, "text/ansi-setmodes.ans", "MS-DOS ANSI.SYS Set Mode examples"},                 //
-		"iso-1":         {text, vga, iso1, "text/iso-8859-1.txt", "ISO 8859-1 select characters"},                          //
+		"437.cr":        {dump, vga, cp437, "text/cp437-cr.txt", "CP-437 all characters test using CR (carriage return)"},
+		"437.crlf":      {dump, vga, cp437, "text/cp437-crlf.txt", "CP-437 all characters test using Windows line breaks"},
+		"437.lf":        {dump, vga, cp437, "text/cp437-lf.txt", "CP-437 all characters test using LF (line feed)"},
+		"865":           {text, vga, cp865, "text/cp865.txt", "CP-865 and CP-860 Nordic test"},
+		"1252":          {text, vga, cp1252, "text/cp1252.txt", "Windows-1252 English test"},
+		"ascii":         {text, vga, cp437, "text/retrotxt.asc", "RetroTxt ASCII logos"},
+		"ansi":          {ansi, vga, cp437, "text/retrotxt.ans", "RetroTxt 256 color ANSI logo"},
+		"ansi.aix":      {ansi, vga, cp437, "text/ansi-aixterm.ans", "IBM AIX terminal colours"},
+		"ansi.blank":    {ansi, vga, cp437, "text/ansi-blank.ans", "Empty file test"},
+		"ansi.cp":       {ansi, vga, cp437, "text/ansi-cp.ans", "ANSI cursor position tests"},
+		"ansi.cpf":      {ansi, vga, cp437, "text/ansi-cpf.ans", "ANSI cursor forward tests"},
+		"ansi.hvp":      {ansi, vga, cp437, "text/ansi-hvp.ans", "ANSI horizontal and vertical cursor positioning"},
+		"ansi.proof":    {ansi, vga, cp437, "text/ansi-proof.ans", "ANSI formatting proof sheet"},
+		"ansi.rgb":      {ansi, vga, cp437, "text/ansi-rgb.ans", "ANSI RGB 24-bit color sheet"},
+		"ansi.setmodes": {ansi, vga, cp437, "text/ansi-setmodes.ans", "MS-DOS ANSI.SYS Set Mode examples"},
+		"iso-1":         {text, vga, iso1, "text/iso-8859-1.txt", "ISO 8859-1 select characters"},
 		"iso-15":        {text, vga, iso15, "text/iso-8859-15.txt", "ISO 8859-15 select characters"},
-		"sauce":         {text, vga, cp437, "text/sauce.txt", "SAUCE metadata test"},                   // todo: check the charmap is okay
-		"shiftjis":      {dump, mona, jis, "text/shiftjis.txt", "Shift-JIS and Mona font test"},        // outputs to utf8?
-		"us-ascii":      {dump, vga, u8, "text/us-ascii.txt", "US-ASCII controls test"},                //
-		"utf8":          {text, vga, u8, "text/utf-8.txt", "UTF-8 test with no Byte Order Mark"},       //
-		"utf8.bom":      {text, vga, u8bom, "text/utf-8-bom.txt", "UTF-8 test with a Byte Order Mark"}, //
+		"sauce":         {text, vga, cp437, "text/sauce.txt", "SAUCE metadata test"},
+		"shiftjis":      {dump, mona, jis, "text/shiftjis.txt", "Shift-JIS and Mona font test"},
+		"us-ascii":      {dump, vga, u8, "text/us-ascii.txt", "US-ASCII controls test"},
+		"utf8":          {text, vga, u8, "text/utf-8.txt", "UTF-8 test with no Byte Order Mark"},
+		"utf8.bom":      {text, vga, u8bom, "text/utf-8-bom.txt", "UTF-8 test with a Byte Order Mark"}, // not working
 		"utf16.be":      {text, vga, u16be, "text/utf-16-be.txt", "UTF-16 Big Endian test"},            //
 		"utf16.le":      {text, vga, u16le, "text/utf-16-le.txt", "UTF-16 Little Endian test"},         //
 	}
@@ -150,6 +151,10 @@ func (f Flags) Open(conv convert.Args, name string) (p Pack, err error) {
 	}
 	// convert to runes and print
 	switch pkg.convert {
+	case ansi:
+		if p.Runes, err = conv.ANSI(&b); err != nil {
+			return p, err
+		}
 	case char:
 		if p.Runes, err = conv.Chars(&b); err != nil {
 			return p, err

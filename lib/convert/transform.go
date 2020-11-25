@@ -35,7 +35,28 @@ type Args struct {
 	Width    int
 }
 
+// ANSI transforms legacy encoded ANSI into modern UTF-8 text.
+// It displays ASCII control codes as characters.
+// It obeys the end of file marker.
+func (a Args) ANSI(b *[]byte) (utf []rune, err error) {
+	var c = Convert{
+		Source:    *b,
+		useBreaks: true,
+		swapChars: nil,
+	}
+	c.controls(a)
+	c.Source = EndOfFile(*b...)
+	if err = c.Transform(a.Encoding); err != nil {
+		return nil, fmt.Errorf("dump transform failed: %w", err)
+	}
+	c.Swap().ANSI()
+	c.width(a.Width)
+	return c.Runes, nil
+}
+
 // Chars transforms legacy encoded characters and text control codes into UTF-8 characters.
+// It displays both ASCII and ANSI control codes as characters.
+// It ignores the end of file marker.
 func (a Args) Chars(b *[]byte) (utf []rune, err error) {
 	var c = Convert{
 		Source:    *b,
@@ -50,8 +71,9 @@ func (a Args) Chars(b *[]byte) (utf []rune, err error) {
 	return c.Runes, nil
 }
 
-// Dump transforms legacy encoded text or ANSI into modern UTF-8 text
-// including all text contained after any MS-DOS end-of-file markers.
+// Dump transforms legacy encoded text or ANSI into modern UTF-8 text.
+// It obeys common ASCII control codes.
+// It ignores the end of file marker.
 func (a Args) Dump(b *[]byte) (utf []rune, err error) {
 	var c = Convert{
 		Source:    *b,
@@ -68,6 +90,8 @@ func (a Args) Dump(b *[]byte) (utf []rune, err error) {
 }
 
 // Text transforms legacy encoded text or ANSI into modern UTF-8 text.
+// It obeys common ASCII control codes.
+// It obeys the end of file marker.
 func (a Args) Text(b *[]byte) (utf []rune, err error) {
 	var c = Convert{
 		Source:    *b,
