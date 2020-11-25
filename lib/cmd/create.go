@@ -71,7 +71,7 @@ var createCmd = &cobra.Command{
 			Flags: convert.Flags{
 				Controls: createFlag.controls,
 				// Encoding: createFlag.encode, // TODO
-				Swap: createFlag.swap,
+				SwapChars: createFlag.swap,
 			},
 		}
 		// handle defaults that are left empty for usage formatting
@@ -79,7 +79,7 @@ var createCmd = &cobra.Command{
 			conv.Flags.Controls = []string{tab}
 		}
 		if s := cmd.Flags().Lookup("swap-chars"); !s.Changed {
-			conv.Flags.Swap = []int{null, verticalBar}
+			conv.Flags.SwapChars = []int{null, verticalBar}
 		}
 		monitorFlags(cmd)
 		if filesystem.IsPipe() {

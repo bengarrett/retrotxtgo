@@ -39,9 +39,9 @@ var viewCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var conv = convert.Convert{}
 		conv.Flags = convert.Flags{
-			Controls: viewFlag.controls,
-			Swap:     viewFlag.swap,
-			Width:    viewFlag.width,
+			Controls:  viewFlag.controls,
+			SwapChars: viewFlag.swap,
+			Width:     viewFlag.width,
 		}
 		f := pack.Flags{}
 		// handle defaults that are left empty for usage formatting
@@ -49,7 +49,7 @@ var viewCmd = &cobra.Command{
 			conv.Flags.Controls = []string{tab}
 		}
 		if s := cmd.Flags().Lookup("swap-chars"); !s.Changed {
-			conv.Flags.Swap = []int{null, verticalBar}
+			conv.Flags.SwapChars = []int{null, verticalBar}
 		}
 		// piped input from other programs
 		if filesystem.IsPipe() {

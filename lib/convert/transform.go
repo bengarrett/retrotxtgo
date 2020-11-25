@@ -37,10 +37,10 @@ type Convert struct {
 
 // Flags are the user supplied values.
 type Flags struct {
-	Controls []string
-	Encoding encoding.Encoding
-	Swap     []int
-	Width    int
+	Controls  []string
+	Encoding  encoding.Encoding
+	SwapChars []int
+	Width     int
 }
 
 // ANSI transforms legacy encoded ANSI into modern UTF-8 text.
@@ -64,7 +64,7 @@ func (c Convert) ANSI(b *[]byte) (utf []rune, err error) {
 // It displays both ASCII and ANSI control codes as characters.
 // It ignores the end of file marker.
 func (c Convert) Chars(b *[]byte) (utf []rune, err error) {
-	c.swapChars = c.Flags.Swap
+	c.swapChars = c.Flags.SwapChars
 	c.table = true
 	c.Source.B = *b
 	if err = c.Transform(c.Flags.Encoding); err != nil {
@@ -80,7 +80,7 @@ func (c Convert) Chars(b *[]byte) (utf []rune, err error) {
 // It ignores the end of file marker.
 func (c Convert) Dump(b *[]byte) (utf []rune, err error) {
 	c.useBreaks = true
-	c.swapChars = c.Flags.Swap
+	c.swapChars = c.Flags.SwapChars
 	c.Source.B = *b
 	c.unicodeControls()
 	if err = c.Transform(c.Flags.Encoding); err != nil {
@@ -96,7 +96,7 @@ func (c Convert) Dump(b *[]byte) (utf []rune, err error) {
 // It obeys the end of file marker.
 func (c Convert) Text(b *[]byte) (utf []rune, err error) {
 	c.useBreaks = true
-	c.swapChars = c.Flags.Swap //todo: redundant?
+	c.swapChars = c.Flags.SwapChars //todo: redundant?
 	c.Source.B = *b
 	c.unicodeControls()
 	c.Source.B = EndOfFile(*b...)
