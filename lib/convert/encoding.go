@@ -369,6 +369,7 @@ func (c *Convert) Swap() *Convert {
 		if c.table {
 			c.RunesEBCDIC()
 		}
+		c.RunesControlsEBCDIC()
 	case charmap.CodePage437, charmap.CodePage850, charmap.CodePage852, charmap.CodePage855,
 		charmap.CodePage858, charmap.CodePage860, charmap.CodePage862, charmap.CodePage863,
 		charmap.CodePage865, charmap.CodePage866:
@@ -455,6 +456,25 @@ func (c *Convert) RunesControls() {
 			c.Runes[i] = decode(byte(rune(z) + r))
 		}
 	}
+}
+
+// RunesControlsEBCDIC switches out EBCDIC controls with Unicode picture represenations.
+func (c *Convert) RunesControlsEBCDIC() {
+	if len(c.Runes) == 0 {
+		return
+	}
+	//
+	const z = byte(row8)
+	for i := 0; i < c.len; i++ {
+		r := c.Runes[i]
+		if c.skipIgnores(i) {
+			continue
+		}
+		if r >= NUL && r <= US {
+			c.Runes[i] = decode(byte(rune(z) + r))
+		}
+	}
+	fmt.Println(string(c.Runes))
 }
 
 // RunesDOS switches out C0, C1 and other controls with PC/MS-DOS picture glyphs.
@@ -707,10 +727,6 @@ func (c *Convert) RunesUTF8() {
 			c.Runes[i] = rune(SP)
 		}
 	}
-}
-
-func (c *Convert) ignore(r rune) {
-	c.ignores = append(c.ignores, r)
 }
 
 func decode(b byte) (r rune) {
