@@ -10,7 +10,6 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"golang.org/x/text/encoding"
 	"retrotxt.com/retrotxt/lib/config"
 	"retrotxt.com/retrotxt/lib/convert"
 	"retrotxt.com/retrotxt/lib/create"
@@ -167,7 +166,6 @@ func createFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 	for i, arg := range args {
 		// convert source text
 		var src []byte
-		var enc encoding.Encoding
 		// internal, packed example file
 		if ok := pack.Valid(arg); ok {
 			if cp := cmd.Flags().Lookup("encode"); cp.Changed {
@@ -204,7 +202,6 @@ func createFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 		} else if html.FontFamily.Value == "" {
 			html.FontFamily.Value = ff.Value.String()
 		}
-		html.Source.Encoding = enc
 		// serve or print html
 		if h := htmlServe(i, cmd, &b); !h {
 			html.Create(&b)

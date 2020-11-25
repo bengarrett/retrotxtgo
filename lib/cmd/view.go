@@ -37,7 +37,7 @@ var viewCmd = &cobra.Command{
   retrotxt view file1.txt file2.txt --encode="iso-8859-1"
   cat file.txt | retrotxt view`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var conv = convert.Convert{}
+		conv := convert.Convert{}
 		conv.Flags = convert.Flags{
 			Controls:  viewFlag.controls,
 			SwapChars: viewFlag.swap,
