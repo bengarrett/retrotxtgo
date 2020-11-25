@@ -39,7 +39,6 @@ var viewCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		conv := convert.Args{
 			Controls: viewFlag.controls,
-			Encoding: viewFlag.encode,
 			Swap:     viewFlag.swap,
 			Width:    viewFlag.width,
 		}
@@ -62,10 +61,10 @@ var viewCmd = &cobra.Command{
 			// internal, packed example file
 			if ok := pack.Valid(arg); ok {
 				if cp := cmd.Flags().Lookup("encode"); cp.Changed {
-					fmt.Println("cp changed", cp.Value.String())
-					if f.Encode, err = convert.Encoding(cp.Value.String()); err != nil {
+					if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
 						logs.Fatal("encoding not known or supported", arg, err)
 					}
+					conv.Encoding = f.From
 				}
 				if to := cmd.Flags().Lookup("to"); to.Changed {
 					if f.To, err = convert.Encoding(to.Value.String()); err != nil {

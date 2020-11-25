@@ -30,7 +30,7 @@ type Convert struct {
 // Args are user supplied flag values.
 type Args struct {
 	Controls []string
-	Encoding string
+	Encoding encoding.Encoding
 	Swap     []int
 	Width    int
 }
@@ -44,7 +44,7 @@ func (a Args) ANSI(b *[]byte) (utf []rune, err error) {
 		useBreaks: true,
 		swapChars: nil,
 	}
-	c.controls(a)
+	c.unicodeControls(a)
 	c.Source = EndOfFile(*b...)
 	if err = c.Transform(a.Encoding); err != nil {
 		return nil, fmt.Errorf("dump transform failed: %w", err)
@@ -80,7 +80,7 @@ func (a Args) Dump(b *[]byte) (utf []rune, err error) {
 		useBreaks: true,
 		swapChars: a.Swap,
 	}
-	c.controls(a)
+	c.unicodeControls(a)
 	if err = c.Transform(a.Encoding); err != nil {
 		return nil, fmt.Errorf("dump transform failed: %w", err)
 	}
@@ -98,7 +98,7 @@ func (a Args) Text(b *[]byte) (utf []rune, err error) {
 		useBreaks: true,
 		swapChars: a.Swap,
 	}
-	c.controls(a)
+	c.unicodeControls(a)
 	c.Source = EndOfFile(*b...)
 	if err = c.Transform(a.Encoding); err != nil {
 		return nil, fmt.Errorf("text transform failed: %w", err)
@@ -109,14 +109,12 @@ func (a Args) Text(b *[]byte) (utf []rune, err error) {
 }
 
 // Transform byte data from named character map encoded text into UTF-8.
-func (c *Convert) Transform(name string) error {
-	if name == "" {
-		name = "UTF-8"
+func (c *Convert) Transform(from encoding.Encoding) error {
+	if from == nil {
+		from = unicode.UTF8
 	}
+	c.encode = from // TODO: check if needed
 	var err error
-	if c.encode, err = Encoding(name); err != nil {
-		return fmt.Errorf("transform encoding error: %w", err)
-	}
 	if len(c.Source) == 0 {
 		return nil
 	}
@@ -186,23 +184,22 @@ func (c *Convert) width(max int) {
 	c.Runes = []rune(w.String())
 }
 
-func (c *Convert) controls(a Args) {
+func (c *Convert) unicodeControls(a Args) {
 	const (
-		esc = 27
-		del = 127
-	)
-	const (
-		bell = iota + 7
+		bell = iota + 7 // BEL = x07
 		bs
 		tab
 		lf
 		vt
 		ff
 		cr
+
+		esc = 27
+		del = 127
 	)
 	for _, v := range a.Controls {
 		switch strings.ToLower(v) {
-		case "bell", "b":
+		case "bell", "bel", "b":
 			c.ignore(bell)
 		case "backspace", "bs":
 			c.ignore(bs)
@@ -222,4 +219,8 @@ func (c *Convert) controls(a Args) {
 			c.ignore(del)
 		}
 	}
+}
+
+func (c *Convert) ignore(r rune) {
+	c.ignores = append(c.ignores, r)
 }
