@@ -72,13 +72,13 @@ var viewCmd = &cobra.Command{
 						logs.Fatal("to not known or supported", arg, err)
 					}
 				}
-				if p, err := f.Open(conv, arg); err != nil {
+				var p pack.Pack
+				if p, err = f.Open(conv, arg); err != nil {
 					logs.Println("pack", arg, err)
 					continue
-				} else {
-					fmt.Println(string(p.Runes))
-					continue
 				}
+				fmt.Println(string(p.Runes))
+				continue
 			}
 			// read file
 			b, err := filesystem.Read(arg)
