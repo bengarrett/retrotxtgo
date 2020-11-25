@@ -33,9 +33,9 @@ type Output struct {
 
 // Flags are the user supplied values.
 type Flags struct {
-	Controls  []string
-	SwapChars []int
-	Width     int
+	Controls  []string // Always use these control codes.
+	SwapChars []int    // Swap out these characters with UTF-8 alternatives.
+	Width     int      // Maximum text width per-line.
 }
 
 const (
