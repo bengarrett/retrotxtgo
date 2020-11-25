@@ -18,16 +18,22 @@ import (
 
 // Flags and configuration values by the user.
 type Flags struct {
-	Encode  encoding.Encoding
-	xEncode string // todo enocoding type
-	To      string
+	Encode encoding.Encoding
+	To     string // todo: change to encoding
+}
+
+// Pack item details.
+type Pack struct {
+	Encoding encoding.Encoding
+	Font     Font
+	Runes    []rune
 }
 
 type internalPack struct {
 	// convert method
 	convert output
 	// font choice
-	font font
+	font Font
 	// default character encoding for the packed data
 	encoding encoding.Encoding
 	// package name used in internal/pack/blob.go
@@ -37,21 +43,28 @@ type internalPack struct {
 }
 
 type (
-	font   uint
+	// Font to use with pack item.
+	Font   uint
 	output uint
 )
+
+func (f Font) String() string {
+	return [...]string{
+		"vga", "mono",
+	}[f]
+}
 
 const (
 	text output = iota // Obey common text controls.
 	dump               // Ignore and print the common text controls as characters.
 
-	vga  font = iota // VGA 8px font.
+	vga  Font = iota // VGA 8px font.
 	mona             // Mona font for shift-jis.
 )
 
 var (
 	cp037  = charmap.CodePage037
-	cp367  = charmap.XUserDefined // IBM367 = us-ascii
+	cp367  = charmap.XUserDefined // todo: IBM367 = us-ascii
 	cp437  = charmap.CodePage437
 	cp865  = charmap.CodePage865 // ibm865
 	cp1252 = charmap.Windows1252 // cp1252
@@ -100,48 +113,48 @@ var internalPacks = map[string]internalPack{
 }
 
 // Open an internal packed example file.
-func (f Flags) Open(conv convert.Args, name string) (r []rune, e encoding.Encoding, err error) {
+func (f Flags) Open(conv convert.Args, name string) (p Pack, err error) {
 	var s = strings.ToLower(name)
 	if _, err = os.Stat(s); !os.IsNotExist(err) {
-		return r, e, nil
+		return p, nil
 	}
 	pkg, exist := internalPacks[s]
 	if !exist {
-		return r, e, nil
+		return p, nil
 	}
 	b := pack.Get(pkg.name)
 	if b == nil {
-		return r, e, fmt.Errorf("view package %q: %w", pkg.name, ErrPackGet)
+		return p, fmt.Errorf("view package %q: %w", pkg.name, ErrPackGet)
 	}
-	e = pkg.encoding
+	p.Encoding = pkg.encoding
 	if f.Encode == nil {
-		conv.Encoding = fmt.Sprint(e)
+		conv.Encoding = fmt.Sprint(p.Encoding)
 	}
 	if f.To != "" {
 		// example exceptions that break the NewEncoder
 		switch s {
 		case "037", "shiftjis", "utf16.be", "utf16.le":
-			return r, e, nil
+			return p, nil
 		}
 		transform(f.Encode, b...)
-		return r, e, nil
+		return p, nil
 	}
 	// convert to runes and print
 	switch pkg.convert {
 	case dump:
 		fmt.Println("dumping pack")
-		if r, err = conv.Dump(&b); err != nil {
-			return r, e, err
+		if p.Runes, err = conv.Dump(&b); err != nil {
+			return p, err
 		}
 	case text:
 		fmt.Println("texting pack")
-		if r, err = conv.Text(&b); err != nil {
-			return r, e, err
+		if p.Runes, err = conv.Text(&b); err != nil {
+			return p, err
 		}
 	default:
-		return r, e, fmt.Errorf("view package %q: %w", pkg.convert, ErrPackValue)
+		return p, fmt.Errorf("view package %q: %w", pkg.convert, ErrPackValue)
 	}
-	return r, e, nil
+	return p, nil
 }
 
 // Valid package name?

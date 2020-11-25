@@ -71,11 +71,11 @@ var viewCmd = &cobra.Command{
 					fmt.Println("to changed", to.Value.String())
 					f.To = to.Value.String()
 				}
-				if r, _, err := f.Open(conv, arg); err != nil {
+				if p, err := f.Open(conv, arg); err != nil {
 					logs.Println("pack", arg, err)
 					continue
 				} else {
-					fmt.Println(string(r))
+					fmt.Println(string(p.Runes))
 					continue
 				}
 			}

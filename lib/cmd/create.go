@@ -11,8 +11,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/text/encoding"
-
-	//"retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/config"
 	"retrotxt.com/retrotxt/lib/convert"
 	"retrotxt.com/retrotxt/lib/create"
@@ -26,6 +24,16 @@ type createFlags struct {
 	controls []string
 	encode   string
 	swap     []int
+}
+
+type metaFlag struct {
+	key   string   // configuration name
+	strg  *string  // StringVarP(p) argument value
+	boo   *bool    // BoolVarP(p) argument value
+	i     *uint    // UintVar(p) argument value
+	name  string   // flag long name
+	short string   // flag short name
+	opts  []string // flag choices for display in the usage string
 }
 
 var createFlag = createFlags{
@@ -64,16 +72,14 @@ var createCmd = &cobra.Command{
 			Encoding: createFlag.encode,
 			Swap:     createFlag.swap,
 		}
-		f := pack.Flags{}
 		// handle defaults that are left empty for usage formatting
 		if c := cmd.Flags().Lookup("controls"); !c.Changed {
-			conv.Controls = []string{"tab"}
+			conv.Controls = []string{"tab"} // todo: hmmmm
 		}
 		if s := cmd.Flags().Lookup("swap-chars"); !s.Changed {
 			conv.Swap = []int{0, 124}
 		}
 		monitorFlags(cmd)
-		// piped input from other programs
 		if filesystem.IsPipe() {
 			createPipe(cmd, conv)
 		}
@@ -81,127 +87,9 @@ var createCmd = &cobra.Command{
 		if body := cmd.Flags().Lookup("body"); body.Changed {
 			createBody(cmd)
 		}
-		// user arguments
 		checkUse(cmd, args...)
-		var err error
-		for i, arg := range args {
-			fmt.Println("i", i)
-			// convert source text
-			var src []byte
-			var enc encoding.Encoding
-			// internal, packed example file
-			if ok := pack.Valid(arg); ok {
-				if cp := cmd.Flags().Lookup("encode"); cp.Changed {
-					fmt.Println("cp changed", cp.Value.String())
-					if f.Encode, err = convert.Encoding(cp.Value.String()); err != nil {
-						logs.Fatal("encoding not known or supported", arg, err)
-					}
-				}
-				var r []rune
-				r, enc, err = f.Open(conv, arg)
-				if err != nil {
-					logs.Println("pack", arg, err)
-					continue
-				}
-				src = create.Normalize(enc, r...)
-			}
-			// read file
-			if src == nil {
-				if src, err = filesystem.Read(arg); err != nil {
-					logs.Fatal("file is invalid", arg, err)
-				}
-			}
-			// convert text
-			r, err := conv.Text(&src)
-			if err != nil {
-				logs.Println("convert text", arg, err)
-				continue
-			}
-			b := []byte(string(r))
-			// marshal source text as html
-			html.Source.Name = arg
-			if ff := cmd.Flags().Lookup("font-family"); !ff.Changed {
-				// todo: get pack font
-				html.FontFamily.Value = "vga"
-			} else {
-				html.FontFamily.Value = ff.Value.String()
-			}
-			html.Source.Encoding = enc
-			// serve or print html
-			if h := htmlServe(i, cmd, &b); !h {
-				html.Create(&b)
-			}
-		}
+		createFiles(cmd, conv, args...)
 	},
-}
-
-func htmlServe(i int, cmd *cobra.Command, b *[]byte) bool {
-	if i != 0 {
-		return false
-		// only ever serve the first file given to the args.
-		// in the future, when handling multiple files an index.html
-		// could be generated with links to each of the htmls.
-	}
-	if serve := cmd.Flags().Lookup("serve"); serve.Changed {
-		html.Serve(b)
-		return true
-	}
-	return false
-}
-
-func createBody(cmd *cobra.Command) {
-	// hidden --body flag that ignores all args
-	if body := cmd.Flags().Lookup("body"); body.Changed {
-		b := []byte(body.Value.String())
-		if h := htmlServe(0, cmd, &b); !h {
-			html.Create(&b)
-		}
-		os.Exit(0)
-	}
-}
-
-func monitorFlags(cmd *cobra.Command) {
-	var changed = func(key string) bool {
-		l := cmd.Flags().Lookup(key)
-		if l == nil {
-			return false
-		}
-		return l.Changed
-	}
-	// monitor string flag changes to allow three user states.
-	// 1) flag not changed so use viper default.
-	// 2) flag with new value to overwrite viper default.
-	// 3) blank flag value to overwrite viper default with an empty/disable value.
-	html.FontFamily.Flag = changed("font-family")
-	html.Metadata.Author.Flag = changed("meta-author")
-	html.Metadata.ColorScheme.Flag = changed("meta-color-scheme")
-	html.Metadata.Description.Flag = changed("meta-description")
-	html.Metadata.Keywords.Flag = changed("meta-keywords")
-	html.Metadata.Referrer.Flag = changed("meta-referrer")
-	html.Metadata.Robots.Flag = changed("meta-robots")
-	html.Metadata.ThemeColor.Flag = changed("meta-theme-color")
-	html.Title.Flag = changed("title")
-}
-
-func createPipe(cmd *cobra.Command, conv convert.Args) {
-	b, err := filesystem.ReadPipe()
-	if err != nil {
-		logs.Fatal("create", "read stdin", err)
-	}
-	if h := htmlServe(0, cmd, &b); !h {
-		html.Create(&b)
-	}
-	os.Exit(0)
-}
-
-type metaFlag struct {
-	key   string   // configuration name
-	strg  *string  // StringVarP(p) argument value
-	boo   *bool    // BoolVarP(p) argument value
-	i     *uint    // UintVar(p) argument value
-	name  string   // flag long name
-	short string   // flag short name
-	opts  []string // flag choices for display in the usage string
 }
 
 func init() {
@@ -260,6 +148,92 @@ or ignore to print (save directory: `+viper.GetString("save-directory")+")")
 	createCmd.Flags().SortFlags = false
 }
 
+func createBody(cmd *cobra.Command) {
+	// hidden --body flag that ignores all args
+	if body := cmd.Flags().Lookup("body"); body.Changed {
+		b := []byte(body.Value.String())
+		if h := htmlServe(0, cmd, &b); !h {
+			html.Create(&b)
+		}
+		os.Exit(0)
+	}
+}
+
+func createFiles(cmd *cobra.Command, conv convert.Args, args ...string) {
+	var err error
+	f := pack.Flags{}
+	for i, arg := range args {
+		// convert source text
+		var src []byte
+		var enc encoding.Encoding
+		// internal, packed example file
+		if ok := pack.Valid(arg); ok {
+			if cp := cmd.Flags().Lookup("encode"); cp.Changed {
+				if f.Encode, err = convert.Encoding(cp.Value.String()); err != nil {
+					logs.Fatal("encoding not known or supported", arg, err)
+				}
+			}
+			p, err := f.Open(conv, arg)
+			if err != nil {
+				logs.Println("pack", arg, err)
+				continue
+			}
+			src = create.Normalize(p.Encoding, p.Runes...)
+			html.FontFamily.Value = p.Font.String()
+		}
+		// read file
+		if src == nil {
+			if src, err = filesystem.Read(arg); err != nil {
+				logs.Fatal("file is invalid", arg, err)
+			}
+		}
+		// convert text
+		r, err := conv.Text(&src)
+		if err != nil {
+			logs.Println("convert text", arg, err)
+			continue
+		}
+		b := []byte(string(r))
+		// marshal source text as html
+		html.Source.Name = arg
+		if ff := cmd.Flags().Lookup("font-family"); !ff.Changed {
+			html.FontFamily.Value = "vga"
+		} else if html.FontFamily.Value == "" {
+			html.FontFamily.Value = ff.Value.String()
+		}
+		html.Source.Encoding = enc
+		// serve or print html
+		if h := htmlServe(i, cmd, &b); !h {
+			html.Create(&b)
+		}
+	}
+}
+
+func createPipe(cmd *cobra.Command, conv convert.Args) {
+	b, err := filesystem.ReadPipe()
+	if err != nil {
+		logs.Fatal("create", "read stdin", err)
+	}
+	if h := htmlServe(0, cmd, &b); !h {
+		html.Create(&b)
+	}
+	os.Exit(0)
+}
+
+func htmlServe(i int, cmd *cobra.Command, b *[]byte) bool {
+	if i != 0 {
+		return false
+		// only ever serve the first file given to the args.
+		// in the future, when handling multiple files an index.html
+		// could be generated with links to each of the htmls.
+	}
+	if serve := cmd.Flags().Lookup("serve"); serve.Changed {
+		html.Serve(b)
+		return true
+	}
+	return false
+}
+
 func metaConfig() map[int]metaFlag {
 	const (
 		serve = iota
@@ -306,4 +280,27 @@ func metaConfig() map[int]metaFlag {
 		body:  {"html.body", &html.Source.HiddenBody, nil, nil, "body", "b", nil},
 		cache: {"html.layout.cache", nil, &html.Output.Cache, nil, "cache", "", nil},
 	}
+}
+
+func monitorFlags(cmd *cobra.Command) {
+	var changed = func(key string) bool {
+		l := cmd.Flags().Lookup(key)
+		if l == nil {
+			return false
+		}
+		return l.Changed
+	}
+	// monitor string flag changes to allow three user states.
+	// 1) flag not changed so use viper default.
+	// 2) flag with new value to overwrite viper default.
+	// 3) blank flag value to overwrite viper default with an empty/disable value.
+	html.FontFamily.Flag = changed("font-family")
+	html.Metadata.Author.Flag = changed("meta-author")
+	html.Metadata.ColorScheme.Flag = changed("meta-color-scheme")
+	html.Metadata.Description.Flag = changed("meta-description")
+	html.Metadata.Keywords.Flag = changed("meta-keywords")
+	html.Metadata.Referrer.Flag = changed("meta-referrer")
+	html.Metadata.Robots.Flag = changed("meta-robots")
+	html.Metadata.ThemeColor.Flag = changed("meta-theme-color")
+	html.Title.Flag = changed("title")
 }
