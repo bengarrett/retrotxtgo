@@ -173,7 +173,8 @@ func createFiles(cmd *cobra.Command, conv convert.Args, args ...string) {
 					logs.Fatal("encoding not known or supported", arg, err)
 				}
 			}
-			p, err := f.Open(conv, arg)
+			var p pack.Pack
+			p, err = f.Open(conv, arg)
 			if err != nil {
 				logs.Println("pack", arg, err)
 				continue

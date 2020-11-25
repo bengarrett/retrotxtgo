@@ -43,28 +43,27 @@ type Args struct {
 	Output struct {
 		Cache       bool   // Cache, when false will always unpack a new .gohtml template
 		Compress    bool   // TODO: Compress and store all files into an archive
-		Destination string // TODO: Destination HTML destination either a directory or file
 		OW          bool   // OW overwrite any existing files when saving
 		SaveToFile  bool   // TODO: SaveToFile save to a file or print to stdout
-
+		Destination string // TODO: Destination HTML destination either a directory or file
 	}
-	Layout string // Layout of the HTML
-	Syntax string // Syntax and color theming printing HTML
-	Port   uint   // Port for HTTP server
-	Title  struct {
+	Title struct {
 		Flag  bool
 		Value string
 	}
-	FontEmbed  bool
 	FontFamily struct {
 		Flag  bool
 		Value string
 	}
-	Metadata Meta
-	layout   Layout // layout flag interpretation
-	test     bool   // unit test mode
-	tmpl     string // template filename
-	pack     string // template package name
+	Metadata  Meta
+	layout    Layout // layout flag interpretation
+	Port      uint   // Port for HTTP server
+	FontEmbed bool
+	test      bool   // unit test mode
+	Layout    string // Layout of the HTML
+	Syntax    string // Syntax and color theming printing HTML
+	tmpl      string // template filename
+	pack      string // template package name
 }
 
 // Meta data embedded into the webpage.
@@ -131,7 +130,7 @@ type PageData struct {
 type Layout int
 
 const (
-	// use 0 as an error placeholder
+	// use 0 as an error placeholder.
 	_ Layout = iota
 	// Standard template with external CSS, JS, fonts.
 	Standard
@@ -283,7 +282,7 @@ func (args *Args) destination(name string) (string, error) {
 func (args *Args) saveCSS(c chan error) {
 	switch args.layout {
 	case Standard:
-	default:
+	case Compact, Inline, None:
 		c <- nil
 	}
 	name, err := args.destination("styles.css")
@@ -305,7 +304,7 @@ func (args *Args) saveCSS(c chan error) {
 func (args *Args) saveFavIcon(c chan error) {
 	switch args.layout {
 	case Standard:
-	default:
+	case Compact, Inline, None:
 		c <- nil
 	}
 	name, err := args.destination("favicon.ico")
@@ -341,6 +340,7 @@ func (args *Args) saveFont(c chan error) {
 		if err := args.saveFontCSS("font.css"); err != nil {
 			c <- err
 		}
+	case Compact, Inline, None:
 	}
 	c <- nil
 }
@@ -386,7 +386,7 @@ func (args *Args) saveFontWoff2(name, packName string) error {
 func (args *Args) saveJS(c chan error) {
 	switch args.layout {
 	case Standard:
-	default:
+	case Compact, Inline, None:
 		c <- nil
 		return
 	}
@@ -629,10 +629,10 @@ func layout(name string) (l Layout) {
 	return l
 }
 
-func (args *Args) marshalCompact(p PageData) PageData {
+func (args *Args) marshalCompact(p *PageData) PageData {
 	p.PageTitle = args.pageTitle()
 	p.MetaGenerator = false
-	return p
+	return *p
 }
 
 func (args *Args) marshalInline(b *[]byte) (p PageData, err error) {
@@ -670,7 +670,7 @@ func (args *Args) marshalInline(b *[]byte) (p PageData, err error) {
 	return p, nil
 }
 
-func (args *Args) marshalStandard(p PageData) PageData {
+func (args *Args) marshalStandard(p *PageData) PageData {
 	p.FontEmbed = args.FontEmbed
 	p.FontFamily = args.fontFamily()
 	p.MetaAuthor = args.metaAuthor()
@@ -688,12 +688,12 @@ func (args *Args) marshalStandard(p PageData) PageData {
 	t := time.Now().UTC()
 	p.BuildDate = t.Format(time.RFC3339)
 	p.BuildVersion = version.B.Version
-	return p
+	return *p
 }
 
-// TODO: reorder etc
+// TODO: reorder etc.
 
-// ReplaceNELs todo: placeholder todo
+// ReplaceNELs todo: placeholder todo.
 func ReplaceNELs() runes.Transformer {
 	return runes.Map(func(r rune) rune {
 		if r == filesystem.NextLine {
@@ -726,38 +726,27 @@ func (args *Args) marshal(b *[]byte) (p PageData, err error) {
 		if p, err = args.marshalInline(b); err != nil {
 			return p, err
 		}
-		p = args.marshalStandard(p)
+		p = args.marshalStandard(&p)
 	case Standard:
-		p = args.marshalStandard(p)
+		p = args.marshalStandard(&p)
 	case Compact: // disables all meta tags
-		p = args.marshalCompact(p)
+		p = args.marshalCompact(&p)
 	case None:
 		// do nothing
 	default:
 		return PageData{}, fmt.Errorf("pagedata %s: %w", args.layout, ErrNoLayout)
 	}
-	// init encoding
-	// var conv = convert.Args{
-	// 	Encoding: args.Source.Encoding,
-	// }
-	// if args.Source.Encoding == "" {
-	// 	conv.Encoding = "cp437"
-	// }
-	// fmt.Println("page data", p)
-	// fmt.Println("marshal byte encoding", conv.Encoding)
 	// convert bytes into utf8
 	r := bytes.Runes(*b)
 	p.PreText = string(r)
 	if p.MetaRetroTxt {
-		lb := filesystem.NEL() // TODO: fix
+		lb := filesystem.NEL() // TODO: replace
 		p.Comment = args.comment(lb, r...)
 	}
 	return p, nil
 }
 
 func (args *Args) comment(lb filesystem.LB, r ...rune) string {
-	//enc, err := convert.Encoding()
-	// encode, _ := convert.Encoding(e)
 	l, w, f := 0, 0, "n/a"
 	b, lbs, e := []byte(string(r)),
 		filesystem.LineBreak(lb, false),
