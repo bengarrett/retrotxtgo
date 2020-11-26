@@ -165,14 +165,15 @@ func createFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 	f := pack.Flags{}
 	for i, arg := range args {
 		// convert source text
+		if cp := cmd.Flags().Lookup("encode"); cp.Changed {
+			if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
+				logs.Fatal("encoding not known or supported", arg, err)
+			}
+			conv.Source.E = f.From
+		}
 		var src []byte
 		// internal, packed example file
 		if ok := pack.Valid(arg); ok {
-			if cp := cmd.Flags().Lookup("encode"); cp.Changed {
-				if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
-					logs.Fatal("encoding not known or supported", arg, err)
-				}
-			}
 			var p pack.Pack
 			p, err = f.Open(&conv, arg)
 			if err != nil {
