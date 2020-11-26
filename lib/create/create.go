@@ -2,35 +2,22 @@
 package create
 
 import (
-	"bufio"
-	"bytes"
 	"errors"
 	"fmt"
 	"html/template"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
-	"time"
 
-	"github.com/gookit/color"
-	"github.com/spf13/viper"
-	"github.com/tdewolff/minify"
-	"github.com/tdewolff/minify/css"
-	"github.com/tdewolff/minify/js"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
-	"golang.org/x/text/language"
 	"golang.org/x/text/runes"
 	"golang.org/x/text/transform"
-	"retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/filesystem"
-	"retrotxt.com/retrotxt/lib/humanize"
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/str"
-	"retrotxt.com/retrotxt/lib/version"
 
-	gap "github.com/muesli/go-app-paths"
+	"github.com/spf13/viper"
 )
 
 // Args holds arguments and options sourced from user flags or the config file.
@@ -249,226 +236,6 @@ func (args *Args) Create(b *[]byte) {
 	}
 }
 
-func (args *Args) destination(name string) (string, error) {
-	dir := filesystem.DirExpansion(args.Save.Destination)
-	path := dir
-	stat, err := os.Stat(dir)
-	if err != nil {
-		return "", fmt.Errorf("args destination directory failed %q: %w", dir, err)
-	}
-	if stat.IsDir() {
-		path = filepath.Join(dir, name)
-	}
-	_, err = os.Stat(path)
-	if !args.Save.OW && !os.IsNotExist(err) {
-		switch name {
-		case "favicon.ico", "scripts.js", "vga.woff2":
-			// existing static files can be ignored
-			return path, nil
-		}
-		logs.Println("file exists", path, ErrReqOW)
-		return path, nil
-	}
-	if os.IsNotExist(err) {
-		empty := []byte{}
-		if _, _, err = filesystem.Save(path, empty...); err != nil {
-			return "", fmt.Errorf("args destination path failed %q: %w", path, err)
-		}
-	}
-	return path, nil
-}
-
-// saveCSS creates and saves the styles stylesheet to the Destination argument.
-func (args *Args) saveCSS(c chan error) {
-	switch args.layout {
-	case Standard:
-	case Compact, Inline, None:
-		c <- nil
-	}
-	name, err := args.destination("styles.css")
-	if err != nil {
-		c <- err
-	}
-	b := pack.Get("css/styles.css")
-	if len(b) == 0 {
-		c <- fmt.Errorf("create.saveCSS %q: %w", args.pack, ErrPackGet)
-	}
-	nn, _, err := filesystem.Save(name, b...)
-	if err != nil {
-		c <- err
-	}
-	bytesStats(name, nn)
-	c <- nil
-}
-
-func (args *Args) saveFavIcon(c chan error) {
-	switch args.layout {
-	case Standard:
-	case Compact, Inline, None:
-		c <- nil
-	}
-	name, err := args.destination("favicon.ico")
-	if err != nil {
-		c <- err
-	}
-	b := pack.Get("img/retrotxt_16.png")
-	if len(b) == 0 {
-		c <- fmt.Errorf("create.saveFavIcon %q: %w", args.pack, ErrPackGet)
-	}
-	nn, _, err := filesystem.Save(name, b...)
-	if err != nil {
-		c <- err
-	}
-	bytesStats(name, nn)
-	c <- nil
-}
-
-// saveFont unpacks and saves the font binary to the Destination argument.
-func (args *Args) saveFont(c chan error) {
-	if !args.FontEmbed {
-		f := Family(args.FontFamily.Value)
-		if f.String() == "" {
-			c <- fmt.Errorf("save font, could not save %q: %w", args.FontFamily.Value, ErrUnknownFF)
-			return
-		}
-		if err := args.saveFontWoff2(f.File(), "font/"+f.File()); err != nil {
-			c <- err
-		}
-	}
-	switch args.layout {
-	case Standard:
-		if err := args.saveFontCSS("font.css"); err != nil {
-			c <- err
-		}
-	case Compact, Inline, None:
-	}
-	c <- nil
-}
-
-func (args *Args) saveFontCSS(name string) error {
-	name, err := args.destination(name)
-	if err != nil {
-		return err
-	}
-	f := Family(args.FontFamily.Value).String()
-	if f == "" {
-		return fmt.Errorf("create.saveFontCSS %q: %w", name, ErrUnknownFF)
-	}
-	b, err := FontCSS(f, args.FontEmbed)
-	if err != nil {
-		return err
-	}
-	nn, _, err := filesystem.Save(name, b...)
-	if err != nil {
-		return err
-	}
-	bytesStats(name, nn)
-	return nil
-}
-
-func (args *Args) saveFontWoff2(name, packName string) error {
-	name, err := args.destination(name)
-	if err != nil {
-		return err
-	}
-	b := pack.Get(packName)
-	if len(b) == 0 {
-		return fmt.Errorf("create.saveFontWoff2 %q: %w", args.pack, ErrPackGet)
-	}
-	nn, _, err := filesystem.Save(name, b...)
-	if err != nil {
-		return err
-	}
-	bytesStats(name, nn)
-	return nil
-}
-
-func (args *Args) saveJS(c chan error) {
-	switch args.layout {
-	case Standard:
-	case Compact, Inline, None:
-		c <- nil
-		return
-	}
-	name, err := args.destination("scripts.js")
-	if err != nil {
-		c <- err
-	}
-	b := pack.Get("js/scripts.js")
-	if len(b) == 0 {
-		c <- fmt.Errorf("create.saveJS %q: %w", args.pack, ErrPackGet)
-	}
-	nn, _, err := filesystem.Save(name, b...)
-	if err != nil {
-		c <- err
-	}
-	bytesStats(name, nn)
-	c <- nil
-}
-
-// SaveHTML creates and saves the html template to the Destination argument.
-func (args *Args) saveHTML(b *[]byte, c chan error) {
-	name, err := args.destination("index.html")
-	if err != nil {
-		c <- err
-	}
-	if name == "" {
-		c <- ErrEmptyName
-	}
-	file, err := os.Create(name)
-	if err != nil {
-		c <- err
-	}
-	defer func() {
-		cerr := file.Close()
-		c <- cerr
-	}()
-	buf, err := args.marshalTextTransform(b)
-	if err != nil {
-		c <- err
-	}
-	w := bufio.NewWriter(file)
-	nn, err := w.Write(buf.Bytes())
-	if err != nil {
-		c <- err
-	}
-	bytesStats(name, nn)
-	if err := w.Flush(); err != nil {
-		c <- err
-	}
-	c <- file.Close()
-}
-
-func bytesStats(name string, nn int) {
-	const kB = 1000
-	h := humanize.Decimal(int64(nn), language.AmericanEnglish)
-	color.OpFuzzy.Printf("saved to %s", name)
-	switch {
-	case nn == 0:
-		color.OpFuzzy.Printf("saved to %s (zero-byte file)", name)
-	case nn < kB:
-		color.OpFuzzy.Printf(", %s", h)
-	default:
-		color.OpFuzzy.Printf(", %s (%d)", h, nn)
-	}
-	fmt.Print("\n")
-}
-
-func (args *Args) marshalTextTransform(b *[]byte) (buf bytes.Buffer, err error) {
-	tmpl, err := args.newTemplate()
-	if err != nil {
-		return buf, fmt.Errorf("stdout new template failure: %w", err)
-	}
-	d, err := args.marshal(b)
-	if err != nil {
-		return buf, fmt.Errorf("stdout meta and pagedata failure: %w", err)
-	}
-	if err = tmpl.Execute(&buf, d); err != nil {
-		return buf, fmt.Errorf("stdout template execute failure: %w", err)
-	}
-	return buf, nil
-}
-
 // Stdout creates and prints the html template.
 func (args *Args) Stdout(b *[]byte) error {
 	buf, err := args.marshalTextTransform(b)
@@ -489,6 +256,22 @@ func (args *Args) Stdout(b *[]byte) error {
 		}
 	}
 	return nil
+}
+
+// Normalize runes to bytes by making adjustments to text control codes.
+func Normalize(e encoding.Encoding, r ...rune) (b []byte) {
+	s := ""
+	switch e {
+	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
+		var err error
+		s, _, err = transform.String(replaceNELs(), string(r))
+		if err != nil {
+			s = string(r)
+		}
+	default:
+		s = string(r)
+	}
+	return []byte(s)
 }
 
 // destination determines if user supplied arguments are a valid file or directory destination.
@@ -526,95 +309,6 @@ func dirs(dir string) (path string, err error) {
 	return path, nil
 }
 
-// newTemplate creates and parses a new template file.
-// The argument test is used internally.
-func (args *Args) newTemplate() (*template.Template, error) {
-	if err := args.templateCache(); err != nil {
-		return nil, fmt.Errorf("using existing template cache: %w", err)
-	}
-	if !args.Save.Cache {
-		if err := args.templateSave(); err != nil {
-			return nil, fmt.Errorf("creating a new template: %w", err)
-		}
-	} else {
-		s, err := os.Stat(args.tmpl)
-		switch {
-		case os.IsNotExist(err):
-			if err2 := args.templateSave(); err2 != nil {
-				return nil, fmt.Errorf("saving to the template: %w", err2)
-			}
-		case err != nil:
-			return nil, err
-		case s.IsDir():
-			return nil, fmt.Errorf("new template %q: %w", args.tmpl, ErrTmplDir)
-		}
-	}
-	// to avoid a potential panic, Stat again in case os.IsNotExist() is true
-	s, err := os.Stat(args.tmpl)
-	if err != nil {
-		return nil, fmt.Errorf("could not access file: %q: %w", args.tmpl, err)
-	}
-	if err = args.templatePack(); err != nil {
-		return nil, fmt.Errorf("template pack: %w", err)
-	}
-	b, err := args.templateData()
-	if s.Size() != int64(len(*b)) {
-		if err != nil {
-			return nil, fmt.Errorf("template data: %w", err)
-		}
-		if _, _, err := filesystem.Save(args.tmpl, *b...); err != nil {
-			return nil, fmt.Errorf("saving template: %q: %w", args.tmpl, err)
-		}
-	}
-	t := template.Must(template.ParseFiles(args.tmpl))
-	return t, nil
-}
-
-// filename creates a filepath for the template filenames.
-func (args *Args) templateCache() (err error) {
-	l := args.layout.Pack()
-	if l == "" {
-		return fmt.Errorf("template cache %q: %w", args.layout, ErrNoLayout)
-	}
-	args.tmpl, err = gap.NewScope(gap.User, "retrotxt").DataPath(l + ".gohtml")
-	if err != nil {
-		return fmt.Errorf("template cache path: %q: %w", args.tmpl, err)
-	}
-	return nil
-}
-
-func (args *Args) templatePack() error {
-	l := args.layout.Pack()
-	if l == "" {
-		return fmt.Errorf("template pack %q: %w", args.layout, ErrNoLayout)
-	}
-	args.pack = fmt.Sprintf("html/%s.gohtml", l)
-	return nil
-}
-
-func (args *Args) templateData() (*[]byte, error) {
-	b := pack.Get(args.pack)
-	if len(b) == 0 {
-		return nil, fmt.Errorf("template data %q: %w", args.pack, ErrPackGet)
-	}
-	return &b, nil
-}
-
-func (args *Args) templateSave() error {
-	err := args.templatePack()
-	if err != nil {
-		return fmt.Errorf("template save pack error: %w", err)
-	}
-	b, err := args.templateData()
-	if err != nil {
-		return fmt.Errorf("template save data error: %w", err)
-	}
-	if _, _, err := filesystem.Save(args.tmpl, *b...); err != nil {
-		return fmt.Errorf("template save error: %w", err)
-	}
-	return nil
-}
-
 func layout(name string) (l Layout) {
 	switch name {
 	case standard, "s":
@@ -629,205 +323,12 @@ func layout(name string) (l Layout) {
 	return l
 }
 
-func (args *Args) marshalCompact(p *PageData) PageData {
-	p.PageTitle = args.pageTitle()
-	p.MetaGenerator = false
-	return *p
-}
-
-func (args *Args) marshalInline(b *[]byte) (p PageData, err error) {
-	if b == nil {
-		return PageData{}, fmt.Errorf("pagedata: %w", ErrNilByte)
-	}
-	p.ExternalEmbed = true
-	m := minify.New()
-	m.AddFunc("text/css", css.Minify)
-	m.AddFuncRegexp(regexp.MustCompile("^(application|text)/(x-)?(java|ecma)script$"), js.Minify)
-	// styles
-	s := bytes.TrimSpace(pack.Get("css/styles.css"))
-	// font
-	var f []byte
-	f, err = FontCSS(args.FontFamily.Value, args.FontEmbed)
-	if err != nil {
-		return p, fmt.Errorf("pagedata font error: %w", err)
-	}
-	f = bytes.TrimSpace(f)
-	// merge
-	c := [][]byte{s, []byte("/* font */"), f}
-	*b = bytes.Join(c, []byte("\n\n"))
-	// compress & embed
-	*b, err = m.Bytes("text/css", *b)
-	if err != nil {
-		return p, fmt.Errorf("pagedata minify css: %w", err)
-	}
-	p.CSSEmbed = template.CSS(string(*b))
-	jsp := pack.Get("js/scripts.js")
-	jsp, err = m.Bytes("application/javascript", jsp)
-	if err != nil {
-		return p, fmt.Errorf("pagedata minify javascript: %w", err)
-	}
-	p.ScriptEmbed = template.JS(string(jsp))
-	return p, nil
-}
-
-func (args *Args) marshalStandard(p *PageData) PageData {
-	p.FontEmbed = args.FontEmbed
-	p.FontFamily = args.fontFamily()
-	p.MetaAuthor = args.metaAuthor()
-	p.MetaColorScheme = args.metaColorScheme()
-	p.MetaDesc = args.metaDesc()
-	p.MetaGenerator = args.Metadata.Generator
-	p.MetaKeywords = args.metaKeywords()
-	p.MetaNoTranslate = args.Metadata.NoTranslate
-	p.MetaReferrer = args.metaReferrer()
-	p.MetaRobots = args.metaRobots()
-	p.MetaRetroTxt = args.Metadata.RetroTxt
-	p.MetaThemeColor = args.metaThemeColor()
-	p.PageTitle = args.pageTitle()
-	// generate data
-	t := time.Now().UTC()
-	p.BuildDate = t.Format(time.RFC3339)
-	p.BuildVersion = version.B.Version
-	return *p
-}
-
-// TODO: reorder etc.
-
 // ReplaceNELs todo: placeholder todo.
-func ReplaceNELs() runes.Transformer {
+func replaceNELs() runes.Transformer {
 	return runes.Map(func(r rune) rune {
 		if r == filesystem.NextLine {
 			return filesystem.Linefeed
 		}
 		return r
 	})
-}
-
-// Normalize runes to bytes by making adjustments to text control codes.
-func Normalize(e encoding.Encoding, r ...rune) (b []byte) {
-	s := ""
-	switch e {
-	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
-		var err error
-		s, _, err = transform.String(ReplaceNELs(), string(r))
-		if err != nil {
-			s = string(r)
-		}
-	default:
-		s = string(r)
-	}
-	return []byte(s)
-}
-
-// marshal transforms bytes into UTF-8, creates the page meta and template data.
-func (args *Args) marshal(b *[]byte) (p PageData, err error) {
-	if b == nil {
-		return PageData{}, fmt.Errorf("pagedata: %w", ErrNilByte)
-	}
-	// templates are found in the dir static/html/*.gohtml
-	switch args.layout {
-	case Inline:
-		if p, err = args.marshalInline(b); err != nil {
-			return p, err
-		}
-		p = args.marshalStandard(&p)
-	case Standard:
-		p = args.marshalStandard(&p)
-	case Compact: // disables all meta tags
-		p = args.marshalCompact(&p)
-	case None:
-		// do nothing
-	default:
-		return PageData{}, fmt.Errorf("pagedata %s: %w", args.layout, ErrNoLayout)
-	}
-	// convert bytes into utf8
-	r := bytes.Runes(*b)
-	p.PreText = string(r)
-	if p.MetaRetroTxt {
-		lb := filesystem.LineBreaks(true, r...)
-		p.Comment = args.comment(lb, r...)
-	}
-	return p, nil
-}
-
-func (args *Args) comment(lb filesystem.LB, r ...rune) string {
-	l, w, f := 0, 0, "n/a"
-	b, lbs, e := []byte(string(r)),
-		filesystem.LineBreak(lb, false),
-		args.Source.Encoding
-	l, err := filesystem.Lines(bytes.NewReader(b), lb)
-	if err != nil {
-		l = -1
-	}
-	w, err = filesystem.Columns(bytes.NewReader(b), lb)
-	if err != nil {
-		w = -1
-	}
-	if args.Source.Name != "" {
-		f = args.Source.Name
-	}
-	return fmt.Sprintf("encoding: %s; line break: %s; length: %d; width: %d; name: %s", e, lbs, l, w, f)
-}
-
-func (args *Args) fontFamily() string {
-	if args.FontFamily.Flag {
-		return args.FontFamily.Value
-	}
-	return viper.GetString("html.font.family")
-}
-
-func (args *Args) metaAuthor() string {
-	if args.Metadata.Author.Flag {
-		return args.Metadata.Author.Value
-	}
-	return viper.GetString("html.meta.author")
-}
-
-func (args *Args) metaColorScheme() string {
-	if args.Metadata.ColorScheme.Flag {
-		return args.Metadata.ColorScheme.Value
-	}
-	return viper.GetString("html.meta.color-scheme")
-}
-
-func (args *Args) metaDesc() string {
-	if args.Metadata.Description.Flag {
-		return args.Metadata.Description.Value
-	}
-	return viper.GetString("html.meta.description")
-}
-
-func (args *Args) metaKeywords() string {
-	if args.Metadata.Keywords.Flag {
-		return args.Metadata.Keywords.Value
-	}
-	return viper.GetString("html.meta.keywords")
-}
-
-func (args *Args) metaReferrer() string {
-	if args.Metadata.Referrer.Flag {
-		return args.Metadata.Referrer.Value
-	}
-	return viper.GetString("html.meta.referrer")
-}
-
-func (args *Args) metaRobots() string {
-	if args.Metadata.Referrer.Flag {
-		return args.Metadata.Referrer.Value
-	}
-	return viper.GetString("html.meta.robots")
-}
-
-func (args *Args) metaThemeColor() string {
-	if args.Metadata.ThemeColor.Flag {
-		return args.Metadata.ThemeColor.Value
-	}
-	return viper.GetString("html.meta.theme-color")
-}
-
-func (args *Args) pageTitle() string {
-	if args.Title.Flag {
-		return args.Title.Value
-	}
-	return viper.GetString("html.title")
 }
