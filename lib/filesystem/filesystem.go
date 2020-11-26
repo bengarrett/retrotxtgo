@@ -45,6 +45,7 @@ func DirExpansion(name string) (dir string) {
 	var root = func() bool {
 		return name[:1] == string(os.PathSeparator)
 	}
+
 	var err error
 	// Bash tilde expension http://www.gnu.org/software/bash/manual/html_node/Tilde-Expansion.html
 	paths := strings.Split(name, string(os.PathSeparator))
@@ -52,40 +53,32 @@ func DirExpansion(name string) (dir string) {
 		p := ""
 		switch s {
 		case homeDir:
-			p, err = os.UserHomeDir()
-			if err != nil {
+			if p, err = os.UserHomeDir(); err != nil {
 				logs.LogFatal(err)
 			}
 		case currentDir:
 			if i != 0 {
 				continue
 			}
-			p, err = os.Getwd()
-			if err != nil {
+			if p, err = os.Getwd(); err != nil {
 				logs.LogFatal(err)
 			}
 		case parentDir:
-			if i == 0 {
-				wd, err := os.Getwd()
-				if err != nil {
-					logs.LogFatal(err)
-				}
-				p = filepath.Dir(wd)
-			} else {
+			if i != 0 {
 				dir = filepath.Dir(dir)
 				continue
 			}
+			wd, err := os.Getwd()
+			if err != nil {
+				logs.LogFatal(err)
+			}
+			p = filepath.Dir(wd)
 		default:
 			p = s
 		}
-		if runtime.GOOS == win {
-			if len(p) == 2 && p[1:] == ":" {
-				dir = strings.ToUpper(p) + "\\"
-				continue
-			} else if dir == "" && i > 0 {
-				dir = p + "\\"
-				continue
-			}
+		var cont bool
+		if dir, cont = winDir(i, p, dir); cont {
+			continue
 		}
 		dir = filepath.Join(dir, p)
 	}
@@ -93,6 +86,20 @@ func DirExpansion(name string) (dir string) {
 		dir = string(os.PathSeparator) + dir
 	}
 	return dir
+}
+
+func winDir(i int, p, dir string) (s string, cont bool) {
+	if runtime.GOOS == win {
+		if len(p) == 2 && p[1:] == ":" {
+			dir = strings.ToUpper(p) + "\\"
+			return dir, true
+		}
+		if dir == "" && i > 0 {
+			dir = p + "\\"
+			return dir, true
+		}
+	}
+	return dir, false
 }
 
 // Save bytes to a named file location.

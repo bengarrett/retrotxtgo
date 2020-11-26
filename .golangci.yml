@@ -147,8 +147,8 @@ linters:
     - varcheck
     - whitespace
     # run manually using cli:
-    # - gocognit
-    # - gocyclo
+    - gocognit
+    - gocyclo
     # don't enable:
     # - dupl # this takes too long
     # - dogsled
@@ -185,9 +185,6 @@ issues:
       linters:
         - gochecknoglobals
         - gochecknoinits
-    - path: lib/config/config\.go
-      linters:
-        - maligned
     - path: lib/info/detail\.go
       linters:
         - gci
@@ -201,6 +198,9 @@ issues:
     - path: lib/sauce/data\.go
       linters:
         - gci
+    - path: lib/filesystem/filesystem\.go
+      linters:
+        - unparam
     - path: lib/filesystem/read\.go
       linters:
         - unused
