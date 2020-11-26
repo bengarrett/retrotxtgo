@@ -14,6 +14,7 @@ import (
 	"golang.org/x/text/encoding/ianaindex"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/encoding/unicode"
+	"golang.org/x/text/encoding/unicode/utf32"
 
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/str"
@@ -30,6 +31,7 @@ type cell struct {
 func Encodings() (e []encoding.Encoding) {
 	a := append(charmap.All, japanese.All...)
 	a = append(a, unicode.All...)
+	a = append(a, utf32.All...)
 	for _, m := range a {
 		switch m {
 		case japanese.EUCJP,
@@ -49,30 +51,39 @@ func List() *bytes.Buffer {
 	var buf bytes.Buffer
 	flags := tabwriter.Debug // tabwriter.AlignRight | tabwriter.Debug
 	w := tabwriter.NewWriter(&buf, 0, 0, 2, ' ', flags)
-	fmt.Fprintln(w, str.Cp(title))
+	fmt.Fprintln(w, "\n"+str.Cp(title))
 	fmt.Fprintln(w, strings.Repeat("-", len(title)))
 	fmt.Fprintln(w, header)
 	fmt.Println(Encodings())
 	for _, e := range Encodings() {
 		if e == charmap.XUserDefined {
-			fmt.Fprintf(w, " %s\t %s\t %s\t %s\t\n", "ISO 8895-11", "iso-8895-11", "11", "iso889511")
 			continue
 		}
 		c := cells(e)
+		switch e {
+		case charmap.ISO8859_10:
+			fmt.Fprintf(w, " %s\t %s\t %s\t %s\t\n", c.name, c.value, c.numeric, c.alias)
+			fmt.Fprintf(w, " %s\t %s\t %s\t %s\t\n", "ISO 8895-11", "iso-8895-11", "11", "iso889511")
+			continue
+		case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
+			fmt.Fprintf(w, " %s*\t %s\t %s\t %s\t\n", c.name, c.value, c.numeric, c.alias)
+			continue
+		}
 		// do not use ANSI colors in cells as it will break the table layout
 		fmt.Fprintf(w, " %s\t %s\t %s\t %s\t\n", c.name, c.value, c.numeric, c.alias)
 	}
-	fmt.Fprintln(w, "\nEither argument, numeric or alias values are valid codepage arguments")
-	fmt.Fprintln(w, "All these codepage arguments will match ISO 8859-1")
-	fmt.Fprintln(w, "\n"+str.Example("retrotxt list table iso-8859-1"))
-	fmt.Fprintln(w, str.Example("retrotxt list table 1"))
-	fmt.Fprintln(w, str.Example("retrotxt list table latin1"))
-	fmt.Fprintln(w, "\n"+str.Cinf("*")+" IBM Code Page 437 ("+str.Cc("cp437")+") is commonly used on MS-DOS and with ANSI art")
-	fmt.Fprintln(w, "  ISO 8859-1 ("+str.Cc("latin1")+") is found on legacy Unix, Amiga and the early Internet")
-	fmt.Fprintln(w, "  Windows 1252 ("+str.Cc("cp1252")+") is found on legacy Windows 9x and earlier systems")
-	fmt.Fprintln(w, "  Macintosh ("+str.Cc("macintosh")+") is found on Mac OS 9 and earlier systems")
-	fmt.Fprintln(w, "  RetroTxt, modern systems and the web today use UTF-8, a Unicode encoding")
-	fmt.Fprintln(w, "  that's a subset of ISO 8859-1 which itself is a subset of US-ASCII")
+	fmt.Fprintln(w, "\n"+str.Cinf("*")+" EBCDIC data encoding is used on IBM Mainframe OS and is not ASCII compatible.")
+	fmt.Fprintln(w, "\nEither argument, numeric or alias values are valid codepage arguments.")
+	fmt.Fprintln(w, "  These example codepage arguments all match ISO 8859-1.")
+	fmt.Fprintln(w, "  "+str.Example("retrotxt list table ")+str.Cc("iso-8859-1")+str.Cf("  # argument"))
+	fmt.Fprintln(w, "  "+str.Example("retrotxt list table ")+str.Cc("1")+str.Cf("           # numeric"))
+	fmt.Fprintln(w, "  "+str.Example("retrotxt list table ")+str.Cc("latin1")+str.Cf("      # alias"))
+	fmt.Fprintln(w, "\n  IBM Code Page 437 ("+str.Cc("cp437")+") is commonly used on MS-DOS and ANSI art.")
+	fmt.Fprintln(w, "  ISO 8859-1 ("+str.Cc("latin1")+") is found on legacy Unix, Amiga and the early Internet.")
+	fmt.Fprintln(w, "  Windows 1252 ("+str.Cc("cp1252")+") is found on legacy Windows 9x and earlier systems.")
+	fmt.Fprintln(w, "  Macintosh ("+str.Cc("macintosh")+") is found on Mac OS 9 and earlier systems.")
+	fmt.Fprintln(w, "\nRetroTxt, PCs and the web today use Unicode UTF-8. It is a subset of ISO 8895-1,")
+	fmt.Fprintln(w, "which allows UTF-8 to be backwards compatible both with it and US-ASCII.")
 	if err := w.Flush(); err != nil {
 		logs.Fatal("convert list", "flush", err)
 	}
