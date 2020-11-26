@@ -70,11 +70,11 @@ type Args struct {
 		Name       string            // Text source, usually a file or pack name
 	}
 	Save struct {
-		AsFiles     bool   // TODO: SaveToFile save to a file or print to stdout
+		AsFiles     bool   // Save assets as files
 		Cache       bool   // Cache, when false will always unpack a new .gohtml template
-		Compress    bool   // TODO: Compress and store all files into an archive
+		Compress    bool   // Compress and store all assets into an archive
 		OW          bool   // OW overwrite any existing files when saving
-		Destination string // TODO: Destination HTML destination either a directory or file
+		Destination string // Destination HTML destination either a directory or file
 	}
 	Title struct {
 		Flag  bool
@@ -172,11 +172,13 @@ const (
 )
 
 func (l Layout) String() string {
-	return [...]string{unknown, standard, "inline", "compact", none}[l]
+	return [...]string{unknown, standard, inline, compact, none}[l]
 }
 
 const (
 	none     = "none"
+	compact  = "compact"
+	inline   = "inline"
 	standard = "standard"
 	unknown  = "unknown"
 )
@@ -355,9 +357,9 @@ func layout(name string) (l Layout) {
 	switch name {
 	case standard, "s":
 		return Standard
-	case "inline", "i":
+	case inline, "i":
 		return Inline
-	case "compact", "c":
+	case compact, "c":
 		return Compact
 	case none, "n":
 		return None
@@ -365,7 +367,7 @@ func layout(name string) (l Layout) {
 	return l
 }
 
-// ReplaceNELs todo: placeholder todo.
+// replace ECD
 func replaceNELs() runes.Transformer {
 	return runes.Map(func(r rune) rune {
 		if r == filesystem.NextLine {
