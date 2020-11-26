@@ -7,8 +7,10 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/encoding/unicode"
+	"golang.org/x/text/encoding/unicode/utf32"
 	"retrotxt.com/retrotxt/lib/filesystem"
 	"retrotxt.com/retrotxt/lib/logs"
 )
@@ -80,18 +82,32 @@ func (c *Convert) Transform() error {
 	if c.Source.E == nil {
 		c.Source.E = unicode.UTF8
 	}
-	var err error
 	if len(c.Source.B) == 0 {
 		return nil
 	}
-	// don't transform, instead copy unicode encoded strings
-	switch c.Source.E {
-	case unicode.UTF8, unicode.UTF8BOM:
-		c.Output.R = []rune(string(c.Source.B))
+	if err := c.transformUnicode(); err != nil {
+		return err
+	} else if c.Output.len > 0 {
+		return nil
+	}
+	c.transformFixJISTable()
+	// return the source as runes if it is already in UTF-8 Unicode
+	if utf8.Valid(c.Source.B) {
+		c.Output.R = bytes.Runes(c.Source.B)
 		c.Output.len = len(c.Output.R)
 		return nil
 	}
-	// blank invalid shiftjis characters when printing 8-bit tables
+	var err error
+	if c.Source.B, err = c.Source.E.NewDecoder().Bytes(c.Source.B); err != nil {
+		return fmt.Errorf("transform new decoder error: %w", err)
+	}
+	c.Output.R = bytes.Runes(c.Source.B)
+	c.Output.len = len(c.Output.R)
+	return nil
+}
+
+// blank invalid shiftjis characters when printing 8-bit tables.
+func (c *Convert) transformFixJISTable() {
 	if c.Source.E == japanese.ShiftJIS && c.Source.table {
 		// this is only for the table command,
 		// it will break normal shift-jis encode text
@@ -103,17 +119,66 @@ func (c *Convert) Transform() error {
 			}
 		}
 	}
-	// transform source if it is not already UTF-8
-	if utf8.Valid(c.Source.B) {
-		c.Output.R = bytes.Runes(c.Source.B)
+}
+
+// transform Unicode-16 or Unicode-32 text into UTF-8 encoded Unicode.
+func (c *Convert) transformUnicode() error {
+	var decode = func(e encoding.Encoding) error {
+		result, err := e.NewDecoder().Bytes(c.Source.B)
+		if err != nil {
+			return err
+		}
+		c.Output.R = bytes.Runes(result)
 		c.Output.len = len(c.Output.R)
 		return nil
 	}
-	if c.Source.B, err = c.Source.E.NewDecoder().Bytes(c.Source.B); err != nil {
-		return fmt.Errorf("transform new decoder error: %w", err)
+	var (
+		u16be  = unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM)
+		u16beB = unicode.UTF16(unicode.BigEndian, unicode.ExpectBOM)
+		u16le  = unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM)
+		u16leB = unicode.UTF16(unicode.LittleEndian, unicode.ExpectBOM)
+		u32be  = utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM)
+		u32beB = utf32.UTF32(utf32.BigEndian, utf32.UseBOM)
+		u32le  = utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM)
+		u32leB = utf32.UTF32(utf32.LittleEndian, utf32.UseBOM)
+	)
+	switch c.Source.E {
+	case unicode.UTF8, unicode.UTF8BOM:
+		c.Output.R = bytes.Runes(c.Source.B)
+		c.Output.len = len(c.Output.R)
+	case u16be:
+		if err := decode(u16be); err != nil {
+			return err
+		}
+	case u16le:
+		if err := decode(u16le); err != nil {
+			return err
+		}
+	case u16beB:
+		if err := decode(u16beB); err != nil {
+			return err
+		}
+	case u16leB:
+		if err := decode(u16leB); err != nil {
+			return err
+		}
+	case u32be:
+		if err := decode(u32be); err != nil {
+			return err
+		}
+	case u32beB:
+		if err := decode(u32beB); err != nil {
+			return err
+		}
+	case u32le:
+		if err := decode(u32le); err != nil {
+			return err
+		}
+	case u32leB:
+		if err := decode(u32leB); err != nil {
+			return err
+		}
 	}
-	c.Output.R = bytes.Runes(c.Source.B)
-	c.Output.len = len(c.Output.R)
 	return nil
 }
 
