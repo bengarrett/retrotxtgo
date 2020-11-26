@@ -185,6 +185,10 @@ issues:
       linters:
         - gochecknoglobals
         - gochecknoinits
+    - path: lib/convert/
+      linters:
+        - gocognit
+        - gocyclo
     - path: lib/info/detail\.go
       linters:
         - gci
