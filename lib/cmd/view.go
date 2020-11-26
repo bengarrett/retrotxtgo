@@ -3,11 +3,13 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"retrotxt.com/retrotxt/lib/convert"
 	"retrotxt.com/retrotxt/lib/filesystem"
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/pack"
+	"retrotxt.com/retrotxt/lib/str"
 
 	"github.com/spf13/cobra"
 )
@@ -60,6 +62,9 @@ var viewCmd = &cobra.Command{
 		var err error
 		for i, arg := range args {
 			conv.Output = convert.Output{} // output must be reset
+			if i > 0 {
+				fmt.Printf(" \n%s\n\n", str.Cb(strings.Repeat("\u2500", 40))) // horizontal bar
+			}
 			if cp := cmd.Flags().Lookup("encode"); cp.Changed {
 				if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
 					logs.Fatal("encoding not known or supported", arg, err)
