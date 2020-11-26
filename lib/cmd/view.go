@@ -59,24 +59,20 @@ var viewCmd = &cobra.Command{
 		checkUse(cmd, args...)
 		var err error
 		for i, arg := range args {
+			if cp := cmd.Flags().Lookup("encode"); cp.Changed {
+				if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
+					logs.Fatal("encoding not known or supported", arg, err)
+				}
+				conv.Source.E = f.From
+			}
 			// internal, packed example file
 			if ok := pack.Valid(arg); ok {
-				if cp := cmd.Flags().Lookup("encode"); cp.Changed {
-					if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
-						logs.Fatal("encoding not known or supported", arg, err)
-					}
-					conv.Source.E = f.From
-				}
-				if to := cmd.Flags().Lookup("to"); to.Changed {
-					if f.To, err = convert.Encoding(to.Value.String()); err != nil {
-						logs.Fatal("to not known or supported", arg, err)
-					}
-				}
 				var p pack.Pack
 				if p, err = f.Open(&conv, arg); err != nil {
 					logs.Println("pack", arg, err)
 					continue
 				}
+				// --to flag is currently ignored
 				fmt.Println(string(p.Runes))
 				continue
 			}
@@ -88,8 +84,9 @@ var viewCmd = &cobra.Command{
 			}
 			// to flag
 			if to := cmd.Flags().Lookup("to"); to.Changed {
-				viewToFlag(b...) // todo: move to root.go and return a value.
-				continue
+				if viewToFlag(b...) {
+					continue
+				}
 			}
 			// convert text
 			r, err := conv.Text(&b)
@@ -123,8 +120,9 @@ func viewPipe(cmd *cobra.Command, conv *convert.Convert) {
 	}
 	// to flag
 	if to := cmd.Flags().Lookup("to"); to.Changed {
-		viewToFlag(b...)
-		os.Exit(0)
+		if viewToFlag(b...) {
+			os.Exit(0)
+		}
 	}
 	r, err := conv.Text(&b)
 	if err != nil {
@@ -134,12 +132,14 @@ func viewPipe(cmd *cobra.Command, conv *convert.Convert) {
 	os.Exit(0)
 }
 
-func viewToFlag(b ...byte) {
-	b, err := viewEncode(viewFlag.to, b...)
+func viewToFlag(b ...byte) (success bool) {
+	newer, err := viewEncode(viewFlag.to, b...)
 	if err != nil {
 		logs.Println("using the original encoding and not", viewFlag.to, err)
+		return false
 	}
-	fmt.Println(string(b))
+	fmt.Println(string(newer))
+	return true
 }
 
 func viewEncode(name string, b ...byte) ([]byte, error) {
