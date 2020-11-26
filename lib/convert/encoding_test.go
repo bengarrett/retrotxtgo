@@ -2,6 +2,7 @@ package convert
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 	"testing"
 
@@ -28,38 +29,52 @@ var (
 	u16le  = unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM)
 )
 
+func toEncoding(e encoding.Encoding, s string) []byte {
+	b, err := e.NewEncoder().Bytes([]byte(s))
+	if err != nil {
+		log.Fatal(err)
+	}
+	return b
+}
+
 func TestSet_Transform(t *testing.T) {
 	tests := []struct {
 		name     string
 		codepage encoding.Encoding
-		str      string
+		text     []byte
 		want     string
 		wantErr  bool
 	}{
-		{"null", u8, "\x00", "␀", false},
-		{"CP037", cp037, "\xc8\x51\xba\x93\xcf", "Hé[lõ", false},
-		{"bell", cp037, "ring a \x07", "ring a ␇", false},
-		{"CP437", cp437, "H\x82ll\x93 \x9d\xa7\xf4\x9c\xbe", "Héllô ¥º⌠£╛", false},
-		{"⌂", cp437, "Home sweat \x7f", "Home sweat ⌂", false},
-		{"mac", mac, "\x11 command + \x12 shift.", "⌘ command + ⇧ shift.", false},
-		{"latin1", iso1, "abcde", "abcde", false},
-		{"6e", iso6e, "ring a \x07", "ring a ␇", false},
-		{"koi8", koi, "\xf5\xf2\xf3\xf3", "УРСС", false},
-		{"jp", jis, "abc", "abc", false},
+		{"u8", u8, toEncoding(u8, "⌚ Watch"), "⌚ Watch", false},
+		{"u8bom", u8bom, toEncoding(u8, "⌚ Watch"), "⌚ Watch", false},
+		{"u16le", u16le, toEncoding(u16le, "⌚ Watch"), "⌚ Watch", false},
+		{"u16be", u16be, toEncoding(u16be, "⌚ Watch"), "⌚ Watch", false},
+		{"null", u8, []byte("\x00"), "␀", false},
+		{"CP037", cp037, []byte("\xc8\x51\xba\x93\xcf"), "Hé[lõ", false},
+		{"bell", cp037, []byte("ring a \x07"), "ring a ␇", false},
+		{"CP437", cp437, []byte("H\x82ll\x93 \x9d\xa7\xf4\x9c\xbe"), "Héllô ¥º⌠£╛", false},
+		{"⌂", cp437, []byte("Home sweat \x7f"), "Home sweat ⌂", false},
+		{"mac", mac, []byte("\x11 command + \x12 shift."), "⌘ command + ⇧ shift.", false},
+		{"latin1", iso1, toEncoding(iso1, "currency sign ¤"), "currency sign ¤", false},
+		{"latin15", iso15, toEncoding(iso15, "euro sign €"), "euro sign €", false},
+		{"6e", iso6e, []byte("ring a \x07"), "ring a ␇", false},
+		{"koi8", koi, []byte("\xf5\xf2\xf3\xf3"), "УРСС", false},
+		{"jp", jis, toEncoding(jis, "abc"), "abc", false},
+		{"865", cp865, toEncoding(cp865, "currency sign ¤"), "currency sign ¤", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			data := Convert{}
-			data.Source.B = []byte(tt.str)
+			data.Source.B = tt.text
 			data.Source.E = tt.codepage
 			err := data.Transform()
-			data.Swap()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+			data.Swap()
 			if string(data.Output.R) != tt.want {
-				t.Errorf("Convert.Transform() = %v, want %v", string(data.Output.R), tt.want)
+				t.Errorf("Convert.Transform() = %q, want %q", data.Output.R, tt.want)
 			}
 		})
 	}

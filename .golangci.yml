@@ -171,6 +171,9 @@ issues:
     - path: info/detail\.go
       linters:
         - gci
+    - path: pack/pack\.go
+      linters:
+        - gci
     - path: main\.go
       linters:
         - gochecknoglobals
