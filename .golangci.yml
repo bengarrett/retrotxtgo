@@ -107,6 +107,7 @@ linters:
     - bodyclose
     - deadcode
     - depguard
+    - dogsled
     - errcheck
     - exhaustive
     - exportloopref
@@ -114,7 +115,9 @@ linters:
     - gci
     - gochecknoglobals
     - goconst
+    - gocognit
     - gocritic
+    - gocyclo
     - godot
     - goerr113
     - goheader
@@ -147,20 +150,18 @@ linters:
     - varcheck
     - whitespace
     # run manually using cli:
-    - gocognit
-    - gocyclo
+    # - funlen # Function length and statement count
+    # - godox # flags todo/bug/fixme
+
     # don't enable:
     # - dupl # this takes too long
-    # - dogsled
-    # - funlen
-    # - godox # flags todo/bug/fixme
     # - gofmt # conflicts with Go Language Server
     # - gofumpt # conflicts with Go Language Server
-    # - goimports
-    # - nestif
-    # - nlreturn
-    # - testpackage
-    # - wsl
+    # - goimports # conflicts with Go Language Server
+    # - nestif # also returns wsl results
+    # - nlreturn # blank line before
+    # - testpackage # this conflicts with Go Language Server
+    # - wsl # white-space formatting
 issues:
   max-same-issues: 0
   # Excluding configuration per-path, per-linter, per-text and per-source
