@@ -39,10 +39,12 @@ var infoCmd = &cobra.Command{
 		for i, arg := range args {
 			n.Index = i + 1
 			// internal, packed example file
-			if filename, err := infoPackage(arg); err != nil {
+			filename, err := infoPackage(arg)
+			if err != nil {
 				logs.Println("pack", arg, err)
 				continue
-			} else if filename != "" {
+			}
+			if filename != "" {
 				defer os.Remove(filename)
 				arg = filename
 			}

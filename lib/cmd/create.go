@@ -226,8 +226,8 @@ func htmlServe(i int, cmd *cobra.Command, b *[]byte) bool {
 	if i != 0 {
 		return false
 		// only ever serve the first file given to the args.
-		// in the future, when handling multiple files an index.html
-		// could be generated with links to each of the htmls.
+		// in the future, when handling multiple files a dynamic
+		// index.html could be generated with links to each of the htmls.
 	}
 	if serve := cmd.Flags().Lookup("serve"); serve.Changed {
 		html.Serve(b)
@@ -262,8 +262,8 @@ func metaConfig() map[int]metaFlag {
 		// output
 		serve: {"serve", nil, nil, &html.Port, "serve", "p", nil},
 		// main tag flags
-		layout: {"html.layout", &html.Layout, nil, nil, "layout", "l", create.Layouts()},
 		style:  {"style.html", &html.Syntax, nil, nil, "syntax-style", "", nil},
+		layout: {"html.layout", &html.Layout, nil, nil, "layout", "l", create.Layouts()},
 		title:  {"html.title", &html.Title.Value, nil, nil, "title", "t", nil},
 		desc:   {"html.meta.description", &html.Metadata.Description.Value, nil, nil, "meta-description", "d", nil},
 		author: {"html.meta.author", &html.Metadata.Author.Value, nil, nil, "meta-author", "a", nil},

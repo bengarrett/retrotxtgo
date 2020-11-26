@@ -72,7 +72,8 @@ var listCmdTables = &cobra.Command{
 			)
 			if e == charmap.XUserDefined {
 				name = "iso-8859-11"
-			} else {
+			}
+			if name == "" {
 				name, err = ianaindex.MIME.Name(e)
 				if err != nil {
 					logs.Println("list.tables.ianaindex", "", err)
