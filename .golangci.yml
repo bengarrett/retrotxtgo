@@ -165,25 +165,7 @@ issues:
   max-same-issues: 0
   # Excluding configuration per-path, per-linter, per-text and per-source
   exclude-rules:
-    - path: sauce/data\.go
-      linters:
-        - gci
-    - path: info/detail\.go
-      linters:
-        - gci
-    - path: pack/pack\.go
-      linters:
-        - gci
-    - path: main\.go
-      linters:
-        - gochecknoglobals
-    - path: lib/config/config\.go
-      linters:
-        - maligned
-    - path: lib/cmd/
-      linters:
-        - gochecknoglobals
-        - gochecknoinits
+    # exclude tests
     - path: _test\.go
       linters:
         - gocyclo
@@ -194,15 +176,34 @@ issues:
         - scopelint
         - gochecknoglobals
         - unparam
-    - path: filesystem/read\.go
+    # exclude main
+    - path: main\.go
       linters:
-        - unused
-    # Exclude known linters from partially hard-vendored code,
-    # which is impossible to exclude via "nolint" comments.
+        - gochecknoglobals
+    # exclude lib
+    - path: lib/cmd/
+      linters:
+        - gochecknoglobals
+        - gochecknoinits
+    - path: lib/config/config\.go
+      linters:
+        - maligned
+    - path: lib/info/detail\.go
+      linters:
+        - gci
     - path: info/detail\.go
       text: "weak cryptographic primitive"
       linters:
         - gosec
+    - path: lib/pack/pack\.go
+      linters:
+        - gci
+    - path: lib/sauce/data\.go
+      linters:
+        - gci
+    - path: lib/filesystem/read\.go
+      linters:
+        - unused
     # Exclude some staticcheck messages
     - linters:
         - gosec
@@ -210,5 +211,4 @@ issues:
 run:
   skip-dirs:
     - internal
-    #- lib/sauce
     - static
