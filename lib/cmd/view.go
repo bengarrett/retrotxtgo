@@ -46,6 +46,7 @@ var viewCmd = &cobra.Command{
   retrotxt view file1.txt file2.txt --encode="iso-8859-1"
   cat file.txt | retrotxt view`,
 	Run: func(cmd *cobra.Command, args []string) {
+		var err error
 		conv := convert.Convert{}
 		conv.Flags = convert.Flags{
 			Controls:  viewFlag.controls,
@@ -62,11 +63,16 @@ var viewCmd = &cobra.Command{
 		}
 		// piped input from other programs
 		if filesystem.IsPipe() {
+			if cp := cmd.Flags().Lookup("encode"); cp.Changed {
+				if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
+					logs.Fatal("encoding not known or supported", "pipe", err)
+				}
+				conv.Source.E = f.From
+			}
 			viewPipe(cmd, &conv)
 		}
 		// user arguments
 		checkUse(cmd, args...)
-		var err error
 		for i, arg := range args {
 			conv.Output = convert.Output{} // output must be reset
 			if i > 0 {
@@ -86,6 +92,11 @@ var viewCmd = &cobra.Command{
 					continue
 				}
 				// --to flag is currently ignored
+				if to := cmd.Flags().Lookup("to"); to.Changed {
+					if viewToFlag(p.Runes...) {
+						continue
+					}
+				}
 				fmt.Println(string(p.Runes))
 				continue
 			}
@@ -95,17 +106,17 @@ var viewCmd = &cobra.Command{
 				logs.Println("read file", arg, err)
 				continue
 			}
-			// to flag
-			if to := cmd.Flags().Lookup("to"); to.Changed {
-				if viewToFlag(b...) {
-					continue
-				}
-			}
 			// convert text
 			r, err := conv.Text(&b)
 			if err != nil {
 				logs.Println("convert text", arg, err)
 				continue
+			}
+			// to flag
+			if to := cmd.Flags().Lookup("to"); to.Changed {
+				if viewToFlag(r...) {
+					continue
+				}
 			}
 			fmt.Println(string(r))
 			if i < len(args) {
@@ -131,22 +142,22 @@ func viewPipe(cmd *cobra.Command, conv *convert.Convert) {
 	if err != nil {
 		logs.Fatal("view", "stdin read", err)
 	}
-	// to flag
-	if to := cmd.Flags().Lookup("to"); to.Changed {
-		if viewToFlag(b...) {
-			os.Exit(0)
-		}
-	}
 	r, err := conv.Text(&b)
 	if err != nil {
 		logs.Fatal("view", "stdin convert", err)
+	}
+	// to flag
+	if to := cmd.Flags().Lookup("to"); to.Changed {
+		if viewToFlag(r...) {
+			os.Exit(0)
+		}
 	}
 	fmt.Println(string(r))
 	os.Exit(0)
 }
 
-func viewToFlag(b ...byte) (success bool) {
-	newer, err := viewEncode(viewFlag.to, b...)
+func viewToFlag(r ...rune) (success bool) {
+	newer, err := viewEncode(viewFlag.to, r...)
 	if err != nil {
 		logs.Println("using the original encoding and not", viewFlag.to, err)
 		return false
@@ -155,11 +166,12 @@ func viewToFlag(b ...byte) (success bool) {
 	return true
 }
 
-func viewEncode(name string, b ...byte) ([]byte, error) {
+func viewEncode(name string, r ...rune) (b []byte, err error) {
 	encode, err := convert.Encoding(name)
 	if err != nil {
 		return b, fmt.Errorf("encoding not known or supported %s: %w", encode, err)
 	}
+	b = []byte(string(r))
 	newer, err := encode.NewEncoder().Bytes(b)
 	if err != nil {
 		if len(newer) == 0 {
