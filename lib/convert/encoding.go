@@ -14,6 +14,7 @@ import (
 	"golang.org/x/text/encoding/ianaindex"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/encoding/unicode"
+	"golang.org/x/text/encoding/unicode/utf32"
 	"retrotxt.com/retrotxt/lib/filesystem"
 )
 
@@ -193,6 +194,15 @@ func Encoding(name string) (encoding.Encoding, error) {
 		// https://en.wikipedia.org/wiki/ISO/IEC_8859-11#Code_page_874_(IBM)_/_9066
 		return charmap.Windows874, nil
 	}
+	// UTF-32... doesn't return a match in ianaindex.IANA
+	switch a {
+	case "UTF-32":
+		return utf32.UTF32(utf32.LittleEndian, utf32.UseBOM), nil
+	case "UTF-32BE":
+		return utf32.UTF32(utf32.BigEndian, utf32.IgnoreBOM), nil
+	case "UTF-32LE":
+		return utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM), nil
+	}
 	enc, err := ianaindex.IANA.Encoding(s)
 	if err != nil {
 		enc, err = ianaindex.IANA.Encoding(a)
@@ -343,6 +353,12 @@ func encodingAlias(name string) (n string) {
 		n = "UTF-16BE"
 	case "16le", "utf16l", "utf16le", "utf-16-le":
 		n = "UTF-16LE"
+	case "utf32", "utf-32":
+		n = "UTF-32" // Go will use the byte-order-mark
+	case "32be", "utf32b", "utf32be", "utf-32be", "utf-32-be":
+		n = "UTF-32BE"
+	case "32le", "utf32l", "utf32le", "utf-32le", "utf-32-le":
+		n = "UTF-32LE"
 	case "ebcdic", "ibm":
 		n = "IBM037"
 	case "iso88598e", "iso88598i", "iso88596e", "iso88596i":
