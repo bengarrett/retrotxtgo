@@ -40,8 +40,8 @@ func Test_Save(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ch := make(chan error)
 			a := Args{layout: Standard, test: true}
-			a.Output.OW = true
-			a.Output.Destination = tt.args.name
+			a.Save.OW = true
+			a.Save.Destination = tt.args.name
 			go a.saveHTML(&tt.args.data, ch)
 			err := <-ch
 			if (err != nil) != tt.wantErr {

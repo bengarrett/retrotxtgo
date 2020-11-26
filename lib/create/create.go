@@ -40,11 +40,11 @@ type Args struct {
 		HiddenBody string            // Pre-text content override, accessible by a hidden flag
 		Name       string            // Text source, usually a file or pack name
 	}
-	Output struct {
+	Save struct {
+		AsFiles     bool   // TODO: SaveToFile save to a file or print to stdout
 		Cache       bool   // Cache, when false will always unpack a new .gohtml template
 		Compress    bool   // TODO: Compress and store all files into an archive
 		OW          bool   // OW overwrite any existing files when saving
-		SaveToFile  bool   // TODO: SaveToFile save to a file or print to stdout
 		Destination string // TODO: Destination HTML destination either a directory or file
 	}
 	Title struct {
@@ -204,12 +204,12 @@ func (args *Args) Create(b *[]byte) {
 	var err error
 	args.layout = layout(args.Layout)
 	switch {
-	case args.Output.SaveToFile:
+	case args.Save.AsFiles:
 		// use config save directory
 		// otherwise assume Destination path is a temporary --serve location
-		if args.Output.Destination == "" {
+		if args.Save.Destination == "" {
 			dir := []string{viper.GetString("save-directory")}
-			if args.Output.Destination, err = destination(dir...); err != nil {
+			if args.Save.Destination, err = destination(dir...); err != nil {
 				logs.Fatal("save to directory failure", fmt.Sprintf("%s", dir), err)
 			}
 		}
@@ -250,7 +250,7 @@ func (args *Args) Create(b *[]byte) {
 }
 
 func (args *Args) destination(name string) (string, error) {
-	dir := filesystem.DirExpansion(args.Output.Destination)
+	dir := filesystem.DirExpansion(args.Save.Destination)
 	path := dir
 	stat, err := os.Stat(dir)
 	if err != nil {
@@ -260,7 +260,7 @@ func (args *Args) destination(name string) (string, error) {
 		path = filepath.Join(dir, name)
 	}
 	_, err = os.Stat(path)
-	if !args.Output.OW && !os.IsNotExist(err) {
+	if !args.Save.OW && !os.IsNotExist(err) {
 		switch name {
 		case "favicon.ico", "scripts.js", "vga.woff2":
 			// existing static files can be ignored
@@ -532,7 +532,7 @@ func (args *Args) newTemplate() (*template.Template, error) {
 	if err := args.templateCache(); err != nil {
 		return nil, fmt.Errorf("using existing template cache: %w", err)
 	}
-	if !args.Output.Cache {
+	if !args.Save.Cache {
 		if err := args.templateSave(); err != nil {
 			return nil, fmt.Errorf("creating a new template: %w", err)
 		}

@@ -107,11 +107,11 @@ func init() {
 	flagEncode(&createFlag.encode, createCmd)
 	flagControls(&createFlag.controls, createCmd)
 	flagRunes(&createFlag.swap, createCmd)
-	createCmd.Flags().BoolVarP(&html.Output.SaveToFile, "save", "s", false,
+	createCmd.Flags().BoolVarP(&html.Save.AsFiles, "save", "s", false,
 		`save HTML and static files to a the save directory
 or ignore to print (save directory: `+viper.GetString("save-directory")+")")
-	createCmd.Flags().BoolVarP(&html.Output.Compress, "compress", "z", false, "store and compress all files into an archive when saving")
-	createCmd.Flags().BoolVarP(&html.Output.OW, "overwrite", "o", false, "overwrite any existing files when saving")
+	createCmd.Flags().BoolVarP(&html.Save.Compress, "compress", "z", false, "store and compress all files into an archive when saving")
+	createCmd.Flags().BoolVarP(&html.Save.OW, "overwrite", "o", false, "overwrite any existing files when saving")
 	// html flags, the key int value must be used as the index
 	// rather than the loop count, otherwise flags might be skipped
 	for _, i := range keys {
@@ -280,7 +280,7 @@ func metaConfig() map[int]metaFlag {
 		fonte:   {"html.font.embed", nil, &html.FontEmbed, nil, "font-embed", "", nil},
 		// hidden flags
 		body:  {"html.body", &html.Source.HiddenBody, nil, nil, "body", "b", nil},
-		cache: {"html.layout.cache", nil, &html.Output.Cache, nil, "cache", "", nil},
+		cache: {"html.layout.cache", nil, &html.Save.Cache, nil, "cache", "", nil},
 	}
 }
 

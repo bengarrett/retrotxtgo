@@ -89,8 +89,8 @@ func (args *Args) override() {
 }
 
 func (args *Args) createDir(b *[]byte) (err error) {
-	args.Output.SaveToFile, args.Output.OW = true, true
-	args.Output.Destination, err = ioutil.TempDir(os.TempDir(), "*-serve")
+	args.Save.AsFiles, args.Save.OW = true, true
+	args.Save.Destination, err = ioutil.TempDir(os.TempDir(), "*-serve")
 	if err != nil {
 		return fmt.Errorf("failed to make a temporary serve directory: %w", err)
 	}
@@ -100,7 +100,7 @@ func (args *Args) createDir(b *[]byte) (err error) {
 
 // serveDir creates and serves b over an internal HTTP server.
 func (args *Args) serveDir() (err error) {
-	http.Handle("/", http.FileServer(http.Dir(args.Output.Destination)))
+	http.Handle("/", http.FileServer(http.Dir(args.Save.Destination)))
 	const timeout, localHost = 15, "127.0.0.1"
 	srv := &http.Server{
 		Addr:         fmt.Sprintf("%s:%v", localHost, args.Port),
@@ -123,15 +123,15 @@ func (args *Args) watch() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		fmt.Printf("\n\nServer shutdown and directory removal of: %s\n", args.Output.Destination)
+		fmt.Printf("\n\nServer shutdown and directory removal of: %s\n", args.Save.Destination)
 		tmp, err := path.Match(fmt.Sprintf("%s%s*",
-			string(os.PathSeparator), os.TempDir()), args.Output.Destination)
+			string(os.PathSeparator), os.TempDir()), args.Save.Destination)
 		if err != nil {
 			logs.Fatal("path match pattern failed", "", err)
 		}
 		if tmp {
-			if err := os.RemoveAll(args.Output.Destination); err != nil {
-				logs.Fatal("could not clean the temporary directory: %q: %s", args.Output.Destination, err)
+			if err := os.RemoveAll(args.Save.Destination); err != nil {
+				logs.Fatal("could not clean the temporary directory: %q: %s", args.Save.Destination, err)
 			}
 		}
 		os.Exit(0)
