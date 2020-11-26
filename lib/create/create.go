@@ -683,7 +683,7 @@ func (args *Args) marshalStandard(p *PageData) PageData {
 	p.MetaRobots = args.metaRobots()
 	p.MetaRetroTxt = args.Metadata.RetroTxt
 	p.MetaThemeColor = args.metaThemeColor()
-	p.PageTitle = args.pageTitle() + "honk!"
+	p.PageTitle = args.pageTitle()
 	// generate data
 	t := time.Now().UTC()
 	p.BuildDate = t.Format(time.RFC3339)
@@ -744,7 +744,7 @@ func (args *Args) marshal(b *[]byte) (p PageData, err error) {
 	r := bytes.Runes(*b)
 	p.PreText = string(r)
 	if p.MetaRetroTxt {
-		lb := filesystem.NEL() // TODO: replace
+		lb := filesystem.LineBreaks(true, r...)
 		p.Comment = args.comment(lb, r...)
 	}
 	return p, nil
@@ -755,11 +755,11 @@ func (args *Args) comment(lb filesystem.LB, r ...rune) string {
 	b, lbs, e := []byte(string(r)),
 		filesystem.LineBreak(lb, false),
 		args.Source.Encoding
-	l, err := filesystem.Lines(bytes.NewReader(b), filesystem.NEL())
+	l, err := filesystem.Lines(bytes.NewReader(b), lb)
 	if err != nil {
 		l = -1
 	}
-	w, err = filesystem.Columns(bytes.NewReader(b), filesystem.NEL())
+	w, err = filesystem.Columns(bytes.NewReader(b), lb)
 	if err != nil {
 		w = -1
 	}
