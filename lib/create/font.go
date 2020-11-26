@@ -128,5 +128,5 @@ func fontBase64(name string) (string, error) {
 	if _, err := encoder.Write(b); err != nil {
 		return "", fmt.Errorf("font base64 failed to write b: %w", err)
 	}
-	return fmt.Sprintf("data:application/font-woff2;charset=utf-8;base64,%s", &s), encoder.Close()
+	return fmt.Sprintf("data:application/font-woff2;charset=utf-8;base64,%s", &s), nil
 }

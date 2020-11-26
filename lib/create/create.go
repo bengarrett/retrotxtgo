@@ -25,7 +25,6 @@ arguments working.
 
 --save
 
-
 --layout=compact,inline, none(!?),standard
 
 --syntax-style
@@ -53,9 +52,6 @@ arguments not working.
 --font-embed
 
 todo:
-problem: could not save file, close /home/ben/github/retrotxtgo/index.html: file already closed
-check for "file already closed" error and ignore
-
 fails!: create static/text/cp437-crlf.txt # no codepage and eof
 fails!: create static/text/cp437-crlf.txt --encode=cp437 # no eof
 add eof bool flag (default on) ?

@@ -172,7 +172,7 @@ func (args *Args) saveHTML(b *[]byte, c chan error) {
 	if err := w.Flush(); err != nil {
 		c <- err
 	}
-	c <- file.Close()
+	c <- nil
 }
 
 func bytesStats(name string, nn int) {
