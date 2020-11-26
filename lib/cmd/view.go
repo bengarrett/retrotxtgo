@@ -14,13 +14,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// issues:
-// go run . view --to=cp1252 1252 > file.txt
-// file file.txt
-
-// returns file.txt: UTF-8 Unicode text, with CRLF, LF line terminators
-// it should be windows-1252
-
 type viewFlags struct {
 	controls []string
 	encode   string
