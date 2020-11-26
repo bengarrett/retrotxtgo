@@ -59,6 +59,7 @@ var viewCmd = &cobra.Command{
 		checkUse(cmd, args...)
 		var err error
 		for i, arg := range args {
+			conv.Output = convert.Output{} // output must be reset
 			if cp := cmd.Flags().Lookup("encode"); cp.Changed {
 				if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
 					logs.Fatal("encoding not known or supported", arg, err)

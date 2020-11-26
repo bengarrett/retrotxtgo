@@ -164,6 +164,7 @@ func createFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 	}
 	f := pack.Flags{}
 	for i, arg := range args {
+		conv.Output = convert.Output{} // output must be reset
 		// convert source text
 		if cp := cmd.Flags().Lookup("encode"); cp.Changed {
 			if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
