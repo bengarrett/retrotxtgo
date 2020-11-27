@@ -81,7 +81,7 @@ var listCmdTables = &cobra.Command{
 				}
 			}
 			switch strings.ToLower(name) {
-			case "utf-16", "utf-16be", "utf-16le":
+			case "utf-16", "utf-16be", "utf-16le", "utf-32", "utf-32be", "utf-32le":
 				continue
 			}
 			table, err := convert.Table(name)
