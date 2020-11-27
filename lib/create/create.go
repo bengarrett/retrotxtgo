@@ -49,8 +49,7 @@ arguments not working.
 
 --meta-referrer | both referrer and robots show together
 --meta-robots   |  "
---font-family
---font-embed
+
 
 todo:
 fails!: create static/text/cp437-crlf.txt # no codepage and eof

@@ -163,8 +163,8 @@ func createFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 		Flags: flags,
 	}
 	f := pack.Flags{}
-
-	if ff := cmd.Flags().Lookup("font-family"); !ff.Changed {
+	ff := cmd.Flags().Lookup("font-family")
+	if !ff.Changed {
 		html.FontFamily.Value = "vga"
 	} else if html.FontFamily.Value == "" {
 		html.FontFamily.Value = ff.Value.String()
@@ -188,7 +188,10 @@ func createFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 				continue
 			}
 			src = create.Normalize(p.Src, p.Runes...)
-			html.FontFamily.Value = p.Font.String()
+			if !ff.Changed {
+				// only apply the pack font when the --font-family flag is unused
+				html.FontFamily.Value = p.Font.String()
+			}
 		}
 		// read file
 		if src == nil {
