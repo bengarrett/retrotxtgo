@@ -502,11 +502,9 @@ func previewPromptPrint(name, value string) (p string) {
 		}
 	}
 	if value != "" {
-		p += ", leave blank to keep as-is or use a dash [-] to remove"
-	} else {
-		p += " or leave blank to keep it unused"
+		return fmt.Sprintf("%s, leave blank to keep as-is or use a dash [-] to remove", p)
 	}
-	return p
+	return fmt.Sprintf("%s or leave blank to keep it unused", p)
 }
 
 func recommendMeta(name, value, suggest string) {
