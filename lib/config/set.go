@@ -363,34 +363,32 @@ func (n names) string(theme bool, lexer string) string {
 				logs.Println("highlight writer failed", name, err)
 			}
 			s = append(s, fmt.Sprintf("%2d %s", i, b.String()))
-			if split+i < len(n) {
-				b = bytes.Buffer{}
-				t = fmt.Sprintf("{ %q:%q }\n", n[split+i], n[split+i])
-				if err := str.HighlightWriter(&b, t, lexer, name, true); err != nil {
-					logs.Println("highlight writer failed", name, err)
-				}
-				s = append(s, fmt.Sprintf("%2d %s", split+i, b.String()))
-			} else {
+			if split+i >= len(n) {
 				break
 			}
-		} else {
 			b = bytes.Buffer{}
-			t = fmt.Sprintf("<%s=%q>%s", name, name, strings.Repeat(" ", pad+space))
+			t = fmt.Sprintf("{ %q:%q }\n", n[split+i], n[split+i])
 			if err := str.HighlightWriter(&b, t, lexer, name, true); err != nil {
 				logs.Println("highlight writer failed", name, err)
 			}
-			s = append(s, fmt.Sprintf("%2d %s", i, b.String()))
-			if split+i < len(n) {
-				b = bytes.Buffer{}
-				t = fmt.Sprintf("<%s=%q>\n", n[split+i], n[split+i])
-				if err := str.HighlightWriter(&b, t, lexer, name, true); err != nil {
-					logs.Println("highlight writer failed", name, err)
-				}
-				s = append(s, fmt.Sprintf("%2d %s", split+i, b.String()))
-			} else {
-				break
-			}
+			s = append(s, fmt.Sprintf("%2d %s", split+i, b.String()))
+			continue
 		}
+		b = bytes.Buffer{}
+		t = fmt.Sprintf("<%s=%q>%s", name, name, strings.Repeat(" ", pad+space))
+		if err := str.HighlightWriter(&b, t, lexer, name, true); err != nil {
+			logs.Println("highlight writer failed", name, err)
+		}
+		s = append(s, fmt.Sprintf("%2d %s", i, b.String()))
+		if split+i >= len(n) {
+			break
+		}
+		b = bytes.Buffer{}
+		t = fmt.Sprintf("<%s=%q>\n", n[split+i], n[split+i])
+		if err := str.HighlightWriter(&b, t, lexer, name, true); err != nil {
+			logs.Println("highlight writer failed", name, err)
+		}
+		s = append(s, fmt.Sprintf("%2d %s", split+i, b.String()))
 	}
 	return strings.Join(s, "")
 }

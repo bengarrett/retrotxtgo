@@ -337,16 +337,16 @@ func destination(args ...string) (path string, err error) {
 func dirs(dir string) (path string, err error) {
 	switch dir {
 	case "~":
-		path, err = os.UserHomeDir()
+		return os.UserHomeDir()
 	case ".":
-		path, err = os.Getwd()
+		return os.Getwd()
 	case "\\", "/":
-		path, err = filepath.Abs(dir)
+		return filepath.Abs(dir)
 	}
 	if err != nil {
 		return "", fmt.Errorf("parse directory error: %q: %w", dir, err)
 	}
-	return path, nil
+	return "", nil
 }
 
 func layout(name string) (l Layout) {
