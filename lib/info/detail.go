@@ -26,7 +26,13 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
-const zipComment = "zip comment"
+const (
+	zipComment = "zip comment"
+	lf         = 10
+	cr         = 13
+	nl         = 21
+	nel        = 133
+)
 
 func (d *Detail) ctrls(filename string) (err error) {
 	f, err := os.Open(filename)
@@ -258,19 +264,19 @@ func (d *Detail) marshalDataValid(k, v string) bool {
 func (d *Detail) linebreaks(r [2]rune) {
 	a, e := "", ""
 	switch r {
-	case [2]rune{10}:
+	case [2]rune{lf}:
 		a = "lf"
 		e = "\n"
-	case [2]rune{13}:
+	case [2]rune{cr}:
 		a = "cr"
 		e = "\r"
-	case [2]rune{13, 10}:
+	case [2]rune{cr, lf}:
 		a = "crlf"
 		e = "\r\n"
-	case [2]rune{10, 13}:
+	case [2]rune{lf, cr}:
 		a = "lfcr"
 		e = "\n\r"
-	case [2]rune{21}, [2]rune{133}:
+	case [2]rune{nl}, [2]rune{nel}:
 		a = "nl"
 		e = "\025"
 	}
@@ -382,7 +388,7 @@ func (d *Detail) words(filename string) (err error) {
 	defer f.Close()
 	var w int
 	switch d.LineBreak.Decimals {
-	case [2]rune{21}, [2]rune{133}:
+	case [2]rune{nl}, [2]rune{nel}:
 		if w, err = filesystem.WordsEBCDIC(f); err != nil {
 			return err
 		}

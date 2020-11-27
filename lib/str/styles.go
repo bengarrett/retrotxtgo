@@ -258,14 +258,14 @@ func UnderlineKeys(keys ...string) string {
 				}
 				keys[i] = fmt.Sprintf("%s.%sin", base, m)
 			}
-		} else {
-			c, err := UnderlineChar(key)
-			if err != nil {
-				keys[i] = key
-			} else {
-				keys[i] = c
-			}
+			continue
 		}
+		c, err := UnderlineChar(key)
+		if err != nil {
+			keys[i] = key
+			continue
+		}
+		keys[i] = c
 	}
 	return strings.Join(keys, ", ")
 }
