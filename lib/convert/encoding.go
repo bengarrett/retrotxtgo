@@ -479,7 +479,6 @@ func (c *Convert) RunesControlsEBCDIC() {
 	if len(c.Output.R) == 0 {
 		return
 	}
-	//
 	const z = byte(row8)
 	for i := 0; i < c.Output.len; i++ {
 		r := c.Output.R[i]
@@ -490,7 +489,6 @@ func (c *Convert) RunesControlsEBCDIC() {
 			c.Output.R[i] = decode(byte(rune(z) + r))
 		}
 	}
-	fmt.Println(string(c.Output.R))
 }
 
 // RunesDOS switches out C0, C1 and other controls with PC/MS-DOS picture glyphs.
