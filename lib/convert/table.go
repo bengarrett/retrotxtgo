@@ -14,12 +14,15 @@ import (
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/japanese"
 	uni "golang.org/x/text/encoding/unicode"
+	"golang.org/x/text/encoding/unicode/utf32"
 	"retrotxt.com/retrotxt/lib/str"
 )
 
 var (
 	// ErrUTF16 UTF-16 unsupported.
 	ErrUTF16 = errors.New("utf-16 table encodings are not supported")
+	// ErrUTF32 UTF-32 unsupported.
+	ErrUTF32 = errors.New("utf-32 table encodings are not supported")
 )
 
 // Table prints out all the characters in the named 8-bit character set.
@@ -33,6 +36,10 @@ func Table(name string) (*bytes.Buffer, error) {
 		uni.UTF16(uni.BigEndian, uni.IgnoreBOM),
 		uni.UTF16(uni.LittleEndian, uni.IgnoreBOM):
 		return nil, ErrUTF16
+	case utf32.UTF32(utf32.BigEndian, utf32.UseBOM),
+		utf32.UTF32(utf32.BigEndian, utf32.IgnoreBOM),
+		utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM):
+		return nil, ErrUTF32
 	}
 	h := fmt.Sprintf("%s", cp)
 	if a := encodingAlias(shorten(name)); a == "iso-8859-11" {
