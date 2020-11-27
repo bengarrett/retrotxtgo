@@ -163,6 +163,12 @@ func createFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 		Flags: flags,
 	}
 	f := pack.Flags{}
+
+	if ff := cmd.Flags().Lookup("font-family"); !ff.Changed {
+		html.FontFamily.Value = "vga"
+	} else if html.FontFamily.Value == "" {
+		html.FontFamily.Value = ff.Value.String()
+	}
 	for i, arg := range args {
 		conv.Output = convert.Output{} // output must be reset
 		// convert source text
@@ -200,11 +206,6 @@ func createFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 		// marshal source text as html
 		html.Source.Name = arg
 		html.Source.Encoding = conv.Source.E // used by retrotxt meta
-		if ff := cmd.Flags().Lookup("font-family"); !ff.Changed {
-			html.FontFamily.Value = "vga"
-		} else if html.FontFamily.Value == "" {
-			html.FontFamily.Value = ff.Value.String()
-		}
 		// serve or print html
 		if h := htmlServe(i, cmd, &b); !h {
 			html.Create(&b)

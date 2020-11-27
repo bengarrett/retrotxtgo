@@ -14,6 +14,14 @@ import (
 	"retrotxt.com/retrotxt/lib/logs"
 )
 
+const (
+	nameCSS  = "styles.css"
+	nameFont = "font.css"
+	nameHTML = "index.html"
+	nameJS   = "scripts.js"
+	nameFav  = "favicon.ico"
+)
+
 // saveCSS creates and saves the styles stylesheet to the Destination argument.
 func (args *Args) saveCSS(c chan error) {
 	switch args.layout {
@@ -21,7 +29,7 @@ func (args *Args) saveCSS(c chan error) {
 	case Compact, Inline, None:
 		c <- nil
 	}
-	name, err := args.destination("styles.css")
+	name, err := args.destination(nameCSS)
 	if err != nil {
 		c <- err
 	}

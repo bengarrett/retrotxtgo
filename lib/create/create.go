@@ -13,6 +13,7 @@ import (
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/runes"
 	"golang.org/x/text/transform"
+	"retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/filesystem"
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/str"
@@ -231,6 +232,8 @@ func (args *Args) Create(b *[]byte) {
 	var err error
 	args.layout = layout(args.Layout)
 	switch {
+	case args.Save.Compress:
+		fmt.Println("TODO!")
 	case args.Save.AsFiles:
 		// use config save directory
 		// otherwise assume Destination path is a temporary --serve location
@@ -278,19 +281,65 @@ func (args *Args) Create(b *[]byte) {
 
 // Stdout creates and prints the html template.
 func (args *Args) Stdout(b *[]byte) error {
+	// html
 	buf, err := args.marshalTextTransform(b)
 	if err != nil {
 		return fmt.Errorf("stdout: %w", err)
 	}
+	// js
+	js := pack.Get("js/scripts.js")
+	// css
+	css := pack.Get("css/styles.css")
+	// font
+	ff := args.FontFamily.Value
+	f := Family(ff).String()
+	if f == "" {
+		return fmt.Errorf("create.saveFontCSS %q: %w", ff, ErrUnknownFF)
+	}
+	font, err := FontCSS(f, args.FontEmbed)
+	if err != nil {
+		return err
+	}
+	const (
+		fJS   = "\nJS file: %s\n"
+		fCSS  = "\nCSS file: %s\n"
+		fFont = "\nFont %q file: %s\n"
+		fHTML = "\nHTML file: %s\n"
+	)
+	var noSyntax = func() {
+		fmt.Printf(fJS, nameJS)
+		fmt.Println(string(js))
+		fmt.Printf(fCSS, nameCSS)
+		fmt.Println(string(css))
+		fmt.Printf(fFont, f, nameFont)
+		fmt.Println(string(font))
+		fmt.Printf(fHTML, nameHTML)
+		fmt.Println(buf.String())
+	}
+	// stdout
+	const format = "%s\n\n%s"
 	switch args.Syntax {
 	case "", none:
-		fmt.Printf("%s", buf.String())
+		noSyntax()
 	default:
 		if !str.Valid(args.Syntax) {
 			fmt.Printf("unknown style %q, so using none\n", args.Syntax)
-			fmt.Printf("%s", buf.String())
+			noSyntax()
 			return nil
 		}
+		fmt.Printf(fJS, nameJS)
+		if err = str.Highlight(string(js), "js", args.Syntax, true); err != nil {
+			return fmt.Errorf("stdout js highlight: %w", err)
+		}
+		fmt.Printf(fCSS, nameCSS)
+		if err = str.Highlight(string(css), "css", args.Syntax, true); err != nil {
+			return fmt.Errorf("stdout css highlight: %w", err)
+		}
+		fmt.Printf(fFont, f, nameFont)
+		if err = str.Highlight(string(font), "css", args.Syntax, true); err != nil {
+			return fmt.Errorf("stdout font css highlight: %w", err)
+		}
+		fmt.Printf(fHTML, nameHTML)
 		if err = str.Highlight(buf.String(), "html", args.Syntax, true); err != nil {
 			return fmt.Errorf("stdout html highlight: %w", err)
 		}
