@@ -190,10 +190,13 @@ issues:
       linters:
         - gocognit
         - gocyclo
+    - path: lib/create/
+      linters:
+        - gci
     - path: lib/info/detail\.go
       linters:
         - gci
-    - path: info/detail\.go
+    - path: lib/info/detail\.go
       text: "weak cryptographic primitive"
       linters:
         - gosec

@@ -363,7 +363,7 @@ func layout(name string) (l Layout) {
 	return l
 }
 
-// replace EBCDIC newline with linefeed
+// replace EBCDIC newline with linefeed.
 func replaceNELs() runes.Transformer {
 	return runes.Map(func(r rune) rune {
 		if r == filesystem.NextLine {

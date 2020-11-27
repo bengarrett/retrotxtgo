@@ -165,9 +165,12 @@ func examples() *bytes.Buffer {
 	fmt.Fprintln(w, "\nAny of these packaged examples will work with the",
 		str.Example("create")+",", str.Example("info"), "and", str.Example("view"), "commands.")
 	fmt.Fprintln(w, "\nPrint the Windows-1252 English test to the terminal.\n"+str.Example("  retrotxt view 1252"))
-	fmt.Fprintln(w, "\nConvert the Windows-1252 English test to UTF-8 encoding and save it to a file.\n"+str.Example("  retrotxt view 1252 > file.txt"))
-	fmt.Fprintln(w, "\nSave the Windows-1252 English test with its original encoding.\n"+str.Example("  retrotxt view --to=cp1252 1252 > file.txt"))
-	fmt.Fprintln(w, "\nDisplay statistics and information from a piped source.\n"+str.Example(" retrotxt view --to=cp1252 1252 | retrotxt info"))
+	fmt.Fprintln(w, "\nConvert the Windows-1252 English test to UTF-8 encoding and save it to a file.\n"+
+		str.Example("  retrotxt view 1252 > file.txt"))
+	fmt.Fprintln(w, "\nSave the Windows-1252 English test with its original encoding.\n"+
+		str.Example("  retrotxt view --to=cp1252 1252 > file.txt"))
+	fmt.Fprintln(w, "\nDisplay statistics and information from a piped source.\n"+
+		str.Example(" retrotxt view --to=cp1252 1252 | retrotxt info"))
 	fmt.Fprintln(w, "\nDisplay statistics and information from the Windows-1252 English test.\n"+str.Example("  retrotxt info 1252"))
 	fmt.Fprintln(w, "\nDisplay statistics, information and SAUCE metadata from the SAUCE test.\n"+str.Example("  retrotxt info sauce"))
 	fmt.Fprintln(w, "\nCreate and display a HTML document from the Windows-1252 English test.\n"+str.Example("  retrotxt create 1252"))
