@@ -9,7 +9,7 @@ import (
 )
 
 func TestEncodings(t *testing.T) {
-	const totalEncodings = 50
+	const totalEncodings = 53
 	got, want := len(Encodings()), totalEncodings
 	if got != want {
 		t.Errorf("Encodings() count = %v, want %v", got, want)
