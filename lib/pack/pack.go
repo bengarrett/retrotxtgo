@@ -156,7 +156,10 @@ func (f Flags) Open(conv *convert.Convert, name string) (p Pack, err error) {
 	// character default overrides
 	switch name {
 	case "437.cr", "437.crlf", "437.lf":
-		conv.Flags.Controls = nil
+		if conv.Flags.Controls != nil {
+			fmt.Printf("\nTo correctly display all %q table cells the --controls flag is ignored\n", name)
+			conv.Flags.Controls = nil
+		}
 	}
 	// convert to runes and print
 	switch pkg.convert {

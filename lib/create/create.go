@@ -23,10 +23,6 @@ import (
 
 /*
 arguments not working.
---controls
-
---swap-chars=124?
-
 --compress # maybe this should be used as an alt to --save?
 
 todo:
