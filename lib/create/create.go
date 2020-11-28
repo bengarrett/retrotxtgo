@@ -24,11 +24,6 @@ import (
 /*
 arguments not working.
 --compress # maybe this should be used as an alt to --save?
-
-todo:
-fails!: create static/text/cp437-crlf.txt # no codepage and eof
-fails!: create static/text/cp437-crlf.txt --encode=cp437 # no eof
-add eof bool flag (default on) ?
 */
 
 // Args holds arguments and options sourced from user flags or the config file.

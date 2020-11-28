@@ -36,7 +36,7 @@ type metaFlag struct {
 }
 
 var createFlag = createFlags{
-	controls: []string{tab},
+	controls: []string{eof, tab},
 	encode:   "CP437",
 	swap:     []int{null, verticalBar},
 }
@@ -72,7 +72,7 @@ var createCmd = &cobra.Command{
 		}
 		// handle defaults that are left empty for usage formatting
 		if c := cmd.Flags().Lookup("controls"); !c.Changed {
-			f.Controls = []string{tab}
+			f.Controls = []string{eof, tab}
 		}
 		if s := cmd.Flags().Lookup("swap-chars"); !s.Changed {
 			f.SwapChars = []int{null, verticalBar}
@@ -200,7 +200,12 @@ func createFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 			}
 		}
 		// convert text
-		r, err := conv.Text(&src)
+		var r []rune
+		if endOfFile(conv.Flags) {
+			r, err = conv.Text(&src)
+		} else {
+			r, err = conv.Dump(&src)
+		}
 		if err != nil {
 			logs.Println("convert text", arg, err)
 			continue

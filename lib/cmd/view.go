@@ -23,7 +23,7 @@ type viewFlags struct {
 }
 
 var viewFlag = viewFlags{
-	controls: []string{tab},
+	controls: []string{eof, tab},
 	encode:   "CP437",
 	swap:     []int{null, verticalBar},
 	to:       "",
@@ -49,7 +49,7 @@ var viewCmd = &cobra.Command{
 		f := pack.Flags{}
 		// handle defaults that are left empty for usage formatting
 		if c := cmd.Flags().Lookup("controls"); !c.Changed {
-			conv.Flags.Controls = []string{tab}
+			conv.Flags.Controls = []string{eof, tab}
 		}
 		if s := cmd.Flags().Lookup("swap-chars"); !s.Changed {
 			conv.Flags.SwapChars = []int{null, verticalBar}
@@ -100,7 +100,12 @@ var viewCmd = &cobra.Command{
 				continue
 			}
 			// convert text
-			r, err := conv.Text(&b)
+			var r []rune
+			if endOfFile(conv.Flags) {
+				r, err = conv.Text(&b)
+			} else {
+				r, err = conv.Dump(&b)
+			}
 			if err != nil {
 				logs.Println("convert text", arg, err)
 				continue

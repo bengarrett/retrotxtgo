@@ -12,8 +12,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-
 	"retrotxt.com/retrotxt/lib/config"
+	"retrotxt.com/retrotxt/lib/convert"
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/pack"
 	"retrotxt.com/retrotxt/lib/str"
@@ -24,6 +24,7 @@ type rootFlags struct {
 }
 
 const (
+	eof         = "eof"
 	tab         = "tab"
 	null        = 0
 	verticalBar = 124
@@ -100,18 +101,28 @@ func checkUse(cmd *cobra.Command, args ...string) {
 	}
 }
 
+func endOfFile(flags convert.Flags) bool {
+	for _, c := range flags.Controls {
+		if c == eof {
+			return true
+		}
+	}
+	return false
+}
+
 func flagControls(p *[]string, cc *cobra.Command) {
 	cc.Flags().StringSliceVarP(p, "controls", "c", []string{},
 		`use these control codes
+  eof    end of file mark
   tab    horizontal tab
   bell   bell or terminal alert
   cr     carriage return
   lf     line feed
   bs backspace, del delete character, esc escape character
   ff formfeed, vt vertical tab
-(default tab)
+(default eof,tab)
 separate multiple controls with commas
-`+str.Example("--controls=tab,bell")+"\n")
+`+str.Example("--controls=eof,tab,bell")+"\n")
 }
 
 func flagEncode(p *string, cc *cobra.Command) {
