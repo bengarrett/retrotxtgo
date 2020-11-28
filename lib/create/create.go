@@ -22,24 +22,6 @@ import (
 )
 
 /*
-arguments working.
-
---save
-
---layout=compact,inline, none(!?),standard
-
---syntax-style
---title
---meta-description
---meta-author
---meta-retrotxt
---meta-generator
---meta-theme-scheme
---meta-notranslate
---meta-theme-color
---encode=
-
-
 arguments not working.
 --controls
 
@@ -47,15 +29,10 @@ arguments not working.
 
 --compress # maybe this should be used as an alt to --save?
 
---meta-referrer | both referrer and robots show together
---meta-robots   |  "
-
-
 todo:
 fails!: create static/text/cp437-crlf.txt # no codepage and eof
 fails!: create static/text/cp437-crlf.txt --encode=cp437 # no eof
 add eof bool flag (default on) ?
-
 */
 
 // Args holds arguments and options sourced from user flags or the config file.

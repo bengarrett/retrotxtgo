@@ -277,8 +277,8 @@ func (args *Args) metaReferrer() string {
 }
 
 func (args *Args) metaRobots() string {
-	if args.Metadata.Referrer.Flag {
-		return args.Metadata.Referrer.Value
+	if args.Metadata.Robots.Flag {
+		return args.Metadata.Robots.Value
 	}
 	return viper.GetString("html.meta.robots")
 }
