@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -20,11 +21,6 @@ import (
 
 	"github.com/spf13/viper"
 )
-
-/*
-arguments not working.
---compress # maybe this should be used as an alt to --save?
-*/
 
 // Args holds arguments and options sourced from user flags or the config file.
 type Args struct {
@@ -145,6 +141,8 @@ const (
 	inline   = "inline"
 	standard = "standard"
 	unknown  = "unknown"
+
+	zipName = "retrotxt.zip"
 )
 
 var (
@@ -196,53 +194,87 @@ func (l Layout) Pack() string {
 
 // Create handles the target output command arguments.
 func (args *Args) Create(b *[]byte) {
-	var err error
+
 	args.layout = layout(args.Layout)
+
 	switch {
-	case args.Save.Compress:
-		fmt.Println("TODO!")
 	case args.Save.AsFiles:
-		// use config save directory
-		// otherwise assume Destination path is a temporary --serve location
-		if args.Save.Destination == "" {
-			dir := []string{viper.GetString("save-directory")}
-			if args.Save.Destination, err = destination(dir...); err != nil {
-				logs.Fatal("save to directory failure", fmt.Sprintf("%s", dir), err)
-			}
-		}
-		ch := make(chan error)
-		go args.saveCSS(ch)
-		go args.saveFont(ch)
-		go args.saveHTML(b, ch)
-		go args.saveJS(ch)
-		go args.saveFavIcon(ch)
-		err1, err2, err3, err4, err5 := <-ch, <-ch, <-ch, <-ch, <-ch
-		const errS, errCode = "could not save file", 1
-		if err1 != nil {
-			logs.Println(errS, "", err1)
-			os.Exit(errCode)
-		}
-		if err2 != nil {
-			logs.Println(errS, "", err2)
-			os.Exit(errCode)
-		}
-		if err3 != nil {
-			logs.Println(errS, "", err3)
-			os.Exit(errCode)
-		}
-		if err4 != nil {
-			logs.Println(errS, "", err4)
-			os.Exit(errCode)
-		}
-		if err5 != nil {
-			logs.Println(errS, "", err5)
-			os.Exit(errCode)
-		}
+		args.saveAssets(b)
+	case args.Save.Compress:
+		args.zipAssets(b)
 	default:
 		// print to terminal
-		if err = args.Stdout(b); err != nil {
-			logs.Fatal("print to stdout", "", err)
+		if err := args.Stdout(b); err != nil {
+			logs.Fatal("create", "stdout", err)
 		}
+	}
+}
+
+func (args *Args) saveAssets(b *[]byte) {
+	var err error
+	if args.Save.Destination == "" {
+		dir := []string{viper.GetString("save-directory")}
+		if args.Save.Destination, err = destination(dir...); err != nil {
+			logs.Fatal("save to directory failure", fmt.Sprintf("%s", dir), err)
+		}
+	}
+	ch := make(chan error)
+	go args.saveCSS(ch)
+	go args.saveFont(ch)
+	go args.saveHTML(b, ch)
+	go args.saveJS(ch)
+	go args.saveFavIcon(ch)
+	err1, err2, err3, err4, err5 := <-ch, <-ch, <-ch, <-ch, <-ch
+	const errS, errCode = "could not save file", 1
+	if err1 != nil {
+		logs.Println(errS, "", err1)
+		os.Exit(errCode)
+	}
+	if err2 != nil {
+		logs.Println(errS, "", err2)
+		os.Exit(errCode)
+	}
+	if err3 != nil {
+		logs.Println(errS, "", err3)
+		os.Exit(errCode)
+	}
+	if err4 != nil {
+		logs.Println(errS, "", err4)
+		os.Exit(errCode)
+	}
+	if err5 != nil {
+		logs.Println(errS, "", err5)
+		os.Exit(errCode)
+	}
+}
+
+func (args *Args) zipAssets(b *[]byte) {
+
+	var err error
+
+	defer func() {
+		dir := args.Save.Destination
+		m, err := filepath.Match(filepath.Join(os.TempDir(), "*"), dir)
+		if err != nil {
+			logs.Println("temp directory match", "*", err)
+		}
+		if m {
+			if err = os.RemoveAll(dir); err != nil {
+				logs.Println("could not remove temp directory", dir, err)
+			}
+		}
+	}()
+
+	args.Save.Destination, err = ioutil.TempDir(os.TempDir(), "*-compress")
+	if err != nil {
+		logs.Fatal("save to directory failure", "temporary", err)
+	}
+
+	args.saveAssets(b)
+
+	err = filesystem.Zip(zipName, args.Save.Destination, "")
+	if err != nil {
+		logs.Fatal("zip archive", zipName, err)
 	}
 }
 
