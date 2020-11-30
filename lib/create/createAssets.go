@@ -51,7 +51,7 @@ func (args *Args) saveFavIcon(c chan error) {
 	case Compact, Inline, None:
 		c <- nil
 	}
-	name, err := args.destination("favicon.ico")
+	name, err := args.destination(nameFav)
 	if err != nil {
 		c <- err
 	}
@@ -98,7 +98,7 @@ func (args *Args) saveFontCSS(name string) error {
 	if f == "" {
 		return fmt.Errorf("create.saveFontCSS %q: %w", name, ErrUnknownFF)
 	}
-	b, err := FontCSS(f, args.FontEmbed)
+	b, err := FontCSS(f, args.Source.Encoding, args.FontEmbed)
 	if err != nil {
 		return err
 	}
@@ -134,7 +134,7 @@ func (args *Args) saveJS(c chan error) {
 		c <- nil
 		return
 	}
-	name, err := args.destination("scripts.js")
+	name, err := args.destination(nameJS)
 	if err != nil {
 		c <- err
 	}
@@ -152,7 +152,7 @@ func (args *Args) saveJS(c chan error) {
 
 // SaveHTML creates and saves the html template to the Destination argument.
 func (args *Args) saveHTML(b *[]byte, c chan error) {
-	name, err := args.destination("index.html")
+	name, err := args.destination(nameHTML)
 	if err != nil {
 		c <- err
 	}
@@ -211,7 +211,7 @@ func (args *Args) destination(name string) (string, error) {
 	_, err = os.Stat(path)
 	if !args.Save.OW && !os.IsNotExist(err) {
 		switch name {
-		case "favicon.ico", "scripts.js", "vga.woff2":
+		case nameFav, nameJS, "vga.woff2", "mona.woff2":
 			// existing static files can be ignored
 			return path, nil
 		}

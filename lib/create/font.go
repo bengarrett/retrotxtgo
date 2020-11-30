@@ -12,7 +12,7 @@ import (
 )
 
 // Font enum.
-type Font int
+type Font uint
 
 const (
 	// Automatic uses AutoFont to suggest a font.
@@ -50,8 +50,10 @@ func Family(name string) Font {
 		return Mona
 	case "vga", "v":
 		return VGA
+	default:
+		return Automatic
+
 	}
-	return -1
 }
 
 // Fonts are values for the CSS font-family attribute.
@@ -60,12 +62,12 @@ func Fonts() []string {
 }
 
 // FontCSS creates the CSS required for customized fonts.
-func FontCSS(name string, embed bool) (b []byte, err error) {
-	const unknown = -1
-	if Family(name) == unknown {
-		return nil, fmt.Errorf("font css %q: %w", name, ErrName)
+func FontCSS(name string, e encoding.Encoding, embed bool) (b []byte, err error) {
+
+	f := Family(name)
+	if Family(name) == Automatic {
+		f = AutoFont(e)
 	}
-	f := Family(name).String()
 	const css = `@font-face {
   font-family: '{{.Name}}';
   src: url({{.URL}}) format('woff2');
@@ -88,7 +90,7 @@ main pre {
 		Name string
 		URL  template.HTML // use HTML type to avoid contextual encoding
 	}{
-		Name: f,
+		Name: f.String(),
 	}
 	if embed {
 		url := ""
@@ -98,7 +100,7 @@ main pre {
 		}
 		data.URL = template.HTML(url)
 	} else {
-		data.URL = template.HTML(Family(name).File())
+		data.URL = template.HTML(f.File())
 	}
 	var out bytes.Buffer
 	t, err := template.New("fontface").Parse(css)
@@ -112,15 +114,10 @@ main pre {
 	return out.Bytes(), nil
 }
 
-func fontBase64(name string) (string, error) {
-	const unknown = -1
-	if Family(name) == unknown {
-		return "", fmt.Errorf("font base64 %q: %w", name, ErrName)
-	}
-	f := Family(name).File()
-	b := pack.Get(fmt.Sprintf("font/%s", f))
+func fontBase64(f Font) (string, error) {
+	b := pack.Get(fmt.Sprintf("font/%s", f.File()))
 	if len(b) == 0 {
-		return "", fmt.Errorf("font base64 %q: %w", f, ErrPack)
+		return "", fmt.Errorf("font base64 %q: %w", f.File(), ErrPack)
 	}
 	var s bytes.Buffer
 	encoder := base64.NewEncoder(base64.StdEncoding, &s)

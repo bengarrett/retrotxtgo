@@ -309,7 +309,7 @@ func (args *Args) Stdout(b *[]byte) error {
 	if f == "" {
 		return fmt.Errorf("create.saveFontCSS %q: %w", ff, ErrUnknownFF)
 	}
-	font, err := FontCSS(f, args.FontEmbed)
+	font, err := FontCSS(f, args.Source.Encoding, args.FontEmbed)
 	if err != nil {
 		return err
 	}

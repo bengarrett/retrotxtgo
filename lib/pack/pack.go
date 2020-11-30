@@ -35,7 +35,7 @@ type Packs struct {
 	// convert method
 	convert output
 	// font choice
-	font Font
+	Font Font
 	// default character encoding for the packed data
 	encoding encoding.Encoding
 	// package name used in internal/pack/blob.go
@@ -52,7 +52,7 @@ type (
 
 func (f Font) String() string {
 	return [...]string{
-		"vga", "mono",
+		"", "vga", "mono",
 	}[f]
 }
 
@@ -61,9 +61,12 @@ const (
 	char               // Ignore and print the common text controls as characters.
 	text               // Obey common text controls.
 	dump               // Obey common text controls except end-of-file.
+)
 
-	vga  Font = iota // VGA 8px font.
-	mona             // Mona font for shift-jis.
+const (
+	_    Font = iota
+	VGA       // VGA 8px font.
+	Mona      // Mona font for shift-jis.
 )
 
 var (
@@ -93,35 +96,35 @@ func Map() map[string]Packs {
 		u32le  = utf32.UTF32(utf32.LittleEndian, utf32.UseBOM)
 	)
 	m := map[string]Packs{
-		"037":           {text, vga, cp037, "text/cp037.txt", "EBCDIC 037 IBM mainframe test"},
-		"437.cr":        {dump, vga, cp437, "text/cp437-cr.txt", "CP-437 all characters test using CR (carriage return)"},
-		"437.crlf":      {dump, vga, cp437, "text/cp437-crlf.txt", "CP-437 all characters test using Windows line breaks"},
-		"437.lf":        {dump, vga, cp437, "text/cp437-lf.txt", "CP-437 all characters test using LF (line feed)"},
-		"865":           {text, vga, cp865, "text/cp865.txt", "CP-865 and CP-860 Nordic test"},
-		"1252":          {text, vga, cp1252, "text/cp1252.txt", "Windows-1252 English test"},
-		"ascii":         {text, vga, cp437, "text/retrotxt.asc", "RetroTxt ASCII logos"},
-		"ansi":          {ansi, vga, cp437, "text/retrotxt.ans", "RetroTxt 256 color ANSI logo"},
-		"ansi.aix":      {ansi, vga, cp437, "text/ansi-aixterm.ans", "IBM AIX terminal colours"},
-		"ansi.blank":    {ansi, vga, cp437, "text/ansi-blank.ans", "Empty file test"},
-		"ansi.cp":       {ansi, vga, cp437, "text/ansi-cp.ans", "ANSI cursor position tests"},
-		"ansi.cpf":      {ansi, vga, cp437, "text/ansi-cpf.ans", "ANSI cursor forward tests"},
-		"ansi.hvp":      {ansi, vga, cp437, "text/ansi-hvp.ans", "ANSI horizontal and vertical cursor positioning"},
-		"ansi.proof":    {ansi, vga, cp437, "text/ansi-proof.ans", "ANSI formatting proof sheet"},
-		"ansi.rgb":      {ansi, vga, cp437, "text/ansi-rgb.ans", "ANSI RGB 24-bit color sheet"},
-		"ansi.setmodes": {ansi, vga, cp437, "text/ansi-setmodes.ans", "MS-DOS ANSI.SYS Set Mode examples"},
-		"iso-1":         {text, vga, iso1, "text/iso-8859-1.txt", "ISO 8859-1 select characters"},
-		"iso-15":        {text, vga, iso15, "text/iso-8859-15.txt", "ISO 8859-15 select characters"},
-		"sauce":         {text, vga, cp437, "text/sauce.txt", "SAUCE metadata test"},
-		"shiftjis":      {text, mona, jis, "text/shiftjis.txt", "Shift-JIS and Mona font test"},
-		"us-ascii":      {dump, vga, u8, "text/us-ascii.txt", "US-ASCII controls test"},
-		"utf8":          {text, vga, u8, "text/utf-8.txt", "UTF-8 test with no Byte Order Mark"},
-		"utf8.bom":      {text, vga, u8bom, "text/utf-8-bom.txt", "UTF-8 test with a Byte Order Mark"},
-		"utf16":         {text, vga, u16, "text/utf-16.txt", "UTF-16 test"},
-		"utf16.be":      {text, vga, u16be, "text/utf-16-be.txt", "UTF-16 Big Endian test"},
-		"utf16.le":      {text, vga, u16le, "text/utf-16-le.txt", "UTF-16 Little Endian test"},
-		"utf32":         {text, vga, u32, "text/utf-32.txt", "UTF-32 test"},
-		"utf32.be":      {text, vga, u32be, "text/utf-32-be.txt", "UTF-32 Big Endian test"},
-		"utf32.le":      {text, vga, u32le, "text/utf-32-le.txt", "UTF-32 Little Endian test"},
+		"037":           {text, VGA, cp037, "text/cp037.txt", "EBCDIC 037 IBM mainframe test"},
+		"437.cr":        {dump, VGA, cp437, "text/cp437-cr.txt", "CP-437 all characters test using CR (carriage return)"},
+		"437.crlf":      {dump, VGA, cp437, "text/cp437-crlf.txt", "CP-437 all characters test using Windows line breaks"},
+		"437.lf":        {dump, VGA, cp437, "text/cp437-lf.txt", "CP-437 all characters test using LF (line feed)"},
+		"865":           {text, VGA, cp865, "text/cp865.txt", "CP-865 and CP-860 Nordic test"},
+		"1252":          {text, VGA, cp1252, "text/cp1252.txt", "Windows-1252 English test"},
+		"ascii":         {text, VGA, cp437, "text/retrotxt.asc", "RetroTxt ASCII logos"},
+		"ansi":          {ansi, VGA, cp437, "text/retrotxt.ans", "RetroTxt 256 color ANSI logo"},
+		"ansi.aix":      {ansi, VGA, cp437, "text/ansi-aixterm.ans", "IBM AIX terminal colours"},
+		"ansi.blank":    {ansi, VGA, cp437, "text/ansi-blank.ans", "Empty file test"},
+		"ansi.cp":       {ansi, VGA, cp437, "text/ansi-cp.ans", "ANSI cursor position tests"},
+		"ansi.cpf":      {ansi, VGA, cp437, "text/ansi-cpf.ans", "ANSI cursor forward tests"},
+		"ansi.hvp":      {ansi, VGA, cp437, "text/ansi-hvp.ans", "ANSI horizontal and vertical cursor positioning"},
+		"ansi.proof":    {ansi, VGA, cp437, "text/ansi-proof.ans", "ANSI formatting proof sheet"},
+		"ansi.rgb":      {ansi, VGA, cp437, "text/ansi-rgb.ans", "ANSI RGB 24-bit color sheet"},
+		"ansi.setmodes": {ansi, VGA, cp437, "text/ansi-setmodes.ans", "MS-DOS ANSI.SYS Set Mode examples"},
+		"iso-1":         {text, VGA, iso1, "text/iso-8859-1.txt", "ISO 8859-1 select characters"},
+		"iso-15":        {text, VGA, iso15, "text/iso-8859-15.txt", "ISO 8859-15 select characters"},
+		"sauce":         {text, VGA, cp437, "text/sauce.txt", "SAUCE metadata test"},
+		"shiftjis":      {text, Mona, jis, "text/shiftjis.txt", "Shift-JIS and Mona font test"},
+		"us-ascii":      {dump, VGA, u8, "text/us-ascii.txt", "US-ASCII controls test"},
+		"utf8":          {text, VGA, u8, "text/utf-8.txt", "UTF-8 test with no Byte Order Mark"},
+		"utf8.bom":      {text, VGA, u8bom, "text/utf-8-bom.txt", "UTF-8 test with a Byte Order Mark"},
+		"utf16":         {text, VGA, u16, "text/utf-16.txt", "UTF-16 test"},
+		"utf16.be":      {text, VGA, u16be, "text/utf-16-be.txt", "UTF-16 Big Endian test"},
+		"utf16.le":      {text, VGA, u16le, "text/utf-16-le.txt", "UTF-16 Little Endian test"},
+		"utf32":         {text, VGA, u32, "text/utf-32.txt", "UTF-32 test"},
+		"utf32.be":      {text, VGA, u32be, "text/utf-32-be.txt", "UTF-32 Big Endian test"},
+		"utf32.le":      {text, VGA, u32le, "text/utf-32-le.txt", "UTF-32 Little Endian test"},
 	}
 	return m
 }
@@ -141,6 +144,7 @@ func (f Flags) Open(conv *convert.Convert, name string) (p Pack, err error) {
 		return p, fmt.Errorf("view package %q: %w", pkg.Name, ErrPackGet)
 	}
 	p.Src = pkg.encoding
+	p.Font = pkg.Font
 	if f.From == nil {
 		conv.Source.E = p.Src
 	}
@@ -153,7 +157,7 @@ func (f Flags) Open(conv *convert.Convert, name string) (p Pack, err error) {
 		transform(f.From, b...)
 		return p, nil
 	}
-	// character default overrides
+	// default overrides
 	switch name {
 	case "437.cr", "437.crlf", "437.lf":
 		if conv.Flags.Controls != nil {

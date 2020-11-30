@@ -67,7 +67,7 @@ func (args *Args) marshalInline(b *[]byte) (p PageData, err error) {
 	s := bytes.TrimSpace(pack.Get("css/styles.css"))
 	// font
 	var f []byte
-	f, err = FontCSS(args.FontFamily.Value, args.FontEmbed)
+	f, err = FontCSS(args.FontFamily.Value, args.Source.Encoding, args.FontEmbed)
 	if err != nil {
 		return p, fmt.Errorf("pagedata font error: %w", err)
 	}
