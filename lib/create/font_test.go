@@ -48,7 +48,8 @@ func TestFamily(t *testing.T) {
 		name string
 		want Font
 	}{
-		{"", -1},
+		{"v", VGA},
+		{"mona", Mona},
 		{"a", Automatic},
 	}
 	for _, tt := range tests {
@@ -71,13 +72,14 @@ func TestFontCSS(t *testing.T) {
 		wantSize int
 		wantErr  bool
 	}{
-		{"empty", args{"", false}, 0, true},
-		{"hi", args{"vga", true}, 19740, false},
-		{"hi", args{"vga", false}, 213, false},
+		{"empty", args{"", false}, 213, false}, // automatic returns vga
+		{"vga embed", args{"vga", true}, 19740, false},
+		{"vga", args{"vga", false}, 213, false},
+		{"mona", args{"mona", false}, 214, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotB, err := FontCSS(tt.args.name, tt.args.embed)
+			gotB, err := FontCSS(tt.args.name, nil, tt.args.embed)
 			gotSize := len(gotB)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("FontCSS() error = %v, wantErr %v", err, tt.wantErr)
