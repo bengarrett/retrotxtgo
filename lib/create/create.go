@@ -281,8 +281,13 @@ func (args *Args) zipAssets(b *[]byte) {
 
 	args.saveAssets(b)
 
-	err = filesystem.Zip(zipName, args.Save.Destination, "")
-	if err != nil {
+	zip := filesystem.Zip{
+		Name:      zipName,
+		Root:      args.Save.Destination,
+		Comment:   "",
+		Overwrite: args.Save.OW,
+	}
+	if err = zip.Create(); err != nil {
 		logs.Fatal("zip archive", zipName, err)
 	}
 }

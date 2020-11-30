@@ -16,8 +16,16 @@ import (
 // Files to zip.
 type Files []string
 
-// Zip packages and compresses files contained the root directory into an archive using the provided name.
-func Zip(name, root, comment string) error {
+// Zip archive details.
+type Zip struct {
+	Name      string
+	Root      string
+	Comment   string
+	Overwrite bool
+}
+
+// Create zip packages and compresses files contained the root directory into an archive using the provided name.
+func (z *Zip) Create() error {
 
 	const dotFile = "."
 
@@ -36,7 +44,7 @@ func Zip(name, root, comment string) error {
 			return nil
 		}
 		// stop recursive walking
-		if filepath.Base(filepath.Dir(path)) != filepath.Base(root) {
+		if filepath.Base(filepath.Dir(path)) != filepath.Base(z.Root) {
 			return nil
 		}
 		// ignore posix hidden files
@@ -52,26 +60,50 @@ func Zip(name, root, comment string) error {
 		return nil
 	}
 
-	if err := filepath.Walk(root, walker); err != nil {
+	if err := filepath.Walk(z.Root, walker); err != nil {
 		return err
 	}
 
-	return files.Zip(name, comment)
+	return files.Zip(z.Name, z.Comment, z.Overwrite)
 }
 
 // Zip packages and compresses files to an archive using the provided name.
-func (files *Files) Zip(name, comment string) error {
+func (files *Files) Zip(name, comment string, ow bool) error {
 
-	new, err := UniqueName(name)
-	if err != nil {
-		return fmt.Errorf("zip name %q: %w", name, err)
-	}
+	const (
+		overwrite    = os.O_RDWR | os.O_CREATE
+		mustNotExist = os.O_RDWR | os.O_CREATE | os.O_EXCL
+		readWriteAll = 0666
+	)
+	var (
+		err error
+		new string
+		w   *os.File
+	)
 
-	w, err := os.OpenFile(new, os.O_RDWR|os.O_CREATE, 0666)
-	if err != nil {
-		return fmt.Errorf("zip create %q: %w", new, err)
+	switch ow {
+	case true:
+
+		new = name
+		w, err = os.OpenFile(new, overwrite, readWriteAll)
+		if err != nil {
+			return fmt.Errorf("zip create %q: %w", new, err)
+		}
+		defer w.Close()
+
+	default:
+
+		new, err = UniqueName(name)
+		if err != nil {
+			return fmt.Errorf("zip name %q: %w", name, err)
+		}
+		w, err = os.OpenFile(new, mustNotExist, readWriteAll)
+		if err != nil {
+			return fmt.Errorf("zip create %q: %w", new, err)
+		}
+		defer w.Close()
+
 	}
-	defer w.Close()
 
 	z := zip.NewWriter(w)
 	defer z.Close()
