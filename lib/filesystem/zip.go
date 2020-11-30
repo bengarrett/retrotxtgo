@@ -13,11 +13,13 @@ import (
 	"retrotxt.com/retrotxt/lib/humanize"
 )
 
-// Files to compress and archive.
+// Files to zip.
 type Files []string
 
-// Zip packages and compresses files contained in root to an archive using the provided name.
+// Zip packages and compresses files contained the root directory into an archive using the provided name.
 func Zip(name, root, comment string) error {
+
+	const dotFile = "."
 
 	var files Files
 
@@ -38,7 +40,11 @@ func Zip(name, root, comment string) error {
 			return nil
 		}
 		// ignore posix hidden files
-		if info.Name()[:1] == "." {
+		if info.Name()[:1] == dotFile {
+			return nil
+		}
+		// ignore 0-byte files
+		if info.Size() == 0 {
 			return nil
 		}
 
@@ -61,7 +67,7 @@ func (files *Files) Zip(name, comment string) error {
 		return fmt.Errorf("zip name %q: %w", name, err)
 	}
 
-	w, err := os.Create(new)
+	w, err := os.OpenFile(new, os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
 		return fmt.Errorf("zip create %q: %w", new, err)
 	}
@@ -131,11 +137,12 @@ func zipper(name string, z *zip.Writer) error {
 	return nil
 }
 
-// UniqueName returns...
+// UniqueName confirms the file name doesn't conflict with an existing file.
+// If there is a conflict, a new incremental name will be returned.
 func UniqueName(name string) (string, error) {
 
 	const (
-		maxAttempts = 100
+		maxAttempts = 9999
 		macOS       = "darwin"
 		windows     = "windows"
 	)
