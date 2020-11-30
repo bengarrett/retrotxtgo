@@ -212,6 +212,9 @@ issues:
     - path: lib/filesystem/read\.go
       linters:
         - unused
+    - path: lib/filesystem/zip\.go
+      linters:
+        - gci
     # Exclude some staticcheck messages
     - linters:
         - gosec

@@ -52,7 +52,6 @@ func Family(name string) Font {
 		return VGA
 	default:
 		return Automatic
-
 	}
 }
 
@@ -63,7 +62,6 @@ func Fonts() []string {
 
 // FontCSS creates the CSS required for customized fonts.
 func FontCSS(name string, e encoding.Encoding, embed bool) (b []byte, err error) {
-
 	f := Family(name)
 	if Family(name) == Automatic {
 		f = AutoFont(e)

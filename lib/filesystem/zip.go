@@ -2,6 +2,7 @@ package filesystem
 
 import (
 	"archive/zip"
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -24,9 +25,15 @@ type Zip struct {
 	Overwrite bool
 }
 
+var (
+	// ErrNameIsDir inc name is dir.
+	ErrNameIsDir = errors.New("increment name must be a file but is a directory")
+	// ErrMaxAttempt max attempts.
+	ErrMaxAttempt = errors.New("maximum attempts reached")
+)
+
 // Create zip packages and compresses files contained the root directory into an archive using the provided name.
 func (z *Zip) Create() error {
-
 	const dotFile = "."
 
 	var files Files
@@ -69,7 +76,6 @@ func (z *Zip) Create() error {
 
 // Zip packages and compresses files to an archive using the provided name.
 func (files *Files) Zip(name, comment string, ow bool) error {
-
 	const (
 		overwrite    = os.O_RDWR | os.O_CREATE
 		mustNotExist = os.O_RDWR | os.O_CREATE | os.O_EXCL
@@ -77,32 +83,31 @@ func (files *Files) Zip(name, comment string, ow bool) error {
 	)
 	var (
 		err error
-		new string
+		n   string
 		w   *os.File
 	)
 
 	switch ow {
 	case true:
 
-		new = name
-		w, err = os.OpenFile(new, overwrite, readWriteAll)
+		n = name
+		w, err = os.OpenFile(n, overwrite, readWriteAll)
 		if err != nil {
-			return fmt.Errorf("zip create %q: %w", new, err)
+			return fmt.Errorf("zip create %q: %w", n, err)
 		}
 		defer w.Close()
 
 	default:
 
-		new, err = UniqueName(name)
+		n, err = UniqueName(name)
 		if err != nil {
 			return fmt.Errorf("zip name %q: %w", name, err)
 		}
-		w, err = os.OpenFile(new, mustNotExist, readWriteAll)
+		w, err = os.OpenFile(n, mustNotExist, readWriteAll)
 		if err != nil {
-			return fmt.Errorf("zip create %q: %w", new, err)
+			return fmt.Errorf("zip create %q: %w", n, err)
 		}
 		defer w.Close()
-
 	}
 
 	z := zip.NewWriter(w)
@@ -126,9 +131,9 @@ func (files *Files) Zip(name, comment string, ow bool) error {
 		return fmt.Errorf("zip close: %w", err)
 	}
 
-	s, err := os.Stat(new)
+	s, err := os.Stat(n)
 	if err != nil {
-		return fmt.Errorf("zip could not stat %q: %w", new, err)
+		return fmt.Errorf("zip could not stat %q: %w", n, err)
 	}
 	abs, err := filepath.Abs(s.Name())
 	if err != nil {
@@ -140,7 +145,6 @@ func (files *Files) Zip(name, comment string, ow bool) error {
 }
 
 func zipper(name string, z *zip.Writer) error {
-
 	s, err := os.Stat(name)
 	if err != nil {
 		fmt.Println("skipping file, could not stat", name)
@@ -172,7 +176,6 @@ func zipper(name string, z *zip.Writer) error {
 // UniqueName confirms the file name doesn't conflict with an existing file.
 // If there is a conflict, a new incremental name will be returned.
 func UniqueName(name string) (string, error) {
-
 	const (
 		maxAttempts = 9999
 		macOS       = "darwin"
@@ -187,35 +190,34 @@ func UniqueName(name string) (string, error) {
 		return name, err
 	}
 	if s.IsDir() {
-		return "", fmt.Errorf("increment name %q: is a directory", name)
+		return "", fmt.Errorf("unique name is a directory %q: %w", name, ErrNameIsDir)
 	}
 
 	i := 1
 	for {
-
 		dir, file := path.Split(name)
 		e := path.Ext(file)
 		b := strings.TrimSuffix(file, e)
-		new := ""
+		n := ""
 
 		switch runtime.GOOS {
 		case macOS:
-			new = fmt.Sprintf("%s %d%s", b, i, e)
+			n = fmt.Sprintf("%s %d%s", b, i, e)
 		case windows:
-			new = fmt.Sprintf("%s (%d)%s", b, i, e)
+			n = fmt.Sprintf("%s (%d)%s", b, i, e)
 		default:
-			new = fmt.Sprintf("%s_%d%s", b, i, e)
+			n = fmt.Sprintf("%s_%d%s", b, i, e)
 		}
 
-		path := filepath.Join(dir, new)
-		_, err := os.Stat(path)
+		p := filepath.Join(dir, n)
+		_, err := os.Stat(p)
 		if os.IsNotExist(err) {
-			return path, nil
+			return p, nil
 		}
 
 		i++
 		if i > maxAttempts {
-			return "", fmt.Errorf("increment name aborted after %d attempts", maxAttempts)
+			return "", fmt.Errorf("unique name aborted after %d attempts: %w", maxAttempts, ErrMaxAttempt)
 		}
 	}
 }

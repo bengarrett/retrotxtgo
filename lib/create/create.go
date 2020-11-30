@@ -167,7 +167,7 @@ var (
 	ErrTmplDir = errors.New("the path to the template file is a directory")
 	// ErrNoLayout layout missing.
 	ErrNoLayout = errors.New("layout template does not exist")
-	// ErrLayout unknown layout
+	// ErrLayout unknown layout.
 	ErrLayout = errors.New("unknown layout template")
 )
 
@@ -258,12 +258,12 @@ func (args *Args) saveAssets(b *[]byte) {
 }
 
 func (args *Args) zipAssets(b *[]byte) {
-
 	var err error
 
 	defer func() {
+		var m bool
 		dir := args.Save.Destination
-		m, err := filepath.Match(filepath.Join(os.TempDir(), "*"), dir)
+		m, err = filepath.Match(filepath.Join(os.TempDir(), "*"), dir)
 		if err != nil {
 			logs.Println("temp directory match", "*", err)
 		}
