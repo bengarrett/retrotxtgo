@@ -143,6 +143,9 @@ const (
 	unknown  = "unknown"
 
 	zipName = "retrotxt.zip"
+
+	cssPack = "css/styles.css"
+	jsPack  = "js/scripts.js"
 )
 
 var (
@@ -265,7 +268,7 @@ func (args *Args) zipAssets(b *[]byte) {
 		}
 	}()
 
-	args.Save.Destination, err = ioutil.TempDir(os.TempDir(), "*-compress")
+	args.Save.Destination, err = ioutil.TempDir(os.TempDir(), "*-zip")
 	if err != nil {
 		logs.Fatal("save to directory failure", "temporary", err)
 	}
@@ -286,9 +289,9 @@ func (args *Args) Stdout(b *[]byte) error {
 		return fmt.Errorf("stdout: %w", err)
 	}
 	// js
-	js := pack.Get("js/scripts.js")
+	js := pack.Get(jsPack)
 	// css
-	css := pack.Get("css/styles.css")
+	css := pack.Get(cssPack)
 	// font
 	ff := args.FontFamily.Value
 	f := Family(ff).String()
@@ -367,8 +370,7 @@ func destination(args ...string) (path string, err error) {
 	if len(args) == 0 {
 		return path, nil
 	}
-	dir := strings.Join(args, " ")
-	dir = filepath.Clean(dir)
+	dir := filepath.Clean(strings.Join(args, " "))
 	if len(dir) == 1 {
 		return dirs(dir)
 	}
@@ -383,12 +385,16 @@ func destination(args ...string) (path string, err error) {
 }
 
 func dirs(dir string) (path string, err error) {
+	const (
+		homeDir    = "~"
+		currentDir = "."
+	)
 	switch dir {
-	case "~":
+	case homeDir:
 		return os.UserHomeDir()
-	case ".":
+	case currentDir:
 		return os.Getwd()
-	case "\\", "/":
+	case string(os.PathSeparator):
 		return filepath.Abs(dir)
 	}
 	if err != nil {
