@@ -166,7 +166,9 @@ var (
 	// ErrTmplDir temp file is a dir.
 	ErrTmplDir = errors.New("the path to the template file is a directory")
 	// ErrNoLayout layout missing.
-	ErrNoLayout = errors.New("layout does not exist")
+	ErrNoLayout = errors.New("layout template does not exist")
+	// ErrLayout unknown layout
+	ErrLayout = errors.New("unknown layout template")
 )
 
 // ColorScheme values for the content attribute of <meta name="color-scheme">.
@@ -197,8 +199,12 @@ func (l Layout) Pack() string {
 
 // Create handles the target output command arguments.
 func (args *Args) Create(b *[]byte) {
+	var err error
 
-	args.layout = layout(args.Layout)
+	args.layout, err = layout(args.Layout)
+	if err != nil {
+		logs.Fatal("create layout", args.Layout, err)
+	}
 
 	switch {
 	case args.Save.AsFiles:
@@ -207,7 +213,7 @@ func (args *Args) Create(b *[]byte) {
 		args.zipAssets(b)
 	default:
 		// print to terminal
-		if err := args.Stdout(b); err != nil {
+		if err = args.Stdout(b); err != nil {
 			logs.Fatal("create", "stdout", err)
 		}
 	}
@@ -403,18 +409,18 @@ func dirs(dir string) (path string, err error) {
 	return "", nil
 }
 
-func layout(name string) (l Layout) {
+func layout(name string) (Layout, error) {
 	switch name {
 	case standard, "s":
-		return Standard
+		return Standard, nil
 	case inline, "i":
-		return Inline
+		return Inline, nil
 	case compact, "c":
-		return Compact
+		return Compact, nil
 	case none, "n":
-		return None
+		return None, nil
 	}
-	return l
+	return 0, ErrLayout
 }
 
 // replace EBCDIC newline with linefeed.

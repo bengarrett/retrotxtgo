@@ -106,7 +106,8 @@ func Test_Templates(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := layout(tt.key).Pack(); !reflect.DeepEqual(got, tt.want) {
+			l, _ := layout(tt.key)
+			if got := l.Pack(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("layout() = %v, want %v", got, tt.want)
 			}
 		})
