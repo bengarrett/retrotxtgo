@@ -107,9 +107,16 @@ func init() {
 	flagEncode(&createFlag.encode, createCmd)
 	flagControls(&createFlag.controls, createCmd)
 	flagRunes(&createFlag.swap, createCmd)
+	var sd = viper.GetString("save-directory")
+	if sd == "" {
+		sd, err = os.Getwd()
+		if err != nil {
+			fmt.Printf("current working directory error: %v\n", err)
+		}
+	}
 	createCmd.Flags().BoolVarP(&html.Save.AsFiles, "save", "s", false,
 		`save HTML and static files to a the save directory
-or ignore to print (save directory: `+viper.GetString("save-directory")+")")
+or ignore to print (save directory: `+sd+")")
 	createCmd.Flags().BoolVarP(&html.Save.Compress, "compress", "z", false, "store and compress all files into an archive when saving")
 	createCmd.Flags().BoolVarP(&html.Save.OW, "overwrite", "o", false, "overwrite any existing files when saving")
 	// html flags, the key int value must be used as the index
