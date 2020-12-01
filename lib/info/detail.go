@@ -139,6 +139,7 @@ func (d *Detail) parse(name string, stat os.FileInfo, data ...byte) (err error) 
 				fmt.Printf("open zip file failure: %s\n", e)
 			}
 			defer r.Close()
+			d.ZipComment = r.Comment
 		}
 	}()
 	go func() {
@@ -204,16 +205,18 @@ func (d *Detail) printMarshal(color bool) []byte {
 		}
 		if x.k == zipComment {
 			if x.v != "" {
-				x.v = fmt.Sprintf("\n%s", x.v)
+				fmt.Fprintf(w, "\t \t   -───-\n%s\n", x.v)
+				if d.sauceIndex <= 0 {
+					break
+				}
+				// divider for sauce metadata
+				fmt.Fprint(w, "\t \t   -───-\n")
+				continue
+			} else if d.sauceIndex <= 0 {
+				break
 			}
 		}
 		fmt.Fprintf(w, "\t %s\t  %s\n", x.k, info(x.v))
-		if x.k == zipComment || x.k == "slug" {
-			if d.sauceIndex <= 0 {
-				break
-			}
-			fmt.Fprint(w, "\t \t   -───-\n")
-		}
 		if x.k == "comment" {
 			if d.Sauce.Comnt.Count <= 0 {
 				break
@@ -253,9 +256,6 @@ func (d *Detail) marshalDataValid(k, v string) bool {
 		return false
 	}
 	if k == "interpretation" && v == "" {
-		return false
-	}
-	if k == zipComment && v == "" {
 		return false
 	}
 	return true
