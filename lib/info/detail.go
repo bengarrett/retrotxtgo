@@ -212,9 +212,13 @@ func (d *Detail) printMarshal(color bool) []byte {
 				// divider for sauce metadata
 				fmt.Fprint(w, "\t \t   -───-\n")
 				continue
-			} else if d.sauceIndex <= 0 {
+			}
+			if d.sauceIndex <= 0 {
 				break
 			}
+			// divider for sauce metadata
+			fmt.Fprint(w, "\t \t   -───-\n")
+			continue
 		}
 		fmt.Fprintf(w, "\t %s\t  %s\n", x.k, info(x.v))
 		if x.k == "comment" {
