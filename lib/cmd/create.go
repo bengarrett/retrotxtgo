@@ -145,6 +145,7 @@ or ignore to print (save directory: `+sd+")")
 			createCmd.Flags().UintVarP(c.i, c.name, c.short, viper.GetUint(c.key), buf.String())
 		}
 	}
+	createCmd.Flags().BoolVarP(&html.SauceData.Use, "sauce", "", true, "use any found SAUCE metadata as HTML meta tags")
 	if err = createCmd.Flags().MarkHidden("body"); err != nil {
 		logs.Fatal("create mark", "body hidden", err)
 	}
@@ -209,14 +210,16 @@ func createFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 		}
 		// fetch any appended sauce data
 		// note: this does not work with the sauce package because f.Open() returns runes.
-		if index := sauce.Scan(src...); index > 0 {
-			s := sauce.Parse(src...)
-			html.SauceData.Title = s.Title
-			html.SauceData.Author = s.Author
-			html.SauceData.Group = s.Group
-			html.SauceData.Description = s.Desc
-			html.SauceData.Width = uint(s.Info.Info1.Value)
-			html.SauceData.Lines = uint(s.Info.Info2.Value)
+		if html.SauceData.Use {
+			if index := sauce.Scan(src...); index > 0 {
+				s := sauce.Parse(src...)
+				html.SauceData.Title = s.Title
+				html.SauceData.Author = s.Author
+				html.SauceData.Group = s.Group
+				html.SauceData.Description = s.Desc
+				html.SauceData.Width = uint(s.Info.Info1.Value)
+				html.SauceData.Lines = uint(s.Info.Info2.Value)
+			}
 		}
 		// convert text
 		var r []rune

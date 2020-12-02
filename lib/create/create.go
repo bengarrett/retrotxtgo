@@ -46,6 +46,7 @@ type Args struct {
 	}
 	Metadata  Meta
 	SauceData struct {
+		Use         bool
 		Title       string
 		Author      string
 		Group       string
