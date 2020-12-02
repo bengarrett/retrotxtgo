@@ -16,6 +16,7 @@ import (
 	"retrotxt.com/retrotxt/lib/filesystem"
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/pack"
+	"retrotxt.com/retrotxt/lib/sauce"
 	"retrotxt.com/retrotxt/lib/str"
 )
 
@@ -205,6 +206,17 @@ func createFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 			if src, err = filesystem.Read(arg); err != nil {
 				logs.Fatal("file is invalid", arg, err)
 			}
+		}
+		// fetch any appended sauce data
+		// note: this does not work with the sauce package because f.Open() returns runes.
+		if index := sauce.Scan(src...); index > 0 {
+			s := sauce.Parse(src...)
+			html.SauceData.Title = s.Title
+			html.SauceData.Author = s.Author
+			html.SauceData.Group = s.Group
+			html.SauceData.Description = s.Desc
+			html.SauceData.Width = uint(s.Info.Info1.Value)
+			html.SauceData.Lines = uint(s.Info.Info2.Value)
 		}
 		// convert text
 		var r []rune

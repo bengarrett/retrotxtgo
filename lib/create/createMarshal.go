@@ -104,6 +104,13 @@ func (args *Args) marshalStandard(p *PageData) PageData {
 	p.MetaRetroTxt = args.Metadata.RetroTxt
 	p.MetaThemeColor = args.metaThemeColor()
 	p.PageTitle = args.pageTitle()
+	// sauce data
+	p.SauceTitle = args.SauceData.Title
+	p.SauceAuthor = args.SauceData.Author
+	p.SauceGroup = args.SauceData.Group
+	p.SauceDescription = args.SauceData.Description
+	p.SauceWidth = args.SauceData.Width
+	p.SauceLines = args.SauceData.Lines
 	// generate data
 	t := time.Now().UTC()
 	p.BuildDate = t.Format(time.RFC3339)
@@ -112,6 +119,7 @@ func (args *Args) marshalStandard(p *PageData) PageData {
 }
 
 func (args *Args) marshalTextTransform(b *[]byte) (buf bytes.Buffer, err error) {
+
 	tmpl, err := args.newTemplate()
 	if err != nil {
 		return buf, fmt.Errorf("stdout new template failure: %w", err)

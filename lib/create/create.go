@@ -45,6 +45,14 @@ type Args struct {
 		Value string
 	}
 	Metadata  Meta
+	SauceData struct {
+		Title       string
+		Author      string
+		Group       string
+		Description string
+		Width       uint
+		Lines       uint
+	}
 	layout    Layout // layout flag interpretation
 	Port      uint   // Port for HTTP server
 	FontEmbed bool
