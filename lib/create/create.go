@@ -92,27 +92,33 @@ type Meta struct {
 
 // PageData temporarily holds template data used for the HTML layout.
 type PageData struct {
-	ExternalEmbed   bool
-	FontEmbed       bool
-	MetaGenerator   bool
-	MetaNoTranslate bool
-	MetaRetroTxt    bool
-	BuildVersion    string
-	BuildDate       string
-	CacheRefresh    string
-	Comment         string
-	FontFamily      string
-	MetaAuthor      string
-	MetaColorScheme string
-	MetaDesc        string
-	MetaKeywords    string
-	MetaReferrer    string
-	MetaRobots      string
-	MetaThemeColor  string
-	PageTitle       string
-	PreText         string
-	CSSEmbed        template.CSS
-	ScriptEmbed     template.JS
+	ExternalEmbed    bool
+	FontEmbed        bool
+	MetaGenerator    bool
+	MetaNoTranslate  bool
+	MetaRetroTxt     bool
+	BuildVersion     string
+	BuildDate        string
+	CacheRefresh     string
+	Comment          string
+	FontFamily       string
+	MetaAuthor       string
+	MetaColorScheme  string
+	MetaDesc         string
+	MetaKeywords     string
+	MetaReferrer     string
+	MetaRobots       string
+	MetaThemeColor   string
+	PageTitle        string
+	PreText          string
+	SauceTitle       string
+	SauceAuthor      string
+	SauceGroup       string
+	SauceDescription string
+	SauceWidth       uint
+	SauceLines       uint
+	CSSEmbed         template.CSS
+	ScriptEmbed      template.JS
 }
 
 // Layout are HTML template variations.
