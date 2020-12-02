@@ -78,5 +78,5 @@ func main() {
 	if err = ioutil.WriteFile(p, code, os.ModePerm); err != nil {
 		log.Fatal("error writing file:", p, err)
 	}
-	f.f.Sync()
+	f.Sync()
 }
