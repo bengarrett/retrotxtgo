@@ -344,8 +344,6 @@ func (args *Args) Stdout(b *[]byte) error {
 		fmt.Printf(fHTML, nameHTML)
 		fmt.Println(buf.String())
 	}
-	// stdout
-	const format = "%s\n\n%s"
 	switch args.Syntax {
 	case "", none:
 		noSyntax()

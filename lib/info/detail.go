@@ -27,6 +27,9 @@ import (
 )
 
 const (
+	ans        = "ANSI controls"
+	cmmt       = "comment"
+	txt        = "text"
 	zipComment = "zip comment"
 	lf         = 10
 	cr         = 13
@@ -221,7 +224,7 @@ func (d *Detail) printMarshal(color bool) []byte {
 			continue
 		}
 		fmt.Fprintf(w, "\t %s\t  %s\n", x.k, info(x.v))
-		if x.k == "comment" {
+		if x.k == cmmt {
 			if d.Sauce.Comnt.Count <= 0 {
 				break
 			}
@@ -239,10 +242,10 @@ func (d *Detail) printMarshal(color bool) []byte {
 func (d *Detail) marshalDataValid(k, v string) bool {
 	if !d.validText() {
 		switch k {
-		case "UTF-8", "line break", "characters", "ANSI controls", "words", "lines", "width":
+		case "UTF-8", "line break", "characters", ans, "words", "lines", "width":
 			return false
 		}
-	} else if k == "ANSI controls" {
+	} else if k == ans {
 		if d.Count.Controls == 0 {
 			return false
 		}
@@ -290,7 +293,10 @@ func (d *Detail) linebreaks(r [2]rune) {
 }
 
 func (d *Detail) printMarshalData() (data []struct{ k, v string }) {
-	const noBreakSpace, symbolForNewline = "\u00a0", "\u2424"
+	const (
+		noBreakSpace     = "\u00a0"
+		symbolForNewline = "\u2424" //nolint:unused
+	)
 	p := message.NewPrinter(lang())
 	data = []struct {
 		k, v string
@@ -300,7 +306,7 @@ func (d *Detail) printMarshalData() (data []struct{ k, v string }) {
 		{k: "UTF-8", v: str.Bool(d.Utf8)},
 		{k: "line break", v: filesystem.LineBreak(d.LineBreak.Decimals, true)},
 		{k: "characters", v: p.Sprint(d.Count.Chars)},
-		{k: "ANSI controls", v: p.Sprint(d.Count.Controls)},
+		{k: ans, v: p.Sprint(d.Count.Controls)},
 		{k: "words", v: p.Sprint(d.Count.Words)},
 		{k: "size", v: d.Size.Decimal},
 		{k: "lines", v: p.Sprint(d.Lines)},
@@ -331,7 +337,7 @@ func (d *Detail) printMarshalData() (data []struct{ k, v string }) {
 			k: noBreakSpace, v: line,
 		}
 		if i == 0 {
-			comment.k = "comment"
+			comment.k = cmmt
 		}
 		data = append(data, comment)
 	}
@@ -359,7 +365,7 @@ func (d *Detail) validText() bool {
 	if len(s) != req {
 		return false
 	}
-	if s[0] == "text" {
+	if s[0] == txt {
 		return true
 	}
 	if d.Mime.Type == octetStream {

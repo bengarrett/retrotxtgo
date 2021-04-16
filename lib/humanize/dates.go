@@ -35,12 +35,13 @@ func MDY24() string { return fmt.Sprintf("%s %s", MDY, H24) }
 
 // Date returns a formatted date string.
 func Date(format string, t time.Time) string {
+	const dmy = "DMY"
 	format = strings.ToUpper(format)
 	if format == "" {
-		format = "DMY"
+		format = dmy
 	}
 	switch format {
-	case "DMY":
+	case dmy:
 		return t.Format(DMY)
 	case "YMD":
 		return t.Format(YMD)

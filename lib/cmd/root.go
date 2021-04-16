@@ -1,4 +1,5 @@
 // Package cmd is the terminal, command line interface.
+// nolint: gochecknoglobals,gochecknoinits
 package cmd
 
 import (

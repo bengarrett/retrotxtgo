@@ -6,9 +6,8 @@ import (
 	"golang.org/x/text/language"
 )
 
-var us = language.AmericanEnglish
-
 func Test_binary(t *testing.T) {
+	var us = language.AmericanEnglish
 	type args struct {
 		b int64
 		t language.Tag
@@ -33,6 +32,7 @@ func Test_binary(t *testing.T) {
 }
 
 func Test_decimal(t *testing.T) {
+	var us = language.AmericanEnglish
 	type args struct {
 		b int64
 		t language.Tag

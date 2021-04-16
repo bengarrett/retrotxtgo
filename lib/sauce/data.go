@@ -91,7 +91,7 @@ func (d *data) dates() Dates {
 	}
 	u := t.Unix()
 	return Dates{
-		Value: fmt.Sprintf("%s", d.date),
+		Value: fmt.Sprintf("%v", d.date),
 		Time:  t,
 		Epoch: u,
 	}

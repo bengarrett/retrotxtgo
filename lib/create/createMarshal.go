@@ -119,7 +119,6 @@ func (args *Args) marshalStandard(p *PageData) PageData {
 }
 
 func (args *Args) marshalTextTransform(b *[]byte) (buf bytes.Buffer, err error) {
-
 	tmpl, err := args.newTemplate()
 	if err != nil {
 		return buf, fmt.Errorf("stdout new template failure: %w", err)

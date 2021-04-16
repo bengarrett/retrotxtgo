@@ -22,7 +22,7 @@ var (
 	ErrRxt = errors.New("not a retrotxt config file")
 )
 
-// InitDefaults initialises flag and configuration defaults.
+// InitDefaults initializes flag and configuration defaults.
 func InitDefaults() {
 	for key, val := range Reset() {
 		viper.SetDefault(key, val)
@@ -90,7 +90,7 @@ func SetConfig(flag string) (err error) {
 			return err
 		}
 		if errors.Is(err, os.ErrNotExist) {
-			// initialise a new, default config file if conditions are met
+			// initialize a new, default config file if conditions are met
 			const min = 2
 			if len(os.Args) > min {
 				switch strings.Join(os.Args[1:3], ".") {

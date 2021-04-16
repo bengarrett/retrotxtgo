@@ -27,15 +27,15 @@ var ErrRune = errors.New("invalid encoded rune")
 type terminal int
 
 const (
-	// TermMono no colour.
+	// TermMono no color.
 	TermMono terminal = iota
-	// Term16 ANSI standard 16 colour.
+	// Term16 ANSI standard 16 color.
 	Term16
-	// Term88 XTerm 88 colour.
+	// Term88 XTerm 88 color.
 	Term88
-	// Term256 XTerm 256 colour.
+	// Term256 XTerm 256 color.
 	Term256
-	// Term16M ANSI high-colour.
+	// Term16M ANSI high-color.
 	Term16M
 )
 
@@ -144,7 +144,7 @@ func HighlightWriter(w io.Writer, source, lexer, style string, ansi bool) (err e
 		return nil
 	}
 	if !ansi && (fo.Mode()&os.ModeCharDevice) == 0 {
-		// disable colour when piping or running unit tests
+		// disable color when piping or running unit tests
 		fmt.Fprintln(w, source)
 		return nil
 	}

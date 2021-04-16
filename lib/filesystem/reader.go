@@ -186,7 +186,7 @@ func LineBreaks(utf bool, runes ...rune) LB {
 				continue
 			}
 			// carriage return on modern terminals will overwrite the existing line of text
-			// todo: add flag or change behaviour to replace CR (\r) with NL (\n)
+			// todo: add flag or change behavor to replace CR (\r) with NL (\n)
 			c[1].count++
 		case NewLine, NextLine:
 			if utf && r == NextLine {

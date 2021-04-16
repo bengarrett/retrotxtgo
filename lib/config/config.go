@@ -84,7 +84,7 @@ func Tip() Hints {
 		notlate:       "used to declare that the page should not be translated by Google Translate",
 		referr:        "controls the Referer HTTP header attached to requests sent from the page",
 		rtx:           "include a custom tag containing the meta information of the source textfile",
-		bot:           "behaviour that crawlers from Google, Bing and other engines should use with the page",
+		bot:           "behavor that crawlers from Google, Bing and other engines should use with the page",
 		theme:         "indicates a suggested color that user agents should use to customize the display of the page",
 		title:         "page title that is shown in a browser title bar or tab",
 		saveDir:       "directory to store RetroTxt created HTML files",
@@ -166,7 +166,7 @@ func Format() Formats {
 }
 
 // Enabled returns all the Viper keys holding a value that are used by RetroTxt.
-// This will hide all unrecognised manual edits to the configuration file.
+// This will hide all unrecognized manual edits to the configuration file.
 func Enabled() map[string]interface{} {
 	var sets = make(map[string]interface{})
 	for _, key := range viper.AllKeys() {

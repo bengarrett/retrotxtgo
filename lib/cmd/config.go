@@ -1,3 +1,4 @@
+// nolint: gochecknoglobals,gochecknoinits
 package cmd
 
 import (
@@ -149,6 +150,7 @@ var configShellCmd = &cobra.Command{
 		str.Example("\n  retrotxt config shell -i=bash >> ~/.bash_profile") +
 		str.Example("\n  retrotxt config shell -i=zsh >> ~/.zshrc"),
 	Run: func(cmd *cobra.Command, args []string) {
+		const ps = "powershell"
 		var (
 			buf bytes.Buffer
 			err error
@@ -160,10 +162,10 @@ var configShellCmd = &cobra.Command{
 			if err = cmd.GenBashCompletion(&buf); err != nil {
 				logs.Fatal("shell", bash, err)
 			}
-		case "powershell", "posh", "ps", "p":
-			lexer = "powershell"
+		case ps, "posh", "ps", "p":
+			lexer = ps
 			if err = cmd.GenPowerShellCompletion(&buf); err != nil {
-				logs.Fatal("shell", "powershell", err)
+				logs.Fatal("shell", ps, err)
 			}
 		case "zsh", "z":
 			lexer = bash

@@ -7,48 +7,40 @@ linters-settings:
       - github.com/sirupsen/logrus
     packages-with-error-message:
       - github.com/sirupsen/logrus: "logging is allowed only by logutils.Log"
-  exhaustive:
-    default-signifies-exhaustive: false
-  errcheck:
-    # report about not checking of errors in type assertions: `a := b.(MyStruct)`;
-    # default is false: such cases aren't reported by default.
-    check-type-assertions: true
-    # report about assignment of errors to blank identifier: `num, _ := strconv.Atoi(numStr)`;
-    # default is false: such cases aren't reported by default.
-    check-blank: true
+  dupl:
+    threshold: 100
+  funlen:
+    lines: 100
+    statements: 50
   gci:
-    # put imports beginning with prefix after 3rd-party packages;
-    # only support one prefix
-    # if not set, use goimports.local-prefixes
-    local-prefixes: retrotxt.com/retrotxt
+    local-prefixes: github.com/golangci/golangci-lint
   goconst:
-    # minimal length of string constant, 3 by default
-    min-len: 3
-    # minimal occurrences count to trigger, 3 by default
-    min-occurrences: 3
+    min-len: 2
+    min-occurrences: 2
   gocritic:
     enabled-tags:
-      - diagnostic # kind of checks that detect various errors in code
-      - experimental # check is under testing and development. Disabled by default
-      - opinionated # check can be unwanted for some people. Disabled by default
-      - performance # kind of checks that detect potential performance issues in code
-      - style # kind of checks that find style issues in code
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
     disabled-checks:
       - dupImport # https://github.com/go-critic/go-critic/issues/845
+      - ifElseChain
+      - octalLiteral
+      - whyNoLint
+      - wrapperFunc
   gocyclo:
-    # minimal code complexity to report, 30 by default (but we recommend 10-20)
-    min-complexity: 30
-  godot:
-    # check all top-level comments, not only declarations
-    check-all: true
+    min-complexity: 15
+  goimports:
+    local-prefixes: github.com/golangci/golangci-lint
   golint:
-    # minimal confidence for issues, default is 0.8
-    min-confidence: 0.8
+    min-confidence: 0
   gomnd:
     settings:
       mnd:
-        # default: don't include the "operation" and "assign"
-        checks: argument,assign,case,condition,operation,return
+        # don't include the "operation" and "assign"
+        checks: argument,case,condition,return
   govet:
     check-shadowing: true
     settings:
@@ -63,163 +55,88 @@ linters-settings:
   maligned:
     suggest-new: true
   misspell:
-    # Correct spellings using locale preferences for US or UK.
-    # Default is to use a neutral variety of English.
-    # Setting locale to US will correct the British spelling of 'colour' to 'color'.
-    #locale: UK
-    ignore-words:
-      - someword
-  nakedret:
-    # make an issue if func has more lines of code than this setting and it has naked returns; default is 30
-    max-func-lines: 5 # default 5
-  prealloc:
-    # XXX: we don't recommend using this linter before doing performance profiling.
-    # For most programs usage of prealloc will be a premature optimization.
-    # Report preallocation suggestions only on simple loops that have no returns/breaks/continues/gotos in them.
-    # True by default.
-    simple: true
-    range-loops: true # Report preallocation suggestions on range loops, true by default
-    for-loops: false # Report preallocation suggestions on for loops, false by default
+    locale: US
   nolintlint:
     allow-leading-space: true # don't require machine-readable nolint directives (i.e. with no leading space)
     allow-unused: false # report any unused nolint directives
     require-explanation: false # don't require an explanation for nolint directives
     require-specific: false # don't require nolint directives to be specific about which linter is being skipped
-  unparam:
-    # Inspect exported functions, default is false. Set to true if no external program/library imports your code.
-    # XXX: if you enable this setting, unparam will report a lot of false-positives in text editors:
-    # if it's called for subdir of a project it can't find external interfaces. All text editor integrations
-    # with golangci-lint call it on a directory with the changed file.
-    check-exported: true
-  unused:
-    # treat code as a program (not a library) and report unused exported identifiers; default is false.
-    # XXX: if you enable this setting, unused will report a lot of false-positives in text editors:
-    # if it's called for subdir of a project it can't find funcs usages. All text editor integrations
-    # with golangci-lint call it on a directory with the changed file.
-    check-exported: true
 
 linters:
   # please, do not use `enable-all`: it's deprecated and will be removed soon.
   # inverted configuration with `enable-all` and `disable` is not scalable during updates of golangci-lint
   disable-all: true
   enable:
-    - asciicheck
     - bodyclose
     - deadcode
     - depguard
     - dogsled
+    - dupl
     - errcheck
-    - exhaustive
     - exportloopref
-    - gochecknoinits
-    - gci
+    - exhaustive
+    - funlen
     - gochecknoglobals
+    - gochecknoinits
     - goconst
-    - gocognit
     - gocritic
     - gocyclo
     - godot
     - goerr113
-    - goheader
+    - gofmt
+    - goimports
     - golint
-    - gomodguard
     - gomnd
     - goprintffuncname
     - gosec
     - gosimple
     - govet
     - ineffassign
-    - interfacer
     - lll
-    - maligned
     - misspell
     - nakedret
     - noctx
     - nolintlint
-    - prealloc
     - rowserrcheck
-    - scopelint
-    - sqlclosecheck
     - staticcheck
     - structcheck
     - stylecheck
     - typecheck
     - unconvert
     - unparam
-    #- unused # TODO do not use until version is in beta
+    - unused
     - varcheck
     - whitespace
-    # run manually using cli:
-    # - funlen # Function length and statement count
-    # - godox # flags todo/bug/fixme
 
-    # don't enable:
-    # - dupl # this takes too long
-    # - gofmt # conflicts with Go Language Server
-    # - gofumpt # conflicts with Go Language Server
-    # - goimports # conflicts with Go Language Server
-    # - nestif # also returns wsl results
-    # - nlreturn # blank line before
-    # - testpackage # this conflicts with Go Language Server
-    # - wsl # white-space formatting
+  # don't enable:
+  # - asciicheck
+  # - scopelint
+  # - gocognit
+  # - godot
+  # - godox
+  # - interfacer
+  # - maligned
+  # - nestif
+  # - prealloc
+  # - testpackage
+  # - revive
+  # - wsl
+
 issues:
-  max-same-issues: 0
   # Excluding configuration per-path, per-linter, per-text and per-source
   exclude-rules:
-    # exclude tests
     - path: _test\.go
       linters:
-        - gocyclo
-        - errcheck
-        - dupl
-        - gosec
-        - unused
-        - scopelint
-        - gochecknoglobals
-        - unparam
-    # exclude main
-    - path: main\.go
-      linters:
-        - gochecknoglobals
-    # exclude lib
-    - path: lib/cmd/
-      linters:
-        - gochecknoglobals
-        - gochecknoinits
-    - path: lib/convert/
-      linters:
-        - gocognit
-        - gocyclo
-    - path: lib/create/
-      linters:
-        - gci
-    - path: lib/info/detail\.go
-      linters:
-        - gci
-    - path: lib/info/detail\.go
-      text: "weak cryptographic primitive"
-      linters:
-        - gosec
-    - path: lib/pack/pack\.go
-      linters:
-        - gci
-    - path: lib/sauce/data\.go
-      linters:
-        - gci
-    - path: lib/filesystem/filesystem\.go
-      linters:
-        - unparam
-    - path: lib/filesystem/read\.go
-      linters:
-        - unused
-    - path: lib/filesystem/zip\.go
-      linters:
-        - gci
-    # Exclude some staticcheck messages
+        - gomnd
+
+    # https://github.com/go-critic/go-critic/issues/926
     - linters:
-        - gosec
-      text: "G203:"
+        - gocritic
+      text: "unnecessaryDefer:"
+
 run:
   skip-dirs:
-    - internal
-    - static
+    - test/testdata_etc
+    - internal/cache
+    - internal/renameio
+    - internal/robustio

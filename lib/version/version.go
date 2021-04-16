@@ -201,7 +201,7 @@ func Semantic(ver string) Version {
 	}
 }
 
-// arch humanises some common Go architecture targets.
+// arch humanizes some common Go architecture targets.
 func arch(goarch string) string {
 	a := map[string]string{
 		"386":   "32-bit Intel/AMD",
