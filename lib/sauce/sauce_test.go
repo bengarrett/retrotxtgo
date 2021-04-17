@@ -1,14 +1,13 @@
 // Package sauce to handle the reading and parsing of embedded SAUCE metadata.
-// nolint:gochecknoglobals
 package sauce
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 	"testing"
 	"time"
 
-	"retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/static"
 )
 
@@ -17,12 +16,21 @@ const (
 	example       = "text/sauce.txt"
 )
 
-var (
-	rawData     = pack.Get("text/sauce.txt")
-	packData    = record(rawData)
-	exampleData = packData.extract()
-	sauceIndex  = Scan(rawData...)
-)
+func raw() []byte {
+	b, err := static.Text.ReadFile(example)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return b
+}
+
+func exampleData() data {
+	return record(raw()).extract()
+}
+
+func sauceIndex() int {
+	return Scan(raw()...)
+}
 
 func TestDataType_String(t *testing.T) {
 	tests := []struct {
@@ -178,7 +186,7 @@ func Test_data_comment(t *testing.T) {
 		want []string
 	}{
 		{"empty", data{}, nil},
-		{"example", exampleData, []string{commentResult}},
+		{"example", exampleData(), []string{commentResult}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -203,7 +211,7 @@ func Test_commentByBreak(t *testing.T) {
 		wantLines []string
 	}{
 		{"empty", []byte{}, nil},
-		{"example", exampleData.comnt.lines, []string{commentResult}},
+		{"example", exampleData().comnt.lines, []string{commentResult}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -221,7 +229,7 @@ func Test_commentByLine(t *testing.T) {
 		wantLines []string
 	}{
 		{"empty", []byte{}, nil},
-		{"example", exampleData.comnt.lines, []string{commentResult}},
+		{"example", exampleData().comnt.lines, []string{commentResult}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -238,7 +246,7 @@ func Test_data_dates(t *testing.T) {
 		date date
 		want Dates
 	}{
-		{"example", exampleData.date, Dates{
+		{"example", exampleData().date, Dates{
 			Value: "20161126",
 			Time:  time.Date(2016, 11, 26, 0, 0, 0, 0, time.UTC),
 			Epoch: 1480118400,
@@ -395,7 +403,7 @@ func Test_record_author(t *testing.T) {
 		i    int
 		want string
 	}{
-		{"example", packData, sauceIndex, "Sauce author        "},
+		{"example", record(raw()), sauceIndex(), "Sauce author        "},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -417,7 +425,7 @@ func Test_record_comnt(t *testing.T) {
 		args       args
 		wantLength int
 	}{
-		{"example", packData, args{count: [1]byte{1}, sauceIndex: sauceIndex}, 1 * comntLineSize},
+		{"example", record(raw()), args{count: [1]byte{1}, sauceIndex: sauceIndex()}, 1 * comntLineSize},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
