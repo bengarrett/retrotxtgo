@@ -1,4 +1,4 @@
-// nolint:gochecknoglobals
+// nolint:gochecknoglobals,dupl
 package convert
 
 import (

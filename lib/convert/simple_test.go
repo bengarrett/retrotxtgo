@@ -139,6 +139,7 @@ func TestEString(t *testing.T) {
 	}
 }
 
+// nolint:dupl
 func TestD437(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -165,6 +166,7 @@ func TestD437(t *testing.T) {
 	}
 }
 
+// nolint:dupl
 func TestE437(t *testing.T) {
 	tests := []struct {
 		name       string
