@@ -1,4 +1,3 @@
-// nolint:gochecknoglobals
 package info
 
 import (
@@ -12,13 +11,17 @@ import (
 	"testing"
 	"time"
 
-	"retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/filesystem"
+	"retrotxt.com/retrotxt/static"
 )
 
-var (
-	rawData = pack.Get("text/sauce.txt")
-)
+func rawData() []byte {
+	b, err := static.Text.ReadFile("text/sauce.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return b
+}
 
 func millennia(name string) {
 	mtime := time.Date(2000, time.January, 1, 0, 0, 0, 0, time.UTC)
@@ -219,11 +222,11 @@ func TestStdin(t *testing.T) {
 	}{
 		{"empty", args{}, false},
 		{"empty xml", args{format: "xml"}, false},
-		{"color", args{format: "c", b: rawData}, false},
-		{"text", args{format: "text", b: rawData}, false},
-		{"json", args{format: "json", b: rawData}, false},
-		{"json.min", args{format: "jm", b: rawData}, false},
-		{"xml", args{format: "x", b: rawData}, false},
+		{"color", args{format: "c", b: rawData()}, false},
+		{"text", args{format: "text", b: rawData()}, false},
+		{"json", args{format: "json", b: rawData()}, false},
+		{"json.min", args{format: "jm", b: rawData()}, false},
+		{"xml", args{format: "x", b: rawData()}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

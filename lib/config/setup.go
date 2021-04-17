@@ -10,10 +10,9 @@ import (
 	"syscall"
 
 	"github.com/spf13/viper"
-
-	"retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/str"
+	"retrotxt.com/retrotxt/static"
 )
 
 // ErrLogo missing logo.
@@ -55,8 +54,8 @@ func hr(width uint) string {
 
 func logo() {
 	const clear, reset, n = "\033c", "\033[0m", "text/retrotxt.utf8ans"
-	b := pack.Get(n)
-	if b == nil {
+	b, err := static.Text.ReadFile(n)
+	if err != nil {
 		logs.Fatal("unknown pack name", n, ErrLogo)
 	}
 	// the terminal screen needs to be cleared if the logo is to display correctly

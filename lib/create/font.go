@@ -8,7 +8,7 @@ import (
 
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/japanese"
-	"retrotxt.com/retrotxt/internal/pack"
+	"retrotxt.com/retrotxt/static"
 )
 
 // Font enum.
@@ -113,8 +113,9 @@ main pre {
 }
 
 func fontBase64(f Font) (string, error) {
-	b := pack.Get(fmt.Sprintf("font/%s", f.File()))
-	if len(b) == 0 {
+	name := fmt.Sprintf("font/%s", f.File())
+	b, err := static.Font.ReadFile(name)
+	if err != nil {
 		return "", fmt.Errorf("font base64 %q: %w", f.File(), ErrPack)
 	}
 	var s bytes.Buffer

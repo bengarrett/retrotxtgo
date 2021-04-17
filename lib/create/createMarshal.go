@@ -13,7 +13,6 @@ import (
 	"github.com/tdewolff/minify"
 	"github.com/tdewolff/minify/css"
 	"github.com/tdewolff/minify/js"
-	"retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/filesystem"
 	"retrotxt.com/retrotxt/lib/version"
 	"retrotxt.com/retrotxt/static"
@@ -65,7 +64,7 @@ func (args *Args) marshalInline(b *[]byte) (p PageData, err error) {
 	m.AddFunc("text/css", css.Minify)
 	m.AddFuncRegexp(regexp.MustCompile("^(application|text)/(x-)?(java|ecma)script$"), js.Minify)
 	// styles
-	s := bytes.TrimSpace(pack.Get("css/styles.css"))
+	s := bytes.TrimSpace(static.Styles)
 	// font
 	var f []byte
 	f, err = FontCSS(args.FontFamily.Value, args.Source.Encoding, args.FontEmbed)
@@ -82,7 +81,7 @@ func (args *Args) marshalInline(b *[]byte) (p PageData, err error) {
 		return p, fmt.Errorf("pagedata minify css: %w", err)
 	}
 	p.CSSEmbed = template.CSS(string(*b))
-	jsp := pack.Get("js/scripts.js")
+	jsp := static.Scripts
 	jsp, err = m.Bytes("application/javascript", jsp)
 	if err != nil {
 		return p, fmt.Errorf("pagedata minify javascript: %w", err)

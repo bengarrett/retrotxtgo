@@ -15,21 +15,6 @@
 // nolint:gochecknoglobals
 package main
 
-/*
-const (
-	name = "blob.go"
-	dir  = "../../static"
-)
-
-//blog.go
-//package pack
-func init(){
-	pack.Add("css/styles.css", []byte{...})
-}
-
-x := pack.Get("css/styles.css")
-*/
-
 import (
 	"retrotxt.com/retrotxt/lib/cmd"
 	ver "retrotxt.com/retrotxt/lib/version"
