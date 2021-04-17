@@ -104,7 +104,7 @@ func Map() map[string]Packs {
 		"1252":          {text, VGA, cp1252, "text/cp1252.txt", "Windows-1252 English test"},
 		"ascii":         {text, VGA, cp437, "text/retrotxt.asc", "RetroTxt ASCII logos"},
 		"ansi":          {ansi, VGA, cp437, "text/retrotxt.ans", "RetroTxt 256 color ANSI logo"},
-		"ansi.aix":      {ansi, VGA, cp437, "text/ansi-aixterm.ans", "IBM AIX terminal colours"},
+		"ansi.aix":      {ansi, VGA, cp437, "text/ansi-aixterm.ans", "IBM AIX terminal colors"},
 		"ansi.blank":    {ansi, VGA, cp437, "text/ansi-blank.ans", "Empty file test"},
 		"ansi.cp":       {ansi, VGA, cp437, "text/ansi-cp.ans", "ANSI cursor position tests"},
 		"ansi.cpf":      {ansi, VGA, cp437, "text/ansi-cpf.ans", "ANSI cursor forward tests"},

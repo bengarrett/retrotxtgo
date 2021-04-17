@@ -140,7 +140,7 @@ func TestEString(t *testing.T) {
 	}
 }
 
-func TestD437(t *testing.T) {
+func TestD437_E437(t *testing.T) {
 	tests := []struct {
 		name       string
 		s          string
@@ -163,20 +163,6 @@ func TestD437(t *testing.T) {
 				t.Errorf("D437() = %s, want %v", gotResult, tt.wantResult)
 			}
 		})
-	}
-}
-
-func TestE437(t *testing.T) {
-	tests := []struct {
-		name       string
-		s          string
-		wantResult []byte
-		wantErr    bool
-	}{
-		{"empty", "", []byte{}, false},
-		{"hello", "hello world", []byte("hello world"), false},
-		{"hex", "α alpha ß beta", []byte("\xe0 alpha \xe1 beta"), false},
-		{"octal", "½ half ¼ quarter", []byte("\253 half \254 quarter"), false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

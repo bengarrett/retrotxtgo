@@ -71,7 +71,7 @@ linters:
     - deadcode
     - depguard
     - dogsled
-    - dupl
+    #- dupl
     - errcheck
     - exportloopref
     - exhaustive
@@ -83,7 +83,7 @@ linters:
     - gocyclo
     - godot
     - goerr113
-    - gofmt
+    #- gofmt
     - goimports
     - golint
     - gomnd
