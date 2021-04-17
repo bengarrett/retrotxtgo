@@ -69,6 +69,8 @@ type ModDates struct {
 
 // Checksums and hashes of the file.
 type Checksums struct {
+	CRC32  string `json:"CRC32" xml:"CRC32"`
+	CRC64  string `json:"CRC64" xml:"CRC64"`
 	MD5    string `json:"MD5" xml:"md5"`
 	SHA256 string `json:"SHA256" xml:"sha256"`
 }

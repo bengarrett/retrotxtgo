@@ -96,9 +96,9 @@ main pre {
 		if err != nil {
 			return nil, fmt.Errorf("binary font to base64 failed: %w", err)
 		}
-		data.URL = template.HTML(url)
+		data.URL = template.HTML(url) // nolint:gosec
 	} else {
-		data.URL = template.HTML(f.File())
+		data.URL = template.HTML(f.File()) // nolint:gosec
 	}
 	var out bytes.Buffer
 	t, err := template.New("fontface").Parse(css)

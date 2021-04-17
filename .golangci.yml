@@ -83,12 +83,12 @@ linters:
     #- gocyclo
     - godot
     - goerr113
-    #- gofmt
+    - gofmt
     - goimports
     - golint
     - gomnd
     - goprintffuncname
-    #- gosec
+    - gosec
     - gosimple
     - govet
     - ineffassign

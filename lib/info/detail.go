@@ -3,11 +3,13 @@ package info
 import (
 	"archive/zip"
 	"bytes"
-	"crypto/md5"
+	"crypto/md5" // nolint:gosec
 	"crypto/sha256"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"hash/crc32"
+	"hash/crc64"
 	"os"
 	"strings"
 	"sync"
@@ -113,7 +115,7 @@ func (d *Detail) mimeUnknown() {
 }
 
 func (d *Detail) parse(name string, stat os.FileInfo, data ...byte) (err error) {
-	const routines = 6
+	const routines = 8
 	var wg sync.WaitGroup
 	wg.Add(routines)
 	go func() {
@@ -170,7 +172,17 @@ func (d *Detail) parse(name string, stat os.FileInfo, data ...byte) (err error) 
 	}()
 	go func() {
 		defer wg.Done()
-		md5sum := md5.Sum(data)
+		crc32sum := crc32.ChecksumIEEE(data)
+		d.Sums.CRC32 = fmt.Sprintf("%x", crc32sum)
+	}()
+	go func() {
+		defer wg.Done()
+		crc64sum := crc64.Checksum(data, crc64.MakeTable(crc64.ECMA))
+		d.Sums.CRC64 = fmt.Sprintf("%x", crc64sum)
+	}()
+	go func() {
+		defer wg.Done()
+		md5sum := md5.Sum(data) // nolint:gosec
 		d.Sums.MD5 = fmt.Sprintf("%x", md5sum)
 	}()
 	go func() {
@@ -301,6 +313,7 @@ func (d *Detail) printMarshalData() (data []struct{ k, v string }) {
 	data = []struct {
 		k, v string
 	}{
+		{k: "slug", v: d.Slug},
 		{k: "filename", v: d.Name},
 		{k: "filetype", v: d.Mime.Commt},
 		{k: "UTF-8", v: str.Bool(d.Utf8)},
@@ -312,10 +325,11 @@ func (d *Detail) printMarshalData() (data []struct{ k, v string }) {
 		{k: "lines", v: p.Sprint(d.Lines)},
 		{k: "width", v: p.Sprint(d.Width)},
 		{k: "modified", v: humanize.Datetime(DTFormat, d.Modified.Time.UTC())},
-		{k: "MD5 checksum", v: d.Sums.MD5},
-		{k: "SHA256 checksum", v: d.Sums.SHA256},
 		{k: "media mime type", v: d.Mime.Type},
-		{k: "slug", v: d.Slug},
+		{k: "SHA256 checksum", v: d.Sums.SHA256},
+		{k: "CRC64 ECMA", v: d.Sums.CRC64},
+		{k: "CRC32", v: d.Sums.CRC32},
+		{k: "MD5", v: d.Sums.MD5},
 		{k: zipComment, v: d.ZipComment},
 		// sauce data
 		{k: "title", v: d.Sauce.Title},

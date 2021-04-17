@@ -86,7 +86,7 @@ func (args *Args) marshalInline(b *[]byte) (p PageData, err error) {
 	if err != nil {
 		return p, fmt.Errorf("pagedata minify javascript: %w", err)
 	}
-	p.ScriptEmbed = template.JS(string(jsp))
+	p.ScriptEmbed = template.JS(string(jsp)) // nolint:gosec
 	return p, nil
 }
 
