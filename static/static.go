@@ -1,3 +1,4 @@
+// nolint:golint,gochecknoglobals,stylecheck
 package static
 
 import (
