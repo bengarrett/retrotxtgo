@@ -137,7 +137,7 @@ func character(i int, r rune, cp encoding.Encoding) string {
 	return string(r)
 }
 
-func charmapAlias(cp encoding.Encoding) string {
+func charmapAlias(cp encoding.Encoding) string { // nolint:gocyclo
 	if c := charmapDOS(cp); c != "" {
 		return c
 	}
@@ -176,16 +176,9 @@ func charmapAlias(cp encoding.Encoding) string {
 		return " (Western European, 1999)"
 	case charmap.ISO8859_16:
 		return " (South-Eastern European)"
-	case charmap.KOI8R:
-		return " (Russian)"
-	case charmap.KOI8U:
-		return " (Ukrainian)"
-	case charmap.Macintosh:
-		return " (Mac OS Roman)"
-	case charmap.Windows1258:
-		return " (Vietnamese)"
-	case japanese.ShiftJIS:
-		return " (Japanese)"
+	}
+	if c := charmapMisc(cp); c != "" {
+		return c
 	}
 	return ""
 }
@@ -214,6 +207,22 @@ func charmapDOS(cp encoding.Encoding) string {
 		return " (DOS, Nordic)"
 	case charmap.CodePage866:
 		return " (DOS, Cyrillic Russian)"
+	}
+	return ""
+}
+
+func charmapMisc(cp encoding.Encoding) string {
+	switch cp {
+	case charmap.KOI8R:
+		return " (Russian)"
+	case charmap.KOI8U:
+		return " (Ukrainian)"
+	case charmap.Macintosh:
+		return " (Mac OS Roman)"
+	case charmap.Windows1258:
+		return " (Vietnamese)"
+	case japanese.ShiftJIS:
+		return " (Japanese)"
 	}
 	return ""
 }

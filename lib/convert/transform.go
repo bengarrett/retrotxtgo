@@ -121,61 +121,70 @@ func (c *Convert) transformFixJISTable() {
 	}
 }
 
+func (c *Convert) decode(e encoding.Encoding) error {
+	result, err := e.NewDecoder().Bytes(c.Source.B)
+	if err != nil {
+		return err
+	}
+	c.Output.R = bytes.Runes(result)
+	c.Output.len = len(c.Output.R)
+	return nil
+}
+
 // transform Unicode-16 or Unicode-32 text into UTF-8 encoded Unicode.
 func (c *Convert) transformUnicode() error {
-	var decode = func(e encoding.Encoding) error {
-		result, err := e.NewDecoder().Bytes(c.Source.B)
-		if err != nil {
-			return err
-		}
-		c.Output.R = bytes.Runes(result)
-		c.Output.len = len(c.Output.R)
-		return nil
-	}
 	var (
 		u16be  = unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM)
 		u16beB = unicode.UTF16(unicode.BigEndian, unicode.ExpectBOM)
 		u16le  = unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM)
 		u16leB = unicode.UTF16(unicode.LittleEndian, unicode.ExpectBOM)
-		u32be  = utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM)
-		u32beB = utf32.UTF32(utf32.BigEndian, utf32.UseBOM)
-		u32le  = utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM)
-		u32leB = utf32.UTF32(utf32.LittleEndian, utf32.UseBOM)
 	)
 	switch c.Source.E {
 	case unicode.UTF8, unicode.UTF8BOM:
 		c.Output.R = bytes.Runes(c.Source.B)
 		c.Output.len = len(c.Output.R)
 	case u16be:
-		if err := decode(u16be); err != nil {
+		if err := c.decode(u16be); err != nil {
 			return err
 		}
 	case u16le:
-		if err := decode(u16le); err != nil {
+		if err := c.decode(u16le); err != nil {
 			return err
 		}
 	case u16beB:
-		if err := decode(u16beB); err != nil {
+		if err := c.decode(u16beB); err != nil {
 			return err
 		}
 	case u16leB:
-		if err := decode(u16leB); err != nil {
+		if err := c.decode(u16leB); err != nil {
 			return err
 		}
+	}
+	return c.transformU32(c.Source.E)
+}
+
+func (c *Convert) transformU32(e encoding.Encoding) error {
+	var (
+		u32be  = utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM)
+		u32beB = utf32.UTF32(utf32.BigEndian, utf32.UseBOM)
+		u32le  = utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM)
+		u32leB = utf32.UTF32(utf32.LittleEndian, utf32.UseBOM)
+	)
+	switch e {
 	case u32be:
-		if err := decode(u32be); err != nil {
+		if err := c.decode(u32be); err != nil {
 			return err
 		}
 	case u32beB:
-		if err := decode(u32beB); err != nil {
+		if err := c.decode(u32beB); err != nil {
 			return err
 		}
 	case u32le:
-		if err := decode(u32le); err != nil {
+		if err := c.decode(u32le); err != nil {
 			return err
 		}
 	case u32leB:
-		if err := decode(u32leB); err != nil {
+		if err := c.decode(u32leB); err != nil {
 			return err
 		}
 	}

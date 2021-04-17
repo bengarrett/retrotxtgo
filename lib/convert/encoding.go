@@ -202,14 +202,8 @@ func Encoding(name string) (encoding.Encoding, error) {
 		// https://en.wikipedia.org/wiki/ISO/IEC_8859-11#Code_page_874_(IBM)_/_9066
 		return charmap.Windows874, nil
 	}
-	// UTF-32... doesn't return a match in ianaindex.IANA
-	switch a {
-	case u32:
-		return utf32.UTF32(utf32.LittleEndian, utf32.UseBOM), nil
-	case u32be:
-		return utf32.UTF32(utf32.BigEndian, utf32.IgnoreBOM), nil
-	case u32le:
-		return utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM), nil
+	if ee := encode32(a); ee != nil {
+		return ee, nil
 	}
 	enc, err := ianaindex.IANA.Encoding(s)
 	if err != nil {
@@ -227,6 +221,19 @@ func Encoding(name string) (encoding.Encoding, error) {
 	return enc, nil
 }
 
+func encode32(a string) encoding.Encoding {
+	// UTF-32... doesn't return a match in ianaindex.IANA
+	switch a {
+	case u32:
+		return utf32.UTF32(utf32.LittleEndian, utf32.UseBOM)
+	case u32be:
+		return utf32.UTF32(utf32.BigEndian, utf32.IgnoreBOM)
+	case u32le:
+		return utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM)
+	}
+	return nil
+}
+
 // Humanize the encoding by using an shorter, less formal name.
 func Humanize(name string) string {
 	if _, err := Encoding(name); err != nil {
@@ -236,33 +243,33 @@ func Humanize(name string) string {
 }
 
 // shorten name to a custom/common names or aliases.
-func shorten(name string) (n string) {
-	n = strings.ToLower(name)
+func shorten(name string) string { // nolint:gocyclo
+	n, l := strings.ToLower(name), len(name)
 	switch {
-	case len(n) > 3 && n[:3] == "cp-":
-		n = n[3:]
-	case len(n) > 2 && n[:2] == "cp":
-		n = n[2:]
-	case len(n) > 14 && n[:14] == "ibm code page ":
-		n = ibm + n[14:]
-	case len(n) > 4 && n[:4] == "ibm-":
-		n = n[4:]
-	case len(n) > 3 && n[:3] == ibm:
-		n = n[3:]
-	case len(n) > 4 && n[:4] == "oem-":
-		n = n[4:]
+	case l > 3 && n[:3] == "cp-":
+		return n[3:]
+	case l > 2 && n[:2] == "cp":
+		return n[2:]
+	case l > 14 && n[:14] == "ibm code page ":
+		return ibm + n[14:]
+	case l > 4 && n[:4] == "ibm-":
+		return n[4:]
+	case l > 3 && n[:3] == ibm:
+		return n[3:]
+	case l > 4 && n[:4] == "oem-":
+		return n[4:]
 	case n == "windows code page 858":
-		n = cp858
-	case len(n) > 8 && n[:8] == "windows-":
-		n = n[8:]
-	case len(n) > 7 && n[:7] == win:
-		n = n[7:]
-	case len(n) > 7 && n[:7] == "iso8859":
-		n = "iso-8859-" + n[7:]
-	case len(n) > 9 && n[:9] == "iso 8859-":
-		n = "iso-8859-" + n[9:]
+		return cp858
+	case l > 8 && n[:8] == "windows-":
+		return n[8:]
+	case l > 7 && n[:7] == win:
+		return n[7:]
+	case l > 7 && n[:7] == "iso8859":
+		return "iso-8859-" + n[7:]
+	case l > 9 && n[:9] == "iso 8859-":
+		return "iso-8859-" + n[9:]
 	}
-	return n
+	return ""
 }
 
 // encodingAlias returns a valid IANA index encoding name from a shorten name or alias.
@@ -270,6 +277,25 @@ func encodingAlias(name string) (n string) {
 	// list of valid tables
 	// https://github.com/golang/text/blob/v0.3.2/encoding/charmap/maketables.go
 	// a switch is used instead of a map to avoid typos with duplicate values
+	if n = encodingIBM(name); n != "" {
+		return n
+	}
+	if n = encodingMisc(name); n != "" {
+		return n
+	}
+	if n = encodingWin(name); n != "" {
+		return n
+	}
+	if n = encodingISO(name); n != "" {
+		return n
+	}
+	if n = encodingUnicode(name); n != "" {
+		return n
+	}
+	return n
+}
+
+func encodingIBM(name string) (n string) {
 	switch name {
 	case "37", "037":
 		n = cp037
@@ -297,6 +323,12 @@ func encodingAlias(name string) (n string) {
 		n = "IBM1047"
 	case "1140", "ibm1140":
 		n = "IBM01140"
+	}
+	return n
+}
+
+func encodingMisc(name string) (n string) {
+	switch name {
 	case "878", "20866", "koi8r":
 		n = "KOI8-R"
 	case "1168", "21866", "koi8u":
@@ -310,16 +342,6 @@ func encodingAlias(name string) (n string) {
 	case "iso88598e", "iso88598i", "iso88596e", "iso88596i":
 		l := len(name)
 		n = fmt.Sprintf("ISO-8859-%v-%v", name[l-2:l-1], name[l-1:])
-	default:
-		if n = encodingWin(name); n != "" {
-			return n
-		}
-		if n = encodingISO(name); n != "" {
-			return n
-		}
-		if n = encodingUnicode(name); n != "" {
-			return n
-		}
 	}
 	return n
 }
@@ -352,14 +374,6 @@ func encodingWin(name string) (n string) {
 
 func encodingISO(name string) (n string) {
 	switch name {
-	case "1", "819", "28591":
-		n = "ISO-8859-1"
-	case "2", "1111", "28592":
-		n = "ISO-8859-2"
-	case "3", "913", "28593":
-		n = "ISO-8859-3"
-	case "4", "914", "28594":
-		n = "ISO-8859-4"
 	case "5", "1124", "28595":
 		n = "ISO-8859-5"
 	case "6", "1089", "28596":
@@ -382,6 +396,24 @@ func encodingISO(name string) (n string) {
 		n = "ISO-8859-15"
 	case "16", "28606", "iso885916":
 		n = "ISO-8859-16"
+	default:
+		if n = encodingEurope(name); n != "" {
+			return n
+		}
+	}
+	return n
+}
+
+func encodingEurope(name string) (n string) {
+	switch name {
+	case "1", "819", "28591":
+		n = "ISO-8859-1"
+	case "2", "1111", "28592":
+		n = "ISO-8859-2"
+	case "3", "913", "28593":
+		n = "ISO-8859-3"
+	case "4", "914", "28594":
+		n = "ISO-8859-4"
 	}
 	return n
 }
@@ -450,6 +482,10 @@ func (c *Convert) Swap() *Convert {
 		c.RunesUTF8()
 	default:
 	}
+	return c.swaps()
+}
+
+func (c *Convert) swaps() *Convert {
 	if len(c.Flags.SwapChars) > 0 {
 		for i := 0; i < c.Output.len; i++ {
 			if s := c.runeSwap(c.Output.R[i]); s >= 0 {
@@ -568,6 +604,18 @@ func (c *Convert) RunesEBCDIC() {
 	if len(c.Output.R) == 0 {
 		return
 	}
+	for i := 0; i < c.Output.len; i++ {
+		r := c.Output.R[i]
+		if c.skipIgnores(i) {
+			continue
+		}
+		if c.controls(i, r) {
+			continue
+		}
+	}
+}
+
+func (c *Convert) controls(i int, r rune) bool { // nolint:gocyclo
 	const (
 		ht  = 0x89
 		del = 0xa1
@@ -586,60 +634,62 @@ func (c *Convert) RunesEBCDIC() {
 		sub = 0x9A
 		nel = 133
 	)
-	for i := 0; i < c.Output.len; i++ {
-		r := c.Output.R[i]
-		if c.skipIgnores(i) {
-			continue
+	switch r {
+	case HT:
+		c.Output.R[i] = decode(ht)
+	case DEL:
+		c.Output.R[i] = decode(del)
+	case nel:
+		if c.Output.lineBreaks {
+			// Go will automatically convert this to CRLF on Windows
+			c.Output.R[i] = LF
+			return true
 		}
-		switch r {
-		case HT:
-			c.Output.R[i] = decode(ht)
-		case DEL:
-			c.Output.R[i] = decode(del)
-		case nel:
-			if c.Output.lineBreaks {
-				// Go will automatically convert this to CRLF on Windows
-				c.Output.R[i] = LF
-				continue
-			}
-			c.Output.R[i] = decode(nl)
-		case BS:
-			c.Output.R[i] = decode(bs)
-		case LF:
-			c.Output.R[i] = decode(lf)
-		case ETB:
-			c.Output.R[i] = decode(etb)
-		case ESC:
-			c.Output.R[i] = decode(esc)
-		case ENQ:
-			c.Output.R[i] = decode(enq)
-		case ACK:
-			c.Output.R[i] = decode(ack)
-		case BEL:
-			c.Output.R[i] = decode(bel)
-		case SYN:
-			c.Output.R[i] = decode(syn)
-		case Dash:
-			c.Output.R[i] = decode(eot)
-		case DC4:
-			c.Output.R[i] = decode(dc4)
-		case NAK:
-			c.Output.R[i] = decode(nak)
-		case SUB:
-			c.Output.R[i] = decode(sub)
-		case Nbsp:
-			c.Output.R[i], _ = utf8.DecodeRune([]byte{0xc2, 0xa0})
-		case NUL, SOH, STX, ETX, VT, FF, CR, SO, SI, DLE, DC1, DC2, DC3, CAN, EM, FS, GS, RS, US:
-			// shared controls with ASCII C0+C1
-			c.Output.R[i] = decode(row8 + byte(r))
-		case EOT, InvertedExclamation:
-			// unprintable controls
-			c.Output.R[i] = rune(SP)
-		case Cent, Negation, PlusMinus:
-			// keep these symbols
-		default:
-			c.outOfRange(i, r)
-		}
+		c.Output.R[i] = decode(nl)
+	case BS:
+		c.Output.R[i] = decode(bs)
+	case LF:
+		c.Output.R[i] = decode(lf)
+	case ETB:
+		c.Output.R[i] = decode(etb)
+	case ESC:
+		c.Output.R[i] = decode(esc)
+	case ENQ:
+		c.Output.R[i] = decode(enq)
+	case ACK:
+		c.Output.R[i] = decode(ack)
+	case BEL:
+		c.Output.R[i] = decode(bel)
+	case SYN:
+		c.Output.R[i] = decode(syn)
+	case Dash:
+		c.Output.R[i] = decode(eot)
+	case DC4:
+		c.Output.R[i] = decode(dc4)
+	case NAK:
+		c.Output.R[i] = decode(nak)
+	case SUB:
+		c.Output.R[i] = decode(sub)
+	default:
+		c.miscCtrls(i, r)
+	}
+	return false
+}
+
+func (c *Convert) miscCtrls(i int, r rune) {
+	switch r {
+	case Nbsp:
+		c.Output.R[i], _ = utf8.DecodeRune([]byte{0xc2, 0xa0})
+	case NUL, SOH, STX, ETX, VT, FF, CR, SO, SI, DLE, DC1, DC2, DC3, CAN, EM, FS, GS, RS, US:
+		// shared controls with ASCII C0+C1
+		c.Output.R[i] = decode(row8 + byte(r))
+	case EOT, InvertedExclamation:
+		// unprintable controls
+		c.Output.R[i] = rune(SP)
+	case Cent, Negation, PlusMinus:
+		// keep these symbols
+	default:
+		c.outOfRange(i, r)
 	}
 }
 

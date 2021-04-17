@@ -166,21 +166,25 @@ func (f Flags) Open(conv *convert.Convert, name string) (p Pack, err error) {
 		}
 	}
 	// convert to runes and print
+	return pkg.convPrint(&b, conv)
+}
+
+func (pkg Packs) convPrint(b *[]byte, conv *convert.Convert) (p Pack, err error) {
 	switch pkg.convert {
 	case ansi:
-		if p.Runes, err = conv.ANSI(&b); err != nil {
+		if p.Runes, err = conv.ANSI(b); err != nil {
 			return p, err
 		}
 	case char:
-		if p.Runes, err = conv.Chars(&b); err != nil {
+		if p.Runes, err = conv.Chars(b); err != nil {
 			return p, err
 		}
 	case dump:
-		if p.Runes, err = conv.Dump(&b); err != nil {
+		if p.Runes, err = conv.Dump(b); err != nil {
 			return p, err
 		}
 	case text:
-		if p.Runes, err = conv.Text(&b); err != nil {
+		if p.Runes, err = conv.Text(b); err != nil {
 			return p, err
 		}
 	default:

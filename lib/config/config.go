@@ -193,50 +193,57 @@ func Keys() []string {
 func Marshal() (interface{}, error) {
 	var sc = Settings{}
 	for key := range Reset() {
-		switch key {
-		case editor:
-			sc.Editor = getString(key)
-		case fontEmb:
-			sc.HTML.Font.Embed = getBool(key)
-		case fontFam:
-			sc.HTML.Font.Family = getString(key)
-		case layout:
-			sc.HTML.Layout = getString(key)
-		case author:
-			sc.HTML.Meta.Author = getString(key)
-		case scheme:
-			sc.HTML.Meta.ColorScheme = getString(key)
-		case desc:
-			sc.HTML.Meta.Description = getString(key)
-		case genr:
-			sc.HTML.Meta.Generator = getBool(key)
-		case keywords:
-			sc.HTML.Meta.Keywords = getString(key)
-		case notlate:
-			sc.HTML.Meta.Notranslate = getBool(key)
-		case referr:
-			sc.HTML.Meta.Referrer = getString(key)
-		case rtx:
-			sc.HTML.Meta.RetroTxt = getBool(key)
-		case bot:
-			sc.HTML.Meta.Robots = getString(key)
-		case theme:
-			sc.HTML.Meta.ThemeColor = getString(key)
-		case title:
-			sc.HTML.Title = getString(key)
-		case saveDir:
-			sc.SaveDirectory = getString(key)
-		case serve:
-			sc.ServerPort = getUint(key)
-		case stylei:
-			sc.Style.Info = getString(key)
-		case styleh:
-			sc.Style.HTML = getString(key)
-		default:
-			return sc, fmt.Errorf("mashal %q: %w", key, ErrCFG)
+		if err := sc.marshals(key); err != nil {
+			return sc, err
 		}
 	}
 	return sc, nil
+}
+
+func (sc *Settings) marshals(key string) error { // nolint:gocyclo
+	switch key {
+	case editor:
+		sc.Editor = getString(key)
+	case fontEmb:
+		sc.HTML.Font.Embed = getBool(key)
+	case fontFam:
+		sc.HTML.Font.Family = getString(key)
+	case layout:
+		sc.HTML.Layout = getString(key)
+	case author:
+		sc.HTML.Meta.Author = getString(key)
+	case scheme:
+		sc.HTML.Meta.ColorScheme = getString(key)
+	case desc:
+		sc.HTML.Meta.Description = getString(key)
+	case genr:
+		sc.HTML.Meta.Generator = getBool(key)
+	case keywords:
+		sc.HTML.Meta.Keywords = getString(key)
+	case notlate:
+		sc.HTML.Meta.Notranslate = getBool(key)
+	case referr:
+		sc.HTML.Meta.Referrer = getString(key)
+	case rtx:
+		sc.HTML.Meta.RetroTxt = getBool(key)
+	case bot:
+		sc.HTML.Meta.Robots = getString(key)
+	case theme:
+		sc.HTML.Meta.ThemeColor = getString(key)
+	case title:
+		sc.HTML.Title = getString(key)
+	case saveDir:
+		sc.SaveDirectory = getString(key)
+	case serve:
+		sc.ServerPort = getUint(key)
+	case stylei:
+		sc.Style.Info = getString(key)
+	case styleh:
+		sc.Style.HTML = getString(key)
+	default:
+		return fmt.Errorf("mashal %q: %w", key, ErrCFG)
+	}
+	return nil
 }
 
 func getBool(key string) bool {
