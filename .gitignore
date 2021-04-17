@@ -15,7 +15,7 @@ retrotxtgo
 *.out
 
 # GoReleaser
-/internal/dist
+/dist
 
 # Editor
 log.txt

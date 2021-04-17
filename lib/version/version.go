@@ -57,6 +57,13 @@ type Output struct {
 	URL       string `json:"url"`
 }
 
+var B = Build{
+	Commit:  "",
+	Date:    "",
+	Domain:  "retrotxt.com",
+	Version: "",
+}
+
 func (o *Output) String(color bool) string {
 	gookit.Enable = color
 	update, ver := NewRelease()
