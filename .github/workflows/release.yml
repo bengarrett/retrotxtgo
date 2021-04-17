@@ -29,11 +29,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
       -
-        name: Tests
-        run: |
-          go mod tidy
-          go test -v ./...
-      -
         name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
