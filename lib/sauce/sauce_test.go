@@ -441,7 +441,6 @@ func TestParse(t *testing.T) {
 		{"empty", []byte(""), ""},
 		{"example", raw, "Sauce title"},
 	}
-	//"                 "
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := Parse(tt.data...); got.Title != tt.want {
