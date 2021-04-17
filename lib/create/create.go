@@ -10,16 +10,15 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/spf13/viper"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/runes"
 	"golang.org/x/text/transform"
-	"retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/filesystem"
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/str"
-
-	"github.com/spf13/viper"
+	"retrotxt.com/retrotxt/static"
 )
 
 // Args holds arguments and options sourced from user flags or the config file.
@@ -315,9 +314,9 @@ func (args *Args) Stdout(b *[]byte) error {
 		return fmt.Errorf("stdout: %w", err)
 	}
 	// js
-	js := pack.Get(jsPack)
+	js := static.Scripts
 	// css
-	css := pack.Get(cssPack)
+	css := static.Styles
 	// font
 	ff := args.FontFamily.Value
 	f := Family(ff).String()

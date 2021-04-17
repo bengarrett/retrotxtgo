@@ -20,6 +20,25 @@ type (
 	tInfoS   [22]byte
 )
 
+func (b id) String() string {
+	return string(b[:])
+}
+func (b version) String() string {
+	return string(b[:])
+}
+func (b title) String() string {
+	return string(b[:])
+}
+func (b author) String() string {
+	return string(b[:])
+}
+func (b group) String() string {
+	return string(b[:])
+}
+func (b date) String() string {
+	return string(b[:])
+}
+
 func (t tInfoS) String() string {
 	const nul = 0
 	s := ""

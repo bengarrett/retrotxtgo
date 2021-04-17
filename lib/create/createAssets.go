@@ -8,10 +8,10 @@ import (
 
 	"github.com/gookit/color"
 	"golang.org/x/text/language"
-	"retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/filesystem"
 	"retrotxt.com/retrotxt/lib/humanize"
 	"retrotxt.com/retrotxt/lib/logs"
+	"retrotxt.com/retrotxt/static"
 )
 
 const (
@@ -33,7 +33,7 @@ func (args *Args) saveCSS(c chan error) {
 	if err != nil {
 		c <- err
 	}
-	b := pack.Get("css/styles.css")
+	b := static.Styles
 	if len(b) == 0 {
 		c <- fmt.Errorf("create.saveCSS %q: %w", args.pack, ErrPackGet)
 	}
@@ -55,9 +55,9 @@ func (args *Args) saveFavIcon(c chan error) {
 	if err != nil {
 		c <- err
 	}
-	b := pack.Get("img/retrotxt_16.png")
-	if len(b) == 0 {
-		c <- fmt.Errorf("create.saveFavIcon %q: %w", args.pack, ErrPackGet)
+	b, err := static.Image.ReadFile("retrotxt_16.png")
+	if err != nil {
+		c <- fmt.Errorf("create.saveFavIcon %q: %w", args.pack, err)
 	}
 	nn, _, err := filesystem.Save(name, b...)
 	if err != nil {
@@ -115,9 +115,9 @@ func (args *Args) saveFontWoff2(name, packName string) error {
 	if err != nil {
 		return err
 	}
-	b := pack.Get(packName)
-	if len(b) == 0 {
-		return fmt.Errorf("create.saveFontWoff2 %q: %w", args.pack, ErrPackGet)
+	b, err := static.Font.ReadFile(packName)
+	if err != nil {
+		return fmt.Errorf("create.saveFontWoff2 %q: %w", args.pack, err)
 	}
 	nn, _, err := filesystem.Save(name, b...)
 	if err != nil {
@@ -138,7 +138,7 @@ func (args *Args) saveJS(c chan error) {
 	if err != nil {
 		c <- err
 	}
-	b := pack.Get("js/scripts.js")
+	b := static.Scripts
 	if len(b) == 0 {
 		c <- fmt.Errorf("create.saveJS %q: %w", args.pack, ErrPackGet)
 	}
