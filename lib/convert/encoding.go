@@ -311,13 +311,13 @@ func encodingAlias(name string) (n string) {
 		l := len(name)
 		n = fmt.Sprintf("ISO-8859-%v-%v", name[l-2:l-1], name[l-1:])
 	default:
-		if n = encodingWin(name); n == "" {
+		if n = encodingWin(name); n != "" {
 			return n
 		}
-		if n = encodingISO(name); n == "" {
+		if n = encodingISO(name); n != "" {
 			return n
 		}
-		if n = encodingUnicode(name); n == "" {
+		if n = encodingUnicode(name); n != "" {
 			return n
 		}
 	}
