@@ -6,14 +6,19 @@ import (
 	"errors"
 )
 
-//ErrPackGet = errors.New("pack.get name is invalid")
 var ErrNotFound = errors.New("static file was not found")
+
+//go:embed *
+var File embed.FS
 
 //go:embed font/*
 var Font embed.FS
 
 //go:embed img/*
 var Image embed.FS
+
+//go:embed html/*
+var Tmpl embed.FS
 
 //go:embed text/*
 var Text embed.FS

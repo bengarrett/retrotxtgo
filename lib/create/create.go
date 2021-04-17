@@ -157,9 +157,6 @@ const (
 	unknown  = "unknown"
 
 	zipName = "retrotxt.zip"
-
-	cssPack = "css/styles.css"
-	jsPack  = "js/scripts.js"
 )
 
 var (
@@ -171,8 +168,6 @@ var (
 	ErrEmptyName = errors.New("filename is empty")
 	// ErrReqOW require overwrite flag.
 	ErrReqOW = errors.New("include an -o flag to overwrite")
-	// ErrPackGet invalid pack name.
-	ErrPackGet = errors.New("pack.get name is invalid")
 	// ErrUnknownFF unknown font family.
 	ErrUnknownFF = errors.New("unknown font family")
 	// ErrNilByte nil byte value.

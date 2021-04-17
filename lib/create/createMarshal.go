@@ -16,6 +16,7 @@ import (
 	"retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/filesystem"
 	"retrotxt.com/retrotxt/lib/version"
+	"retrotxt.com/retrotxt/static"
 )
 
 // marshal transforms bytes into UTF-8, creates the page meta and template data.
@@ -200,9 +201,9 @@ func (args *Args) templatePack() error {
 }
 
 func (args *Args) templateData() (*[]byte, error) {
-	b := pack.Get(args.pack)
-	if len(b) == 0 {
-		return nil, fmt.Errorf("template data %q: %w", args.pack, ErrPackGet)
+	b, err := static.Tmpl.ReadFile(args.pack)
+	if err != nil {
+		return nil, fmt.Errorf("template data %q: %w", args.pack, err)
 	}
 	return &b, nil
 }

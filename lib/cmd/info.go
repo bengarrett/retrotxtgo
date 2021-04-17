@@ -9,14 +9,13 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-
-	internal "retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/config"
 	"retrotxt.com/retrotxt/lib/filesystem"
 	"retrotxt.com/retrotxt/lib/info"
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/pack"
 	"retrotxt.com/retrotxt/lib/str"
+	"retrotxt.com/retrotxt/static"
 )
 
 var infoFlag struct {
@@ -82,9 +81,9 @@ func infoPackage(name string) (filename string, err error) {
 	if !exist {
 		return "", nil
 	}
-	b := internal.Get(pkg.Name)
-	if b == nil {
-		return "", fmt.Errorf("view package %q: %w", pkg.Name, ErrPackGet)
+	b, err := static.File.ReadFile(pkg.Name)
+	if err != nil {
+		return "", fmt.Errorf("view package %q: %w", pkg.Name, err)
 	}
 	file, err := ioutil.TempFile("", fmt.Sprintf("retrotxt_%s.*.txt", s))
 	if err != nil {

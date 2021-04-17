@@ -35,7 +35,7 @@ func (args *Args) saveCSS(c chan error) {
 	}
 	b := static.Styles
 	if len(b) == 0 {
-		c <- fmt.Errorf("create.saveCSS %q: %w", args.pack, ErrPackGet)
+		c <- fmt.Errorf("create.saveCSS %q: %w", args.pack, static.ErrNotFound)
 	}
 	nn, _, err := filesystem.Save(name, b...)
 	if err != nil {
@@ -140,7 +140,7 @@ func (args *Args) saveJS(c chan error) {
 	}
 	b := static.Scripts
 	if len(b) == 0 {
-		c <- fmt.Errorf("create.saveJS %q: %w", args.pack, ErrPackGet)
+		c <- fmt.Errorf("create.saveJS %q: %w", args.pack, static.ErrNotFound)
 	}
 	nn, _, err := filesystem.Save(name, b...)
 	if err != nil {

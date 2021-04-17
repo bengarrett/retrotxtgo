@@ -34,8 +34,6 @@ const (
 var (
 	// ErrIntpr no interpreter.
 	ErrIntpr = errors.New("the interpreter is not supported")
-	// ErrPackGet invalid pack name.
-	ErrPackGet = errors.New("pack.get name is invalid")
 	// ErrPackValue unknown pack value.
 	ErrPackValue = errors.New("unknown package convert value")
 	// ErrTempClose close temp file.
