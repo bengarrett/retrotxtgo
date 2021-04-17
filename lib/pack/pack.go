@@ -12,9 +12,9 @@ import (
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/encoding/unicode/utf32"
-	"retrotxt.com/retrotxt/internal/pack"
 	"retrotxt.com/retrotxt/lib/convert"
 	"retrotxt.com/retrotxt/lib/logs"
+	"retrotxt.com/retrotxt/static"
 )
 
 // Flags and configuration values by the user.
@@ -139,8 +139,8 @@ func (f Flags) Open(conv *convert.Convert, name string) (p Pack, err error) {
 	if !exist {
 		return p, nil
 	}
-	b := pack.Get(pkg.Name)
-	if b == nil {
+	b, err := static.File.ReadFile(pkg.Name)
+	if err != nil {
 		return p, fmt.Errorf("view package %q: %w", pkg.Name, ErrPackGet)
 	}
 	p.Src = pkg.encoding
