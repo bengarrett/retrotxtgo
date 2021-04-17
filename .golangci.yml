@@ -75,7 +75,7 @@ linters:
     - errcheck
     - exportloopref
     - exhaustive
-    #- funlen
+    - funlen
     - gochecknoglobals
     - gochecknoinits
     - goconst

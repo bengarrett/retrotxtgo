@@ -138,29 +138,10 @@ func character(i int, r rune, cp encoding.Encoding) string {
 }
 
 func charmapAlias(cp encoding.Encoding) string {
+	if c := charmapDOS(cp); c != "" {
+		return c
+	}
 	switch cp {
-	case charmap.CodePage037:
-		return " (US/Canada Latin 1)"
-	case charmap.CodePage437:
-		return " (DOS, OEM-US)"
-	case charmap.CodePage850:
-		return " (DOS, Latin 1)"
-	case charmap.CodePage852:
-		return " (DOS, Latin 2)"
-	case charmap.CodePage855:
-		return " (DOS, Cyrillic)"
-	case charmap.CodePage858:
-		return " (DOS, Western Europe)"
-	case charmap.CodePage860:
-		return " (DOS, Portuguese)"
-	case charmap.CodePage862:
-		return " (DOS, Hebrew)"
-	case charmap.CodePage863:
-		return " (DOS, French Canada)"
-	case charmap.CodePage865:
-		return " (DOS, Nordic)"
-	case charmap.CodePage866:
-		return " (DOS, Cyrillic Russian)"
 	case charmap.CodePage1047:
 		return " (C programming language)"
 	case charmap.CodePage1140:
@@ -205,6 +186,34 @@ func charmapAlias(cp encoding.Encoding) string {
 		return " (Vietnamese)"
 	case japanese.ShiftJIS:
 		return " (Japanese)"
+	}
+	return ""
+}
+
+func charmapDOS(cp encoding.Encoding) string {
+	switch cp {
+	case charmap.CodePage037:
+		return " (US/Canada Latin 1)"
+	case charmap.CodePage437:
+		return " (DOS, OEM-US)"
+	case charmap.CodePage850:
+		return " (DOS, Latin 1)"
+	case charmap.CodePage852:
+		return " (DOS, Latin 2)"
+	case charmap.CodePage855:
+		return " (DOS, Cyrillic)"
+	case charmap.CodePage858:
+		return " (DOS, Western Europe)"
+	case charmap.CodePage860:
+		return " (DOS, Portuguese)"
+	case charmap.CodePage862:
+		return " (DOS, Hebrew)"
+	case charmap.CodePage863:
+		return " (DOS, French Canada)"
+	case charmap.CodePage865:
+		return " (DOS, Nordic)"
+	case charmap.CodePage866:
+		return " (DOS, Cyrillic Russian)"
 	}
 	return ""
 }

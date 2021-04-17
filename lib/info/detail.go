@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"hash/crc32"
 	"hash/crc64"
+	"io/fs"
 	"os"
 	"strings"
 	"sync"
@@ -149,26 +150,7 @@ func (d *Detail) parse(name string, stat os.FileInfo, data ...byte) (err error) 
 	}()
 	go func() {
 		defer wg.Done()
-		var standardInput os.FileInfo = nil
-		if stat != standardInput {
-			b := stat.Size()
-			d.Size.Bytes = b
-			d.Size.Binary = humanize.Binary(b, lang())
-			d.Size.Decimal = humanize.Decimal(b, lang())
-			d.Name = stat.Name()
-			d.Modified.Time = stat.ModTime().UTC()
-			d.Modified.Epoch = stat.ModTime().Unix()
-			d.Slug = slugify.Slugify(stat.Name())
-		} else {
-			b := int64(len(data))
-			d.Size.Bytes = b
-			d.Size.Binary = humanize.Binary(b, lang())
-			d.Size.Decimal = humanize.Decimal(b, lang())
-			d.Name = "n/a (stdin)"
-			d.Slug = "n/a"
-			d.Modified.Time = time.Now()
-			d.Modified.Epoch = time.Now().Unix()
-		}
+		d.input(len(data), stat)
 	}()
 	go func() {
 		defer wg.Done()
@@ -196,6 +178,30 @@ func (d *Detail) parse(name string, stat os.FileInfo, data ...byte) (err error) 
 	}()
 	wg.Wait()
 	return err
+}
+
+func (d *Detail) input(data int, stat fs.FileInfo) {
+	var standardInput os.FileInfo = nil
+	isFile := (stat != standardInput)
+	if isFile {
+		b := stat.Size()
+		d.Size.Bytes = b
+		d.Size.Binary = humanize.Binary(b, lang())
+		d.Size.Decimal = humanize.Decimal(b, lang())
+		d.Name = stat.Name()
+		d.Modified.Time = stat.ModTime().UTC()
+		d.Modified.Epoch = stat.ModTime().Unix()
+		d.Slug = slugify.Slugify(stat.Name())
+		return
+	}
+	b := int64(data)
+	d.Size.Bytes = b
+	d.Size.Binary = humanize.Binary(b, lang())
+	d.Size.Decimal = humanize.Decimal(b, lang())
+	d.Name = "n/a (stdin)"
+	d.Slug = "n/a"
+	d.Modified.Time = time.Now()
+	d.Modified.Epoch = time.Now().Unix()
 }
 
 func (d *Detail) printMarshal(color bool) []byte {

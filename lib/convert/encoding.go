@@ -297,6 +297,61 @@ func encodingAlias(name string) (n string) {
 		n = "IBM1047"
 	case "1140", "ibm1140":
 		n = "IBM01140"
+	case "878", "20866", "koi8r":
+		n = "KOI8-R"
+	case "1168", "21866", "koi8u":
+		n = "KOI8-U"
+	case "10000", "macroman", "mac-roman", "mac os roman":
+		n = "Macintosh"
+	case "shift jis", "shiftjis":
+		n = "shift_jis"
+	case "ebcdic", ibm:
+		n = cp037
+	case "iso88598e", "iso88598i", "iso88596e", "iso88596i":
+		l := len(name)
+		n = fmt.Sprintf("ISO-8859-%v-%v", name[l-2:l-1], name[l-1:])
+	default:
+		if n = encodingWin(name); n == "" {
+			return n
+		}
+		if n = encodingISO(name); n == "" {
+			return n
+		}
+		if n = encodingUnicode(name); n == "" {
+			return n
+		}
+	}
+	return n
+}
+
+func encodingWin(name string) (n string) {
+	switch name {
+	case "874":
+		n = "Windows-874"
+	case "1250":
+		n = "Windows-1250"
+	case "1251":
+		n = "Windows-1251"
+	case "1252", "1004", "win", win:
+		n = "Windows-1252"
+	case "1253":
+		n = "Windows-1253"
+	case "1254":
+		n = "Windows-1254"
+	case "1255":
+		n = "Windows-1255"
+	case "1256":
+		n = "Windows-1256"
+	case "1257":
+		n = "Windows-1257"
+	case "1258":
+		n = "Windows-1258"
+	}
+	return n
+}
+
+func encodingISO(name string) (n string) {
+	switch name {
 	case "1", "819", "28591":
 		n = "ISO-8859-1"
 	case "2", "1111", "28592":
@@ -327,34 +382,12 @@ func encodingAlias(name string) (n string) {
 		n = "ISO-8859-15"
 	case "16", "28606", "iso885916":
 		n = "ISO-8859-16"
-	case "878", "20866", "koi8r":
-		n = "KOI8-R"
-	case "1168", "21866", "koi8u":
-		n = "KOI8-U"
-	case "10000", "macroman", "mac-roman", "mac os roman":
-		n = "Macintosh"
-	case "874":
-		n = "Windows-874"
-	case "1250":
-		n = "Windows-1250"
-	case "1251":
-		n = "Windows-1251"
-	case "1252", "1004", "win", win:
-		n = "Windows-1252"
-	case "1253":
-		n = "Windows-1253"
-	case "1254":
-		n = "Windows-1254"
-	case "1255":
-		n = "Windows-1255"
-	case "1256":
-		n = "Windows-1256"
-	case "1257":
-		n = "Windows-1257"
-	case "1258":
-		n = "Windows-1258"
-	case "shift jis", "shiftjis":
-		n = "shift_jis"
+	}
+	return n
+}
+
+func encodingUnicode(name string) (n string) {
+	switch name {
 	case "utf16":
 		n = "UTF-16" // Go will use the byte-order-mark
 	case "16be", "utf16b", "utf16be", "utf-16-be":
@@ -367,11 +400,6 @@ func encodingAlias(name string) (n string) {
 		n = u32be
 	case "32le", "utf32l", "utf32le", "utf-32le", "utf-32-le":
 		n = u32le
-	case "ebcdic", ibm:
-		n = cp037
-	case "iso88598e", "iso88598i", "iso88596e", "iso88596i":
-		l := len(name)
-		n = fmt.Sprintf("ISO-8859-%v-%v", name[l-2:l-1], name[l-1:])
 	}
 	return n
 }
@@ -558,7 +586,6 @@ func (c *Convert) RunesEBCDIC() {
 		sub = 0x9A
 		nel = 133
 	)
-	const skipA, skipB, skipC, skipD = 0xA0, 0xBF, 0xC0, 0xFF
 	for i := 0; i < c.Output.len; i++ {
 		r := c.Output.R[i]
 		if c.skipIgnores(i) {
@@ -611,15 +638,20 @@ func (c *Convert) RunesEBCDIC() {
 		case Cent, Negation, PlusMinus:
 			// keep these symbols
 		default:
-			switch {
-			case
-				r >= skipA && r <= skipB,
-				r >= skipC && r <= skipD,
-				r >= row8 && r <= row8f,
-				r >= row9 && r <= row9f:
-				c.Output.R[i] = rune(SP)
-			}
+			c.outOfRange(i, r)
 		}
+	}
+}
+
+func (c *Convert) outOfRange(i int, r rune) {
+	const skipA, skipB, skipC, skipD = 0xA0, 0xBF, 0xC0, 0xFF
+	switch {
+	case
+		r >= skipA && r <= skipB,
+		r >= skipC && r <= skipD,
+		r >= row8 && r <= row8f,
+		r >= row9 && r <= row9f:
+		c.Output.R[i] = rune(SP)
 	}
 }
 
