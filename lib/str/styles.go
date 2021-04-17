@@ -37,6 +37,7 @@ const (
 	Term256
 	// Term16M ANSI high-color.
 	Term16M
+	none = "none"
 )
 
 // JSONExample is used for previewing color themes.
@@ -68,7 +69,7 @@ func (s JSONExample) String(flag string) {
 func (t terminal) Formatter() string {
 	switch t {
 	case TermMono:
-		return "none"
+		return none
 	case Term16, Term88:
 		return "terminal"
 	case Term256:
@@ -138,7 +139,7 @@ func HighlightWriter(w io.Writer, source, lexer, style string, ansi bool) (err e
 	if err != nil {
 		return fmt.Errorf("highlight writer stdout error: %w", err)
 	}
-	if term == "none" {
+	if term == none {
 		// user disabled color output, but it doesn't disable ANSI output
 		fmt.Fprintln(w, source)
 		return nil

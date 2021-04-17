@@ -15,7 +15,6 @@ import (
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/encoding/unicode/utf32"
-
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/str"
 )
@@ -26,6 +25,8 @@ type cell struct {
 	numeric string
 	alias   string
 }
+
+const latin = "isolatin"
 
 // Encodings returns all the supported legacy text encodings.
 func Encodings() (e []encoding.Encoding) {
@@ -146,10 +147,10 @@ func alias(s, val string, e encoding.Encoding) string {
 		if len(a) > 2 && a[:2] == "pc" {
 			return ""
 		}
-		if len(a) == 9 && a[:8] == "isolatin" {
+		if len(a) == 9 && a[:8] == latin {
 			return "latin" + a[8:]
 		}
-		if len(a) > 9 && a[:8] == "isolatin" {
+		if len(a) > 9 && a[:8] == latin {
 			return a[8:]
 		}
 	}

@@ -53,14 +53,15 @@ func Date(format string, t time.Time) string {
 
 // Time returns a formatted time string.
 func Time(format string, t time.Time) string {
+	const def = "H24"
 	format = strings.ToUpper(format)
 	if format == "" {
-		format = "H24"
+		format = def
 	}
 	switch format {
 	case "H12":
 		return t.Format(H12)
-	case "H24":
+	case def:
 		return t.Format(H24)
 	}
 	return ""
@@ -68,9 +69,10 @@ func Time(format string, t time.Time) string {
 
 // Datetime returns a formatted date and time string.
 func Datetime(format string, t time.Time) string {
+	const def = "DMY24"
 	format = strings.ToUpper(format)
 	if format == "" {
-		format = "DMY24"
+		format = def
 	}
 	switch format {
 	case "DMY12":
@@ -79,7 +81,7 @@ func Datetime(format string, t time.Time) string {
 		return t.Format(YMD12())
 	case "MDY12":
 		return t.Format(MDY12())
-	case "DMY24":
+	case def:
 		return t.Format(DMY24())
 	case "YMD24":
 		return t.Format(YMD24())

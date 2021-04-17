@@ -1,5 +1,5 @@
 // Package sauce to handle the reading and parsing of embedded SAUCE metadata.
-
+// nolint:gochecknoglobals
 package sauce
 
 import (

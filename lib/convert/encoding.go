@@ -145,7 +145,15 @@ const (
 	row9f = 159
 	rowA  = 160
 	rowE  = 224
+	cp037 = "IBM037"
+	cp858 = "IBM00858"
+	ibm   = "ibm"
 	iso11 = "iso-8859-11"
+	msdos = "msdos"
+	u32   = "UTF-32"
+	u32be = "UTF-32BE"
+	u32le = "UTF-32LE"
+	win   = "windows"
 )
 
 // Chars are characters with alternative runes.
@@ -196,11 +204,11 @@ func Encoding(name string) (encoding.Encoding, error) {
 	}
 	// UTF-32... doesn't return a match in ianaindex.IANA
 	switch a {
-	case "UTF-32":
+	case u32:
 		return utf32.UTF32(utf32.LittleEndian, utf32.UseBOM), nil
-	case "UTF-32BE":
+	case u32be:
 		return utf32.UTF32(utf32.BigEndian, utf32.IgnoreBOM), nil
-	case "UTF-32LE":
+	case u32le:
 		return utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM), nil
 	}
 	enc, err := ianaindex.IANA.Encoding(s)
@@ -236,18 +244,18 @@ func shorten(name string) (n string) {
 	case len(n) > 2 && n[:2] == "cp":
 		n = n[2:]
 	case len(n) > 14 && n[:14] == "ibm code page ":
-		n = "ibm" + n[14:]
+		n = ibm + n[14:]
 	case len(n) > 4 && n[:4] == "ibm-":
 		n = n[4:]
-	case len(n) > 3 && n[:3] == "ibm":
+	case len(n) > 3 && n[:3] == ibm:
 		n = n[3:]
 	case len(n) > 4 && n[:4] == "oem-":
 		n = n[4:]
 	case n == "windows code page 858":
-		n = "IBM00858"
+		n = cp858
 	case len(n) > 8 && n[:8] == "windows-":
 		n = n[8:]
-	case len(n) > 7 && n[:7] == "windows":
+	case len(n) > 7 && n[:7] == win:
 		n = n[7:]
 	case len(n) > 7 && n[:7] == "iso8859":
 		n = "iso-8859-" + n[7:]
@@ -264,8 +272,8 @@ func encodingAlias(name string) (n string) {
 	// a switch is used instead of a map to avoid typos with duplicate values
 	switch name {
 	case "37", "037":
-		n = "IBM037"
-	case "437", "dos", "ibmpc", "msdos", "us", "pc-8", "latin-us":
+		n = cp037
+	case "437", "dos", "ibmpc", msdos, "us", "pc-8", "latin-us":
 		n = "IBM437"
 	case "850", "latini":
 		n = "IBM850"
@@ -274,7 +282,7 @@ func encodingAlias(name string) (n string) {
 	case "855":
 		n = "IBM855"
 	case "858":
-		n = "IBM00858"
+		n = cp858
 	case "860":
 		n = "IBM860"
 	case "862":
@@ -331,7 +339,7 @@ func encodingAlias(name string) (n string) {
 		n = "Windows-1250"
 	case "1251":
 		n = "Windows-1251"
-	case "1252", "1004", "win", "windows":
+	case "1252", "1004", "win", win:
 		n = "Windows-1252"
 	case "1253":
 		n = "Windows-1253"
@@ -354,13 +362,13 @@ func encodingAlias(name string) (n string) {
 	case "16le", "utf16l", "utf16le", "utf-16-le":
 		n = "UTF-16LE"
 	case "utf32", "utf-32":
-		n = "UTF-32" // Go will use the byte-order-mark
+		n = u32 // Go will use the byte-order-mark
 	case "32be", "utf32b", "utf32be", "utf-32be", "utf-32-be":
-		n = "UTF-32BE"
+		n = u32be
 	case "32le", "utf32l", "utf32le", "utf-32le", "utf-32-le":
-		n = "UTF-32LE"
-	case "ebcdic", "ibm":
-		n = "IBM037"
+		n = u32le
+	case "ebcdic", ibm:
+		n = cp037
 	case "iso88598e", "iso88598i", "iso88596e", "iso88596i":
 		l := len(name)
 		n = fmt.Sprintf("ISO-8859-%v-%v", name[l-2:l-1], name[l-1:])

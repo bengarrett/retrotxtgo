@@ -1,3 +1,4 @@
+// nolint:gochecknoglobals
 package convert
 
 import (
@@ -13,7 +14,7 @@ import (
 )
 
 var (
-	cp037  = charmap.CodePage037
+	ccp037 = charmap.CodePage037
 	cp437  = charmap.CodePage437
 	cp865  = charmap.CodePage865
 	cp1252 = charmap.Windows1252
@@ -50,8 +51,8 @@ func TestSet_Transform(t *testing.T) {
 		{"u16le", u16le, toEncoding(u16le, "⌚ Watch"), "⌚ Watch", false},
 		{"u16be", u16be, toEncoding(u16be, "⌚ Watch"), "⌚ Watch", false},
 		{"null", u8, []byte("\x00"), "␀", false},
-		{"CP037", cp037, []byte("\xc8\x51\xba\x93\xcf"), "Hé[lõ", false},
-		{"bell", cp037, []byte("ring a \x07"), "ring a ␇", false},
+		{"CP037", ccp037, []byte("\xc8\x51\xba\x93\xcf"), "Hé[lõ", false},
+		{"bell", ccp037, []byte("ring a \x07"), "ring a ␇", false},
 		{"CP437", cp437, []byte("H\x82ll\x93 \x9d\xa7\xf4\x9c\xbe"), "Héllô ¥º⌠£╛", false},
 		{"⌂", cp437, []byte("Home sweat \x7f"), "Home sweat ⌂", false},
 		{"mac", mac, []byte("\x11 command + \x12 shift."), "⌘ command + ⇧ shift.", false},
@@ -89,7 +90,7 @@ func TestANSI(t *testing.T) {
 		wantErr  bool
 	}{
 		{"null", u8, "\x00", []rune("␀"), false},
-		{"CP037", cp037, "\xc8\x51\xba\x93\xcf", []rune("Hé[lõ"), false},
+		{"CP037", ccp037, "\xc8\x51\xba\x93\xcf", []rune("Hé[lõ"), false},
 		{"ansi dos", cp437, "\x1b\x5b0m", []rune{27, 91, 48, 109}, false},
 		{"ansi win", cp1252, "\x1b\x5b0m", []rune{27, 91, 48, 109}, false},
 		{"panic", cp1252, "\x1b", []rune{9243}, false},

@@ -437,6 +437,7 @@ func Scan(b ...byte) (index int) {
 		return l - 1 - i
 	}
 	// search for the id sequence in b
+	const indexEnd = 6
 	for i := range b {
 		if i > maximum {
 			break
@@ -446,7 +447,7 @@ func Scan(b ...byte) (index int) {
 			break
 		}
 		// do matching in reverse
-		if b[i] != id[6] {
+		if b[i] != id[indexEnd] {
 			continue // 0
 		}
 		if b[i-1] != id[5] {
@@ -464,10 +465,10 @@ func Scan(b ...byte) (index int) {
 		if b[i-5] != id[1] {
 			continue // A
 		}
-		if b[i-6] != id[0] {
+		if b[i-indexEnd] != id[0] {
 			continue // S
 		}
-		return i - 6
+		return i - indexEnd
 	}
 	return -1
 }

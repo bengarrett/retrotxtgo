@@ -45,6 +45,12 @@ type comnt struct {
 	lines  []byte
 }
 
+const (
+	chrw = "character width"
+	nol  = "number of lines"
+	pxw  = "pixel width"
+)
+
 func (d *data) commentBlock() (c Comments) {
 	breakCount := len(strings.Split(string(d.comnt.lines), "\n"))
 	c.ID = comntID
@@ -193,10 +199,10 @@ func (d *data) typeInfo() TypeInfos {
 	case character:
 		switch Character(ft) {
 		case ascii, ansi, ansiMation, pcBoard, avatar, tundraDraw:
-			ti.Info1.Info = "character width"
-			ti.Info2.Info = "number of lines"
+			ti.Info1.Info = chrw
+			ti.Info2.Info = nol
 		case ripScript:
-			ti.Info1.Info = "pixel width"
+			ti.Info1.Info = pxw
 			ti.Info2.Info = "character screen height"
 			ti.Info3.Info = "number of colors"
 		case html, source:
@@ -205,7 +211,7 @@ func (d *data) typeInfo() TypeInfos {
 	case bitmap:
 		switch Bitmap(ft) {
 		case gif, pcx, lbm, tga, fli, flc, bmp, gl, dl, wpg, png, jpg, mpg, avi:
-			ti.Info1.Info = "pixel width"
+			ti.Info1.Info = pxw
 			ti.Info2.Info = "pixel height"
 			ti.Info3.Info = "pixel depth"
 		}
@@ -225,8 +231,8 @@ func (d *data) typeInfo() TypeInfos {
 	case binaryText:
 		return ti
 	case xBin:
-		ti.Info1.Info = "character width"
-		ti.Info2.Info = "number of lines"
+		ti.Info1.Info = chrw
+		ti.Info2.Info = nol
 	case archive:
 		switch Archive(ft) {
 		case zip, arj, lzh, arc, tar, zoo, rar, uc2, pak, sqz:

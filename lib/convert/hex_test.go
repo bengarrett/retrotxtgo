@@ -7,9 +7,11 @@ import (
 
 const c, h = "═╣░╠═", "cdb9b0cccd"
 
-var samp, _ = E437(c)
-
 func TestHexDecode(t *testing.T) {
+	samp, err := E437(c)
+	if err != nil {
+		t.Errorf("HexDecode() E437() error = %v", err)
+	}
 	type args struct {
 		hexadecimal string
 	}
@@ -36,6 +38,10 @@ func TestHexDecode(t *testing.T) {
 }
 
 func TestHexEncode(t *testing.T) {
+	samp, err := E437(c)
+	if err != nil {
+		t.Errorf("HexDecode() E437() error = %v", err)
+	}
 	type args struct {
 		text string
 	}

@@ -6,8 +6,8 @@ import (
 )
 
 var (
-	nyd      = time.Date(2020, 1, 1, 12, 0, 0, 0, time.UTC)
-	midnight = time.Date(2020, 1, 1, 24, 0, 0, 0, time.UTC)
+	nyd      = time.Date(2020, 1, 1, 12, 0, 0, 0, time.UTC) //nolint:gochecknoglobals
+	midnight = time.Date(2020, 1, 1, 24, 0, 0, 0, time.UTC) //nolint:gochecknoglobals
 )
 
 func TestDate(t *testing.T) {

@@ -258,7 +258,7 @@ func Marshal(filename string, f Format, i, length int) error {
 	if m, err = d.marshal(f); err != nil {
 		return err
 	}
-	print(f, m...)
+	printf(f, m...)
 	return nil
 }
 
@@ -324,11 +324,11 @@ func Stdin(format string, b ...byte) error {
 	if m, e = d.marshal(f); e != nil {
 		return e
 	}
-	print(f, m...)
+	printf(f, m...)
 	return nil
 }
 
-func print(f Format, b ...byte) {
+func printf(f Format, b ...byte) {
 	switch f {
 	case ColorText, PlainText:
 		fmt.Printf("%s", b)
