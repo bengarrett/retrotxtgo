@@ -197,17 +197,8 @@ func (d *data) typeInfo() TypeInfos {
 	case none:
 		return ti // golangci-lint deadcode placeholder
 	case character:
-		switch Character(ft) {
-		case ascii, ansi, ansiMation, pcBoard, avatar, tundraDraw:
-			ti.Info1.Info = chrw
-			ti.Info2.Info = nol
-		case ripScript:
-			ti.Info1.Info = pxw
-			ti.Info2.Info = "character screen height"
-			ti.Info3.Info = "number of colors"
-		case html, source:
-			return ti
-		}
+		ti.character(ft)
+		return ti
 	case bitmap:
 		switch Bitmap(ft) {
 		case gif, pcx, lbm, tga, fli, flc, bmp, gl, dl, wpg, png, jpg, mpg, avi:
@@ -221,13 +212,8 @@ func (d *data) typeInfo() TypeInfos {
 			return ti
 		}
 	case audio:
-		switch Audio(ft) {
-		case smp8, smp8s, smp16, smp16s:
-			ti.Info1.Info = "sample rate"
-		case mod, composer669, stm, s3m, mtm, far, ult, amf, dmf, okt, rol, cmf, midi,
-			sadt, voc, wave, patch8, patch16, xm, hsc, it:
-			return ti
-		}
+		ti.audio(ft)
+		return ti
 	case binaryText:
 		return ti
 	case xBin:
@@ -242,4 +228,28 @@ func (d *data) typeInfo() TypeInfos {
 		return ti
 	}
 	return ti
+}
+
+func (ti *TypeInfos) character(ft uint8) {
+	switch Character(ft) {
+	case ascii, ansi, ansiMation, pcBoard, avatar, tundraDraw:
+		ti.Info1.Info = chrw
+		ti.Info2.Info = nol
+	case ripScript:
+		ti.Info1.Info = pxw
+		ti.Info2.Info = "character screen height"
+		ti.Info3.Info = "number of colors"
+	case html, source:
+		return
+	}
+}
+
+func (ti *TypeInfos) audio(ft uint8) {
+	switch Audio(ft) {
+	case smp8, smp8s, smp16, smp16s:
+		ti.Info1.Info = "sample rate"
+	case mod, composer669, stm, s3m, mtm, far, ult, amf, dmf, okt, rol, cmf, midi,
+		sadt, voc, wave, patch8, patch16, xm, hsc, it:
+		return
+	}
 }

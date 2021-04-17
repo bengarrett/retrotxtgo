@@ -188,26 +188,9 @@ func createFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 			}
 			conv.Source.E = f.From
 		}
-		var src []byte
-		// internal, packed example file
-		if ok := pack.Valid(arg); ok {
-			var p pack.Pack
-			p, err = f.Open(&conv, arg)
-			if err != nil {
-				logs.Println("pack", arg, err)
-				continue
-			}
-			src = create.Normalize(p.Src, p.Runes...)
-			if !ff.Changed {
-				// only apply the pack font when the --font-family flag is unused
-				html.FontFamily.Value = p.Font.String()
-			}
-		}
-		// read file
-		if src == nil {
-			if src, err = filesystem.Read(arg); err != nil {
-				logs.Fatal("file is invalid", arg, err)
-			}
+		src, cont := internalExample(f, &conv, arg, ff.Changed)
+		if cont {
+			continue
 		}
 		// fetch any appended sauce data
 		// note: this does not work with the sauce package because f.Open() returns runes.
@@ -242,6 +225,31 @@ func createFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 			html.Create(&b)
 		}
 	}
+}
+
+func internalExample(f pack.Flags, conv *convert.Convert, arg string, changed bool) (src []byte, cont bool) {
+	var err error
+	// internal, packed example file
+	if ok := pack.Valid(arg); ok {
+		var p pack.Pack
+		p, err = f.Open(conv, arg)
+		if err != nil {
+			logs.Println("pack", arg, err)
+			return nil, true
+		}
+		src = create.Normalize(p.Src, p.Runes...)
+		if changed {
+			// only apply the pack font when the --font-family flag is unused
+			html.FontFamily.Value = p.Font.String()
+		}
+	}
+	// read file
+	if src == nil {
+		if src, err = filesystem.Read(arg); err != nil {
+			logs.Fatal("file is invalid", arg, err)
+		}
+	}
+	return src, false
 }
 
 func createPipe(cmd *cobra.Command) {

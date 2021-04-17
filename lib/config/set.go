@@ -175,6 +175,21 @@ func updatePrompt(u update) {
 	switch u.name {
 	case "editor":
 		promptEditor(u)
+	case "save-directory":
+		promptSaveDir(u)
+	case "serve":
+		promptServe(u)
+	case "style.html":
+		promptStyleHTML(u)
+	case "style.info":
+		promptStyleInfo(u)
+	default:
+		metaPrompts(u)
+	}
+}
+
+func metaPrompts(u update) {
+	switch u.name {
 	case "html.font.embed":
 		setFontEmbed(u.value.(bool), u.setup)
 	case "html.font.family":
@@ -211,14 +226,6 @@ func updatePrompt(u update) {
 		previewTitle(u.value.(string))
 		fmt.Println("Choose a new " + Tip()[u.name] + ":")
 		setString(u.name, u.setup)
-	case "save-directory":
-		promptSaveDir(u)
-	case "serve":
-		promptServe(u)
-	case "style.html":
-		promptStyleHTML(u)
-	case "style.info":
-		promptStyleInfo(u)
 	default:
 		log.Fatalln("config is not configured:", u.name)
 	}
