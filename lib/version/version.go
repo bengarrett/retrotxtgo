@@ -34,6 +34,8 @@ var (
 
 // Build and version information.
 type Build struct {
+	// Built by
+	By string
 	// Commit git SHA
 	Commit string
 	// Date in RFC3339
@@ -47,6 +49,7 @@ type Build struct {
 // Output the version data.
 type Output struct {
 	App       string `json:"version"`
+	By        string `json:"buildBy"`
 	Copyright string `json:"copyright"`
 	Date      string `json:"date"`
 	Exe       string `json:"binary"`
@@ -57,9 +60,10 @@ type Output struct {
 	URL       string `json:"url"`
 }
 
-var B = Build{
-	Commit:  "",
-	Date:    "",
+var Data = Build{ //nolint:gochecknoglobals
+	By:      "go build",
+	Commit:  "unset",
+	Date:    time.Now().Format("2006 Jan 2, 15:04 MST"),
 	Domain:  "retrotxt.com",
 	Version: "",
 }
@@ -76,8 +80,9 @@ func (o *Output) String(color bool) string {
 	fmt.Fprintf(&b, "\nGo version:\t%s\n", o.GoVer)
 	fmt.Fprintf(&b, "\nBinary:\t\t%s\n", o.Exe)
 	fmt.Fprintf(&b, "OS/Arch:\t%s\n", o.OS)
-	fmt.Fprintf(&b, "Build commit:\t%s\n", o.Git)
-	fmt.Fprintf(&b, "Build date:\t%s\n", o.Date)
+	fmt.Fprintf(&b, "\nBuild commit:\t%s\n", o.Git)
+	fmt.Fprintf(&b, "Date:\t\t%s\n", o.Date)
+	fmt.Fprintf(&b, "By:\t\t%s\n", o.By)
 	if update {
 		fmt.Fprint(&b, newRelease())
 	}
@@ -160,7 +165,7 @@ func NewRelease() (ok bool, ver string) {
 			}
 		}
 	}
-	if comp := compare(B.Version, ver); comp {
+	if comp := compare(Data.Version, ver); comp {
 		return true, ver
 	}
 	return false, ver
@@ -304,7 +309,7 @@ func compare(current, fetched string) bool {
 func copyrightYear(date string) string {
 	t, err := time.Parse(time.RFC3339, date)
 	if err != nil {
-		return date
+		return time.Now().Format("2006")
 	}
 	return t.Local().Format("2006")
 }
@@ -331,14 +336,15 @@ func localBuild(date string) string {
 
 func marshal() Output {
 	v := Output{
-		Copyright: fmt.Sprintf("Copyright © %s Ben Garrett", copyrightYear(B.Date)),
-		URL:       fmt.Sprintf("https://%s/go", B.Domain),
-		App:       Semantic(B.Version).String(),
+		Copyright: fmt.Sprintf("Copyright © %s Ben Garrett", copyrightYear(Data.Date)),
+		URL:       fmt.Sprintf("https://%s/go", Data.Domain),
+		App:       Semantic(Data.Version).String(),
 		GoVer:     semanticGo(),
 		OS:        fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
 		Exe:       binary(),
-		Date:      localBuild(B.Date),
-		Git:       B.Commit,
+		Date:      localBuild(Data.Date),
+		By:        Data.By,
+		Git:       Data.Commit,
 		License:   "LGPL-3.0 [https://www.gnu.org/licenses/lgpl-3.0.html]",
 	}
 	if a := arch(runtime.GOARCH); a != "" {

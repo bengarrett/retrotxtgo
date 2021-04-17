@@ -114,7 +114,7 @@ func (args *Args) marshalStandard(p *PageData) PageData {
 	// generate data
 	t := time.Now().UTC()
 	p.BuildDate = t.Format(time.RFC3339)
-	p.BuildVersion = version.B.Version
+	p.BuildVersion = version.Data.Version
 	return *p
 }
 

@@ -194,7 +194,7 @@ func Test_marshal_json(t *testing.T) {
 }
 
 func Test_marshal_text(t *testing.T) {
-	const want = 670
+	const want = 727
 	var d Detail
 	tmp := sampleFile()
 	err := d.read(tmp)
@@ -204,7 +204,6 @@ func Test_marshal_text(t *testing.T) {
 	}
 	b, _ := d.marshal(PlainText)
 	if got := len(b); got != want {
-		fmt.Printf("%+v\n", tmp)
 		t.Errorf("marshal() = %v, want %v", got, want)
 	}
 	filesystem.Clean(tmp)

@@ -623,9 +623,9 @@ Embed the font as base64 data in the HTML`
 }
 
 func setGenerator(value bool) {
-	name, ver := "html.meta.generator", v.Semantic(v.B.Version)
+	name, ver := "html.meta.generator", v.Semantic(v.Data.Version)
 	elm := fmt.Sprintf("<head>\n  <meta name=\"generator\" content=\"RetroTxt v%s, %s\">",
-		ver.String(), v.B.Date)
+		ver.String(), v.Data.Date)
 	fmt.Println(ColorHTML(elm))
 	p := "Enable the generator element"
 	if value {
