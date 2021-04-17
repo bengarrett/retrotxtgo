@@ -75,12 +75,12 @@ linters:
     - errcheck
     - exportloopref
     - exhaustive
-    - funlen
+    #- funlen
     - gochecknoglobals
     - gochecknoinits
     - goconst
     - gocritic
-    - gocyclo
+    #- gocyclo
     - godot
     - goerr113
     #- gofmt
@@ -88,7 +88,7 @@ linters:
     - golint
     - gomnd
     - goprintffuncname
-    - gosec
+    #- gosec
     - gosimple
     - govet
     - ineffassign

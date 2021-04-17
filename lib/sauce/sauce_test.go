@@ -395,7 +395,7 @@ func Test_record_author(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.r.author(tt.i); !reflect.DeepEqual(fmt.Sprintf("%s", got), tt.want) {
+			if got := tt.r.author(tt.i); !reflect.DeepEqual(fmt.Sprintf("%v", got), tt.want) {
 				t.Errorf("record.author() = %v, want %v", fmt.Sprintf("%q", got), tt.want)
 			}
 		})
