@@ -482,11 +482,11 @@ func Parse(data ...byte) Record {
 		return Record{}
 	}
 	return Record{
-		ID:       fmt.Sprintf("%v", d.id),
-		Version:  fmt.Sprintf("%v", d.version),
-		Title:    strings.TrimSpace(fmt.Sprintf("%v", d.title)),
-		Author:   strings.TrimSpace(fmt.Sprintf("%v", d.author)),
-		Group:    strings.TrimSpace(fmt.Sprintf("%v", d.group)),
+		ID:       d.id.String(),
+		Version:  d.version.String(),
+		Title:    strings.TrimSpace(d.title.String()),
+		Author:   strings.TrimSpace(d.author.String()),
+		Group:    strings.TrimSpace(d.group.String()),
 		Date:     d.dates(),
 		FileSize: d.sizes(),
 		Data:     d.dataType(),

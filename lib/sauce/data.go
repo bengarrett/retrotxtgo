@@ -97,7 +97,7 @@ func (d *data) dates() Dates {
 	}
 	u := t.Unix()
 	return Dates{
-		Value: fmt.Sprintf("%v", d.date),
+		Value: d.date.String(),
 		Time:  t,
 		Epoch: u,
 	}
@@ -107,7 +107,7 @@ func (d *data) dataType() DataTypes {
 	dt := DataType(unsignedBinary1(d.datatype))
 	return DataTypes{
 		Type: dt,
-		Name: fmt.Sprintf("%v", dt.String()),
+		Name: dt.String(),
 	}
 }
 

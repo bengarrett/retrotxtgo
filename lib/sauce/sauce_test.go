@@ -9,9 +9,13 @@ import (
 	"time"
 
 	"retrotxt.com/retrotxt/internal/pack"
+	"retrotxt.com/retrotxt/static"
 )
 
-const commentResult = "Any comments go here.                                           "
+const (
+	commentResult = "Any comments go here.                                           "
+	example       = "text/sauce.txt"
+)
 
 var (
 	rawData     = pack.Get("text/sauce.txt")
@@ -425,17 +429,22 @@ func Test_record_comnt(t *testing.T) {
 }
 
 func TestParse(t *testing.T) {
+	raw, err := static.Text.ReadFile(example)
+	if err != nil {
+		t.Errorf("Parse() %v error: %v", example, err)
+	}
 	tests := []struct {
 		name string
 		data []byte
 		want string
 	}{
-		{"empty", []byte{}, ""},
-		{"example", rawData, "Sauce title"},
+		{"empty", []byte(""), ""},
+		{"example", raw, "Sauce title"},
 	}
+	//"                 "
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Parse(tt.data...); !reflect.DeepEqual(got.Title, tt.want) {
+			if got := Parse(tt.data...); got.Title != tt.want {
 				t.Errorf("Parse() = %v, want %v", got.Title, tt.want)
 			}
 		})
