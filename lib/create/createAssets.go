@@ -55,7 +55,7 @@ func (args *Args) saveFavIcon(c chan error) {
 	if err != nil {
 		c <- err
 	}
-	b, err := static.Image.ReadFile("retrotxt_16.png")
+	b, err := static.Image.ReadFile("img/retrotxt_16.png")
 	if err != nil {
 		c <- fmt.Errorf("create.saveFavIcon %q: %w", args.pack, err)
 	}
