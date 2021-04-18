@@ -26,7 +26,7 @@ func Setup() {
 	watch()
 	for i, key := range keys {
 		if i == 0 {
-			fmt.Printf("\n %s\n\n", str.Cinf(enterKey()))
+			fmt.Printf("\n\n  %s\n\n", str.Cinf(str.Center(enterKey(), 80)))
 		}
 		h := fmt.Sprintf("  %d/%d. RetroTxt Setup - %s",
 			i+1, len(keys), key)

@@ -94,7 +94,7 @@ func Options(s string, shorthand bool, opts ...string) (usage string) {
 	} else {
 		keys = strings.Join(opts, ", ")
 	}
-	return fmt.Sprintf("%s\noptions: %s", s, color.Info.Sprint(keys))
+	return fmt.Sprintf("%s\n options: %s", s, color.Info.Sprint(keys))
 }
 
 // Required appends (required) to the usage string.

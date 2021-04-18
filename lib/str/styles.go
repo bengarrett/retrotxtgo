@@ -163,11 +163,11 @@ func NumberizeKeys(keys ...string) string {
 	var s = make([]string, len(keys))
 	sort.Strings(keys)
 	for i, key := range keys {
-		n, err := UnderlineChar(strconv.Itoa(i))
-		if err != nil {
-			log.Fatal(err)
+		if i == 0 {
+			s[i] = fmt.Sprintf("  Use %s for\u00a0%s", Example(strconv.Itoa(i)), key)
+			continue
 		}
-		s[i] = fmt.Sprintf("%s)\u00a0%s", n, key)
+		s[i] = fmt.Sprintf("      %s for\u00a0%s", Example(strconv.Itoa(i)), key)
 	}
 	return strings.Join(s, "\n")
 }

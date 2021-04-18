@@ -50,10 +50,10 @@ func List() (err error) {
 	fmt.Fprintln(w, strings.Repeat("-", len(title)))
 	fmt.Fprintf(w, "Alias\t\tName value\t\tHint\n")
 	for i, key := range keys {
-		fmt.Fprintf(w, "%d\t\t%s\t\t%s", i, key, Tip()[key])
+		fmt.Fprintf(w, " %d\t\t%s\t\t%s", i, key, Tip()[key])
 		switch key {
 		case "html.layout":
-			fmt.Fprintf(w, ", choices: %s (recommend: %s)",
+			fmt.Fprintf(w, ", choices: %s (suggestion: %s)",
 				str.Cp(strings.Join(create.Layouts(), ", ")), str.Cp("standard"))
 		case "serve":
 			fmt.Fprintf(w, ", choices: %s", portInfo())
@@ -131,18 +131,18 @@ func Update(name string, setup bool) {
 func updateBool(b bool, name string) {
 	switch b {
 	case true:
-		fmt.Printf("\n%s is in use\n", str.Cf(name))
+		fmt.Printf("\n  %s is in use\n", str.Cf(name))
 	default:
-		fmt.Printf("\n%s is currently not in use\n", str.Cf(name))
+		fmt.Printf("\n  %s is currently not in use\n", str.Cf(name))
 	}
 }
 
 func updateString(s, name, value string) {
 	switch s {
 	case "":
-		fmt.Printf("\n%s is currently not in use\n", str.Cf(name))
+		fmt.Printf("\n  %s is currently not in use\n", str.Cf(name))
 	default:
-		fmt.Printf("\n%s is set to %q", str.Cf(name), value)
+		fmt.Printf("\n  %s is set to %q", str.Cf(name), value)
 		// print the operating system's ability to use the existing set values
 		// does the 'editor' exist in the env path, does the save-directory exist?
 		switch name {
@@ -165,9 +165,9 @@ func updateString(s, name, value string) {
 
 func recommend(s string) string {
 	if s == "" {
-		return " (recommend: do not use)"
+		return " (suggestion: do not use)"
 	}
-	return fmt.Sprintf(" (recommend: %s)", str.Cp(s))
+	return fmt.Sprintf(" (suggestion: %s)", str.Cp(s))
 }
 
 func updatePrompt(u update) {
@@ -224,7 +224,7 @@ func metaPrompts(u update) {
 		setRetrotxt(u.value.(bool))
 	case "html.title":
 		previewTitle(u.value.(string))
-		fmt.Println("Choose a new " + Tip()[u.name] + ":")
+		fmt.Println(" Choose a new " + Tip()[u.name] + ":")
 		setString(u.name, u.setup)
 	default:
 		log.Fatalln("config is not configured:", u.name)
@@ -236,7 +236,7 @@ func promptColorScheme(u update) {
 	ccc := create.ColorScheme()
 	var prints = make([]string, len(ccc[:]))
 	copy(prints, ccc[:])
-	fmt.Println(str.UnderlineKeys(prints...) + recommend(""))
+	fmt.Println(" " + str.UnderlineKeys(prints...) + recommend(""))
 	setShortStrings(u.name, u.setup, ccc[:]...)
 }
 
@@ -247,28 +247,28 @@ func promptEditor(u update) {
 	} else if Editor() != "" {
 		fmt.Printf("instead the %s editor will be run\n\n", str.Cp(Editor()))
 	}
-	fmt.Printf("%s:\n", s)
+	fmt.Printf(" %s:\n", s)
 	setEditor(u.name, u.setup)
 }
 
 func promptLayout(u update) {
-	fmt.Println("\nChoose a " + str.Options(Tip()[u.name], true, create.Layouts()...) + " (recommend: " + str.Cp("standard") + ")")
 	fmt.Println("\n  standard: uses external CSS, JS and woff2 fonts and is the recommended layout for web servers")
 	fmt.Println("  inline:   includes both the CSS and JS as inline elements but is not recommended")
 	fmt.Println("  compact:  is the same as the standard layout but without any <meta> tags")
 	fmt.Println("  none:     no template is used, instead only the generated markup is returned")
+	fmt.Println("\n Choose a " + str.Options(Tip()[u.name], true, create.Layouts()...) + " (suggestion: " + str.Cp("standard") + ")")
 	setShortStrings(u.name, u.setup, create.Layouts()...)
 }
 
 func promptSaveDir(u update) {
-	fmt.Println("Choose a new " + Tip()[u.name] + ":")
+	fmt.Println(" Choose a new " + Tip()[u.name] + ":")
 	if home, err := os.UserHomeDir(); err == nil {
-		fmt.Printf("\nUse %s to save the home directory %s", str.Example("~"), str.Cb(home))
+		fmt.Printf("\n  Use %s to save the home directory %s", str.Example("~"), str.Cb(home))
 	}
 	if wd, err := os.Getwd(); err == nil {
-		fmt.Printf("\nUse %s to save this current directory %s", str.Example("."), str.Cb(wd))
+		fmt.Printf("\n      %s to save this current directory %s", str.Example("."), str.Cb(wd))
 	}
-	fmt.Printf("\nUse %s to disable and always use the user's current directory\n\n", str.Example("-"))
+	fmt.Printf("\n      %s to disable and always use the user's current directory\n\n", str.Example("-"))
 	setDirectory(u.name, u.setup)
 }
 
@@ -292,11 +292,11 @@ func promptServe(u update) {
 	if p > prompt.PortMax {
 		reset()
 	}
-	fmt.Printf("\n%slocalhost%s%d %s\n", "http://",
+	fmt.Printf("\n  HTTP server: %slocalhost%s%d %s\n", "http://",
 		str.Cb(":"), p, str.Bool(create.Port(p)))
-	fmt.Printf("\nPort %s is reserved, ", str.Example("0"))
-	fmt.Printf("while the ports below %s are normally restricted by the operating system and are not recommended\n", str.Example("1024"))
-	fmt.Printf("\nSet a HTTP port value, to %s\nChoices %s:\n", Tip()[u.name], portInfo())
+	fmt.Printf("\n Port %s is reserved, ", str.Example("0"))
+	fmt.Printf("while the ports below %s are normally restricted\n by the operating system and are not recommended\n", str.Example("1024"))
+	fmt.Printf("\n Set a HTTP port value, to %s\n Choices %s:\n", Tip()[u.name], portInfo())
 	setPort(u.name, u.setup)
 }
 
@@ -305,7 +305,7 @@ func promptStyleHTML(u update) {
 	if s, ok := Reset()[u.name].(string); ok {
 		d = s
 	}
-	fmt.Printf("\n%s\n\nSet a new HTML syntax style%s:\n", str.Ci(Names("css")), recommend(d))
+	fmt.Printf("\n%s\n\n Set a new HTML syntax style%s:\n", str.Ci(Names("css")), recommend(d))
 	setStrings(u.name, u.setup, styles.Names()...)
 }
 
@@ -314,7 +314,7 @@ func promptStyleInfo(u update) {
 	if s, ok := Reset()[u.name].(string); ok {
 		d = s
 	}
-	fmt.Printf("\n%s\n\nSet a new %s syntax style%s:\n", str.Ci(Names("json")), str.Example("config info"), recommend(d))
+	fmt.Printf("\n%s\n\n Set a new %s syntax style%s:\n", str.Ci(Names("json")), str.Example("config info"), recommend(d))
 	setStrings(u.name, u.setup, styles.Names()...)
 }
 
@@ -462,7 +462,7 @@ func portInfo() string {
 		rec: prompt.PortRec,
 	}
 	pm, px, pr := strconv.Itoa(int(port.min)), strconv.Itoa(int(port.max)), strconv.Itoa(int(port.rec))
-	return str.Cp(pm) + "-" + str.Cp(px) + fmt.Sprintf(" (recommend: %s)", str.Cp(pr))
+	return str.Cp(pm) + "-" + str.Cp(px) + fmt.Sprintf(" (suggestion: %s)", str.Cp(pr))
 }
 
 func previewMeta(name, value string) {
@@ -487,7 +487,7 @@ func previewMetaPrint(name, value string) {
 	fmt.Print(ColorHTML(elm))
 	h := strings.Split(Tip()[name], " ")
 	fmt.Println(str.Cf("\nAbout this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name"))
-	fmt.Printf("\n%s %s.", strings.Title(h[0]), strings.Join(h[1:], " "))
+	fmt.Printf("\n %s %s.", strings.Title(h[0]), strings.Join(h[1:], " "))
 }
 
 func previewTitle(value string) {
@@ -510,14 +510,14 @@ func previewPromptPrint(name, value string) (p string) {
 		}
 	}
 	if value != "" {
-		return fmt.Sprintf("%s, leave blank to keep as-is or use a dash [-] to remove", p)
+		return fmt.Sprintf(" %s, leave blank to keep as-is or use a dash [-] to remove", p)
 	}
-	return fmt.Sprintf("%s or leave blank to keep it unused", p)
+	return fmt.Sprintf(" %s or leave blank to keep it unused", p)
 }
 
 func recommendMeta(name, value, suggest string) {
 	previewMetaPrint(name, value)
-	fmt.Printf("\n%s \n", recommendPrompt(name, value, suggest))
+	fmt.Printf("\n%s\n", recommendPrompt(name, value, suggest))
 }
 
 func recommendPrompt(name, value, suggest string) string {
@@ -544,7 +544,7 @@ func save(name string, setup bool, value interface{}) {
 	if err := UpdateConfig("", false); err != nil {
 		logs.LogFatal(err)
 	}
-	fmt.Printf("%s %s is set to \"%v\"\n", str.Cs("✓"), str.Cs(name), value)
+	fmt.Printf(" %s %s is set to \"%v\"\n", str.Cs("✓"), str.Cs(name), value)
 	if !setup {
 		os.Exit(0)
 	}
@@ -607,8 +607,8 @@ func setFont(value string, setup bool) {
 	fmt.Fprintln(&b, "  font-display: swap;\n}")
 	fmt.Print(ColorCSS(b.String()))
 	fmt.Println(str.Cf("About font families: https://developer.mozilla.org/en-US/docs/Web/CSS/font-family") + "\n")
-	fmt.Println("Choose a font:")
-	fmt.Println(str.UnderlineKeys(create.Fonts()...) + " (recommend: " + str.Cp("automatic") + ")")
+	fmt.Println(" Choose a font:")
+	fmt.Println(" " + str.UnderlineKeys(create.Fonts()...) + " (suggestion: " + str.Cp("automatic") + ")")
 	setShortStrings("html.font.family", setup, create.Fonts()...)
 }
 
@@ -619,8 +619,7 @@ func setFontEmbed(value, setup bool) {
   src: url(data:font/woff2;base64,[a large font binary will be embedded here]...) format('woff2');
 }`
 	fmt.Println(ColorCSS(elm))
-	q := `This is not recommended, unless you need self-contained files for distribution.
-Embed the font as base64 data in the HTML`
+	q := "This is not recommended, unless you need self-contained files for distribution.\n Embed the font as base64 data in the HTML"
 	if value {
 		q = "Keep the embedded font option"
 	}

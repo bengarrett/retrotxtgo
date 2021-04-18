@@ -72,7 +72,7 @@ func YesNo(ask string, yesDefault bool) bool {
 	if !yesDefault {
 		y, n = "y", "N"
 	}
-	fmt.Printf("%s? [%s/%s] ", ask, y, n)
+	fmt.Printf(" %s? [%s/%s] ", ask, y, n)
 	input, err := promptRead(os.Stdin)
 	if err != nil {
 		logs.LogFatal(err)
