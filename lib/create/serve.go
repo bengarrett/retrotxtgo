@@ -15,7 +15,6 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
-
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/prompt"
 	"retrotxt.com/retrotxt/lib/str"
@@ -66,15 +65,16 @@ func (args *Args) Serve(b *[]byte) {
 	}
 }
 
+// override the user flag values which are not yet implemented.
 func (args *Args) override() {
 	const embed = false
 	var s = []string{}
 	if args.layout != Standard {
-		s = append(s, fmt.Sprintf("layout to %q", Standard))
+		s = append(s, fmt.Sprintf("%s HTML layout", Standard))
 		args.layout = Standard
 	}
 	if args.FontEmbed {
-		s = append(s, fmt.Sprintf("font-embed to %v", false))
+		s = append(s, "not embedding the font")
 		args.FontEmbed = embed
 	}
 	l := len(s)
@@ -82,10 +82,10 @@ func (args *Args) override() {
 		return
 	}
 	if l == 1 {
-		fmt.Println("Replaced this argument:", s[0])
+		fmt.Printf("Using the %s\n", s[0])
 		return
 	}
-	fmt.Println("Replaced these arguments:", strings.Join(s, ", "))
+	fmt.Printf("Using %s\n", strings.Join(s, " and "))
 }
 
 func (args *Args) createDir(b *[]byte) (err error) {
