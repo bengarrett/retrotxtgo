@@ -15,7 +15,6 @@ import (
 	"retrotxt.com/retrotxt/static"
 )
 
-// ErrLogo missing logo.
 var ErrLogo = errors.New("retrotxt logo is missing")
 
 // Setup walks through all the settings and saves them to the configuration file.
@@ -27,7 +26,7 @@ func Setup() {
 	watch()
 	for i, key := range keys {
 		if i == 0 {
-			fmt.Printf("\n%s\n\n", str.Cb(enterKey()))
+			fmt.Printf("\n %s\n\n", str.Cinf(enterKey()))
 		}
 		h := fmt.Sprintf("  %d/%d. RetroTxt Setup - %s",
 			i+1, len(keys), key)
