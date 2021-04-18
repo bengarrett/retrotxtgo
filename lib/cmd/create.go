@@ -22,9 +22,9 @@ import (
 )
 
 type createFlags struct {
-	controls []string
-	encode   string
-	swap     []int
+	controls []string // character encoding used by the filename
+	encode   string   // use these control codes
+	swap     []int    // swap out these characters with UTF8 alternatives
 }
 
 type metaFlag struct {
@@ -37,15 +37,17 @@ type metaFlag struct {
 	opts  []string // flag choices for display in the usage string
 }
 
+// create default values
 var createFlag = createFlags{
 	controls: []string{eof, tab},
 	encode:   "CP437",
 	swap:     []int{null, verticalBar},
 }
 
+// flags container
 var html create.Args
 
-// createCmd makes create usage examples.
+// exampleCmd returns help usage examples.
 var exampleCmd = func() string {
 	var b bytes.Buffer
 	tmpl := `  retrotxt create file.txt -t "A text file" -d "Some text goes here"
@@ -72,212 +74,143 @@ var createCmd = &cobra.Command{
 			Controls:  createFlag.controls,
 			SwapChars: createFlag.swap,
 		}
-		// handle defaults that are left empty for usage formatting
+		// handle defaults, use these control codes
 		if c := cmd.Flags().Lookup("controls"); !c.Changed {
 			f.Controls = []string{eof, tab}
 		}
+		// handle defaults, swap out these characters with UTF8 alternatives
 		if s := cmd.Flags().Lookup("swap-chars"); !s.Changed {
 			f.SwapChars = []int{null, verticalBar}
 		}
-		monitorFlags(cmd)
+		// handle the defaults for most other flags
+		stringFlags(cmd)
+		// handle standard input (stdio)
 		if filesystem.IsPipe() {
 			createPipe(cmd)
 		}
-		// hidden --body flag value that ignores args and overrides the pre value.
+		// handle the hidden --body flag value,
+		// used for debugging, it ignores most other flags and
+		// overrides the <pre></pre> content before exiting
 		if body := cmd.Flags().Lookup("body"); body.Changed {
 			createBody(cmd)
 		}
+		// print help if no flags are supplied
 		checkUse(cmd, args...)
+		// parse the flags to create the HTML
 		createFiles(cmd, f, args...)
 	},
 }
 
-func init() {
-	var err error
-	rootCmd.AddCommand(createCmd)
-	// config must be initialized before getting saved default values
-	initConfig()
-	// init flags and their usage
-	var metaCfg = metaConfig()
-	// create an ordered index for the flags
-	var keys = make([]int, len(metaCfg))
-	for i := range metaCfg {
-		keys[i] = i
+// stringFlags handles the defaults for flags that accept strings.
+// These flags are parse to three different states.
+// 1) the flag is unchanged, so use the configured viper default.
+// 2) the flag has a new value to overwrite viper default.
+// 3) a blank flag value is given to overwrite viper default with an empty/disable value.
+func stringFlags(cmd *cobra.Command) {
+	var changed = func(key string) bool {
+		l := cmd.Flags().Lookup(key)
+		if l == nil {
+			return false
+		}
+		return l.Changed
 	}
-	sort.Ints(keys)
+	html.FontFamily.Flag = changed("font-family")
+	html.Metadata.Author.Flag = changed("meta-author")
+	html.Metadata.ColorScheme.Flag = changed("meta-color-scheme")
+	html.Metadata.Description.Flag = changed("meta-description")
+	html.Metadata.Keywords.Flag = changed("meta-keywords")
+	html.Metadata.Referrer.Flag = changed("meta-referrer")
+	html.Metadata.Robots.Flag = changed("meta-robots")
+	html.Metadata.ThemeColor.Flag = changed("meta-theme-color")
+	html.Title.Flag = changed("title")
+}
+
+func init() {
+	rootCmd.AddCommand(createCmd)
+	// root config must be initialized before getting saved default values
+	initConfig()
 	// output flags
 	flagEncode(&createFlag.encode, createCmd)
 	flagControls(&createFlag.controls, createCmd)
 	flagRunes(&createFlag.swap, createCmd)
-	var sd = viper.GetString("save-directory")
-	if sd == "" {
-		sd, err = os.Getwd()
-		if err != nil {
-			fmt.Printf("current working directory error: %v\n", err)
-		}
-	}
+	dir := saveDir()
 	createCmd.Flags().BoolVarP(&html.Save.AsFiles, "save", "s", false,
-		`save HTML and static files to a the save directory
-or ignore to print (save directory: `+sd+")")
-	createCmd.Flags().BoolVarP(&html.Save.Compress, "compress", "z", false, "store and compress all files into an archive when saving")
-	createCmd.Flags().BoolVarP(&html.Save.OW, "overwrite", "o", false, "overwrite any existing files when saving")
-	// html flags, the key int value must be used as the index
-	// rather than the loop count, otherwise flags might be skipped
+		"save HTML and static files to a the save directory\nor ignore to print (save directory: "+dir+")")
+	createCmd.Flags().BoolVarP(&html.Save.Compress, "compress", "z", false,
+		"store and compress all files into an archive when saving")
+	createCmd.Flags().BoolVarP(&html.Save.OW, "overwrite", "o", false,
+		"overwrite any existing files when saving")
+	// meta and html related flags.
+	flags := initFlags()
+	keys := index(flags)
 	for _, i := range keys {
-		c := metaCfg[i]
+		c := flags[i]
 		var buf bytes.Buffer
-		switch {
-		case c.key == "html.body":
-			fmt.Fprint(&buf, "override and inject a string into the HTML body element")
-		case len(c.opts) == 0:
-			fmt.Fprint(&buf, config.Tip()[c.key])
-		default:
-			fmt.Fprint(&buf, str.Options(config.Tip()[c.key], true, c.opts...))
-		}
-		switch {
-		case c.key == "serve":
-			fmt.Fprint(&buf, "\nsupply a 0 value to use the default port, "+str.Example("-p0")+" or "+str.Example("--serve=0"))
-			createCmd.Flags().UintVarP(c.i, c.name, c.short, viper.GetUint(c.key), buf.String())
-		case c.strg != nil:
-			createCmd.Flags().StringVarP(c.strg, c.name, c.short, viper.GetString(c.key), buf.String())
-		case c.boo != nil:
-			createCmd.Flags().BoolVarP(c.boo, c.name, c.short, viper.GetBool(c.key), buf.String())
-		case c.i != nil:
-			createCmd.Flags().UintVarP(c.i, c.name, c.short, viper.GetUint(c.key), buf.String())
-		}
+		buf = c.initBody(buf)
+		buf = c.initFlags(buf)
 	}
 	createCmd.Flags().BoolVarP(&html.SauceData.Use, "sauce", "", true, "use any found SAUCE metadata as HTML meta tags")
-	if err = createCmd.Flags().MarkHidden("body"); err != nil {
+	if err := createCmd.Flags().MarkHidden("body"); err != nil {
 		logs.Fatal("create mark", "body hidden", err)
 	}
-	if err = createCmd.Flags().MarkHidden("cache"); err != nil {
+	if err := createCmd.Flags().MarkHidden("cache"); err != nil {
 		logs.Fatal("create mark", "cache hidden", err)
 	}
 	createCmd.Flags().SortFlags = false
 }
 
-func createBody(cmd *cobra.Command) {
-	// hidden --body flag that ignores all args
-	if body := cmd.Flags().Lookup("body"); body.Changed {
-		b := []byte(body.Value.String())
-		if h := htmlServe(0, cmd, &b); !h {
-			html.Create(&b)
-		}
-		os.Exit(0)
+func (c metaFlag) initBody(buf bytes.Buffer) bytes.Buffer {
+	switch {
+	case c.key == "html.body":
+		fmt.Fprint(&buf, "override and inject a string into the HTML body element")
+	case len(c.opts) == 0:
+		fmt.Fprint(&buf, config.Tip()[c.key])
+	default:
+		fmt.Fprint(&buf, str.Options(config.Tip()[c.key], true, c.opts...))
 	}
+	return buf
 }
 
-func createFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
+func (c metaFlag) initFlags(buf bytes.Buffer) bytes.Buffer {
+	switch {
+	case c.key == "serve":
+		fmt.Fprint(&buf, "\nsupply a 0 value to use the default port, "+str.Example("-p0")+" or "+str.Example("--serve=0"))
+		createCmd.Flags().UintVarP(c.i, c.name, c.short, viper.GetUint(c.key), buf.String())
+	case c.strg != nil:
+		createCmd.Flags().StringVarP(c.strg, c.name, c.short, viper.GetString(c.key), buf.String())
+	case c.boo != nil:
+		createCmd.Flags().BoolVarP(c.boo, c.name, c.short, viper.GetBool(c.key), buf.String())
+	case c.i != nil:
+		createCmd.Flags().UintVarP(c.i, c.name, c.short, viper.GetUint(c.key), buf.String())
+	}
+	return buf
+}
+
+// saveDir returns the directory the created HTML and other files will be saved to.
+func saveDir() string {
 	var err error
-	conv := convert.Convert{
-		Flags: flags,
-	}
-	f := pack.Flags{}
-	ff := cmd.Flags().Lookup("font-family")
-	if !ff.Changed {
-		html.FontFamily.Value = "vga"
-	} else if html.FontFamily.Value == "" {
-		html.FontFamily.Value = ff.Value.String()
-	}
-	for i, arg := range args {
-		conv.Output = convert.Output{} // output must be reset
-		// convert source text
-		if cp := cmd.Flags().Lookup("encode"); cp.Changed {
-			if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
-				logs.Fatal("encoding not known or supported", arg, err)
-			}
-			conv.Source.E = f.From
-		}
-		src, cont := internalExample(f, &conv, arg, ff.Changed)
-		if cont {
-			continue
-		}
-		// fetch any appended sauce data
-		// note: this does not work with the sauce package because f.Open() returns runes.
-		if html.SauceData.Use {
-			if index := sauce.Scan(src...); index > 0 {
-				s := sauce.Parse(src...)
-				html.SauceData.Title = s.Title
-				html.SauceData.Author = s.Author
-				html.SauceData.Group = s.Group
-				html.SauceData.Description = s.Desc
-				html.SauceData.Width = uint(s.Info.Info1.Value)
-				html.SauceData.Lines = uint(s.Info.Info2.Value)
-			}
-		}
-		// convert text
-		var r []rune
-		if endOfFile(conv.Flags) {
-			r, err = conv.Text(&src)
-		} else {
-			r, err = conv.Dump(&src)
-		}
+	s := viper.GetString("save-directory")
+	if s == "" {
+		s, err = os.Getwd()
 		if err != nil {
-			logs.Println("convert text", arg, err)
-			continue
-		}
-		b := []byte(string(r))
-		// marshal source text as html
-		html.Source.Name = arg
-		html.Source.Encoding = conv.Source.E // used by retrotxt meta
-		// serve or print html
-		if h := htmlServe(i, cmd, &b); !h {
-			html.Create(&b)
+			fmt.Printf("current working directory error: %v\n", err)
 		}
 	}
+	return s
 }
 
-func internalExample(f pack.Flags, conv *convert.Convert, arg string, changed bool) (src []byte, cont bool) {
-	var err error
-	// internal, packed example file
-	if ok := pack.Valid(arg); ok {
-		var p pack.Pack
-		p, err = f.Open(conv, arg)
-		if err != nil {
-			logs.Println("pack", arg, err)
-			return nil, true
-		}
-		src = create.Normalize(p.Src, p.Runes...)
-		if changed {
-			// only apply the pack font when the --font-family flag is unused
-			html.FontFamily.Value = p.Font.String()
-		}
+// index creates an ordered index of the meta flags.
+func index(cfg map[int]metaFlag) []int {
+	k := make([]int, len(cfg))
+	for i := range cfg {
+		k[i] = i
 	}
-	// read file
-	if src == nil {
-		if src, err = filesystem.Read(arg); err != nil {
-			logs.Fatal("file is invalid", arg, err)
-		}
-	}
-	return src, false
+	sort.Ints(k)
+	return k
 }
 
-func createPipe(cmd *cobra.Command) {
-	b, err := filesystem.ReadPipe()
-	if err != nil {
-		logs.Fatal("create", "read stdin", err)
-	}
-	if h := htmlServe(0, cmd, &b); !h {
-		html.Create(&b)
-	}
-	os.Exit(0)
-}
-
-func htmlServe(i int, cmd *cobra.Command, b *[]byte) bool {
-	if i != 0 {
-		return false
-		// only ever serve the first file given to the args.
-		// in the future, when handling multiple files a dynamic
-		// index.html could be generated with links to each of the htmls.
-	}
-	if serve := cmd.Flags().Lookup("serve"); serve.Changed {
-		html.Serve(b)
-		return true
-	}
-	return false
-}
-
-func metaConfig() map[int]metaFlag {
+// initFlags initializes the create command flags and their help.
+func initFlags() map[int]metaFlag {
 	const (
 		serve = iota
 		layout
@@ -298,7 +231,6 @@ func metaConfig() map[int]metaFlag {
 		body
 		cache
 	)
-	// init flags and their usage
 	return map[int]metaFlag{
 		// output
 		serve: {"serve", nil, nil, &html.Port, "serve", "p", nil},
@@ -325,25 +257,136 @@ func metaConfig() map[int]metaFlag {
 	}
 }
 
-func monitorFlags(cmd *cobra.Command) {
-	var changed = func(key string) bool {
-		l := cmd.Flags().Lookup(key)
-		if l == nil {
-			return false
+// createBody is a hidden function used for debugging.
+// It takes the supplied text and uses it as the content of the generated HTML <pre></pre> elements.
+func createBody(cmd *cobra.Command) {
+	// hidden --body flag ignores most other args
+	if body := cmd.Flags().Lookup("body"); body.Changed {
+		b := []byte(body.Value.String())
+		if h := serveBytes(0, cmd, &b); !h {
+			html.Create(&b)
 		}
-		return l.Changed
+		os.Exit(0)
 	}
-	// monitor string flag changes to allow three user states.
-	// 1) flag not changed so use viper default.
-	// 2) flag with new value to overwrite viper default.
-	// 3) blank flag value to overwrite viper default with an empty/disable value.
-	html.FontFamily.Flag = changed("font-family")
-	html.Metadata.Author.Flag = changed("meta-author")
-	html.Metadata.ColorScheme.Flag = changed("meta-color-scheme")
-	html.Metadata.Description.Flag = changed("meta-description")
-	html.Metadata.Keywords.Flag = changed("meta-keywords")
-	html.Metadata.Referrer.Flag = changed("meta-referrer")
-	html.Metadata.Robots.Flag = changed("meta-robots")
-	html.Metadata.ThemeColor.Flag = changed("meta-theme-color")
-	html.Title.Flag = changed("title")
+}
+
+// createFiles parses the flags to create the HTML document or website.
+// The generated HTML and associated files will either be served, saved or printed.
+func createFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
+	var err error
+	conv := convert.Convert{
+		Flags: flags,
+	}
+	f, ff := pack.Flags{}, cmd.Flags().Lookup("font-family")
+	if !ff.Changed {
+		html.FontFamily.Value = "vga"
+	}
+	if html.FontFamily.Value == "" {
+		html.FontFamily.Value = ff.Value.String()
+	}
+	for i, arg := range args {
+		// output must be reset
+		conv.Output = convert.Output{}
+		// encode and convert the source text
+		if cp := cmd.Flags().Lookup("encode"); cp.Changed {
+			if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
+				logs.Fatal("encoding not known or supported", arg, err)
+			}
+			conv.Source.E = f.From
+		}
+		src, cont := staticTextfile(f, &conv, arg, ff.Changed)
+		if cont {
+			continue
+		}
+		// obtain any appended SAUCE metadata
+		appendSAUCE(src)
+		// convert the source text into web friendly UTF8
+		var r []rune
+		if endOfFile(conv.Flags) {
+			r, err = conv.Text(&src)
+		} else {
+			r, err = conv.Dump(&src)
+		}
+		if err != nil {
+			logs.Println("convert text", arg, err)
+			continue
+		}
+		b := []byte(string(r))
+		// marshal source text as HTML
+		html.Source.Name = arg
+		html.Source.Encoding = conv.Source.E // used by retrotxt meta
+		// serve the HTML?
+		if h := serveBytes(i, cmd, &b); !h {
+			html.Create(&b)
+		}
+	}
+}
+
+// appendSAUCE parses any embedded SAUCE metadata.
+func appendSAUCE(src []byte) {
+	if html.SauceData.Use {
+		if index := sauce.Scan(src...); index > 0 {
+			s := sauce.Parse(src...)
+			html.SauceData.Title = s.Title
+			html.SauceData.Author = s.Author
+			html.SauceData.Group = s.Group
+			html.SauceData.Description = s.Desc
+			html.SauceData.Width = uint(s.Info.Info1.Value)
+			html.SauceData.Lines = uint(s.Info.Info2.Value)
+		}
+	}
+}
+
+// staticTextfile fetches a static text file from `/static/text`
+// and uses it as the input source text.
+func staticTextfile(f pack.Flags, conv *convert.Convert, arg string, changed bool) (src []byte, cont bool) {
+	var err error
+	// internal, packed example file
+	if ok := pack.Valid(arg); ok {
+		var p pack.Pack
+		p, err = f.Open(conv, arg)
+		if err != nil {
+			logs.Println("pack", arg, err)
+			return nil, true
+		}
+		src = create.Normalize(p.Src, p.Runes...)
+		if changed {
+			// only apply the pack font when the --font-family flag is unused
+			html.FontFamily.Value = p.Font.String()
+		}
+	}
+	// read file
+	if src == nil {
+		if src, err = filesystem.Read(arg); err != nil {
+			logs.Fatal("file is invalid", arg, err)
+		}
+	}
+	return src, false
+}
+
+// createPipe creates HTML content using the standard input (stdio) of the operating system.
+func createPipe(cmd *cobra.Command) {
+	b, err := filesystem.ReadPipe()
+	if err != nil {
+		logs.Fatal("create", "read stdin", err)
+	}
+	if h := serveBytes(0, cmd, &b); !h {
+		html.Create(&b)
+	}
+	os.Exit(0)
+}
+
+// serveBytes hosts the HTML using an internal HTTP server.
+func serveBytes(i int, cmd *cobra.Command, b *[]byte) bool {
+	if i != 0 {
+		return false
+		// only ever serve the first file given to the args.
+		// in the future, when handling multiple files a dynamic
+		// index.html could be generated with links to each of the htmls.
+	}
+	if serve := cmd.Flags().Lookup("serve"); serve.Changed {
+		html.Serve(b)
+		return true
+	}
+	return false
 }
