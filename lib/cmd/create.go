@@ -146,7 +146,7 @@ func init() {
 	for _, i := range keys {
 		c := flags[i]
 		var buf bytes.Buffer
-		buf = c.initBody(buf)
+		buf = c.initBodyFlag(buf)
 		buf = c.initFlags(buf)
 	}
 	createCmd.Flags().BoolVarP(&html.SauceData.Use, "sauce", "", true, "use any found SAUCE metadata as HTML meta tags")
@@ -159,7 +159,7 @@ func init() {
 	createCmd.Flags().SortFlags = false
 }
 
-func (c metaFlag) initBody(buf bytes.Buffer) bytes.Buffer {
+func (c metaFlag) initBodyFlag(buf bytes.Buffer) bytes.Buffer {
 	switch {
 	case c.key == "html.body":
 		fmt.Fprint(&buf, "override and inject a string into the HTML body element")
