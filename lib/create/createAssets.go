@@ -185,11 +185,13 @@ func (args *Args) saveHTML(b *[]byte, c chan error) {
 
 func bytesStats(name string, nn int) {
 	const kB = 1000
+	if nn == 0 {
+		color.OpFuzzy.Printf("saved to %s (zero-byte file)\n", name)
+		return
+	}
 	h := humanize.Decimal(int64(nn), language.AmericanEnglish)
 	color.OpFuzzy.Printf("saved to %s", name)
 	switch {
-	case nn == 0:
-		color.OpFuzzy.Printf("saved to %s (zero-byte file)", name)
 	case nn < kB:
 		color.OpFuzzy.Printf(", %s", h)
 	default:
