@@ -86,18 +86,18 @@ var createCmd = &cobra.Command{
 		stringFlags(cmd)
 		// handle standard input (stdio)
 		if filesystem.IsPipe() {
-			createPipe(cmd)
+			parsePipe(cmd, f)
 		}
 		// handle the hidden --body flag value,
 		// used for debugging, it ignores most other flags and
 		// overrides the <pre></pre> content before exiting
 		if body := cmd.Flags().Lookup("body"); body.Changed {
-			createBody(cmd)
+			parseBody(cmd)
 		}
 		// print help if no flags are supplied
 		checkUse(cmd, args...)
 		// parse the flags to create the HTML
-		createFiles(cmd, f, args...)
+		parseFiles(cmd, f, args...)
 	},
 }
 
@@ -123,6 +123,13 @@ func stringFlags(cmd *cobra.Command) {
 	html.Metadata.Robots.Flag = changed("meta-robots")
 	html.Metadata.ThemeColor.Flag = changed("meta-theme-color")
 	html.Title.Flag = changed("title")
+	ff := cmd.Flags().Lookup("font-family")
+	if !ff.Changed {
+		html.FontFamily.Value = "vga"
+	}
+	if html.FontFamily.Value == "" {
+		html.FontFamily.Value = ff.Value.String()
+	}
 }
 
 func init() {
@@ -257,9 +264,9 @@ func initFlags() map[int]metaFlag {
 	}
 }
 
-// createBody is a hidden function used for debugging.
+// parseBody is a hidden function used for debugging.
 // It takes the supplied text and uses it as the content of the generated HTML <pre></pre> elements.
-func createBody(cmd *cobra.Command) {
+func parseBody(cmd *cobra.Command) {
 	// hidden --body flag ignores most other args
 	if body := cmd.Flags().Lookup("body"); body.Changed {
 		b := []byte(body.Value.String())
@@ -270,56 +277,70 @@ func createBody(cmd *cobra.Command) {
 	}
 }
 
-// createFiles parses the flags to create the HTML document or website.
+// parseFiles parses the flags to create the HTML document or website.
 // The generated HTML and associated files will either be served, saved or printed.
-func createFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
-	var err error
+func parseFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 	conv := convert.Convert{
 		Flags: flags,
 	}
 	f, ff := pack.Flags{}, cmd.Flags().Lookup("font-family")
-	if !ff.Changed {
-		html.FontFamily.Value = "vga"
-	}
-	if html.FontFamily.Value == "" {
-		html.FontFamily.Value = ff.Value.String()
-	}
 	for i, arg := range args {
-		// output must be reset
-		conv.Output = convert.Output{}
-		// encode and convert the source text
-		if cp := cmd.Flags().Lookup("encode"); cp.Changed {
-			if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
-				logs.Fatal("encoding not known or supported", arg, err)
-			}
-			conv.Source.E = f.From
-		}
 		src, cont := staticTextfile(f, &conv, arg, ff.Changed)
 		if cont {
 			continue
 		}
-		// obtain any appended SAUCE metadata
-		appendSAUCE(src)
-		// convert the source text into web friendly UTF8
-		var r []rune
-		if endOfFile(conv.Flags) {
-			r, err = conv.Text(&src)
-		} else {
-			r, err = conv.Dump(&src)
-		}
-		if err != nil {
-			logs.Println("convert text", arg, err)
+		b := createHTML(cmd, flags, src)
+		if b == nil {
 			continue
 		}
-		b := []byte(string(r))
-		// marshal source text as HTML
-		html.Source.Name = arg
-		html.Source.Encoding = conv.Source.E // used by retrotxt meta
-		// serve the HTML?
+		// serve the HTML over HTTP?
 		if h := serveBytes(i, cmd, &b); !h {
 			html.Create(&b)
 		}
 	}
+}
+
+// parsePipe creates HTML content using the standard input (stdio) of the operating system.
+func parsePipe(cmd *cobra.Command, flags convert.Flags) {
+	src, err := filesystem.ReadPipe()
+	if err != nil {
+		logs.Fatal("create", "read stdin", err)
+	}
+	b := createHTML(cmd, flags, src)
+	if h := serveBytes(0, cmd, &b); !h {
+		html.Create(&b)
+	}
+	os.Exit(0)
+}
+
+func createHTML(cmd *cobra.Command, flags convert.Flags, src []byte) (b []byte) {
+	var err error
+	conv := convert.Convert{
+		Flags: flags,
+	}
+	f := pack.Flags{}
+	conv.Output = convert.Output{}
+	// encode and convert the source text
+	if cp := cmd.Flags().Lookup("encode"); cp.Changed {
+		if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
+			logs.Fatal("encoding not known or supported", "createHTML", err)
+		}
+		conv.Source.E = f.From
+	}
+	// obtain any appended SAUCE metadata
+	appendSAUCE(src)
+	// convert the source text into web friendly UTF8
+	var r []rune
+	if endOfFile(conv.Flags) {
+		r, err = conv.Text(&src)
+	} else {
+		r, err = conv.Dump(&src)
+	}
+	if err != nil {
+		logs.Println("convert text", "createHTML", err)
+		return nil
+	}
+	return []byte(string(r))
 }
 
 // appendSAUCE parses any embedded SAUCE metadata.
@@ -362,18 +383,6 @@ func staticTextfile(f pack.Flags, conv *convert.Convert, arg string, changed boo
 		}
 	}
 	return src, false
-}
-
-// createPipe creates HTML content using the standard input (stdio) of the operating system.
-func createPipe(cmd *cobra.Command) {
-	b, err := filesystem.ReadPipe()
-	if err != nil {
-		logs.Fatal("create", "read stdin", err)
-	}
-	if h := serveBytes(0, cmd, &b); !h {
-		html.Create(&b)
-	}
-	os.Exit(0)
 }
 
 // serveBytes hosts the HTML using an internal HTTP server.
