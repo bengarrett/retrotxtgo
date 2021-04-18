@@ -165,6 +165,7 @@ func ReadPipe() (b []byte, err error) {
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		b = append(b, scanner.Bytes()...)
+		b = append(b, []byte("\n")...)
 	}
 	if err = scanner.Err(); err != nil {
 		return b, fmt.Errorf("read pipe could not scan stdin: %w", err)
