@@ -37,14 +37,14 @@ type metaFlag struct {
 	opts  []string // flag choices for display in the usage string
 }
 
-// create default values
+// create default values.
 var createFlag = createFlags{
 	controls: []string{eof, tab},
 	encode:   "CP437",
 	swap:     []int{null, verticalBar},
 }
 
-// flags container
+// flags container.
 var html create.Args
 
 // exampleCmd returns help usage examples.
@@ -166,7 +166,7 @@ func init() {
 	createCmd.Flags().SortFlags = false
 }
 
-func (c metaFlag) initBodyFlag(buf bytes.Buffer) bytes.Buffer {
+func (c *metaFlag) initBodyFlag(buf bytes.Buffer) bytes.Buffer {
 	switch {
 	case c.key == "html.body":
 		fmt.Fprint(&buf, "override and inject a string into the HTML body element")
@@ -178,7 +178,7 @@ func (c metaFlag) initBodyFlag(buf bytes.Buffer) bytes.Buffer {
 	return buf
 }
 
-func (c metaFlag) initFlags(buf bytes.Buffer) bytes.Buffer {
+func (c *metaFlag) initFlags(buf bytes.Buffer) bytes.Buffer {
 	switch {
 	case c.key == "serve":
 		fmt.Fprint(&buf, "\nsupply a 0 value to use the default port, "+str.Example("-p0")+" or "+str.Example("--serve=0"))
@@ -289,7 +289,7 @@ func parseFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 		if cont {
 			continue
 		}
-		b := createHTML(cmd, flags, src)
+		b := createHTML(cmd, flags, &src)
 		if b == nil {
 			continue
 		}
@@ -306,14 +306,15 @@ func parsePipe(cmd *cobra.Command, flags convert.Flags) {
 	if err != nil {
 		logs.Fatal("create", "read stdin", err)
 	}
-	b := createHTML(cmd, flags, src)
+	b := createHTML(cmd, flags, &src)
 	if h := serveBytes(0, cmd, &b); !h {
 		html.Create(&b)
 	}
 	os.Exit(0)
 }
 
-func createHTML(cmd *cobra.Command, flags convert.Flags, src []byte) (b []byte) {
+// createHTML applies a HTML template to src text.
+func createHTML(cmd *cobra.Command, flags convert.Flags, src *[]byte) []byte {
 	var err error
 	conv := convert.Convert{
 		Flags: flags,
@@ -332,9 +333,9 @@ func createHTML(cmd *cobra.Command, flags convert.Flags, src []byte) (b []byte) 
 	// convert the source text into web friendly UTF8
 	var r []rune
 	if endOfFile(conv.Flags) {
-		r, err = conv.Text(&src)
+		r, err = conv.Text(src)
 	} else {
-		r, err = conv.Dump(&src)
+		r, err = conv.Dump(src)
 	}
 	if err != nil {
 		logs.Println("convert text", "createHTML", err)
@@ -344,10 +345,10 @@ func createHTML(cmd *cobra.Command, flags convert.Flags, src []byte) (b []byte) 
 }
 
 // appendSAUCE parses any embedded SAUCE metadata.
-func appendSAUCE(src []byte) {
+func appendSAUCE(src *[]byte) {
 	if html.SauceData.Use {
-		if index := sauce.Scan(src...); index > 0 {
-			s := sauce.Parse(src...)
+		if index := sauce.Scan(*src...); index > 0 {
+			s := sauce.Parse(*src...)
 			html.SauceData.Title = s.Title
 			html.SauceData.Author = s.Author
 			html.SauceData.Group = s.Group
