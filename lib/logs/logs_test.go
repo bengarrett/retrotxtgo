@@ -11,9 +11,19 @@ import (
 )
 
 var (
-	ErrC      = errors.New("c")
-	ErrRandom = errors.New("some problem")
+	ErrC       = errors.New("c")
+	ErrRandom  = errors.New("some problem")
+	ErrLogTest = errors.New("log test")
 )
+
+func ExampleLog() {
+	t := fmt.Sprintf("%s", ErrLogTest)
+	Log(ErrLogTest)
+	last, _ := LastEntry()
+	i := len(last) - len(t) - 1
+	fmt.Print(last[i:])
+	// Output:log test
+}
 
 func TestErr_String(t *testing.T) {
 	color.Disable()

@@ -43,7 +43,7 @@ func TestFlags_Open(t *testing.T) {
 				From: tt.fields.From,
 				To:   tt.fields.To,
 			}
-			gotS, err := f.Open(tt.args.conv, tt.args.name)
+			gotS, err := f.Open(tt.args.name, tt.args.conv)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Flags.Open() error = %v, wantErr %v", err, tt.wantErr)
 				return

@@ -113,13 +113,9 @@ const (
 )
 
 var (
-	// ErrFmt format error.
-	ErrFmt = errors.New("format is not known")
-	// ErrNoName name cannot be empty.
+	ErrFmt    = errors.New("format is not known")
 	ErrNoName = errors.New("name cannot be empty")
-	// ErrNoDir directories not usable with command.
-	ErrNoDir = errors.New("directories are not usable with this command")
-	// ErrNoFile file does not exist.
+	ErrNoDir  = errors.New("directories are not usable with this command")
 	ErrNoFile = errors.New("file does not exist")
 )
 
@@ -184,7 +180,7 @@ func lang() language.Tag {
 	return language.English
 }
 
-// output converts the --format argument value to a format type.
+// Output converts the --format argument value to a format type.
 func output(argument string) (f Format, err error) {
 	switch argument {
 	case "color", "c", "":
@@ -330,6 +326,8 @@ func Stdin(format string, b ...byte) error {
 	return nil
 }
 
+// Printf prints the bytes as text and
+// appends a newline to JSON and XML text.
 func printf(f Format, b ...byte) {
 	switch f {
 	case ColorText, PlainText:

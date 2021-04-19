@@ -18,6 +18,8 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
+const width = 67
+
 var (
 	// ErrUTF16 UTF-16 unsupported.
 	ErrUTF16 = errors.New("utf-16 table encodings are not supported")
@@ -50,8 +52,8 @@ func Table(name string) (*bytes.Buffer, error) {
 	h += charmapStandard(cp)
 	var buf bytes.Buffer
 	w := new(tabwriter.Writer).Init(&buf, 0, 8, 0, '\t', 0)
-	fmt.Fprintln(w, " "+color.OpFuzzy.Sprint(strings.Repeat("\u2015", 67)))
-	fmt.Fprintln(w, color.Primary.Sprint(str.Center(h, 67)))
+	fmt.Fprintln(w, " "+color.OpFuzzy.Sprint(strings.Repeat("\u2015", width)))
+	fmt.Fprintln(w, color.Primary.Sprint(str.Center(width, h)))
 	const start, end, max = 0, 15, 255
 	for i := 0; i < 16; i++ {
 		switch {

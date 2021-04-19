@@ -80,7 +80,7 @@ var viewCmd = &cobra.Command{
 			// internal example file
 			if ok := sample.Valid(arg); ok {
 				var p sample.File
-				if p, err = f.Open(&conv, arg); err != nil {
+				if p, err = f.Open(arg, &conv); err != nil {
 					logs.Println("sample", arg, err)
 					continue
 				}

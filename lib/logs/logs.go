@@ -2,6 +2,7 @@
 package logs
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"log"
@@ -14,7 +15,6 @@ import (
 )
 
 const (
-	// default error log.
 	filename = "errors.log"
 	// posix permissions for the configuration file and directory.
 	filemode os.FileMode = 0600
@@ -23,7 +23,6 @@ const (
 	Panic = false
 )
 
-// ErrNil cannot be nil.
 var ErrNil = errors.New("error value cannot be nil")
 
 // Log saves the error and continues the program.
@@ -67,7 +66,27 @@ func Path() string {
 	return fp
 }
 
-// save an error to the log directory, an optional named file is available for unit tests.
+// LastEntry returns the last log entry in the error log file.
+func LastEntry() (entry string, err error) {
+	name := Path()
+	file, err := os.Open(name)
+	if err != nil {
+		return "", fmt.Errorf("read tail could not open file: %q: %w", name, err)
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	scanner.Split(bufio.ScanLines)
+	for scanner.Scan() {
+		entry = scanner.Text()
+	}
+	if err = scanner.Err(); err != nil {
+		return "", fmt.Errorf("read tail could scan file bytes: %q: %w", name, err)
+	}
+	return entry, file.Close()
+}
+
+// Save an error to the log directory.
+// An optional named file is available for unit tests.
 func save(err error, name string) error {
 	if err == nil || fmt.Sprintf("%v", err) == "" {
 		return fmt.Errorf("logs save: %w", ErrNil)

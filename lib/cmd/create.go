@@ -366,7 +366,7 @@ func staticTextfile(f sample.Flags, conv *convert.Convert, arg string, changed b
 	// internal, packed example file
 	if ok := sample.Valid(arg); ok {
 		var p sample.File
-		p, err = f.Open(conv, arg)
+		p, err = f.Open(arg, conv)
 		if err != nil {
 			logs.Println("sample", arg, err)
 			return nil, true

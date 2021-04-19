@@ -40,6 +40,7 @@ const (
 	nel        = 133
 )
 
+// Ctrls counts the number of ANSI escape controls in the file.
 func (d *Detail) ctrls(filename string) (err error) {
 	f, err := os.Open(filename)
 	if err != nil {
@@ -54,6 +55,7 @@ func (d *Detail) ctrls(filename string) (err error) {
 	return f.Close()
 }
 
+// Lines counts the number of lines in the file.
 func (d *Detail) lines(filename string) (err error) {
 	f, err := os.Open(filename)
 	if err != nil {
@@ -68,6 +70,7 @@ func (d *Detail) lines(filename string) (err error) {
 	return f.Close()
 }
 
+// Marshal the detail to a format.
 func (d *Detail) marshal(f Format) (b []byte, err error) {
 	switch f {
 	case ColorText:
@@ -95,6 +98,7 @@ func (d *Detail) marshal(f Format) (b []byte, err error) {
 	return b, nil
 }
 
+// MimeUnknown detects non-Standard legacy data.
 func (d *Detail) mimeUnknown() {
 	if d.Mime.Commt == "unknown" {
 		if d.Count.Controls > 0 {
@@ -115,6 +119,7 @@ func (d *Detail) mimeUnknown() {
 	}
 }
 
+// Parse the file and the raw data content.
 func (d *Detail) parse(name string, stat os.FileInfo, data ...byte) (err error) {
 	const routines = 8
 	var wg sync.WaitGroup
@@ -180,6 +185,7 @@ func (d *Detail) parse(name string, stat os.FileInfo, data ...byte) (err error) 
 	return err
 }
 
+// Input parses simple statistical data on the file.
 func (d *Detail) input(data int, stat fs.FileInfo) {
 	var standardInput os.FileInfo = nil
 	isFile := (stat != standardInput)
@@ -204,6 +210,7 @@ func (d *Detail) input(data int, stat fs.FileInfo) {
 	d.Modified.Epoch = time.Now().Unix()
 }
 
+// PrintMarshal returns the marshaled detail data as plain or color text.
 func (d *Detail) printMarshal(color bool) []byte {
 	gookit.Enable = color
 	var (
@@ -257,6 +264,7 @@ func (d *Detail) printMarshal(color bool) []byte {
 	return buf.Bytes()
 }
 
+// MarshalDataValid validates the key and value data.
 func (d *Detail) marshalDataValid(k, v string) bool {
 	if !d.validText() {
 		switch k {
@@ -286,6 +294,7 @@ func (d *Detail) marshalDataValid(k, v string) bool {
 	return true
 }
 
+// Linebreaks determines the new lines characters found in the rune pair.
 func (d *Detail) linebreaks(r [2]rune) {
 	a, e := "", ""
 	switch r {
@@ -310,6 +319,7 @@ func (d *Detail) linebreaks(r [2]rune) {
 	d.LineBreak.Escape = e
 }
 
+// PrintMarshalData returns the data structure used for print marshaling.
 func (d *Detail) printMarshalData() (data []struct{ k, v string }) {
 	const (
 		noBreakSpace     = "\u00a0"
@@ -364,6 +374,7 @@ func (d *Detail) printMarshalData() (data []struct{ k, v string }) {
 	return data
 }
 
+// Read and parse a named file and the file content.
 func (d *Detail) read(name string) (err error) {
 	// Get the file details
 	stat, err := os.Stat(name)
@@ -378,7 +389,7 @@ func (d *Detail) read(name string) (err error) {
 	return d.parse(name, stat, data...)
 }
 
-// validText checks the MIME content-type value for valid text files.
+// ValidText checks the MIME content-type value for valid text files.
 func (d *Detail) validText() bool {
 	s := strings.Split(d.Mime.Type, "/")
 	const req = 2
@@ -394,6 +405,7 @@ func (d *Detail) validText() bool {
 	return false
 }
 
+// Width counts the number of characters used per line in the file.
 func (d *Detail) width(filename string) (err error) {
 	f, err := os.Open(filename)
 	if err != nil {
@@ -410,6 +422,7 @@ func (d *Detail) width(filename string) (err error) {
 	return f.Close()
 }
 
+// Words counts the number of words used in the file.
 func (d *Detail) words(filename string) (err error) {
 	f, err := os.Open(filename)
 	if err != nil {

@@ -8,28 +8,17 @@ import (
 )
 
 var (
-	// ErrCmd choose a cmd.
-	ErrCmd = errors.New("choose a command from the list available")
-	// ErrNewCmd choose another cmd.
-	ErrNewCmd = errors.New("choose another command from the available commands")
-	// ErrNoCmd invalid cmd.
-	ErrNoCmd = errors.New("invalid command")
-	// ErrEmpty empty value.
-	ErrEmpty = errors.New("value is empty")
-	// ErrFlag unknown flag.
-	ErrFlag = errors.New("use a flag from the list of flags")
-	// ErrSyntax flag syntax.
-	ErrSyntax = errors.New("flags can only be in -s (short) or --long (long) form")
-	// ErrNoFlag value cannot be empty.
-	ErrNoFlag = errors.New("cannot be empty and requires a value")
-	// ErrReqFlag cmd requires a flag.
+	ErrCmd     = errors.New("choose a command from the list available")
+	ErrNewCmd  = errors.New("choose another command from the available commands")
+	ErrNoCmd   = errors.New("invalid command")
+	ErrEmpty   = errors.New("value is empty")
+	ErrFlag    = errors.New("use a flag from the list of flags")
+	ErrSyntax  = errors.New("flags can only be in -s (short) or --long (long) form")
+	ErrNoFlag  = errors.New("cannot be empty and requires a value")
 	ErrReqFlag = errors.New("you must include this flag in your command")
-	// ErrSlice invalid option.
-	ErrSlice = errors.New("invalid option choice")
-	// ErrShort too few words.
-	ErrShort = errors.New("word count is too short, less than 3")
-	// ErrVal value is invalid.
-	ErrVal = errors.New("value is not a valid choice")
+	ErrSlice   = errors.New("invalid option choice")
+	ErrShort   = errors.New("word count is too short, less than 3")
+	ErrVal     = errors.New("value is not a valid choice")
 )
 
 // Cmd is a command error type to handle command arguments and flags.
@@ -59,14 +48,13 @@ func FlagFatal(name, value string, args ...string) {
 	os.Exit(1)
 }
 
+//
 func (c Cmd) error() Generic {
-	var (
-		s     = strings.Split(fmt.Sprintf("%s", c.Err), " ")
-		l     = len(s)
-		quote = func(s string) string {
-			return fmt.Sprintf("%q", s)
-		}
-	)
+	s := strings.Split(fmt.Sprintf("%s", c.Err), " ")
+	l := len(s)
+	quote := func(s string) string {
+		return fmt.Sprintf("%q", s)
+	}
 	const min = 3
 	if l < min {
 		LogFatal(fmt.Errorf("cmd error args: %w", ErrShort))

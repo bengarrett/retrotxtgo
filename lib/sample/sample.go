@@ -117,7 +117,7 @@ func Map() map[string]Sample {
 }
 
 // Open a sample textfile.
-func (f Flags) Open(conv *convert.Convert, name string) (s File, err error) {
+func (f Flags) Open(name string, conv *convert.Convert) (s File, err error) {
 	name = strings.ToLower(name)
 	if _, err = os.Stat(name); !os.IsNotExist(err) {
 		return s, nil

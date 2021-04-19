@@ -122,7 +122,7 @@ func TestCenter(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Center(tt.args.text, tt.args.width); got != tt.want {
+			if got := Center(tt.args.width, tt.args.text); got != tt.want {
 				t.Errorf("Center() = %q, want %q", got, tt.want)
 			}
 		})

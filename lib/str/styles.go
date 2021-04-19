@@ -100,7 +100,7 @@ func Border(text string) *bytes.Buffer {
 }
 
 // Center align text to the width.
-func Center(text string, width int) string {
+func Center(width int, text string) string {
 	const split = 2
 	w := (width - len(text)) / split
 	if w > 0 {
