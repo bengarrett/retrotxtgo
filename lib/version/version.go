@@ -1,4 +1,4 @@
-// Package version and build information.
+// Package version is the release and build information.
 package version
 
 import (
