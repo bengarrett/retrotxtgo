@@ -20,14 +20,15 @@ func ExampleZip() {
 	// Create a temporary 1 byte file in the temporary directory
 	tmpFile, err := SaveTemp(path.Join(tmpZip, "temp.zip"), []byte("x")...)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return
 	}
 	defer os.Remove(tmpFile)
 
 	// Initialize the Zip archive file
-	path := tempFile("exampleZip.zip")
+	name := tempFile("exampleZip.zip")
 	zip := Zip{
-		Name:      path,
+		Name:      name,
 		Root:      tmpZip,
 		Comment:   "",
 		Overwrite: true,
@@ -35,14 +36,16 @@ func ExampleZip() {
 	}
 
 	// Create the Zip archive file
-	if err := zip.Create(); err != nil {
-		log.Fatal(err)
+	if err = zip.Create(); err != nil {
+		log.Print(err)
+		return
 	}
 
 	// Check the Zip archive exists
-	s, err := os.Stat(path)
+	s, err := os.Stat(name)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return
 	}
 	fmt.Printf("%s, %d", s.Name(), s.Size())
 	// Output: exampleZip.zip, 149
@@ -62,7 +65,8 @@ func ExampleUniqueName() {
 	// so not to conflict with the previously saved file
 	u, err := UniqueName(tmpFile)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return
 	}
 
 	// In Linux the new name will be retrotxtgo_uniquetest_1.txt

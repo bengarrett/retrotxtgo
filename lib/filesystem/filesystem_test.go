@@ -21,12 +21,14 @@ func ExampleTar() {
 		log.Fatal(err)
 	}
 	defer os.Remove(tmpFile)
-	if err := Tar(tmpTar, tmpFile); err != nil {
-		log.Fatal(err)
+	if err = Tar(tmpTar, tmpFile); err != nil {
+		log.Print(err)
+		return
 	}
 	f, err := os.Stat(tmpFile)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return
 	}
 	fmt.Printf("%s, %d", f.Name(), f.Size())
 	// Output:tar_test.tar, 1536

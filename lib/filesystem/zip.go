@@ -74,7 +74,7 @@ func (z *Zip) Create() error {
 }
 
 // Zip packages and compresses files to an archive using the provided name.
-func (files *Files) Zip(name, comment string, ow bool, quiet bool) error {
+func (files *Files) Zip(name, comment string, ow, quiet bool) error {
 	const (
 		overwrite    = os.O_RDWR | os.O_CREATE
 		mustNotExist = os.O_RDWR | os.O_CREATE | os.O_EXCL

@@ -323,7 +323,7 @@ func WordsEBCDIC(r io.Reader) (count int, err error) {
 	return Words(c)
 }
 
-// isWord scans the content of a word for characters that are not digits,
+// IsWord scans the content of a word for characters that are not digits,
 // letters or punctuation and if discovered returns false.
 // If a space or line break is encountered the scan will end.
 func word(s string) bool {

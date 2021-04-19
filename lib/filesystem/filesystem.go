@@ -88,8 +88,8 @@ func DirExpansion(name string) (dir string) {
 }
 
 // WinDir appends Windows style syntax to the directory.
-func winDir(i int, p, os, dir string) (s string, cont bool) {
-	if os == "windows" {
+func winDir(i int, p, platform, dir string) (s string, cont bool) {
+	if platform == "windows" {
 		if len(p) == 2 && p[1:] == ":" {
 			dir = strings.ToUpper(p) + "\\"
 			return dir, true
@@ -229,9 +229,10 @@ func lineBreak(platform lineBreaks) string {
 		return fmt.Sprintf("%x", CarriageReturn)
 	case amiga, linux, unix:
 		return fmt.Sprintf("%x", Linefeed)
-	default: // use operating system default
+	case nl: // use operating system default
 		return "\n"
 	}
+	return "\n"
 }
 
 // TempFile returns a path to the named file
