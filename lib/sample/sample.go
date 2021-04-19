@@ -58,8 +58,9 @@ const (
 )
 
 var (
-	ErrName    = errors.New("sample name is invalid")
 	ErrConvert = errors.New("unknown convert method")
+	ErrConvNil = errors.New("conv argument cannot be empty")
+	ErrName    = errors.New("sample name is invalid")
 )
 
 // Map the samples.
@@ -123,11 +124,14 @@ func (f Flags) Open(conv *convert.Convert, name string) (s File, err error) {
 	}
 	samp, exist := Map()[name]
 	if !exist {
-		return s, nil
+		return s, ErrName
 	}
 	b, err := static.File.ReadFile(samp.Name)
 	if err != nil {
 		return s, fmt.Errorf("view package %q: %w", samp.Name, ErrName)
+	}
+	if conv == nil {
+		return s, ErrConvNil
 	}
 	s.Encoding = samp.encoding
 	s.Font = samp.Font
@@ -189,6 +193,10 @@ func Valid(name string) bool {
 
 // PrintT encodes and prints the bytes as a string.
 func printT(e encoding.Encoding, b ...byte) {
+	if e == nil {
+		fmt.Println(string(b))
+		return
+	}
 	b, err := encode(e, b...)
 	if err != nil {
 		logs.Println("using the original encoding and not", fmt.Sprint(e), err)
