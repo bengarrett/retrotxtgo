@@ -20,10 +20,9 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
-// ErrPort port failed.
 var ErrPort = errors.New("tried and failed to serve using these ports")
 
-// Port checks the TCP port is available on the local machine.
+// Port checks if the TCP port is available on the local machine.
 func Port(port uint) bool {
 	var d net.Dialer
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -36,7 +35,7 @@ func Port(port uint) bool {
 	return false
 }
 
-// Serve data over an internal HTTP server.
+// Serve data over the internal HTTP server.
 func (args *Args) Serve(b *[]byte) {
 	args.override()
 	port := args.Port
@@ -65,7 +64,7 @@ func (args *Args) Serve(b *[]byte) {
 	}
 }
 
-// override the user flag values which are not yet implemented.
+// Override the user flag values which are not yet implemented.
 func (args *Args) override() {
 	const embed = false
 	var s = []string{}
@@ -88,6 +87,7 @@ func (args *Args) override() {
 	fmt.Printf("Using %s\n", strings.Join(s, " and "))
 }
 
+// CreateDir creates a temporary save directory destination.
 func (args *Args) createDir(b *[]byte) (err error) {
 	args.Save.AsFiles, args.Save.OW = true, true
 	args.Save.Destination, err = ioutil.TempDir(os.TempDir(), "*-serve")
@@ -98,7 +98,7 @@ func (args *Args) createDir(b *[]byte) (err error) {
 	return nil
 }
 
-// serveDir creates and serves b over an internal HTTP server.
+// ServeDir hosts the named souce directory on the internal HTTP server.
 func (args *Args) serveDir() (err error) {
 	http.Handle("/", http.FileServer(http.Dir(args.Save.Destination)))
 	const timeout, localHost = 15, "127.0.0.1"
@@ -117,7 +117,7 @@ func (args *Args) serveDir() (err error) {
 	return nil
 }
 
-// watch intercepts Ctrl-C exit key combination.
+// Watch intercepts Ctrl-C keypress combinations and exits to the operating system.
 func (args *Args) watch() {
 	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)

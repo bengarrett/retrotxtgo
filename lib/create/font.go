@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"html/template"
+	"strings"
 
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/japanese"
@@ -43,12 +44,12 @@ func AutoFont(e encoding.Encoding) Font {
 
 // Family returns the named font.
 func Family(name string) Font {
-	switch name {
-	case "automatic", "a":
+	switch strings.ToLower(name) {
+	case Automatic.String(), "a":
 		return Automatic
-	case "mona", "m":
+	case Mona.String(), "m":
 		return Mona
-	case "vga", "v":
+	case VGA.String(), "v":
 		return VGA
 	default:
 		return Automatic
@@ -112,6 +113,8 @@ main pre {
 	return out.Bytes(), nil
 }
 
+// FontBase64 encodes a font using the Base64 binary-to-text encoding scheme,
+// for embedding into HTML or CSS textfiles.
 func fontBase64(f Font) (string, error) {
 	name := fmt.Sprintf("font/%s", f.File())
 	b, err := static.Font.ReadFile(name)

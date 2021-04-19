@@ -22,7 +22,7 @@ const (
 	nameFav  = "favicon.ico"
 )
 
-// saveCSS creates and saves the styles stylesheet to the Destination argument.
+// saveCSS creates and save the Retrotxt styles CSS file.
 func (args *Args) saveCSS(c chan error) {
 	switch args.layout {
 	case Standard:
@@ -45,6 +45,7 @@ func (args *Args) saveCSS(c chan error) {
 	c <- nil
 }
 
+// saveFavIcon read and save the Retrotxt favorite icon to a file.
 func (args *Args) saveFavIcon(c chan error) {
 	switch args.layout {
 	case Standard:
@@ -67,7 +68,7 @@ func (args *Args) saveFavIcon(c chan error) {
 	c <- nil
 }
 
-// saveFont unpacks and saves the font binary to the Destination argument.
+// saveFont read and save the font to a file.
 func (args *Args) saveFont(c chan error) {
 	if !args.FontEmbed {
 		f := Family(args.FontFamily.Value)
@@ -89,6 +90,7 @@ func (args *Args) saveFont(c chan error) {
 	c <- nil
 }
 
+// saveFont creates and save the font styles CSS file.
 func (args *Args) saveFontCSS(name string) error {
 	name, err := args.destination(name)
 	if err != nil {
@@ -110,6 +112,7 @@ func (args *Args) saveFontCSS(name string) error {
 	return nil
 }
 
+// saveFontWoff2 read and save the WOFF2 font binary to a file.
 func (args *Args) saveFontWoff2(name, packName string) error {
 	name, err := args.destination(name)
 	if err != nil {
@@ -127,6 +130,7 @@ func (args *Args) saveFontWoff2(name, packName string) error {
 	return nil
 }
 
+// saveJS creates and save the JS file.
 func (args *Args) saveJS(c chan error) {
 	switch args.layout {
 	case Standard:
@@ -150,7 +154,7 @@ func (args *Args) saveJS(c chan error) {
 	c <- nil
 }
 
-// SaveHTML creates and saves the html template to the Destination argument.
+// SaveHTML creates and save the HTML file.
 func (args *Args) saveHTML(b *[]byte, c chan error) {
 	name, err := args.destination(nameHTML)
 	if err != nil {
@@ -183,6 +187,7 @@ func (args *Args) saveHTML(b *[]byte, c chan error) {
 	c <- nil
 }
 
+// BytesStats humanizes, colorizes and prints the filename and size.
 func bytesStats(name string, nn int) {
 	const kB = 1000
 	if nn == 0 {
@@ -200,6 +205,7 @@ func bytesStats(name string, nn int) {
 	fmt.Print("\n")
 }
 
+// Destination validate and returns the path of the named file.
 func (args *Args) destination(name string) (string, error) {
 	dir := filesystem.DirExpansion(args.Save.Destination)
 	path := dir

@@ -63,7 +63,7 @@ type Args struct {
 	pack      string // template package name
 }
 
-// Meta data embedded into the webpage.
+// Meta data to embed into the HTML.
 type Meta struct {
 	Author struct {
 		Flag  bool
@@ -160,24 +160,15 @@ const (
 )
 
 var (
-	// ErrName unknown font.
-	ErrName = errors.New("font name is not known")
-	// ErrPack font not found.
-	ErrPack = errors.New("font pack is not found")
-	// ErrEmptyName filename is empty.
+	ErrName      = errors.New("font name is not known")
+	ErrPack      = errors.New("font pack is not found")
 	ErrEmptyName = errors.New("filename is empty")
-	// ErrReqOW require overwrite flag.
-	ErrReqOW = errors.New("include an -o flag to overwrite")
-	// ErrUnknownFF unknown font family.
+	ErrReqOW     = errors.New("include an -o flag to overwrite")
 	ErrUnknownFF = errors.New("unknown font family")
-	// ErrNilByte nil byte value.
-	ErrNilByte = errors.New("cannot convert a nil byte value")
-	// ErrTmplDir temp file is a dir.
-	ErrTmplDir = errors.New("the path to the template file is a directory")
-	// ErrNoLayout layout missing.
-	ErrNoLayout = errors.New("layout template does not exist")
-	// ErrLayout unknown layout.
-	ErrLayout = errors.New("unknown layout template")
+	ErrNilByte   = errors.New("cannot convert a nil byte value")
+	ErrTmplDir   = errors.New("the path to the template file is a directory")
+	ErrNoLayout  = errors.New("layout template does not exist")
+	ErrLayout    = errors.New("unknown layout template")
 )
 
 // ColorScheme values for the content attribute of <meta name="color-scheme">.
@@ -266,6 +257,7 @@ func (args *Args) saveAssets(b *[]byte) {
 	}
 }
 
+// ZipAssets compresses all assets into a single zip archive.
 func (args *Args) zipAssets(b *[]byte) {
 	var err error
 
@@ -301,7 +293,7 @@ func (args *Args) zipAssets(b *[]byte) {
 	}
 }
 
-// Stdout creates and prints the html template.
+// Stdout creates and prints the HTML template.
 func (args *Args) Stdout(b *[]byte) error {
 	// html
 	buf, err := args.marshalTextTransform(b)
@@ -367,7 +359,7 @@ func (args *Args) Stdout(b *[]byte) error {
 	return nil
 }
 
-// Normalize runes to bytes by making adjustments to text control codes.
+// Normalize runes into bytes by making adjustments to text control codes.
 func Normalize(e encoding.Encoding, r ...rune) (b []byte) {
 	s := ""
 	switch e {
@@ -383,7 +375,7 @@ func Normalize(e encoding.Encoding, r ...rune) (b []byte) {
 	return []byte(s)
 }
 
-// destination determines if user supplied arguments are a valid file or directory destination.
+// Destination determines if user supplied arguments are a valid file or directory destination.
 func destination(args ...string) (path string, err error) {
 	if len(args) == 0 {
 		return path, nil
@@ -402,6 +394,7 @@ func destination(args ...string) (path string, err error) {
 	return strings.Join(part, string(os.PathSeparator)), nil
 }
 
+// Dirs parses and expand special directory characters.
 func dirs(dir string) (path string, err error) {
 	const (
 		homeDir    = "~"
@@ -421,6 +414,7 @@ func dirs(dir string) (path string, err error) {
 	return "", nil
 }
 
+// Layout parses possible --layout argument values.
 func layout(name string) (Layout, error) {
 	switch name {
 	case standard, "s":
@@ -435,7 +429,7 @@ func layout(name string) (Layout, error) {
 	return 0, ErrLayout
 }
 
-// replace EBCDIC newline with linefeed.
+// Replace EBCDIC newlines with Unicode linefeeds.
 func replaceNELs() runes.Transformer {
 	return runes.Map(func(r rune) rune {
 		if r == filesystem.NextLine {
