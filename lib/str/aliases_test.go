@@ -1,5 +1,5 @@
 // Package str for strings and styles.
-// nolint:gocritic
+// nolint:gocritic,gochecknoinits
 package str
 
 import (

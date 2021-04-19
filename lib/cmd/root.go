@@ -16,7 +16,7 @@ import (
 	"retrotxt.com/retrotxt/lib/config"
 	"retrotxt.com/retrotxt/lib/convert"
 	"retrotxt.com/retrotxt/lib/logs"
-	"retrotxt.com/retrotxt/lib/pack"
+	"retrotxt.com/retrotxt/lib/sample"
 	"retrotxt.com/retrotxt/lib/str"
 )
 
@@ -157,7 +157,7 @@ func flagWidth(p *int, cc *cobra.Command) {
 }
 
 func examples() *bytes.Buffer {
-	m := pack.Map()
+	m := sample.Map()
 	keys := make([]string, 0, len(m))
 	for k := range m {
 		keys = append(keys, k)

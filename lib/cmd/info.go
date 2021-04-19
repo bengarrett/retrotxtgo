@@ -13,7 +13,7 @@ import (
 	"retrotxt.com/retrotxt/lib/filesystem"
 	"retrotxt.com/retrotxt/lib/info"
 	"retrotxt.com/retrotxt/lib/logs"
-	"retrotxt.com/retrotxt/lib/pack"
+	"retrotxt.com/retrotxt/lib/sample"
 	"retrotxt.com/retrotxt/lib/str"
 	"retrotxt.com/retrotxt/static"
 )
@@ -77,7 +77,7 @@ func infoPackage(name string) (filename string, err error) {
 	if _, err = os.Stat(s); !os.IsNotExist(err) {
 		return "", nil
 	}
-	pkg, exist := pack.Map()[s]
+	pkg, exist := sample.Map()[s]
 	if !exist {
 		return "", nil
 	}

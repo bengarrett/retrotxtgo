@@ -6,13 +6,12 @@ import (
 	"os"
 	"strings"
 
+	"github.com/spf13/cobra"
 	"retrotxt.com/retrotxt/lib/convert"
 	"retrotxt.com/retrotxt/lib/filesystem"
 	"retrotxt.com/retrotxt/lib/logs"
-	"retrotxt.com/retrotxt/lib/pack"
+	"retrotxt.com/retrotxt/lib/sample"
 	"retrotxt.com/retrotxt/lib/str"
-
-	"github.com/spf13/cobra"
 )
 
 type viewFlags struct {
@@ -47,7 +46,7 @@ var viewCmd = &cobra.Command{
 			SwapChars: viewFlag.swap,
 			Width:     viewFlag.width,
 		}
-		f := pack.Flags{}
+		f := sample.Flags{}
 		// handle defaults that are left empty for usage formatting
 		if c := cmd.Flags().Lookup("controls"); !c.Changed {
 			conv.Flags.Controls = []string{eof, tab}
@@ -78,11 +77,11 @@ var viewCmd = &cobra.Command{
 				}
 				conv.Source.E = f.From
 			}
-			// internal, packed example file
-			if ok := pack.Valid(arg); ok {
-				var p pack.Pack
+			// internal example file
+			if ok := sample.Valid(arg); ok {
+				var p sample.File
 				if p, err = f.Open(&conv, arg); err != nil {
-					logs.Println("pack", arg, err)
+					logs.Println("sample", arg, err)
 					continue
 				}
 				// --to flag is currently ignored

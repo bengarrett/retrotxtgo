@@ -16,7 +16,7 @@ import (
 	"retrotxt.com/retrotxt/lib/create"
 	"retrotxt.com/retrotxt/lib/filesystem"
 	"retrotxt.com/retrotxt/lib/logs"
-	"retrotxt.com/retrotxt/lib/pack"
+	"retrotxt.com/retrotxt/lib/sample"
 	"retrotxt.com/retrotxt/lib/sauce"
 	"retrotxt.com/retrotxt/lib/str"
 )
@@ -283,7 +283,7 @@ func parseFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 	conv := convert.Convert{
 		Flags: flags,
 	}
-	f, ff := pack.Flags{}, cmd.Flags().Lookup("font-family")
+	f, ff := sample.Flags{}, cmd.Flags().Lookup("font-family")
 	for i, arg := range args {
 		src, cont := staticTextfile(f, &conv, arg, ff.Changed)
 		if cont {
@@ -319,7 +319,7 @@ func createHTML(cmd *cobra.Command, flags convert.Flags, src *[]byte) []byte {
 	conv := convert.Convert{
 		Flags: flags,
 	}
-	f := pack.Flags{}
+	f := sample.Flags{}
 	conv.Output = convert.Output{}
 	// encode and convert the source text
 	if cp := cmd.Flags().Lookup("encode"); cp.Changed {
@@ -361,19 +361,19 @@ func appendSAUCE(src *[]byte) {
 
 // staticTextfile fetches a static text file from `/static/text`
 // and uses it as the input source text.
-func staticTextfile(f pack.Flags, conv *convert.Convert, arg string, changed bool) (src []byte, cont bool) {
+func staticTextfile(f sample.Flags, conv *convert.Convert, arg string, changed bool) (src []byte, cont bool) {
 	var err error
 	// internal, packed example file
-	if ok := pack.Valid(arg); ok {
-		var p pack.Pack
+	if ok := sample.Valid(arg); ok {
+		var p sample.File
 		p, err = f.Open(conv, arg)
 		if err != nil {
-			logs.Println("pack", arg, err)
+			logs.Println("sample", arg, err)
 			return nil, true
 		}
-		src = create.Normalize(p.Src, p.Runes...)
+		src = create.Normalize(p.Encoding, p.Runes...)
 		if changed {
-			// only apply the pack font when the --font-family flag is unused
+			// only apply the sample font when the --font-family flag is unused
 			html.FontFamily.Value = p.Font.String()
 		}
 	}

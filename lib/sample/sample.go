@@ -1,5 +1,5 @@
-// Package pack ...
-package pack
+// Package sample opens and encodes the example textfiles embedded into the program.
+package sample
 
 import (
 	"errors"
@@ -13,6 +13,7 @@ import (
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/encoding/unicode/utf32"
 	"retrotxt.com/retrotxt/lib/convert"
+	"retrotxt.com/retrotxt/lib/create"
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/static"
 )
@@ -23,61 +24,46 @@ type Flags struct {
 	To   encoding.Encoding
 }
 
-// Pack item details.
-type Pack struct {
-	Src   encoding.Encoding
-	Font  Font
-	Runes []rune
+// File details.
+type File struct {
+	Encoding encoding.Encoding
+	Font     create.Font
+	Runes    []rune
 }
 
-// Packs for items.
-type Packs struct {
-	// convert method
+// Sample textfile data.
+type Sample struct {
+	// Convert text method.
 	convert output
-	// font choice
-	Font Font
-	// default character encoding for the packed data
+	// Font used the render the text.
+	Font create.Font
+	// Encoding used by the textfile.
 	encoding encoding.Encoding
-	// package name used in internal/pack/blob.go
+	// Name of the sample textfile.
 	Name string
-	// package description
+	// Description of the sample textfile.
 	Description string
 }
 
-type (
-	// Font to use with pack item.
-	Font   uint
-	output uint
-)
-
-func (f Font) String() string {
-	return [...]string{
-		"", "vga", "mono",
-	}[f]
-}
+type output uint
 
 const (
+	Mona = create.Mona
+	VGA  = create.VGA
+
 	ansi output = iota // Only use with ANSI text.
 	char               // Ignore and print the common text controls as characters.
 	text               // Obey common text controls.
 	dump               // Obey common text controls except end-of-file.
 )
 
-const (
-	_    Font = iota
-	VGA       // VGA 8px font.
-	Mona      // Mona font for shift-jis.
-)
-
 var (
-	// ErrPackGet invalid pack name.
-	ErrPackGet = errors.New("pack.get name is invalid")
-	// ErrPackValue unknown pack value.
-	ErrPackValue = errors.New("unknown package convert value")
+	ErrName    = errors.New("sample name is invalid")
+	ErrConvert = errors.New("unknown convert method")
 )
 
-// Map the pack items.
-func Map() map[string]Packs {
+// Map the samples.
+func Map() map[string]Sample {
 	var (
 		cp037  = charmap.CodePage037
 		cp437  = charmap.CodePage437
@@ -95,7 +81,7 @@ func Map() map[string]Packs {
 		u32be  = utf32.UTF32(utf32.BigEndian, utf32.UseBOM)
 		u32le  = utf32.UTF32(utf32.LittleEndian, utf32.UseBOM)
 	)
-	m := map[string]Packs{
+	m := map[string]Sample{
 		"037":           {text, VGA, cp037, "text/cp037.txt", "EBCDIC 037 IBM mainframe test"},
 		"437.cr":        {dump, VGA, cp437, "text/cp437-cr.txt", "CP-437 all characters test using CR (carriage return)"},
 		"437.crlf":      {dump, VGA, cp437, "text/cp437-crlf.txt", "CP-437 all characters test using Windows line breaks"},
@@ -129,33 +115,33 @@ func Map() map[string]Packs {
 	return m
 }
 
-// Open an internal packed example file.
-func (f Flags) Open(conv *convert.Convert, name string) (p Pack, err error) {
+// Open a sample textfile.
+func (f Flags) Open(conv *convert.Convert, name string) (s File, err error) {
 	name = strings.ToLower(name)
 	if _, err = os.Stat(name); !os.IsNotExist(err) {
-		return p, nil
+		return s, nil
 	}
-	pkg, exist := Map()[name]
+	samp, exist := Map()[name]
 	if !exist {
-		return p, nil
+		return s, nil
 	}
-	b, err := static.File.ReadFile(pkg.Name)
+	b, err := static.File.ReadFile(samp.Name)
 	if err != nil {
-		return p, fmt.Errorf("view package %q: %w", pkg.Name, ErrPackGet)
+		return s, fmt.Errorf("view package %q: %w", samp.Name, ErrName)
 	}
-	p.Src = pkg.encoding
-	p.Font = pkg.Font
+	s.Encoding = samp.encoding
+	s.Font = samp.Font
 	if f.From == nil {
-		conv.Source.E = p.Src
+		conv.Source.E = s.Encoding
 	}
 	if f.To != nil {
-		// pack items that break the NewEncoder
+		// sample items that break the NewEncoder
 		switch name {
 		case "037", "shiftjis", "utf16.be", "utf16.le":
-			return p, nil
+			return s, nil
 		}
-		transform(f.From, b...)
-		return p, nil
+		printT(f.From, b...)
+		return s, nil
 	}
 	// default overrides
 	switch name {
@@ -165,35 +151,35 @@ func (f Flags) Open(conv *convert.Convert, name string) (p Pack, err error) {
 			conv.Flags.Controls = nil
 		}
 	}
-	// convert to runes and print
-	return pkg.convPrint(&b, conv)
+	return samp.transform(&b, conv)
 }
 
-func (pkg Packs) convPrint(b *[]byte, conv *convert.Convert) (p Pack, err error) {
-	switch pkg.convert {
+// Transform converts the raw byte data of the textfile into UTF8 runes.
+func (samp Sample) transform(b *[]byte, conv *convert.Convert) (s File, err error) {
+	switch samp.convert {
 	case ansi:
-		if p.Runes, err = conv.ANSI(b); err != nil {
-			return p, err
+		if s.Runes, err = conv.ANSI(b); err != nil {
+			return s, err
 		}
 	case char:
-		if p.Runes, err = conv.Chars(b); err != nil {
-			return p, err
+		if s.Runes, err = conv.Chars(b); err != nil {
+			return s, err
 		}
 	case dump:
-		if p.Runes, err = conv.Dump(b); err != nil {
-			return p, err
+		if s.Runes, err = conv.Dump(b); err != nil {
+			return s, err
 		}
 	case text:
-		if p.Runes, err = conv.Text(b); err != nil {
-			return p, err
+		if s.Runes, err = conv.Text(b); err != nil {
+			return s, err
 		}
 	default:
-		return p, fmt.Errorf("view package %q: %w", pkg.convert, ErrPackValue)
+		return s, fmt.Errorf("transform sample %q: %w", samp.convert, ErrConvert)
 	}
-	return p, nil
+	return s, nil
 }
 
-// Valid package name?
+// Valid textfile name.
 func Valid(name string) bool {
 	if _, exist := Map()[name]; !exist {
 		return false
@@ -201,7 +187,8 @@ func Valid(name string) bool {
 	return true
 }
 
-func transform(e encoding.Encoding, b ...byte) {
+// PrintT encodes and prints the bytes as a string.
+func printT(e encoding.Encoding, b ...byte) {
 	b, err := encode(e, b...)
 	if err != nil {
 		logs.Println("using the original encoding and not", fmt.Sprint(e), err)
@@ -210,12 +197,12 @@ func transform(e encoding.Encoding, b ...byte) {
 }
 
 func encode(e encoding.Encoding, b ...byte) ([]byte, error) {
-	newer, err := e.NewEncoder().Bytes(b)
+	nb, err := e.NewEncoder().Bytes(b)
 	if err != nil {
-		if len(newer) == 0 {
+		if len(nb) == 0 {
 			return b, fmt.Errorf("encoder could not convert bytes to %s: %w", e, err)
 		}
-		return newer, nil
+		return nb, nil
 	}
-	return newer, nil
+	return nb, nil
 }
