@@ -12,6 +12,8 @@ import (
 	"testing"
 )
 
+const windows = "windows"
+
 func ExampleTar() {
 	tmpTar := tempFile("tar_test.tar")
 	tmpFile, err := SaveTemp(tmpTar, []byte("x")...)
@@ -187,7 +189,7 @@ func Test_DirExpansion(t *testing.T) {
 	s := string(os.PathSeparator)
 
 	var tests dirTests
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == windows {
 		tests = windowsTests(h, hp, s, w, wp)
 	} else {
 		tests = nixTests(h, hp, s, w, wp)
@@ -441,7 +443,7 @@ func Test_winDir(t *testing.T) {
 		wantCont bool
 	}{
 		{"home", args{1, "", "linux", "/home/retro"}, "/home/retro", false},
-		{"c drive", args{0, "c:", "windows", ""}, "C:\\", true},
+		{"c drive", args{0, "c:", windows, ""}, "C:\\", true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
