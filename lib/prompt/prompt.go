@@ -3,6 +3,7 @@ package prompt
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -16,6 +17,8 @@ import (
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/str"
 )
+
+var ErrNoReader = errors.New("reader interface is empty")
 
 type keys []string
 
@@ -80,6 +83,7 @@ func YesNo(ask string, yesDefault bool) bool {
 	return parseYN(input, yesDefault)
 }
 
+// Check used in scanner Scans to prompt a user for a valid text input.
 func check(prompts int) {
 	const info, max = 2, 4
 	switch {
@@ -93,6 +97,7 @@ func check(prompts int) {
 	}
 }
 
+// PPort asks for and validates HTTP ports.
 func pport(r io.Reader, validate, setup bool) (port uint) {
 	const reset uint = 0
 	input, prompts := "", 0
@@ -127,8 +132,9 @@ func pport(r io.Reader, validate, setup bool) (port uint) {
 	return reset
 }
 
-func promptRead(stdin io.Reader) (input string, err error) {
-	reader := bufio.NewReader(stdin)
+// PromptRead parses a line of text from the reader.
+func promptRead(r io.Reader) (input string, err error) {
+	reader := bufio.NewReader(r)
 	input, err = reader.ReadString('\n')
 	input = strings.TrimSpace(input)
 	if err != nil && err != io.EOF {
@@ -137,6 +143,7 @@ func promptRead(stdin io.Reader) (input string, err error) {
 	return input, nil
 }
 
+// ParseYN parses the input to boolean value.
 func parseYN(input string, yesDefault bool) bool {
 	switch input {
 	case "":
@@ -149,7 +156,11 @@ func parseYN(input string, yesDefault bool) bool {
 	return false
 }
 
+// PString parses the reader input for any os exit commands.
 func pstring(r io.Reader, setup bool) (words string) {
+	if r == nil {
+		logs.Fatal("prompt string scanner", "stdin", ErrNoReader)
+	}
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		words = scanner.Text()
@@ -171,7 +182,7 @@ func pstring(r io.Reader, setup bool) (words string) {
 	return words
 }
 
-// numeric checks input string for a valid int value and returns a matching slice.
+// Numeric checks input string for a valid int value and returns a matching slice.
 func (k keys) numeric(input string) (key string) {
 	if input == "" {
 		return key
@@ -187,6 +198,7 @@ func (k keys) numeric(input string) (key string) {
 	return k[i]
 }
 
+// Prompt parses the reader input for a valid key.
 func (k keys) prompt(r io.Reader, setup bool) (key string) {
 	prompts := 0
 	scanner := bufio.NewScanner(r)
@@ -212,6 +224,7 @@ func (k keys) prompt(r io.Reader, setup bool) (key string) {
 	return ""
 }
 
+// ShortPrompt parses the reader input for a valid key or alias of the key.
 func (k keys) shortPrompt(r io.Reader) (key string) {
 	prompts := 0
 	scanner := bufio.NewScanner(r)
@@ -235,7 +248,7 @@ func (k keys) shortPrompt(r io.Reader) (key string) {
 	return ""
 }
 
-// shortValidate validates the key exists in keys.
+// ShortValidate validates the key exists in keys.
 // Both the first letter of the key and the full name of the key are accepted as valid.
 // Whenever the key is valid the full key name will be returned otherwise an empty string
 // signifies a false result.
@@ -265,6 +278,7 @@ func (k keys) shortValidate(key string) string {
 	return k[i]
 }
 
+// Validate that the key exists in the slice of keys.
 func (k keys) validate(key string) (ok bool) {
 	if key == "" {
 		return false
@@ -278,7 +292,8 @@ func (k keys) validate(key string) (ok bool) {
 	return true
 }
 
-// watch intercepts Ctrl-C exit key combination.
+// Watch intercepts any Ctrl-C keyboard input
+// and exits to the operating system.
 func watch() {
 	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)

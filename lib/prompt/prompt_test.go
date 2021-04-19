@@ -2,8 +2,17 @@ package prompt
 
 import (
 	"bytes"
+	"fmt"
+	"io"
+	"strings"
 	"testing"
 )
+
+func ExampleYesNo() {
+	yn := YesNo("Say hello", true)
+	fmt.Print(yn)
+	// Output:Say hello? [Y/n] true
+}
 
 func Test_pport(t *testing.T) {
 	var stdin bytes.Buffer
@@ -176,6 +185,54 @@ func Test_keys_shortValidate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.k.shortValidate(tt.key); got != tt.want {
 				t.Errorf("keys.shortValidate(%s) = %v, want %v", tt.key, got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_pstring(t *testing.T) {
+	type args struct {
+		r     io.Reader
+		setup bool
+	}
+	a := strings.NewReader("my request")
+	b := strings.NewReader("-")
+	c := strings.NewReader("\x0D")
+	tests := []struct {
+		name      string
+		args      args
+		wantWords string
+	}{
+		{"input", args{a, false}, "my request"},
+		{"remove", args{b, false}, "-"},
+		{"enter", args{c, true}, ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotWords := pstring(tt.args.r, tt.args.setup); gotWords != tt.wantWords {
+				t.Errorf("pstring() = %v, want %v", gotWords, tt.wantWords)
+			}
+		})
+	}
+}
+
+func Test_keys_shortPrompt(t *testing.T) {
+	var fruits = keys{"apple", "orange", "grape"}
+	tests := []struct {
+		name    string
+		k       keys
+		r       io.Reader
+		wantKey string
+	}{
+		{"no match", fruits, strings.NewReader("some input"), ""},
+		{"match", fruits, strings.NewReader("orange"), "orange"},
+		{"short", fruits, strings.NewReader("o"), "orange"},
+		{"remove", fruits, strings.NewReader("-"), "-"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotKey := tt.k.shortPrompt(tt.r); gotKey != tt.wantKey {
+				t.Errorf("keys.shortPrompt() = %v, want %v", gotKey, tt.wantKey)
 			}
 		})
 	}
