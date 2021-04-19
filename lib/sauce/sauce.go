@@ -1,4 +1,5 @@
-// Package sauce to handle the reading and parsing of embedded SAUCE metadata.
+// Package sauce parses SAUCE (Standard Architecture for Universal Comment Extensions) metadata.
+// http://www.acid.org/info/sauce/sauce.htm
 package sauce
 
 import (
@@ -18,7 +19,7 @@ const (
 	comntMaxLines = 255
 )
 
-// Record layout for the SAUCE metadata.
+// Record is the container for SAUCE data.
 type Record struct {
 	ID       string    `json:"id" xml:"id,attr"`
 	Version  string    `json:"version" xml:"version,attr"`
@@ -48,13 +49,13 @@ type Sizes struct {
 	Binary  string `json:"binary" xml:"binary,attr"`
 }
 
-// DataTypes includes both the SAUCE DataType value and name.
+// DataTypes, both the SAUCE DataType value and name.
 type DataTypes struct {
 	Type DataType `json:"type" xml:"type"`
 	Name string   `json:"name" xml:"name"`
 }
 
-// DataType is the type of data.
+// DataType is the data type (SAUCE DataType).
 type DataType uint
 
 const (
@@ -77,16 +78,16 @@ func (d DataType) String() string {
 	return s
 }
 
-// FileTypes includes both the SAUCE FileType value and name.
+// FileTypes, both the SAUCE FileType value and name.
 type FileTypes struct {
 	Type FileType `json:"type" xml:"type"`
 	Name string   `json:"name" xml:"name"`
 }
 
-// FileType is the type of file.
+// FileType is the type of file (SAUCE FileType).
 type FileType uint
 
-// TypeInfos includes the SAUCE fields dependant on DataType and FileType.
+// TypeInfos includes the SAUCE fields dependant on both DataType and FileType.
 type TypeInfos struct {
 	Info1 TypeInfo  `json:"1" xml:"1"`
 	Info2 TypeInfo  `json:"2" xml:"2"`
@@ -207,14 +208,14 @@ func (ar arBit) String() string {
 	}
 }
 
-// Comments contain the optional, SAUCE comment block.
+// Comments contain the optional SAUCE comment block.
 type Comments struct {
 	ID      string   `json:"id" xml:"id,attr"`
 	Count   int      `json:"count" xml:"count,attr"`
 	Comment []string `json:"lines" xml:"line"`
 }
 
-// Character based files.
+// Character based files more commonly referred as text files.
 type Character uint
 
 const (

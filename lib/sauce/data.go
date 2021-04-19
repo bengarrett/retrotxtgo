@@ -13,11 +13,9 @@ import (
 	"retrotxt.com/retrotxt/lib/humanize"
 )
 
-// ErrDate to integer failure.
 var ErrDate = errors.New("parse date to integer conversion")
 
-// this sauce data struct intentionally shares the key names with the type key names.
-// so the `data.version` item uses the type named `version` which is a [2]byte value.
+// this data struct intentionally shares the SAUCE key names with the type key names.
 type data struct {
 	id       id
 	version  version
@@ -51,6 +49,7 @@ const (
 	pxw  = "pixel width"
 )
 
+// commentBlock parses the optional SAUCE comment block.
 func (d *data) commentBlock() (c Comments) {
 	breakCount := len(strings.Split(string(d.comnt.lines), "\n"))
 	c.ID = comntID
@@ -65,6 +64,7 @@ func (d *data) commentBlock() (c Comments) {
 	return c
 }
 
+// commentByBreak parses the SAUCE comment by line break characters.
 func commentByBreak(b []byte) (lines []string) {
 	r := bytes.NewReader(b)
 	scanner := bufio.NewScanner(r)
@@ -74,6 +74,7 @@ func commentByBreak(b []byte) (lines []string) {
 	return lines
 }
 
+// commentByLine parses the SAUCE comment by lines of 64 characters.
 func commentByLine(b []byte) (lines []string) {
 	s, l := "", 0
 	var resetLine = func() {
