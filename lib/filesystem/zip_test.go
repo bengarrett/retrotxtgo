@@ -6,28 +6,40 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"testing"
 )
 
 func ExampleZip() {
+	// Create a temporary directory
 	tmpZip := tempFile("retrotxtgo_zip_directory_test")
 	err := os.Mkdir(tmpZip, 0755)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer os.RemoveAll(tmpZip)
+
+	// Create a temporary 1 byte file in the temporary directory
 	tmpFile, err := SaveTemp(path.Join(tmpZip, "temp.zip"), []byte("x")...)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer os.Remove(tmpFile)
+
+	// Initialize the Zip archive file
 	path := tempFile("exampleZip.zip")
 	zip := Zip{
-		path, tmpZip, "", true, true,
+		Name:      path,
+		Root:      tmpZip,
+		Comment:   "",
+		Overwrite: true,
+		Quiet:     true,
 	}
+
+	// Create the Zip archive file
 	if err := zip.Create(); err != nil {
 		log.Fatal(err)
 	}
+
+	// Check the Zip archive exists
 	s, err := os.Stat(path)
 	if err != nil {
 		log.Fatal(err)
@@ -38,42 +50,28 @@ func ExampleZip() {
 
 func ExampleUniqueName() {
 	name := "retrotxtgo_uniquetest.txt"
+
+	// Create a temporary 1 byte file in the temporary directory
 	tmpFile, err := SaveTemp(tempFile(name), []byte("x")...)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer os.Remove(tmpFile)
+
+	// Use UniqueName to find a new unique filename
+	// so not to conflict with the previously saved file
 	u, err := UniqueName(tmpFile)
 	if err != nil {
 		log.Fatal(err)
 	}
-	newName := bool(len(filepath.Base(u)) > len(name))
-	fmt.Print(newName)
-	// Output: true
-}
 
-func TestUniqueName(t *testing.T) {
-	type args struct {
-		name string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    string
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := UniqueName(tt.args.name)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("UniqueName() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("UniqueName() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	// In Linux the new name will be retrotxtgo_uniquetest_1.txt
+	// In Windows the name be retrotxtgo_uniquetest (1).txt
+	newName := filepath.Base(u)
+
+	// As the new unique names vary based on the host operating system
+	// Compare the name lengths to confirm the creation of a new filename
+	unique := bool(len(newName) > len(name))
+	fmt.Print(unique)
+	// Output: true
 }
