@@ -24,26 +24,32 @@ import (
 )
 
 var (
-	// ErrCacheYaml set cache yaml error.
 	ErrCacheYaml = errors.New("set cache cannot marshal yaml")
-	// ErrCacheData set cache data path.
 	ErrCacheData = errors.New("set cache cannot create a data path")
-	// ErrCacheSave set cache save.
 	ErrCacheSave = errors.New("set cache cannot save data")
 )
 
-// Build and version information.
-type Build struct {
-	// Built by
-	By string
-	// Commit git SHA
-	Commit string
-	// Date in RFC3339
+// Data for the release information.
+type Data struct {
+	// Built by (usually goreleaser).
+	BuiltBy string
+	// Git commit SHA hash.
+	GitHash string
+	// Date in RFC3339.
 	Date string
-	// Domain name for the website
+	// Domain name for the website.
 	Domain string
-	// Version of RetroTxt
+	// Version of RetroTxt.
 	Version string
+}
+
+// Release placeholder data.
+var Release = Data{ //nolint:gochecknoglobals
+	BuiltBy: "go build",
+	GitHash: "unset",
+	Date:    time.Now().Format("2006 Jan 2, 15:04 MST"),
+	Domain:  "retrotxt.com",
+	Version: "",
 }
 
 // Output the version data.
@@ -60,14 +66,7 @@ type Output struct {
 	URL       string `json:"url"`
 }
 
-var Data = Build{ //nolint:gochecknoglobals
-	By:      "go build",
-	Commit:  "unset",
-	Date:    time.Now().Format("2006 Jan 2, 15:04 MST"),
-	Domain:  "retrotxt.com",
-	Version: "",
-}
-
+// Print the results of the version command as ANSI or plain text.
 func (o *Output) String(color bool) string {
 	gookit.Enable = color
 	update, ver := NewRelease()
@@ -89,6 +88,7 @@ func (o *Output) String(color bool) string {
 	return b.String()
 }
 
+// Print the results of the version command as JSON.
 func (o *Output) json() (data []byte) {
 	data, err := json.MarshalIndent(&o, "", "    ")
 	if err != nil {
@@ -97,6 +97,7 @@ func (o *Output) json() (data []byte) {
 	return data
 }
 
+// Print the results of the version command as minified JSON.
 func (o *Output) jsonMin() (data []byte) {
 	data, err := json.Marshal(&o)
 	if err != nil {
@@ -105,7 +106,7 @@ func (o *Output) jsonMin() (data []byte) {
 	return data
 }
 
-// Version details in semantic syntax.
+// Version using semantic syntax values.
 type Version struct {
 	Major int
 	Minor int
@@ -115,7 +116,7 @@ type Version struct {
 func (v Version) String() string {
 	const alpha, beta = "α", "β"
 	if !v.valid() {
-		return ""
+		return "unset"
 	}
 	p := ""
 	switch {
@@ -135,7 +136,7 @@ func (v Version) valid() bool {
 	return true
 }
 
-// Cache of version data.
+// Cache the version data.
 type Cache struct {
 	Etag string `yaml:"etag"`
 	Ver  string `yaml:"version"`
@@ -165,13 +166,13 @@ func NewRelease() (ok bool, ver string) {
 			}
 		}
 	}
-	if comp := compare(Data.Version, ver); comp {
+	if comp := compare(Release.Version, ver); comp {
 		return true, ver
 	}
 	return false, ver
 }
 
-// Print formats and prints the RetroTxt version and binary compile information.
+// Print and format the RetroTxt version plus the binary compile information.
 func Print(format string) (ok bool) {
 	m := marshal()
 	switch format {
@@ -213,7 +214,7 @@ func Semantic(ver string) Version {
 	}
 }
 
-// arch humanizes some common Go architecture targets.
+// Arch humanizes some common Go target architectures.
 func arch(goarch string) string {
 	a := map[string]string{
 		"386":   "32-bit Intel/AMD",
@@ -225,7 +226,7 @@ func arch(goarch string) string {
 	return a[goarch]
 }
 
-// binary is the location of this program executable.
+// Binary is the location of this executable program.
 func binary() string {
 	bin, err := os.Executable()
 	if err != nil {
@@ -234,7 +235,7 @@ func binary() string {
 	return bin
 }
 
-// cacheGet returns the stored Github API ETag HTTP header and release version.
+// CacheGet returns the stored Github API ETag HTTP header and release version.
 func cacheGet() (etag, ver string) {
 	cf, err := home().DataPath(cacheFile)
 	if err != nil {
@@ -261,7 +262,7 @@ func cacheGet() (etag, ver string) {
 	return cache.Etag, cache.Ver
 }
 
-// cacheSet saves the Github API ETag HTTP header and release version.
+// CacheSet saves the Github API ETag HTTP header and release version.
 func cacheSet(etag, ver string) error {
 	if etag == "" || ver == "" {
 		return nil
@@ -284,6 +285,8 @@ func cacheSet(etag, ver string) error {
 	return nil
 }
 
+// Compare the version of this executable program against
+// the latest version hosted on GitHub.
 func compare(current, fetched string) bool {
 	cur := Semantic(current)
 	if !cur.valid() {
@@ -305,7 +308,7 @@ func compare(current, fetched string) bool {
 	return false
 }
 
-// copyrightYear uses the build date as a the year of copyright.
+// CopyrightYear uses the build date as a the year of copyright.
 func copyrightYear(date string) string {
 	t, err := time.Parse(time.RFC3339, date)
 	if err != nil {
@@ -314,18 +317,18 @@ func copyrightYear(date string) string {
 	return t.Local().Format("2006")
 }
 
-// digits returns only the digits and decimal point values from a string.
+// Digits returns only the digits and decimal point values from a string.
 func digits(s string) string {
 	reg := regexp.MustCompile("[^0-9/.]+")
 	return reg.ReplaceAllString(s, "")
 }
 
-// home directory path determined by the host operating system.
+// Home returns the user's home directory determined by the host operating system.
 func home() *gap.Scope {
 	return gap.NewScope(gap.User, "retrotxt")
 }
 
-// localBuild date of this binary executable.
+// LocalBuild date of this binary executable.
 func localBuild(date string) string {
 	t, err := time.Parse(time.RFC3339, date)
 	if err != nil {
@@ -336,34 +339,36 @@ func localBuild(date string) string {
 
 func marshal() Output {
 	v := Output{
-		Copyright: fmt.Sprintf("Copyright © %s Ben Garrett", copyrightYear(Data.Date)),
-		URL:       fmt.Sprintf("https://%s/go", Data.Domain),
-		App:       Semantic(Data.Version).String(),
+		Copyright: fmt.Sprintf("Copyright © %s Ben Garrett", copyrightYear(Release.Date)),
+		URL:       fmt.Sprintf("https://%s/go", Release.Domain),
+		App:       Semantic(Release.Version).String(),
 		GoVer:     semanticGo(),
 		OS:        fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
 		Exe:       binary(),
-		Date:      localBuild(Data.Date),
-		By:        Data.By,
-		Git:       Data.Commit,
+		Date:      localBuild(Release.Date),
+		By:        Release.BuiltBy,
+		Git:       Release.GitHash,
 		License:   "LGPL-3.0 [https://www.gnu.org/licenses/lgpl-3.0.html]",
 	}
 	if a := arch(runtime.GOARCH); a != "" {
+		// as of Go v1.16, darwin/arm64 equals the Mx architecture
 		if runtime.GOOS == "darwin" && runtime.GOARCH == "arm64" {
 			v.OS += " [Apple M1 CPU]"
-		} else {
-			v.OS += fmt.Sprintf(" [%s CPU]", a)
+			return v
 		}
+		v.OS += fmt.Sprintf(" [%s CPU]", a)
 	}
 	return v
 }
 
+// NewRelease notification.
 func newRelease() *bytes.Buffer {
 	s := "A newer edition of RetroTxt is available!\n" +
 		"Learn more at https://retrotxt.com/go"
 	return str.Border(s)
 }
 
-// semantic go version.
+// Semantic go version.
 func semanticGo() string {
 	ver := runtime.Version()
 	if len(ver) > 2 && ver[:2] == "go" {

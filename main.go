@@ -20,22 +20,22 @@ import (
 	v "retrotxt.com/retrotxt/lib/version"
 )
 
-// goreleaser generated ldflags containers
+// goreleaser generated ldflags containers.
 // https://goreleaser.com/environment/#using-the-mainversion
 var version, commit, date, builtBy string
 
 func main() {
 	if version != "" {
-		v.Data.Version = version
+		v.Release.Version = version
 	}
 	if commit != "" {
-		v.Data.Commit = commit
+		v.Release.GitHash = commit
 	}
 	if date != "" {
-		v.Data.Date = date
+		v.Release.Date = date
 	}
 	if builtBy != "" {
-		v.Data.By = builtBy
+		v.Release.BuiltBy = builtBy
 	}
 	cmd.Execute()
 }
