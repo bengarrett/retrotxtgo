@@ -11,12 +11,22 @@ import (
 
 // Alert prints "problem:" in Error color.
 func Alert() string {
-	return color.Error.Sprint("problem:")
+	s := "problem:"
+	e := color.Error.Sprint(s)
+	if e == "" {
+		return s
+	}
+	return e
 }
 
 // Info prints "info:" in Info color.
 func Info() string {
-	return color.Info.Sprint("info:")
+	s := "info:"
+	e := color.Info.Sprint(s)
+	if e == "" {
+		return s
+	}
+	return e
 }
 
 // color aliases.

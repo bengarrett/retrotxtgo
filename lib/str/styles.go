@@ -21,7 +21,6 @@ import (
 	"github.com/gookit/color"
 )
 
-// ErrRune invalid rune.
 var ErrRune = errors.New("invalid encoded rune")
 
 type terminal int
@@ -38,9 +37,14 @@ const (
 	// Term16M ANSI high-color.
 	Term16M
 	none = "none"
+	term = "terminal"
 )
 
-// JSONExample is used for previewing color themes.
+func (t terminal) String() string {
+	return [...]string{none, term, term, "terminal256", "terminal16m"}[t]
+}
+
+// JSONExample is used to preview theme colors.
 type JSONExample struct {
 	Style struct {
 		Name    string `json:"name"`
@@ -63,21 +67,6 @@ func (s JSONExample) String(flag string) {
 		// cannot use the logs package as it causes an import cycle error
 		log.Fatalln(fmt.Errorf("json example highlight syntax error: %w", err))
 	}
-}
-
-// Formatter takes a terminal value and returns the quick.Highlight formatter value.
-func (t terminal) Formatter() string {
-	switch t {
-	case TermMono:
-		return none
-	case Term16, Term88:
-		return "terminal"
-	case Term256:
-		return "terminal256"
-	case Term16M:
-		return "terminal16m"
-	}
-	return ""
 }
 
 // Border wraps text around a single line border.
@@ -178,41 +167,32 @@ func Term(colorEnv, env string) string {
 	// https://www.gnu.org/software/gettext/manual/html_node/The-TERM-variable.html
 	// Terminal Colors
 	// https://gist.github.com/XVilka/8346728
-	var t terminal = -1
-	// first attempt to detect COLORTERM variable
 
+	// first, attempt to detect a COLORTERM variable
 	switch colorEnv {
 	case "24bit", "truecolor":
-		t = Term16M
-		return t.Formatter()
+		return Term16M.String()
 	}
 	// then fallback to the -color suffix in TERM variable values
-
 	s := strings.Split(env, "-")
 	if len(s) > 1 {
 		switch s[len(s)-1] {
 		case "mono":
-			t = TermMono
-			return t.Formatter()
+			return TermMono.String()
 		case "color", "16color", "88color":
-			t = Term16
-			return t.Formatter()
+			return Term16.String()
 		case "256color":
-			t = Term256
-			return t.Formatter()
+			return Term256.String()
 		}
 	}
 	// otherwise do a direct match of the TERM variable value
 	switch env {
 	case "linux":
-		t = TermMono
-		return t.Formatter()
+		return TermMono.String()
 	case "konsole", "rxvt", "xterm", "vt100":
-		t = Term16
-		return t.Formatter()
+		return Term16.String()
 	}
-	t = Term256
-	return t.Formatter()
+	return Term256.String()
 }
 
 // UnderlineChar uses ANSI to underline the first character of a string.

@@ -133,16 +133,59 @@ func TestNumberizeKeys(t *testing.T) {
 	tests := []struct {
 		name string
 		keys []string
-		want string
+		want bool
 	}{
-		{"empty", nil, ""},
-		{"three", []string{"alpha", "bravo", "charlie"},
-			"\x1b[0m\x1b[4m0\x1b[0m) alpha\n\x1b[0m\x1b[4m1\x1b[0m) bravo\n\x1b[0m\x1b[4m2\x1b[0m) charlie"},
+		{"empty", nil, false},
+		{"three", []string{"alpha", "bravo", "charlie"}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NumberizeKeys(tt.keys...); got != tt.want {
+			if got := NumberizeKeys(tt.keys...); bool(len(got) > 16) != tt.want {
 				t.Errorf("NumberizeKeys() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestHighlight(t *testing.T) {
+	type args struct {
+		source string
+		lexer  string
+		style  string
+		ansi   bool
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"empty", args{"", "", "", false}, false},
+		{"unknown", args{"abcde", "zxcvb", "sdfgh", false}, false},
+		{"okay", args{"hello world", "json", "solarized-dark", true}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := Highlight(tt.args.source, tt.args.lexer, tt.args.style, tt.args.ansi); (err != nil) != tt.wantErr {
+				t.Errorf("Highlight() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestValid(t *testing.T) {
+	tests := []struct {
+		name  string
+		style string
+		want  bool
+	}{
+		{"empty", "", false},
+		{"err", "zxcv", false},
+		{"okay", "rrt", true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Valid(tt.style); got != tt.want {
+				t.Errorf("Valid() = %v, want %v", got, tt.want)
 			}
 		})
 	}
