@@ -258,7 +258,7 @@ func Test_Format(t *testing.T) {
 		version string
 		want    string
 	}{
-		{"empty", "", ""},
+		{"empty", "", "unset"},
 		{"v2+", "v2.5.140", "2.5.140"},
 		{"v1", "v1.0.0", "1.0.0"},
 		{"v0.1", "v0.1.0", "β0.1.0"},
