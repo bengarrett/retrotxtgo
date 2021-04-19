@@ -1,9 +1,16 @@
 // Package str for strings and styles.
+// nolint:gocritic
 package str
 
 import (
 	"fmt"
+
+	"github.com/gookit/color"
 )
+
+func init() {
+	color.Enable = false
+}
 
 func ExampleAlert() {
 	fmt.Print(Alert())

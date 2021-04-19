@@ -1,4 +1,4 @@
-// Package str for strings and styles.
+// Package str manipulates strings and standard output text.
 package str
 
 import (
