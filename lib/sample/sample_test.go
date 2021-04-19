@@ -2,12 +2,23 @@
 package sample
 
 import (
+	"fmt"
+	"log"
 	"testing"
 
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"retrotxt.com/retrotxt/lib/convert"
 )
+
+func ExampleOpen() {
+	b, err := Open("037")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Print(len(b))
+	// Output:130
+}
 
 func TestFlags_Open(t *testing.T) {
 	var file convert.Convert

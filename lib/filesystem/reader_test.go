@@ -1,9 +1,30 @@
 package filesystem
 
 import (
+	"bytes"
+	"fmt"
+	"io"
+	"log"
 	"reflect"
+	"strings"
 	"testing"
+
+	"retrotxt.com/retrotxt/static"
 )
+
+func ExampleWordsEBCDIC() {
+	b, err := static.File.ReadFile("text/cp037.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	nr := bytes.NewReader(b)
+	words, err := WordsEBCDIC(nr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%d words", words)
+	// Output: 16 words
+}
 
 func TestLineBreaks(t *testing.T) {
 	tests := []struct {
@@ -44,6 +65,35 @@ func TestLineBreak(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := LineBreak(tt.args.r, tt.args.extraInfo); got != tt.want {
 				t.Errorf("LineBreak() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestLines(t *testing.T) {
+	type args struct {
+		r  io.Reader
+		lb LB
+	}
+	tests := []struct {
+		name      string
+		args      args
+		wantCount int
+		wantErr   bool
+	}{
+		{"empty", args{strings.NewReader(""), LF()}, 0, false},
+		{"single line", args{strings.NewReader("hello world"), LF()}, 1, false},
+		{"multiple lines", args{strings.NewReader("hello\nworld\neof"), LF()}, 3, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotCount, err := Lines(tt.args.r, tt.args.lb)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Lines() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotCount != tt.wantCount {
+				t.Errorf("Lines() = %v, want %v", gotCount, tt.wantCount)
 			}
 		})
 	}

@@ -116,7 +116,21 @@ func Map() map[string]Sample {
 	return m
 }
 
-// Open a sample textfile.
+// Open a sample text file.
+func Open(name string) ([]byte, error) {
+	name = strings.ToLower(name)
+	samp, exist := Map()[name]
+	if !exist {
+		return nil, ErrName
+	}
+	b, err := static.File.ReadFile(samp.Name)
+	if err != nil {
+		return nil, fmt.Errorf("open sample %q: %w", samp.Name, ErrName)
+	}
+	return b, nil
+}
+
+// Open and convert a sample textfile.
 func (f Flags) Open(name string, conv *convert.Convert) (s File, err error) {
 	name = strings.ToLower(name)
 	if _, err = os.Stat(name); !os.IsNotExist(err) {
@@ -128,7 +142,7 @@ func (f Flags) Open(name string, conv *convert.Convert) (s File, err error) {
 	}
 	b, err := static.File.ReadFile(samp.Name)
 	if err != nil {
-		return s, fmt.Errorf("view package %q: %w", samp.Name, ErrName)
+		return s, fmt.Errorf("open sample %q: %w", samp.Name, ErrName)
 	}
 	if conv == nil {
 		return s, ErrConvNil

@@ -10,6 +10,20 @@ import (
 	"retrotxt.com/retrotxt/lib/logs"
 )
 
+type lineBreaks int
+
+const (
+	nl lineBreaks = iota
+	dos
+	win
+	c64
+	darwin
+	mac
+	amiga
+	linux
+	unix
+)
+
 // IsPipe determines if Stdin (standard input) is piped from another command.
 func IsPipe() bool {
 	// source: https://dev.to/napicella/linux-pipes-in-golang-2e8j
@@ -108,8 +122,8 @@ func ReadControls(name string) (count int, err error) {
 }
 
 // ReadLine reads a named file location or a named temporary file and returns its content.
-func ReadLine(name, linebreak string) (text string, err error) {
-	var path, n = tempFile(name), lineBreak(linebreak)
+func ReadLine(name string, lb lineBreaks) (text string, err error) {
+	var path, n = tempFile(name), lineBreak(lb)
 	file, err := os.OpenFile(path, os.O_RDONLY, filemode)
 	if err != nil {
 		return text, fmt.Errorf("read line could not open file: %q: %w", name, err)
@@ -220,7 +234,7 @@ func ReadTail(name string, offset int) (data []byte, err error) {
 
 // ReadText reads a named file location or a named temporary file and returns its content.
 func ReadText(name string) (text string, err error) {
-	text, err = ReadLine(name, "")
+	text, err = ReadLine(name, nl)
 	if err != nil {
 		return text, fmt.Errorf("read text: %q: %w", name, err)
 	}

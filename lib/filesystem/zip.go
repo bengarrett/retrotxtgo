@@ -23,12 +23,11 @@ type Zip struct {
 	Root      string
 	Comment   string
 	Overwrite bool
+	Quiet     bool
 }
 
 var (
-	// ErrNameIsDir inc name is dir.
-	ErrNameIsDir = errors.New("increment name must be a file but is a directory")
-	// ErrMaxAttempt max attempts.
+	ErrNameIsDir  = errors.New("increment name must be a file but is a directory")
 	ErrMaxAttempt = errors.New("maximum attempts reached")
 )
 
@@ -71,11 +70,11 @@ func (z *Zip) Create() error {
 		return err
 	}
 
-	return files.Zip(z.Name, z.Comment, z.Overwrite)
+	return files.Zip(z.Name, z.Comment, z.Overwrite, z.Quiet)
 }
 
 // Zip packages and compresses files to an archive using the provided name.
-func (files *Files) Zip(name, comment string, ow bool) error {
+func (files *Files) Zip(name, comment string, ow bool, quiet bool) error {
 	const (
 		overwrite    = os.O_RDWR | os.O_CREATE
 		mustNotExist = os.O_RDWR | os.O_CREATE | os.O_EXCL
@@ -140,7 +139,9 @@ func (files *Files) Zip(name, comment string, ow bool) error {
 		return fmt.Errorf("zip abs %q: %w", s.Name(), err)
 	}
 
-	fmt.Println("created zip file:", abs, humanize.Decimal(s.Size(), language.AmericanEnglish))
+	if !quiet {
+		fmt.Println("created zip file:", abs, humanize.Decimal(s.Size(), language.AmericanEnglish))
+	}
 	return nil
 }
 

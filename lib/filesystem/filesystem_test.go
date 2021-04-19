@@ -12,6 +12,24 @@ import (
 	"testing"
 )
 
+func ExampleTar() {
+	tmpTar := tempFile("tar_test.tar")
+	tmpFile, err := SaveTemp(tmpTar, []byte("x")...)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.Remove(tmpFile)
+	if err := Tar(tmpTar, tmpFile); err != nil {
+		log.Fatal(err)
+	}
+	f, err := os.Stat(tmpFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%s, %d", f.Name(), f.Size())
+	// Output:tar_test.tar, 1536
+}
+
 // fileExample the string to a text file.
 func fileExample(s string, i int) (path string) {
 	name := fmt.Sprintf("rt_fs_save%d.txt", i)
@@ -407,4 +425,33 @@ func TestTouch(t *testing.T) {
 		})
 	}
 	Clean(tmpFile)
+}
+
+func Test_winDir(t *testing.T) {
+	type args struct {
+		i   int
+		p   string
+		os  string
+		dir string
+	}
+	tests := []struct {
+		name     string
+		args     args
+		wantS    string
+		wantCont bool
+	}{
+		{"home", args{1, "", "linux", "/home/retro"}, "/home/retro", false},
+		{"c drive", args{0, "c:", "windows", ""}, "C:\\", true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotS, gotCont := winDir(tt.args.i, tt.args.p, tt.args.os, tt.args.dir)
+			if gotS != tt.wantS {
+				t.Errorf("winDir() gotS = %v, want %v", gotS, tt.wantS)
+			}
+			if gotCont != tt.wantCont {
+				t.Errorf("winDir() gotCont = %v, want %v", gotCont, tt.wantCont)
+			}
+		})
+	}
 }

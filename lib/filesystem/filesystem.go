@@ -1,4 +1,4 @@
-// Package filesystem to handle the opening and reading of text files.
+// Package filesystem handles the opening and reading of text files.
 package filesystem
 
 import (
@@ -16,7 +16,6 @@ import (
 )
 
 const (
-	win = "windows"
 	// posix permission bits for files.
 	filemode os.FileMode = 0660
 	// posix permission bits for directories.
@@ -77,7 +76,7 @@ func DirExpansion(name string) (dir string) {
 			p = s
 		}
 		var cont bool
-		if dir, cont = winDir(i, p, dir); cont {
+		if dir, cont = winDir(i, p, runtime.GOOS, dir); cont {
 			continue
 		}
 		dir = filepath.Join(dir, p)
@@ -88,8 +87,9 @@ func DirExpansion(name string) (dir string) {
 	return dir
 }
 
-func winDir(i int, p, dir string) (s string, cont bool) {
-	if runtime.GOOS == win {
+// WinDir appends Windows style syntax to the directory.
+func winDir(i int, p, os, dir string) (s string, cont bool) {
+	if os == "windows" {
 		if len(p) == 2 && p[1:] == ":" {
 			dir = strings.ToUpper(p) + "\\"
 			return dir, true
@@ -157,7 +157,7 @@ func T() map[string]string {
 	}
 }
 
-// Tar addes files to a named tar file archive.
+// Tar add files to a named tar file archive.
 func Tar(name string, files ...string) error {
 	f, err := os.Create(name)
 	if err != nil {
@@ -174,6 +174,7 @@ func Tar(name string, files ...string) error {
 	return nil
 }
 
+// AddTar inserts the named file to the TAR writer.
 func addTar(name string, w *tar.Writer) error {
 	f, err := os.Open(name)
 	if err != nil {
@@ -219,20 +220,22 @@ func dir(name string) (path string, err error) {
 	return path, err
 }
 
-// lineBreak returns a platform's line break character.
-func lineBreak(platform string) string {
+// LineBreak returns line break character for the system platform.
+func lineBreak(platform lineBreaks) string {
 	switch platform {
-	case "dos", win:
+	case dos, win:
 		return fmt.Sprintf("%x%x", CarriageReturn, Linefeed)
-	case "c64", "darwin", "mac":
+	case c64, darwin, mac:
 		return fmt.Sprintf("%x", CarriageReturn)
-	case "amiga", "linux", "unix":
+	case amiga, linux, unix:
 		return fmt.Sprintf("%x", Linefeed)
 	default: // use operating system default
 		return "\n"
 	}
 }
 
+// TempFile returns a path to the named file
+// if it was stored in the system's temporary directory.
 func tempFile(name string) (path string) {
 	path = name
 	if filepath.Base(name) == name {

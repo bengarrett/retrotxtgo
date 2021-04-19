@@ -95,7 +95,7 @@ func TestReadLine(t *testing.T) {
 	tmp0 := fileExample("hello\nworld\n", 0)
 	type args struct {
 		name      string
-		linebreak string
+		linebreak lineBreaks
 	}
 	tests := []struct {
 		name     string
@@ -103,8 +103,8 @@ func TestReadLine(t *testing.T) {
 		wantText string
 		wantErr  bool
 	}{
-		{"none", args{"", ""}, "", true},
-		{"tmp0", args{tmp0, ""}, "hello\nworld\n", false},
+		{"none", args{"", nl}, "", true},
+		{"tmp0", args{tmp0, nl}, "hello\nworld\n", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
