@@ -38,8 +38,8 @@ var infoCmd = &cobra.Command{
 		n.Length = len(args)
 		for i, arg := range args {
 			n.Index = i + 1
-			// internal, packed example file
-			filename, err := infoPackage(arg)
+			// embed sample filename
+			filename, err := infoSample(arg)
 			if err != nil {
 				logs.Println("pack", arg, err)
 				continue
@@ -72,32 +72,34 @@ func init() {
 		str.Options("output format", true, i[:]...))
 }
 
-func infoPackage(name string) (filename string, err error) {
+// infoSample extracts and saves an embed sample file then returns its location.
+func infoSample(name string) (filename string, err error) {
 	var s = strings.ToLower(name)
 	if _, err = os.Stat(s); !os.IsNotExist(err) {
 		return "", nil
 	}
-	pkg, exist := sample.Map()[s]
+	samp, exist := sample.Map()[s]
 	if !exist {
 		return "", nil
 	}
-	b, err := static.File.ReadFile(pkg.Name)
+	b, err := static.File.ReadFile(samp.Name)
 	if err != nil {
-		return "", fmt.Errorf("view package %q: %w", pkg.Name, err)
+		return "", fmt.Errorf("view package %q: %w", samp.Name, err)
 	}
 	file, err := ioutil.TempFile("", fmt.Sprintf("retrotxt_%s.*.txt", s))
 	if err != nil {
-		return "", fmt.Errorf("view package %q: %w", pkg.Name, ErrTempOpen)
+		return "", fmt.Errorf("view package %q: %w", samp.Name, ErrTempOpen)
 	}
 	if _, err = file.Write(b); err != nil {
-		return "", fmt.Errorf("view package %q: %w", pkg.Name, ErrTempWrite)
+		return "", fmt.Errorf("view package %q: %w", samp.Name, ErrTempWrite)
 	}
 	if err := file.Close(); err != nil {
-		return "", fmt.Errorf("view package %q: %w", pkg.Name, ErrTempClose)
+		return "", fmt.Errorf("view package %q: %w", samp.Name, ErrTempClose)
 	}
 	return file.Name(), nil
 }
 
+// infoPipe parses a standard input (stdin) stream of data.
 func infoPipe() {
 	b, err := filesystem.ReadPipe()
 	if err != nil {

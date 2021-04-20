@@ -135,6 +135,7 @@ func init() {
 	viewCmd.Flags().SortFlags = false
 }
 
+// viewPipe converts and prints out standard input (stdin) or piped text.
 func viewPipe(cmd *cobra.Command, conv *convert.Convert) {
 	b, err := filesystem.ReadPipe()
 	if err != nil {
@@ -154,6 +155,7 @@ func viewPipe(cmd *cobra.Command, conv *convert.Convert) {
 	os.Exit(0)
 }
 
+// viewToFlag prints the results of viewEncode().
 func viewToFlag(r ...rune) (success bool) {
 	newer, err := viewEncode(viewFlag.to, r...)
 	if err != nil {
@@ -164,6 +166,7 @@ func viewToFlag(r ...rune) (success bool) {
 	return true
 }
 
+// viewEncode encodes runes into the named encoding.
 func viewEncode(name string, r ...rune) (b []byte, err error) {
 	encode, err := convert.Encoding(name)
 	if err != nil {

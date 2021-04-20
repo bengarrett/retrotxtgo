@@ -59,7 +59,7 @@ var configDeleteCmd = &cobra.Command{
 	},
 }
 
-// note: Previously I inserted the results of config.Editor() into
+// Note: Previously I inserted the results of config.Editor() into
 // the Short and Long fields. This will cause a logic error because
 // viper.GetString("editor") is not yet set and the EDITOR env value
 // will instead always be used.

@@ -37,7 +37,7 @@ type metaFlag struct {
 	opts  []string // flag choices for display in the usage string
 }
 
-// create default values.
+// createFlag contain default values.
 var createFlag = createFlags{
 	controls: []string{eof, tab},
 	encode:   "CP437",
@@ -166,6 +166,7 @@ func init() {
 	createCmd.Flags().SortFlags = false
 }
 
+// initBodyFlag initializes the hidden body flag.
 func (c *metaFlag) initBodyFlag(buf bytes.Buffer) bytes.Buffer {
 	switch {
 	case c.key == "html.body":
@@ -178,6 +179,7 @@ func (c *metaFlag) initBodyFlag(buf bytes.Buffer) bytes.Buffer {
 	return buf
 }
 
+// initFlags initializes the public facing flags.
 func (c *metaFlag) initFlags(buf bytes.Buffer) bytes.Buffer {
 	switch {
 	case c.key == "serve":
