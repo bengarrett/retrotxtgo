@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/gookit/color"
@@ -154,13 +155,15 @@ func Test_previewPrompt(t *testing.T) {
 		args  args
 		wantP string
 	}{
-		{"empty", args{}, "Set a new value or leave blank to keep it unused:"},
-		{"key", args{"html.meta.keywords", "ooooh"}, "Replace the current keywords, leave blank to keep as-is or use a dash [-] to remove:"},
+		{"empty", args{}, "Set"},
+		{"key", args{"html.meta.keywords", "ooooh"}, "Replace"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotP := previewPrompt(tt.args.name, tt.args.value); gotP != tt.wantP {
-				t.Errorf("previewPrompt() = %v, want %v", gotP, tt.wantP)
+			gotP := previewPrompt(tt.args.name, tt.args.value)
+			firstWord := strings.Split(strings.TrimSpace(gotP), " ")[0]
+			if firstWord != tt.wantP {
+				t.Errorf("previewPrompt() = %v, want %v", firstWord, tt.wantP)
 			}
 		})
 	}

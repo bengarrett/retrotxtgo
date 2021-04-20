@@ -513,7 +513,7 @@ func previewPrompt(name, value string) string {
 	return fmt.Sprintf("%s:", previewPromptPrint(name, value))
 }
 
-// PreviewPromptPrint returns the avaliable input options.
+// PreviewPromptPrint returns the available input options.
 func previewPromptPrint(name, value string) (p string) {
 	p = "Set a new value"
 	if name == "html.meta.keywords" {
@@ -564,7 +564,7 @@ func save(name string, setup bool, value interface{}) {
 	}
 }
 
-// SetDirectory checks the existance of a directory
+// SetDirectory checks the existence of a directory
 // and saves the path as a configuration regardless of the result.
 func setDirectory(name string, setup bool) {
 	if name == "" {
@@ -590,7 +590,7 @@ func setDirectory(name string, setup bool) {
 	save(name, setup, dir)
 }
 
-// SetEditor checks the existance of given text editor location
+// SetEditor checks the existence of given text editor location
 // and saves it as a configuration regardless of the result.
 func setEditor(name string, setup bool) {
 	if name == "" {

@@ -5,16 +5,7 @@ import (
 	"log"
 	"os"
 	"testing"
-
-	"github.com/gookit/color"
 )
-
-func Example_configMissing() {
-	color.Enable = false
-	configMissing("example", "")
-	// Output: info: no config file is in use
-	// create it: example create
-}
 
 func TestPath(t *testing.T) {
 	tests := []struct {

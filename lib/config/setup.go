@@ -40,6 +40,7 @@ func Setup() {
 	fmt.Println(Info(viper.GetString("style.info")))
 }
 
+// EnterKey returns the appropriate Setup instructions based on the user's platform.
 func enterKey() string {
 	if runtime.GOOS == "darwin" {
 		return "Press ↩ return to skip the question or ⌃ control-c to quit"
@@ -47,10 +48,12 @@ func enterKey() string {
 	return "Press ⏎ enter to skip the question or Ctrl-c to quit"
 }
 
+// HR returns a horizontal rule.
 func hr(width uint) string {
 	return str.Cb(strings.Repeat("-", int(width)))
 }
 
+// Logo prints the RetroTxt ANSI logo.
 func logo() {
 	const clear, reset, n = "\033c", "\033[0m", "text/retrotxt.utf8ans"
 	b, err := static.Text.ReadFile(n)
@@ -61,7 +64,7 @@ func logo() {
 	fmt.Println(clear + string(b) + reset)
 }
 
-// watch intercepts Ctrl-C exit key combination.
+// Watch intercepts Ctrl-C key combinations to exit out of the Setup.
 func watch() {
 	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
