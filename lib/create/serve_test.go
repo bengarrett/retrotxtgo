@@ -6,7 +6,7 @@ import (
 )
 
 func ExampleServe() {
-	// Initalize the bare minimum configuration.
+	// Initialize the bare minimum configuration.
 	b := []byte("hello world")
 	args := Args{}
 	args.Layout = "standard"

@@ -271,7 +271,10 @@ func parseBody(cmd *cobra.Command) {
 	if body := cmd.Flags().Lookup("body"); body.Changed {
 		b := []byte(body.Value.String())
 		if h := serveBytes(0, cmd, &b); !h {
-			html.Create(&b)
+			i, a, err := html.Create(&b)
+			if err != nil {
+				logs.Fatal(i, a, err)
+			}
 		}
 		os.Exit(0)
 	}
@@ -295,7 +298,10 @@ func parseFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 		}
 		// serve the HTML over HTTP?
 		if h := serveBytes(i, cmd, &b); !h {
-			html.Create(&b)
+			i, a, err := html.Create(&b)
+			if err != nil {
+				logs.Fatal(i, a, err)
+			}
 		}
 	}
 }
@@ -308,7 +314,10 @@ func parsePipe(cmd *cobra.Command, flags convert.Flags) {
 	}
 	b := createHTML(cmd, flags, &src)
 	if h := serveBytes(0, cmd, &b); !h {
-		html.Create(&b)
+		i, a, err := html.Create(&b)
+		if err != nil {
+			logs.Fatal(i, a, err)
+		}
 	}
 	os.Exit(0)
 }

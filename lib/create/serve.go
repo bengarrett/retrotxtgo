@@ -99,7 +99,7 @@ func (args *Args) createDir(b *[]byte) (err error) {
 	}
 	i, a, err := args.Create(b)
 	if err != nil {
-		return fmt.Errorf("%s%s %s", i, a, err)
+		return fmt.Errorf("%s%s %w", i, a, err)
 	}
 	return nil
 }
@@ -115,18 +115,15 @@ func (args *Args) serveDir() {
 	var ctx context.Context
 	var cancel context.CancelFunc
 	if args.test {
-
 		go func() {
-			if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+			if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 				log.Fatalf("tcp listen and serve failed: %s\n", err)
 			}
 		}()
 		ctx, cancel = context.WithCancel(context.Background())
 		// cancel the server straight away
 		cancel()
-
 	} else {
-
 		// listen for Ctrl+C keyboard interrupt
 		done := make(chan os.Signal, 1)
 		signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
@@ -136,14 +133,13 @@ func (args *Args) serveDir() {
 				str.Cp(fmt.Sprintf("http://localhost%v", srv.Addr)))
 			fmt.Println(str.Cinf("Press Ctrl+C to stop\n"))
 
-			if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+			if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 				log.Fatalf("tcp listen and serve failed: %s\n", err)
 			}
 		}()
 
 		<-done
 		ctx, cancel = context.WithTimeout(context.Background(), timeout*time.Second)
-
 	}
 
 	defer func() {
@@ -152,16 +148,14 @@ func (args *Args) serveDir() {
 	}()
 
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatalf("http server shutdown failed: %s\n", err)
-	}
-
-	if args.test {
+		log.Printf("http server shutdown failed: %s\n", err)
+	} else if args.test {
 		fmt.Print("Server example was successful")
 	}
 }
 
 // Cleanup the temporary files and directories.
-func (args Args) cleanup() {
+func (args *Args) cleanup() {
 	if !args.test {
 		fmt.Printf("\n\nServer shutdown and directory removal of: %s\n", args.Save.Destination)
 	}

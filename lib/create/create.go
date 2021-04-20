@@ -213,7 +213,7 @@ func (args *Args) Create(b *[]byte) (issue, arg string, err error) {
 		args.zipAssets("", b)
 	default:
 		// print to terminal
-		if err = args.Stdout(b); err != nil {
+		if err := args.Stdout(b); err != nil {
 			return "create:", "stdout", err
 		}
 	}
@@ -277,9 +277,9 @@ func (args *Args) zipAssets(destDir string, b *[]byte) {
 		logs.Fatal("save to directory failure", "temporary", err)
 	}
 
-	if err := args.saveAssets(b); err != nil {
+	if err = args.saveAssets(b); err != nil {
 		logs.Println("could not save file", "", err)
-		os.Exit(1)
+		return
 	}
 
 	name := zipName

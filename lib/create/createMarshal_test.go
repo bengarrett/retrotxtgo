@@ -21,5 +21,4 @@ func TestComment(t *testing.T) {
 			t.Errorf("AutoFont() = %v, want %v", got, want)
 		}
 	})
-
 }
