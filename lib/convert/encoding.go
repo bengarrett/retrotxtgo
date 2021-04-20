@@ -160,10 +160,8 @@ const (
 type Chars map[int]rune
 
 var (
-	// ErrChainANSI ansi() is a chain method.
 	ErrChainANSI = errors.New("ansi() is a chain method that is to be used in conjunction with swap: c.swap().ansi()")
-	// ErrName unknown encoding.
-	ErrName = errors.New("encoding could not match name or alias")
+	ErrName      = errors.New("encoding could not match name or alias")
 )
 
 // Characters map code page 437 characters with alternative runes.
@@ -221,9 +219,10 @@ func Encoding(name string) (encoding.Encoding, error) {
 	return enc, nil
 }
 
+// Encode32 initializes common UTF-32 encodings.
 func encode32(a string) encoding.Encoding {
 	// UTF-32... doesn't return a match in ianaindex.IANA
-	switch a {
+	switch strings.ToUpper(a) {
 	case u32:
 		return utf32.UTF32(utf32.LittleEndian, utf32.UseBOM)
 	case u32be:
@@ -242,7 +241,7 @@ func Humanize(name string) string {
 	return encodingAlias(shorten(name))
 }
 
-// shorten name to a custom/common names or aliases.
+// Shorten name to a custom/common names or aliases.
 func shorten(name string) string { // nolint:gocyclo
 	n, l := strings.ToLower(name), len(name)
 	switch {
@@ -272,7 +271,7 @@ func shorten(name string) string { // nolint:gocyclo
 	return ""
 }
 
-// encodingAlias returns a valid IANA index encoding name from a shorten name or alias.
+// EncodingAlias returns a valid IANA index encoding name from a shorten name or alias.
 func encodingAlias(name string) (n string) {
 	// list of valid tables
 	// https://github.com/golang/text/blob/v0.3.2/encoding/charmap/maketables.go
@@ -295,6 +294,7 @@ func encodingAlias(name string) (n string) {
 	return n
 }
 
+// EncodingIBM returns a valid IANA index encoding name for IBM codepages using a custom alias.
 func encodingIBM(name string) (n string) {
 	switch name {
 	case "37", "037":
@@ -327,6 +327,7 @@ func encodingIBM(name string) (n string) {
 	return n
 }
 
+// EncodingMisc returns a valid IANA index encoding name using a custom alias.
 func encodingMisc(name string) (n string) {
 	switch name {
 	case "878", "20866", "koi8r":
@@ -346,6 +347,7 @@ func encodingMisc(name string) (n string) {
 	return n
 }
 
+// EncodingIBM returns a valid IANA index encoding name for Microsoft codepages using a custom alias.
 func encodingWin(name string) (n string) {
 	switch name {
 	case "874":
@@ -372,6 +374,7 @@ func encodingWin(name string) (n string) {
 	return n
 }
 
+// EncodingIBM returns a valid IANA index encoding name for ISO codepages using a custom alias.
 func encodingISO(name string) (n string) {
 	switch name {
 	case "5", "1124", "28595":
@@ -404,6 +407,7 @@ func encodingISO(name string) (n string) {
 	return n
 }
 
+// EncodingIBM returns a valid IANA index encoding name for Latin codepages using a custom alias.
 func encodingEurope(name string) (n string) {
 	switch name {
 	case "1", "819", "28591":
@@ -418,8 +422,9 @@ func encodingEurope(name string) (n string) {
 	return n
 }
 
+// EncodingIBM returns a valid IANA index encoding name for Unicode using a custom alias.
 func encodingUnicode(name string) (n string) {
-	switch name {
+	switch strings.ToLower(name) {
 	case "utf16":
 		n = "UTF-16" // Go will use the byte-order-mark
 	case "16be", "utf16b", "utf16be", "utf-16-be":
@@ -599,7 +604,7 @@ func (c *Convert) RunesDOS() {
 }
 
 // RunesEBCDIC switches out EBCDIC IBM mainframe controls with Unicode picture represenations.
-// Where no appropriate picture exists a space is used.
+// Where no appropriate picture exists a space placeholder is used.
 func (c *Convert) RunesEBCDIC() {
 	if len(c.Output.R) == 0 {
 		return
@@ -609,13 +614,14 @@ func (c *Convert) RunesEBCDIC() {
 		if c.skipIgnores(i) {
 			continue
 		}
-		if c.controls(i, r) {
+		if c.control(i, r) {
 			continue
 		}
 	}
 }
 
-func (c *Convert) controls(i int, r rune) bool { // nolint:gocyclo
+// Control switches out an EBCDIC IBM mainframe control with Unicode picture representation.
+func (c *Convert) control(i int, r rune) bool { // nolint:gocyclo
 	const (
 		ht  = 0x89
 		del = 0xa1
@@ -676,6 +682,8 @@ func (c *Convert) controls(i int, r rune) bool { // nolint:gocyclo
 	return false
 }
 
+// MiscCtrls switches out an EBCDIC control with Unicode picture representation.
+// Controls included those shared with ASCII C0+C1, NBSP and unprintables.
 func (c *Convert) miscCtrls(i int, r rune) {
 	switch r {
 	case Nbsp:
@@ -693,6 +701,8 @@ func (c *Convert) miscCtrls(i int, r rune) {
 	}
 }
 
+// OutOfRange replaces EBCDIC runes that are out of range of
+// valid 8-bit ASCII tables with a space placeholder.
 func (c *Convert) outOfRange(i int, r rune) {
 	const skipA, skipB, skipC, skipD = 0xA0, 0xBF, 0xC0, 0xFF
 	switch {
@@ -833,12 +843,14 @@ func (c *Convert) RunesUTF8() {
 	}
 }
 
+// Decode converts a byte to a UTF-8 rune.
 func decode(b byte) (r rune) {
-	r, _ = utf8.DecodeRune([]byte{0xe2, 0x90, b})
+	utf8Sequence := []byte{0xe2, 0x90}
+	r, _ = utf8.DecodeRune(append(utf8Sequence, b))
 	return r
 }
 
-// equalLB reports whether r matches the single or multi-byte, line break character runes.
+// EqualLB reports whether r matches the single or multi-byte, line break character runes.
 func equalLB(r, nl [2]rune) bool {
 	// single-byte line break
 	if nl[1] == 0 {
@@ -849,6 +861,7 @@ func equalLB(r, nl [2]rune) bool {
 		[]byte{byte(nl[0]), byte(nl[1])})
 }
 
+// SkipLineBreaks determines if rune is a linebreak.
 func (c *Convert) skipLineBreaks(i int) bool {
 	if !c.Output.lineBreaks {
 		return false
@@ -888,15 +901,6 @@ func (c *Convert) runeSwap(r rune) rune {
 	return -1
 }
 
-func (c *Convert) skipIgnores(i int) bool {
-	for _, ign := range c.Output.ignores {
-		if c.Output.R[i] == ign {
-			return true
-		}
-	}
-	return false
-}
-
 func (c *Convert) swap(r rune) bool {
 	chk := NUL
 	switch r {
@@ -911,6 +915,16 @@ func (c *Convert) swap(r rune) bool {
 	}
 	for _, c := range c.Flags.SwapChars {
 		if c == chk {
+			return true
+		}
+	}
+	return false
+}
+
+// SkipIgnores determines if the rune should be ignored and skipped.
+func (c *Convert) skipIgnores(i int) bool {
+	for _, ign := range c.Output.ignores {
+		if c.Output.R[i] == ign {
 			return true
 		}
 	}

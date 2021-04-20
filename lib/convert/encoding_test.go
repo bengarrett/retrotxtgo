@@ -11,7 +11,14 @@ import (
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/encoding/unicode"
+	"golang.org/x/text/encoding/unicode/utf32"
 )
+
+func ExampleCharacters() {
+	fmt.Print(string(Characters()[DEL]))
+	fmt.Print(string(Characters()[SquareRoot]))
+	// Output: Δ✓
+}
 
 var (
 	ccp037 = charmap.CodePage037
@@ -113,28 +120,6 @@ func TestANSI(t *testing.T) {
 	}
 }
 
-func TestMark(t *testing.T) {
-	type args struct {
-		b []byte
-	}
-	tests := []struct {
-		name string
-		args args
-		want []byte
-	}{
-		{"empty string", args{}, []byte{239, 187, 191}},
-		{"ascii string", args{[]byte("hi")}, []byte{239, 187, 191, 104, 105}},
-		{"existing bom string", args{BOM()}, []byte{239, 187, 191}},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := Mark(tt.args.b...); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Mark() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestEncoding(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -207,36 +192,10 @@ func TestEncoding(t *testing.T) {
 	}
 }
 
-func TestMakeBytes(t *testing.T) {
-	if l := len(MakeBytes()); l != 256 {
-		t.Errorf("MakeBytes() = %v, want %v", l, 256)
-	}
-}
-
 func TestEndOfFileX(t *testing.T) {
 	b := []byte("hello\x1aworld")
 	if got := EndOfFile(b...); string(got) != "hello" {
 		t.Errorf("TestEndOfFile() = %v, want %v", string(got), "hello")
-	}
-}
-
-func TestEndOfFile(t *testing.T) {
-	tests := []struct {
-		name string
-		b    []byte
-		want []byte
-	}{
-		{"empty", nil, nil},
-		{"none", []byte("hello world"), []byte("hello world")},
-		{"one", []byte("hello\x1aworld"), []byte("hello")},
-		{"two", []byte("hello\x1aworld\x1athis should be hidden"), []byte("hello")},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := EndOfFile(tt.b...); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("EndOfFile() = %v, want %v", got, tt.want)
-			}
-		})
 	}
 }
 
@@ -465,6 +424,24 @@ func Test_equalLB(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := equalLB(tt.args.r, tt.args.nl); got != tt.want {
 				t.Errorf("equalLB() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_encode32(t *testing.T) {
+	tests := []struct {
+		name string
+		a    string
+		want encoding.Encoding
+	}{
+		{"empty", "", nil},
+		{"le", "UTF-32", utf32.UTF32(utf32.LittleEndian, utf32.UseBOM)},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := encode32(tt.a); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("encode32() = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -16,10 +16,8 @@ import (
 )
 
 var (
-	// ErrMissing config missing.
 	ErrMissing = errors.New("config does not exist")
-	// ErrRxt not a retrotxt config file.
-	ErrRxt = errors.New("not a retrotxt config file")
+	ErrRxt     = errors.New("not a retrotxt config file")
 )
 
 // InitDefaults initializes flag and configuration defaults.
@@ -30,19 +28,17 @@ func InitDefaults() {
 	}
 }
 
-// configMissing prints an error notice and exits.
+// ConfigMissing prints an error notice and exits.
 func configMissing(name, suffix string) {
-	const existCode = 1
 	cmd := strings.TrimSuffix(name, suffix) + " create"
 	used := viper.ConfigFileUsed()
 	if used != "" {
 		fmt.Printf("%s %q config file is missing\ncreate it: %s\n",
 			str.Info(), used, str.Cp(cmd+" --config="+used))
-		os.Exit(existCode)
+		return
 	}
 	fmt.Printf("%s no config file is in use\ncreate it: %s\n",
 		str.Info(), str.Cp(cmd))
-	os.Exit(existCode)
 }
 
 // Path is the absolute path and filename of the configuration file.

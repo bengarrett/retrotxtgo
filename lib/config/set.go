@@ -170,8 +170,8 @@ func recommend(s string) string {
 	return fmt.Sprintf(" (suggestion: %s)", str.Cp(s))
 }
 
+// UpdatePrompt prompts the user for a config setting input.
 func updatePrompt(u update) {
-	// print the setting user input prompt
 	switch u.name {
 	case "editor":
 		promptEditor(u)
@@ -188,6 +188,7 @@ func updatePrompt(u update) {
 	}
 }
 
+// MetaPrompts prompts the user for a meta setting.
 func metaPrompts(u update) {
 	switch u.name {
 	case "html.font.embed":
@@ -231,6 +232,7 @@ func metaPrompts(u update) {
 	}
 }
 
+// PromptColorScheme prompts the user for the color scheme setting.
 func promptColorScheme(u update) {
 	previewMeta(u.name, u.value.(string))
 	ccc := create.ColorScheme()
@@ -240,6 +242,7 @@ func promptColorScheme(u update) {
 	setShortStrings(u.name, u.setup, ccc[:]...)
 }
 
+// PromptEditor prompts the user for the editor setting.
 func promptEditor(u update) {
 	s := fmt.Sprint("Set a " + Tip()[u.name])
 	if u.value.(string) != "" {
@@ -251,6 +254,7 @@ func promptEditor(u update) {
 	setEditor(u.name, u.setup)
 }
 
+// PromptLayout prompts the user for the layout setting.
 func promptLayout(u update) {
 	fmt.Println("\n  standard: uses external CSS, JS and woff2 fonts and is the recommended layout for web servers")
 	fmt.Println("  inline:   includes both the CSS and JS as inline elements but is not recommended")
@@ -260,6 +264,7 @@ func promptLayout(u update) {
 	setShortStrings(u.name, u.setup, create.Layouts()...)
 }
 
+// PromptSaveDir prompts the user for the a save destination directory setting.
 func promptSaveDir(u update) {
 	fmt.Println(" Choose a new " + Tip()[u.name] + ":")
 	if home, err := os.UserHomeDir(); err == nil {
@@ -272,6 +277,7 @@ func promptSaveDir(u update) {
 	setDirectory(u.name, u.setup)
 }
 
+// PromptServe prompts the user for a HTTP server port setting.
 func promptServe(u update) {
 	var reset = func() {
 		var p uint
@@ -300,6 +306,7 @@ func promptServe(u update) {
 	setPort(u.name, u.setup)
 }
 
+// PromptStyleHTML prompts the user for the a HTML and CSS style setting.
 func promptStyleHTML(u update) {
 	var d string
 	if s, ok := Reset()[u.name].(string); ok {
@@ -309,6 +316,7 @@ func promptStyleHTML(u update) {
 	setStrings(u.name, u.setup, styles.Names()...)
 }
 
+// PromptStyleInfo prompts the user for the a JS style setting.
 func promptStyleInfo(u update) {
 	var d string
 	if s, ok := Reset()[u.name].(string); ok {
@@ -329,6 +337,7 @@ func Validate(key string) (ok bool) {
 	return true
 }
 
+// ColorElm applies color syntax to an element.
 func colorElm(elm, lexer, style string, color bool) string {
 	if elm == "" {
 		return ""
@@ -343,7 +352,7 @@ func colorElm(elm, lexer, style string, color bool) string {
 
 type names []string
 
-// lists and applies the named themes for the HighlightWriter.
+// String lists and applies the named themes for the HighlightWriter.
 func (n names) string(theme bool, lexer string) string {
 	maxWidth := 0
 	for _, s := range n {
@@ -401,7 +410,7 @@ func (n names) string(theme bool, lexer string) string {
 	return strings.Join(s, "")
 }
 
-// dirExpansion traverses the named directory to apply shell-like expansions.
+// DirExpansion traverses the named directory to apply shell-like expansions.
 // It currently supports limited Bash tilde, shell dot and double dot syntax.
 func dirExpansion(name string) (dir string) {
 	const sep, homeDir, currentDir, parentDir = string(os.PathSeparator), "~", ".", ".."
@@ -450,6 +459,7 @@ func dirExpansion(name string) (dir string) {
 	return dir
 }
 
+// PortInfo returns valid and recommended HTTP port values.
 func portInfo() string {
 	type ports struct {
 		max uint
@@ -465,6 +475,7 @@ func portInfo() string {
 	return str.Cp(pm) + "-" + str.Cp(px) + fmt.Sprintf(" (suggestion: %s)", str.Cp(pr))
 }
 
+// PreviewMeta previews and prompts for a meta element content value.
 func previewMeta(name, value string) {
 	previewMetaPrint(name, value)
 	fmt.Printf("\n%s \n", previewPrompt(name, value))
@@ -490,6 +501,7 @@ func previewMetaPrint(name, value string) {
 	fmt.Printf("\n %s %s.", strings.Title(h[0]), strings.Join(h[1:], " "))
 }
 
+// PreviewTitle previews and prompts for the title element.
 func previewTitle(value string) {
 	elm := fmt.Sprintf("<head>\n  <title>%s</title>", value)
 	fmt.Print(ColorHTML(elm))
@@ -501,6 +513,7 @@ func previewPrompt(name, value string) string {
 	return fmt.Sprintf("%s:", previewPromptPrint(name, value))
 }
 
+// PreviewPromptPrint returns the avaliable input options.
 func previewPromptPrint(name, value string) (p string) {
 	p = "Set a new value"
 	if name == "html.meta.keywords" {
@@ -525,6 +538,7 @@ func recommendPrompt(name, value, suggest string) string {
 	return fmt.Sprintf("%s%s:", p, recommend(suggest))
 }
 
+// Save value to the named configuration.
 func save(name string, setup bool, value interface{}) {
 	if name == "" {
 		logs.LogFatal(fmt.Errorf("save: %w", ErrNoName))
@@ -550,6 +564,8 @@ func save(name string, setup bool, value interface{}) {
 	}
 }
 
+// SetDirectory checks the existance of a directory
+// and saves the path as a configuration regardless of the result.
 func setDirectory(name string, setup bool) {
 	if name == "" {
 		logs.LogFatal(fmt.Errorf("set directory: %w", ErrNoName))
@@ -574,6 +590,8 @@ func setDirectory(name string, setup bool) {
 	save(name, setup, dir)
 }
 
+// SetEditor checks the existance of given text editor location
+// and saves it as a configuration regardless of the result.
 func setEditor(name string, setup bool) {
 	if name == "" {
 		logs.LogFatal(fmt.Errorf("set editor: %w", ErrNoName))
@@ -593,6 +611,7 @@ func setEditor(name string, setup bool) {
 	save(name, setup, val)
 }
 
+// SetFont previews and saves a default font setting.
 func setFont(value string, setup bool) {
 	var (
 		b bytes.Buffer
@@ -612,6 +631,7 @@ func setFont(value string, setup bool) {
 	setShortStrings("html.font.family", setup, create.Fonts()...)
 }
 
+// SetFont previews and saves the embed Base64 font setting.
 func setFontEmbed(value, setup bool) {
 	name := "html.font.embed"
 	elm := `@font-face{
@@ -628,6 +648,7 @@ func setFontEmbed(value, setup bool) {
 	save(name, setup, val)
 }
 
+// SetGenerator previews and prompts the custom RetroTxt generator meta tag.
 func setGenerator(value bool) {
 	name, ver := "html.meta.generator", v.Semantic(v.Release.Version)
 	elm := fmt.Sprintf("<head>\n  <meta name=\"generator\" content=\"RetroTxt v%s, %s\">",
@@ -644,6 +665,7 @@ func setGenerator(value bool) {
 	}
 }
 
+// SetIndex prompts for a value from a list of valid choices and saves the result.
 func setIndex(name string, setup bool, data ...string) {
 	if name == "" {
 		logs.LogFatal(fmt.Errorf("set index: %w", ErrNoName))
@@ -652,6 +674,8 @@ func setIndex(name string, setup bool, data ...string) {
 	save(name, setup, p)
 }
 
+// SetNoTranslate previews and prompts for the notranslate HTML attribute
+// and Google meta elemenet.
 func setNoTranslate(value, setup bool) {
 	name := "html.meta.notranslate"
 	elm := "<html translate=\"no\">\n  <head>\n    <meta name=\"google\" content=\"notranslate\">"
@@ -665,6 +689,7 @@ func setNoTranslate(value, setup bool) {
 	save(name, setup, val)
 }
 
+// SetPort prompts for and saves HTTP port.
 func setPort(name string, setup bool) {
 	if name == "" {
 		logs.LogFatal(fmt.Errorf("set port: %w", ErrNoName))
@@ -673,6 +698,7 @@ func setPort(name string, setup bool) {
 	save(name, setup, val)
 }
 
+// SetRetrotxt previews and prompts the custom retrotxt meta tag.
 func setRetrotxt(value bool) {
 	name := "html.meta.retrotxt"
 	elm := "<head>\n  <meta name=\"retrotxt\" content=\"encoding: IBM437; linebreak: CRLF; length: 50; width: 80; name: file.txt\">"
@@ -688,6 +714,7 @@ func setRetrotxt(value bool) {
 	}
 }
 
+// SetShortStrings prompts and saves setting values that support 1 character aliases.
 func setShortStrings(name string, setup bool, data ...string) {
 	val := prompt.ShortStrings(&data)
 	switch val {
@@ -702,6 +729,7 @@ func setShortStrings(name string, setup bool, data ...string) {
 	save(name, setup, val)
 }
 
+// SetString prompts and saves a single word setting value.
 func setString(name string, setup bool) {
 	if name == "" {
 		logs.LogFatal(fmt.Errorf("set string: %w", ErrNoName))
@@ -716,6 +744,7 @@ func setString(name string, setup bool) {
 	save(name, setup, val)
 }
 
+// SetStrings prompts and saves a string of text setting value.
 func setStrings(name string, setup bool, data ...string) {
 	if name == "" {
 		logs.LogFatal(fmt.Errorf("set strings: %w", ErrNoName))

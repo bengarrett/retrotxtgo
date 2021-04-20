@@ -1,9 +1,33 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"testing"
+
+	"github.com/gookit/color"
 )
+
+func Example_updateBool() {
+	color.Enable = false
+	updateBool(false, "example")
+	// Output: example is currently not in use
+}
+
+func Example_updateString() {
+	color.Enable = false
+	updateString("", "example", "")
+	updateString("x", "save-directory", "")
+	// Output: example is currently not in use
+	//
+	//   save-directory is set to "" ✗
+}
+
+func Example_recommend() {
+	color.Enable = false
+	fmt.Print(recommend(""))
+	// Output: (suggestion: do not use)
+}
 
 func TestList(t *testing.T) {
 	tests := []struct {

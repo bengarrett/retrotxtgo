@@ -135,17 +135,11 @@ const (
 )
 
 var (
-	// ErrCFG unknown config name.
-	ErrCFG = errors.New("unknown configuration name")
-	// ErrEnv $editor env error.
-	ErrEnv = errors.New("set one by creating an $EDITOR environment variable in your shell configuration")
-	// ErrKey no bool key.
-	ErrKey = errors.New("key does not exist or is not a bool value")
-	// ErrNoName empty name.
-	ErrNoName = errors.New("name cannot be empty")
-	// ErrNoFName empty filename.
+	ErrCFG     = errors.New("unknown configuration name")
+	ErrEnv     = errors.New("set one by creating an $EDITOR environment variable in your shell configuration")
+	ErrKey     = errors.New("key does not exist or is not a bool value")
+	ErrNoName  = errors.New("name cannot be empty")
 	ErrNoFName = errors.New("filename cannot be empty")
-	// ErrSetting unknown setting name.
 	ErrSetting = errors.New("configuration setting name is not known")
 )
 

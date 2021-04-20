@@ -106,7 +106,7 @@ func (c *Convert) Transform() error {
 	return nil
 }
 
-// blank invalid shiftjis characters when printing 8-bit tables.
+// TransformFixJISTable blanks invalid ShiftJIS characters while printing 8-bit tables.
 func (c *Convert) transformFixJISTable() {
 	if c.Source.E == japanese.ShiftJIS && c.Source.table {
 		// this is only for the table command,
@@ -121,6 +121,7 @@ func (c *Convert) transformFixJISTable() {
 	}
 }
 
+// Decode transforms Source bytes into Output runes.
 func (c *Convert) decode(e encoding.Encoding) error {
 	result, err := e.NewDecoder().Bytes(c.Source.B)
 	if err != nil {
@@ -131,7 +132,7 @@ func (c *Convert) decode(e encoding.Encoding) error {
 	return nil
 }
 
-// transform Unicode-16 or Unicode-32 text into UTF-8 encoded Unicode.
+// TransformUnicode transforms Unicode-16 or Unicode-32 text into UTF-8 encoded Unicode.
 func (c *Convert) transformUnicode() error {
 	var (
 		u16be  = unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM)
@@ -163,6 +164,7 @@ func (c *Convert) transformUnicode() error {
 	return c.transformU32(c.Source.E)
 }
 
+// TransformU32 transforms Unicode-32 text into UTF-8 encoded Unicode.
 func (c *Convert) transformU32(e encoding.Encoding) error {
 	var (
 		u32be  = utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM)
@@ -191,6 +193,7 @@ func (c *Convert) transformU32(e encoding.Encoding) error {
 	return nil
 }
 
+// Width enforces a row length by inserting newline characters.
 func (c *Convert) width(max int) {
 	if max < 1 {
 		return
@@ -224,6 +227,7 @@ func (c *Convert) width(max int) {
 	c.Output.R = []rune(w.String())
 }
 
+// UnicodeControls flags standard control characters to be ignored.
 func (c *Convert) unicodeControls() {
 	const (
 		bell = iota + 7 // BEL = x07

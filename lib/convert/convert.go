@@ -1,5 +1,5 @@
-// Package convert is extends Go's x/text/encoding capability to convert legacy text
-// to UTF-8.
+// Package convert is extends Go's x/text/encoding capability
+// to convert legacy encoded text to a modern UTF-8 encoding.
 package convert
 
 import (

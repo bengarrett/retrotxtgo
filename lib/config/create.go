@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/spf13/viper"
-
 	"retrotxt.com/retrotxt/lib/filesystem"
 	"retrotxt.com/retrotxt/lib/str"
 )
@@ -20,6 +19,7 @@ func Create(name string, ow bool) (err error) {
 	switch {
 	case !os.IsNotExist(err) && !ow:
 		configDoesExist(cmdPath, "create")
+		os.Exit(1)
 	case os.IsNotExist(err):
 		// a missing named file is okay
 	case err != nil:
@@ -45,5 +45,4 @@ func configDoesExist(name, suffix string) {
 	fmt.Printf(" edit it: %s\n", str.Cp(cmd+" edit"))
 	fmt.Printf("  delete: %s\n", str.Cp(cmd+" delete"))
 	fmt.Printf("   reset: %s\n", str.Cp(cmd+" create --overwrite"))
-	os.Exit(1)
 }

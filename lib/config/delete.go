@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/spf13/viper"
-
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/prompt"
 )
@@ -15,9 +14,11 @@ func Delete() (err logs.Generic) {
 	cfg := viper.ConfigFileUsed()
 	if cfg == "" {
 		configMissing(cmdPath, "delete")
+		os.Exit(1)
 	}
 	if _, err := os.Stat(cfg); os.IsNotExist(err) {
 		configMissing(cmdPath, "delete")
+		os.Exit(1)
 	} else if err != nil {
 		return logs.Generic{
 			Issue: "failed to stat the config file",

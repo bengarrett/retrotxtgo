@@ -16,6 +16,7 @@ func Edit() (err logs.Generic) {
 	file := viper.ConfigFileUsed()
 	if file == "" {
 		configMissing(cmdPath, "edit")
+		os.Exit(1)
 	}
 	edit := Editor()
 	if edit == "" {

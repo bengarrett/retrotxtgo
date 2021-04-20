@@ -91,6 +91,7 @@ func List() *bytes.Buffer {
 	return &buf
 }
 
+// Cells return character encoding details for use in a text table.
 func cells(e encoding.Encoding) (c cell) {
 	if e == nil {
 		return cell{}
@@ -119,6 +120,7 @@ func cells(e encoding.Encoding) (c cell) {
 	return c
 }
 
+// Alias return character encoding aliases.
 func alias(s, val string, e encoding.Encoding) string {
 	a := strings.ToLower(s)
 	if val == a {
@@ -157,6 +159,7 @@ func alias(s, val string, e encoding.Encoding) string {
 	return a
 }
 
+// Uniform formats MIME values.
 func uniform(mime string) (s string) {
 	s = mime
 	s = strings.Replace(s, "IBM00", "CP", 1)

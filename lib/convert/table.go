@@ -21,9 +21,7 @@ import (
 const width = 67
 
 var (
-	// ErrUTF16 UTF-16 unsupported.
 	ErrUTF16 = errors.New("utf-16 table encodings are not supported")
-	// ErrUTF32 UTF-32 unsupported.
 	ErrUTF32 = errors.New("utf-32 table encodings are not supported")
 )
 
@@ -102,6 +100,7 @@ func Table(name string) (*bytes.Buffer, error) {
 	return &buf, nil
 }
 
+// Character converts rune to an encoded string.
 func character(i int, r rune, cp encoding.Encoding) string {
 	// ISO-8859-11 is not included in Go so a user defined charmap is used.
 	var iso8859_11 = charmap.XUserDefined
@@ -139,6 +138,7 @@ func character(i int, r rune, cp encoding.Encoding) string {
 	return string(r)
 }
 
+// CharmapAlias humanizes ISO encodings.
 func charmapAlias(cp encoding.Encoding) string { // nolint:gocyclo
 	if c := charmapDOS(cp); c != "" {
 		return c
@@ -185,6 +185,7 @@ func charmapAlias(cp encoding.Encoding) string { // nolint:gocyclo
 	return ""
 }
 
+// CharmapDOS humanizes DOS encodings.
 func charmapDOS(cp encoding.Encoding) string {
 	switch cp {
 	case charmap.CodePage037:
@@ -213,6 +214,7 @@ func charmapDOS(cp encoding.Encoding) string {
 	return ""
 }
 
+// CharmapDOS humanizes encodings.
 func charmapMisc(cp encoding.Encoding) string {
 	switch cp {
 	case charmap.KOI8R:
@@ -229,6 +231,7 @@ func charmapMisc(cp encoding.Encoding) string {
 	return ""
 }
 
+// CharmapDOS humanizes common encodings.
 func charmapStandard(cp encoding.Encoding) string {
 	switch cp {
 	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
