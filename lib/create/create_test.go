@@ -3,7 +3,6 @@ package create
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -12,6 +11,8 @@ import (
 	"testing"
 
 	"github.com/spf13/viper"
+	"golang.org/x/text/encoding"
+	"golang.org/x/text/encoding/charmap"
 )
 
 func ExampleColorScheme() {
@@ -28,61 +29,71 @@ func ExampleRobots() {
 	// Output: follow
 }
 
-func Example_saveAssets() {
-	// Create a temporary directory
-	tmpDir := filepath.Join(os.TempDir(), "retrotxt_example_save_assets")
-	if err := os.Mkdir(tmpDir, 0755); err != nil {
-		log.Print(err)
-	}
-	defer os.RemoveAll(tmpDir)
+func Test_saveAssets(t *testing.T) {
+	t.Run("comment", func(t *testing.T) {
+		// Create a temporary directory
+		tmpDir := filepath.Join(os.TempDir(), "retrotxt_example_save_assets")
+		if err := os.Mkdir(tmpDir, 0755); err != nil {
+			t.Errorf("saveAssets make temp dir: %w", err)
+		}
+		defer os.RemoveAll(tmpDir)
 
-	// Initialize
-	a := Args{}
-	a.Save.Destination = tmpDir
-	a.test = true
+		// Initialize
+		a := Args{}
+		a.Save.Destination = tmpDir
+		a.test = true
 
-	// Save files
-	b := []byte("hello")
-	if err := a.saveAssets(&b); err != nil {
-		log.Print(err)
-	}
+		// Save files
+		b := []byte("hello")
+		if err := a.saveAssets(&b); err != nil {
+			t.Errorf("saveAssets: %w", err)
+		}
 
-	// Count the saved files in the temporary directory
-	files, err := ioutil.ReadDir(tmpDir)
-	if err != nil {
-		log.Print(err)
-	}
-	fmt.Printf("Files created: %d", len(files))
-	// Output:Files created: 5
+		// Count the saved files in the temporary directory
+		files, err := ioutil.ReadDir(tmpDir)
+		if err != nil {
+			t.Errorf("saveAssets read dir: %w", err)
+		}
+		const zero = 0
+
+		if got := len(files); got == zero {
+			t.Errorf("saveAssets() file count = %v", got)
+		}
+	})
 }
 
-func Example_zipAssets() {
-	// Create a temporary directory
-	tmpDir := filepath.Join(os.TempDir(), "retrotxt_example_save_assets")
-	if err := os.Mkdir(tmpDir, 0755); err != nil {
-		log.Print(err)
-	}
-	defer os.RemoveAll(tmpDir)
+func Test_zipAssets(t *testing.T) {
+	t.Run("comment", func(t *testing.T) {
+		// Create a temporary directory
+		tmpDir := filepath.Join(os.TempDir(), "retrotxt_example_save_assets")
+		if err := os.Mkdir(tmpDir, 0755); err != nil {
+			t.Errorf("saveAssets make temp dir: %w", err)
+		}
+		defer os.RemoveAll(tmpDir)
 
-	// Initialize
-	a := Args{}
-	a.layout = Standard
-	a.Save.Destination = tmpDir
-	a.test = true
+		// Initialize
+		a := Args{}
+		a.layout = Standard
+		a.Save.Destination = tmpDir
+		a.test = true
 
-	// Create a zip file
-	name := filepath.Join(os.TempDir(), zipName)
-	b := []byte("hello")
-	a.zipAssets(os.TempDir(), &b)
-	defer os.Remove(name)
+		// Create a zip file
+		name := filepath.Join(os.TempDir(), zipName)
+		b := []byte("hello")
+		a.zipAssets(os.TempDir(), &b)
+		defer os.Remove(name)
 
-	// Print the filename of the new zip file
-	file, err := os.Stat(name)
-	if err != nil {
-		log.Print(err)
-	}
-	fmt.Printf("%s", file.Name())
-	// Output:retrotxt.zip
+		// Print the filename of the new zip file
+		file, err := os.Stat(name)
+		if err != nil {
+			t.Errorf("stat file: %w", err)
+		}
+
+		const want = "retrotxt.zip"
+		if got := file.Name(); got != want {
+			t.Errorf("zipAssets() filename = %v, want %v", got, want)
+		}
+	})
 }
 
 func Test_Save(t *testing.T) {
@@ -271,6 +282,32 @@ func Test_destination(t *testing.T) {
 			}
 			if gotPath != tt.wantPath {
 				t.Errorf("destination() = %v, want %v", gotPath, tt.wantPath)
+			}
+		})
+	}
+}
+
+func TestNormalize(t *testing.T) {
+	hi := []rune("hello world")
+	cp437 := charmap.CodePage437
+	empty := []byte("")
+	type args struct {
+		e encoding.Encoding
+		r []rune
+	}
+	tests := []struct {
+		name  string
+		args  args
+		wantB []byte
+	}{
+		{"empty", args{nil, nil}, empty},
+		{"no enc", args{nil, hi}, []byte(string(hi))},
+		{"enc", args{cp437, hi}, []byte(string(hi))},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotB := Normalize(tt.args.e, tt.args.r...); !reflect.DeepEqual(gotB, tt.wantB) {
+				t.Errorf("Normalize() = %v, want %v", gotB, tt.wantB)
 			}
 		})
 	}
