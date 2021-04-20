@@ -11,3 +11,21 @@ func Test_examples(t *testing.T) {
 		}
 	})
 }
+
+func Test_skipTable(t *testing.T) {
+	tests := []struct {
+		n    string
+		name string
+		want bool
+	}{
+		{"empty", "", false},
+		{"utf", "UTF-32Be", true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.n, func(t *testing.T) {
+			if got := skipTable(tt.name); got != tt.want {
+				t.Errorf("skipTable() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

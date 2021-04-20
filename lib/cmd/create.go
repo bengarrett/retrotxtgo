@@ -374,7 +374,6 @@ func appendSAUCE(src *[]byte) {
 // and uses it as the input source text.
 func staticTextfile(f sample.Flags, conv *convert.Convert, arg string, changed bool) (src []byte, cont bool) {
 	var err error
-	// internal, packed example file
 	if ok := sample.Valid(arg); ok {
 		var p sample.File
 		p, err = f.Open(arg, conv)
