@@ -395,7 +395,10 @@ func serveBytes(i int, cmd *cobra.Command, b *[]byte) bool {
 		// index.html could be generated with links to each of the htmls.
 	}
 	if serve := cmd.Flags().Lookup("serve"); serve.Changed {
-		html.Serve(b)
+		i, a, err := html.Serve(b)
+		if err != nil {
+			logs.Fatal(i, a, err)
+		}
 		return true
 	}
 	return false

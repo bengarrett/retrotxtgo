@@ -138,7 +138,6 @@ func (args *Args) marshalTextTransform(b *[]byte) (buf bytes.Buffer, err error) 
 }
 
 // NewTemplate creates and parses a new template file.
-// The argument test is used internally.
 func (args *Args) newTemplate() (*template.Template, error) {
 	if err := args.templateCache(); err != nil {
 		return nil, fmt.Errorf("using existing template cache: %w", err)

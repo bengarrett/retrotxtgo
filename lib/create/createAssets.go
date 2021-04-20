@@ -41,7 +41,9 @@ func (args *Args) saveCSS(c chan error) {
 	if err != nil {
 		c <- err
 	}
-	bytesStats(name, nn)
+	if !args.test {
+		fmt.Println(bytesStats(name, nn))
+	}
 	c <- nil
 }
 
@@ -64,7 +66,9 @@ func (args *Args) saveFavIcon(c chan error) {
 	if err != nil {
 		c <- err
 	}
-	bytesStats(name, nn)
+	if !args.test {
+		fmt.Println(bytesStats(name, nn))
+	}
 	c <- nil
 }
 
@@ -108,7 +112,9 @@ func (args *Args) saveFontCSS(name string) error {
 	if err != nil {
 		return err
 	}
-	bytesStats(name, nn)
+	if !args.test {
+		fmt.Println(bytesStats(name, nn))
+	}
 	return nil
 }
 
@@ -126,7 +132,9 @@ func (args *Args) saveFontWoff2(name, packName string) error {
 	if err != nil {
 		return err
 	}
-	bytesStats(name, nn)
+	if !args.test {
+		fmt.Println(bytesStats(name, nn))
+	}
 	return nil
 }
 
@@ -150,7 +158,9 @@ func (args *Args) saveJS(c chan error) {
 	if err != nil {
 		c <- err
 	}
-	bytesStats(name, nn)
+	if !args.test {
+		fmt.Println(bytesStats(name, nn))
+	}
 	c <- nil
 }
 
@@ -180,7 +190,9 @@ func (args *Args) saveHTML(b *[]byte, c chan error) {
 	if err != nil {
 		c <- err
 	}
-	bytesStats(name, nn)
+	if !args.test {
+		fmt.Println(bytesStats(name, nn))
+	}
 	if err := w.Flush(); err != nil {
 		c <- err
 	}
@@ -188,21 +200,20 @@ func (args *Args) saveHTML(b *[]byte, c chan error) {
 }
 
 // BytesStats humanizes, colorizes and prints the filename and size.
-func bytesStats(name string, nn int) {
+func bytesStats(name string, nn int) string {
 	const kB = 1000
 	if nn == 0 {
-		color.OpFuzzy.Printf("saved to %s (zero-byte file)\n", name)
-		return
+		return color.OpFuzzy.Sprintf("saved to %s (zero-byte file)", name)
 	}
 	h := humanize.Decimal(int64(nn), language.AmericanEnglish)
-	color.OpFuzzy.Printf("saved to %s", name)
+	s := color.OpFuzzy.Sprintf("saved to %s", name)
 	switch {
 	case nn < kB:
-		color.OpFuzzy.Printf(", %s", h)
+		s += color.OpFuzzy.Sprintf(", %s", h)
 	default:
-		color.OpFuzzy.Printf(", %s (%d)", h, nn)
+		s += color.OpFuzzy.Sprintf(", %s (%d)", h, nn)
 	}
-	fmt.Print("\n")
+	return s
 }
 
 // Destination validate and returns the path of the named file.

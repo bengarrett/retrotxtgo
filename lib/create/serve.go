@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
 	"os"
@@ -36,7 +37,7 @@ func Port(port uint) bool {
 }
 
 // Serve data over the internal HTTP server.
-func (args *Args) Serve(b *[]byte) {
+func (args *Args) Serve(b *[]byte) (issue, arg string, err error) {
 	args.override()
 	port := args.Port
 	if port == 0 || !prompt.PortValid(port) {
@@ -49,19 +50,19 @@ func (args *Args) Serve(b *[]byte) {
 			port++
 			continue
 		case tries >= max:
-			logs.Fatal("http ports", fmt.Sprintf("%d-%d", args.Port, port), ErrPort)
-			continue
+			return "http ports", fmt.Sprintf("%d-%d", args.Port, port), ErrPort
 		default:
 			args.Port = port
 		}
 		break
 	}
 	if err := args.createDir(b); err != nil {
-		logs.Fatal("serve create directory", "", err)
+		return "serve createDir", "", err
 	}
-	if err := args.serveDir(); err != nil {
-		logs.Fatal("serve directory", "", err)
-	}
+
+	args.serveDir()
+
+	return "", "", nil
 }
 
 // Override the user flag values which are not yet implemented.
@@ -81,7 +82,9 @@ func (args *Args) override() {
 		return
 	}
 	if l == 1 {
-		fmt.Printf("Using the %s\n", s[0])
+		if !args.test {
+			fmt.Printf("Using the %s\n", s[0])
+		}
 		return
 	}
 	fmt.Printf("Using %s\n", strings.Join(s, " and "))
@@ -94,46 +97,82 @@ func (args *Args) createDir(b *[]byte) (err error) {
 	if err != nil {
 		return fmt.Errorf("failed to make a temporary serve directory: %w", err)
 	}
-	args.Create(b)
+	i, a, err := args.Create(b)
+	if err != nil {
+		return fmt.Errorf("%s%s %s", i, a, err)
+	}
 	return nil
 }
 
 // ServeDir hosts the named souce directory on the internal HTTP server.
-func (args *Args) serveDir() (err error) {
-	http.Handle("/", http.FileServer(http.Dir(args.Save.Destination)))
-	const timeout, localHost = 15, "127.0.0.1"
+func (args *Args) serveDir() {
+	const timeout = 5
 	srv := &http.Server{
-		Addr:         fmt.Sprintf("%s:%v", localHost, args.Port),
-		WriteTimeout: timeout * time.Second,
-		ReadTimeout:  timeout * time.Second,
+		Addr: fmt.Sprintf(":%v", args.Port),
 	}
-	fmt.Printf("\nWeb server is available at %s\n",
-		str.Cp(fmt.Sprintf("http:/%v", srv.Addr)))
-	fmt.Println(str.Cinf("Press Ctrl+C to stop\n"))
-	args.watch()
-	if err = srv.ListenAndServe(); err != nil {
-		return fmt.Errorf("tcp listen and serve failed: %w", err)
+	http.Handle("/", http.FileServer(http.Dir(args.Save.Destination)))
+
+	var ctx context.Context
+	var cancel context.CancelFunc
+	if args.test {
+
+		go func() {
+			if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+				log.Fatalf("tcp listen and serve failed: %s\n", err)
+			}
+		}()
+		ctx, cancel = context.WithCancel(context.Background())
+		// cancel the server straight away
+		cancel()
+
+	} else {
+
+		// listen for Ctrl+C keyboard interrupt
+		done := make(chan os.Signal, 1)
+		signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+		go func() {
+			fmt.Printf("\nWeb server is available at %s\n",
+				str.Cp(fmt.Sprintf("http://localhost%v", srv.Addr)))
+			fmt.Println(str.Cinf("Press Ctrl+C to stop\n"))
+
+			if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+				log.Fatalf("tcp listen and serve failed: %s\n", err)
+			}
+		}()
+
+		<-done
+		ctx, cancel = context.WithTimeout(context.Background(), timeout*time.Second)
+
 	}
-	return nil
+
+	defer func() {
+		cancel()
+		args.cleanup()
+	}()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatalf("http server shutdown failed: %s\n", err)
+	}
+
+	if args.test {
+		fmt.Print("Server example was successful")
+	}
 }
 
-// Watch intercepts Ctrl-C keypress combinations and exits to the operating system.
-func (args *Args) watch() {
-	c := make(chan os.Signal)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-c
+// Cleanup the temporary files and directories.
+func (args Args) cleanup() {
+	if !args.test {
 		fmt.Printf("\n\nServer shutdown and directory removal of: %s\n", args.Save.Destination)
-		tmp, err := path.Match(fmt.Sprintf("%s%s*",
-			string(os.PathSeparator), os.TempDir()), args.Save.Destination)
-		if err != nil {
-			logs.Fatal("path match pattern failed", "", err)
+	}
+	tmp, err := path.Match(fmt.Sprintf("%s%s*",
+		string(os.PathSeparator), os.TempDir()), args.Save.Destination)
+	if err != nil {
+		logs.Fatal("path match pattern failed", "", err)
+	}
+	if tmp {
+		if err := os.RemoveAll(args.Save.Destination); err != nil {
+			logs.Fatal("could not clean the temporary directory: %q: %s", args.Save.Destination, err)
 		}
-		if tmp {
-			if err := os.RemoveAll(args.Save.Destination); err != nil {
-				logs.Fatal("could not clean the temporary directory: %q: %s", args.Save.Destination, err)
-			}
-		}
-		os.Exit(0)
-	}()
+	}
 }

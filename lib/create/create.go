@@ -198,28 +198,29 @@ func (l Layout) Pack() string {
 }
 
 // Create handles the target output command arguments.
-func (args *Args) Create(b *[]byte) {
-	var err error
-
+func (args *Args) Create(b *[]byte) (issue, arg string, err error) {
 	args.layout, err = layout(args.Layout)
 	if err != nil {
-		logs.Fatal("create layout", args.Layout, err)
+		return "create layout:", args.Layout, err
 	}
 
 	switch {
 	case args.Save.AsFiles:
-		args.saveAssets(b)
+		if err := args.saveAssets(b); err != nil {
+			return "could not save file:", "", err
+		}
 	case args.Save.Compress:
-		args.zipAssets(b)
+		args.zipAssets("", b)
 	default:
 		// print to terminal
 		if err = args.Stdout(b); err != nil {
-			logs.Fatal("create", "stdout", err)
+			return "create:", "stdout", err
 		}
 	}
+	return "", "", nil
 }
 
-func (args *Args) saveAssets(b *[]byte) {
+func (args *Args) saveAssets(b *[]byte) error {
 	var err error
 	if args.Save.Destination == "" {
 		dir := []string{viper.GetString("save-directory")}
@@ -234,31 +235,27 @@ func (args *Args) saveAssets(b *[]byte) {
 	go args.saveJS(ch)
 	go args.saveFavIcon(ch)
 	err1, err2, err3, err4, err5 := <-ch, <-ch, <-ch, <-ch, <-ch
-	const errS, errCode = "could not save file", 1
 	if err1 != nil {
-		logs.Println(errS, "", err1)
-		os.Exit(errCode)
+		return err
 	}
 	if err2 != nil {
-		logs.Println(errS, "", err2)
-		os.Exit(errCode)
+		return err
 	}
 	if err3 != nil {
-		logs.Println(errS, "", err3)
-		os.Exit(errCode)
+		return err
 	}
 	if err4 != nil {
-		logs.Println(errS, "", err4)
-		os.Exit(errCode)
+		return err
 	}
 	if err5 != nil {
-		logs.Println(errS, "", err5)
-		os.Exit(errCode)
+		return err
 	}
+	return nil
 }
 
 // ZipAssets compresses all assets into a single zip archive.
-func (args *Args) zipAssets(b *[]byte) {
+// An empty destination directory argument will save the zip file to the user working directory.
+func (args *Args) zipAssets(destDir string, b *[]byte) {
 	var err error
 
 	defer func() {
@@ -280,16 +277,25 @@ func (args *Args) zipAssets(b *[]byte) {
 		logs.Fatal("save to directory failure", "temporary", err)
 	}
 
-	args.saveAssets(b)
+	if err := args.saveAssets(b); err != nil {
+		logs.Println("could not save file", "", err)
+		os.Exit(1)
+	}
+
+	name := zipName
+	if destDir != "" {
+		name = filepath.Join(destDir, zipName)
+	}
 
 	zip := filesystem.Zip{
-		Name:      zipName,
+		Name:      name,
 		Root:      args.Save.Destination,
 		Comment:   "",
 		Overwrite: args.Save.OW,
+		Quiet:     args.test,
 	}
 	if err = zip.Create(); err != nil {
-		logs.Fatal("zip archive", zipName, err)
+		logs.Fatal("zip archive", name, err)
 	}
 }
 

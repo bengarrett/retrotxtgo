@@ -3,6 +3,7 @@ package create
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -12,6 +13,77 @@ import (
 
 	"github.com/spf13/viper"
 )
+
+func ExampleColorScheme() {
+	fmt.Print(ColorScheme()[0])
+	// Output: normal
+}
+func ExampleReferrer() {
+	fmt.Print(Referrer()[1])
+	// Output: origin
+}
+
+func ExampleRobots() {
+	fmt.Print(Robots()[2])
+	// Output: follow
+}
+
+func Example_saveAssets() {
+	// Create a temporary directory
+	tmpDir := filepath.Join(os.TempDir(), "retrotxt_example_save_assets")
+	if err := os.Mkdir(tmpDir, 0755); err != nil {
+		log.Print(err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	// Initialize
+	a := Args{}
+	a.Save.Destination = tmpDir
+	a.test = true
+
+	// Save files
+	b := []byte("hello")
+	if err := a.saveAssets(&b); err != nil {
+		log.Print(err)
+	}
+
+	// Count the saved files in the temporary directory
+	files, err := ioutil.ReadDir(tmpDir)
+	if err != nil {
+		log.Print(err)
+	}
+	fmt.Printf("Files created: %d", len(files))
+	// Output:Files created: 5
+}
+
+func Example_zipAssets() {
+	// Create a temporary directory
+	tmpDir := filepath.Join(os.TempDir(), "retrotxt_example_save_assets")
+	if err := os.Mkdir(tmpDir, 0755); err != nil {
+		log.Print(err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	// Initialize
+	a := Args{}
+	a.layout = Standard
+	a.Save.Destination = tmpDir
+	a.test = true
+
+	// Create a zip file
+	name := filepath.Join(os.TempDir(), zipName)
+	b := []byte("hello")
+	a.zipAssets(os.TempDir(), &b)
+	defer os.Remove(name)
+
+	// Print the filename of the new zip file
+	file, err := os.Stat(name)
+	if err != nil {
+		log.Print(err)
+	}
+	fmt.Printf("%s", file.Name())
+	// Output:retrotxt.zip
+}
 
 func Test_Save(t *testing.T) {
 	type args struct {

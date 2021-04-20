@@ -19,11 +19,16 @@ type Files []string
 
 // Zip archive details.
 type Zip struct {
-	Name      string
-	Root      string
-	Comment   string
+	// Zip path and filename.
+	Name string
+	// Root path of the directory to archive.
+	Root string
+	// Comment to embed.
+	Comment string
+	// Overwrite an existing named zip file if encountered.
 	Overwrite bool
-	Quiet     bool
+	// Quiet suppresses all non-error messages.
+	Quiet bool
 }
 
 var (

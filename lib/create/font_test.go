@@ -1,12 +1,18 @@
 package create
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/japanese"
 )
+
+func ExampleFonts() {
+	fmt.Print(Fonts()[2])
+	// Output: vga
+}
 
 func TestAutoFont(t *testing.T) {
 	tests := []struct {
