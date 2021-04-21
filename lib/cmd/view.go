@@ -39,89 +39,118 @@ var viewCmd = &cobra.Command{
   retrotxt view file1.txt file2.txt --encode="iso-8859-1"
   cat file.txt | retrotxt view`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var err error
-		conv := convert.Convert{}
-		conv.Flags = convert.Flags{
-			Controls:  viewFlag.controls,
-			SwapChars: viewFlag.swap,
-			Width:     viewFlag.width,
-		}
-		f := sample.Flags{}
-		// handle defaults that are left empty for usage formatting
-		if c := cmd.Flags().Lookup("controls"); !c.Changed {
-			conv.Flags.Controls = []string{eof, tab}
-		}
-		if s := cmd.Flags().Lookup("swap-chars"); !s.Changed {
-			conv.Flags.SwapChars = []int{null, verticalBar}
-		}
-		// piped input from other programs
-		if filesystem.IsPipe() {
-			if cp := cmd.Flags().Lookup("encode"); cp.Changed {
-				if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
-					logs.Fatal("encoding not known or supported", "pipe", err)
-				}
-				conv.Source.E = f.From
-			}
-			viewPipe(cmd, &conv)
-		}
-		// user arguments
-		checkUse(cmd, args...)
-		for i, arg := range args {
-			conv.Output = convert.Output{} // output must be reset
-			if i > 0 {
-				fmt.Printf(" \n%s\n\n", str.Cb(strings.Repeat("\u2500", 40))) // horizontal bar
-			}
-			if cp := cmd.Flags().Lookup("encode"); cp.Changed {
-				if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
-					logs.Fatal("encoding not known or supported", arg, err)
-				}
-				conv.Source.E = f.From
-			}
-			// internal example file
-			if ok := sample.Valid(arg); ok {
-				var p sample.File
-				if p, err = f.Open(arg, &conv); err != nil {
-					logs.Println("sample", arg, err)
-					continue
-				}
-				// --to flag is currently ignored
-				if to := cmd.Flags().Lookup("to"); to.Changed {
-					if viewToFlag(p.Runes...) {
-						continue
-					}
-				}
-				fmt.Println(string(p.Runes))
-				continue
-			}
-			// read file
-			b, err := filesystem.Read(arg)
-			if err != nil {
-				logs.Println("read file", arg, err)
-				continue
-			}
-			// convert text
-			var r []rune
-			if endOfFile(conv.Flags) {
-				r, err = conv.Text(&b)
-			} else {
-				r, err = conv.Dump(&b)
-			}
-			if err != nil {
-				logs.Println("convert text", arg, err)
-				continue
-			}
-			// to flag
-			if to := cmd.Flags().Lookup("to"); to.Changed {
-				if viewToFlag(r...) {
-					continue
-				}
-			}
-			fmt.Println(string(r))
-			if i < len(args) {
-				fmt.Print("\n")
-			}
-		}
+		viewParsePipe(cmd)
+		viewParseArgs(cmd, args)
 	},
+}
+
+func viewParsePipe(cmd *cobra.Command) {
+	if !filesystem.IsPipe() {
+		return
+	}
+	var err error
+	conv := convert.Convert{}
+	conv.Flags = convert.Flags{
+		Controls:  viewFlag.controls,
+		SwapChars: viewFlag.swap,
+		Width:     viewFlag.width,
+	}
+	f := sample.Flags{}
+	// handle defaults that are left empty for usage formatting
+	if c := cmd.Flags().Lookup("controls"); !c.Changed {
+		conv.Flags.Controls = []string{eof, tab}
+	}
+	if s := cmd.Flags().Lookup("swap-chars"); !s.Changed {
+		conv.Flags.SwapChars = []int{null, verticalBar}
+	}
+	// piped input from other programs
+	if cp := cmd.Flags().Lookup("encode"); cp.Changed {
+		if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
+			logs.Fatal("encoding not known or supported", "pipe", err)
+		}
+		conv.Source.E = f.From
+	}
+	viewPipe(cmd, &conv)
+}
+
+func viewParseArgs(cmd *cobra.Command, args []string) {
+	conv := convert.Convert{}
+	conv.Flags = convert.Flags{
+		Controls:  viewFlag.controls,
+		SwapChars: viewFlag.swap,
+		Width:     viewFlag.width,
+	}
+	if c := cmd.Flags().Lookup("controls"); !c.Changed {
+		conv.Flags.Controls = []string{eof, tab}
+	}
+	if s := cmd.Flags().Lookup("swap-chars"); !s.Changed {
+		conv.Flags.SwapChars = []int{null, verticalBar}
+	}
+	checkUse(cmd, args...)
+	for i, arg := range args {
+		skip, r := viewParseArg(cmd, &conv, i, arg)
+		if skip {
+			continue
+		}
+		fmt.Println(string(r))
+		if i < len(args) {
+			fmt.Println("")
+		}
+	}
+}
+
+func viewParseArg(cmd *cobra.Command, conv *convert.Convert, i int, arg string) (skip bool, r []rune) {
+	var err error
+	conv.Output = convert.Output{} // output must be reset
+	f := sample.Flags{}
+	if i > 0 {
+		fmt.Printf(" \n%s\n\n", str.Cb(strings.Repeat("\u2500", 40))) // horizontal bar
+	}
+	if cp := cmd.Flags().Lookup("encode"); cp.Changed {
+		if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
+			logs.Fatal("encoding not known or supported", arg, err)
+		}
+		conv.Source.E = f.From
+	}
+	// internal example file
+	if ok := sample.Valid(arg); ok {
+		var p sample.File
+		if p, err = f.Open(arg, conv); err != nil {
+			logs.Println("sample", arg, err)
+			return true, nil
+		}
+		// --to flag is currently ignored
+		if to := cmd.Flags().Lookup("to"); to.Changed {
+			if viewToFlag(p.Runes...) {
+				return true, nil
+			}
+		}
+		fmt.Println(string(p.Runes))
+		return true, nil
+	}
+	// read file
+	b, err := filesystem.Read(arg)
+	if err != nil {
+		logs.Println("read file", arg, err)
+		return true, nil
+	}
+	// convert text
+	if endOfFile(conv.Flags) {
+		r, err = conv.Text(&b)
+	} else {
+		r, err = conv.Dump(&b)
+	}
+	if err != nil {
+		logs.Println("convert text", arg, err)
+		return true, nil
+	}
+	// to flag
+	if to := cmd.Flags().Lookup("to"); to.Changed {
+		if viewToFlag(r...) {
+			return true, nil
+		}
+	}
+	return false, r
 }
 
 func init() {

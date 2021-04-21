@@ -328,7 +328,6 @@ func parsePipe(cmd *cobra.Command, flags convert.Flags) {
 }
 
 // createHTML applies a HTML template to src text.
-// cp := cmd.Flags().Lookup("encode");
 func createHTML(cmd *cobra.Command, flags convert.Flags, src *[]byte) []byte {
 	var err error
 	conv := convert.Convert{
@@ -401,7 +400,6 @@ func staticTextfile(f sample.Flags, conv *convert.Convert, arg string, changed b
 }
 
 // serveBytes hosts the HTML using an internal HTTP server.
-//func serveBytes(i int, cmd *cobra.Command, b *[]byte) bool {
 func serveBytes(i int, changed bool, b *[]byte) bool {
 	if i != 0 {
 		return false

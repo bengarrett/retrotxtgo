@@ -1,4 +1,3 @@
-// nolint: gochecknoglobals,gochecknoinits
 package cmd
 
 import (
@@ -22,7 +21,6 @@ func Test_configInfo(t *testing.T) {
 }
 
 func Test_configSet(t *testing.T) {
-
 	tests := []struct {
 		name string
 		flag bool
