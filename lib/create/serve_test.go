@@ -14,7 +14,7 @@ func ExampleServe() {
 
 	// The test argument will immediately shutdown
 	// the server after it successfully starts.
-	args.test = true
+	args.Test = true
 
 	// Run the HTTP server
 	i, a, err := args.Serve(&b)

@@ -56,7 +56,7 @@ type Args struct {
 	layout    Layout // layout flag interpretation
 	Port      uint   // Port for HTTP server
 	FontEmbed bool
-	test      bool   // unit test mode
+	Test      bool   // unit test mode
 	Layout    string // Layout of the HTML
 	Syntax    string // Syntax and color theming printing HTML
 	tmpl      string // template filename
@@ -292,7 +292,7 @@ func (args *Args) zipAssets(destDir string, b *[]byte) {
 		Root:      args.Save.Destination,
 		Comment:   "",
 		Overwrite: args.Save.OW,
-		Quiet:     args.test,
+		Quiet:     args.Test,
 	}
 	if err = zip.Create(); err != nil {
 		logs.Fatal("zip archive", name, err)

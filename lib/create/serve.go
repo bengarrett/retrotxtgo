@@ -82,7 +82,7 @@ func (args *Args) override() {
 		return
 	}
 	if l == 1 {
-		if !args.test {
+		if !args.Test {
 			fmt.Printf("Using the %s\n", s[0])
 		}
 		return
@@ -114,7 +114,7 @@ func (args *Args) serveDir() {
 
 	var ctx context.Context
 	var cancel context.CancelFunc
-	if args.test {
+	if args.Test {
 		go func() {
 			if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 				log.Fatalf("tcp listen and serve failed: %s\n", err)
@@ -149,14 +149,14 @@ func (args *Args) serveDir() {
 
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Printf("http server shutdown failed: %s\n", err)
-	} else if args.test {
+	} else if args.Test {
 		fmt.Print("Server example was successful")
 	}
 }
 
 // Cleanup the temporary files and directories.
 func (args *Args) cleanup() {
-	if !args.test {
+	if !args.Test {
 		fmt.Printf("\n\nServer shutdown and directory removal of: %s\n", args.Save.Destination)
 	}
 	tmp, err := path.Match(fmt.Sprintf("%s%s*",

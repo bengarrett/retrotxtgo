@@ -41,7 +41,7 @@ func (args *Args) saveCSS(c chan error) {
 	if err != nil {
 		c <- err
 	}
-	if !args.test {
+	if !args.Test {
 		fmt.Println(bytesStats(name, nn))
 	}
 	c <- nil
@@ -66,7 +66,7 @@ func (args *Args) saveFavIcon(c chan error) {
 	if err != nil {
 		c <- err
 	}
-	if !args.test {
+	if !args.Test {
 		fmt.Println(bytesStats(name, nn))
 	}
 	c <- nil
@@ -112,7 +112,7 @@ func (args *Args) saveFontCSS(name string) error {
 	if err != nil {
 		return err
 	}
-	if !args.test {
+	if !args.Test {
 		fmt.Println(bytesStats(name, nn))
 	}
 	return nil
@@ -132,7 +132,7 @@ func (args *Args) saveFontWoff2(name, packName string) error {
 	if err != nil {
 		return err
 	}
-	if !args.test {
+	if !args.Test {
 		fmt.Println(bytesStats(name, nn))
 	}
 	return nil
@@ -158,7 +158,7 @@ func (args *Args) saveJS(c chan error) {
 	if err != nil {
 		c <- err
 	}
-	if !args.test {
+	if !args.Test {
 		fmt.Println(bytesStats(name, nn))
 	}
 	c <- nil
@@ -190,7 +190,7 @@ func (args *Args) saveHTML(b *[]byte, c chan error) {
 	if err != nil {
 		c <- err
 	}
-	if !args.test {
+	if !args.Test {
 		fmt.Println(bytesStats(name, nn))
 	}
 	if err := w.Flush(); err != nil {

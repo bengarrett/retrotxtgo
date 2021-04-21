@@ -272,7 +272,8 @@ func parseBody(cmd *cobra.Command) {
 	// hidden --body flag ignores most other args
 	if body := cmd.Flags().Lookup("body"); body.Changed {
 		b := []byte(body.Value.String())
-		if h := serveBytes(0, cmd, &b); !h {
+		serve := cmd.Flags().Lookup("serve").Changed
+		if h := serveBytes(0, serve, &b); !h {
 			i, a, err := html.Create(&b)
 			if err != nil {
 				logs.Fatal(i, a, err)
@@ -289,6 +290,7 @@ func parseFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 		Flags: flags,
 	}
 	f, ff := sample.Flags{}, cmd.Flags().Lookup("font-family")
+	serve := cmd.Flags().Lookup("serve").Changed
 	for i, arg := range args {
 		src, cont := staticTextfile(f, &conv, arg, ff.Changed)
 		if cont {
@@ -299,7 +301,7 @@ func parseFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 			continue
 		}
 		// serve the HTML over HTTP?
-		if h := serveBytes(i, cmd, &b); !h {
+		if h := serveBytes(i, serve, &b); !h {
 			i, a, err := html.Create(&b)
 			if err != nil {
 				logs.Fatal(i, a, err)
@@ -315,7 +317,8 @@ func parsePipe(cmd *cobra.Command, flags convert.Flags) {
 		logs.Fatal("create", "read stdin", err)
 	}
 	b := createHTML(cmd, flags, &src)
-	if h := serveBytes(0, cmd, &b); !h {
+	serve := cmd.Flags().Lookup("serve").Changed
+	if h := serveBytes(0, serve, &b); !h {
 		i, a, err := html.Create(&b)
 		if err != nil {
 			logs.Fatal(i, a, err)
@@ -325,6 +328,7 @@ func parsePipe(cmd *cobra.Command, flags convert.Flags) {
 }
 
 // createHTML applies a HTML template to src text.
+// cp := cmd.Flags().Lookup("encode");
 func createHTML(cmd *cobra.Command, flags convert.Flags, src *[]byte) []byte {
 	var err error
 	conv := convert.Convert{
@@ -397,14 +401,15 @@ func staticTextfile(f sample.Flags, conv *convert.Convert, arg string, changed b
 }
 
 // serveBytes hosts the HTML using an internal HTTP server.
-func serveBytes(i int, cmd *cobra.Command, b *[]byte) bool {
+//func serveBytes(i int, cmd *cobra.Command, b *[]byte) bool {
+func serveBytes(i int, changed bool, b *[]byte) bool {
 	if i != 0 {
 		return false
 		// only ever serve the first file given to the args.
 		// in the future, when handling multiple files a dynamic
 		// index.html could be generated with links to each of the htmls.
 	}
-	if serve := cmd.Flags().Lookup("serve"); serve.Changed {
+	if changed {
 		i, a, err := html.Serve(b)
 		if err != nil {
 			logs.Fatal(i, a, err)

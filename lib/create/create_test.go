@@ -41,7 +41,7 @@ func Test_saveAssets(t *testing.T) {
 		// Initialize
 		a := Args{}
 		a.Save.Destination = tmpDir
-		a.test = true
+		a.Test = true
 
 		// Save files
 		b := []byte("hello")
@@ -75,7 +75,7 @@ func Test_zipAssets(t *testing.T) {
 		a := Args{}
 		a.layout = Standard
 		a.Save.Destination = tmpDir
-		a.test = true
+		a.Test = true
 
 		// Create a zip file
 		name := filepath.Join(os.TempDir(), zipName)
@@ -122,7 +122,7 @@ func Test_Save(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ch := make(chan error)
-			a := Args{layout: Standard, test: true}
+			a := Args{layout: Standard, Test: true}
 			a.Save.OW = true
 			a.Save.Destination = tt.args.name
 			go a.saveHTML(&tt.args.data, ch)

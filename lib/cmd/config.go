@@ -41,11 +41,19 @@ var configCreateCmd = &cobra.Command{
 	Aliases: []string{"c"},
 	Short:   "Create a new or reset the config file",
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := config.Create(viper.ConfigFileUsed(), configFlag.ow); err != nil {
-			logs.Fatal("config", "create", err)
+		if configCreate() {
+			os.Exit(1)
 		}
-		fmt.Println("New config file:", viper.ConfigFileUsed())
 	},
+}
+
+func configCreate() bool {
+	if err := config.Create(viper.ConfigFileUsed(), configFlag.ow); err != nil {
+		logs.Println("config", "create", err)
+		return true
+	}
+	fmt.Println("New config file:", viper.ConfigFileUsed())
+	return false
 }
 
 var configDeleteCmd = &cobra.Command{
@@ -86,27 +94,34 @@ var configInfoCmd = &cobra.Command{
 	Aliases: []string{"i"},
 	Short:   "View all the settings configured in the config file",
 	Run: func(cmd *cobra.Command, args []string) {
-		if configFlag.configs {
-			if err := config.List(); err != nil {
-				logs.Fatal("config info", "list", err)
-			}
+		if configInfo() {
 			os.Exit(0)
-		}
-		if configFlag.styles {
-			str.JSONStyles("retrotxt info --style")
-			os.Exit(0)
-		}
-		style := viper.GetString("style.info")
-		if configFlag.style != "" {
-			style = configFlag.style
-		}
-		if style == "" {
-			style = "dracula"
-		}
-		if err := config.Info(style); err.Err != nil {
-			err.Fatal()
 		}
 	},
+}
+
+func configInfo() (exit bool) {
+	if configFlag.configs {
+		if err := config.List(); err != nil {
+			logs.Fatal("config info", "list", err)
+		}
+		return true
+	}
+	if configFlag.styles {
+		str.JSONStyles("retrotxt info --style")
+		return true
+	}
+	style := viper.GetString("style.info")
+	if configFlag.style != "" {
+		style = configFlag.style
+	}
+	if style == "" {
+		style = "dracula"
+	}
+	if err := config.Info(style); err.Err != nil {
+		err.Fatal()
+	}
+	return false
 }
 
 var configSetCmd = &cobra.Command{
@@ -118,10 +133,7 @@ var configSetCmd = &cobra.Command{
 		str.Example("  retrotxt config set style.info style.html") +
 		" # to set the color styles",
 	Run: func(cmd *cobra.Command, args []string) {
-		if configFlag.configs {
-			if err := config.List(); err != nil {
-				logs.Fatal("config", "list", err)
-			}
+		if configSet() {
 			os.Exit(0)
 		}
 		checkUse(cmd, args...)
@@ -129,6 +141,16 @@ var configSetCmd = &cobra.Command{
 			config.Set(arg)
 		}
 	},
+}
+
+func configSet() bool {
+	if configFlag.configs {
+		if err := config.List(); err != nil {
+			logs.Fatal("config", "list", err)
+		}
+		return true
+	}
+	return false
 }
 
 var configSetupCmd = &cobra.Command{
