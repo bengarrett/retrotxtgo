@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/spf13/cobra"
 	"retrotxt.com/retrotxt/lib/convert"
@@ -46,35 +47,6 @@ var viewCmd = &cobra.Command{
 	},
 }
 
-func viewParsePipe(cmd *cobra.Command) {
-	if !filesystem.IsPipe() {
-		return
-	}
-	var err error
-	conv := convert.Convert{}
-	conv.Flags = convert.Flags{
-		Controls:  viewFlag.controls,
-		SwapChars: viewFlag.swap,
-		Width:     viewFlag.width,
-	}
-	f := sample.Flags{}
-	// handle defaults that are left empty for usage formatting
-	if c := cmd.Flags().Lookup("controls"); !c.Changed {
-		conv.Flags.Controls = []string{eof, tab}
-	}
-	if s := cmd.Flags().Lookup("swap-chars"); !s.Changed {
-		conv.Flags.SwapChars = []int{null, verticalBar}
-	}
-	// piped input from other programs
-	if cp := cmd.Flags().Lookup("encode"); cp.Changed {
-		if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
-			logs.Fatal("encoding not known or supported", "pipe", err)
-		}
-		conv.Source.E = f.From
-	}
-	viewPipe(cmd, &conv)
-}
-
 func viewParseArgs(cmd *cobra.Command, args []string) {
 	conv := convert.Convert{}
 	conv.Flags = convert.Flags{
@@ -106,13 +78,8 @@ func viewParseArg(cmd *cobra.Command, conv *convert.Convert, i int, arg string) 
 	conv.Output = convert.Output{} // output must be reset
 	f := sample.Flags{}
 	if i > 0 {
-		fmt.Printf(" \n%s\n\n", str.Cb(strings.Repeat("\u2500", 40))) // horizontal bar
-	}
-	if cp := cmd.Flags().Lookup("encode"); cp.Changed {
-		if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
-			logs.Fatal("encoding not known or supported", arg, err)
-		}
-		conv.Source.E = f.From
+		const horizontalBar = "\u2500"
+		fmt.Printf(" \n%s\n\n", str.Cb(strings.Repeat(horizontalBar, 40)))
 	}
 	// internal example file
 	if ok := sample.Valid(arg); ok {
@@ -134,6 +101,62 @@ func viewParseArg(cmd *cobra.Command, conv *convert.Convert, i int, arg string) 
 	b, err := filesystem.Read(arg)
 	if err != nil {
 		logs.Println("read file", arg, err)
+		return true, nil
+	}
+	return viewParseBytes(cmd, conv, arg, b)
+}
+
+func viewParsePipe(cmd *cobra.Command) {
+	if !filesystem.IsPipe() {
+		return
+	}
+	conv := convert.Convert{}
+	conv.Flags = convert.Flags{
+		Controls:  viewFlag.controls,
+		SwapChars: viewFlag.swap,
+		Width:     viewFlag.width,
+	}
+	if c := cmd.Flags().Lookup("controls"); !c.Changed {
+		conv.Flags.Controls = []string{eof, tab}
+	}
+	if s := cmd.Flags().Lookup("swap-chars"); !s.Changed {
+		conv.Flags.SwapChars = []int{null, verticalBar}
+	}
+	// piped input from other programs
+	var err error
+	if cp := cmd.Flags().Lookup("encode"); cp.Changed {
+		f := sample.Flags{}
+		if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
+			logs.Fatal("encoding not known or supported", "pipe", err)
+		}
+		conv.Source.E = f.From
+	}
+	b, err := filesystem.ReadPipe()
+	if err != nil {
+		logs.Fatal("view", "stdin read", err)
+	}
+	_, r := viewParseBytes(cmd, &conv, "piped", b)
+	fmt.Print(string(r))
+	os.Exit(0)
+}
+
+func viewParseBytes(cmd *cobra.Command, conv *convert.Convert, arg string, b []byte) (skip bool, r []rune) {
+	// configure source encoding
+	name := "CP437"
+	cp := cmd.Flags().Lookup("encode")
+	if cp.Changed && cp.Value.String() != "" {
+		name = cp.Value.String()
+	}
+	var f = sample.Flags{}
+	var err error
+	if f.From, err = convert.Encoding(name); err != nil {
+		logs.Fatal("encoding not known or supported", arg, err)
+	}
+	conv.Source.E = f.From
+
+	// make sure the file source isn't already encoded as UTF-8
+	if utf8.Valid(b) {
+		fmt.Println(string(b))
 		return true, nil
 	}
 	// convert text
@@ -164,26 +187,6 @@ func init() {
 	flagTo(&viewFlag.to, viewCmd)
 	flagWidth(&viewFlag.width, viewCmd)
 	viewCmd.Flags().SortFlags = false
-}
-
-// viewPipe converts and prints out standard input (stdin) or piped text.
-func viewPipe(cmd *cobra.Command, conv *convert.Convert) {
-	b, err := filesystem.ReadPipe()
-	if err != nil {
-		logs.Fatal("view", "stdin read", err)
-	}
-	r, err := conv.Text(&b)
-	if err != nil {
-		logs.Fatal("view", "stdin convert", err)
-	}
-	// to flag
-	if to := cmd.Flags().Lookup("to"); to.Changed {
-		if viewToFlag(r...) {
-			os.Exit(0)
-		}
-	}
-	fmt.Println(string(r))
-	os.Exit(0)
 }
 
 // viewToFlag prints the results of viewEncode().
