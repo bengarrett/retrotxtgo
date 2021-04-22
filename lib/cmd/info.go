@@ -22,12 +22,14 @@ var infoFlag struct {
 	format string
 }
 
+const infoExample = "  retrotxt info text.asc logo.jpg\n  retrotxt info file.txt --format=json"
+
 // infoCmd represents the info command.
 var infoCmd = &cobra.Command{
 	Use:     "info [filenames]",
 	Aliases: []string{"i"},
 	Short:   "Information on a text file",
-	Example: "  retrotxt info text.asc logo.jpg\n  retrotxt info file.txt --format=json",
+	Example: exampleCmd(infoExample),
 	Run: func(cmd *cobra.Command, args []string) {
 		// piped input from other programs
 		if filesystem.IsPipe() {

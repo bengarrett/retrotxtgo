@@ -3,7 +3,6 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-
 	"retrotxt.com/retrotxt/lib/config"
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/str"
@@ -18,10 +17,12 @@ var versionFlag = versionFlags{
 	format: "color",
 }
 
+const versionExample = "  retrotxt version --format=text\n  retrotxt ver -f t"
+
 var versionCmd = &cobra.Command{
 	Use:     "version",
 	Aliases: []string{"ver"},
-	Example: "  retrotxt version --format=text\n  retrotxt ver -f t",
+	Example: exampleCmd(versionExample),
 	Short:   "Version information for RetroTxt",
 	Long: `Version information for Retrotxt
 

@@ -17,11 +17,13 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
+const listExample = "  retrotxt list codepages\n  retrotxt list examples\n  retrotxt list table cp437 cp1252 \n  retrotxt list tables"
+
 var listCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"l"},
 	Short:   "Available built-in examples, codepages and tabled datasets",
-	Example: "  retrotxt list codepages\n  retrotxt list examples\n  retrotxt list table cp437 cp1252 \n  retrotxt list tables",
+	Example: exampleCmd(listExample),
 	Run: func(cmd *cobra.Command, args []string) {
 		checkUse(cmd, args...)
 		logs.ArgFatal(args...)
@@ -85,11 +87,13 @@ func examples() *bytes.Buffer {
 	return &buf
 }
 
+const listTableExample = "  retrotxt table cp437\n  retrotxt table cp437 latin1 windows-1252\n  retrotxt table iso-8859-15"
+
 var listCmdTable = &cobra.Command{
 	Use:     "table [codepage names or aliases]",
 	Aliases: []string{"t"},
 	Short:   "Display one or more tables showing the codepage and all their characters",
-	Example: "  retrotxt table cp437\n  retrotxt table cp437 latin1 windows-1252\n  retrotxt table iso-8859-15",
+	Example: exampleCmd(listTableExample),
 	Run: func(cmd *cobra.Command, args []string) {
 		checkUse(cmd, args...)
 		fmt.Println(listTable(args))

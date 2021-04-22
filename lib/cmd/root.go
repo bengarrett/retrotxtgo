@@ -3,8 +3,14 @@
 package cmd
 
 import (
+	"bufio"
+	"bytes"
 	"errors"
+	"fmt"
+	"log"
 	"os"
+	"strings"
+	"text/template"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -97,6 +103,38 @@ func endOfFile(flags convert.Flags) bool {
 		}
 	}
 	return false
+}
+
+// exampleCmd returns help usage examples.
+func exampleCmd(tmpl string) string {
+	if tmpl == "" {
+		return ""
+	}
+	var b bytes.Buffer
+	// change example operating system path separator
+	t := template.Must(template.New("example").Parse(tmpl))
+	err := t.Execute(&b, string(os.PathSeparator))
+	if err != nil {
+		log.Fatal(err)
+	}
+	// color the example text except text following
+	// the last hash #, which is treated as a comment
+	const cmmt, sentence = "#", 2
+	var s string
+	scanner := bufio.NewScanner(&b)
+	for scanner.Scan() {
+		ss := strings.Split(scanner.Text(), cmmt)
+		l := len(ss)
+		if l < sentence {
+			s += str.Cinf(scanner.Text()) + "\n  "
+			continue
+		}
+		// do not the last hash as a comment
+		ex := strings.Join(ss[:l-1], cmmt)
+		s += str.Cinf(ex)
+		s += fmt.Sprintf("%s%s\n  ", cmmt, ss[l-1])
+	}
+	return s
 }
 
 // flagControls handles the controls flag.

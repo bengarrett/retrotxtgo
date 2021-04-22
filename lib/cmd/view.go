@@ -30,14 +30,16 @@ var viewFlag = viewFlags{
 	width:    0,
 }
 
+const viewExample = `  retrotxt view file.txt -e latin1
+  retrotxt view file1.txt file2.txt --encode="iso-8859-1"
+  cat file.txt | retrotxt view`
+
 // viewCmd represents the view command.
 var viewCmd = &cobra.Command{
 	Use:     "view [filenames]",
 	Aliases: []string{"v"},
 	Short:   "Print a legacy text file to the standard output",
-	Example: `  retrotxt view file.txt -e latin1
-  retrotxt view file1.txt file2.txt --encode="iso-8859-1"
-  cat file.txt | retrotxt view`,
+	Example: exampleCmd(viewExample),
 	Run: func(cmd *cobra.Command, args []string) {
 		viewParsePipe(cmd)
 		viewParseArgs(cmd, args)

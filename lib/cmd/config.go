@@ -124,14 +124,14 @@ func configInfo() (exit bool) {
 	return false
 }
 
+const configSetExample = `  retrotxt config set html.meta.description # to change the meta description setting
+retrotxt config set style.info style.html # to set the color styles`
+
 var configSetCmd = &cobra.Command{
 	Use:     "set [setting names]",
 	Aliases: []string{"s"},
 	Short:   "Change individual Retrotxt settings",
-	Example: str.Example("  retrotxt config set html.meta.description") +
-		" # to change the meta description setting\n" +
-		str.Example("  retrotxt config set style.info style.html") +
-		" # to set the color styles",
+	Example: exampleCmd(configSetExample),
 	Run: func(cmd *cobra.Command, args []string) {
 		if configSet() {
 			os.Exit(0)
@@ -161,13 +161,15 @@ var configSetupCmd = &cobra.Command{
 	},
 }
 
+const configShellExample = `  retrotxt config shell --interpreter string [flags]
+  retrotxt config shell -i=bash >> ~/.bash_profile
+  retrotxt config shell -i=zsh >> ~/.zshrc`
+
 var configShellCmd = &cobra.Command{
 	Use:     "shell",
 	Aliases: []string{"sh"},
 	Short:   "Apply autocompletion a terminal shell",
-	Example: str.Example("  retrotxt config shell --interpreter string [flags]") +
-		str.Example("\n  retrotxt config shell -i=bash >> ~/.bash_profile") +
-		str.Example("\n  retrotxt config shell -i=zsh >> ~/.zshrc"),
+	Example: exampleCmd(configShellExample),
 	Run: func(cmd *cobra.Command, args []string) {
 		const ps = "powershell"
 		var (

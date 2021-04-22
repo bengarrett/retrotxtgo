@@ -4,10 +4,8 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"os"
 	"sort"
-	"text/template"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -47,28 +45,18 @@ var createFlag = createFlags{
 // flags container.
 var html create.Args
 
-// exampleCmd returns help usage examples.
-var exampleCmd = func() string {
-	var b bytes.Buffer
-	tmpl := `  retrotxt create file.txt -t "A text file" -d "Some text goes here"
+const createExample = `  retrotxt create file.txt -t "A text file" -d "Some text goes here"
   retrotxt create file1.txt file2.asc --save
   retrotxt create ~{{.}}Downloads{{.}}file.txt --archive
   retrotxt create file.txt --serve=8080
   cat file.txt | retrotxt create`
-	t := template.Must(template.New("example").Parse(tmpl))
-	err := t.Execute(&b, string(os.PathSeparator))
-	if err != nil {
-		log.Fatal(err)
-	}
-	return str.Cinf(b.String())
-}
 
 // createCmd represents the create command.
 var createCmd = &cobra.Command{
 	Use:     "create [filenames]",
 	Aliases: []string{"c", "html"},
 	Short:   "Create a HTML document from a text file",
-	Example: exampleCmd(),
+	Example: exampleCmd(createExample),
 	Run: func(cmd *cobra.Command, args []string) {
 		f := convert.Flags{
 			Controls:  createFlag.controls,
