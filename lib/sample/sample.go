@@ -84,8 +84,8 @@ func Map() map[string]Sample {
 	)
 	m := map[string]Sample{
 		"037":           {text, VGA, cp037, "text/cp037.txt", "EBCDIC 037 IBM mainframe test"},
+		"437":           {dump, VGA, cp437, "text/cp437-crlf.txt", "CP-437 all characters test using Windows line breaks"},
 		"437.cr":        {dump, VGA, cp437, "text/cp437-cr.txt", "CP-437 all characters test using CR (carriage return)"},
-		"437.crlf":      {dump, VGA, cp437, "text/cp437-crlf.txt", "CP-437 all characters test using Windows line breaks"},
 		"437.lf":        {dump, VGA, cp437, "text/cp437-lf.txt", "CP-437 all characters test using LF (line feed)"},
 		"865":           {text, VGA, cp865, "text/cp865.txt", "CP-865 and CP-860 Nordic test"},
 		"1252":          {text, VGA, cp1252, "text/cp1252.txt", "Windows-1252 English test"},
@@ -163,7 +163,7 @@ func (f Flags) Open(name string, conv *convert.Convert) (s File, err error) {
 	}
 	// default overrides
 	switch name {
-	case "437.cr", "437.crlf", "437.lf":
+	case "437", "437.cr", "437.lf":
 		if conv.Flags.Controls != nil {
 			fmt.Printf("\nTo correctly display all %q table cells the --controls flag is ignored\n", name)
 			conv.Flags.Controls = nil
