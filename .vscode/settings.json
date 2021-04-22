@@ -1,4 +1,16 @@
 {
-  "cSpell.words": ["lexer", "retrotxt", "retrotxtgo"],
-  "go.formatFlags": ["-local \"retrotxt.com/retrotxt\""]
+  "go.formatFlags": [
+    "-local \"retrotxt.com/retrotxt\""
+  ],
+  "spellright.language": [
+    "en_US"
+  ],
+  "spellright.documentTypes": [
+    "markdown",
+    "latex",
+    "plaintext"
+  ],
+  "spellright.notificationClassByParser": {
+    "code": "hint"
+  }
 }
