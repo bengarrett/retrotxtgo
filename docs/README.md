@@ -1,8 +1,8 @@
-![Build](https://github.com/bengarrett/retrotxtgo/workflows/Go/badge.svg) ![Tests](https://github.com/bengarrett/retrotxtgo/workflows/Go%20tests/badge.svg) ![Lint](https://github.com/bengarrett/retrotxtgo/workflows/golangci-lint/badge.svg)
+![Build](https://github.com/bengarrett/retrotxtgo/workflows/Go/badge.svg) ![Tests](https://github.com/bengarrett/retrotxtgo/workflows/Go%20tests/badge.svg)
 
 # RetroTxt on Go
 
-[RetroTxt](https://github.com/bengarrett/retrotxt) for the command line
+[RetroTxt](https://github.com/bengarrett/retrotxt) for the terminal.
 
 ### _α_ - work-in-progress and feature incomplete
 
@@ -10,7 +10,7 @@
 
 ## About
 
-#### Text files created in the pre Unicode days often fail to display on modern systems.
+#### Text files created in the pre-Unicode days often fail to display on modern systems.
 
 ```sh
 cat samples/ascii-logos.txt
@@ -23,7 +23,7 @@ cat samples/ascii-logos.txt
 �ͼ  �ͼ������ͼ   �ͼ   �ͼ  �ͼ �����ͼ    �ͼ   �ͼ  �ͼ   �ͼ
 ```
 
-#### Use Retrotxt to print legacy encoded text on modern terminals.
+#### Use RetroTxt to print legacy encoded text on modern terminals.
 
 ```sh
 retrotxt view ascii-logos.txt
@@ -42,7 +42,7 @@ retrotxt view ascii-logos.txt
 retrotxt view ascii-logos.txt > ascii-logos-utf8.txt
 ```
 
-#### Then turn the text into a static website with accurate fonts and colours.
+#### Then turn the text into a static website with accurate fonts and colors.
 
 ```sh
 retrotxt create --layout=compact ascii-logos.txt
@@ -143,13 +143,13 @@ retrotxt create --layout=inline --font-embed
 - [x] Convert ASCII text to HTML.
 - [ ] Convert ANSI text to HTML.
 - [ ] Convert BBS text to HTML.
-- [x] List or export (json, text, xml) meta details of a text file.
+- [x] List or export (JSON, text, XML) meta details of a text file.
 - [x] List or export SAUCE metadata of a file.
 - [x] Transform the encoding of a text file. CP437 -> UTF8, UTF8 -> ISO8859-1 ...
 - [x] View any legacy encoded text file in a UTF8 terminal by converting on the fly.
-- [x] Extensive customisations through command flags or a configuration file with a setup.
+- [x] Extensive customizations through command flags or a configuration file with a setup.
 - [ ] ANSI compatibility tests, output 16, 88, 256, high and true-color tables.
-- [x] Multiplatform support including Windows, macOS, Linux, Raspbian and FreeBSD.
+- [x] Multi-platform support including Windows, macOS, Linux, Raspberry Pi and FreeBSD.
 - [x] IO redirection with piping support.
 
 ---
@@ -157,127 +157,100 @@ retrotxt create --layout=inline --font-embed
 ## Install
 
 There are [downloads](https://github.com/bengarrett/retrotxtgo/releases/latest/) available for
-[Windows](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_windows.zip),
-[macOS (intel)](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_macos.zip),
-[Linux](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_linux.tar.gz),
-[FreeBSD](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_freebsd.tar.gz) and for the
-[Raspberry Pi](https://github.com/bengarrett/retrotxtgo/releases/latest/).
+[Windows](https://github.com/bengarrett/retrotxtgo/releases/download/v0.0.30/retrotxt_Windows_Intel.zip),
+[macOS Intel](https://github.com/bengarrett/retrotxtgo/releases/download/v0.0.30/retrotxt_macOS_Intel.tar.gz),
+[macOS M series](https://github.com/bengarrett/retrotxtgo/releases/download/v0.0.30/retrotxt_macOS_M-series.tar.gz),
+[Linux](https://github.com/bengarrett/retrotxtgo/releases/download/v0.0.30/retrotxt_Linux_Intel.tar.gz),
+[FreeBSD](https://github.com/bengarrett/retrotxtgo/releases/download/v0.0.30/retrotxt_FreeBSD_Intel.tar.gz) and the
+[Raspberry Pi](https://github.com/bengarrett/retrotxtgo/releases/download/v0.0.30/retrotxt_Linux_arm32_.tar.gz).
 
-Otherwise these operating system specific install methods are available.
+Otherwise these package manager methods are available.
 
-### Windows
-
-<!-- #### ~~[Chocolatey](https://chocolatey.org/)~~ \*
-
-```ps
-choco install retrotxt
-retrotxt version
-``` -->
-
-#### [Scoop](https://scoop.sh/)
+#### Windows [Scoop](https://scoop.sh/)
 
 ```ps
 scoop bucket add retrotxt https://github.com/bengarrett/retrotxtgo.git
-scoop install retrotxt
+scoop install bengarrett/retrotxt
 retrotxt version
 ```
 
-### macOS (intel)
-
-#### [Homebrew](https://brew.sh/)
+#### macOS [Homebrew](https://brew.sh/)
 
 ```sh
 brew cask install bengarrett/tap/retrotxt
 retrotxt version
 ```
 
-### Linux
-
-<!-- #### ~~[Linux Snap](https://snapcraft.io/)~~ \*
-
 ```sh
-snap install retrotxt
-retrotxt version
-``` -->
-
-#### Raspberry Pi, Linux ARM
-
-Download the **deb** package for either the
-[Raspberry Pi](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_raspberry_pi.deb) <small>(ARMv7)</small>
-or the [Zero family](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_raspberry_pi-zero.deb) <small>(ARMv6)</small>
-and install using `dpkg -i`.
-
-```sh
-# Raspberry Pi example
 wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_raspberry_pi.deb
 dpkg -i retrotxt_raspberry_pi.deb
 retrotxt version
 ```
 
-#### Deb packager
-
-Used by, but not limited to Ubuntu, Mint, Debian
+#### DEB (Debian package)
 
 ```sh
 wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_linux.deb
-dpkg -i retrotxt_linux.deb
+dpkg -i retrotxt.deb
 retrotxt version
 ```
 
-#### RPM packager
-
-Used by, but not limited to Fedora, OpenSUSE, CentOS, RHEL
+#### RPM (Redhat package)
 
 ```sh
 wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_linux.rpm
-rpm -i retrotxt_linux.rpm
+rpm -i retrotxt.rpm
 retrotxt version
 ```
 
-\* not implemented
-
-## Build using Go
-
-RetroTxt on Go requires [Go v1.13+](https://github.com/golang/go/wiki/MinimumRequirements).
-Assuming [Go](https://golang.org/) and and the relevant build-tools are already installed.
-
+#### APK (Alpine package)
 ```sh
-git clone https://github.com/bengarrett/retrotxtgo.git
-cd retrotxtgo
-# recommended, run the package and import tests on your distribution/platform
-go test ./...
-go build -i
+wget https://github.com/bengarrett/myip/releases/latest/download/retrotxt.apk
+apk add retrotxt.apk
 retrotxt version
 ```
 
-The binary will be installed either at `$GOPATH/bin` or `$HOME/go/bin`
+### Building RetroTxt for other platforms
 
-## Compile to other platforms using Go
+[Go](https://golang.org/doc/install) supports dozens of architectures and operating systems letting [RetroTxt to be built for most platforms](https://golang.org/doc/install/source#environment).
 
-Go supports a number of operating systems and platforms that can be built using any other supported platform.
-Were you on a Linux system and needed to compile a 32-bit version of RetroTxt to target Windows 7.
 
 ```sh
 # to see a list of supported platforms
 go tool dist list
 
+# clone this repo
 git clone https://github.com/bengarrett/retrotxtgo.git
 cd retrotxtgo
-# target 32-bit Windows
+
+# access the repo
+cd retrotxtgo
+
+# target and build the app for the host system
+go test ./...
+go build
+
+# target and build for Windows 7+ 32-bit
 env GOOS=windows GOARCH=386 go build
-# optional, compress the binary
-upx retrotxt.exe
-# test the binary
 file retrotxt.exe
+
+# target and build for OpenBSD
+env GOOS=openbsd GOARCH=amd64 go build
+file retrotxt
+
+# target and build for Linux on MIPS CPUs
+env GOOS=linux GOARCH=mips64 go build
+file retrotxt
 ```
 
 ---
 
 ### Why Go?
 
-- native [Unicode](https://golang.org/pkg/unicode/) and UTF-8/16 support
-- [native legacy text encodings support](golang.org/x/text/encoding/charmap)
-- creates a standalone binary with no dependencies
-- [wide OS and CPU support](https://gist.github.com/asukakenji/f15ba7e588ac42795f421b48b8aede63)
-- simple, compact standard library and fast compiling
-- it is a language I know 😉
+- Native [Unicode](https://golang.org/pkg/unicode/), UTF 8/16/32 support.
+- [A large selection of native legacy text encodings](golang.org/x/text/encoding/charmap).
+- Builds a standalone binary with no dependencies.
+- [Wide Operating system and CPU architecture support](https://gist.github.com/asukakenji/f15ba7e588ac42795f421b48b8aede63).
+- Uses a simple, compact standard library with extremely fast compiling.
+- The standard library has helpful and safe web templating such as HTML, JSON, XML.
+- It is a language I know. 😉
