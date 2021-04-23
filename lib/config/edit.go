@@ -11,7 +11,7 @@ import (
 )
 
 // Edit a configuration file.
-func Edit() (err logs.Generic) {
+func Edit() (err logs.Argument) {
 	PrintLocation()
 	file := viper.ConfigFileUsed()
 	if file == "" {
@@ -20,7 +20,7 @@ func Edit() (err logs.Generic) {
 	}
 	edit := Editor()
 	if edit == "" {
-		return logs.Generic{
+		return logs.Argument{
 			Issue: "no suitable editor could be found",
 			Err:   ErrEnv,
 		}
@@ -30,12 +30,12 @@ func Edit() (err logs.Generic) {
 	exe.Stdin = os.Stdin
 	exe.Stdout = os.Stdout
 	if err := exe.Run(); err != nil {
-		return logs.Generic{
+		return logs.Argument{
 			Issue: "failed to run editor" + fmt.Sprintf(" %q", edit),
 			Err:   err,
 		}
 	}
-	return logs.Generic{}
+	return logs.Argument{}
 }
 
 // Editor returns the path of a configured or discovered text editor.

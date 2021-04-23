@@ -10,7 +10,7 @@ import (
 )
 
 // Delete a configuration file.
-func Delete() (err logs.Generic) {
+func Delete() (err logs.Argument) {
 	cfg := viper.ConfigFileUsed()
 	if cfg == "" {
 		configMissing(cmdPath, "delete")
@@ -20,7 +20,7 @@ func Delete() (err logs.Generic) {
 		configMissing(cmdPath, "delete")
 		os.Exit(1)
 	} else if err != nil {
-		return logs.Generic{
+		return logs.Argument{
 			Issue: "failed to stat the config file",
 			Err:   err,
 		}
@@ -28,12 +28,12 @@ func Delete() (err logs.Generic) {
 	PrintLocation()
 	if prompt.YesNo("Confirm the configuration file deletion", false) {
 		if err := os.Remove(cfg); err != nil {
-			return logs.Generic{
+			return logs.Argument{
 				Issue: "failed to remove config file",
 				Err:   err,
 			}
 		}
 		fmt.Println("The config is gone")
 	}
-	return logs.Generic{}
+	return logs.Argument{}
 }

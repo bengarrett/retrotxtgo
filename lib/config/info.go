@@ -11,12 +11,12 @@ import (
 )
 
 // Info prints the content of a configuration file.
-func Info(style string) (err logs.Generic) {
+func Info(style string) (err logs.Argument) {
 	fmt.Println(str.Cp("RetroTxt default configurations when no flags are given."))
 	PrintLocation()
 	out, e := json.MarshalIndent(Enabled(), "", " ")
 	if e != nil {
-		return logs.Generic{
+		return logs.Argument{
 			Issue: "failed to read configuration in yaml syntax",
 			Err:   e,
 		}
@@ -32,7 +32,7 @@ func Info(style string) (err logs.Generic) {
 		}
 		e = str.Highlight(string(out), "json", style, true)
 		if e != nil {
-			return logs.Generic{
+			return logs.Argument{
 				Issue: "failed to run highligher",
 				Err:   e,
 			}
@@ -53,5 +53,5 @@ func Info(style string) (err logs.Generic) {
 			fmt.Print(str.Example("retrotxt config set setup\n"))
 		}
 	}
-	return logs.Generic{}
+	return logs.Argument{}
 }

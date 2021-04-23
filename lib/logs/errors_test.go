@@ -12,7 +12,7 @@ var ErrTest = errors.New("error")
 func TestHint_String(t *testing.T) {
 	color.Enable = false
 	type fields struct {
-		Error Generic
+		Error Argument
 		Hint  string
 	}
 	tests := []struct {
@@ -21,9 +21,9 @@ func TestHint_String(t *testing.T) {
 		want   string
 	}{
 		{"empty", fields{}, "\n         run retrotxt "},
-		{"text", fields{Generic{}, "hint"}, "\n         run retrotxt hint"},
-		{"text", fields{Generic{"issue", "arg", nil}, "hint"}, "\n         run retrotxt hint"},
-		{"text", fields{Generic{"issue", "arg", ErrTest}, "hint"}, "problem: issue arg, error\n         run retrotxt hint"},
+		{"text", fields{Argument{}, "hint"}, "\n         run retrotxt hint"},
+		{"text", fields{Argument{"issue", "arg", nil}, "hint"}, "\n         run retrotxt hint"},
+		{"text", fields{Argument{"issue", "arg", ErrTest}, "hint"}, "problem: issue arg, error\n         run retrotxt hint"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

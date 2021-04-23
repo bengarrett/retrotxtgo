@@ -49,7 +49,10 @@ func FlagFatal(name, value string, args ...string) {
 }
 
 //
-func (c Cmd) error() Generic {
+func (c Cmd) error() Argument {
+	uw := errors.Unwrap(c.Err)
+	fmt.Printf("\n%T %+v %T %+v\n", c.Err, c.Err, uw, uw)
+
 	s := strings.Split(fmt.Sprintf("%s", c.Err), " ")
 	l := len(s)
 	quote := func(s string) string {
@@ -64,45 +67,45 @@ func (c Cmd) error() Generic {
 	a := fmt.Sprintf("%q", c.Args[0])
 	switch strings.Join(s[0:2], " ") {
 	case "bad flag":
-		return Generic{Issue: "flag syntax",
+		return Argument{Issue: "flag syntax",
 			Arg: quote(s[l-1]),
 			Err: ErrSyntax}
 	case "flag needs":
-		return Generic{Issue: "invalid flag",
+		return Argument{Issue: "invalid flag",
 			Arg: quote(s[l-1]),
 			Err: ErrNoFlag}
 	case "invalid argument":
 		m := strings.Split(fmt.Sprint(c.Err), ":")
-		return Generic{Issue: "flag value",
+		return Argument{Issue: "flag value",
 			Arg: a,
 			Err: fmt.Errorf("%s: %w", m[0], ErrNoCmd)}
 	case "invalid slice":
-		return Generic{Issue: "flag value",
+		return Argument{Issue: "flag value",
 			Arg: quote(s[l-1]),
 			Err: fmt.Errorf("--%s: %w", s[l-2], ErrVal)}
 	case "invalid command":
-		return Generic{Issue: "invalid command",
+		return Argument{Issue: "invalid command",
 			Arg: quote(s[l-1]),
 			Err: ErrNewCmd}
 	case "required flag(s)":
-		return Generic{Issue: "a required flag is missing",
+		return Argument{Issue: "a required flag is missing",
 			Arg: s[2],
 			Err: ErrReqFlag}
 	case "subcommand is":
 		fmt.Printf("SUBCMD DEBUG: %+v", c.Err)
-		return Generic{} // ignore error
+		return Argument{} // ignore error
 	case "unknown command":
-		return Generic{Issue: "invalid command",
+		return Argument{Issue: "invalid command",
 			Arg: a,
 			Err: ErrCmd}
 	case "unknown flag:":
-		return Generic{Issue: "unknown flag",
+		return Argument{Issue: "unknown flag",
 			Arg: s[2],
 			Err: ErrFlag}
 	case "unknown shorthand":
-		return Generic{Issue: "unknown shorthand flag",
+		return Argument{Issue: "unknown shorthand flag",
 			Arg: s[5],
 			Err: ErrFlag}
 	}
-	return Generic{Issue: "command", Arg: "execute", Err: c.Err}
+	return Argument{Issue: "command", Arg: "execute", Err: c.Err}
 }

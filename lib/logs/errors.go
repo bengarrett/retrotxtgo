@@ -1,7 +1,9 @@
 package logs
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 
 	"retrotxt.com/retrotxt/lib/str"
@@ -15,7 +17,7 @@ func Fatal(issue, arg string, msg error) {
 
 // Println prints a generic error.
 func Println(issue, arg string, err error) {
-	var g = Generic{
+	var g = Argument{
 		Issue: issue,
 		Arg:   arg,
 		Err:   err,
@@ -24,17 +26,22 @@ func Println(issue, arg string, err error) {
 }
 
 // Generic is the standard error type used to apply color to errors.
-type Generic struct {
+type Argument struct {
 	Issue string // Issue is a summary of the problem
-	Arg   string // Arg is the argument, flag or item that triggered the error
+	Arg   string // Arg is the argument, flag or item that triggered the error // Value
 	Err   error  // Err is required and is the actual error generated
 }
 
-func (g Generic) String() string {
+func (g Argument) String() string {
 	if g.Err == nil {
 		return ""
 	}
-	var a, c = str.Alert(), str.Cf(fmt.Sprintf("%v", g.Err))
+	a, c := str.Alert(), str.Cf(fmt.Sprintf("%v", g.Err))
+
+	if s := g.unWrap(); s != "" {
+		return fmt.Sprintf("%s %s", a, s)
+	}
+
 	if g.Issue == "" && g.Arg == "" {
 		return fmt.Sprintf("%s %s", a, c) // alert and err
 	}
@@ -47,15 +54,29 @@ func (g Generic) String() string {
 	return fmt.Sprintf("%s %s %s", a, b, c)
 }
 
+func (g Argument) unWrap() string {
+	var fp *fs.PathError
+	uw := errors.Unwrap(g.Err)
+	if uw == nil {
+		return ""
+	}
+	if errors.As(uw, &fp) {
+		return fmt.Sprintf("cannot open file %q, %s", g.Arg, str.Cf("is there a typo?"))
+	}
+
+	fmt.Printf("\n%T %+v\n", uw, uw)
+	return ""
+}
+
 // Fatal prints a generic error and exits.
-func (g Generic) Fatal() {
+func (g Argument) Fatal() {
 	fmt.Println(g.String())
 	os.Exit(1)
 }
 
 // Hint is a standard error type that also offers the user a command hint.
 type Hint struct {
-	Error Generic
+	Error Argument
 	Hint  string // Hint is an optional solution such as a retrotxt command
 }
 

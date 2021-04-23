@@ -96,7 +96,7 @@ func Set(name string) {
 func Update(name string, setup bool) {
 	if !Validate(name) {
 		h := logs.Hint{
-			Error: logs.Generic{
+			Error: logs.Argument{
 				Issue: "invalid name",
 				Arg:   fmt.Sprintf("%q for config", name),
 				Err:   ErrCFG,

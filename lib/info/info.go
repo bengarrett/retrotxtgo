@@ -121,8 +121,8 @@ var (
 )
 
 // Info parses the named file and prints out its details in a specific syntax.
-func (n Names) Info(name, format string) logs.Generic {
-	gen := logs.Generic{Issue: "info", Arg: name}
+func (n Names) Info(name, format string) logs.Argument {
+	gen := logs.Argument{Issue: "info", Arg: name}
 	if name == "" {
 		gen.Issue = "name"
 		gen.Err = ErrNoName
@@ -165,7 +165,7 @@ func (n Names) Info(name, format string) logs.Generic {
 			gen.Err = err
 			return gen
 		}
-		return logs.Generic{}
+		return logs.Argument{}
 	}
 	if err := Marshal(name, f, n.Index, n.Length); err != nil {
 		gen.Issue = "info.print"
