@@ -27,6 +27,7 @@ var (
 	ErrCacheYaml = errors.New("set cache cannot marshal yaml")
 	ErrCacheData = errors.New("set cache cannot create a data path")
 	ErrCacheSave = errors.New("set cache cannot save data")
+	ErrMarshal   = errors.New("version could not marshal")
 )
 
 // Data for the release information.
@@ -92,7 +93,7 @@ func (o *Output) String(color bool) string {
 func (o *Output) json() (data []byte) {
 	data, err := json.MarshalIndent(&o, "", "    ")
 	if err != nil {
-		logs.Fatal("version could not marshal", "json", err)
+		logs.MarkProblemFatal("json", ErrMarshal, err)
 	}
 	return data
 }
@@ -101,7 +102,7 @@ func (o *Output) json() (data []byte) {
 func (o *Output) jsonMin() (data []byte) {
 	data, err := json.Marshal(&o)
 	if err != nil {
-		logs.Fatal("version could not marshal", "json", err)
+		logs.MarkProblemFatal("json", ErrMarshal, err)
 	}
 	return data
 }

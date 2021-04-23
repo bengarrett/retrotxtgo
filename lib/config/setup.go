@@ -15,7 +15,10 @@ import (
 	"retrotxt.com/retrotxt/static"
 )
 
-var ErrLogo = errors.New("retrotxt logo is missing")
+var (
+	//	ErrName = errors.New("")
+	ErrLogo = errors.New("retrotxt logo is missing")
+)
 
 // Setup walks through all the settings and saves them to the configuration file.
 func Setup() {
@@ -58,7 +61,7 @@ func logo() {
 	const clear, reset, n = "\033c", "\033[0m", "text/retrotxt.utf8ans"
 	b, err := static.Text.ReadFile(n)
 	if err != nil {
-		logs.Fatal("unknown pack name", n, ErrLogo)
+		logs.MarkProblemFatal(n, logs.ErrSampFile, ErrLogo)
 	}
 	// the terminal screen needs to be cleared if the logo is to display correctly
 	fmt.Println(clear + string(b) + reset)

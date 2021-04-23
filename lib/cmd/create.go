@@ -302,7 +302,7 @@ func parseFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 func parsePipe(cmd *cobra.Command, flags convert.Flags) {
 	src, err := filesystem.ReadPipe()
 	if err != nil {
-		logs.Fatal("create", "read stdin", err)
+		logs.ProblemFatal(logs.ErrPipe, err)
 	}
 	b := createHTML(cmd, flags, &src)
 	serve := cmd.Flags().Lookup("serve").Changed
@@ -326,7 +326,7 @@ func createHTML(cmd *cobra.Command, flags convert.Flags, src *[]byte) []byte {
 	// encode and convert the source text
 	if cp := cmd.Flags().Lookup("encode"); cp.Changed {
 		if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
-			logs.Fatal("encoding not known or supported", "createHTML", err)
+			logs.ProblemFatal(logs.ErrEncode, err)
 		}
 		conv.Source.E = f.From
 	}
@@ -381,7 +381,7 @@ func staticTextfile(f sample.Flags, conv *convert.Convert, arg string, changed b
 	// read file
 	if src == nil {
 		if src, err = filesystem.Read(arg); err != nil {
-			logs.Fatal("file is invalid", arg, err)
+			logs.MarkProblemFatal(arg, logs.ErrOpenFile, err)
 		}
 	}
 	return src, false

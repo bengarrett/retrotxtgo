@@ -35,6 +35,8 @@ func Log(err error) {
 	}
 }
 
+var ErrLogsSave = errors.New("save fatal logs failed")
+
 // LogFatal saves the error and exits.
 func LogFatal(err error) {
 	if err != nil {
@@ -48,7 +50,7 @@ func LogFatal(err error) {
 			log.Println(fmt.Sprintf("error type: %T\tmsg: %v", err, err))
 			log.Panic(err)
 		default:
-			Fatal("log error", "", err)
+			ProblemFatal(ErrLogsSave, err)
 		}
 	}
 }

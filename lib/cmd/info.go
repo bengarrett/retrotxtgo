@@ -105,10 +105,10 @@ func infoSample(name string) (filename string, err error) {
 func infoPipe() {
 	b, err := filesystem.ReadPipe()
 	if err != nil {
-		logs.Fatal("info", "read stdin", err)
+		logs.MarkProblemFatal("info", logs.ErrPipe, err)
 	}
 	if err = info.Stdin(infoFlag.format, b...); err != nil {
-		logs.Fatal("info", "parse stdin", err)
+		logs.MarkProblemFatal("info", logs.ErrPipeParse, err)
 	}
 	os.Exit(0)
 }

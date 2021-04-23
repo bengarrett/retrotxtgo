@@ -154,6 +154,8 @@ func (args *Args) serveDir() {
 	}
 }
 
+var ErrCleanPath = errors.New("cleanup temporary path match failed")
+
 // Cleanup the temporary files and directories.
 func (args *Args) cleanup() {
 	if !args.Test {
@@ -162,11 +164,11 @@ func (args *Args) cleanup() {
 	tmp, err := path.Match(fmt.Sprintf("%s%s*",
 		string(os.PathSeparator), os.TempDir()), args.Save.Destination)
 	if err != nil {
-		logs.Fatal("path match pattern failed", "", err)
+		logs.ProblemFatal(ErrCleanPath, err)
 	}
 	if tmp {
 		if err := os.RemoveAll(args.Save.Destination); err != nil {
-			logs.Fatal("could not clean the temporary directory: %q: %s", args.Save.Destination, err)
+			logs.MarkProblemFatal(args.Save.Destination, logs.ErrTmpClean, err)
 		}
 	}
 }

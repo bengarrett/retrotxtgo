@@ -12,6 +12,19 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
+var (
+	ErrCFG     = errors.New("unknown configuration name")
+	ErrEnv     = errors.New("set one by creating an $EDITOR environment variable in your shell configuration")
+	ErrKey     = errors.New("configuration key is invalid")
+	ErrNoName  = errors.New("name cannot be empty")
+	ErrNoFName = errors.New("filename cannot be empty")
+	ErrSetting = errors.New("configuration setting name is not known")
+	// key types
+	ErrBool   = errors.New("key is not a boolean (true/false) value")
+	ErrString = errors.New("key is not a string (text) value")
+	ErrUint   = errors.New("key is not a absolute number")
+)
+
 const (
 	httpPort uint = 8080
 
@@ -134,15 +147,6 @@ const (
 	namedFile = "config.yaml"
 )
 
-var (
-	ErrCFG     = errors.New("unknown configuration name")
-	ErrEnv     = errors.New("set one by creating an $EDITOR environment variable in your shell configuration")
-	ErrKey     = errors.New("key does not exist or is not a bool value")
-	ErrNoName  = errors.New("name cannot be empty")
-	ErrNoFName = errors.New("filename cannot be empty")
-	ErrSetting = errors.New("configuration setting name is not known")
-)
-
 // Formats choices for flags.
 type Formats struct {
 	Info    [5]string
@@ -248,7 +252,7 @@ func getBool(key string) bool {
 	case bool:
 		return Reset()[key].(bool)
 	default:
-		logs.Fatal("getbool", key, ErrKey)
+		logs.MarkProblemFatal(key, ErrBool, ErrKey)
 	}
 	return false
 }
@@ -261,7 +265,7 @@ func getUint(key string) uint {
 	case uint:
 		return Reset()[key].(uint)
 	default:
-		logs.Fatal("getunit", key, ErrKey)
+		logs.MarkProblemFatal(key, ErrUint, ErrKey)
 	}
 	return 0
 }
@@ -274,7 +278,7 @@ func getString(key string) string {
 	case string:
 		return Reset()[key].(string)
 	default:
-		logs.Fatal("getstring", key, ErrKey)
+		logs.MarkProblemFatal(key, ErrString, ErrKey)
 	}
 	return ""
 }

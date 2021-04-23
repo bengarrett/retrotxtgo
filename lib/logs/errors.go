@@ -9,11 +9,96 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
+var (
+	// generic errors
+	ErrConfigFile = errors.New("could not open the configuration file")
+	ErrEncode     = errors.New("text encoding not known or supported")
+	ErrHighlight  = errors.New("could not format or colorize the element")
+	ErrOpenFile   = errors.New("could not open the file")
+	ErrPipe       = errors.New("could not read text stream from piped stdin (standard input)")
+	ErrPipeParse  = errors.New("could not parse the text stream from piped stdin (standard input)")
+	ErrSaveDir    = errors.New("could not save file to the directory")
+	ErrSaveFile   = errors.New("could not save the file")
+	ErrSampFile   = errors.New("unknown sample filename")
+	ErrTmpClean   = errors.New("could not cleanup the temporary directory")
+	ErrTmpDir     = errors.New("could not save file to the temporary directory")
+	ErrTmpSave    = errors.New("could not save the temporary file")
+	ErrTabFlush   = errors.New("tab writer could not write or flush")
+	ErrZipFile    = errors.New("could not create the zip archive")
+	// command (cmd library) and argument errors
+	ErrHelp        = errors.New("command help could not display")
+	ErrMarkRequire = errors.New("command flag could not be marked as required")
+	ErrUsage       = errors.New("command usage could not display")
+	// type errors
+
+)
+
 // Argument is used to highlight user supplied argument values in error replies.
 type Argument struct {
 	Issue string // Issue is a human readable summary of the problem
 	Value string // Value of the the argument, flag or item that triggered the error
 	Err   error  // Err is required error
+}
+
+// CLI ...
+type CLI struct {
+	Args []string // Command line arguments
+	Err  error    // rootCmd.Execute output
+}
+
+type Cmmd struct {
+	Name string
+	Flag string
+	Err  error
+}
+
+func CmdProblem(name, flag string, err error) string {
+	a := str.Alert()
+	return fmt.Sprintf("%s %s flag --%s %s", a, name, flag, err)
+}
+
+func CmdProblemFatal(name, flag string, err error) {
+	fmt.Println(CmdProblem(name, flag, err))
+	os.Exit(1)
+}
+
+// Mark ...
+type Mark struct {
+	Value string
+	New   error
+	Err   error
+}
+
+func MarkProblem(value string, new, err error) string {
+	v := value
+	a := str.Alert()
+	n := str.Cf(fmt.Sprintf("%v", new))
+	e := str.Cf(fmt.Sprintf("%v", err))
+
+	return fmt.Sprintf("%s %s %q: %s", a, n, v, e)
+}
+
+func MarkProblemFatal(value string, new, err error) {
+	fmt.Println(MarkProblem(value, new, err))
+	os.Exit(1)
+}
+
+// Problem ...
+type Problem struct {
+	New error
+	Err error
+}
+
+// ok
+func Problemln(new, err error) {
+	e := fmt.Errorf("%s: %w", new, err)
+	fmt.Printf("%s%s\n", str.Alert(), e)
+}
+
+// ok
+func ProblemFatal(new, err error) {
+	Problemln(new, err)
+	os.Exit(1)
 }
 
 // Fatal prints a generic error and exits.

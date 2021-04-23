@@ -18,7 +18,10 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
-var ErrNoReader = errors.New("reader interface is empty")
+var (
+	ErrNoReader = errors.New("reader interface is empty")
+	ErrPString  = errors.New("prompt string standard input problem")
+)
 
 type keys []string
 
@@ -159,7 +162,7 @@ func parseYN(input string, yesDefault bool) bool {
 // PString parses the reader input for any os exit commands.
 func pstring(r io.Reader, setup bool) (words string) {
 	if r == nil {
-		logs.Fatal("prompt string scanner", "stdin", ErrNoReader)
+		logs.ProblemFatal(ErrPString, ErrNoReader)
 	}
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
@@ -177,7 +180,7 @@ func pstring(r io.Reader, setup bool) (words string) {
 		}
 	}
 	if err := scanner.Err(); err != nil {
-		logs.Fatal("prompt string scanner", "stdin", err)
+		logs.ProblemFatal(ErrPString, err)
 	}
 	return words
 }

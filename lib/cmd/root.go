@@ -59,7 +59,7 @@ func Execute() {
 		const minArgs = 2
 		if len(os.Args) < minArgs {
 			if err1 := rootCmd.Usage(); err1 != nil {
-				logs.Fatal("rootcmd", "usage", err1)
+				logs.MarkProblemFatal("rootCmd", logs.ErrUsage, err1)
 			}
 		}
 		logs.Execute(err, os.Args[1:]...)
@@ -81,7 +81,7 @@ func initConfig() {
 	viper.AutomaticEnv()
 	// configuration file
 	if err := config.SetConfig(rootFlag.config); err != nil {
-		logs.Fatal("config file", viper.ConfigFileUsed(), err)
+		logs.MarkProblemFatal(viper.ConfigFileUsed(), logs.ErrConfigFile, err)
 	}
 }
 
@@ -89,7 +89,7 @@ func initConfig() {
 func checkUse(cmd *cobra.Command, args ...string) {
 	if len(args) == 0 {
 		if err := cmd.Help(); err != nil {
-			logs.Fatal("root", "cmd.help", err)
+			logs.MarkProblemFatal("checkUse", logs.ErrHelp, err)
 		}
 		os.Exit(0)
 	}

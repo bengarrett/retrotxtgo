@@ -128,13 +128,13 @@ func viewParsePipe(cmd *cobra.Command) {
 	if cp := cmd.Flags().Lookup("encode"); cp.Changed {
 		f := sample.Flags{}
 		if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
-			logs.Fatal("encoding not known or supported", "pipe", err)
+			logs.MarkProblemFatal("pipe", logs.ErrEncode, err)
 		}
 		conv.Source.E = f.From
 	}
 	b, err := filesystem.ReadPipe()
 	if err != nil {
-		logs.Fatal("view", "stdin read", err)
+		logs.MarkProblemFatal("view", logs.ErrPipe, err)
 	}
 	_, r := viewParseBytes(cmd, &conv, "piped", b)
 	fmt.Print(string(r))
@@ -151,7 +151,7 @@ func viewParseBytes(cmd *cobra.Command, conv *convert.Convert, arg string, b []b
 	var f = sample.Flags{}
 	var err error
 	if f.From, err = convert.Encoding(name); err != nil {
-		logs.Fatal("encoding not known or supported", arg, err)
+		logs.MarkProblemFatal(arg, logs.ErrEncode, err)
 	}
 	conv.Source.E = f.From
 

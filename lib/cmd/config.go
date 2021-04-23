@@ -3,6 +3,7 @@ package cmd
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 
@@ -14,7 +15,9 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
-const bash = "bash"
+const bash, zsh = "bash", "zsh"
+
+var ErrShellCompletion = errors.New("could not generate completion for")
 
 type configFlags struct {
 	configs bool
@@ -103,7 +106,7 @@ var configInfoCmd = &cobra.Command{
 func configInfo() (exit bool) {
 	if configFlag.configs {
 		if err := config.List(); err != nil {
-			logs.Fatal("config info", "list", err)
+			logs.CmdProblemFatal("config info", "list", err)
 		}
 		return true
 	}
@@ -146,7 +149,7 @@ var configSetCmd = &cobra.Command{
 func configSet() bool {
 	if configFlag.configs {
 		if err := config.List(); err != nil {
-			logs.Fatal("config", "list", err)
+			logs.CmdProblemFatal("config", "list", err)
 		}
 		return true
 	}
@@ -181,17 +184,17 @@ var configShellCmd = &cobra.Command{
 		case bash, "bsh", "b":
 			lexer = bash
 			if err = cmd.GenBashCompletion(&buf); err != nil {
-				logs.Fatal("shell", bash, err)
+				logs.MarkProblemFatal(bash, ErrShellCompletion, err)
 			}
 		case ps, "posh", "ps", "p":
 			lexer = ps
 			if err = cmd.GenPowerShellCompletion(&buf); err != nil {
-				logs.Fatal("shell", ps, err)
+				logs.MarkProblemFatal(ps, ErrShellCompletion, err)
 			}
-		case "zsh", "z":
+		case zsh, "z":
 			lexer = bash
 			if err = cmd.GenZshCompletion(&buf); err != nil {
-				logs.Fatal("shell", "zsh", err)
+				logs.MarkProblemFatal(zsh, ErrShellCompletion, err)
 			}
 		default:
 			s := config.Format().Shell
@@ -200,7 +203,7 @@ var configShellCmd = &cobra.Command{
 				ErrIntpr)
 		}
 		if err := str.Highlight(buf.String(), lexer, style, true); err != nil {
-			logs.Fatal("config", "shell", err)
+			logs.MarkProblemFatal("shell", logs.ErrHighlight, err)
 		}
 	},
 }
@@ -237,7 +240,7 @@ func init() {
 		str.Required("user shell to receive retrotxt auto-completions")+
 			str.Options("", true, s[:]...))
 	if err = configShellCmd.MarkFlagRequired("interpreter"); err != nil {
-		logs.Fatal("interpreter flag", "", err)
+		logs.MarkProblemFatal("interpreter", logs.ErrMarkRequire, err)
 	}
 	configShellCmd.SilenceErrors = true
 }

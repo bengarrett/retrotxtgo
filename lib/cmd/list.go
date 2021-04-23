@@ -82,7 +82,7 @@ func examples() *bytes.Buffer {
 	fmt.Fprintln(w, "\nMultiple examples used together are supported.")
 	fmt.Fprintln(w, str.Example("  retrotxt view ansi ascii ansi.rgb"))
 	if err := w.Flush(); err != nil {
-		logs.Fatal("flush of tab writer failed", "", err)
+		logs.ProblemFatal(logs.ErrTabFlush, err)
 	}
 	return &buf
 }

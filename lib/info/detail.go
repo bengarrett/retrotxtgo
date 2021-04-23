@@ -259,7 +259,7 @@ func (d *Detail) printMarshal(color bool) []byte {
 		fmt.Fprint(w, hr(l))
 	}
 	if err := w.Flush(); err != nil {
-		logs.Fatal("flush of tab writer failed", "", err)
+		logs.ProblemFatal(logs.ErrTabFlush, err)
 	}
 	return buf.Bytes()
 }

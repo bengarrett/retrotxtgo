@@ -86,7 +86,7 @@ func List() *bytes.Buffer {
 	fmt.Fprintln(w, "\nRetroTxt, PCs and the web today use Unicode UTF-8. It is a subset of ISO 8895-1,")
 	fmt.Fprintln(w, "which allows UTF-8 to be backwards compatible both with it and US-ASCII.")
 	if err := w.Flush(); err != nil {
-		logs.Fatal("convert list", "flush", err)
+		logs.ProblemFatal(logs.ErrTabFlush, err)
 	}
 	return &buf
 }

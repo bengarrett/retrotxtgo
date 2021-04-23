@@ -225,7 +225,7 @@ func (args *Args) saveAssets(b *[]byte) error {
 	if args.Save.Destination == "" {
 		dir := []string{viper.GetString("save-directory")}
 		if args.Save.Destination, err = destination(dir...); err != nil {
-			logs.Fatal("save to directory failure", fmt.Sprintf("%s", dir), err)
+			logs.MarkProblemFatal(args.Save.Destination, logs.ErrSaveDir, err)
 		}
 	}
 	ch := make(chan error)
@@ -274,11 +274,11 @@ func (args *Args) zipAssets(destDir string, b *[]byte) {
 
 	args.Save.Destination, err = ioutil.TempDir(os.TempDir(), "*-zip")
 	if err != nil {
-		logs.Fatal("save to directory failure", "temporary", err)
+		logs.MarkProblemFatal("temporary", logs.ErrSaveDir, err)
 	}
 
 	if err = args.saveAssets(b); err != nil {
-		logs.Println("could not save file", "", err)
+		logs.Problemln(logs.ErrSaveFile, err)
 		return
 	}
 
@@ -295,7 +295,7 @@ func (args *Args) zipAssets(destDir string, b *[]byte) {
 		Quiet:     args.Test,
 	}
 	if err = zip.Create(); err != nil {
-		logs.Fatal("zip archive", name, err)
+		logs.MarkProblemFatal(name, logs.ErrZipFile, err)
 	}
 }
 

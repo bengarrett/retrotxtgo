@@ -345,7 +345,7 @@ func colorElm(elm, lexer, style string, color bool) string {
 	var b bytes.Buffer
 	_ = io.Writer(&b)
 	if err := str.HighlightWriter(&b, elm, lexer, style, color); err != nil {
-		logs.Fatal("logs", "colorhtml", err)
+		logs.MarkProblemFatal(fmt.Sprint("html ", lexer), logs.ErrHighlight, err)
 	}
 	return fmt.Sprintf("\n%s\n", b.String())
 }
