@@ -4,7 +4,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
 	"unicode/utf8"
 
 	"github.com/spf13/cobra"
@@ -77,10 +76,6 @@ func viewParseArg(cmd *cobra.Command, conv *convert.Convert, i int, arg string) 
 	var err error
 	conv.Output = convert.Output{} // output must be reset
 	f := sample.Flags{}
-	if i > 0 {
-		const horizontalBar = "\u2500"
-		fmt.Printf(" \n%s\n\n", str.Cb(strings.Repeat(horizontalBar, 40)))
-	}
 	// internal example file
 	if ok := sample.Valid(arg); ok {
 		var p sample.File
@@ -94,6 +89,9 @@ func viewParseArg(cmd *cobra.Command, conv *convert.Convert, i int, arg string) 
 				return true, nil
 			}
 		}
+		if i > 0 {
+			str.HR(40)
+		}
 		fmt.Println(string(p.Runes))
 		return true, nil
 	}
@@ -102,6 +100,9 @@ func viewParseArg(cmd *cobra.Command, conv *convert.Convert, i int, arg string) 
 	if err != nil {
 		logs.Println("read file", arg, err)
 		return true, nil
+	}
+	if i > 0 {
+		str.HR(40)
 	}
 	return viewParseBytes(cmd, conv, arg, b)
 }
