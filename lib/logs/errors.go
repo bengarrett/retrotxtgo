@@ -9,6 +9,13 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
+// Argument is used to highlight user supplied argument values in error replies.
+type Argument struct {
+	Issue string // Issue is a human readable summary of the problem
+	Value string // Value of the the argument, flag or item that triggered the error
+	Err   error  // Err is required error
+}
+
 // Fatal prints a generic error and exits.
 func Fatal(issue, arg string, msg error) {
 	Println(issue, arg, msg)
@@ -16,20 +23,15 @@ func Fatal(issue, arg string, msg error) {
 }
 
 // Println prints a generic error.
-func Println(issue, arg string, err error) {
+// TODO, make into (a Argument) Println ?
+// (a Argument) Println() {}
+func Println(i, v string, err error) {
 	var g = Argument{
-		Issue: issue,
-		Arg:   arg,
+		Issue: i,
+		Value: v,
 		Err:   err,
 	}
 	fmt.Println(g.String())
-}
-
-// Generic is the standard error type used to apply color to errors.
-type Argument struct {
-	Issue string // Issue is a summary of the problem
-	Arg   string // Arg is the argument, flag or item that triggered the error // Value
-	Err   error  // Err is required and is the actual error generated
 }
 
 func (g Argument) String() string {
@@ -42,14 +44,14 @@ func (g Argument) String() string {
 		return fmt.Sprintf("%s %s", a, s)
 	}
 
-	if g.Issue == "" && g.Arg == "" {
+	if g.Issue == "" && g.Value == "" {
 		return fmt.Sprintf("%s %s", a, c) // alert and err
 	}
 	var b string
-	if g.Arg == "" {
+	if g.Value == "" {
 		b = str.Ci(fmt.Sprintf("%s,", g.Issue)) // alert, issue and err
 	} else {
-		b = str.Ci(fmt.Sprintf("%s %s,", g.Issue, g.Arg)) // alert, issue, arg, err
+		b = str.Ci(fmt.Sprintf("%s %s,", g.Issue, g.Value)) // alert, issue, arg, err
 	}
 	return fmt.Sprintf("%s %s %s", a, b, c)
 }
@@ -61,7 +63,7 @@ func (g Argument) unWrap() string {
 		return ""
 	}
 	if errors.As(uw, &fp) {
-		return fmt.Sprintf("cannot open file %q, %s", g.Arg, str.Cf("is there a typo?"))
+		return fmt.Sprintf("cannot open file %q, %s", g.Value, str.Cf("is there a typo?"))
 	}
 
 	fmt.Printf("\n%T %+v\n", uw, uw)

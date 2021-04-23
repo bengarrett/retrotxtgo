@@ -98,7 +98,7 @@ func Update(name string, setup bool) {
 		h := logs.Hint{
 			Error: logs.Argument{
 				Issue: "invalid name",
-				Arg:   fmt.Sprintf("%q for config", name),
+				Value: fmt.Sprintf("%q for config", name),
 				Err:   ErrCFG,
 			},
 			Hint: "config set --list",

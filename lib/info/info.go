@@ -122,7 +122,7 @@ var (
 
 // Info parses the named file and prints out its details in a specific syntax.
 func (n Names) Info(name, format string) logs.Argument {
-	gen := logs.Argument{Issue: "info", Arg: name}
+	gen := logs.Argument{Issue: "info", Value: name}
 	if name == "" {
 		gen.Issue = "name"
 		gen.Err = ErrNoName
@@ -161,7 +161,7 @@ func (n Names) Info(name, format string) logs.Argument {
 		})
 		if err != nil {
 			gen.Issue = "info.print.directory"
-			gen.Arg = format
+			gen.Value = format
 			gen.Err = err
 			return gen
 		}
@@ -169,7 +169,7 @@ func (n Names) Info(name, format string) logs.Argument {
 	}
 	if err := Marshal(name, f, n.Index, n.Length); err != nil {
 		gen.Issue = "info.print"
-		gen.Arg = format
+		gen.Value = format
 		gen.Err = err
 		return gen
 	}

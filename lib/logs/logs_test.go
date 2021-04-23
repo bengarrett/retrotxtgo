@@ -33,7 +33,7 @@ func TestErr_String(t *testing.T) {
 		want string
 	}{
 		{"empty", Argument{}, ""},
-		{"abc", Argument{Issue: "a", Arg: "b", Err: ErrC}, "problem: a b, c"},
+		{"abc", Argument{Issue: "a", Value: "b", Err: ErrC}, "problem: a b, c"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

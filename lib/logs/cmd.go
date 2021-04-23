@@ -68,44 +68,44 @@ func (c Cmd) error() Argument {
 	switch strings.Join(s[0:2], " ") {
 	case "bad flag":
 		return Argument{Issue: "flag syntax",
-			Arg: quote(s[l-1]),
-			Err: ErrSyntax}
+			Value: quote(s[l-1]),
+			Err:   ErrSyntax}
 	case "flag needs":
 		return Argument{Issue: "invalid flag",
-			Arg: quote(s[l-1]),
-			Err: ErrNoFlag}
+			Value: quote(s[l-1]),
+			Err:   ErrNoFlag}
 	case "invalid argument":
 		m := strings.Split(fmt.Sprint(c.Err), ":")
 		return Argument{Issue: "flag value",
-			Arg: a,
-			Err: fmt.Errorf("%s: %w", m[0], ErrNoCmd)}
+			Value: a,
+			Err:   fmt.Errorf("%s: %w", m[0], ErrNoCmd)}
 	case "invalid slice":
 		return Argument{Issue: "flag value",
-			Arg: quote(s[l-1]),
-			Err: fmt.Errorf("--%s: %w", s[l-2], ErrVal)}
+			Value: quote(s[l-1]),
+			Err:   fmt.Errorf("--%s: %w", s[l-2], ErrVal)}
 	case "invalid command":
 		return Argument{Issue: "invalid command",
-			Arg: quote(s[l-1]),
-			Err: ErrNewCmd}
+			Value: quote(s[l-1]),
+			Err:   ErrNewCmd}
 	case "required flag(s)":
 		return Argument{Issue: "a required flag is missing",
-			Arg: s[2],
-			Err: ErrReqFlag}
+			Value: s[2],
+			Err:   ErrReqFlag}
 	case "subcommand is":
 		fmt.Printf("SUBCMD DEBUG: %+v", c.Err)
 		return Argument{} // ignore error
 	case "unknown command":
 		return Argument{Issue: "invalid command",
-			Arg: a,
-			Err: ErrCmd}
+			Value: a,
+			Err:   ErrCmd}
 	case "unknown flag:":
 		return Argument{Issue: "unknown flag",
-			Arg: s[2],
-			Err: ErrFlag}
+			Value: s[2],
+			Err:   ErrFlag}
 	case "unknown shorthand":
 		return Argument{Issue: "unknown shorthand flag",
-			Arg: s[5],
-			Err: ErrFlag}
+			Value: s[5],
+			Err:   ErrFlag}
 	}
-	return Argument{Issue: "command", Arg: "execute", Err: c.Err}
+	return Argument{Issue: "command", Value: "execute", Err: c.Err}
 }
