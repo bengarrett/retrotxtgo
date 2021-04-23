@@ -7,28 +7,15 @@ import (
 	"strings"
 )
 
-var (
-	ErrCmd     = errors.New("choose a command from the list available")
-	ErrNewCmd  = errors.New("choose another command from the available commands")
-	ErrNoCmd   = errors.New("invalid command")
-	ErrEmpty   = errors.New("value is empty")
-	ErrFlag    = errors.New("use a flag from the list of flags")
-	ErrSyntax  = errors.New("flags can only be in -s (short) or --long (long) form")
-	ErrNoFlag  = errors.New("cannot be empty and requires a value")
-	ErrReqFlag = errors.New("you must include this flag in your command")
-	ErrSlice   = errors.New("invalid option choice")
-	ErrShort   = errors.New("word count is too short, less than 3")
-	ErrVal     = errors.New("value is not a valid choice")
-)
-
 // Cmd is a command error type to handle command arguments and flags.
 type Cmd struct {
-	Args []string // Command line arguments
+	Args []string // Arguments
 	Err  error    // rootCmd.Execute output
 }
 
 // Execute is the error handler for command flags and arguments.
 func Execute(err error, args ...string) {
+	//Parse(err, args...)
 	cmd := Cmd{Args: args, Err: err}
 	fmt.Println(cmd.error().String())
 }
@@ -48,11 +35,20 @@ func FlagFatal(name, value string, args ...string) {
 	os.Exit(1)
 }
 
+// Parse placeholder
+func Parse(err error, args ...string) {
+	uw := errors.Unwrap(err)
+	fmt.Println("uw", uw)
+	fmt.Println("err", err)
+	s := fmt.Sprint(err)
+	switch {
+	case strings.Contains(s, "strconv.ParseInt"):
+		fmt.Println("hehhh")
+	}
+}
+
 //
 func (c Cmd) error() Argument {
-	uw := errors.Unwrap(c.Err)
-	fmt.Printf("\n%T %+v %T %+v\n", c.Err, c.Err, uw, uw)
-
 	s := strings.Split(fmt.Sprintf("%s", c.Err), " ")
 	l := len(s)
 	quote := func(s string) string {

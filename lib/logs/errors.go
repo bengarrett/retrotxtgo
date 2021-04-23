@@ -30,7 +30,17 @@ var (
 	ErrMarkRequire = errors.New("command flag could not be marked as required")
 	ErrUsage       = errors.New("command usage could not display")
 	// type errors
-
+	ErrCmd     = errors.New("choose a command from the list available")
+	ErrNewCmd  = errors.New("choose another command from the available commands")
+	ErrNoCmd   = errors.New("invalid command")
+	ErrEmpty   = errors.New("value is empty")
+	ErrFlag    = errors.New("use a flag from the list of flags")
+	ErrSyntax  = errors.New("flags can only be in -s (short) or --long (long) form")
+	ErrNoFlag  = errors.New("cannot be empty and requires a value")
+	ErrReqFlag = errors.New("you must include this flag in your command")
+	ErrSlice   = errors.New("invalid option choice")
+	ErrShort   = errors.New("word count is too short, less than 3")
+	ErrVal     = errors.New("value is not a valid choice")
 )
 
 // Argument is used to highlight user supplied argument values in error replies.
