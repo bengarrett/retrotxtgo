@@ -19,12 +19,6 @@ var (
 	ErrNotInts    = errors.New("the value must be a single or a list of numbers")
 )
 
-// Cmd is a command error type to handle command arguments and flags.
-type Cmd struct {
-	Args []string // Arguments
-	Err  error    // rootCmd.Execute output
-}
-
 // InvalidCommand prints a problem highlighting the unsupported command.
 func InvalidCommand(args ...string) {
 	err := fmt.Errorf("invalid command %s", args[0])
@@ -112,71 +106,4 @@ func parseType(name, flag string, err error) string {
 	default:
 		return FlagProblem(name, flag, err)
 	}
-}
-
-// func CmdProblem(name, flag string, err error) string {
-// 	alert := str.Alert()
-// 	return fmt.Sprintf("%s %s flag --%s %s", alert, name, flag, err)
-// }
-
-// func CmdProblemFatal(name, flag string, err error) {
-
-//
-func (c Cmd) error() Argument {
-	s := strings.Split(fmt.Sprintf("%s", c.Err), " ")
-	l := len(s)
-	quote := func(s string) string {
-		return fmt.Sprintf("%q", s)
-	}
-	const min = 3
-	if l < min {
-		LogFatal(fmt.Errorf("cmd error args: %w", ErrShort))
-	} else if len(c.Args) < 1 {
-		LogFatal(fmt.Errorf("cmd error err: %w", ErrEmpty))
-	}
-	a := fmt.Sprintf("%q", c.Args[0])
-	fmt.Println("Cmd.error(): ", s)
-	switch strings.Join(s[0:2], " ") {
-	case "bad flag":
-		return Argument{Issue: "flag syntax",
-			Value: quote(s[l-1]),
-			Err:   ErrSyntax}
-	case "flag needs":
-		return Argument{Issue: "invalid flag",
-			Value: quote(s[l-1]),
-			Err:   ErrNoFlag}
-	case "invalid argument":
-		m := strings.Split(fmt.Sprint(c.Err), ":")
-		return Argument{Issue: "flag value",
-			Value: a,
-			Err:   fmt.Errorf("%s: %w", m[0], ErrNoCmd)}
-	case "invalid slice":
-		return Argument{Issue: "flag value",
-			Value: quote(s[l-1]),
-			Err:   fmt.Errorf("--%s: %w", s[l-2], ErrVal)}
-	case "invalid command":
-		return Argument{Issue: "invalid command",
-			Value: quote(s[l-1]),
-			Err:   ErrNewCmd}
-	case "required flag(s)":
-		return Argument{Issue: "a required flag is missing",
-			Value: s[2],
-			Err:   ErrReqFlag}
-	case "subcommand is":
-		fmt.Printf("SUBCMD DEBUG: %+v", c.Err)
-		return Argument{} // ignore error
-	case "unknown command":
-		return Argument{Issue: "invalid command",
-			Value: a,
-			Err:   ErrCmd}
-	case "unknown flag:":
-		return Argument{Issue: "unknown flag",
-			Value: s[2],
-			Err:   ErrFlag}
-	case "unknown shorthand":
-		return Argument{Issue: "unknown shorthand flag",
-			Value: s[5],
-			Err:   ErrFlag}
-	}
-	return Argument{Issue: "command", Value: "execute", Err: c.Err}
 }
