@@ -41,7 +41,7 @@ if it is launched through an operating system symlink.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if ok := version.Print(versionFlag.format); !ok {
 			v := config.Format().Version
-			logs.FlagFatal("format", versionFlag.format, v[:]...)
+			logs.InvalidChoice("version", "format", v[:]...)
 		}
 	},
 }

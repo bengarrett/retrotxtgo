@@ -8,14 +8,15 @@ import (
 )
 
 var (
-	ErrCmdExist  = errors.New("the command does not exist")
-	ErrCmdChoose = errors.New("choose an available command from the --help list")
-	ErrFlagExist = errors.New("the flag does not work with this command")
-	ErrNoFlag    = errors.New("the flag with a value must be included with this command")
-	ErrNoFlagVal = errors.New("the value cannot be left empty")
-	ErrNotBool   = errors.New("the value must be either true or false")
-	ErrNotInt    = errors.New("the value must be a number")
-	ErrNotInts   = errors.New("the value must be a single or a list of numbers")
+	ErrCmdExist   = errors.New("the command does not exist")
+	ErrCmdChoose  = errors.New("choose an available command from the --help list")
+	ErrFlagExist  = errors.New("the flag does not work with this command")
+	ErrFlagChoice = errors.New("choose a value from the following")
+	ErrNoFlag     = errors.New("the flag with a value must be included with this command")
+	ErrNoFlagVal  = errors.New("the value cannot be left empty")
+	ErrNotBool    = errors.New("the value must be either true or false")
+	ErrNotInt     = errors.New("the value must be a number")
+	ErrNotInts    = errors.New("the value must be a single or a list of numbers")
 )
 
 // Cmd is a command error type to handle command arguments and flags.
@@ -24,22 +25,16 @@ type Cmd struct {
 	Err  error    // rootCmd.Execute output
 }
 
-// func Execute(err error, args ...string) {
-// 	Parse(err, args...)
-// 	cmd := Cmd{Args: args, Err: err}
-// 	fmt.Println(cmd.error().String())
-// }
-
+// InvalidCommand prints a problem highlighting the unsupported command.
 func InvalidCommand(args ...string) {
 	err := fmt.Errorf("invalid command %s", args[0])
 	Execute(err, args...)
 }
 
-// FlagFatal returns flag options when an invalid choice is used.
-func FlagFatal(name, value string, args ...string) {
-	cmd := Cmd{Args: args, Err: fmt.Errorf("--%s=%q: %w", name, value, ErrSlice)}
-	fmt.Println(cmd.error().String())
-	fmt.Printf("         choices: %s\n", strings.Join(args, ", "))
+func InvalidChoice(name, value string, choices ...string) {
+	c := FlagProblem(name, value, ErrFlagChoice)
+	fmt.Println(c)
+	fmt.Printf("          choices: %s\n", strings.Join(choices, ", "))
 	os.Exit(1)
 }
 
@@ -47,6 +42,7 @@ func FlagFatal(name, value string, args ...string) {
 func Execute(err error, args ...string) {
 	const (
 		minWords       = 3
+		flagChoice     = "invalid option choice"
 		flagRequired   = "required flag(s)"
 		flagSyntax     = "bad flag"
 		invalidCommand = "invalid command"
@@ -89,12 +85,14 @@ func Execute(err error, args ...string) {
 		c = CmdProblem(mark, ErrCmdChoose)
 	case unknownFlag, unknownShort:
 		c = FlagProblem(name, mark, ErrFlagExist)
+	case flagChoice:
+		c = "honk"
 	}
 	if c != "" {
 		fmt.Println(c)
 		os.Exit(1)
 	}
-
+	// TODO: handle unknown/empty
 }
 
 func parseType(name, flag string, err error) string {
