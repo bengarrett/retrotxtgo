@@ -59,7 +59,7 @@ func viewParseArgs(cmd *cobra.Command, args []string) {
 	if s := cmd.Flags().Lookup("swap-chars"); !s.Changed {
 		conv.Flags.SwapChars = []int{null, verticalBar}
 	}
-	checkUse(cmd, args...)
+	printUsage(cmd, args...)
 	for i, arg := range args {
 		skip, r := viewParseArg(cmd, &conv, i, arg)
 		if skip {

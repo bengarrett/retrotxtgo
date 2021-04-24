@@ -54,7 +54,7 @@ copy in a web browser.`,
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	rootCmd.SilenceErrors = true // set to false to debug
+	rootCmd.SilenceErrors = false // set to false to debug
 	if err := rootCmd.Execute(); err != nil {
 		const minArgs = 2
 		if len(os.Args) < minArgs {
@@ -85,14 +85,15 @@ func initConfig() {
 	}
 }
 
-// checkUsage will print the help and exit when no arguments are supplied.
-func checkUse(cmd *cobra.Command, args ...string) {
+// printUsage will print the help and exit when no arguments are supplied.
+func printUsage(cmd *cobra.Command, args ...string) bool {
 	if len(args) == 0 {
 		if err := cmd.Help(); err != nil {
 			logs.MarkProblemFatal("checkUse", logs.ErrHelp, err)
 		}
 		os.Exit(0)
 	}
+	return false
 }
 
 // endOfFile determines if an EOF marker should be obeyed.

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"strings"
 
 	"retrotxt.com/retrotxt/lib/str"
 )
@@ -36,7 +37,7 @@ var (
 	ErrEmpty   = errors.New("value is empty")
 	ErrFlag    = errors.New("use a flag from the list of flags")
 	ErrSyntax  = errors.New("flags can only be in -s (short) or --long (long) form")
-	ErrNoFlag  = errors.New("cannot be empty and requires a value")
+	ErrNoFlagx = errors.New("cannot be empty and requires a value")
 	ErrReqFlag = errors.New("you must include this flag in your command")
 	ErrSlice   = errors.New("invalid option choice")
 	ErrShort   = errors.New("word count is too short, less than 3")
@@ -62,13 +63,29 @@ type Cmmd struct {
 	Err  error
 }
 
-func CmdProblem(name, flag string, err error) string {
-	a := str.Alert()
-	return fmt.Sprintf("%s %s flag --%s %s", a, name, flag, err)
+func CmdProblem(name string, err error) string {
+	alert := str.Alert()
+	return fmt.Sprintf("%s the command %s does not exist, %s", alert, name, err)
+}
+
+func SubCmdProblem(name string, err error) string {
+	alert := str.Alert()
+	return fmt.Sprintf("%s the subcommand %s does not exist, %s", alert, name, err)
+}
+
+func FlagProblem(name, flag string, err error) string {
+	alert, toggle := str.Alert(), "--"
+	fmt.Println("FLAG:", flag)
+	if strings.Contains(flag, "-") {
+		toggle = ""
+	} else if len(flag) == 1 {
+		toggle = "-"
+	}
+	return fmt.Sprintf("%s with the %s %s%s flag, %s", alert, name, toggle, flag, err)
 }
 
 func CmdProblemFatal(name, flag string, err error) {
-	fmt.Println(CmdProblem(name, flag, err))
+	fmt.Println(FlagProblem(name, flag, err))
 	os.Exit(1)
 }
 

@@ -25,8 +25,9 @@ var listCmd = &cobra.Command{
 	Short:   "Available built-in examples, codepages and tabled datasets",
 	Example: exampleCmd(listExample),
 	Run: func(cmd *cobra.Command, args []string) {
-		checkUse(cmd, args...)
-		logs.ArgFatal(args...)
+		if !printUsage(cmd, args...) {
+			logs.InvalidCommand(args...)
+		}
 	},
 }
 
@@ -95,8 +96,9 @@ var listCmdTable = &cobra.Command{
 	Short:   "Display one or more tables showing the codepage and all their characters",
 	Example: exampleCmd(listTableExample),
 	Run: func(cmd *cobra.Command, args []string) {
-		checkUse(cmd, args...)
-		fmt.Println(listTable(args))
+		if !printUsage(cmd, args...) {
+			fmt.Println(listTable(args))
+		}
 	},
 }
 

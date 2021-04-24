@@ -35,7 +35,7 @@ var infoCmd = &cobra.Command{
 		if filesystem.IsPipe() {
 			infoPipe()
 		}
-		checkUse(cmd, args...)
+		printUsage(cmd, args...)
 		var n info.Names
 		n.Length = len(args)
 		for i, arg := range args {

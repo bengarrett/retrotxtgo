@@ -7,24 +7,32 @@ import (
 	"strings"
 )
 
+var (
+	ErrCmdExist  = errors.New("the command does not exist")
+	ErrCmdChoose = errors.New("choose an available command from the --help list")
+	ErrFlagExist = errors.New("the flag does not work with this command")
+	ErrNoFlag    = errors.New("the flag with a value must be included with this command")
+	ErrNoFlagVal = errors.New("the value cannot be left empty")
+	ErrNotBool   = errors.New("the value must be either true or false")
+	ErrNotInt    = errors.New("the value must be a number")
+	ErrNotInts   = errors.New("the value must be a single or a list of numbers")
+)
+
 // Cmd is a command error type to handle command arguments and flags.
 type Cmd struct {
 	Args []string // Arguments
 	Err  error    // rootCmd.Execute output
 }
 
-// Execute is the error handler for command flags and arguments.
-func Execute(err error, args ...string) {
-	//Parse(err, args...)
-	cmd := Cmd{Args: args, Err: err}
-	fmt.Println(cmd.error().String())
-}
+// func Execute(err error, args ...string) {
+// 	Parse(err, args...)
+// 	cmd := Cmd{Args: args, Err: err}
+// 	fmt.Println(cmd.error().String())
+// }
 
-// ArgFatal returns instructions for invalid command arguments.
-func ArgFatal(args ...string) {
-	cmd := Cmd{Args: args, Err: fmt.Errorf("%q: %w", args[0], ErrNoCmd)}
-	fmt.Println(cmd.error().String())
-	os.Exit(1)
+func InvalidCommand(args ...string) {
+	err := fmt.Errorf("invalid command %s", args[0])
+	Execute(err, args...)
 }
 
 // FlagFatal returns flag options when an invalid choice is used.
@@ -35,17 +43,85 @@ func FlagFatal(name, value string, args ...string) {
 	os.Exit(1)
 }
 
-// Parse placeholder
-func Parse(err error, args ...string) {
-	uw := errors.Unwrap(err)
-	fmt.Println("uw", uw)
-	fmt.Println("err", err)
-	s := fmt.Sprint(err)
+// Execute is the error handler for command flags and arguments.
+func Execute(err error, args ...string) {
+	const (
+		minWords       = 3
+		flagRequired   = "required flag(s)"
+		flagSyntax     = "bad flag"
+		invalidCommand = "invalid command"
+		invalidFlag    = "flag needs"
+		invalidSlice   = "invalid slice"
+		invalidType    = "invalid argument"
+		unknownCmd     = "unknown command"
+		unknownFlag    = "unknown flag:"
+		unknownShort   = "unknown shorthand"
+	)
+
+	words := strings.Split(fmt.Sprintf("%s", err), " ")
+	argsCnt, wordCnt := len(args), len(words)
+	if wordCnt < minWords {
+		LogFatal(fmt.Errorf("cmd error args: %w", ErrShort))
+	}
+	if argsCnt == 0 {
+		LogFatal(fmt.Errorf("cmd error err: %w", ErrEmpty))
+	}
+
+	mark, name := words[wordCnt-1], args[0]
+	problem := strings.Join(words[0:2], " ")
+	var c string
+	switch problem {
+	case flagSyntax:
+		c = FlagProblem(name, mark, err)
+	case invalidFlag:
+		c = FlagProblem(name, mark, ErrNoFlagVal)
+	case invalidType:
+		mark = strings.Join(words[4:6], " ")
+		c = parseType(name, mark, err)
+	case invalidSlice:
+		return // TODO:
+	case invalidCommand:
+		c = SubCmdProblem(mark, ErrCmdChoose)
+	case flagRequired:
+		c = CmdProblem(mark, ErrNoFlag)
+	case unknownCmd:
+		mark = words[2]
+		c = CmdProblem(mark, ErrCmdChoose)
+	case unknownFlag, unknownShort:
+		c = FlagProblem(name, mark, ErrFlagExist)
+	}
+	if c != "" {
+		fmt.Println(c)
+		os.Exit(1)
+	}
+
+}
+
+func parseType(name, flag string, err error) string {
+	const (
+		invalidBool = "strconv.ParseBool"
+		invalidInt  = "strconv.ParseInt"
+		invalidStr  = "strconv.Atoi"
+	)
+	s := err.Error()
 	switch {
-	case strings.Contains(s, "strconv.ParseInt"):
-		fmt.Println("hehhh")
+	case strings.Contains(s, invalidBool):
+		return FlagProblem(name, flag, ErrNotBool)
+	case strings.Contains(s, invalidInt):
+		return FlagProblem(name, flag, ErrNotInt)
+	case strings.Contains(s, invalidStr):
+		return FlagProblem(name, flag, ErrNotInts)
+	default:
+		return FlagProblem(name, flag, err)
 	}
 }
+
+// func CmdProblem(name, flag string, err error) string {
+// 	alert := str.Alert()
+// 	return fmt.Sprintf("%s %s flag --%s %s", alert, name, flag, err)
+// }
+
+// func CmdProblemFatal(name, flag string, err error) {
 
 //
 func (c Cmd) error() Argument {
@@ -61,6 +137,7 @@ func (c Cmd) error() Argument {
 		LogFatal(fmt.Errorf("cmd error err: %w", ErrEmpty))
 	}
 	a := fmt.Sprintf("%q", c.Args[0])
+	fmt.Println("Cmd.error(): ", s)
 	switch strings.Join(s[0:2], " ") {
 	case "bad flag":
 		return Argument{Issue: "flag syntax",

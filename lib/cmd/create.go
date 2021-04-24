@@ -82,10 +82,10 @@ var createCmd = &cobra.Command{
 		if body := cmd.Flags().Lookup("body"); body.Changed {
 			parseBody(cmd)
 		}
-		// print help if no flags are supplied
-		checkUse(cmd, args...)
-		// parse the flags to create the HTML
-		parseFiles(cmd, f, args...)
+		if !printUsage(cmd, args...) {
+			// parse the flags to create the HTML
+			parseFiles(cmd, f, args...)
+		}
 	},
 }
 
