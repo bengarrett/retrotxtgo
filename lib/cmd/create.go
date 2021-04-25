@@ -3,6 +3,7 @@ package cmd
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"sort"
@@ -18,6 +19,8 @@ import (
 	"retrotxt.com/retrotxt/lib/sauce"
 	"retrotxt.com/retrotxt/lib/str"
 )
+
+var ErrHideCreate = errors.New("could not hide the create flag")
 
 type createFlags struct {
 	controls []string // character encoding used by the filename
@@ -146,10 +149,10 @@ func init() {
 	}
 	createCmd.Flags().BoolVarP(&html.SauceData.Use, "sauce", "", true, "use any found SAUCE metadata as HTML meta tags")
 	if err := createCmd.Flags().MarkHidden("body"); err != nil {
-		logs.Fatal("create mark", "body hidden", err)
+		logs.MarkProblemFatal("body", ErrHideCreate, err)
 	}
 	if err := createCmd.Flags().MarkHidden("cache"); err != nil {
-		logs.Fatal("create mark", "cache hidden", err)
+		logs.MarkProblemFatal("cache", ErrHideCreate, err)
 	}
 	createCmd.Flags().SortFlags = false
 }
@@ -262,9 +265,9 @@ func parseBody(cmd *cobra.Command) {
 		b := []byte(body.Value.String())
 		serve := cmd.Flags().Lookup("serve").Changed
 		if h := serveBytes(0, serve, &b); !h {
-			i, a, err := html.Create(&b)
+			err := html.Create(&b)
 			if err != nil {
-				logs.Fatal(i, a, err)
+				logs.ProblemFatal(fmt.Errorf("could not parse the body flag"), err)
 			}
 		}
 		os.Exit(0)
@@ -290,9 +293,9 @@ func parseFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 		}
 		// serve the HTML over HTTP?
 		if h := serveBytes(i, serve, &b); !h {
-			i, a, err := html.Create(&b)
+			err := html.Create(&b)
 			if err != nil {
-				logs.Fatal(i, a, err)
+				logs.ProblemFatal(fmt.Errorf("could not serve %s over HTTP", arg), err)
 			}
 		}
 	}
@@ -307,9 +310,9 @@ func parsePipe(cmd *cobra.Command, flags convert.Flags) {
 	b := createHTML(cmd, flags, &src)
 	serve := cmd.Flags().Lookup("serve").Changed
 	if h := serveBytes(0, serve, &b); !h {
-		i, a, err := html.Create(&b)
+		err := html.Create(&b)
 		if err != nil {
-			logs.Fatal(i, a, err)
+			logs.ProblemFatal(fmt.Errorf("could not serve stdin over HTTP"), err)
 		}
 	}
 	os.Exit(0)

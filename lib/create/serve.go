@@ -97,9 +97,9 @@ func (args *Args) createDir(b *[]byte) (err error) {
 	if err != nil {
 		return fmt.Errorf("failed to make a temporary serve directory: %w", err)
 	}
-	i, a, err := args.Create(b)
+	err = args.Create(b)
 	if err != nil {
-		return fmt.Errorf("%s%s %w", i, a, err)
+		return fmt.Errorf("failed to create files in the temporary directory: %w", err)
 	}
 	return nil
 }

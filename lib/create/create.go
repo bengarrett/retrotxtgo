@@ -198,26 +198,26 @@ func (l Layout) Pack() string {
 }
 
 // Create handles the target output command arguments.
-func (args *Args) Create(b *[]byte) (issue, arg string, err error) {
+func (args *Args) Create(b *[]byte) (err error) {
 	args.layout, err = layout(args.Layout)
 	if err != nil {
-		return "create layout:", args.Layout, err
+		return fmt.Errorf("create command layout: %w", err)
 	}
 
 	switch {
 	case args.Save.AsFiles:
 		if err := args.saveAssets(b); err != nil {
-			return "could not save file:", "", err
+			return fmt.Errorf("create could not save file: %w", err)
 		}
 	case args.Save.Compress:
 		args.zipAssets("", b)
 	default:
 		// print to terminal
 		if err := args.Stdout(b); err != nil {
-			return "create:", "stdout", err
+			return fmt.Errorf("create stdout failure: %w", err)
 		}
 	}
-	return "", "", nil
+	return nil
 }
 
 func (args *Args) saveAssets(b *[]byte) error {
