@@ -13,7 +13,6 @@ import (
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/text/language"
 	"retrotxt.com/retrotxt/lib/filesystem"
-	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/sauce"
 )
 
@@ -121,26 +120,21 @@ var (
 )
 
 // Info parses the named file and prints out its details in a specific syntax.
-func (n Names) Info(name, format string) logs.Argument {
-	gen := logs.Argument{Issue: "info", Value: name}
+func (n Names) Info(name, format string) error {
+	err1 := fmt.Sprintf("info on %s failed", name)
 	if name == "" {
-		gen.Issue = "name"
-		gen.Err = ErrNoName
-		return gen
+		return fmt.Errorf("%s: %w", err1, ErrNoName)
 	}
 	f, err := output(format)
 	if err != nil {
-		gen.Err = ErrFmt
-		return gen
+		return fmt.Errorf("%s: %w", err1, ErrFmt)
 	}
 	s, err := os.Stat(name)
 	if os.IsNotExist(err) {
-		gen.Err = ErrNoFile
-		return gen
+		return fmt.Errorf("%s: %w", err1, ErrNoFile)
 	}
 	if err != nil {
-		gen.Err = err
-		return gen
+		return fmt.Errorf("%s: %w", err1, err)
 	}
 	if s.IsDir() {
 		const walkMode = -1
@@ -160,20 +154,14 @@ func (n Names) Info(name, format string) logs.Argument {
 			Unsorted: true, // set true for faster yet non-deterministic enumeration
 		})
 		if err != nil {
-			gen.Issue = "info.print.directory"
-			gen.Value = format
-			gen.Err = err
-			return gen
+			return fmt.Errorf("info could not walk directory: %w", err)
 		}
-		return logs.Argument{}
+		return nil
 	}
 	if err := Marshal(name, f, n.Index, n.Length); err != nil {
-		gen.Issue = "info.print"
-		gen.Value = format
-		gen.Err = err
-		return gen
+		return fmt.Errorf("info on %s could not marshal: %w", name, err)
 	}
-	return gen
+	return nil
 }
 
 // Language tag used for numeric syntax formatting.

@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/spf13/viper"
-	"retrotxt.com/retrotxt/lib/logs"
 )
 
 func TestDelete(t *testing.T) {
@@ -18,9 +17,9 @@ func TestDelete(t *testing.T) {
 	defer os.Remove(tmpFile.Name())
 	tests := []struct {
 		name    string
-		wantErr logs.Argument
+		wantErr error
 	}{
-		{"ok", logs.Argument{}},
+		{"ok", nil},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

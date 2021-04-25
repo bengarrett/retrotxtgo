@@ -261,8 +261,8 @@ func TestNames_Info(t *testing.T) {
 				Index:  tt.fields.Index,
 				Length: tt.fields.Length,
 			}
-			if got := n.Info(tt.args.name, tt.args.format); !errors.Is(got.Err, tt.wantErr) {
-				t.Errorf("Names.Info() = %v, want %v", got.Err, tt.wantErr)
+			if got := n.Info(tt.args.name, tt.args.format); !errors.Is(got, tt.wantErr) {
+				t.Errorf("Names.Info() = %v, want %v", got, tt.wantErr)
 			}
 		})
 	}

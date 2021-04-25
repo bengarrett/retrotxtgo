@@ -61,6 +61,16 @@ func CmdProblemFatal(name, flag string, err error) {
 	os.Exit(1)
 }
 
+// rename to Fatal
+func ErrorFatal(err error) {
+	Errorf(err)
+	os.Exit(1)
+}
+
+func Errorf(err error) {
+	fmt.Printf("%s%s\n", str.Alert(), err) // TODO: change to string return?
+}
+
 func FlagProblem(name, flag string, err error) string {
 	alert, toggle := str.Alert(), "--"
 	fmt.Println("FLAG:", flag)
@@ -158,7 +168,7 @@ func (g Argument) unWrap() string {
 }
 
 // Fatal prints a generic error and exits.
-func (g Argument) Fatal() {
+func (g Argument) XFatal() {
 	fmt.Println(g.String())
 	os.Exit(1)
 }

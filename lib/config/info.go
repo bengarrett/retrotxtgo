@@ -6,20 +6,16 @@ import (
 	"strings"
 
 	"github.com/gookit/color"
-	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/str"
 )
 
 // Info prints the content of a configuration file.
-func Info(style string) (err logs.Argument) {
+func Info(style string) error {
 	fmt.Println(str.Cp("RetroTxt default configurations when no flags are given."))
 	PrintLocation()
-	out, e := json.MarshalIndent(Enabled(), "", " ")
-	if e != nil {
-		return logs.Argument{
-			Issue: "failed to read configuration in yaml syntax",
-			Err:   e,
-		}
+	out, err := json.MarshalIndent(Enabled(), "", " ")
+	if err != nil {
+		return fmt.Errorf("failed to read configuration in yaml syntax: %w", err)
 	}
 	switch style {
 	case "none", "":
@@ -30,12 +26,9 @@ func Info(style string) (err logs.Argument) {
 			fmt.Println(string(out))
 			break
 		}
-		e = str.Highlight(string(out), "json", style, true)
-		if e != nil {
-			return logs.Argument{
-				Issue: "failed to run highligher",
-				Err:   e,
-			}
+		err = str.Highlight(string(out), "json", style, true)
+		if err != nil {
+			return fmt.Errorf("failed to run highlighter: %w", err)
 		}
 		fmt.Println()
 	}
@@ -53,5 +46,5 @@ func Info(style string) (err logs.Argument) {
 			fmt.Print(str.Example("retrotxt config set setup\n"))
 		}
 	}
-	return logs.Argument{}
+	return nil
 }

@@ -7,11 +7,10 @@ import (
 	"runtime"
 
 	"github.com/spf13/viper"
-	"retrotxt.com/retrotxt/lib/logs"
 )
 
 // Edit a configuration file.
-func Edit() (err logs.Argument) {
+func Edit() error {
 	PrintLocation()
 	file := viper.ConfigFileUsed()
 	if file == "" {
@@ -20,22 +19,16 @@ func Edit() (err logs.Argument) {
 	}
 	edit := Editor()
 	if edit == "" {
-		return logs.Argument{
-			Issue: "no suitable editor could be found",
-			Err:   ErrEnv,
-		}
+		return fmt.Errorf("no suitable editor could be found: %w", ErrEnv)
 	}
 	// credit: https://stackoverflow.com/questions/21513321/how-to-start-vim-from-go
 	exe := exec.Command(edit, file)
 	exe.Stdin = os.Stdin
 	exe.Stdout = os.Stdout
 	if err := exe.Run(); err != nil {
-		return logs.Argument{
-			Issue: "failed to run editor" + fmt.Sprintf(" %q", edit),
-			Err:   err,
-		}
+		return fmt.Errorf("failed to run editor"+fmt.Sprintf(" %q", edit)+": %w", err)
 	}
-	return logs.Argument{}
+	return nil
 }
 
 // Editor returns the path of a configured or discovered text editor.

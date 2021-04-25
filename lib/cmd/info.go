@@ -50,10 +50,10 @@ var infoCmd = &cobra.Command{
 				defer os.Remove(filename)
 				arg = filename
 			}
-			if err := n.Info(arg, infoFlag.format); err.Err != nil {
-				if errors.Is(err.Err, info.ErrNoFile) {
+			if err := n.Info(arg, infoFlag.format); err != nil {
+				if errors.As(err, info.ErrNoFile) {
 					if n.Length <= 1 {
-						err.Fatal()
+						logs.ErrorFatal(err)
 					}
 					logs.Println("pack", arg, info.ErrNoFile)
 					continue
@@ -61,7 +61,7 @@ var infoCmd = &cobra.Command{
 				if err := cmd.Usage(); err != nil {
 					logs.Println("command", "usage", err)
 				}
-				err.Fatal()
+				logs.ErrorFatal(err)
 			}
 		}
 	},

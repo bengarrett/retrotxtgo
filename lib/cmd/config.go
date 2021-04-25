@@ -65,8 +65,8 @@ var configDeleteCmd = &cobra.Command{
 	Aliases: []string{"d", "del", "rm"},
 	Short:   "Remove the config file",
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := config.Delete(); err.Err != nil {
-			err.Fatal()
+		if err := config.Delete(); err != nil {
+			logs.ErrorFatal(err)
 		}
 	},
 }
@@ -87,8 +87,8 @@ To switch editors either:
   Set an editor in the configuration file, ` +
 		str.Example("retrotxt config set --name=editor"),
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := config.Edit(); err.Err != nil {
-			err.Fatal()
+		if err := config.Edit(); err != nil {
+			logs.ErrorFatal(err)
 		}
 	},
 }
@@ -122,8 +122,8 @@ func configInfo() (exit bool) {
 	if style == "" {
 		style = "dracula"
 	}
-	if err := config.Info(style); err.Err != nil {
-		err.Fatal()
+	if err := config.Info(style); err != nil {
+		logs.ErrorFatal(err)
 	}
 	return false
 }
