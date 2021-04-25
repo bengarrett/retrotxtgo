@@ -76,7 +76,7 @@ func Test_save(t *testing.T) {
 }
 
 func TestPath(t *testing.T) {
-	if got := Path(); !filepath.IsAbs(got) {
-		t.Errorf("Path() is empty or not an absolute path, it should return a directory")
+	if got := Name(); !filepath.IsAbs(got) {
+		t.Errorf("Name() is empty or not an absolute path, it should return a directory")
 	}
 }

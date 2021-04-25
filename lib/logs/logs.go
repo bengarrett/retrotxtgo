@@ -24,6 +24,7 @@ const (
 )
 
 var ErrNil = errors.New("error value cannot be nil")
+var ErrLogsSave = errors.New("save fatal logs failed")
 
 // Log saves the error and continues the program.
 func Log(err error) {
@@ -34,8 +35,6 @@ func Log(err error) {
 		}
 	}
 }
-
-var ErrLogsSave = errors.New("save fatal logs failed")
 
 // LogFatal saves the error and exits.
 func LogFatal(err error) {
@@ -55,22 +54,9 @@ func LogFatal(err error) {
 	}
 }
 
-// Path is the absolute path and filename of the error log file.
-func Path() string {
-	fp, err := gap.NewScope(gap.User, "df2").LogPath(filename)
-	if err != nil {
-		h, err := os.UserHomeDir()
-		if err != nil {
-			log.Fatal(fmt.Errorf("log path userhomedir: %w", err))
-		}
-		return path.Join(h, filename)
-	}
-	return fp
-}
-
 // LastEntry returns the last log entry in the error log file.
 func LastEntry() (entry string, err error) {
-	name := Path()
+	name := Name()
 	file, err := os.Open(name)
 	if err != nil {
 		return "", fmt.Errorf("read tail could not open file: %q: %w", name, err)
@@ -87,6 +73,19 @@ func LastEntry() (entry string, err error) {
 	return entry, file.Close()
 }
 
+// Name is the absolute path and filename of the error log file.
+func Name() string {
+	fp, err := gap.NewScope(gap.User, "df2").LogPath(filename)
+	if err != nil {
+		h, err := os.UserHomeDir()
+		if err != nil {
+			log.Fatal(fmt.Errorf("log path userhomedir: %w", err))
+		}
+		return path.Join(h, filename)
+	}
+	return fp
+}
+
 // Save an error to the log directory.
 // An optional named file is available for unit tests.
 func save(err error, name string) error {
@@ -96,7 +95,7 @@ func save(err error, name string) error {
 	// use UTC date and times in the log file
 	log.SetFlags(log.Ldate | log.Ltime | log.LUTC)
 	if name == "" {
-		name = Path()
+		name = Name()
 	}
 	p := filepath.Dir(name)
 	if _, e := os.Stat(p); os.IsNotExist(e) {
