@@ -1,21 +1,12 @@
 package logs
 
 import (
-	"errors"
 	"fmt"
-	"io/fs"
 	"os"
 	"strings"
 
 	"retrotxt.com/retrotxt/lib/str"
 )
-
-// Argument is used to highlight user supplied argument values in error replies.
-type Argument struct {
-	Issue string // Issue is a human readable summary of the problem
-	Value string // Value of the the argument, flag or item that triggered the error
-	Err   error  // Err is required error
-}
 
 func CmdProblem(name string, err error) string {
 	alert := str.Alert()
@@ -77,42 +68,6 @@ func ProblemFatal(new, err error) {
 func SubCmdProblem(name string, err error) string {
 	alert := str.Alert()
 	return fmt.Sprintf("%s the subcommand %s does not exist, %s", alert, name, err)
-}
-
-func (g Argument) XString() string {
-	if g.Err == nil {
-		return ""
-	}
-	a, c := str.Alert(), str.Cf(fmt.Sprintf("%v", g.Err))
-
-	if s := g.unWrap(); s != "" {
-		return fmt.Sprintf("%s %s", a, s)
-	}
-
-	if g.Issue == "" && g.Value == "" {
-		return fmt.Sprintf("%s %s", a, c) // alert and err
-	}
-	var b string
-	if g.Value == "" {
-		b = str.Ci(fmt.Sprintf("%s,", g.Issue)) // alert, issue and err
-	} else {
-		b = str.Ci(fmt.Sprintf("%s %s,", g.Issue, g.Value)) // alert, issue, arg, err
-	}
-	return fmt.Sprintf("%s %s %s", a, b, c)
-}
-
-func (g Argument) unWrap() string {
-	var fp *fs.PathError
-	uw := errors.Unwrap(g.Err)
-	if uw == nil {
-		return ""
-	}
-	if errors.As(uw, &fp) {
-		return fmt.Sprintf("cannot open file %q, %s", g.Value, str.Cf("is there a typo?"))
-	}
-
-	fmt.Printf("\n%T %+v\n", uw, uw)
-	return ""
 }
 
 func Hint(s string, err error) string {
