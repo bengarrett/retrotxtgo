@@ -200,9 +200,7 @@ var configShellCmd = &cobra.Command{
 			}
 		default:
 			s := config.Format().Shell
-			logs.Fatal(fmt.Sprintf("options: %s", s[:]),
-				configFlag.shell,
-				ErrIntpr)
+			logs.InvalidChoice("shell", "interpreter", s[0], s[1], s[2])
 		}
 		if err := str.Highlight(buf.String(), lexer, style, true); err != nil {
 			logs.MarkProblemFatal("shell", logs.ErrHighlight, err)
