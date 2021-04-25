@@ -113,24 +113,6 @@ func SubCmdProblem(name string, err error) string {
 	return fmt.Sprintf("%s the subcommand %s does not exist, %s", alert, name, err)
 }
 
-// Fatal prints a generic error and exits.
-func XFatal(issue, arg string, msg error) {
-	Println(issue, arg, msg)
-	os.Exit(1)
-}
-
-// Println prints a generic error.
-// TODO, make into (a Argument) Println ?
-// (a Argument) Println() {}
-func Println(i, v string, err error) {
-	var g = Argument{
-		Issue: i,
-		Value: v,
-		Err:   err,
-	}
-	fmt.Println(g.String())
-}
-
 func (g Argument) String() string {
 	if g.Err == nil {
 		return ""

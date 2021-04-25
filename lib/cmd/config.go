@@ -3,7 +3,6 @@ package cmd
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"os"
 
@@ -16,8 +15,6 @@ import (
 )
 
 const bash, zsh = "bash", "zsh"
-
-var ErrShellCompletion = errors.New("could not generate completion for")
 
 type configFlags struct {
 	configs bool
@@ -53,7 +50,7 @@ var configCreateCmd = &cobra.Command{
 
 func configCreate() bool {
 	if err := config.Create(viper.ConfigFileUsed(), configFlag.ow); err != nil {
-		logs.Println("config", "create", err)
+		logs.Problemln(ErrCfgCreate, err)
 		return true
 	}
 	fmt.Println("New config file:", viper.ConfigFileUsed())

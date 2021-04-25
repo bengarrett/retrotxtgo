@@ -3,6 +3,7 @@ package config
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -22,6 +23,8 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 	v "retrotxt.com/retrotxt/lib/version"
 )
+
+var ErrHighlight = errors.New("syntax highlight writer failed")
 
 type update struct {
 	name  string
@@ -377,7 +380,7 @@ func (n names) string(theme bool, lexer string) string {
 			b = bytes.Buffer{}
 			t = fmt.Sprintf("{ %q:%q }%s", name, name, strings.Repeat(" ", pad+space))
 			if err := str.HighlightWriter(&b, t, lexer, name, true); err != nil {
-				logs.Println("highlight writer failed", name, err)
+				logs.MarkProblem(name, ErrHighlight, err)
 			}
 			s = append(s, fmt.Sprintf("%2d %s", i, b.String()))
 			if split+i >= len(n) {
@@ -386,7 +389,7 @@ func (n names) string(theme bool, lexer string) string {
 			b = bytes.Buffer{}
 			t = fmt.Sprintf("{ %q:%q }\n", n[split+i], n[split+i])
 			if err := str.HighlightWriter(&b, t, lexer, name, true); err != nil {
-				logs.Println("highlight writer failed", name, err)
+				logs.MarkProblem(name, ErrHighlight, err)
 			}
 			s = append(s, fmt.Sprintf("%2d %s", split+i, b.String()))
 			continue
@@ -394,7 +397,7 @@ func (n names) string(theme bool, lexer string) string {
 		b = bytes.Buffer{}
 		t = fmt.Sprintf("<%s=%q>%s", name, name, strings.Repeat(" ", pad+space))
 		if err := str.HighlightWriter(&b, t, lexer, name, true); err != nil {
-			logs.Println("highlight writer failed", name, err)
+			logs.MarkProblem(name, ErrHighlight, err)
 		}
 		s = append(s, fmt.Sprintf("%2d %s", i, b.String()))
 		if split+i >= len(n) {
@@ -403,7 +406,7 @@ func (n names) string(theme bool, lexer string) string {
 		b = bytes.Buffer{}
 		t = fmt.Sprintf("<%s=%q>\n", n[split+i], n[split+i])
 		if err := str.HighlightWriter(&b, t, lexer, name, true); err != nil {
-			logs.Println("highlight writer failed", name, err)
+			logs.MarkProblem(name, ErrHighlight, err)
 		}
 		s = append(s, fmt.Sprintf("%2d %s", split+i, b.String()))
 	}

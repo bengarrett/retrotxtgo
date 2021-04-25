@@ -60,6 +60,7 @@ const (
 var (
 	ErrConvert = errors.New("unknown convert method")
 	ErrConvNil = errors.New("conv argument cannot be empty")
+	ErrEncode  = errors.New("using the original text encoding")
 	ErrName    = errors.New("sample name is invalid")
 )
 
@@ -213,7 +214,7 @@ func printT(e encoding.Encoding, b ...byte) {
 	}
 	b, err := encode(e, b...)
 	if err != nil {
-		logs.Println("using the original encoding and not", fmt.Sprint(e), err)
+		logs.MarkProblemFatal(fmt.Sprint(e), ErrEncode, err)
 	}
 	fmt.Println(string(b))
 }

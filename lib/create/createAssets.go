@@ -234,7 +234,7 @@ func (args *Args) destination(name string) (string, error) {
 			// existing static files can be ignored
 			return path, nil
 		}
-		logs.Println("file exists", path, ErrReqOW)
+		logs.MarkProblem(path, ErrFileExist, ErrReqOW)
 		return path, nil
 	}
 	if os.IsNotExist(err) {

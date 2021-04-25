@@ -43,7 +43,7 @@ var infoCmd = &cobra.Command{
 			// embed sample filename
 			filename, err := infoSample(arg)
 			if err != nil {
-				logs.Println("pack", arg, err)
+				logs.MarkProblem(arg, ErrInfo, err)
 				continue
 			}
 			if filename != "" {
@@ -55,11 +55,11 @@ var infoCmd = &cobra.Command{
 					if n.Length <= 1 {
 						logs.ErrorFatal(err)
 					}
-					logs.Println("pack", arg, info.ErrNoFile)
+					logs.MarkProblem(arg, info.ErrNoFile, err)
 					continue
 				}
 				if err := cmd.Usage(); err != nil {
-					logs.Println("command", "usage", err)
+					logs.Problemln(ErrCmdUsage, err)
 				}
 				logs.ErrorFatal(err)
 			}

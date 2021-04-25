@@ -2,6 +2,7 @@ package convert
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"math"
 	"strings"
@@ -14,6 +15,8 @@ import (
 	"retrotxt.com/retrotxt/lib/filesystem"
 	"retrotxt.com/retrotxt/lib/logs"
 )
+
+var ErrWidth = errors.New("could not determine the number columns using line break")
 
 // ANSI transforms legacy encoded ANSI into modern UTF-8 text.
 // It displays ASCII control codes as characters.
@@ -201,8 +204,7 @@ func (c *Convert) width(max int) {
 	cnt := len(c.Output.R)
 	cols, err := filesystem.Columns(bytes.NewReader(c.Source.B), c.Source.lineBreak)
 	if err != nil {
-		logs.Println("ignoring width argument", "",
-			fmt.Errorf("width could not determine the columns: %w", err))
+		logs.MarkProblem(fmt.Sprint(c.Source.lineBreak), ErrWidth, err)
 		return
 	}
 	if cols <= max {

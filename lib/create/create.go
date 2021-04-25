@@ -163,12 +163,15 @@ var (
 	ErrName      = errors.New("font name is not known")
 	ErrPack      = errors.New("font pack is not found")
 	ErrEmptyName = errors.New("filename is empty")
+	ErrFileExist = errors.New("filename already exists")
 	ErrReqOW     = errors.New("include an -o flag to overwrite")
 	ErrUnknownFF = errors.New("unknown font family")
 	ErrNilByte   = errors.New("cannot convert a nil byte value")
 	ErrTmplDir   = errors.New("the path to the template file is a directory")
 	ErrNoLayout  = errors.New("layout template does not exist")
 	ErrLayout    = errors.New("unknown layout template")
+	ErrTmpDir    = errors.New("temporary directory match")
+	ErrRmTmpDir  = errors.New("temporary directory removal")
 )
 
 // ColorScheme values for the content attribute of <meta name="color-scheme">.
@@ -263,11 +266,11 @@ func (args *Args) zipAssets(destDir string, b *[]byte) {
 		dir := args.Save.Destination
 		m, err = filepath.Match(filepath.Join(os.TempDir(), "*"), dir)
 		if err != nil {
-			logs.Println("temp directory match", "*", err)
+			logs.MarkProblem("*", ErrTmpDir, err)
 		}
 		if m {
 			if err = os.RemoveAll(dir); err != nil {
-				logs.Println("could not remove temp directory", dir, err)
+				logs.MarkProblem(dir, ErrRmTmpDir, err)
 			}
 		}
 	}()

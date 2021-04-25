@@ -5,7 +5,6 @@ package cmd
 import (
 	"bufio"
 	"bytes"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -29,14 +28,6 @@ const (
 	tab         = "tab"
 	null        = 0
 	verticalBar = 124
-)
-
-var (
-	ErrIntpr     = errors.New("the interpreter is not supported")
-	ErrPackValue = errors.New("unknown package convert value")
-	ErrTempClose = errors.New("could not close temporary file")
-	ErrTempOpen  = errors.New("could not create temporary file")
-	ErrTempWrite = errors.New("could not write to temporary file")
 )
 
 var rootFlag = rootFlags{}

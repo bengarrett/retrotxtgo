@@ -80,7 +80,7 @@ func viewParseArg(cmd *cobra.Command, conv *convert.Convert, i int, arg string) 
 	if ok := sample.Valid(arg); ok {
 		var p sample.File
 		if p, err = f.Open(arg, conv); err != nil {
-			logs.Println("sample", arg, err)
+			logs.MarkProblem(arg, ErrSampleView, err)
 			return true, nil
 		}
 		// --to flag is currently ignored
@@ -98,7 +98,7 @@ func viewParseArg(cmd *cobra.Command, conv *convert.Convert, i int, arg string) 
 	// read file
 	b, err := filesystem.Read(arg)
 	if err != nil {
-		logs.Println("read file", arg, err)
+		logs.MarkProblem(arg, logs.ErrOpenFile, err)
 		return true, nil
 	}
 	if i > 0 {
@@ -167,7 +167,7 @@ func viewParseBytes(cmd *cobra.Command, conv *convert.Convert, arg string, b []b
 		r, err = conv.Dump(&b)
 	}
 	if err != nil {
-		logs.Println("convert text", arg, err)
+		logs.MarkProblem(arg, ErrViewUTF8, err)
 		return true, nil
 	}
 	// to flag
@@ -194,7 +194,7 @@ func init() {
 func viewToFlag(r ...rune) (success bool) {
 	newer, err := viewEncode(viewFlag.to, r...)
 	if err != nil {
-		logs.Println("using the original encoding and not", viewFlag.to, err)
+		logs.MarkProblem(viewFlag.to, ErrEncode, err)
 		return false
 	}
 	fmt.Println(string(newer))

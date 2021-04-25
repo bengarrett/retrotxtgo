@@ -3,7 +3,6 @@ package cmd
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"os"
 	"sort"
@@ -19,8 +18,6 @@ import (
 	"retrotxt.com/retrotxt/lib/sauce"
 	"retrotxt.com/retrotxt/lib/str"
 )
-
-var ErrHideCreate = errors.New("could not hide the create flag")
 
 type createFlags struct {
 	controls []string // character encoding used by the filename
@@ -343,7 +340,7 @@ func createHTML(cmd *cobra.Command, flags convert.Flags, src *[]byte) []byte {
 		r, err = conv.Dump(src)
 	}
 	if err != nil {
-		logs.Println("convert text", "createHTML", err)
+		logs.Problemln(ErrCreateHTML, err)
 		return nil
 	}
 	return []byte(string(r))
@@ -372,7 +369,7 @@ func staticTextfile(f sample.Flags, conv *convert.Convert, arg string, changed b
 		var p sample.File
 		p, err = f.Open(arg, conv)
 		if err != nil {
-			logs.Println("sample", arg, err)
+			logs.MarkProblem(arg, ErrSampleHTML, err)
 			return nil, true
 		}
 		src = create.Normalize(p.Encoding, p.Runes...)
