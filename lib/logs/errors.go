@@ -51,26 +51,14 @@ type Argument struct {
 	Err   error  // Err is required error
 }
 
-// CLI ...
-type CLI struct {
-	Args []string // Command line arguments
-	Err  error    // rootCmd.Execute output
-}
-
-type Cmmd struct {
-	Name string
-	Flag string
-	Err  error
-}
-
 func CmdProblem(name string, err error) string {
 	alert := str.Alert()
 	return fmt.Sprintf("%s the command %s does not exist, %s", alert, name, err)
 }
 
-func SubCmdProblem(name string, err error) string {
-	alert := str.Alert()
-	return fmt.Sprintf("%s the subcommand %s does not exist, %s", alert, name, err)
+func CmdProblemFatal(name, flag string, err error) {
+	fmt.Println(FlagProblem(name, flag, err))
+	os.Exit(1)
 }
 
 func FlagProblem(name, flag string, err error) string {
@@ -82,18 +70,6 @@ func FlagProblem(name, flag string, err error) string {
 		toggle = "-"
 	}
 	return fmt.Sprintf("%s with the %s %s%s flag, %s", alert, name, toggle, flag, err)
-}
-
-func CmdProblemFatal(name, flag string, err error) {
-	fmt.Println(FlagProblem(name, flag, err))
-	os.Exit(1)
-}
-
-// Mark ...
-type Mark struct {
-	Value string
-	New   error
-	Err   error
 }
 
 func MarkProblem(value string, new, err error) string {
@@ -110,12 +86,6 @@ func MarkProblemFatal(value string, new, err error) {
 	os.Exit(1)
 }
 
-// Problem ...
-type Problem struct {
-	New error
-	Err error
-}
-
 // ok
 func Problemln(new, err error) {
 	e := fmt.Errorf("%s: %w", new, err)
@@ -126,6 +96,11 @@ func Problemln(new, err error) {
 func ProblemFatal(new, err error) {
 	Problemln(new, err)
 	os.Exit(1)
+}
+
+func SubCmdProblem(name string, err error) string {
+	alert := str.Alert()
+	return fmt.Sprintf("%s the subcommand %s does not exist, %s", alert, name, err)
 }
 
 // Fatal prints a generic error and exits.
