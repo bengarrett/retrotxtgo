@@ -399,9 +399,8 @@ func serveBytes(i int, changed bool, b *[]byte) bool {
 		// index.html could be generated with links to each of the htmls.
 	}
 	if changed {
-		i, a, err := html.Serve(b)
-		if err != nil {
-			logs.Fatal(i, a, err)
+		if err := html.Serve(b); err != nil {
+			logs.ErrorFatal(err)
 		}
 		return true
 	}

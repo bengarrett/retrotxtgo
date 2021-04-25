@@ -37,7 +37,7 @@ func Port(port uint) bool {
 }
 
 // Serve data over the internal HTTP server.
-func (args *Args) Serve(b *[]byte) (issue, arg string, err error) {
+func (args *Args) Serve(b *[]byte) error {
 	args.override()
 	port := args.Port
 	if port == 0 || !prompt.PortValid(port) {
@@ -50,19 +50,19 @@ func (args *Args) Serve(b *[]byte) (issue, arg string, err error) {
 			port++
 			continue
 		case tries >= max:
-			return "http ports", fmt.Sprintf("%d-%d", args.Port, port), ErrPort
+			return fmt.Errorf("serve http ports %d-%d: %w", args.Port, port, ErrPort)
 		default:
 			args.Port = port
 		}
 		break
 	}
 	if err := args.createDir(b); err != nil {
-		return "serve createDir", "", err
+		return fmt.Errorf("serve create directory: %w", err)
 	}
 
 	args.serveDir()
 
-	return "", "", nil
+	return nil
 }
 
 // Override the user flag values which are not yet implemented.

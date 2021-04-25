@@ -1,7 +1,7 @@
 package create
 
 import (
-	"fmt"
+	"log"
 	"testing"
 )
 
@@ -17,9 +17,9 @@ func ExampleServe() {
 	args.Test = true
 
 	// Run the HTTP server
-	i, a, err := args.Serve(&b)
+	err := args.Serve(&b)
 	if err != nil {
-		fmt.Print(i, a, err)
+		log.Println(err)
 	}
 	// Output:Server example was successful
 }

@@ -114,7 +114,7 @@ func SubCmdProblem(name string, err error) string {
 }
 
 // Fatal prints a generic error and exits.
-func Fatal(issue, arg string, msg error) {
+func XFatal(issue, arg string, msg error) {
 	Println(issue, arg, msg)
 	os.Exit(1)
 }
@@ -165,12 +165,6 @@ func (g Argument) unWrap() string {
 
 	fmt.Printf("\n%T %+v\n", uw, uw)
 	return ""
-}
-
-// Fatal prints a generic error and exits.
-func (g Argument) XFatal() {
-	fmt.Println(g.String())
-	os.Exit(1)
 }
 
 // Hint is a standard error type that also offers the user a command hint.
