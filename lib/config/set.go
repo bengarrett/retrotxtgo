@@ -98,15 +98,7 @@ func Set(name string) {
 // Update edits and saves a named setting within a configuration file.
 func Update(name string, setup bool) {
 	if !Validate(name) {
-		h := logs.Hint{
-			Error: logs.Argument{
-				Issue: "invalid name",
-				Value: fmt.Sprintf("%q for config", name),
-				Err:   ErrCFG,
-			},
-			Hint: "config set --list",
-		}
-		fmt.Println(h.String())
+		fmt.Println(logs.Hint("config set --list", ErrCfgName))
 		return
 	}
 	if !setup {

@@ -6,8 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-
-	"github.com/gookit/color"
 )
 
 var (
@@ -23,25 +21,6 @@ func ExampleLog() {
 	i := len(last) - len(t) - 1
 	fmt.Print(last[i:])
 	// Output:log test
-}
-
-func TestErr_String(t *testing.T) {
-	color.Disable()
-	tests := []struct {
-		name string
-		e    Argument
-		want string
-	}{
-		{"empty", Argument{}, ""},
-		{"abc", Argument{Issue: "a", Value: "b", Err: ErrC}, "problem: a b, c"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.e.String(); got != tt.want {
-				t.Errorf("Err.String() = %q, want %v", got, tt.want)
-			}
-		})
-	}
 }
 
 func testSave() string {
