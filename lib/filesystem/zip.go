@@ -2,7 +2,6 @@ package filesystem
 
 import (
 	"archive/zip"
-	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -12,6 +11,7 @@ import (
 
 	"golang.org/x/text/language"
 	"retrotxt.com/retrotxt/lib/humanize"
+	"retrotxt.com/retrotxt/lib/logs"
 )
 
 // Files to zip.
@@ -30,11 +30,6 @@ type Zip struct {
 	// Quiet suppresses all non-error messages.
 	Quiet bool
 }
-
-var (
-	ErrNameIsDir  = errors.New("increment name must be a file but is a directory")
-	ErrMaxAttempt = errors.New("maximum attempts reached")
-)
 
 // Create zip packages and compresses files contained the root directory into an archive using the provided name.
 func (z *Zip) Create() error {
@@ -196,7 +191,7 @@ func UniqueName(name string) (string, error) {
 		return name, err
 	}
 	if s.IsDir() {
-		return "", fmt.Errorf("unique name is a directory %q: %w", name, ErrNameIsDir)
+		return "", fmt.Errorf("unique name is a directory %q: %w", name, logs.ErrDirSave)
 	}
 
 	i := 1
@@ -223,7 +218,7 @@ func UniqueName(name string) (string, error) {
 
 		i++
 		if i > maxAttempts {
-			return "", fmt.Errorf("unique name aborted after %d attempts: %w", maxAttempts, ErrMaxAttempt)
+			return "", fmt.Errorf("unique name aborted after %d attempts: %w", maxAttempts, logs.ErrMax)
 		}
 	}
 }

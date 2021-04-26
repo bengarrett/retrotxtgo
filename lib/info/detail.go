@@ -93,7 +93,7 @@ func (d *Detail) marshal(f Format) (b []byte, err error) {
 			return nil, fmt.Errorf("detail xml marshal: %w", err)
 		}
 	default:
-		return nil, fmt.Errorf("detail marshal %q: %w", f, ErrFmt)
+		return nil, fmt.Errorf("detail marshal %q: %w", f, logs.ErrFmt)
 	}
 	return b, nil
 }

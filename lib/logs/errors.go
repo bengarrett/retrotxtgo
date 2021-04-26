@@ -9,6 +9,10 @@ var (
 	ErrCfg       = errors.New("could not parse or use the configuration file")
 	ErrCfgCreate = errors.New("could not create a configuration file")
 	ErrCfgFile   = errors.New("could not open the configuration file")
+	ErrCfgName   = errors.New("unknown configuration or setting name")
+
+	// inputs
+	ErrNameNil = errors.New("name cannot be empty")
 
 	// pipe/stdin
 	ErrPipe      = errors.New("could not read text stream from piped stdin (standard input)")
@@ -16,6 +20,7 @@ var (
 
 	// named file
 	ErrFileOpen = errors.New("could not open the file")
+	ErrFileNil  = errors.New("file does not exist")
 	ErrFileSave = errors.New("could not save the file")
 	ErrDirSave  = errors.New("could not save the file to the directory")
 
@@ -39,7 +44,9 @@ var (
 
 	// generic errors
 	ErrEncode    = errors.New("text encoding not known or supported")
+	ErrFmt       = errors.New("format is not known")
 	ErrHighlight = errors.New("could not format or colorize the element")
+	ErrMax       = errors.New("maximum attempts reached")
 	ErrTabFlush  = errors.New("tab writer could not write or flush")
 	ErrZipFile   = errors.New("could not create the zip archive")
 

@@ -4,7 +4,6 @@ package info
 import (
 	"bytes"
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -13,6 +12,7 @@ import (
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/text/language"
 	"retrotxt.com/retrotxt/lib/filesystem"
+	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/sauce"
 )
 
@@ -112,26 +112,19 @@ const (
 	XML
 )
 
-var (
-	ErrFmt     = errors.New("format is not known")
-	ErrNameNil = errors.New("name cannot be empty")
-	ErrNoDir   = errors.New("directories are not usable with this command")
-	ErrNoFile  = errors.New("file does not exist")
-)
-
 // Info parses the named file and prints out its details in a specific syntax.
 func (n Names) Info(name, format string) error {
 	err1 := fmt.Sprintf("info on %s failed", name)
 	if name == "" {
-		return fmt.Errorf("%s: %w", err1, ErrNameNil)
+		return fmt.Errorf("%s: %w", err1, logs.ErrNameNil)
 	}
 	f, err := output(format)
 	if err != nil {
-		return fmt.Errorf("%s: %w", err1, ErrFmt)
+		return fmt.Errorf("%s: %w", err1, logs.ErrFmt)
 	}
 	s, err := os.Stat(name)
 	if os.IsNotExist(err) {
-		return fmt.Errorf("%s: %w", err1, ErrNoFile)
+		return fmt.Errorf("%s: %w", err1, logs.ErrFileNil)
 	}
 	if err != nil {
 		return fmt.Errorf("%s: %w", err1, err)
@@ -183,7 +176,7 @@ func output(argument string) (f Format, err error) {
 	case "xml", "x":
 		return XML, nil
 	}
-	return f, ErrFmt
+	return f, logs.ErrFmt
 }
 
 // Marshal the meta and operating system details of a file.

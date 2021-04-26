@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"retrotxt.com/retrotxt/lib/filesystem"
+	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/static"
 )
 
@@ -251,8 +252,8 @@ func TestNames_Info(t *testing.T) {
 		args    args
 		wantErr error
 	}{
-		{"empty", fields{}, args{}, ErrNameNil},
-		{"bad dir", fields{}, args{name: "some invalid filename"}, ErrNoFile},
+		{"empty", fields{}, args{}, logs.ErrNameNil},
+		{"bad dir", fields{}, args{name: "some invalid filename"}, logs.ErrFileNil},
 		{"temp dir", fields{}, args{name: os.TempDir(), format: "json.min"}, nil},
 	}
 	for _, tt := range tests {

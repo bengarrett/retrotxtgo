@@ -51,11 +51,11 @@ var infoCmd = &cobra.Command{
 				arg = filename
 			}
 			if err := n.Info(arg, infoFlag.format); err != nil {
-				if errors.As(info.ErrNoFile, &err) {
+				if errors.As(logs.ErrFileNil, &err) {
 					if n.Length <= 1 {
 						logs.ErrorFatal(err)
 					}
-					logs.MarkProblem(arg, info.ErrNoFile, err)
+					logs.MarkProblem(arg, logs.ErrFileNil, err)
 					continue
 				}
 				if err := cmd.Usage(); err != nil {

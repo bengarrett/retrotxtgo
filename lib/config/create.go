@@ -7,13 +7,14 @@ import (
 
 	"github.com/spf13/viper"
 	"retrotxt.com/retrotxt/lib/filesystem"
+	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/str"
 )
 
 // Create a named configuration file.
 func Create(name string, ow bool) (err error) {
 	if name == "" {
-		return fmt.Errorf("create configuration: %w", ErrFilename)
+		return fmt.Errorf("create configuration: %w", logs.ErrNameNil)
 	}
 	_, err = os.Stat(name)
 	switch {

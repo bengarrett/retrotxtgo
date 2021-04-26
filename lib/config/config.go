@@ -225,7 +225,7 @@ func (sc *Settings) marshals(key string) error { // nolint:gocyclo
 	case styleh:
 		sc.Style.HTML = getString(key)
 	default:
-		return fmt.Errorf("mashal %q: %w", key, ErrName)
+		return fmt.Errorf("mashal %q: %w", key, logs.ErrCfgName)
 	}
 	return nil
 }
@@ -238,7 +238,7 @@ func getBool(key string) bool {
 	case bool:
 		return Reset()[key].(bool)
 	default:
-		logs.MarkProblemFatal(key, ErrBool, ErrName)
+		logs.MarkProblemFatal(key, ErrBool, logs.ErrCfgName)
 	}
 	return false
 }
@@ -251,7 +251,7 @@ func getUint(key string) uint {
 	case uint:
 		return Reset()[key].(uint)
 	default:
-		logs.MarkProblemFatal(key, ErrUint, ErrName)
+		logs.MarkProblemFatal(key, ErrUint, logs.ErrCfgName)
 	}
 	return 0
 }
@@ -264,7 +264,7 @@ func getString(key string) string {
 	case string:
 		return Reset()[key].(string)
 	default:
-		logs.MarkProblemFatal(key, ErrString, ErrName)
+		logs.MarkProblemFatal(key, ErrString, logs.ErrCfgName)
 	}
 	return ""
 }
