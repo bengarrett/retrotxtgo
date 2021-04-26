@@ -45,7 +45,7 @@ copy in a web browser.`,
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	rootCmd.SilenceErrors = false // set to false to debug
+	rootCmd.SilenceErrors = true // set to false to debug using the feedback from Viper.
 	if err := rootCmd.Execute(); err != nil {
 		const minArgs = 2
 		if len(os.Args) < minArgs {

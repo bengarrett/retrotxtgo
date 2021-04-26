@@ -1,14 +1,17 @@
 package logs
 
 import (
+	"errors"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 )
 
 // InvalidCommand prints a problem highlighting the unsupported command.
-func InvalidCommand(args ...string) {
-	err := fmt.Errorf("%s: %w", args[0], ErrCmdExist)
+func InvalidCommand(usage string, args ...string) {
+	err := fmt.Errorf("%w: %s", ErrCmdExist, args[0])
+	args = append(args, usage)
 	Execute(err, args...)
 }
 
@@ -23,6 +26,7 @@ func InvalidChoice(name, value string, choices ...string) {
 func Execute(err error, args ...string) {
 	const (
 		minWords       = 3
+		rt             = "retrotxt"
 		flagChoice     = "invalid option choice"
 		flagRequired   = "required flag(s)"
 		flagSyntax     = "bad flag"
@@ -51,28 +55,52 @@ func Execute(err error, args ...string) {
 	case flagSyntax:
 		c = ProblemFlag(name, mark, err)
 	case invalidFlag:
+		// retroxt config shell -i
 		c = ProblemFlag(name, mark, ErrNotNil)
 	case invalidType:
+		// retroxt --help=foo
 		mark = strings.Join(words[4:6], " ")
 		c = parseType(name, mark, err)
 	case invalidSlice:
-		return // TODO:
+		c = "invalidSlice placeholder"
 	case invalidCommand:
+		// retrotxt config foo
 		c = Hint(fmt.Sprintf("%s --help", mark), ErrCmdExist)
 	case flagRequired:
+		// retrotxt config shell
 		c = ProblemCmd(mark, ErrFlagNil)
 	case unknownCmd:
-		c = Hint(fmt.Sprintf("%s --help", mark), ErrCmdExist)
-	case unknownFlag, unknownShort:
+		// retrotxt foo
+		c = Hint("--help", fmt.Errorf("%w: %s", ErrCmdExist, args[0]))
+	case unknownFlag:
+		// retrotxt --foo
+		mark = words[2]
+		if mark == name {
+			name = rt
+		}
+		c = ProblemFlag(name, mark, ErrFlag)
+	case unknownShort:
+		// retrotxt -foo
+		mark = words[5]
+		if mark == name {
+			name = rt
+		}
 		c = ProblemFlag(name, mark, ErrFlag)
 	case flagChoice:
-		c = "honk"
+		c = "flagChoice placeholder"
+	default:
+		if errors.As(err, &ErrCmdExist) {
+			mark = strings.Join(args[1:], " ")
+			c = Hint(fmt.Sprintf("%s --help", mark), ErrCmdExist)
+			break
+		}
+		c = Errorf(err)
 	}
 	if c != "" {
 		fmt.Println(c)
 		os.Exit(1)
 	}
-	// TODO: handle unknown/empty
+	log.Panic(err)
 }
 
 func parseType(name, flag string, err error) string {
