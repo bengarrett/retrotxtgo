@@ -3,8 +3,7 @@ module retrotxt.com/retrotxt
 go 1.16
 
 require (
-	github.com/alecthomas/chroma v0.8.2
-	github.com/dlclark/regexp2 v1.4.0 // indirect
+	github.com/alecthomas/chroma v0.9.1
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/gookit/color v1.4.2
 	github.com/karrick/godirwalk v1.16.1
