@@ -3,7 +3,6 @@ package config
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -23,8 +22,6 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 	v "retrotxt.com/retrotxt/lib/version"
 )
-
-var ErrHighlight = errors.New("syntax highlight writer failed")
 
 type update struct {
 	name  string
@@ -98,7 +95,7 @@ func Set(name string) {
 // Update edits and saves a named setting within a configuration file.
 func Update(name string, setup bool) {
 	if !Validate(name) {
-		fmt.Println(logs.Hint("config set --list", ErrCfgName))
+		fmt.Println(logs.Hint("config set --list", ErrName))
 		return
 	}
 	if !setup {
@@ -372,7 +369,7 @@ func (n names) string(theme bool, lexer string) string {
 			b = bytes.Buffer{}
 			t = fmt.Sprintf("{ %q:%q }%s", name, name, strings.Repeat(" ", pad+space))
 			if err := str.HighlightWriter(&b, t, lexer, name, true); err != nil {
-				logs.MarkProblem(name, ErrHighlight, err)
+				logs.MarkProblem(name, logs.ErrHighlight, err)
 			}
 			s = append(s, fmt.Sprintf("%2d %s", i, b.String()))
 			if split+i >= len(n) {
@@ -381,7 +378,7 @@ func (n names) string(theme bool, lexer string) string {
 			b = bytes.Buffer{}
 			t = fmt.Sprintf("{ %q:%q }\n", n[split+i], n[split+i])
 			if err := str.HighlightWriter(&b, t, lexer, name, true); err != nil {
-				logs.MarkProblem(name, ErrHighlight, err)
+				logs.MarkProblem(name, logs.ErrHighlight, err)
 			}
 			s = append(s, fmt.Sprintf("%2d %s", split+i, b.String()))
 			continue
@@ -389,7 +386,7 @@ func (n names) string(theme bool, lexer string) string {
 		b = bytes.Buffer{}
 		t = fmt.Sprintf("<%s=%q>%s", name, name, strings.Repeat(" ", pad+space))
 		if err := str.HighlightWriter(&b, t, lexer, name, true); err != nil {
-			logs.MarkProblem(name, ErrHighlight, err)
+			logs.MarkProblem(name, logs.ErrHighlight, err)
 		}
 		s = append(s, fmt.Sprintf("%2d %s", i, b.String()))
 		if split+i >= len(n) {
@@ -398,7 +395,7 @@ func (n names) string(theme bool, lexer string) string {
 		b = bytes.Buffer{}
 		t = fmt.Sprintf("<%s=%q>\n", n[split+i], n[split+i])
 		if err := str.HighlightWriter(&b, t, lexer, name, true); err != nil {
-			logs.MarkProblem(name, ErrHighlight, err)
+			logs.MarkProblem(name, logs.ErrHighlight, err)
 		}
 		s = append(s, fmt.Sprintf("%2d %s", split+i, b.String()))
 	}
@@ -478,10 +475,10 @@ func previewMeta(name, value string) {
 
 func previewMetaPrint(name, value string) {
 	if name == "" {
-		logs.LogFatal(fmt.Errorf("preview meta: %w", ErrNoName))
+		logs.LogFatal(fmt.Errorf("preview meta: %w", ErrNameNil))
 	}
 	if !Validate(name) {
-		logs.LogFatal(fmt.Errorf("preview meta %q: %w", name, ErrSetting))
+		logs.LogFatal(fmt.Errorf("preview meta %q: %w", name, ErrName))
 	}
 	s := strings.Split(name, ".")
 	const req = 3
@@ -536,10 +533,10 @@ func recommendPrompt(name, value, suggest string) string {
 // Save value to the named configuration.
 func save(name string, setup bool, value interface{}) {
 	if name == "" {
-		logs.LogFatal(fmt.Errorf("save: %w", ErrNoName))
+		logs.LogFatal(fmt.Errorf("save: %w", ErrNameNil))
 	}
 	if !Validate(name) {
-		logs.LogFatal(fmt.Errorf("save %q: %w", name, ErrSetting))
+		logs.LogFatal(fmt.Errorf("save %q: %w", name, ErrName))
 	}
 	// don't save unchanged input values
 	if viper.Get(name) == fmt.Sprint(value) {
@@ -563,7 +560,7 @@ func save(name string, setup bool, value interface{}) {
 // and saves the path as a configuration regardless of the result.
 func setDirectory(name string, setup bool) {
 	if name == "" {
-		logs.LogFatal(fmt.Errorf("set directory: %w", ErrNoName))
+		logs.LogFatal(fmt.Errorf("set directory: %w", ErrNameNil))
 	}
 	dir := dirExpansion(prompt.String(setup))
 	if setup && dir == "" {
@@ -589,7 +586,7 @@ func setDirectory(name string, setup bool) {
 // and saves it as a configuration regardless of the result.
 func setEditor(name string, setup bool) {
 	if name == "" {
-		logs.LogFatal(fmt.Errorf("set editor: %w", ErrNoName))
+		logs.LogFatal(fmt.Errorf("set editor: %w", ErrNameNil))
 	}
 	val := prompt.String(setup)
 	switch val {
@@ -663,7 +660,7 @@ func setGenerator(value bool) {
 // SetIndex prompts for a value from a list of valid choices and saves the result.
 func setIndex(name string, setup bool, data ...string) {
 	if name == "" {
-		logs.LogFatal(fmt.Errorf("set index: %w", ErrNoName))
+		logs.LogFatal(fmt.Errorf("set index: %w", ErrNameNil))
 	}
 	p := prompt.IndexStrings(&data, setup)
 	save(name, setup, p)
@@ -687,7 +684,7 @@ func setNoTranslate(value, setup bool) {
 // SetPort prompts for and saves HTTP port.
 func setPort(name string, setup bool) {
 	if name == "" {
-		logs.LogFatal(fmt.Errorf("set port: %w", ErrNoName))
+		logs.LogFatal(fmt.Errorf("set port: %w", ErrNameNil))
 	}
 	val := prompt.Port(true, setup)
 	save(name, setup, val)
@@ -727,7 +724,7 @@ func setShortStrings(name string, setup bool, data ...string) {
 // SetString prompts and saves a single word setting value.
 func setString(name string, setup bool) {
 	if name == "" {
-		logs.LogFatal(fmt.Errorf("set string: %w", ErrNoName))
+		logs.LogFatal(fmt.Errorf("set string: %w", ErrNameNil))
 	}
 	val := prompt.String(setup)
 	switch val {
@@ -742,7 +739,7 @@ func setString(name string, setup bool) {
 // SetStrings prompts and saves a string of text setting value.
 func setStrings(name string, setup bool, data ...string) {
 	if name == "" {
-		logs.LogFatal(fmt.Errorf("set strings: %w", ErrNoName))
+		logs.LogFatal(fmt.Errorf("set strings: %w", ErrNameNil))
 	}
 	val := prompt.Strings(&data, setup)
 	switch val {

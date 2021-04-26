@@ -251,7 +251,7 @@ func TestNames_Info(t *testing.T) {
 		args    args
 		wantErr error
 	}{
-		{"empty", fields{}, args{}, ErrNoName},
+		{"empty", fields{}, args{}, ErrNameNil},
 		{"bad dir", fields{}, args{name: "some invalid filename"}, ErrNoFile},
 		{"temp dir", fields{}, args{name: os.TempDir(), format: "json.min"}, nil},
 	}

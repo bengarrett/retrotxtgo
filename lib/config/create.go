@@ -13,7 +13,7 @@ import (
 // Create a named configuration file.
 func Create(name string, ow bool) (err error) {
 	if name == "" {
-		return fmt.Errorf("create configuration: %w", ErrNoFName)
+		return fmt.Errorf("create configuration: %w", ErrFilename)
 	}
 	_, err = os.Stat(name)
 	switch {

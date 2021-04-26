@@ -113,17 +113,17 @@ const (
 )
 
 var (
-	ErrFmt    = errors.New("format is not known")
-	ErrNoName = errors.New("name cannot be empty")
-	ErrNoDir  = errors.New("directories are not usable with this command")
-	ErrNoFile = errors.New("file does not exist")
+	ErrFmt     = errors.New("format is not known")
+	ErrNameNil = errors.New("name cannot be empty")
+	ErrNoDir   = errors.New("directories are not usable with this command")
+	ErrNoFile  = errors.New("file does not exist")
 )
 
 // Info parses the named file and prints out its details in a specific syntax.
 func (n Names) Info(name, format string) error {
 	err1 := fmt.Sprintf("info on %s failed", name)
 	if name == "" {
-		return fmt.Errorf("%s: %w", err1, ErrNoName)
+		return fmt.Errorf("%s: %w", err1, ErrNameNil)
 	}
 	f, err := output(format)
 	if err != nil {

@@ -19,7 +19,7 @@ func Edit() error {
 	}
 	edit := Editor()
 	if edit == "" {
-		return fmt.Errorf("no suitable editor could be found: %w", ErrEnv)
+		return fmt.Errorf("create an $EDITOR environment variable in your shell configuration: %w", ErrEditor)
 	}
 	// credit: https://stackoverflow.com/questions/21513321/how-to-start-vim-from-go
 	exe := exec.Command(edit, file)

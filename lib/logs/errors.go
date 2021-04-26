@@ -6,6 +6,7 @@ import (
 
 var (
 	// config file
+	ErrCfg       = errors.New("could not parse or use the configuration file")
 	ErrCfgCreate = errors.New("could not create a configuration file")
 	ErrCfgFile   = errors.New("could not open the configuration file")
 

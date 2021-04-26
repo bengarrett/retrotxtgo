@@ -12,12 +12,8 @@ import (
 	gap "github.com/muesli/go-app-paths"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
+	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/str"
-)
-
-var (
-	ErrMissing = errors.New("config does not exist")
-	ErrRxt     = errors.New("not a retrotxt config file")
 )
 
 // InitDefaults initializes flag and configuration defaults.
@@ -95,14 +91,14 @@ func SetConfig(flag string) (err error) {
 					return nil
 				}
 			}
-			return fmt.Errorf("set config: %w\nuse the command, retrotxt config create --config=%s", ErrMissing, flag)
+			return fmt.Errorf("set config: %w\nuse the command, retrotxt config create --config=%s", logs.ErrCfgFile, flag)
 		}
 		// user config file fail
 		return nil
 	}
 	if flag != "" {
 		if len(viper.AllKeys()) == 0 {
-			return fmt.Errorf("set config: %w", ErrRxt)
+			return fmt.Errorf("set config: %w", logs.ErrCfg)
 		}
 		// always print the config location when the --config flag is used
 		if len(os.Args) > 0 && os.Args[1] == "config" {

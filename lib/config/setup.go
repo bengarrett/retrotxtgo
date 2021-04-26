@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -13,11 +12,6 @@ import (
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/str"
 	"retrotxt.com/retrotxt/static"
-)
-
-var (
-	//	ErrName = errors.New("")
-	ErrLogo = errors.New("retrotxt logo is missing")
 )
 
 // Setup walks through all the settings and saves them to the configuration file.

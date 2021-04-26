@@ -51,7 +51,7 @@ var infoCmd = &cobra.Command{
 				arg = filename
 			}
 			if err := n.Info(arg, infoFlag.format); err != nil {
-				if errors.As(err, info.ErrNoFile) {
+				if errors.As(info.ErrNoFile, &err) {
 					if n.Length <= 1 {
 						logs.ErrorFatal(err)
 					}
