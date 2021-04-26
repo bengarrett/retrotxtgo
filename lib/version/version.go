@@ -4,7 +4,6 @@ package version
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -21,13 +20,6 @@ import (
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/online"
 	"retrotxt.com/retrotxt/lib/str"
-)
-
-var (
-	ErrCacheYaml = errors.New("set cache cannot marshal yaml")
-	ErrCacheData = errors.New("set cache cannot create a data path")
-	ErrCacheSave = errors.New("set cache cannot save data")
-	ErrMarshal   = errors.New("version could not marshal")
 )
 
 // Data for the release information.

@@ -3,7 +3,6 @@ package prompt
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -16,11 +15,6 @@ import (
 
 	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/str"
-)
-
-var (
-	ErrNoReader = errors.New("reader interface is empty")
-	ErrPString  = errors.New("prompt string standard input problem")
 )
 
 type keys []string

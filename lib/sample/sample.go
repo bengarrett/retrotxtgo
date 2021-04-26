@@ -2,7 +2,6 @@
 package sample
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -55,13 +54,6 @@ const (
 	char               // Ignore and print the common text controls as characters.
 	text               // Obey common text controls.
 	dump               // Obey common text controls except end-of-file.
-)
-
-var (
-	ErrConvert = errors.New("unknown convert method")
-	ErrConvNil = errors.New("conv argument cannot be empty")
-	ErrEncode  = errors.New("using the original text encoding")
-	ErrName    = errors.New("sample name is invalid")
 )
 
 // Map the samples.
@@ -122,11 +114,11 @@ func Open(name string) ([]byte, error) {
 	name = strings.ToLower(name)
 	samp, exist := Map()[name]
 	if !exist {
-		return nil, ErrName
+		return nil, logs.ErrSampFile
 	}
 	b, err := static.File.ReadFile(samp.Name)
 	if err != nil {
-		return nil, fmt.Errorf("open sample %q: %w", samp.Name, ErrName)
+		return nil, fmt.Errorf("open sample %q: %w", samp.Name, logs.ErrSampFile)
 	}
 	return b, nil
 }
@@ -139,11 +131,11 @@ func (f Flags) Open(name string, conv *convert.Convert) (s File, err error) {
 	}
 	samp, exist := Map()[name]
 	if !exist {
-		return s, ErrName
+		return s, logs.ErrSampFile
 	}
 	b, err := static.File.ReadFile(samp.Name)
 	if err != nil {
-		return s, fmt.Errorf("open sample %q: %w", samp.Name, ErrName)
+		return s, fmt.Errorf("open sample %q: %w", samp.Name, logs.ErrSampFile)
 	}
 	if conv == nil {
 		return s, ErrConvNil
@@ -214,7 +206,7 @@ func printT(e encoding.Encoding, b ...byte) {
 	}
 	b, err := encode(e, b...)
 	if err != nil {
-		logs.MarkProblemFatal(fmt.Sprint(e), ErrEncode, err)
+		logs.MarkProblemFatal(fmt.Sprint(e), logs.ErrEncode, err)
 	}
 	fmt.Println(string(b))
 }

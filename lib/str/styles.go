@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"html/template"
 	"io"
@@ -20,8 +19,6 @@ import (
 	"github.com/alecthomas/chroma/styles"
 	"github.com/gookit/color"
 )
-
-var ErrRune = errors.New("invalid encoded rune")
 
 type terminal int
 

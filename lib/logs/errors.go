@@ -5,6 +5,20 @@ import (
 )
 
 var (
+	// logs package errors
+	ErrCmdExist   = errors.New("the command is invalid")
+	ErrFlag       = errors.New("the flag does not work with this command")
+	ErrFlagChoice = errors.New("choose a value from the following")
+	ErrFlagNil    = errors.New("the flag with a value must be included with this command")
+	ErrNil        = errors.New("error value cannot be nil")
+	ErrNotBool    = errors.New("the value must be either true or false")
+	ErrNotInt     = errors.New("the value must be a number")
+	ErrNotInts    = errors.New("the value must be a single or a list of numbers")
+	ErrNotNil     = errors.New("the value cannot be empty")
+	ErrLogSave    = errors.New("save fatal logs failed")
+)
+
+var (
 	// config file
 	ErrCfg       = errors.New("could not parse or use the configuration file")
 	ErrCfgCreate = errors.New("could not create a configuration file")

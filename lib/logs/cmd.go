@@ -1,22 +1,9 @@
 package logs
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strings"
-)
-
-var (
-	ErrCmdExist   = errors.New("the command does not exist")
-	ErrCmdChoose  = errors.New("choose an available command from the --help list")
-	ErrFlagExist  = errors.New("the flag does not work with this command")
-	ErrFlagChoice = errors.New("choose a value from the following")
-	ErrNoFlag     = errors.New("the flag with a value must be included with this command")
-	ErrNoFlagVal  = errors.New("the value cannot be left empty")
-	ErrNotBool    = errors.New("the value must be either true or false")
-	ErrNotInt     = errors.New("the value must be a number")
-	ErrNotInts    = errors.New("the value must be a single or a list of numbers")
 )
 
 // InvalidCommand prints a problem highlighting the unsupported command.
@@ -64,21 +51,22 @@ func Execute(err error, args ...string) {
 	case flagSyntax:
 		c = FlagProblem(name, mark, err)
 	case invalidFlag:
-		c = FlagProblem(name, mark, ErrNoFlagVal)
+		c = FlagProblem(name, mark, ErrNotNil)
 	case invalidType:
 		mark = strings.Join(words[4:6], " ")
 		c = parseType(name, mark, err)
 	case invalidSlice:
 		return // TODO:
 	case invalidCommand:
-		c = SubCmdProblem(mark, ErrCmdChoose)
+		c = Hint(fmt.Sprintf("%s --help", mark), ErrCmdExist)
 	case flagRequired:
-		c = CmdProblem(mark, ErrNoFlag)
+		c = CmdProblem(mark, ErrFlagNil)
 	case unknownCmd:
-		mark = words[2]
-		c = CmdProblem(mark, ErrCmdChoose)
+		c = Hint(fmt.Sprintf("%s --help", mark), ErrCmdExist)
+		// mark = words[2]
+		// c = CmdProblem(mark, ErrCmdChoose)
 	case unknownFlag, unknownShort:
-		c = FlagProblem(name, mark, ErrFlagExist)
+		c = FlagProblem(name, mark, ErrFlag)
 	case flagChoice:
 		c = "honk"
 	}

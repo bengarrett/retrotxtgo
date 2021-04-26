@@ -4,7 +4,6 @@ package online
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -17,11 +16,6 @@ const (
 	// ReleaseAPI GitHub API v3 releases endpoint.
 	// See: https://developer.github.com/v3/repos/releases/
 	ReleaseAPI = "https://api.github.com/repos/bengarrett/retrotxtgo/releases/latest"
-)
-
-var (
-	ErrJSON = errors.New("response body data is not valid json")
-	ErrMash = errors.New("response body json could not unmarshal")
 )
 
 // API interface to store the JSON results from GitHub.

@@ -3,7 +3,6 @@ package logs
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -22,9 +21,6 @@ const (
 	// Panic uses log.Panic to print all saved errors.
 	Panic = false
 )
-
-var ErrNil = errors.New("error value cannot be nil")
-var ErrLogsSave = errors.New("save fatal logs failed")
 
 // Log saves the error and continues the program.
 func Log(err error) {
@@ -49,7 +45,7 @@ func LogFatal(err error) {
 			log.Println(fmt.Sprintf("error type: %T\tmsg: %v", err, err))
 			log.Panic(err)
 		default:
-			ProblemFatal(ErrLogsSave, err)
+			ProblemFatal(ErrLogSave, err)
 		}
 	}
 }
