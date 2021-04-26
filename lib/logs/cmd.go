@@ -63,8 +63,6 @@ func Execute(err error, args ...string) {
 		c = ProblemCmd(mark, ErrFlagNil)
 	case unknownCmd:
 		c = Hint(fmt.Sprintf("%s --help", mark), ErrCmdExist)
-		// mark = words[2]
-		// c = ProblemCmd(mark, ErrCmdChoose)
 	case unknownFlag, unknownShort:
 		c = ProblemFlag(name, mark, ErrFlag)
 	case flagChoice:

@@ -54,28 +54,28 @@ func ProblemFlag(name, flag string, err error) string {
 }
 
 // ProblemMark formats the errors and highlights the value.
-func ProblemMark(value string, new, err error) string {
+func ProblemMark(value string, err, errs error) string {
 	v := value
 	a := str.Alert()
-	n := str.Cf(fmt.Sprintf("%v", new))
-	e := str.Cf(fmt.Sprintf("%v", err))
+	n := str.Cf(fmt.Sprintf("%v", err))
+	e := str.Cf(fmt.Sprintf("%v", errs))
 	return fmt.Sprintf("%s %s %q: %s", a, n, v, e)
 }
 
 // ProblemMark formats the errors, highlights the value and exits.
-func ProblemMarkFatal(value string, new, err error) {
-	fmt.Println(ProblemMark(value, new, err))
+func ProblemMarkFatal(value string, err, errs error) {
+	fmt.Println(ProblemMark(value, err, errs))
 	os.Exit(1)
 }
 
 // Problemf formats the errors.
-func Problemf(new, err error) {
-	e := fmt.Errorf("%s: %w", new, err)
+func Problemf(err, errs error) {
+	e := fmt.Errorf("%s: %w", err, errs)
 	fmt.Printf("%s%s\n", str.Alert(), e)
 }
 
 // Problemf formats the errors and exits.
-func ProblemFatal(new, err error) {
-	Problemf(new, err)
+func ProblemFatal(err, errs error) {
+	Problemf(err, errs)
 	os.Exit(1)
 }
