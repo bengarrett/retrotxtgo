@@ -2,7 +2,6 @@ package convert
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"math"
 	"strings"
@@ -15,8 +14,6 @@ import (
 	"retrotxt.com/retrotxt/lib/filesystem"
 	"retrotxt.com/retrotxt/lib/logs"
 )
-
-var ErrWidth = errors.New("could not determine the number columns using line break")
 
 // ANSI transforms legacy encoded ANSI into modern UTF-8 text.
 // It displays ASCII control codes as characters.

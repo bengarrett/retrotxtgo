@@ -2,7 +2,6 @@ package convert
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -158,11 +157,6 @@ const (
 
 // Chars are characters with alternative runes.
 type Chars map[int]rune
-
-var (
-	ErrChainANSI = errors.New("ansi() is a chain method that is to be used in conjunction with swap: c.swap().ansi()")
-	ErrName      = errors.New("encoding could not match name or alias")
-)
 
 // Characters map code page 437 characters with alternative runes.
 func Characters() Chars {

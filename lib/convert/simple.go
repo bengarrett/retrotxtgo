@@ -1,7 +1,6 @@
 package convert
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"strings"
@@ -10,8 +9,6 @@ import (
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/transform"
 )
-
-var ErrNoUTF8 = errors.New("string is not encoded as utf-8")
 
 // DString decodes simple character encoding text.
 func DString(s string, c *charmap.Charmap) (result []byte, err error) {
@@ -27,7 +24,7 @@ func DString(s string, c *charmap.Charmap) (result []byte, err error) {
 // EString encodes text into a simple character encoding.
 func EString(s string, c *charmap.Charmap) (result []byte, err error) {
 	if !utf8.Valid([]byte(s)) {
-		return result, fmt.Errorf("estring: %w", ErrNoUTF8)
+		return result, fmt.Errorf("estring: %w", ErrUTF8)
 	}
 	encoder := c.NewEncoder()
 	reader := transform.NewReader(strings.NewReader(s), encoder)

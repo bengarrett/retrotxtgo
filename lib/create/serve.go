@@ -21,8 +21,6 @@ import (
 	"retrotxt.com/retrotxt/lib/str"
 )
 
-var ErrPort = errors.New("tried and failed to serve using these ports")
-
 // Port checks if the TCP port is available on the local machine.
 func Port(port uint) bool {
 	var d net.Dialer

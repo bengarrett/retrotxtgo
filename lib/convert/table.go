@@ -2,7 +2,6 @@ package convert
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"math"
 	"strings"
@@ -19,11 +18,6 @@ import (
 )
 
 const width = 67
-
-var (
-	ErrUTF16 = errors.New("utf-16 table encodings are not supported")
-	ErrUTF32 = errors.New("utf-32 table encodings are not supported")
-)
 
 // Table prints out all the characters in the named 8-bit character set.
 func Table(name string) (*bytes.Buffer, error) {
