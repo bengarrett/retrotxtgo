@@ -15,4 +15,7 @@ var (
 	ErrInfo   = errors.New("could not any obtain information")
 	ErrIANA   = errors.New("could not work out the IANA index or MIME type")
 	ErrUTF8   = errors.New("could not convert the text into a UTF-8 encoding")
+
+	ErrBody    = errors.New("could not parse the body flag")
+	ErrServeIn = errors.New("could not serve stdin over HTTP")
 )

@@ -8,7 +8,7 @@ import (
 
 // InvalidCommand prints a problem highlighting the unsupported command.
 func InvalidCommand(args ...string) {
-	err := fmt.Errorf("invalid command %s", args[0])
+	err := fmt.Errorf("%s: %w", args[0], ErrCmdExist)
 	Execute(err, args...)
 }
 

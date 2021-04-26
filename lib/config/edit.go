@@ -19,14 +19,15 @@ func Edit() error {
 	}
 	edit := Editor()
 	if edit == "" {
-		return fmt.Errorf("create an $EDITOR environment variable in your shell configuration: %w", ErrEditor)
+		return fmt.Errorf("create an $EDITOR environment variable in your shell configuration: %w", ErrEditorNil)
 	}
 	// credit: https://stackoverflow.com/questions/21513321/how-to-start-vim-from-go
 	exe := exec.Command(edit, file)
 	exe.Stdin = os.Stdin
 	exe.Stdout = os.Stdout
 	if err := exe.Run(); err != nil {
-		return fmt.Errorf("failed to run editor"+fmt.Sprintf(" %q", edit)+": %w", err)
+		e := fmt.Errorf("%s: %w", edit, ErrEditorRun)
+		return fmt.Errorf("%s: %w", e, err)
 	}
 	return nil
 }

@@ -3,8 +3,9 @@ package config
 import "errors"
 
 var (
-	ErrEditor = errors.New("no suitable text editor can be found")
-	ErrLogo   = errors.New("retrotxt logo is missing")
+	ErrEditorNil = errors.New("no suitable text editor can be found")
+	ErrEditorRun = errors.New("editor cannot be run")
+	ErrLogo      = errors.New("retrotxt logo is missing")
 
 	// key types.
 

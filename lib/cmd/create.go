@@ -264,7 +264,7 @@ func parseBody(cmd *cobra.Command) {
 		if h := serveBytes(0, serve, &b); !h {
 			err := html.Create(&b)
 			if err != nil {
-				logs.ProblemFatal(fmt.Errorf("could not parse the body flag"), err)
+				logs.ProblemFatal(ErrBody, err)
 			}
 		}
 		os.Exit(0)
@@ -292,7 +292,7 @@ func parseFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 		if h := serveBytes(i, serve, &b); !h {
 			err := html.Create(&b)
 			if err != nil {
-				logs.ProblemFatal(fmt.Errorf("could not serve %s over HTTP", arg), err)
+				logs.ProblemFatal(fmt.Errorf("%s: %w", arg, ErrServeIn), err)
 			}
 		}
 	}
@@ -309,7 +309,7 @@ func parsePipe(cmd *cobra.Command, flags convert.Flags) {
 	if h := serveBytes(0, serve, &b); !h {
 		err := html.Create(&b)
 		if err != nil {
-			logs.ProblemFatal(fmt.Errorf("could not serve stdin over HTTP"), err)
+			logs.ProblemFatal(fmt.Errorf("stdin: %w", ErrServeIn), err)
 		}
 	}
 	os.Exit(0)
