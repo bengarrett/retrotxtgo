@@ -19,7 +19,7 @@ func Fatal(err error) {
 	os.Exit(1)
 }
 
-// Hint formats and returns the error with a hint.
+// Hint formats and returns the error with a usage suggestion or hint.
 func Hint(s string, err error) string {
 	if err == nil {
 		return ""

@@ -143,7 +143,7 @@ func NewRelease() (ok bool, ver string) {
 	etag, ver := cacheGet()
 	cache, data, err := online.Endpoint(online.ReleaseAPI, etag)
 	if err != nil {
-		logs.Log(err)
+		logs.Save(err)
 		return false, ver
 	}
 	if !cache {
@@ -154,7 +154,7 @@ func NewRelease() (ok bool, ver string) {
 		if fmt.Sprintf("%T", data["etag"]) == "string" {
 			if data["etag"].(string) != "" {
 				if err = cacheSet(data["etag"].(string), ver); err != nil {
-					logs.Log(err)
+					logs.Save(err)
 				}
 			}
 		}
@@ -232,7 +232,7 @@ func binary() string {
 func cacheGet() (etag, ver string) {
 	cf, err := home().DataPath(cacheFile)
 	if err != nil {
-		logs.Log(err)
+		logs.Save(err)
 		return
 	}
 	if _, err = os.Stat(cf); os.IsNotExist(err) {
@@ -240,16 +240,16 @@ func cacheGet() (etag, ver string) {
 	}
 	f, err := ioutil.ReadFile(cf)
 	if err != nil {
-		logs.Log(err)
+		logs.Save(err)
 	}
 	var cache Cache
 	if err = yaml.Unmarshal(f, &cache); err != nil {
-		logs.Log(err)
+		logs.Save(err)
 	}
 	// if either value is missing, delete the broken cache
 	if cache.Etag == "" || cache.Ver == "" {
 		err = os.Remove(cf)
-		logs.Log(err)
+		logs.Save(err)
 		return "", ""
 	}
 	return cache.Etag, cache.Ver

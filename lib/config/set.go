@@ -418,7 +418,7 @@ func dirExpansion(name string) (dir string) {
 			var err error
 			p, err = os.UserHomeDir()
 			if err != nil {
-				logs.LogFatal(err)
+				logs.SaveFatal(err)
 			}
 		case currentDir:
 			if i != 0 {
@@ -427,13 +427,13 @@ func dirExpansion(name string) (dir string) {
 			var err error
 			p, err = os.Getwd()
 			if err != nil {
-				logs.LogFatal(err)
+				logs.SaveFatal(err)
 			}
 		case parentDir:
 			if i == 0 {
 				wd, err := os.Getwd()
 				if err != nil {
-					logs.LogFatal(err)
+					logs.SaveFatal(err)
 				}
 				p = filepath.Dir(wd)
 			} else {
@@ -475,10 +475,10 @@ func previewMeta(name, value string) {
 
 func previewMetaPrint(name, value string) {
 	if name == "" {
-		logs.LogFatal(fmt.Errorf("preview meta: %w", logs.ErrNameNil))
+		logs.SaveFatal(fmt.Errorf("preview meta: %w", logs.ErrNameNil))
 	}
 	if !Validate(name) {
-		logs.LogFatal(fmt.Errorf("preview meta %q: %w", name, logs.ErrCfgName))
+		logs.SaveFatal(fmt.Errorf("preview meta %q: %w", name, logs.ErrCfgName))
 	}
 	s := strings.Split(name, ".")
 	const req = 3
@@ -533,10 +533,10 @@ func recommendPrompt(name, value, suggest string) string {
 // Save value to the named configuration.
 func save(name string, setup bool, value interface{}) {
 	if name == "" {
-		logs.LogFatal(fmt.Errorf("save: %w", logs.ErrNameNil))
+		logs.SaveFatal(fmt.Errorf("save: %w", logs.ErrNameNil))
 	}
 	if !Validate(name) {
-		logs.LogFatal(fmt.Errorf("save %q: %w", name, logs.ErrCfgName))
+		logs.SaveFatal(fmt.Errorf("save %q: %w", name, logs.ErrCfgName))
 	}
 	// don't save unchanged input values
 	if viper.Get(name) == fmt.Sprint(value) {
@@ -548,7 +548,7 @@ func save(name string, setup bool, value interface{}) {
 	// save named value
 	viper.Set(name, value)
 	if err := UpdateConfig("", false); err != nil {
-		logs.LogFatal(err)
+		logs.SaveFatal(err)
 	}
 	fmt.Printf(" %s %s is set to \"%v\"\n", str.Cs("✓"), str.Cs(name), value)
 	if !setup {
@@ -560,7 +560,7 @@ func save(name string, setup bool, value interface{}) {
 // and saves the path as a configuration regardless of the result.
 func setDirectory(name string, setup bool) {
 	if name == "" {
-		logs.LogFatal(fmt.Errorf("set directory: %w", logs.ErrNameNil))
+		logs.SaveFatal(fmt.Errorf("set directory: %w", logs.ErrNameNil))
 	}
 	dir := dirExpansion(prompt.String(setup))
 	if setup && dir == "" {
@@ -586,7 +586,7 @@ func setDirectory(name string, setup bool) {
 // and saves it as a configuration regardless of the result.
 func setEditor(name string, setup bool) {
 	if name == "" {
-		logs.LogFatal(fmt.Errorf("set editor: %w", logs.ErrNameNil))
+		logs.SaveFatal(fmt.Errorf("set editor: %w", logs.ErrNameNil))
 	}
 	val := prompt.String(setup)
 	switch val {
@@ -653,14 +653,14 @@ func setGenerator(value bool) {
 	p += recommend("yes")
 	viper.Set(name, prompt.YesNo(p, viper.GetBool(name)))
 	if err := UpdateConfig("", false); err != nil {
-		logs.LogFatal(err)
+		logs.SaveFatal(err)
 	}
 }
 
 // SetIndex prompts for a value from a list of valid choices and saves the result.
 func setIndex(name string, setup bool, data ...string) {
 	if name == "" {
-		logs.LogFatal(fmt.Errorf("set index: %w", logs.ErrNameNil))
+		logs.SaveFatal(fmt.Errorf("set index: %w", logs.ErrNameNil))
 	}
 	p := prompt.IndexStrings(&data, setup)
 	save(name, setup, p)
@@ -684,7 +684,7 @@ func setNoTranslate(value, setup bool) {
 // SetPort prompts for and saves HTTP port.
 func setPort(name string, setup bool) {
 	if name == "" {
-		logs.LogFatal(fmt.Errorf("set port: %w", logs.ErrNameNil))
+		logs.SaveFatal(fmt.Errorf("set port: %w", logs.ErrNameNil))
 	}
 	val := prompt.Port(true, setup)
 	save(name, setup, val)
@@ -702,7 +702,7 @@ func setRetrotxt(value bool) {
 	p += recommend("yes")
 	viper.Set(name, prompt.YesNo(p, viper.GetBool(name)))
 	if err := UpdateConfig("", false); err != nil {
-		logs.LogFatal(err)
+		logs.SaveFatal(err)
 	}
 }
 
@@ -724,7 +724,7 @@ func setShortStrings(name string, setup bool, data ...string) {
 // SetString prompts and saves a single word setting value.
 func setString(name string, setup bool) {
 	if name == "" {
-		logs.LogFatal(fmt.Errorf("set string: %w", logs.ErrNameNil))
+		logs.SaveFatal(fmt.Errorf("set string: %w", logs.ErrNameNil))
 	}
 	val := prompt.String(setup)
 	switch val {
@@ -739,7 +739,7 @@ func setString(name string, setup bool) {
 // SetStrings prompts and saves a string of text setting value.
 func setStrings(name string, setup bool, data ...string) {
 	if name == "" {
-		logs.LogFatal(fmt.Errorf("set strings: %w", logs.ErrNameNil))
+		logs.SaveFatal(fmt.Errorf("set strings: %w", logs.ErrNameNil))
 	}
 	val := prompt.Strings(&data, setup)
 	switch val {

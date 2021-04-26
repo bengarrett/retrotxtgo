@@ -22,8 +22,8 @@ const (
 	Panic = false
 )
 
-// Log saves the error and continues the program.
-func Log(err error) {
+// Save by appending the error to the logfile.
+func Save(err error) {
 	if err != nil {
 		// save error to log file
 		if err = save(err, ""); err != nil {
@@ -32,8 +32,8 @@ func Log(err error) {
 	}
 }
 
-// LogFatal saves the error and exits.
-func LogFatal(err error) {
+// SaveFatal saves the error to the logfile and exits.
+func SaveFatal(err error) {
 	if err != nil {
 		// save error to log file
 		if err = save(err, ""); err != nil {
@@ -50,7 +50,7 @@ func LogFatal(err error) {
 	}
 }
 
-// LastEntry returns the last log entry in the error log file.
+// LastEntry returns the last and newest saved entry in the error log file.
 func LastEntry() (entry string, err error) {
 	name := Name()
 	file, err := os.Open(name)

@@ -29,7 +29,7 @@ func IsPipe() bool {
 	// source: https://dev.to/napicella/linux-pipes-in-golang-2e8j
 	fileInfo, err := os.Stdin.Stat()
 	if err != nil {
-		logs.Log(err)
+		logs.Save(err)
 	}
 	return fileInfo.Mode()&os.ModeCharDevice == 0
 }

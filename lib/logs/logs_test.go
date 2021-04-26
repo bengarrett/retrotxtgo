@@ -14,9 +14,9 @@ var (
 	ErrLogTest = errors.New("log test")
 )
 
-func ExampleLog() {
+func ExampleSave() {
 	t := fmt.Sprintf("%s", ErrLogTest)
-	Log(ErrLogTest)
+	Save(ErrLogTest)
 	last, _ := LastEntry()
 	i := len(last) - len(t) - 1
 	fmt.Print(last[i:])

@@ -29,7 +29,7 @@ var ErrStdErr = errors.New("failed to print to stderr")
 func Clean(name string) {
 	if err := os.RemoveAll(name); err != nil {
 		if _, err = fmt.Fprintf(os.Stderr, "failed to clean %q: %s", name, err); err != nil {
-			logs.LogFatal(fmt.Errorf("clean %s: %w", name, ErrStdErr))
+			logs.SaveFatal(fmt.Errorf("clean %s: %w", name, ErrStdErr))
 		}
 	}
 }
@@ -53,14 +53,14 @@ func DirExpansion(name string) (dir string) {
 		switch s {
 		case homeDir:
 			if p, err = os.UserHomeDir(); err != nil {
-				logs.LogFatal(err)
+				logs.SaveFatal(err)
 			}
 		case currentDir:
 			if i != 0 {
 				continue
 			}
 			if p, err = os.Getwd(); err != nil {
-				logs.LogFatal(err)
+				logs.SaveFatal(err)
 			}
 		case parentDir:
 			if i != 0 {
@@ -69,7 +69,7 @@ func DirExpansion(name string) (dir string) {
 			}
 			wd, err := os.Getwd()
 			if err != nil {
-				logs.LogFatal(err)
+				logs.SaveFatal(err)
 			}
 			p = filepath.Dir(wd)
 		default:

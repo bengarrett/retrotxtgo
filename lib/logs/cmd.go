@@ -38,10 +38,10 @@ func Execute(err error, args ...string) {
 	words := strings.Split(fmt.Sprintf("%s", err), " ")
 	argsCnt, wordCnt := len(args), len(words)
 	if wordCnt < minWords {
-		LogFatal(fmt.Errorf("cmd error args: %w", ErrShort))
+		SaveFatal(fmt.Errorf("cmd error args: %w", ErrShort))
 	}
 	if argsCnt == 0 {
-		LogFatal(fmt.Errorf("cmd error err: %w", ErrEmpty))
+		SaveFatal(fmt.Errorf("cmd error err: %w", ErrEmpty))
 	}
 
 	mark, name := words[wordCnt-1], args[0]
