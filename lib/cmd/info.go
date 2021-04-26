@@ -59,7 +59,7 @@ var infoCmd = &cobra.Command{
 					continue
 				}
 				if err := cmd.Usage(); err != nil {
-					logs.Problemln(ErrCmdUsage, err)
+					logs.Problemln(ErrUsage, err)
 				}
 				logs.ErrorFatal(err)
 			}
@@ -90,13 +90,13 @@ func infoSample(name string) (filename string, err error) {
 	}
 	file, err := ioutil.TempFile("", fmt.Sprintf("retrotxt_%s.*.txt", s))
 	if err != nil {
-		return "", fmt.Errorf("view package %q: %w", samp.Name, ErrTempOpen)
+		return "", fmt.Errorf("view package %q: %w", samp.Name, logs.ErrTmpOpen)
 	}
 	if _, err = file.Write(b); err != nil {
-		return "", fmt.Errorf("view package %q: %w", samp.Name, ErrTempWrite)
+		return "", fmt.Errorf("view package %q: %w", samp.Name, logs.ErrTmpSave)
 	}
 	if err := file.Close(); err != nil {
-		return "", fmt.Errorf("view package %q: %w", samp.Name, ErrTempClose)
+		return "", fmt.Errorf("view package %q: %w", samp.Name, logs.ErrTmpClose)
 	}
 	return file.Name(), nil
 }

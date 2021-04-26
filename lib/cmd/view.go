@@ -80,7 +80,7 @@ func viewParseArg(cmd *cobra.Command, conv *convert.Convert, i int, arg string) 
 	if ok := sample.Valid(arg); ok {
 		var p sample.File
 		if p, err = f.Open(arg, conv); err != nil {
-			logs.MarkProblem(arg, ErrSampleView, err)
+			logs.MarkProblem(arg, logs.ErrSampView, err)
 			return true, nil
 		}
 		// --to flag is currently ignored
@@ -98,7 +98,7 @@ func viewParseArg(cmd *cobra.Command, conv *convert.Convert, i int, arg string) 
 	// read file
 	b, err := filesystem.Read(arg)
 	if err != nil {
-		logs.MarkProblem(arg, logs.ErrOpenFile, err)
+		logs.MarkProblem(arg, logs.ErrFileOpen, err)
 		return true, nil
 	}
 	if i > 0 {
@@ -167,7 +167,7 @@ func viewParseBytes(cmd *cobra.Command, conv *convert.Convert, arg string, b []b
 		r, err = conv.Dump(&b)
 	}
 	if err != nil {
-		logs.MarkProblem(arg, ErrViewUTF8, err)
+		logs.MarkProblem(arg, ErrUTF8, err)
 		return true, nil
 	}
 	// to flag

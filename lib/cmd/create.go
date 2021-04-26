@@ -340,7 +340,7 @@ func createHTML(cmd *cobra.Command, flags convert.Flags, src *[]byte) []byte {
 		r, err = conv.Dump(src)
 	}
 	if err != nil {
-		logs.Problemln(ErrCreateHTML, err)
+		logs.Problemln(ErrCreate, err)
 		return nil
 	}
 	return []byte(string(r))
@@ -369,7 +369,7 @@ func staticTextfile(f sample.Flags, conv *convert.Convert, arg string, changed b
 		var p sample.File
 		p, err = f.Open(arg, conv)
 		if err != nil {
-			logs.MarkProblem(arg, ErrSampleHTML, err)
+			logs.MarkProblem(arg, logs.ErrSampHTML, err)
 			return nil, true
 		}
 		src = create.Normalize(p.Encoding, p.Runes...)
@@ -381,7 +381,7 @@ func staticTextfile(f sample.Flags, conv *convert.Convert, arg string, changed b
 	// read file
 	if src == nil {
 		if src, err = filesystem.Read(arg); err != nil {
-			logs.MarkProblemFatal(arg, logs.ErrOpenFile, err)
+			logs.MarkProblemFatal(arg, logs.ErrFileOpen, err)
 		}
 	}
 	return src, false

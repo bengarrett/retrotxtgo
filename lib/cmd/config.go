@@ -50,7 +50,7 @@ var configCreateCmd = &cobra.Command{
 
 func configCreate() bool {
 	if err := config.Create(viper.ConfigFileUsed(), configFlag.ow); err != nil {
-		logs.Problemln(ErrCfgCreate, err)
+		logs.Problemln(logs.ErrCfgCreate, err)
 		return true
 	}
 	fmt.Println("New config file:", viper.ConfigFileUsed())
@@ -183,17 +183,17 @@ var configShellCmd = &cobra.Command{
 		case bash, "bsh", "b":
 			lexer = bash
 			if err = cmd.GenBashCompletion(&buf); err != nil {
-				logs.MarkProblemFatal(bash, ErrShellCompletion, err)
+				logs.MarkProblemFatal(bash, ErrShell, err)
 			}
 		case ps, "posh", "ps", "p":
 			lexer = ps
 			if err = cmd.GenPowerShellCompletion(&buf); err != nil {
-				logs.MarkProblemFatal(ps, ErrShellCompletion, err)
+				logs.MarkProblemFatal(ps, ErrShell, err)
 			}
 		case zsh, "z":
 			lexer = bash
 			if err = cmd.GenZshCompletion(&buf); err != nil {
-				logs.MarkProblemFatal(zsh, ErrShellCompletion, err)
+				logs.MarkProblemFatal(zsh, ErrShell, err)
 			}
 		default:
 			s := config.Format().Shell
@@ -237,7 +237,7 @@ func init() {
 		str.Required("user shell to receive retrotxt auto-completions")+
 			str.Options("", true, s[:]...))
 	if err = configShellCmd.MarkFlagRequired("interpreter"); err != nil {
-		logs.MarkProblemFatal("interpreter", logs.ErrMarkRequire, err)
+		logs.MarkProblemFatal("interpreter", ErrMarkRequire, err)
 	}
 	configShellCmd.SilenceErrors = true
 }
