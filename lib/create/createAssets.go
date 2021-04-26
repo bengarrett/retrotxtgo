@@ -77,7 +77,7 @@ func (args *Args) saveFont(c chan error) {
 	if !args.FontEmbed {
 		f := Family(args.FontFamily.Value)
 		if f.String() == "" {
-			c <- fmt.Errorf("save font, could not save %q: %w", args.FontFamily.Value, ErrUnknownFF)
+			c <- fmt.Errorf("save font, could not save %q: %w", args.FontFamily.Value, ErrFont)
 			return
 		}
 		if err := args.saveFontWoff2(f.File(), "font/"+f.File()); err != nil {
@@ -102,7 +102,7 @@ func (args *Args) saveFontCSS(name string) error {
 	}
 	f := Family(args.FontFamily.Value).String()
 	if f == "" {
-		return fmt.Errorf("create.saveFontCSS %q: %w", name, ErrUnknownFF)
+		return fmt.Errorf("create.saveFontCSS %q: %w", name, ErrFont)
 	}
 	b, err := FontCSS(f, args.Source.Encoding, args.FontEmbed)
 	if err != nil {
@@ -171,7 +171,7 @@ func (args *Args) saveHTML(b *[]byte, c chan error) {
 		c <- err
 	}
 	if name == "" {
-		c <- ErrEmptyName
+		c <- ErrFileNil
 	}
 	file, err := os.Create(name)
 	if err != nil {
@@ -234,7 +234,7 @@ func (args *Args) destination(name string) (string, error) {
 			// existing static files can be ignored
 			return path, nil
 		}
-		logs.MarkProblem(path, ErrFileExist, ErrReqOW)
+		logs.Hint("use the -o flag to overwrite", ErrFileExist)
 		return path, nil
 	}
 	if os.IsNotExist(err) {

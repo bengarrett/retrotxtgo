@@ -14,6 +14,7 @@ import (
 	"github.com/tdewolff/minify/css"
 	"github.com/tdewolff/minify/js"
 	"retrotxt.com/retrotxt/lib/filesystem"
+	"retrotxt.com/retrotxt/lib/logs"
 	"retrotxt.com/retrotxt/lib/version"
 	"retrotxt.com/retrotxt/static"
 )
@@ -37,7 +38,7 @@ func (args *Args) marshal(b *[]byte) (p PageData, err error) {
 	case None:
 		// do nothing
 	default:
-		return PageData{}, fmt.Errorf("pagedata %s: %w", args.layout, ErrNoLayout)
+		return PageData{}, fmt.Errorf("pagedata %s: %w", args.layout, logs.ErrTmplNil)
 	}
 	// convert bytes into utf8
 	r := bytes.Runes(*b)
@@ -156,7 +157,7 @@ func (args *Args) newTemplate() (*template.Template, error) {
 		case err != nil:
 			return nil, err
 		case s.IsDir():
-			return nil, fmt.Errorf("new template %q: %w", args.tmpl, ErrTmplDir)
+			return nil, fmt.Errorf("new template %q: %w", args.tmpl, logs.ErrTmplDir)
 		}
 	}
 	// to avoid a potential panic, Stat again in case os.IsNotExist() is true
@@ -184,7 +185,7 @@ func (args *Args) newTemplate() (*template.Template, error) {
 func (args *Args) templateCache() (err error) {
 	l := args.layout.Pack()
 	if l == "" {
-		return fmt.Errorf("template cache %q: %w", args.layout, ErrNoLayout)
+		return fmt.Errorf("template cache %q: %w", args.layout, logs.ErrTmplNil)
 	}
 	args.tmpl, err = gap.NewScope(gap.User, "retrotxt").DataPath(l + ".gohtml")
 	if err != nil {
@@ -197,7 +198,7 @@ func (args *Args) templateCache() (err error) {
 func (args *Args) templatePack() error {
 	l := args.layout.Pack()
 	if l == "" {
-		return fmt.Errorf("template pack %q: %w", args.layout, ErrNoLayout)
+		return fmt.Errorf("template pack %q: %w", args.layout, logs.ErrTmplNil)
 	}
 	args.pack = fmt.Sprintf("html/%s.gohtml", l)
 	return nil

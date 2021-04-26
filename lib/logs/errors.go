@@ -24,6 +24,10 @@ var (
 	ErrSampFile = errors.New("unknown sample filename")
 	ErrSampView = errors.New("could not view the sample text")
 
+	// template file
+	ErrTmplDir = errors.New("the named template file is a directory")
+	ErrTmplNil = errors.New("the named template layout does not exist")
+
 	// temporary directory
 	ErrTmpClean = errors.New("could not cleanup the temporary directory")
 	ErrTmpDir   = errors.New("could not save file to the temporary directory")

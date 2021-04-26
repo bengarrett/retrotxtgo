@@ -250,11 +250,11 @@ func (args *Args) zipAssets(destDir string, b *[]byte) {
 		dir := args.Save.Destination
 		m, err = filepath.Match(filepath.Join(os.TempDir(), "*"), dir)
 		if err != nil {
-			logs.MarkProblem("*", ErrTmpDir, err)
+			logs.MarkProblem("*", logs.ErrTmpDir, err)
 		}
 		if m {
 			if err = os.RemoveAll(dir); err != nil {
-				logs.MarkProblem(dir, ErrRmTmpDir, err)
+				logs.MarkProblem(dir, logs.ErrTmpClean, err)
 			}
 		}
 	}()
@@ -301,7 +301,7 @@ func (args *Args) Stdout(b *[]byte) error {
 	ff := args.FontFamily.Value
 	f := Family(ff).String()
 	if f == "" {
-		return fmt.Errorf("create.saveFontCSS %q: %w", ff, ErrUnknownFF)
+		return fmt.Errorf("create.saveFontCSS %q: %w", ff, ErrFont)
 	}
 	font, err := FontCSS(f, args.Source.Encoding, args.FontEmbed)
 	if err != nil {
@@ -419,7 +419,7 @@ func layout(name string) (Layout, error) {
 	case none, "n":
 		return None, nil
 	}
-	return 0, ErrLayout
+	return 0, logs.ErrTmplNil
 }
 
 // Replace EBCDIC newlines with Unicode linefeeds.

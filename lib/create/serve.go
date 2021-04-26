@@ -48,7 +48,7 @@ func (args *Args) Serve(b *[]byte) error {
 			port++
 			continue
 		case tries >= max:
-			return fmt.Errorf("serve http ports %d-%d: %w", args.Port, port, ErrPort)
+			return fmt.Errorf("serve http ports %d-%d: %w", args.Port, port, ErrPorts)
 		default:
 			args.Port = port
 		}

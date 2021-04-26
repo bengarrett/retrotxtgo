@@ -119,7 +119,7 @@ func fontBase64(f Font) (string, error) {
 	name := fmt.Sprintf("font/%s", f.File())
 	b, err := static.Font.ReadFile(name)
 	if err != nil {
-		return "", fmt.Errorf("font base64 %q: %w", f.File(), ErrPack)
+		return "", fmt.Errorf("font base64 %q: %w", f.File(), ErrFont)
 	}
 	var s bytes.Buffer
 	encoder := base64.NewEncoder(base64.StdEncoding, &s)
