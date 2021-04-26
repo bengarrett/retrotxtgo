@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"io/ioutil"
 	"log"
 	"os"
@@ -26,7 +27,7 @@ func TestDelete(t *testing.T) {
 			if tt.name == "ok" {
 				viper.SetConfigFile(tmpFile.Name())
 			}
-			if gotErr := Delete(); gotErr != tt.wantErr {
+			if gotErr := Delete(); !errors.Is(gotErr, tt.wantErr) {
 				t.Errorf("Delete() = %v, want %v", gotErr, tt.wantErr)
 			}
 		})

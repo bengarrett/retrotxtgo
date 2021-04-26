@@ -55,7 +55,7 @@ func logo() {
 	const clear, reset, n = "\033c", "\033[0m", "text/retrotxt.utf8ans"
 	b, err := static.Text.ReadFile(n)
 	if err != nil {
-		logs.MarkProblemFatal(n, logs.ErrSampFile, ErrLogo)
+		logs.ProblemMarkFatal(n, logs.ErrSampFile, ErrLogo)
 	}
 	// the terminal screen needs to be cleared if the logo is to display correctly
 	fmt.Println(clear + string(b) + reset)

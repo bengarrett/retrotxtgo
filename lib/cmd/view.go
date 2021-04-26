@@ -74,13 +74,14 @@ func viewParseArgs(cmd *cobra.Command, args []string) {
 
 func viewParseArg(cmd *cobra.Command, conv *convert.Convert, i int, arg string) (skip bool, r []rune) {
 	var err error
+	const halfPage = 40
 	conv.Output = convert.Output{} // output must be reset
 	f := sample.Flags{}
 	// internal example file
 	if ok := sample.Valid(arg); ok {
 		var p sample.File
 		if p, err = f.Open(arg, conv); err != nil {
-			logs.MarkProblem(arg, logs.ErrSampView, err)
+			logs.ProblemMark(arg, logs.ErrSampView, err)
 			return true, nil
 		}
 		// --to flag is currently ignored
@@ -90,7 +91,7 @@ func viewParseArg(cmd *cobra.Command, conv *convert.Convert, i int, arg string) 
 			}
 		}
 		if i > 0 {
-			str.HR(40)
+			str.HR(halfPage)
 		}
 		fmt.Println(string(p.Runes))
 		return true, nil
@@ -98,11 +99,11 @@ func viewParseArg(cmd *cobra.Command, conv *convert.Convert, i int, arg string) 
 	// read file
 	b, err := filesystem.Read(arg)
 	if err != nil {
-		logs.MarkProblem(arg, logs.ErrFileOpen, err)
+		logs.ProblemMark(arg, logs.ErrFileOpen, err)
 		return true, nil
 	}
 	if i > 0 {
-		str.HR(40)
+		str.HR(halfPage)
 	}
 	return viewParseBytes(cmd, conv, arg, b)
 }
@@ -128,13 +129,13 @@ func viewParsePipe(cmd *cobra.Command) {
 	if cp := cmd.Flags().Lookup("encode"); cp.Changed {
 		f := sample.Flags{}
 		if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
-			logs.MarkProblemFatal("pipe", logs.ErrEncode, err)
+			logs.ProblemMarkFatal("pipe", logs.ErrEncode, err)
 		}
 		conv.Source.E = f.From
 	}
 	b, err := filesystem.ReadPipe()
 	if err != nil {
-		logs.MarkProblemFatal("view", logs.ErrPipe, err)
+		logs.ProblemMarkFatal("view", logs.ErrPipe, err)
 	}
 	_, r := viewParseBytes(cmd, &conv, "piped", b)
 	fmt.Print(string(r))
@@ -151,7 +152,7 @@ func viewParseBytes(cmd *cobra.Command, conv *convert.Convert, arg string, b []b
 	var f = sample.Flags{}
 	var err error
 	if f.From, err = convert.Encoding(name); err != nil {
-		logs.MarkProblemFatal(arg, logs.ErrEncode, err)
+		logs.ProblemMarkFatal(arg, logs.ErrEncode, err)
 	}
 	conv.Source.E = f.From
 
@@ -167,7 +168,7 @@ func viewParseBytes(cmd *cobra.Command, conv *convert.Convert, arg string, b []b
 		r, err = conv.Dump(&b)
 	}
 	if err != nil {
-		logs.MarkProblem(arg, ErrUTF8, err)
+		logs.ProblemMark(arg, ErrUTF8, err)
 		return true, nil
 	}
 	// to flag
@@ -194,7 +195,7 @@ func init() {
 func viewToFlag(r ...rune) (success bool) {
 	newer, err := viewEncode(viewFlag.to, r...)
 	if err != nil {
-		logs.MarkProblem(viewFlag.to, ErrEncode, err)
+		logs.ProblemMark(viewFlag.to, ErrEncode, err)
 		return false
 	}
 	fmt.Println(string(newer))

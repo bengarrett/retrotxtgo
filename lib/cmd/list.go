@@ -106,7 +106,7 @@ func listTable(args []string) (s string) {
 	for _, arg := range args {
 		table, err := convert.Table(arg)
 		if err != nil {
-			logs.MarkProblem(arg, ErrTable, err)
+			logs.ProblemMark(arg, ErrTable, err)
 			continue
 		}
 		s += fmt.Sprintln(table.String())
@@ -134,7 +134,7 @@ func listAllTables() (s string) {
 		if name == "" {
 			name, err = ianaindex.MIME.Name(e)
 			if err != nil {
-				logs.MarkProblem(fmt.Sprint(e), ErrIANA, err)
+				logs.ProblemMark(fmt.Sprint(e), ErrIANA, err)
 				continue
 			}
 		}
@@ -143,7 +143,7 @@ func listAllTables() (s string) {
 		}
 		table, err := convert.Table(name)
 		if err != nil {
-			logs.MarkProblem(name, ErrTable, err)
+			logs.ProblemMark(name, ErrTable, err)
 			continue
 		}
 		s += fmt.Sprintln(table.String())

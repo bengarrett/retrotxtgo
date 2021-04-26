@@ -50,7 +50,7 @@ var configCreateCmd = &cobra.Command{
 
 func configCreate() bool {
 	if err := config.Create(viper.ConfigFileUsed(), configFlag.ow); err != nil {
-		logs.Problemln(logs.ErrCfgCreate, err)
+		logs.Problemf(logs.ErrCfgCreate, err)
 		return true
 	}
 	fmt.Println("New config file:", viper.ConfigFileUsed())
@@ -63,7 +63,7 @@ var configDeleteCmd = &cobra.Command{
 	Short:   "Remove the config file",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := config.Delete(); err != nil {
-			logs.ErrorFatal(err)
+			logs.Fatal(err)
 		}
 	},
 }
@@ -85,7 +85,7 @@ To switch editors either:
 		str.Example("retrotxt config set --name=editor"),
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := config.Edit(); err != nil {
-			logs.ErrorFatal(err)
+			logs.Fatal(err)
 		}
 	},
 }
@@ -104,7 +104,7 @@ var configInfoCmd = &cobra.Command{
 func configInfo() (exit bool) {
 	if configFlag.configs {
 		if err := config.List(); err != nil {
-			logs.CmdProblemFatal("config info", "list", err)
+			logs.ProblemCmdFatal("config info", "list", err)
 		}
 		return true
 	}
@@ -120,7 +120,7 @@ func configInfo() (exit bool) {
 		style = "dracula"
 	}
 	if err := config.Info(style); err != nil {
-		logs.ErrorFatal(err)
+		logs.Fatal(err)
 	}
 	return false
 }
@@ -148,7 +148,7 @@ var configSetCmd = &cobra.Command{
 func configSet() bool {
 	if configFlag.configs {
 		if err := config.List(); err != nil {
-			logs.CmdProblemFatal("config", "list", err)
+			logs.ProblemCmdFatal("config", "list", err)
 		}
 		return true
 	}
@@ -183,24 +183,24 @@ var configShellCmd = &cobra.Command{
 		case bash, "bsh", "b":
 			lexer = bash
 			if err = cmd.GenBashCompletion(&buf); err != nil {
-				logs.MarkProblemFatal(bash, ErrShell, err)
+				logs.ProblemMarkFatal(bash, ErrShell, err)
 			}
 		case ps, "posh", "ps", "p":
 			lexer = ps
 			if err = cmd.GenPowerShellCompletion(&buf); err != nil {
-				logs.MarkProblemFatal(ps, ErrShell, err)
+				logs.ProblemMarkFatal(ps, ErrShell, err)
 			}
 		case zsh, "z":
 			lexer = bash
 			if err = cmd.GenZshCompletion(&buf); err != nil {
-				logs.MarkProblemFatal(zsh, ErrShell, err)
+				logs.ProblemMarkFatal(zsh, ErrShell, err)
 			}
 		default:
 			s := config.Format().Shell
 			logs.InvalidChoice("shell", "interpreter", s[0], s[1], s[2])
 		}
 		if err := str.Highlight(buf.String(), lexer, style, true); err != nil {
-			logs.MarkProblemFatal("shell", logs.ErrHighlight, err)
+			logs.ProblemMarkFatal("shell", logs.ErrHighlight, err)
 		}
 	},
 }
@@ -237,7 +237,7 @@ func init() {
 		str.Required("user shell to receive retrotxt auto-completions")+
 			str.Options("", true, s[:]...))
 	if err = configShellCmd.MarkFlagRequired("interpreter"); err != nil {
-		logs.MarkProblemFatal("interpreter", ErrMarkRequire, err)
+		logs.ProblemMarkFatal("interpreter", ErrMarkRequire, err)
 	}
 	configShellCmd.SilenceErrors = true
 }

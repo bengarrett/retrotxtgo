@@ -151,7 +151,8 @@ func (f Flags) Open(name string, conv *convert.Convert) (s File, err error) {
 		case "037", "shiftjis", "utf16.be", "utf16.le":
 			return s, nil
 		}
-		if err = printT(f.From, b...); err != nil {
+		err = printT(f.From, b...)
+		if err != nil {
 			return s, err
 		}
 		return s, nil

@@ -85,7 +85,7 @@ func (o *Output) String(color bool) string {
 func (o *Output) json() (data []byte) {
 	data, err := json.MarshalIndent(&o, "", "    ")
 	if err != nil {
-		logs.MarkProblemFatal("json", ErrMarshal, err)
+		logs.ProblemMarkFatal("json", ErrMarshal, err)
 	}
 	return data
 }
@@ -94,7 +94,7 @@ func (o *Output) json() (data []byte) {
 func (o *Output) jsonMin() (data []byte) {
 	data, err := json.Marshal(&o)
 	if err != nil {
-		logs.MarkProblemFatal("json", ErrMarshal, err)
+		logs.ProblemMarkFatal("json", ErrMarshal, err)
 	}
 	return data
 }

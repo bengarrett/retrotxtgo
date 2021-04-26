@@ -13,7 +13,7 @@ func InvalidCommand(args ...string) {
 }
 
 func InvalidChoice(name, value string, choices ...string) {
-	c := FlagProblem(name, value, ErrFlagChoice)
+	c := ProblemFlag(name, value, ErrFlagChoice)
 	fmt.Println(c)
 	fmt.Printf("          choices: %s\n", strings.Join(choices, ", "))
 	os.Exit(1)
@@ -49,9 +49,9 @@ func Execute(err error, args ...string) {
 	var c string
 	switch problem {
 	case flagSyntax:
-		c = FlagProblem(name, mark, err)
+		c = ProblemFlag(name, mark, err)
 	case invalidFlag:
-		c = FlagProblem(name, mark, ErrNotNil)
+		c = ProblemFlag(name, mark, ErrNotNil)
 	case invalidType:
 		mark = strings.Join(words[4:6], " ")
 		c = parseType(name, mark, err)
@@ -60,13 +60,13 @@ func Execute(err error, args ...string) {
 	case invalidCommand:
 		c = Hint(fmt.Sprintf("%s --help", mark), ErrCmdExist)
 	case flagRequired:
-		c = CmdProblem(mark, ErrFlagNil)
+		c = ProblemCmd(mark, ErrFlagNil)
 	case unknownCmd:
 		c = Hint(fmt.Sprintf("%s --help", mark), ErrCmdExist)
 		// mark = words[2]
-		// c = CmdProblem(mark, ErrCmdChoose)
+		// c = ProblemCmd(mark, ErrCmdChoose)
 	case unknownFlag, unknownShort:
-		c = FlagProblem(name, mark, ErrFlag)
+		c = ProblemFlag(name, mark, ErrFlag)
 	case flagChoice:
 		c = "honk"
 	}
@@ -86,12 +86,12 @@ func parseType(name, flag string, err error) string {
 	s := err.Error()
 	switch {
 	case strings.Contains(s, invalidBool):
-		return FlagProblem(name, flag, ErrNotBool)
+		return ProblemFlag(name, flag, ErrNotBool)
 	case strings.Contains(s, invalidInt):
-		return FlagProblem(name, flag, ErrNotInt)
+		return ProblemFlag(name, flag, ErrNotInt)
 	case strings.Contains(s, invalidStr):
-		return FlagProblem(name, flag, ErrNotInts)
+		return ProblemFlag(name, flag, ErrNotInts)
 	default:
-		return FlagProblem(name, flag, err)
+		return ProblemFlag(name, flag, err)
 	}
 }
