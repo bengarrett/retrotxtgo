@@ -25,7 +25,7 @@ func ErrorFatal(err error) {
 }
 
 func Errorf(err error) string {
-	return fmt.Sprintf("%s%s", str.Alert(), err) // TODO: change to string return?
+	return fmt.Sprintf("%s %s", str.Alert(), err) // TODO: change to string return?
 }
 
 func FlagProblem(name, flag string, err error) string {
@@ -71,5 +71,11 @@ func SubCmdProblem(name string, err error) string {
 }
 
 func Hint(s string, err error) string {
+	if err == nil {
+		return ""
+	}
+	if s == "" {
+		return Errorf(err)
+	}
 	return fmt.Sprintf("%s\n         run %s", Errorf(err), str.Example("retrotxt "+s))
 }

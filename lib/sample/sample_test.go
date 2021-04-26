@@ -44,7 +44,7 @@ func TestFlags_Open(t *testing.T) {
 		{"okay 1252", fields{nil, nil}, args{&file, "1252"}, true, false},
 		{"no convert", fields{nil, charmap.CodePage1047}, args{&file, "037"}, false, false},
 		{"convert 1252", fields{nil, charmap.CodePage437}, args{&file, "1252"}, false, false},
-		{"convert to cp437", fields{charmap.Windows1252, charmap.CodePage437}, args{&file, "1252"}, false, false},
+		{"convert to cp437", fields{charmap.Windows1252, charmap.CodePage437}, args{&file, "1252"}, false, true},
 		{"ansi", fields{}, args{&file, "ansi"}, true, false},
 		{"cp437 dump", fields{}, args{&file, "437.cr"}, true, false},
 	}
@@ -61,7 +61,7 @@ func TestFlags_Open(t *testing.T) {
 			}
 			r := bool(len(gotS.Runes) > 0)
 			if r != tt.wantRunes {
-				t.Errorf("Flags.Open() = %v, want %v", r, tt.wantRunes)
+				t.Errorf("Flags.Open() runes = %v, want %v", r, tt.wantRunes)
 			}
 		})
 	}

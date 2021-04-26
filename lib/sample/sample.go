@@ -151,7 +151,9 @@ func (f Flags) Open(name string, conv *convert.Convert) (s File, err error) {
 		case "037", "shiftjis", "utf16.be", "utf16.le":
 			return s, nil
 		}
-		printT(f.From, b...)
+		if err = printT(f.From, b...); err != nil {
+			return s, err
+		}
 		return s, nil
 	}
 	// default overrides
@@ -199,16 +201,17 @@ func Valid(name string) bool {
 }
 
 // PrintT encodes and prints the bytes as a string.
-func printT(e encoding.Encoding, b ...byte) {
+func printT(e encoding.Encoding, b ...byte) error {
 	if e == nil {
 		fmt.Println(string(b))
-		return
+		return nil
 	}
 	b, err := encode(e, b...)
 	if err != nil {
-		logs.MarkProblemFatal(fmt.Sprint(e), logs.ErrEncode, err)
+		return err
 	}
 	fmt.Println(string(b))
+	return nil
 }
 
 func encode(e encoding.Encoding, b ...byte) ([]byte, error) {

@@ -66,6 +66,7 @@ func Test_zipAssets(t *testing.T) {
 	t.Run("comment", func(t *testing.T) {
 		// Create a temporary directory
 		tmpDir := filepath.Join(os.TempDir(), "retrotxt_example_save_assets")
+		os.RemoveAll(tmpDir)
 		if err := os.Mkdir(tmpDir, 0755); err != nil {
 			t.Errorf("saveAssets make temp dir: %w", err)
 		}
