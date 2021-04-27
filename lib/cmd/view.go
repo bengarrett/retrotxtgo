@@ -38,7 +38,7 @@ const viewExample = `  retrotxt view file.txt -e latin1
 var viewCmd = &cobra.Command{
 	Use:     "view [filenames]",
 	Aliases: []string{"v"},
-	Short:   "Print a legacy text file to the standard output",
+	Short:   "Print a text file to the terminal using the standard output",
 	Example: exampleCmd(viewExample),
 	Run: func(cmd *cobra.Command, args []string) {
 		viewParsePipe(cmd)
@@ -91,7 +91,7 @@ func viewParseArg(cmd *cobra.Command, conv *convert.Convert, i int, arg string) 
 			}
 		}
 		if i > 0 {
-			str.HR(halfPage)
+			fmt.Println(str.HRPadded(halfPage))
 		}
 		fmt.Println(string(p.Runes))
 		return true, nil
@@ -103,7 +103,7 @@ func viewParseArg(cmd *cobra.Command, conv *convert.Convert, i int, arg string) 
 		return true, nil
 	}
 	if i > 0 {
-		str.HR(halfPage)
+		fmt.Println(str.HRPadded(halfPage))
 	}
 	return viewParseBytes(cmd, conv, arg, b)
 }
