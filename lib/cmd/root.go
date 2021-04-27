@@ -39,10 +39,9 @@ var rootFlag = rootFlags{}
 var rootCmd = &cobra.Command{
 	Use:   "retrotxt",
 	Short: "RetroTxt is the tool that turns ANSI, ASCII, NFO text into browser ready HTML",
-	Long: `Turn many pieces of ANSI text art and ASCII/NFO plain text into HTML5 text
-using RetroTxt. The operating system agnostic tool that takes retro text
-files and stylises them into a more pleasing, useful format to view and
-copy in a web browser.`,
+	Long: `Turn many pieces of ANSI art, ASCII and NFO texts into HTML5 using RetroTxt.
+It is the platform agnostic tool that takes nostaglic text files and stylises
+them into a more modern, useful format to view or copy in a web browser.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Do nothing other than print the help.
 		// This func must remain otherwise root command flags are ignored by Cobra.

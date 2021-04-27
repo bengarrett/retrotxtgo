@@ -26,10 +26,14 @@ type configFlags struct {
 
 var configFlag configFlags
 
+const configExample = `  retrotxt config setup  # to start the setup walkthrough
+retrotxt config set -c # to list all available settings`
+
 var configCmd = &cobra.Command{
 	Use:     "config",
 	Aliases: []string{"cfg"},
-	Short:   "Configure and save settings for RetroTxt",
+	Short:   "RetroTxt configuration and save settings",
+	Example: exampleCmd(configExample),
 	Run: func(cmd *cobra.Command, args []string) {
 		if !printUsage(cmd, args...) {
 			logs.InvalidCommand("config", args...)
@@ -90,9 +94,13 @@ To switch editors either:
 	},
 }
 
+const configInfoExample = `  retrotxt config info   # to list the default setting values
+retrotxt config set -c # to list the settings and help hints`
+
 var configInfoCmd = &cobra.Command{
 	Use:     "info",
 	Aliases: []string{"i"},
+	Example: exampleCmd(configInfoExample),
 	Short:   "View all the settings configured in the config file",
 	Run: func(cmd *cobra.Command, args []string) {
 		if configInfo() {
