@@ -94,7 +94,7 @@ func SetConfig(flag string) (err error) {
 			return fmt.Errorf("set config: %w\nuse the command, retrotxt config create --config=%s", logs.ErrCfgFile, flag)
 		}
 		// user config file fail
-		return nil
+		return err
 	}
 	if flag != "" {
 		if len(viper.AllKeys()) == 0 {
