@@ -28,6 +28,9 @@ const (
 	tab         = "tab"
 	null        = 0
 	verticalBar = 124
+
+	// silence can be set to false to debug cmd/flag feedback from Viper.
+	silence = true
 )
 
 var rootFlag = rootFlags{}
@@ -40,12 +43,16 @@ var rootCmd = &cobra.Command{
 using RetroTxt. The operating system agnostic tool that takes retro text
 files and stylises them into a more pleasing, useful format to view and
 copy in a web browser.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		// do nothing, but this func must remain
+		// otherwise root command flags are ignored by Cobra
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	rootCmd.SilenceErrors = true // set to false to debug using the feedback from Viper.
+	rootCmd.SilenceErrors = silence
 	if err := rootCmd.Execute(); err != nil {
 		const minArgs = 2
 		if len(os.Args) < minArgs {
@@ -58,14 +65,13 @@ func Execute() {
 }
 
 func init() {
-	// cobra.OnInitialize will not run if there is no provided command.
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVar(&rootFlag.config, "config", "",
 		"optional config file location")
 }
 
 // initConfig reads in the config file and ENV variables if set.
-// this does not run when rootCmd is in use.
+// This init can be run twice due to the Cobra initializer registers.
 func initConfig() {
 	// read in environment variables
 	viper.SetEnvPrefix("env")

@@ -239,5 +239,5 @@ func init() {
 	if err = configShellCmd.MarkFlagRequired("interpreter"); err != nil {
 		logs.ProblemMarkFatal("interpreter", ErrMarkRequire, err)
 	}
-	configShellCmd.SilenceErrors = true
+	configShellCmd.SilenceErrors = silence
 }
