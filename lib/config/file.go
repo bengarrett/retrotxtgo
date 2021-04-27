@@ -24,7 +24,7 @@ func InitDefaults() {
 	}
 }
 
-// ConfigMissing prints an error notice and exits.
+// configMissing prints an error notice and exits.
 func configMissing(name, suffix string) {
 	cmd := strings.TrimSuffix(name, suffix) + " create"
 	used := viper.ConfigFileUsed()
@@ -38,7 +38,7 @@ func configMissing(name, suffix string) {
 }
 
 // Path is the absolute path and filename of the configuration file.
-func Path() (dir string) {
+func Path() string {
 	dir, err := gap.NewScope(gap.User, "retrotxt").ConfigPath(namedFile)
 	if err != nil {
 		h := ""
