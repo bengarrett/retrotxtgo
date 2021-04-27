@@ -45,9 +45,9 @@ func ColorHTML(elm string) string {
 func List() (err error) {
 	keys := Keys()
 	w := tabwriter.NewWriter(os.Stdout, 2, 2, 0, ' ', 0)
-	const title = " All the available RetroTxt config file settings "
-	fmt.Fprintln(w, str.Cp(title))
-	fmt.Fprintln(w, strings.Repeat("-", len(title)))
+	const title = "  Available RetroTxt configurations and settings"
+	fmt.Fprintln(w, "\n"+str.Cp(title))
+	fmt.Fprintln(w, str.HR(len(title)))
 	fmt.Fprintf(w, "Alias\t\tName value\t\tHint\n")
 	for i, key := range keys {
 		fmt.Fprintf(w, " %d\t\t%s\t\t%s", i, key, Tip()[key])
@@ -60,13 +60,14 @@ func List() (err error) {
 		}
 		fmt.Fprint(w, "\n")
 	}
+	fmt.Fprintln(w, str.HR(len(title)))
 	fmt.Fprintln(w, "\nEither the Name value or the Alias can be used as the setting name")
 	fmt.Fprintln(w, "\n"+str.Example(" retrotxt config set html.meta.description")+
 		" to change the meta description setting")
 	fmt.Fprintln(w, str.Example(" retrotxt config set 6")+
 		" will also change the meta description setting")
 	fmt.Fprintln(w, "\nMultiple settings are supported")
-	fmt.Fprintln(w, str.Example(" retrotxt config set style.html style.info"))
+	fmt.Fprintln(w, "\n"+str.Example(" retrotxt config set style.html style.info"))
 	fmt.Fprint(w, "\n")
 	return w.Flush()
 }

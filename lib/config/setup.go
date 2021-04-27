@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
-	"strings"
 	"syscall"
 
 	"github.com/spf13/viper"
@@ -19,7 +18,7 @@ func Setup() {
 	keys := Keys()
 	logo()
 	PrintLocation()
-	var width uint = 80
+	var width int = 80
 	watch()
 	for i, key := range keys {
 		if i == 0 {
@@ -28,11 +27,11 @@ func Setup() {
 		h := fmt.Sprintf("  %d/%d. RetroTxt Setup - %s",
 			i+1, len(keys), key)
 		if i == 0 {
-			fmt.Println(hr(width))
+			fmt.Println(str.HRPadded(width))
 		}
 		fmt.Println(h)
 		Update(key, true)
-		fmt.Println(hr(width))
+		fmt.Println(str.HRPadded(width))
 	}
 	fmt.Println(Info(viper.GetString("style.info")))
 }
@@ -43,11 +42,6 @@ func enterKey() string {
 		return "Press ↩ return to skip the question or ⌃ control-c to quit"
 	}
 	return "Press ⏎ enter to skip the question or Ctrl-c to quit"
-}
-
-// HR returns a horizontal rule.
-func hr(width uint) string {
-	return str.Cb(strings.Repeat("-", int(width)))
 }
 
 // Logo prints the RetroTxt ANSI logo.

@@ -141,10 +141,15 @@ func HighlightWriter(w io.Writer, source, lexer, style string, ansi bool) (err e
 	return nil
 }
 
-// HR prints a horizontal ruler or line break.
-func HR(width int) {
+// HR returns a horizontal ruler or line break.
+func HR(width int) string {
 	const horizontalBar = "\u2500"
-	fmt.Printf(" \n%s\n\n", Cb(strings.Repeat(horizontalBar, width)))
+	return fmt.Sprintf(" %s", Cb(strings.Repeat(horizontalBar, width)))
+}
+
+func HRPadded(width int) string {
+	const horizontalBar = "\u2500"
+	return fmt.Sprintf(" \n%s\n", Cb(strings.Repeat(horizontalBar, width)))
 }
 
 // NumberizeKeys uses ANSI to underline and prefix a sequential number in front of each key.
