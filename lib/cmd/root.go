@@ -58,7 +58,7 @@ func Execute() {
 }
 
 func init() {
-	// OnInitialize will not run if there is no provided command.
+	// cobra.OnInitialize will not run if there is no provided command.
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVar(&rootFlag.config, "config", "",
 		"optional config file location")
