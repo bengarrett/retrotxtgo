@@ -91,9 +91,13 @@ func SetConfig(flag string) (err error) {
 					return nil
 				}
 			}
-			return fmt.Errorf("set config: %w\nuse the command, retrotxt config create --config=%s", logs.ErrCfgFile, flag)
+			fmt.Println(logs.Hint(fmt.Sprintf("config create --config=%s", flag), err))
+			os.Exit(1)
 		}
-		// user config file fail
+		// user given config file fail
+		if strings.Contains(err.Error(), "found character that cannot start any token") {
+			return logs.ErrCfg
+		}
 		return err
 	}
 	if flag != "" {

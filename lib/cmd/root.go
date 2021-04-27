@@ -30,7 +30,7 @@ const (
 	verticalBar = 124
 
 	// silence can be set to false to debug cmd/flag feedback from Viper.
-	silence = true
+	silence = false
 )
 
 var rootFlag = rootFlags{}
@@ -44,8 +44,9 @@ using RetroTxt. The operating system agnostic tool that takes retro text
 files and stylises them into a more pleasing, useful format to view and
 copy in a web browser.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// do nothing, but this func must remain
-		// otherwise root command flags are ignored by Cobra
+		// Do nothing other than print the help.
+		// This func must remain otherwise root command flags are ignored by Cobra.
+		printUsage(cmd)
 	},
 }
 
