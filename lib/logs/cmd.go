@@ -49,6 +49,9 @@ func Execute(err error, args ...string) {
 	}
 
 	mark, name := words[wordCnt-1], args[0]
+	if mark == name {
+		name = rt
+	}
 	problem := strings.Join(words[0:2], " ")
 	var c string
 	switch problem {
@@ -71,7 +74,8 @@ func Execute(err error, args ...string) {
 		c = ProblemCmd(mark, ErrFlagNil)
 	case unknownCmd:
 		// retrotxt foo
-		c = Hint("--help", fmt.Errorf("%w: %s", ErrCmdExist, args[0]))
+		mark = words[2]
+		c = Hint("--help", fmt.Errorf("%w: %s", ErrCmdExist, mark))
 	case unknownFlag:
 		// retrotxt --foo
 		mark = words[2]
