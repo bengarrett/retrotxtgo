@@ -27,7 +27,8 @@ func Setup() {
 		h := fmt.Sprintf("  %d/%d. RetroTxt Setup - %s",
 			i+1, len(keys), key)
 		if i == 0 {
-			fmt.Println(str.HRPadded(width))
+			fmt.Println(str.HR(width))
+			fmt.Println("")
 		}
 		fmt.Println(h)
 		Update(key, true)
@@ -41,7 +42,7 @@ func enterKey() string {
 	if runtime.GOOS == "darwin" {
 		return "Press ↩ return to skip the question or ⌃ control-c to quit"
 	}
-	return "Press ⏎ enter to skip the question or Ctrl-c to quit"
+	return "Press ⏎ return to skip the question or Ctrl-c to quit"
 }
 
 // Logo prints the RetroTxt ANSI logo.
@@ -61,7 +62,7 @@ func watch() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		fmt.Printf("\n\nexited setup\n")
+		fmt.Printf("\n\n%s Quit setup\n", str.Info())
 		os.Exit(0)
 	}()
 }

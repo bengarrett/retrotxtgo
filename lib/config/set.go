@@ -29,6 +29,8 @@ type update struct {
 	value interface{}
 }
 
+const skipped = ` ↵ skipped`
+
 // ColorCSS prints colored CSS syntax highlighting.
 func ColorCSS(elm string) string {
 	style := viper.GetString("style.html")
@@ -151,7 +153,7 @@ func updateString(s, name, value string) {
 			fmt.Print(" ", str.Bool(f))
 			fmt.Println()
 		default:
-			fmt.Println()
+			fmt.Println("skipped")
 		}
 	}
 }
@@ -595,6 +597,7 @@ func setEditor(name string, setup bool) {
 		save(name, setup, "")
 		return
 	case "":
+		fmt.Println(skipped)
 		return
 	}
 	if _, err := exec.LookPath(val); err != nil {
@@ -714,9 +717,7 @@ func setShortStrings(name string, setup bool, data ...string) {
 	case "-":
 		val = ""
 	case "":
-		if !setup {
-			fmt.Println(prompt.NoChange)
-		}
+		fmt.Println(skipped)
 		return
 	}
 	save(name, setup, val)
