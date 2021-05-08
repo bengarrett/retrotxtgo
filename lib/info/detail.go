@@ -18,15 +18,15 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/bengarrett/retrotxtgo/lib/filesystem"
+	"github.com/bengarrett/retrotxtgo/lib/humanize"
+	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/sauce"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	gookit "github.com/gookit/color"
 	"github.com/mozillazg/go-slugify"
 	"github.com/zRedShift/mimemagic"
 	"golang.org/x/text/message"
-	"retrotxt.com/retrotxt/lib/filesystem"
-	"retrotxt.com/retrotxt/lib/humanize"
-	"retrotxt.com/retrotxt/lib/logs"
-	"retrotxt.com/retrotxt/lib/sauce"
-	"retrotxt.com/retrotxt/lib/str"
 )
 
 const (

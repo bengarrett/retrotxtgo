@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"retrotxt.com/retrotxt/lib/convert"
+	"github.com/bengarrett/retrotxtgo/lib/convert"
 )
 
 func Example_viewToFlag() {

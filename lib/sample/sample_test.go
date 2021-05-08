@@ -6,9 +6,9 @@ import (
 	"log"
 	"testing"
 
+	"github.com/bengarrett/retrotxtgo/lib/convert"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
-	"retrotxt.com/retrotxt/lib/convert"
 )
 
 func ExampleOpen() {

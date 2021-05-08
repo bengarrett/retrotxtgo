@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/bengarrett/retrotxtgo/lib/config"
+	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"retrotxt.com/retrotxt/lib/config"
-	"retrotxt.com/retrotxt/lib/logs"
-	"retrotxt.com/retrotxt/lib/str"
 )
 
 const bash, zsh = "bash", "zsh"

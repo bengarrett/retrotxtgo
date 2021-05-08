@@ -9,11 +9,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	gap "github.com/muesli/go-app-paths"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
-	"retrotxt.com/retrotxt/lib/logs"
-	"retrotxt.com/retrotxt/lib/str"
 )
 
 // InitDefaults initializes flag and configuration defaults.

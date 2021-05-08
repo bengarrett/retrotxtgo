@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"retrotxt.com/retrotxt/static"
+	"github.com/bengarrett/retrotxtgo/static"
 )
 
 func ExampleWordsEBCDIC() {

@@ -7,10 +7,10 @@ import (
 	"runtime"
 	"syscall"
 
+	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/bengarrett/retrotxtgo/static"
 	"github.com/spf13/viper"
-	"retrotxt.com/retrotxt/lib/logs"
-	"retrotxt.com/retrotxt/lib/str"
-	"retrotxt.com/retrotxt/static"
 )
 
 // Setup walks through all the settings and saves them to the configuration file.

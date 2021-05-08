@@ -7,9 +7,9 @@ import (
 	"html/template"
 	"strings"
 
+	"github.com/bengarrett/retrotxtgo/static"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/japanese"
-	"retrotxt.com/retrotxt/static"
 )
 
 // Font enum.

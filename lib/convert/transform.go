@@ -7,12 +7,12 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/bengarrett/retrotxtgo/lib/filesystem"
+	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/encoding/unicode/utf32"
-	"retrotxt.com/retrotxt/lib/filesystem"
-	"retrotxt.com/retrotxt/lib/logs"
 )
 
 // ANSI transforms legacy encoded ANSI into modern UTF-8 text.

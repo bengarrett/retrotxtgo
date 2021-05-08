@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"retrotxt.com/retrotxt/lib/str"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 )
 
 // Errorf formats and returns the error.

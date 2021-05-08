@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"retrotxt.com/retrotxt/static"
+	"github.com/bengarrett/retrotxtgo/static"
 )
 
 const (

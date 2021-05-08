@@ -8,14 +8,14 @@ import (
 	"os"
 	"strings"
 
+	"github.com/bengarrett/retrotxtgo/lib/config"
+	"github.com/bengarrett/retrotxtgo/lib/filesystem"
+	"github.com/bengarrett/retrotxtgo/lib/info"
+	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/sample"
+	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/bengarrett/retrotxtgo/static"
 	"github.com/spf13/cobra"
-	"retrotxt.com/retrotxt/lib/config"
-	"retrotxt.com/retrotxt/lib/filesystem"
-	"retrotxt.com/retrotxt/lib/info"
-	"retrotxt.com/retrotxt/lib/logs"
-	"retrotxt.com/retrotxt/lib/sample"
-	"retrotxt.com/retrotxt/lib/str"
-	"retrotxt.com/retrotxt/static"
 )
 
 var infoFlag struct {

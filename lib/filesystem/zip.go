@@ -9,9 +9,9 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/bengarrett/retrotxtgo/lib/humanize"
+	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"golang.org/x/text/language"
-	"retrotxt.com/retrotxt/lib/humanize"
-	"retrotxt.com/retrotxt/lib/logs"
 )
 
 // Files to zip.

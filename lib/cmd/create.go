@@ -7,16 +7,16 @@ import (
 	"os"
 	"sort"
 
+	"github.com/bengarrett/retrotxtgo/lib/config"
+	"github.com/bengarrett/retrotxtgo/lib/convert"
+	"github.com/bengarrett/retrotxtgo/lib/create"
+	"github.com/bengarrett/retrotxtgo/lib/filesystem"
+	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/sample"
+	"github.com/bengarrett/retrotxtgo/lib/sauce"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"retrotxt.com/retrotxt/lib/config"
-	"retrotxt.com/retrotxt/lib/convert"
-	"retrotxt.com/retrotxt/lib/create"
-	"retrotxt.com/retrotxt/lib/filesystem"
-	"retrotxt.com/retrotxt/lib/logs"
-	"retrotxt.com/retrotxt/lib/sample"
-	"retrotxt.com/retrotxt/lib/sauce"
-	"retrotxt.com/retrotxt/lib/str"
 )
 
 type createFlags struct {

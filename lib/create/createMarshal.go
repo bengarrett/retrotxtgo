@@ -8,15 +8,15 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/bengarrett/retrotxtgo/lib/filesystem"
+	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/version"
+	"github.com/bengarrett/retrotxtgo/static"
 	gap "github.com/muesli/go-app-paths"
 	"github.com/spf13/viper"
 	"github.com/tdewolff/minify"
 	"github.com/tdewolff/minify/css"
 	"github.com/tdewolff/minify/js"
-	"retrotxt.com/retrotxt/lib/filesystem"
-	"retrotxt.com/retrotxt/lib/logs"
-	"retrotxt.com/retrotxt/lib/version"
-	"retrotxt.com/retrotxt/static"
 )
 
 // Marshal transforms bytes into UTF-8, creates the page meta and template data.

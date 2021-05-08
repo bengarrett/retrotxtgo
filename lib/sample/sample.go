@@ -6,15 +6,15 @@ import (
 	"os"
 	"strings"
 
+	"github.com/bengarrett/retrotxtgo/lib/convert"
+	"github.com/bengarrett/retrotxtgo/lib/create"
+	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/static"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/encoding/unicode/utf32"
-	"retrotxt.com/retrotxt/lib/convert"
-	"retrotxt.com/retrotxt/lib/create"
-	"retrotxt.com/retrotxt/lib/logs"
-	"retrotxt.com/retrotxt/static"
 )
 
 // Flags and configuration values by the user.

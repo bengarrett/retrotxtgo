@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bengarrett/retrotxtgo/lib/humanize"
 	"golang.org/x/text/language"
-	"retrotxt.com/retrotxt/lib/humanize"
 )
 
 var ErrDate = errors.New("parse date to integer conversion")

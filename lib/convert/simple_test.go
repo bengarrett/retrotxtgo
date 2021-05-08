@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"golang.org/x/text/encoding/charmap"
-	"retrotxt.com/retrotxt/lib/filesystem"
 )
 
 const (

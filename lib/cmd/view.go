@@ -6,12 +6,12 @@ import (
 	"os"
 	"unicode/utf8"
 
+	"github.com/bengarrett/retrotxtgo/lib/convert"
+	"github.com/bengarrett/retrotxtgo/lib/filesystem"
+	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/sample"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/spf13/cobra"
-	"retrotxt.com/retrotxt/lib/convert"
-	"retrotxt.com/retrotxt/lib/filesystem"
-	"retrotxt.com/retrotxt/lib/logs"
-	"retrotxt.com/retrotxt/lib/sample"
-	"retrotxt.com/retrotxt/lib/str"
 )
 
 type viewFlags struct {

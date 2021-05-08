@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"retrotxt.com/retrotxt/lib/convert"
-	"retrotxt.com/retrotxt/lib/sample"
+	"github.com/bengarrett/retrotxtgo/lib/convert"
+	"github.com/bengarrett/retrotxtgo/lib/sample"
 )
 
 func Example_staticTextfile() {

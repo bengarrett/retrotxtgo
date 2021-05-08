@@ -13,8 +13,8 @@ import (
 	"strings"
 	"syscall"
 
-	"retrotxt.com/retrotxt/lib/logs"
-	"retrotxt.com/retrotxt/lib/str"
+	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 )
 
 type keys []string

@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"retrotxt.com/retrotxt/lib/filesystem"
-	"retrotxt.com/retrotxt/lib/logs"
-	"retrotxt.com/retrotxt/static"
+	"github.com/bengarrett/retrotxtgo/lib/filesystem"
+	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/static"
 )
 
 func rawData() []byte {

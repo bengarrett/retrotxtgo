@@ -1,4 +1,4 @@
-module retrotxt.com/retrotxt
+module github.com/bengarrett/retrotxtgo
 
 go 1.16
 

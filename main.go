@@ -16,8 +16,8 @@
 package main
 
 import (
-	"retrotxt.com/retrotxt/lib/cmd"
-	v "retrotxt.com/retrotxt/lib/version"
+	"github.com/bengarrett/retrotxtgo/lib/cmd"
+	v "github.com/bengarrett/retrotxtgo/lib/version"
 )
 
 // goreleaser generated ldflags containers.

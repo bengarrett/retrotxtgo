@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"retrotxt.com/retrotxt/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/logs"
 )
 
 type lineBreaks int

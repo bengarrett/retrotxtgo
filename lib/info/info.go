@@ -8,12 +8,12 @@ import (
 	"os"
 	"time"
 
+	"github.com/bengarrett/retrotxtgo/lib/filesystem"
+	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/sauce"
 	"github.com/karrick/godirwalk"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/text/language"
-	"retrotxt.com/retrotxt/lib/filesystem"
-	"retrotxt.com/retrotxt/lib/logs"
-	"retrotxt.com/retrotxt/lib/sauce"
 )
 
 const (

@@ -8,13 +8,13 @@ import (
 	"text/tabwriter"
 	"unicode"
 
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/gookit/color"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/japanese"
 	uni "golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/encoding/unicode/utf32"
-	"retrotxt.com/retrotxt/lib/str"
 )
 
 const width = 67

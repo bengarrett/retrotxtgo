@@ -12,7 +12,7 @@ import (
 	"runtime"
 	"strings"
 
-	"retrotxt.com/retrotxt/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/logs"
 )
 
 const (
