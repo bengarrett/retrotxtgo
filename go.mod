@@ -3,8 +3,7 @@ module github.com/bengarrett/retrotxtgo
 go 1.16
 
 require (
-	github.com/alecthomas/chroma v0.8.2
-	github.com/dlclark/regexp2 v1.4.0 // indirect
+	github.com/alecthomas/chroma v0.9.1
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/gookit/color v1.4.2
 	github.com/karrick/godirwalk v1.16.1
@@ -26,9 +25,9 @@ require (
 	github.com/tdewolff/parse v2.3.4+incompatible // indirect
 	github.com/tdewolff/test v1.0.6 // indirect
 	github.com/zRedShift/mimemagic v1.2.0
-	golang.org/x/net v0.0.0-20210420210106-798c2154c571 // indirect
+	golang.org/x/net v0.0.0-20210508051633-16afe75a6701 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/sys v0.0.0-20210420205809-ac73e9fd8988 // indirect
+	golang.org/x/sys v0.0.0-20210507161434-a76c4d0a0096 // indirect
 	golang.org/x/text v0.3.6
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
