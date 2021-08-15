@@ -21,19 +21,9 @@ const width = 67
 
 // Table prints out all the characters in the named 8-bit character set.
 func Table(name string) (*bytes.Buffer, error) {
-	cp, err := Encoding(name)
+	cp, err := tblEncode(name)
 	if err != nil {
-		return nil, fmt.Errorf("table encoding error: %w", err)
-	}
-	switch cp {
-	case uni.UTF16(uni.BigEndian, uni.UseBOM),
-		uni.UTF16(uni.BigEndian, uni.IgnoreBOM),
-		uni.UTF16(uni.LittleEndian, uni.IgnoreBOM):
-		return nil, ErrUTF16
-	case utf32.UTF32(utf32.BigEndian, utf32.UseBOM),
-		utf32.UTF32(utf32.BigEndian, utf32.IgnoreBOM),
-		utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM):
-		return nil, ErrUTF32
+		return nil, err
 	}
 	h := fmt.Sprintf("%s", cp)
 	if a := encodingAlias(shorten(name)); a == "iso-8859-11" {
@@ -43,8 +33,9 @@ func Table(name string) (*bytes.Buffer, error) {
 	h += charmapAlias(cp)
 	h += charmapStandard(cp)
 	var buf bytes.Buffer
-	w := new(tabwriter.Writer).Init(&buf, 0, 8, 0, '\t', 0)
-	fmt.Fprintln(w, " "+color.OpFuzzy.Sprint(strings.Repeat("\u2015", width)))
+	const tabWidth, horizontalBar = 8, "\u2015"
+	w := new(tabwriter.Writer).Init(&buf, 0, tabWidth, 0, '\t', 0)
+	fmt.Fprintln(w, " "+color.OpFuzzy.Sprint(strings.Repeat(horizontalBar, width)))
 	fmt.Fprintln(w, color.Primary.Sprint(str.Center(width, h)))
 	const start, end, max = 0, 15, 255
 	for i := 0; i < 16; i++ {
@@ -64,6 +55,7 @@ func Table(name string) (*bytes.Buffer, error) {
 	if err != nil {
 		return nil, fmt.Errorf("table convert bytes error: %w", err)
 	}
+	const hex = 16
 	for i, r := range runes {
 		char := character(i, r, cp)
 		switch {
@@ -75,7 +67,7 @@ func Table(name string) (*bytes.Buffer, error) {
 		case i == max:
 			fmt.Fprintf(w, " %s %s\n", char,
 				color.OpFuzzy.Sprint("|"))
-		case math.Mod(float64(i+1), 16) == 0:
+		case math.Mod(float64(i+1), hex) == 0:
 			// every 16th loop
 			row++
 			fmt.Fprintf(w, " %s %s\n %s %s", char,
@@ -92,6 +84,24 @@ func Table(name string) (*bytes.Buffer, error) {
 		return nil, fmt.Errorf("table tab writer failed to flush data: %w", err)
 	}
 	return &buf, nil
+}
+
+func tblEncode(name string) (encoding.Encoding, error) {
+	cp, err := Encoding(name)
+	if err != nil {
+		return nil, fmt.Errorf("table encoding error: %w", err)
+	}
+	switch cp {
+	case uni.UTF16(uni.BigEndian, uni.UseBOM),
+		uni.UTF16(uni.BigEndian, uni.IgnoreBOM),
+		uni.UTF16(uni.LittleEndian, uni.IgnoreBOM):
+		return nil, ErrUTF16
+	case utf32.UTF32(utf32.BigEndian, utf32.UseBOM),
+		utf32.UTF32(utf32.BigEndian, utf32.IgnoreBOM),
+		utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM):
+		return nil, ErrUTF32
+	}
+	return cp, nil
 }
 
 // Character converts rune to an encoded string.

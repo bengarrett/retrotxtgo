@@ -97,6 +97,7 @@ func check(prompts int) {
 // PPort asks for and validates HTTP ports.
 func pport(r io.Reader, validate, setup bool) (port uint) {
 	const reset uint = 0
+	const baseTen = 10
 	input, prompts := "", 0
 	scanner := bufio.NewScanner(r)
 	watch()
@@ -110,7 +111,7 @@ func pport(r io.Reader, validate, setup bool) (port uint) {
 			check(prompts)
 			continue
 		}
-		value, err := strconv.ParseInt(input, 10, 0)
+		value, err := strconv.ParseInt(input, baseTen, 0)
 		if err != nil {
 			fmt.Printf("%s %v\n", str.Bool(false), input)
 			check(prompts)
@@ -292,7 +293,7 @@ func (k keys) validate(key string) (ok bool) {
 // Watch intercepts any Ctrl-C keyboard input
 // and exits to the operating system.
 func watch() {
-	c := make(chan os.Signal)
+	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c

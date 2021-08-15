@@ -197,34 +197,19 @@ func Marshal(filename string, f Format, i, length int) error {
 			return nil
 		})
 		g.Go(func() error {
-			if err := d.ctrls(filename); err != nil {
-				return err
-			}
-			return nil
+			return d.ctrls(filename)
 		})
 		g.Go(func() error {
-			if err := d.width(filename); err != nil {
-				return err
-			}
-			return nil
+			return d.width(filename)
 		})
 		g.Go(func() error {
-			if err := d.lines(filename); err != nil {
-				return err
-			}
-			return nil
+			return d.lines(filename)
 		})
 		g.Go(func() error {
-			if err := d.width(filename); err != nil {
-				return err
-			}
-			return nil
+			return d.width(filename)
 		})
 		g.Go(func() error {
-			if err := d.words(filename); err != nil {
-				return err
-			}
-			return nil
+			return d.words(filename)
 		})
 		if err := g.Wait(); err != nil {
 			return err

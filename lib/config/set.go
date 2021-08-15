@@ -46,7 +46,8 @@ func ColorHTML(elm string) string {
 // List and print all the available configurations.
 func List() (err error) {
 	keys := Keys()
-	w := tabwriter.NewWriter(os.Stdout, 2, 2, 0, ' ', 0)
+	const minWidth, tabWidth = 2, 2
+	w := tabwriter.NewWriter(os.Stdout, minWidth, tabWidth, 0, ' ', 0)
 	const title = "  Available RetroTxt configurations and settings"
 	fmt.Fprintln(w, "\n"+str.Cp(title))
 	fmt.Fprintln(w, str.HR(len(title)))

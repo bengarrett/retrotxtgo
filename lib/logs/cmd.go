@@ -23,7 +23,7 @@ func InvalidChoice(name, value string, choices ...string) {
 }
 
 // Execute is the error handler for command flags and arguments.
-func Execute(err error, args ...string) {
+func Execute(err error, args ...string) { //nolint:gocyclo,funlen
 	const (
 		minWords       = 3
 		rt             = "retrotxt"

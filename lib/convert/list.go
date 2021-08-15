@@ -30,7 +30,8 @@ const latin = "isolatin"
 
 // Encodings returns all the supported legacy text encodings.
 func Encodings() (e []encoding.Encoding) {
-	a := append(charmap.All, japanese.All...)
+	a := charmap.All
+	a = append(a, japanese.All...)
 	a = append(a, unicode.All...)
 	a = append(a, utf32.All...)
 	for _, m := range a {
@@ -51,7 +52,8 @@ func List() *bytes.Buffer {
 		" Supported legacy code pages and character encodings "
 	var buf bytes.Buffer
 	flags := tabwriter.Debug // tabwriter.AlignRight | tabwriter.Debug
-	w := tabwriter.NewWriter(&buf, 0, 0, 2, ' ', flags)
+	const padding = 2
+	w := tabwriter.NewWriter(&buf, 0, 0, padding, ' ', flags)
 	fmt.Fprintln(w, "\n"+str.Cp(title))
 	fmt.Fprintln(w, strings.Repeat("-", len(title)))
 	fmt.Fprintln(w, header)

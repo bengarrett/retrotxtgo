@@ -18,7 +18,7 @@ func Setup() {
 	keys := Keys()
 	logo()
 	PrintLocation()
-	var width int = 80
+	const width = 80
 	watch()
 	for i, key := range keys {
 		if i == 0 {
@@ -58,7 +58,7 @@ func logo() {
 
 // Watch intercepts Ctrl-C key combinations to exit out of the Setup.
 func watch() {
-	c := make(chan os.Signal)
+	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c

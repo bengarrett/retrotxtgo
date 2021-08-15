@@ -1,4 +1,4 @@
-// nolint:golint,gochecknoglobals,stylecheck
+// nolint:golint,gochecknoglobals
 package static
 
 import (

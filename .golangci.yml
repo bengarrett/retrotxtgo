@@ -77,7 +77,7 @@ linters:
     - exhaustive
     - funlen
     - gochecknoglobals
-    - gochecknoinits
+  #  - gochecknoinits
     - goconst
     - gocritic
     - gocyclo
@@ -85,7 +85,6 @@ linters:
     - goerr113
     - gofmt
     - goimports
-    - golint
     - gomnd
     - goprintffuncname
     - gosec
@@ -97,6 +96,7 @@ linters:
     - nakedret
     - noctx
     - nolintlint
+    - revive
     - rowserrcheck
     - staticcheck
     - structcheck

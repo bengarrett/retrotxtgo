@@ -40,7 +40,7 @@ var rootCmd = &cobra.Command{
 	Use:   "retrotxt",
 	Short: "RetroTxt is the tool that turns ANSI, ASCII, NFO text into browser ready HTML",
 	Long: `Turn many pieces of ANSI art, ASCII and NFO texts into HTML5 using RetroTxt.
-It is the platform agnostic tool that takes nostaglic text files and stylises
+It is the platform agnostic tool that takes nostalgic text files and stylises
 them into a more modern, useful format to view or copy in a web browser.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Do nothing other than print the help.

@@ -58,8 +58,8 @@ func examples() *bytes.Buffer {
 	}
 	sort.Strings(keys)
 	var buf bytes.Buffer
-	var flags uint = 0 // tabwriter.AlignRight | tabwriter.Debug
-	w := tabwriter.NewWriter(&buf, 0, 0, 2, ' ', flags)
+	const padding = 2
+	w := tabwriter.NewWriter(&buf, 0, 0, padding, ' ', 0)
 	const title = "\n Packaged example text and ANSI files to test and play with RetroTxt "
 	fmt.Fprintln(w, str.Cp(title))
 	fmt.Fprintln(w, strings.Repeat("-", len(title)))

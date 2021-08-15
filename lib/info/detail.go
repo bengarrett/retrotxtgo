@@ -187,9 +187,7 @@ func (d *Detail) parse(name string, stat os.FileInfo, data ...byte) (err error) 
 
 // Input parses simple statistical data on the file.
 func (d *Detail) input(data int, stat fs.FileInfo) {
-	var standardInput os.FileInfo = nil
-	isFile := (stat != standardInput)
-	if isFile {
+	if stat != nil {
 		b := stat.Size()
 		d.Size.Bytes = b
 		d.Size.Binary = humanize.Binary(b, lang())
@@ -213,19 +211,21 @@ func (d *Detail) input(data int, stat fs.FileInfo) {
 // PrintMarshal returns the marshaled detail data as plain or color text.
 func (d *Detail) printMarshal(color bool) []byte {
 	gookit.Enable = color
+	const padding, lightHorizontalBox = 10, "\u2500"
 	var (
 		buf  bytes.Buffer
 		info = func(t string) string {
 			return str.Cinf(fmt.Sprintf("%s\t", t))
 		}
 		hr = func(l int) string {
-			return fmt.Sprintf("\t%s\n", str.Cb(strings.Repeat("\u2500", l)))
+			return fmt.Sprintf("\t%s\n", str.Cb(strings.Repeat(lightHorizontalBox, l)))
 		}
 		data = d.printMarshalData()
 		w    = new(tabwriter.Writer)
-		l    = len(fmt.Sprintf(" filename%s%s", strings.Repeat(" ", 10), data[0].v))
+		l    = len(fmt.Sprintf(" filename%s%s", strings.Repeat(" ", padding), data[0].v))
 	)
-	w.Init(&buf, 0, 8, 0, '\t', 0)
+	const tabWidth = 8
+	w.Init(&buf, 0, tabWidth, 0, '\t', 0)
 	fmt.Fprint(w, hr(l))
 	for _, x := range data {
 		if !d.marshalDataValid(x.k, x.v) {
