@@ -98,10 +98,10 @@ func Border(text string) *bytes.Buffer {
 
 // Center align text to the width.
 func Center(width int, text string) string {
-	const split = 2
+	const split, space = 2, "\u0020"
 	w := (width - len(text)) / split
 	if w > 0 {
-		return strings.Repeat("\u0020", w) + text
+		return strings.Repeat(space, w) + text
 	}
 	return text
 }
@@ -157,14 +157,15 @@ func NumberizeKeys(keys ...string) string {
 	if len(keys) == 0 {
 		return ""
 	}
+	const nbsp = "\u00A0"
 	var s = make([]string, len(keys))
 	sort.Strings(keys)
 	for i, key := range keys {
 		if i == 0 {
-			s[i] = fmt.Sprintf("  Use %s for\u00a0%s", Example(strconv.Itoa(i)), key)
+			s[i] = fmt.Sprintf("  Use %s for%s%s", Example(strconv.Itoa(i)), nbsp, key)
 			continue
 		}
-		s[i] = fmt.Sprintf("      %s for\u00a0%s", Example(strconv.Itoa(i)), key)
+		s[i] = fmt.Sprintf("      %s for%s%s", Example(strconv.Itoa(i)), nbsp, key)
 	}
 	return strings.Join(s, "\n")
 }

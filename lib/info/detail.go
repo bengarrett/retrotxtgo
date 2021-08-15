@@ -322,7 +322,7 @@ func (d *Detail) linebreaks(r [2]rune) {
 // PrintMarshalData returns the data structure used for print marshaling.
 func (d *Detail) printMarshalData() (data []struct{ k, v string }) {
 	const (
-		noBreakSpace     = "\u00a0"
+		noBreakSpace     = "\u00A0"
 		symbolForNewline = "\u2424"
 	)
 	p := message.NewPrinter(lang())
