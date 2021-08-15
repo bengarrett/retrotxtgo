@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 	"testing"
+
+	"github.com/gookit/color"
 )
 
 func TestPath(t *testing.T) {
@@ -24,6 +26,7 @@ func TestPath(t *testing.T) {
 }
 
 func TestSetConfig(t *testing.T) {
+	color.Enable = false
 	tmpFile, err := ioutil.TempFile(os.TempDir(), "testsetconfig-")
 	if err != nil {
 		log.Fatal("Cannot create the temporary test file", err)

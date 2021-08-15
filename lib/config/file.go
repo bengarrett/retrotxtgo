@@ -92,7 +92,7 @@ func SetConfig(flag string) (err error) {
 				}
 			}
 			fmt.Println(logs.Hint(fmt.Sprintf("config create --config=%s", flag), err))
-			os.Exit(1)
+			return err
 		}
 		// user given config file fail
 		if strings.Contains(err.Error(), "found character that cannot start any token") {
