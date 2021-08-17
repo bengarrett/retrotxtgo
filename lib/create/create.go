@@ -188,7 +188,7 @@ func (l Layout) Pack() string {
 func (args *Args) Create(b *[]byte) (err error) {
 	args.layout, err = layout(args.Layout)
 	if err != nil {
-		return fmt.Errorf("create command layout: %w", err)
+		return fmt.Errorf("create command layout %q: %w", args.Layout, err)
 	}
 
 	switch {

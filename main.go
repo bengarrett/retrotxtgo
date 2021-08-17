@@ -17,25 +17,22 @@ package main
 
 import (
 	"github.com/bengarrett/retrotxtgo/lib/cmd"
-	v "github.com/bengarrett/retrotxtgo/lib/version"
+	"github.com/bengarrett/retrotxtgo/meta"
 )
 
 // goreleaser generated ldflags containers.
-// https://goreleaser.com/environment/#using-the-mainversion
-var version, commit, date, builtBy string
+// https://goreleaser.com/cookbooks/using-main.version
+var (
+	version = "0.0.0"
+	commit  = meta.Placeholder
+	date    = meta.Placeholder
+	builtBy = "go builder"
+)
 
 func main() {
-	if version != "" {
-		v.Release.Version = version
-	}
-	if commit != "" {
-		v.Release.GitHash = commit
-	}
-	if date != "" {
-		v.Release.Date = date
-	}
-	if builtBy != "" {
-		v.Release.BuiltBy = builtBy
-	}
+	meta.App.Version = version
+	meta.App.Commit = commit
+	meta.App.Date = date
+	meta.App.BuiltBy = builtBy
 	cmd.Execute()
 }

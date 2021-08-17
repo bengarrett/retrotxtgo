@@ -10,7 +10,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
-	"github.com/bengarrett/retrotxtgo/lib/version"
+	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/bengarrett/retrotxtgo/static"
 	gap "github.com/muesli/go-app-paths"
 	"github.com/spf13/viper"
@@ -118,7 +118,7 @@ func (args *Args) marshalStandard(p *PageData) PageData {
 	// generate data
 	t := time.Now().UTC()
 	p.BuildDate = t.Format(time.RFC3339)
-	p.BuildVersion = version.Release.Version
+	p.BuildVersion = meta.App.Version
 	return *p
 }
 

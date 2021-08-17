@@ -8,13 +8,18 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 	"strings"
+	"text/tabwriter"
 	"text/template"
+	"time"
 
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/convert"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/bengarrett/retrotxtgo/meta"
+	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -53,6 +58,8 @@ them into a more modern, useful format to view or copy in a web browser.`,
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	rootCmd.SilenceErrors = silence
+	rootCmd.Version = "hehh"
+	rootCmd.SetVersionTemplate(version())
 	if err := rootCmd.Execute(); err != nil {
 		const minArgs = 2
 		if len(os.Args) < minArgs {
@@ -64,10 +71,51 @@ func Execute() {
 	}
 }
 
+func version() string {
+	years := func() string {
+		const year = 2020
+		y, _, _ := time.Now().Date()
+		if y > year {
+			return fmt.Sprintf("%d-%s", year, time.Now().Format("06"))
+		}
+		return fmt.Sprintf("%d", year)
+	}
+	const tabWidth, copyright = 8, "\u00A9"
+	check, newVer := chkRelease()
+	exe, err := self()
+	if err != nil {
+		exe = err.Error()
+	}
+	var b bytes.Buffer
+	w := new(tabwriter.Writer)
+	w.Init(&b, 0, tabWidth, 0, '\t', 0)
+	fmt.Fprintf(w, "RetroTxtGo %s\n", meta.Semantic(meta.App.Version))
+	fmt.Fprintf(w, "%s %s Ben Garrett\n", copyright, years())
+	fmt.Fprintln(w, color.Primary.Sprint("https://github.com/bengarrett/retrotxtgo"))
+	fmt.Fprintf(w, "\n%s\t%s (%s)\n", color.Secondary.Sprint("build:"), meta.App.BuiltBy, meta.App.Date)
+	fmt.Fprintf(w, "%s\t%s\n", color.Secondary.Sprint("go:"), strings.Replace(runtime.Version(), "go", "v", 1))
+	fmt.Fprintf(w, "%s\t%s\n", color.Secondary.Sprint("path:"), exe)
+	if check {
+		fmt.Fprintf(w, "\n%s\n", newRelease(meta.App.Version, newVer))
+	}
+	w.Flush()
+	return b.String()
+}
+
+// Self returns the path to this dupers executable file.
+func self() (string, error) {
+	exe, err := os.Executable()
+	if err != nil {
+		return "", fmt.Errorf("self error: %w", err)
+	}
+	return exe, nil
+}
+
 func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVar(&rootFlag.config, "config", "",
 		"optional config file location")
+	rootCmd.LocalNonPersistentFlags().BoolP("version", "v", false, "")
 }
 
 // initConfig reads in the config file and ENV variables if set.

@@ -11,7 +11,7 @@ import (
 func ExampleZip() {
 	// Create a temporary directory
 	tmpZip := tempFile("retrotxtgo_zip_directory_test")
-	err := os.Mkdir(tmpZip, 0755)
+	err := os.MkdirAll(tmpZip, 0755)
 	if err != nil {
 		log.Fatal(err)
 	}

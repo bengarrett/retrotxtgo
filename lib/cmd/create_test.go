@@ -1,10 +1,15 @@
 package cmd
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/gookit/color"
+)
 
 func Test_serveBytes(t *testing.T) {
-	b := []byte("hello world")
+	color.Enable = false
 	html.Test = true
+	b := []byte("hello world")
 	type args struct {
 		i       int
 		changed bool

@@ -33,26 +33,23 @@ func Test_saveAssets(t *testing.T) {
 	t.Run("comment", func(t *testing.T) {
 		// Create a temporary directory
 		tmpDir := filepath.Join(os.TempDir(), "retrotxt_example_save_assets")
-		if err := os.Mkdir(tmpDir, 0755); err != nil {
-			t.Errorf("saveAssets make temp dir: %w", err)
+		if err := os.MkdirAll(tmpDir, 0755); err != nil {
+			t.Errorf("saveAssets make temp dir: %q: %w", tmpDir, err)
 		}
 		defer os.RemoveAll(tmpDir)
-
 		// Initialize
 		a := Args{}
 		a.Save.Destination = tmpDir
 		a.Test = true
-
 		// Save files
 		b := []byte("hello")
 		if err := a.saveAssets(&b); err != nil {
 			t.Errorf("saveAssets: %w", err)
 		}
-
 		// Count the saved files in the temporary directory
 		files, err := ioutil.ReadDir(tmpDir)
 		if err != nil {
-			t.Errorf("saveAssets read dir: %w", err)
+			t.Errorf("saveAssets read dir: %q: %w", tmpDir, err)
 		}
 		const zero = 0
 
@@ -67,7 +64,7 @@ func Test_zipAssets(t *testing.T) {
 		// Create a temporary directory
 		tmpDir := filepath.Join(os.TempDir(), "retrotxt_example_save_assets")
 		os.RemoveAll(tmpDir)
-		if err := os.Mkdir(tmpDir, 0755); err != nil {
+		if err := os.MkdirAll(tmpDir, 0755); err != nil {
 			t.Errorf("saveAssets make temp dir: %w", err)
 		}
 		defer os.RemoveAll(tmpDir)
@@ -97,7 +94,7 @@ func Test_zipAssets(t *testing.T) {
 	})
 }
 
-func Test_Save(t *testing.T) {
+func TestSave(t *testing.T) {
 	type args struct {
 		data []byte
 		name string
@@ -143,7 +140,7 @@ func Test_Save(t *testing.T) {
 	}
 }
 
-func TestArgs_Stdout(t *testing.T) {
+func TestArgsStdout(t *testing.T) {
 	var (
 		a  = Args{layout: Standard}
 		b  = []byte("")
@@ -168,7 +165,7 @@ func TestArgs_Stdout(t *testing.T) {
 	}
 }
 
-func Test_Keys(t *testing.T) {
+func TestKeys(t *testing.T) {
 	l := Layouts()
 	if got := len(l); got != 4 {
 		t.Errorf("Templates().Keys() = %v, want %v", got, 4)
@@ -178,7 +175,7 @@ func Test_Keys(t *testing.T) {
 	}
 }
 
-func Test_Templates(t *testing.T) {
+func TestTemplates(t *testing.T) {
 	tests := []struct {
 		name string
 		key  string

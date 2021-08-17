@@ -19,7 +19,8 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/prompt"
 	"github.com/bengarrett/retrotxtgo/lib/str"
-	v "github.com/bengarrett/retrotxtgo/lib/version"
+
+	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/spf13/viper"
 )
 
@@ -647,9 +648,10 @@ func setFontEmbed(value, setup bool) {
 
 // SetGenerator previews and prompts the custom RetroTxt generator meta tag.
 func setGenerator(value bool) {
-	name, ver := "html.meta.generator", v.Semantic(v.Release.Version)
+	name, ver := "html.meta.generator",
+		meta.Semantic(meta.App.Version)
 	elm := fmt.Sprintf("<head>\n  <meta name=\"generator\" content=\"RetroTxt v%s, %s\">",
-		ver.String(), v.Release.Date)
+		ver.String(), meta.App.Date)
 	fmt.Println(ColorHTML(elm))
 	p := "Enable the generator element"
 	if value {
