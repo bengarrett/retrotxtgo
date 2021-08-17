@@ -42,9 +42,9 @@ func Info(style string) error {
 			strings.Join(m, ", "), color.Warn.Sprint("To repair"))
 		const tries = 5
 		if len(m) < tries {
-			fmt.Print(str.Example(fmt.Sprintf("retrotxt config set %s\n", strings.Join(m, " "))))
+			fmt.Print(str.Example(fmt.Sprintf("%s config set %s\n", meta.Bin, strings.Join(m, " "))))
 		} else {
-			fmt.Print(str.Example("retrotxt config set setup\n"))
+			fmt.Print(str.Example(fmt.Sprintf("%s config set setup\n", meta.Bin)))
 		}
 	}
 	return nil

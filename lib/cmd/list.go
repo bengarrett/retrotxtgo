@@ -18,7 +18,8 @@ import (
 	"golang.org/x/text/encoding/ianaindex"
 )
 
-const listExample = "  retrotxt list codepages\n  retrotxt list examples\n  retrotxt list table cp437 cp1252 \n  retrotxt list tables"
+var listExample = fmt.Sprintf("  %s list codepages\n  %s list examples\n  %s list table cp437 cp1252 \n  %s list tables",
+	meta.Bin, meta.Bin, meta.Bin, meta.Bin)
 
 var listCmd = &cobra.Command{
 	Use:     "list",
@@ -61,35 +62,43 @@ func examples() *bytes.Buffer {
 	var buf bytes.Buffer
 	const padding = 2
 	w := tabwriter.NewWriter(&buf, 0, 0, padding, ' ', 0)
+	bin := fmt.Sprintf("  %s ", meta.Bin)
 	title := fmt.Sprintf("\n Packaged example text and ANSI files to test and play with %s ", meta.Name)
 	fmt.Fprintln(w, str.Cp(title))
 	fmt.Fprintln(w, strings.Repeat("-", len(title)))
 	for _, k := range keys {
 		fmt.Fprintf(w, "%s\t%s\t\n", k, m[k].Description)
 	}
-	fmt.Fprintln(w, "\nAny of these packaged examples will work with the",
-		str.Example("create")+",", str.Example("info"), "and", str.Example("view"), "commands.")
-	fmt.Fprintln(w, "\nPrint the Windows-1252 English test to the terminal.\n"+str.Example("  retrotxt view 1252"))
-	fmt.Fprintln(w, "\nConvert the Windows-1252 English test to UTF-8 encoding and save it to a file.\n"+
-		str.Example("  retrotxt view 1252 > file.txt"))
-	fmt.Fprintln(w, "\nSave the Windows-1252 English test with its original encoding.\n"+
-		str.Example("  retrotxt view --to=cp1252 1252 > file.txt"))
-	fmt.Fprintln(w, "\nDisplay statistics and information from a piped source.\n"+
-		str.Example(" retrotxt view --to=cp1252 1252 | retrotxt info"))
-	fmt.Fprintln(w, "\nDisplay statistics and information from the Windows-1252 English test.\n"+str.Example("  retrotxt info 1252"))
-	fmt.Fprintln(w, "\nDisplay statistics, information and SAUCE metadata from the SAUCE test.\n"+str.Example("  retrotxt info sauce"))
-	fmt.Fprintln(w, "\nCreate and display a HTML document from the Windows-1252 English test.\n"+str.Example("  retrotxt create 1252"))
-	fmt.Fprintln(w, "\nCreate and save the HTML and assets from the Windows-1252 English test.\n"+str.Example("  retrotxt create 1252 --save"))
-	fmt.Fprintln(w, "\nServe the Windows-1252 English test over a local web server.\n"+str.Example("  retrotxt create 1252 -p0"))
-	fmt.Fprintln(w, "\nMultiple examples used together are supported.")
-	fmt.Fprintln(w, str.Example("  retrotxt view ansi ascii ansi.rgb"))
+	fmt.Fprintf(w, "\nAny of these packaged examples will work with the %s, %s and %s commands.\n",
+		str.Example("create"), str.Example("info"), str.Example("view"))
+	fmt.Fprintf(w, "\nPrint the Windows-1252 English test to the terminal.\n%s\n",
+		str.Example(bin+"view 1252"))
+	fmt.Fprintf(w, "\nConvert the Windows-1252 English test to UTF-8 encoding and save it to a file.\n%s\n",
+		str.Example(bin+"view 1252 > file.txt"))
+	fmt.Fprintf(w, "\nSave the Windows-1252 English test with its original encoding.\n%s\n",
+		str.Example(bin+"view --to=cp1252 1252 > file.txt"))
+	fmt.Fprintf(w, "\nDisplay statistics and information from a piped source.\n%s\n",
+		str.Example(fmt.Sprintf("%sview --to=cp1252 1252 | %s info", bin, meta.Bin)))
+	fmt.Fprintf(w, "\nDisplay statistics and information from the Windows-1252 English test.\n%s\n",
+		str.Example(bin+"info 1252"))
+	fmt.Fprintf(w, "\nDisplay statistics, information and SAUCE metadata from the SAUCE test.\n%s\n",
+		str.Example(bin+"info sauce"))
+	fmt.Fprintf(w, "\nCreate and display a HTML document from the Windows-1252 English test.\n%s\n",
+		str.Example(bin+"create 1252"))
+	fmt.Fprintf(w, "\nCreate and save the HTML and assets from the Windows-1252 English test.\n%s\n",
+		str.Example(bin+"create 1252 --save"))
+	fmt.Fprintf(w, "\nServe the Windows-1252 English test over a local web server.\n%s\n",
+		str.Example(bin+"create 1252 -p0"))
+	fmt.Fprintf(w, "\nMultiple examples used together are supported.\n%s\n",
+		str.Example(bin+"view ansi ascii ansi.rgb"))
 	if err := w.Flush(); err != nil {
 		logs.ProblemFatal(logs.ErrTabFlush, err)
 	}
 	return &buf
 }
 
-const listTableExample = "  retrotxt table cp437\n  retrotxt table cp437 latin1 windows-1252\n  retrotxt table iso-8859-15"
+var listTableExample = fmt.Sprintf("  %s table cp437\n  %s table cp437 latin1 windows-1252\n  %s table iso-8859-15",
+	meta.Bin, meta.Bin, meta.Bin)
 
 var listCmdTable = &cobra.Command{
 	Use:     "table [codepage names or aliases]",

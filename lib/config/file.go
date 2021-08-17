@@ -40,7 +40,7 @@ func configMissing(name, suffix string) {
 
 // Path is the absolute path and filename of the configuration file.
 func Path() string {
-	dir, err := gap.NewScope(gap.User, "retrotxt").ConfigPath(namedFile)
+	dir, err := gap.NewScope(gap.User, meta.Dir).ConfigPath(namedFile)
 	if err != nil {
 		h := ""
 		if h, err = os.UserHomeDir(); err != nil {

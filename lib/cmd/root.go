@@ -42,11 +42,11 @@ var rootFlag = rootFlags{}
 
 // rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
-	Use:   "retrotxt",
+	Use:   meta.Bin,
 	Short: fmt.Sprintf("%s is the tool that turns ANSI, ASCII, NFO text into browser ready HTML", meta.Name),
 	Long: fmt.Sprintf(`Turn many pieces of ANSI art, ASCII and NFO texts into HTML5 using %s.
-	It is the platform agnostic tool that takes nostalgic text files and stylises
-	them into a more modern, useful format to view or copy in a web browser.`, meta.Name),
+It is the platform agnostic tool that takes nostalgic text files and stylises
+them into a more modern, useful format to view or copy in a web browser.`, meta.Name),
 	Run: func(cmd *cobra.Command, args []string) {
 		// Do nothing other than print the help.
 		// This func must remain otherwise root command flags are ignored by Cobra.
@@ -57,6 +57,7 @@ var rootCmd = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
+	rootCmd.CompletionOptions.DisableDefaultCmd = true
 	rootCmd.SilenceErrors = silence
 	rootCmd.Version = meta.Print()
 	rootCmd.SetVersionTemplate(version())
@@ -202,10 +203,11 @@ separate multiple controls with commas
 // flagEncode handles the encode flag.
 func flagEncode(p *string, cc *cobra.Command) {
 	cc.Flags().StringVarP(p, "encode", "e", "",
-		`character encoding used by the filename(s)
+		fmt.Sprintf(`character encoding used by the filename(s)
 this flag is silently ignored if Unicode text is detected
 otherwise the default is used (default CP437)
-see the list of encode values `+str.Example("retrotxt list codepages")+"\n")
+see the list of encode values %s%s`,
+			str.Example(meta.Bin+" list codepages"), "\n"))
 }
 
 // flagRunes handles the swap-chars flag.
@@ -227,7 +229,7 @@ func flagTo(p *string, cc *cobra.Command) {
 	cc.Flags().StringVar(p, "to", "", fmt.Sprintf(`alternative character encoding to print to stdout
 modern terminals and %s use UTF8 encoding
 this flag is unreliable and not recommended
-see the list of usable values %s%s`, meta.Name, str.Example("retrotxt list codepages"), "\n"))
+see the list of usable values %s%s`, meta.Name, str.Example(meta.Bin+" list codepages"), "\n"))
 }
 
 // flagWidth handles the width flag.

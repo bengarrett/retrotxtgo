@@ -25,10 +25,11 @@ type configFlags struct {
 	style   string
 }
 
-var configFlag configFlags
-
-const configExample = `  retrotxt config setup  # to start the setup walkthrough
-retrotxt config set -c # to list all available settings`
+var (
+	configFlag    configFlags
+	configExample = fmt.Sprintf(`  %s config setup  # to start the setup walkthrough
+%s config set -c # to list all available settings`, meta.Bin, meta.Bin)
+)
 
 var configCmd = &cobra.Command{
 	Use:     "config",
@@ -87,7 +88,7 @@ To switch editors either:
   Set one by creating or changing the ` + str.Example("$EDITOR") +
 		` environment variable in your shell configuration.
   Set an editor in the configuration file, ` +
-		str.Example("retrotxt config set --name=editor"),
+		str.Example(fmt.Sprintf("%s config set --name=editor", meta.Bin)),
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := config.Edit(); err != nil {
 			logs.Fatal(err)
@@ -95,8 +96,8 @@ To switch editors either:
 	},
 }
 
-const configInfoExample = `  retrotxt config info   # to list the default setting values
-retrotxt config set -c # to list the settings and help hints`
+var configInfoExample = fmt.Sprintf(`  %s config info   # to list the default setting values
+%s config set -c # to list the settings and help hints`, meta.Bin, meta.Bin)
 
 var configInfoCmd = &cobra.Command{
 	Use:     "info",
@@ -118,7 +119,7 @@ func configInfo() (exit bool) {
 		return true
 	}
 	if configFlag.styles {
-		str.JSONStyles("retrotxt info --style")
+		str.JSONStyles(fmt.Sprintf("%s info --style", meta.Bin))
 		return true
 	}
 	style := viper.GetString("style.info")
@@ -134,8 +135,8 @@ func configInfo() (exit bool) {
 	return false
 }
 
-const configSetExample = `  retrotxt config set html.meta.description # to change the meta description setting
-retrotxt config set style.info style.html # to set the color styles`
+var configSetExample = fmt.Sprintf(`  %s config set html.meta.description # to change the meta description setting
+%s config set style.info style.html # to set the color styles`, meta.Bin, meta.Bin)
 
 var configSetCmd = &cobra.Command{
 	Use:     "set [setting names]",

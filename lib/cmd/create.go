@@ -15,6 +15,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/sample"
 	"github.com/bengarrett/retrotxtgo/lib/sauce"
 	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -45,11 +46,12 @@ var createFlag = createFlags{
 // flags container.
 var html create.Args
 
-const createExample = `  retrotxt create file.txt -t "A text file" -d "Some text goes here"
-  retrotxt create file1.txt file2.asc --save
-  retrotxt create ~{{.}}Downloads{{.}}file.txt --archive
-  retrotxt create file.txt --serve=8080
-  cat file.txt | retrotxt create`
+var createExample = fmt.Sprintf(`  %s create file.txt -t "A text file" -d "Some text goes here"
+  %s create file1.txt file2.asc --save
+  %s create ~{{.}}Downloads{{.}}file.txt --archive
+  %s create file.txt --serve=8080
+  cat file.txt | %s create`,
+	meta.Bin, meta.Bin, meta.Bin, meta.Bin, meta.Bin)
 
 // createCmd represents the create command.
 var createCmd = &cobra.Command{

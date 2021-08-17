@@ -14,6 +14,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/sample"
 	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/bengarrett/retrotxtgo/static"
 	"github.com/spf13/cobra"
 )
@@ -22,7 +23,7 @@ var infoFlag struct {
 	format string
 }
 
-const infoExample = "  retrotxt info text.asc logo.jpg\n  retrotxt info file.txt --format=json"
+var infoExample = fmt.Sprintf("  %s info text.asc logo.jpg\n  %s info file.txt --format=json", meta.Bin, meta.Bin)
 
 // infoCmd represents the info command.
 var infoCmd = &cobra.Command{

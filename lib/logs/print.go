@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/bengarrett/retrotxtgo/meta"
 )
 
 // Errorf formats and returns the error.
@@ -27,7 +28,8 @@ func Hint(s string, err error) string {
 	if s == "" {
 		return Errorf(err)
 	}
-	return fmt.Sprintf("%s\n         run %s", Errorf(err), str.Example("retrotxt "+s))
+	return fmt.Sprintf("%s\n         run %s", Errorf(err),
+		str.Example(fmt.Sprintf("%s %s", meta.Bin, s)))
 }
 
 // ProblemCmd returns the command does not exist.

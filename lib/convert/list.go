@@ -79,13 +79,21 @@ func List() *bytes.Buffer {
 	fmt.Fprintln(w, "\n"+str.Cinf("*")+" EBCDIC data encoding is used on IBM Mainframe OS and is not ASCII compatible.")
 	fmt.Fprintln(w, "\nEither argument, numeric or alias values are valid codepage arguments.")
 	fmt.Fprintln(w, "  These example codepage arguments all match ISO 8859-1.")
-	fmt.Fprintln(w, "  "+str.Example("retrotxt list table ")+str.Cc("iso-8859-1")+str.Cf("  # argument"))
-	fmt.Fprintln(w, "  "+str.Example("retrotxt list table ")+str.Cc("1")+str.Cf("           # numeric"))
-	fmt.Fprintln(w, "  "+str.Example("retrotxt list table ")+str.Cc("latin1")+str.Cf("      # alias"))
-	fmt.Fprintln(w, "\n  IBM Code Page 437 ("+str.Cc("cp437")+") is commonly used on MS-DOS and ANSI art.")
-	fmt.Fprintln(w, "  ISO 8859-1 ("+str.Cc("latin1")+") is found on legacy Unix, Amiga and the early Internet.")
-	fmt.Fprintln(w, "  Windows 1252 ("+str.Cc("cp1252")+") is found on legacy Windows 9x and earlier systems.")
-	fmt.Fprintln(w, "  Macintosh ("+str.Cc("macintosh")+") is found on Mac OS 9 and earlier systems.")
+	cmds := fmt.Sprintf("%s list table ", meta.Bin)
+	fmt.Fprintf(w, "  %s%s  %s\n",
+		str.Example(cmds), str.Cc("iso-8859-1"), str.Cf("# argument"))
+	fmt.Fprintf(w, "  %s%s           %s\n",
+		str.Example(cmds), str.Cc("1"), str.Cf("# numeric"))
+	fmt.Fprintf(w, "  %s%s      %s\n",
+		str.Example(cmds), str.Cc("latin1"), str.Cf("# alias"))
+	fmt.Fprintf(w, "\n  IBM Code Page 437 (%s) is commonly used on MS-DOS and ANSI art.\n",
+		str.Cc("cp437"))
+	fmt.Fprintf(w, "  ISO 8859-1 (%s) is found on legacy Unix, Amiga and the early Internet.\n",
+		str.Cc("latin1"))
+	fmt.Fprintf(w, "  Windows 1252 (%s) is found on legacy Windows 9x and earlier systems.\n",
+		str.Cc("cp1252"))
+	fmt.Fprintf(w, "  Macintosh (%s) is found on Mac OS 9 and earlier systems.\n",
+		str.Cc("macintosh"))
 	fmt.Fprintf(w, "\n%s, PCs and the web today use Unicode UTF-8. It is a subset of ISO 8895-1,\n", meta.Name)
 	fmt.Fprintln(w, "which allows UTF-8 to be backwards compatible both with it and US-ASCII.")
 	if err := w.Flush(); err != nil {

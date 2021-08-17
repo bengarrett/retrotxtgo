@@ -133,7 +133,7 @@ func compare(current, fetched string) bool {
 
 // Home returns the user's home directory determined by the host operating system.
 func home() *gap.Scope {
-	return gap.NewScope(gap.User, "retrotxt")
+	return gap.NewScope(gap.User, meta.Dir)
 }
 
 // newRelease notification box and text.

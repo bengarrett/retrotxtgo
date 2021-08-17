@@ -11,6 +11,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/sample"
 	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/spf13/cobra"
 )
 
@@ -30,9 +31,9 @@ var viewFlag = viewFlags{
 	width:    0,
 }
 
-const viewExample = `  retrotxt view file.txt -e latin1
-  retrotxt view file1.txt file2.txt --encode="iso-8859-1"
-  cat file.txt | retrotxt view`
+var viewExample = fmt.Sprintf(`  %s view file.txt -e latin1
+  %s view file1.txt file2.txt --encode="iso-8859-1"
+  cat file.txt | %s view`, meta.Bin, meta.Bin, meta.Bin)
 
 // viewCmd represents the view command.
 var viewCmd = &cobra.Command{

@@ -19,7 +19,7 @@ func Create(name string, ow bool) (err error) {
 	_, err = os.Stat(name)
 	switch {
 	case !os.IsNotExist(err) && !ow:
-		configDoesExist(cmdPath, "create")
+		configDoesExist(cmdPath(), "create")
 		os.Exit(1)
 	case os.IsNotExist(err):
 		// a missing named file is okay

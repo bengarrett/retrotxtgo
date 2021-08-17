@@ -39,6 +39,10 @@ const (
 	GoBuild = "0.0.0"
 	// Placeholder string when no ldflags are in use.
 	Placeholder = "unset"
+	// Bin is the binary filename of this program.
+	Bin = "retrotxt"
+	// Dir is the sub-directory name used for configuration and temporary paths.
+	Dir = "retrotxt"
 	// Name of this program.
 	Name = "RetroTxtGo"
 	// URL for this program's website.

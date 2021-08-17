@@ -6,6 +6,8 @@ import (
 	"log"
 	"os"
 	"strings"
+
+	"github.com/bengarrett/retrotxtgo/meta"
 )
 
 // InvalidCommand prints a problem highlighting the unsupported command.
@@ -26,7 +28,7 @@ func InvalidChoice(name, value string, choices ...string) {
 func Execute(err error, args ...string) { //nolint:gocyclo,funlen
 	const (
 		minWords       = 3
-		rt             = "retrotxt"
+		rt             = meta.Bin
 		flagChoice     = "invalid option choice"
 		flagRequired   = "required flag(s)"
 		flagSyntax     = "bad flag"

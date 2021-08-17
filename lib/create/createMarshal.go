@@ -188,7 +188,7 @@ func (args *Args) templateCache() (err error) {
 	if l == "" {
 		return fmt.Errorf("template cache %q: %w", args.layout, logs.ErrTmplNil)
 	}
-	args.tmpl, err = gap.NewScope(gap.User, "retrotxt").DataPath(l + ".gohtml")
+	args.tmpl, err = gap.NewScope(gap.User, meta.Dir).DataPath(l + ".gohtml")
 	if err != nil {
 		return fmt.Errorf("template cache path: %q: %w", args.tmpl, err)
 	}

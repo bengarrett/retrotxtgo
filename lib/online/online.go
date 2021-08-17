@@ -8,10 +8,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"github.com/bengarrett/retrotxtgo/meta"
 )
 
 const (
-	userAgent   = "retrotxt version ping"
 	httpTimeout = time.Second * 3
 	// ReleaseAPI GitHub API v3 releases endpoint.
 	// See: https://developer.github.com/v3/repos/releases/
@@ -64,7 +65,7 @@ func Get(url, etag string) (resp *http.Response, body []byte, err error) {
 	if etag != "" {
 		req.Header.Set("If-None-Match", etag)
 	}
-	req.Header.Set("User-Agent", userAgent)
+	req.Header.Set("User-Agent", userAgent())
 	resp, err = client.Do(req)
 	if err != nil {
 		return nil, body, fmt.Errorf("requesting to set the get user-agent header: %w", err)
@@ -90,10 +91,14 @@ func Ping(url string) (ok bool, err error) {
 	if err != nil {
 		return ok, fmt.Errorf("pinging a new request error: %w", err)
 	}
-	req.Header.Set("User-Agent", userAgent)
+	req.Header.Set("User-Agent", userAgent())
 	resp, err := client.Do(req)
 	if err != nil {
 		return ok, fmt.Errorf("requesting to set the ping user-agent header: %w", err)
 	}
 	return (resp.StatusCode >= 200 && resp.StatusCode <= 299), resp.Body.Close()
+}
+
+func userAgent() string {
+	return fmt.Sprintf("%s version ping", meta.Bin)
 }

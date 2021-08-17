@@ -46,33 +46,39 @@ func ColorHTML(elm string) string {
 
 // List and print all the available configurations.
 func List() (err error) {
+	capitalize := func(s string) string {
+		return strings.Title(s[:1]) + s[1:]
+	}
 	keys := Keys()
-	const minWidth, tabWidth = 2, 2
+	const minWidth, tabWidth, tabs = 2, 2, "\t\t\t\t"
 	w := tabwriter.NewWriter(os.Stdout, minWidth, tabWidth, 0, ' ', 0)
+	cmds := fmt.Sprintf(" %s config set ", meta.Bin)
 	title := fmt.Sprintf("  Available %s configurations and settings", meta.Name)
 	fmt.Fprintln(w, "\n"+str.Cp(title))
 	fmt.Fprintln(w, str.HR(len(title)))
+	fmt.Fprintln(w, tabs)
 	fmt.Fprintf(w, "Alias\t\tName value\t\tHint\n")
 	for i, key := range keys {
-		fmt.Fprintf(w, " %d\t\t%s\t\t%s", i, key, Tip()[key])
+		fmt.Fprintln(w, tabs)
+		fmt.Fprintf(w, " %d\t\t%s\t\t%s", i, key, capitalize(Tip()[key]))
 		switch key {
 		case "html.layout":
-			fmt.Fprintf(w, ", choices: %s (suggestion: %s)",
-				str.Cp(strings.Join(create.Layouts(), ", ")), str.Cp("standard"))
+			fmt.Fprintf(w, "\n%schoices: %s (suggestion: %s)",
+				tabs, str.Cp(strings.Join(create.Layouts(), ", ")), str.Cp("standard"))
 		case "serve":
-			fmt.Fprintf(w, ", choices: %s", portInfo())
+			fmt.Fprintf(w, "\n%schoices: %s",
+				tabs, portInfo())
 		}
 		fmt.Fprint(w, "\n")
 	}
+	fmt.Fprintln(w, tabs)
 	fmt.Fprintln(w, str.HR(len(title)))
 	fmt.Fprintln(w, "\nEither the Name value or the Alias can be used as the setting name")
-	fmt.Fprintln(w, "\n"+str.Example(" retrotxt config set html.meta.description")+
-		" to change the meta description setting")
-	fmt.Fprintln(w, str.Example(" retrotxt config set 6")+
-		" will also change the meta description setting")
+	fmt.Fprintf(w, "\n%s to change the meta description setting\n",
+		str.Example(cmds+"html.meta.description"))
+	fmt.Fprintf(w, "%s will also change the meta description setting\n", str.Example(cmds+"6"))
 	fmt.Fprintln(w, "\nMultiple settings are supported")
-	fmt.Fprintln(w, "\n"+str.Example(" retrotxt config set style.html style.info"))
-	fmt.Fprint(w, "\n")
+	fmt.Fprintf(w, "\n%s\n", str.Example(cmds+"style.html style.info"))
 	return w.Flush()
 }
 
@@ -649,7 +655,7 @@ func setFontEmbed(value, setup bool) {
 // SetGenerator previews and prompts the custom program generator meta tag.
 func setGenerator(value bool) {
 	const name = "html.meta.generator"
-	elm := fmt.Sprintf("<head>\n  <meta name=\"generator\" content=\"%s v%s, %s\">",
+	elm := fmt.Sprintf("<head>\n  <meta name=\"generator\" content=\"%s %s, %s\">",
 		meta.Name, meta.Print(), meta.App.Date)
 	fmt.Println(ColorHTML(elm))
 	p := "Enable the generator element"

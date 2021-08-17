@@ -2,8 +2,10 @@ package logs
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
+	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/gookit/color"
 )
 
@@ -22,7 +24,7 @@ func TestHint_String(t *testing.T) {
 	}{
 		{"empty", fields{}, ""},
 		{"text", fields{nil, "hint"}, ""},
-		{"text", fields{ErrTest, "hint"}, "problem: error\n         run retrotxt hint"},
+		{"text", fields{ErrTest, "hint"}, fmt.Sprintf("problem: error\n         run %s hint", meta.Bin)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

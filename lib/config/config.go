@@ -126,13 +126,14 @@ type Settings struct {
 	}
 }
 
-// filemode is posix permission bits for files.
-const filemode os.FileMode = 0660
-
 const (
-	cmdPath   = "retrotxt config"
-	namedFile = "config.yaml"
+	filemode  os.FileMode = 0660
+	namedFile             = "config.yaml"
 )
+
+func cmdPath() string {
+	return fmt.Sprintf("%s config", meta.Bin)
+}
 
 // Formats choices for flags.
 type Formats struct {
