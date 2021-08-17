@@ -29,9 +29,9 @@ I use [Visual Studio Code](https://code.visualstudio.com) with the [Markdown Pre
 
 ## Code
 
-_Retrotxt on Go is written entirely in native Go as a platform-agnostic command-line only tool._
+_RetroTxt on Go is written entirely in native Go as a platform-agnostic command-line only tool._
 
-Retrotxt uses [Go modules](https://blog.golang.org/using-go-modules).
+RetroTxt uses [Go modules](https://blog.golang.org/using-go-modules).
 
 The target Go version is in [`go.mod`](https://github.com/bengarrett/retrotxtgo/blob/master/go.mod).
 

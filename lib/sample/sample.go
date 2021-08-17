@@ -9,6 +9,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/convert"
 	"github.com/bengarrett/retrotxtgo/lib/create"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/bengarrett/retrotxtgo/static"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
@@ -82,8 +83,8 @@ func Map() map[string]Sample {
 		"437.lf":        {dump, VGA, cp437, "text/cp437-lf.txt", "CP-437 all characters test using LF (line feed)"},
 		"865":           {text, VGA, cp865, "text/cp865.txt", "CP-865 and CP-860 Nordic test"},
 		"1252":          {text, VGA, cp1252, "text/cp1252.txt", "Windows-1252 English test"},
-		"ascii":         {text, VGA, cp437, "text/retrotxt.asc", "RetroTxt ASCII logos"},
-		"ansi":          {ansi, VGA, cp437, "text/retrotxt.ans", "RetroTxt 256 color ANSI logo"},
+		"ascii":         {text, VGA, cp437, "text/retrotxt.asc", fmt.Sprintf("%s ASCII logos", meta.Name)},
+		"ansi":          {ansi, VGA, cp437, "text/retrotxt.ans", fmt.Sprintf("%s 256 color ANSI logo", meta.Name)},
 		"ansi.aix":      {ansi, VGA, cp437, "text/ansi-aixterm.ans", "IBM AIX terminal colors"},
 		"ansi.blank":    {ansi, VGA, cp437, "text/ansi-blank.ans", "Empty file test"},
 		"ansi.cp":       {ansi, VGA, cp437, "text/ansi-cp.ans", "ANSI cursor position tests"},

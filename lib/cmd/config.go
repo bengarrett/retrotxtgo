@@ -9,6 +9,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -32,7 +33,7 @@ retrotxt config set -c # to list all available settings`
 var configCmd = &cobra.Command{
 	Use:     "config",
 	Aliases: []string{"cfg"},
-	Short:   "RetroTxt configuration and save settings",
+	Short:   fmt.Sprintf("%s configuration and save settings", meta.Name),
 	Example: exampleCmd(configExample),
 	Run: func(cmd *cobra.Command, args []string) {
 		if !printUsage(cmd, args...) {
@@ -139,7 +140,7 @@ retrotxt config set style.info style.html # to set the color styles`
 var configSetCmd = &cobra.Command{
 	Use:     "set [setting names]",
 	Aliases: []string{"s"},
-	Short:   "Change individual Retrotxt settings",
+	Short:   fmt.Sprintf("Change individual %s settings", meta.Name),
 	Example: exampleCmd(configSetExample),
 	Run: func(cmd *cobra.Command, args []string) {
 		if configSet() {
@@ -165,7 +166,7 @@ func configSet() bool {
 
 var configSetupCmd = &cobra.Command{
 	Use:   "setup",
-	Short: "Setup all the available Retrotxt settings",
+	Short: fmt.Sprintf("Setup all the available %s settings", meta.Name),
 	Run: func(cmd *cobra.Command, args []string) {
 		config.Setup()
 	},

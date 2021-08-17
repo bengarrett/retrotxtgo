@@ -49,7 +49,7 @@ func List() (err error) {
 	keys := Keys()
 	const minWidth, tabWidth = 2, 2
 	w := tabwriter.NewWriter(os.Stdout, minWidth, tabWidth, 0, ' ', 0)
-	const title = "  Available RetroTxt configurations and settings"
+	title := fmt.Sprintf("  Available %s configurations and settings", meta.Name)
 	fmt.Fprintln(w, "\n"+str.Cp(title))
 	fmt.Fprintln(w, str.HR(len(title)))
 	fmt.Fprintf(w, "Alias\t\tName value\t\tHint\n")
@@ -219,7 +219,7 @@ func metaPrompts(u update) {
 		fmt.Println(str.NumberizeKeys(cr[:]...))
 		setIndex(u.name, u.setup, cr[:]...)
 	case "html.meta.retrotxt":
-		setRetrotxt(u.value.(bool))
+		setRetroTxt(u.value.(bool))
 	case "html.title":
 		previewTitle(u.value.(string))
 		fmt.Println(" Choose a new " + Tip()[u.name] + ":")
@@ -603,8 +603,8 @@ func setEditor(name string, setup bool) {
 		return
 	}
 	if _, err := exec.LookPath(val); err != nil {
-		fmt.Printf("%s this editor choice is not accessible by RetroTxt\n%s\n",
-			str.Info(), err.Error())
+		fmt.Printf("%s this editor choice is not accessible by %s\n%s\n",
+			str.Info(), meta.Name, err.Error())
 	}
 	save(name, setup, val)
 }
@@ -646,11 +646,11 @@ func setFontEmbed(value, setup bool) {
 	save(name, setup, val)
 }
 
-// SetGenerator previews and prompts the custom RetroTxt generator meta tag.
+// SetGenerator previews and prompts the custom program generator meta tag.
 func setGenerator(value bool) {
 	const name = "html.meta.generator"
-	elm := fmt.Sprintf("<head>\n  <meta name=\"generator\" content=\"RetroTxt v%s, %s\">",
-		meta.Print(), meta.App.Date)
+	elm := fmt.Sprintf("<head>\n  <meta name=\"generator\" content=\"%s v%s, %s\">",
+		meta.Name, meta.Print(), meta.App.Date)
 	fmt.Println(ColorHTML(elm))
 	p := "Enable the generator element"
 	if value {
@@ -696,8 +696,8 @@ func setPort(name string, setup bool) {
 	save(name, setup, val)
 }
 
-// SetRetrotxt previews and prompts the custom retrotxt meta tag.
-func setRetrotxt(value bool) {
+// setRetroTxt previews and prompts the custom retrotxt meta tag.
+func setRetroTxt(value bool) {
 	name := "html.meta.retrotxt"
 	elm := "<head>\n  <meta name=\"retrotxt\" content=\"encoding: IBM437; linebreak: CRLF; length: 50; width: 80; name: file.txt\">"
 	fmt.Println(ColorHTML(elm))

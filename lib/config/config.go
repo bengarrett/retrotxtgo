@@ -8,6 +8,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/spf13/viper"
 )
 
@@ -57,7 +58,7 @@ func Reset() Defaults {
 		rtx:      true,
 		bot:      "",
 		theme:    "",
-		title:    "RetroTxt",
+		title:    meta.Name,
 		saveDir:  "",
 		serve:    httpPort,
 		stylei:   "dracula",
@@ -78,7 +79,7 @@ func Tip() Hints {
 		author:        "defines the name of the page authors",
 		scheme:        "specifies one or more color schemes with which the page is compatible",
 		desc:          "a short and accurate summary of the content of the page",
-		genr:          "include the RetroTxt version and page generation date?",
+		genr:          fmt.Sprintf("include the %s version and page generation date?", meta.Name),
 		keywords:      "words relevant to the page content",
 		notlate:       "used to declare that the page should not be translated by Google Translate",
 		referr:        "controls the Referer HTTP header attached to requests sent from the page",
@@ -86,7 +87,7 @@ func Tip() Hints {
 		bot:           "behavor that crawlers from Google, Bing and other engines should use with the page",
 		theme:         "indicates a suggested color that user agents should use to customize the display of the page",
 		title:         "page title that is shown in a browser title bar or tab",
-		saveDir:       "directory to store RetroTxt created HTML files",
+		saveDir:       fmt.Sprintf("directory to store %s created HTML files", meta.Name),
 		serve:         "serve files using an internal web server with this port",
 		stylei:        "syntax highlighter for the config info output",
 		styleh:        "syntax highlighter for html previews",
@@ -149,7 +150,7 @@ func Format() Formats {
 	}
 }
 
-// Enabled returns all the Viper keys holding a value that are used by RetroTxt.
+// Enabled returns all the Viper keys holding a value that are used.
 // This will hide all unrecognized manual edits to the configuration file.
 func Enabled() map[string]interface{} {
 	var sets = make(map[string]interface{})

@@ -10,6 +10,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/bengarrett/retrotxtgo/meta"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/htmlindex"
@@ -85,7 +86,7 @@ func List() *bytes.Buffer {
 	fmt.Fprintln(w, "  ISO 8859-1 ("+str.Cc("latin1")+") is found on legacy Unix, Amiga and the early Internet.")
 	fmt.Fprintln(w, "  Windows 1252 ("+str.Cc("cp1252")+") is found on legacy Windows 9x and earlier systems.")
 	fmt.Fprintln(w, "  Macintosh ("+str.Cc("macintosh")+") is found on Mac OS 9 and earlier systems.")
-	fmt.Fprintln(w, "\nRetroTxt, PCs and the web today use Unicode UTF-8. It is a subset of ISO 8895-1,")
+	fmt.Fprintf(w, "\n%s, PCs and the web today use Unicode UTF-8. It is a subset of ISO 8895-1,\n", meta.Name)
 	fmt.Fprintln(w, "which allows UTF-8 to be backwards compatible both with it and US-ASCII.")
 	if err := w.Flush(); err != nil {
 		logs.ProblemFatal(logs.ErrTabFlush, err)

@@ -138,9 +138,8 @@ func home() *gap.Scope {
 
 // newRelease notification box and text.
 func newRelease(old, newest string) *bytes.Buffer {
-	s := fmt.Sprintf("%s\n%s\n%s → %s",
-		"A newer edition of RetroTxt is available!",
-		"Learn more at https://retrotxt.com/go",
-		meta.Semantic(old), newest)
+	s := fmt.Sprintf("%s%s%s\n%s%s\n%s → %s",
+		"A newer edition of ", meta.Name, " is available!",
+		"Learn more at ", meta.URL, meta.Semantic(old), newest)
 	return str.Border(s)
 }

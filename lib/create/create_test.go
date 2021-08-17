@@ -10,6 +10,7 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/spf13/viper"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
@@ -211,7 +212,8 @@ func Test_templateSave(t *testing.T) {
 }
 
 func Test_marshal(t *testing.T) {
-	viper.SetDefault("html.title", "RetroTxt | example")
+	ex := fmt.Sprintf("%s | example", meta.Name)
+	viper.SetDefault("html.title", ex)
 	args := Args{layout: Standard}
 	w := "hello"
 	d := []byte(w)
@@ -220,7 +222,7 @@ func Test_marshal(t *testing.T) {
 		t.Errorf("marshal().PreText = %v, want %v", got, w)
 	}
 	args.layout = Compact
-	w = "RetroTxt | example"
+	w = ex
 	got, _ = args.marshal(&d)
 	if got.PageTitle != w {
 		t.Errorf("marshal().PageTitle = %v, want %v", got, w)

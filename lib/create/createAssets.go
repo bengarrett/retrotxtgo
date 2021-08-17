@@ -22,7 +22,7 @@ const (
 	nameFav  = "favicon.ico"
 )
 
-// saveCSS creates and save the Retrotxt styles CSS file.
+// saveCSS creates and save the styles CSS file.
 func (args *Args) saveCSS(c chan error) {
 	switch args.layout {
 	case Standard:
@@ -47,7 +47,7 @@ func (args *Args) saveCSS(c chan error) {
 	c <- nil
 }
 
-// saveFavIcon read and save the Retrotxt favorite icon to a file.
+// saveFavIcon read and save the favorite icon to a file.
 func (args *Args) saveFavIcon(c chan error) {
 	switch args.layout {
 	case Standard:

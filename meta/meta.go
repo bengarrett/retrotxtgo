@@ -8,14 +8,15 @@ import (
 	"strings"
 )
 
+// Release metadata.
 type Release struct {
-	// Version of RetroTxt.
+	// Version of this program.
 	Version string
 	// GitHub commit checksum.
 	Commit string
 	// Date in the RFC3339 format.
 	Date string
-	// Built by (goreleaser).
+	// Built by name (goreleaser).
 	BuiltBy string
 }
 
@@ -30,10 +31,18 @@ type Version struct {
 var App = Release{} //nolint:gochecknoglobals
 
 const (
-	Alpha       = "α"
-	Beta        = "β"
+	// Alpha Greek character.
+	Alpha = "α"
+	// Beta Greek character.
+	Beta = "β"
+	// GoBuild version when no ldflags are in use.
+	GoBuild = "0.0.0"
+	// Placeholder string when no ldflags are in use.
 	Placeholder = "unset"
-	GoBuild     = "0.0.0"
+	// Name of this program.
+	Name = "RetroTxtGo"
+	// URL for this program's website.
+	URL = "https://retrotxt.com/go"
 )
 
 // Print the release version string.

@@ -36,7 +36,7 @@
     {{- end}} {{if .MetaGenerator}}
     <meta
       name="generator"
-      content="RetroTxt v{{.BuildVersion}}; {{.BuildDate}}"
+      content="{{.BuildName}} v{{.BuildVersion}}; {{.BuildDate}}"
     />
     {{- end}} {{if .ExternalEmbed}}
     <style type="text/css">{{.CSSEmbed}}</style>

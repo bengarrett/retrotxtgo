@@ -9,6 +9,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/bengarrett/retrotxtgo/static"
 	"github.com/spf13/viper"
 )
@@ -24,8 +25,8 @@ func Setup() {
 		if i == 0 {
 			fmt.Printf("\n\n  %s\n\n", str.Cinf(str.Center(int(width), enterKey())))
 		}
-		h := fmt.Sprintf("  %d/%d. RetroTxt Setup - %s",
-			i+1, len(keys), key)
+		h := fmt.Sprintf("  %d/%d. %s Setup - %s",
+			i+1, len(keys), meta.Name, key)
 		if i == 0 {
 			fmt.Println(str.HR(width))
 			fmt.Println("")
@@ -45,7 +46,7 @@ func enterKey() string {
 	return "Press ⏎ return to skip the question or Ctrl-c to quit"
 }
 
-// Logo prints the RetroTxt ANSI logo.
+// Logo prints the ANSI logo.
 func logo() {
 	const clear, reset, n = "\033c", "\033[0m", "text/retrotxt.utf8ans"
 	b, err := static.Text.ReadFile(n)

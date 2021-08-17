@@ -6,12 +6,13 @@ import (
 	"strings"
 
 	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/gookit/color"
 )
 
 // Info prints the content of a configuration file.
 func Info(style string) error {
-	fmt.Println(str.Cp("RetroTxt default configurations when no flags are given."))
+	fmt.Println(str.Cp(fmt.Sprintf("%s default configurations when no flags are given.", meta.Name)))
 	PrintLocation()
 	out, err := json.MarshalIndent(Enabled(), "", " ")
 	if err != nil {

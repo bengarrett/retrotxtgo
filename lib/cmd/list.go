@@ -12,6 +12,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/sample"
 	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/spf13/cobra"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/ianaindex"
@@ -34,7 +35,7 @@ var listCmd = &cobra.Command{
 var listCmdCodepages = &cobra.Command{
 	Use:     "codepages",
 	Aliases: []string{"c", "cp"},
-	Short:   "List available legacy codepages that RetroTxt can convert into UTF-8",
+	Short:   fmt.Sprintf("List available legacy codepages that %s can convert into UTF-8", meta.Name),
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(convert.List())
 	},
@@ -60,7 +61,7 @@ func examples() *bytes.Buffer {
 	var buf bytes.Buffer
 	const padding = 2
 	w := tabwriter.NewWriter(&buf, 0, 0, padding, ' ', 0)
-	const title = "\n Packaged example text and ANSI files to test and play with RetroTxt "
+	title := fmt.Sprintf("\n Packaged example text and ANSI files to test and play with %s ", meta.Name)
 	fmt.Fprintln(w, str.Cp(title))
 	fmt.Fprintln(w, strings.Repeat("-", len(title)))
 	for _, k := range keys {

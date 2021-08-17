@@ -43,10 +43,10 @@ var rootFlag = rootFlags{}
 // rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
 	Use:   "retrotxt",
-	Short: "RetroTxt is the tool that turns ANSI, ASCII, NFO text into browser ready HTML",
-	Long: `Turn many pieces of ANSI art, ASCII and NFO texts into HTML5 using RetroTxt.
-It is the platform agnostic tool that takes nostalgic text files and stylises
-them into a more modern, useful format to view or copy in a web browser.`,
+	Short: fmt.Sprintf("%s is the tool that turns ANSI, ASCII, NFO text into browser ready HTML", meta.Name),
+	Long: fmt.Sprintf(`Turn many pieces of ANSI art, ASCII and NFO texts into HTML5 using %s.
+	It is the platform agnostic tool that takes nostalgic text files and stylises
+	them into a more modern, useful format to view or copy in a web browser.`, meta.Name),
 	Run: func(cmd *cobra.Command, args []string) {
 		// Do nothing other than print the help.
 		// This func must remain otherwise root command flags are ignored by Cobra.
@@ -89,9 +89,9 @@ func version() string {
 	var b bytes.Buffer
 	w := new(tabwriter.Writer)
 	w.Init(&b, 0, tabWidth, 0, '\t', 0)
-	fmt.Fprintf(w, "RetroTxtGo %s\n", meta.Print())
+	fmt.Fprintf(w, "%s %s\n", meta.Name, meta.Print())
 	fmt.Fprintf(w, "%s %s Ben Garrett\n", copyright, years())
-	fmt.Fprintln(w, color.Primary.Sprint("https://github.com/bengarrett/retrotxtgo"))
+	fmt.Fprintln(w, color.Primary.Sprint(meta.URL))
 	fmt.Fprintf(w, "\n%s\t%s (%s)\n", color.Secondary.Sprint("build:"), meta.App.BuiltBy, meta.App.Date)
 	fmt.Fprintf(w, "%s\t%s\n", color.Secondary.Sprint("go:"), strings.Replace(runtime.Version(), "go", "v", 1))
 	fmt.Fprintf(w, "%s\t%s\n", color.Secondary.Sprint("path:"), exe)
@@ -224,10 +224,10 @@ separate multiple values with commas
 
 // flagTo handles the to flag.
 func flagTo(p *string, cc *cobra.Command) {
-	cc.Flags().StringVar(p, "to", "", `alternative character encoding to print to stdout
-modern terminals and RetroTxt use UTF8 encoding
+	cc.Flags().StringVar(p, "to", "", fmt.Sprintf(`alternative character encoding to print to stdout
+modern terminals and %s use UTF8 encoding
 this flag is unreliable and not recommended
-see the list of usable values `+str.Example("retrotxt list codepages")+"\n")
+see the list of usable values %s%s`, meta.Name, str.Example("retrotxt list codepages"), "\n"))
 }
 
 // flagWidth handles the width flag.

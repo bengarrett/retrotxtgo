@@ -11,6 +11,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/bengarrett/retrotxtgo/meta"
 	gap "github.com/muesli/go-app-paths"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
@@ -129,7 +130,7 @@ func UpdateConfig(name string, stdout bool) (err error) {
 		return fmt.Errorf("config update marshal data failed: %w", err)
 	}
 	// prepend comments
-	cmt := []byte("# RetroTxt configuration file")
+	cmt := []byte(fmt.Sprintf("# %s configuration file", meta.Name))
 	out = bytes.Join([][]byte{cmt, out}, []byte("\n"))
 	if err = ioutil.WriteFile(name, out, filemode); err != nil {
 		return fmt.Errorf("config update saving data to the file failed: %q: %w", name, err)
