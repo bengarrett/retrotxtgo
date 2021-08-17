@@ -648,10 +648,9 @@ func setFontEmbed(value, setup bool) {
 
 // SetGenerator previews and prompts the custom RetroTxt generator meta tag.
 func setGenerator(value bool) {
-	name, ver := "html.meta.generator",
-		meta.Semantic(meta.App.Version)
+	const name = "html.meta.generator"
 	elm := fmt.Sprintf("<head>\n  <meta name=\"generator\" content=\"RetroTxt v%s, %s\">",
-		ver.String(), meta.App.Date)
+		meta.Print(), meta.App.Date)
 	fmt.Println(ColorHTML(elm))
 	p := "Enable the generator element"
 	if value {

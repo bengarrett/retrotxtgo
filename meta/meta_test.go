@@ -42,7 +42,7 @@ func TestSemantic(t *testing.T) {
 	}{
 		{"empty", "", false, Version{-1, -1, -1}},
 		{"text", "hello world", false, Version{-1, -1, -1}},
-		{"zero", "0.0.0", true, Version{0, 0, 0}},
+		{"zero", GoBuild, true, Version{0, 0, 0}},
 		{"vzero", "v0.0.0", true, Version{0, 0, 0}},
 		{"ver str", "v1.2.3 (super-release)", true, Version{1, 2, 3}},
 		{"short", "V1", true, Version{1, 0, 0}},

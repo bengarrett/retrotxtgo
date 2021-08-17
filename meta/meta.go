@@ -33,7 +33,13 @@ const (
 	Alpha       = "α"
 	Beta        = "β"
 	Placeholder = "unset"
+	GoBuild     = "0.0.0"
 )
+
+// Print the release version string.
+func Print() string {
+	return Semantic(App.Version).String()
+}
 
 // Semantic breaks down a semantic version string into major, minor and patch integers.
 func Semantic(ver string) Version {

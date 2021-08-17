@@ -23,7 +23,7 @@ import (
 // goreleaser generated ldflags containers.
 // https://goreleaser.com/cookbooks/using-main.version
 var (
-	version = "0.0.0"
+	version = meta.GoBuild
 	commit  = meta.Placeholder
 	date    = meta.Placeholder
 	builtBy = "go builder"

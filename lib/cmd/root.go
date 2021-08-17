@@ -58,7 +58,7 @@ them into a more modern, useful format to view or copy in a web browser.`,
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	rootCmd.SilenceErrors = silence
-	rootCmd.Version = "hehh"
+	rootCmd.Version = meta.Print()
 	rootCmd.SetVersionTemplate(version())
 	if err := rootCmd.Execute(); err != nil {
 		const minArgs = 2
@@ -89,7 +89,7 @@ func version() string {
 	var b bytes.Buffer
 	w := new(tabwriter.Writer)
 	w.Init(&b, 0, tabWidth, 0, '\t', 0)
-	fmt.Fprintf(w, "RetroTxtGo %s\n", meta.Semantic(meta.App.Version))
+	fmt.Fprintf(w, "RetroTxtGo %s\n", meta.Print())
 	fmt.Fprintf(w, "%s %s Ben Garrett\n", copyright, years())
 	fmt.Fprintln(w, color.Primary.Sprint("https://github.com/bengarrett/retrotxtgo"))
 	fmt.Fprintf(w, "\n%s\t%s (%s)\n", color.Secondary.Sprint("build:"), meta.App.BuiltBy, meta.App.Date)
