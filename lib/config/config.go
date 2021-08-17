@@ -138,15 +138,13 @@ func cmdPath() string {
 // Formats choices for flags.
 type Formats struct {
 	Info    [5]string
-	Shell   [3]string
 	Version [4]string
 }
 
-// Format flag choices for info, shell and version commands.
+// Format flag choices for info and version commands.
 func Format() Formats {
 	return Formats{
 		Info:    [5]string{"color", "json", "json.min", "text", "xml"},
-		Shell:   [3]string{"bash", "powershell", "zsh"},
 		Version: [4]string{"color", "json", "json.min", "text"},
 	}
 }

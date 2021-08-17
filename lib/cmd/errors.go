@@ -6,7 +6,6 @@ var (
 	ErrHelp        = errors.New("command help could not display")
 	ErrHideCreate  = errors.New("could not hide the create flag")
 	ErrMarkRequire = errors.New("command flag could not be marked as required")
-	ErrShell       = errors.New("could not generate shell completion")
 	ErrTable       = errors.New("could not display the table")
 	ErrUsage       = errors.New("command usage could not display")
 

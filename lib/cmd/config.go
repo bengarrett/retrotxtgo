@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 
@@ -15,13 +14,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-const bash, zsh = "bash", "zsh"
-
 type configFlags struct {
 	configs bool
 	ow      bool
 	styles  bool
-	shell   string
 	style   string
 }
 
@@ -173,53 +169,10 @@ var configSetupCmd = &cobra.Command{
 	},
 }
 
-const configShellExample = `  retrotxt config shell --interpreter string [flags]
-  retrotxt config shell -i=bash >> ~/.bash_profile
-  retrotxt config shell -i=zsh >> ~/.zshrc`
-
-var configShellCmd = &cobra.Command{
-	Use:     "shell",
-	Aliases: []string{"sh"},
-	Short:   "Apply autocompletion a terminal shell",
-	Example: exampleCmd(configShellExample),
-	Run: func(cmd *cobra.Command, args []string) {
-		const ps = "powershell"
-		var (
-			buf bytes.Buffer
-			err error
-		)
-		lexer, style := "", viper.GetString("style.html")
-		switch configFlag.shell {
-		case bash, "bsh", "b":
-			lexer = bash
-			if err = cmd.GenBashCompletion(&buf); err != nil {
-				logs.ProblemMarkFatal(bash, ErrShell, err)
-			}
-		case ps, "posh", "ps", "p":
-			lexer = ps
-			if err = cmd.GenPowerShellCompletion(&buf); err != nil {
-				logs.ProblemMarkFatal(ps, ErrShell, err)
-			}
-		case zsh, "z":
-			lexer = bash
-			if err = cmd.GenZshCompletion(&buf); err != nil {
-				logs.ProblemMarkFatal(zsh, ErrShell, err)
-			}
-		default:
-			s := config.Format().Shell
-			logs.InvalidChoice("shell", "interpreter", s[0], s[1], s[2])
-		}
-		if err := str.Highlight(buf.String(), lexer, style, true); err != nil {
-			logs.ProblemMarkFatal("shell", logs.ErrHighlight, err)
-		}
-	},
-}
-
 func init() {
 	if str.Term(str.GetEnv("COLORTERM"), str.GetEnv("TERM")) == "none" {
 		color.Enable = false
 	}
-	var err error
 	rootCmd.AddCommand(configCmd)
 	configCmd.AddCommand(configCreateCmd)
 	configCmd.AddCommand(configDeleteCmd)
@@ -227,7 +180,6 @@ func init() {
 	configCmd.AddCommand(configInfoCmd)
 	configCmd.AddCommand(configSetCmd)
 	configCmd.AddCommand(configSetupCmd)
-	configCmd.AddCommand(configShellCmd)
 	// create
 	configCreateCmd.Flags().BoolVarP(&configFlag.ow, "overwrite", "y", false,
 		"overwrite and reset the existing config file")
@@ -241,13 +193,4 @@ func init() {
 	// set
 	configSetCmd.Flags().BoolVarP(&configFlag.configs, "list", "l", false,
 		"list all the available setting names")
-	// shell
-	s := config.Format().Shell
-	configShellCmd.Flags().StringVarP(&configFlag.shell, "interpreter", "i", "",
-		str.Required("user shell to receive retrotxt auto-completions")+
-			str.Options("", true, s[:]...))
-	if err = configShellCmd.MarkFlagRequired("interpreter"); err != nil {
-		logs.ProblemMarkFatal("interpreter", ErrMarkRequire, err)
-	}
-	configShellCmd.SilenceErrors = silence
 }
