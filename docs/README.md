@@ -212,6 +212,7 @@ retrotxt -v
 
 [Go](https://golang.org/doc/install) supports [dozens of architectures and operating systems](https://golang.org/doc/install/source#environment).
 
+Note: The version string returned by `retrotxt -v` will always be `x0.0.0` for user builds.
 
 #### Working on Windows, PowerShell
 
@@ -229,7 +230,8 @@ go tool dist list
 
 # to build retrotxt for windows/386, 32-bit Windows 7 and later
 $Env:GOOS="windows"; $Env:GOARCH="386"; go build -o retrotxt.exe; .\retrotxt.exe -v
-# be sure to remove or revert these environment vars
+
+# be sure to remove or revert these two temporary environment vars
 $Env:GOOS=""; $Env:GOARCH="";
 ```
 

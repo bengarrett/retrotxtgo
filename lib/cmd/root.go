@@ -78,13 +78,17 @@ func version() string {
 		exe = err.Error()
 	}
 	newVer, v := chkRelease()
+	appDate := ""
+	if meta.App.Date != meta.Placeholder {
+		appDate = fmt.Sprintf(" (%s)", meta.App.Date)
+	}
 	var b bytes.Buffer
 	w := new(tabwriter.Writer)
 	w.Init(&b, 0, tabWidth, 0, '\t', 0)
 	fmt.Fprintf(w, "%s %s\n", meta.Name, meta.Print())
 	fmt.Fprintf(w, "%s %s Ben Garrett\n", copyright, years)
 	fmt.Fprintln(w, color.Primary.Sprint(meta.URL))
-	fmt.Fprintf(w, "\n%s\t%s %s (%s)\n", color.Secondary.Sprint("build:"), runtime.Compiler, meta.App.BuiltBy, meta.App.Date)
+	fmt.Fprintf(w, "\n%s\t%s %s%s\n", color.Secondary.Sprint("build:"), runtime.Compiler, meta.App.BuiltBy, appDate)
 	fmt.Fprintf(w, "%s\t%s/%s\n", color.Secondary.Sprint("platform:"), runtime.GOOS, runtime.GOARCH)
 	fmt.Fprintf(w, "%s\t%s\n", color.Secondary.Sprint("go:"), strings.Replace(runtime.Version(), "go", "v", 1))
 	fmt.Fprintf(w, "%s\t%s\n", color.Secondary.Sprint("path:"), exe)

@@ -90,6 +90,8 @@ func (v Version) String() string {
 	}
 	p := ""
 	switch {
+	case v.Major == 0 && v.Minor == 0 && v.Patch == 0:
+		p = "x"
 	case v.Major == 0 && v.Minor == 0:
 		p = Alpha
 	case v.Major == 0:
