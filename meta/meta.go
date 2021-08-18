@@ -47,6 +47,8 @@ const (
 	Name = "RetroTxtGo"
 	// URL for this program's website.
 	URL = "https://retrotxt.com/go"
+	// WebPort is the internal server HTTP port.
+	WebPort uint = 8086
 )
 
 // Print the release version string.

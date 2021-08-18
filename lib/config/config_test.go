@@ -3,6 +3,8 @@ package config
 import (
 	"reflect"
 	"testing"
+
+	"github.com/bengarrett/retrotxtgo/meta"
 )
 
 func TestKeys(t *testing.T) {
@@ -44,7 +46,7 @@ func Test_getUint(t *testing.T) {
 		key  string
 		want uint
 	}{
-		{"uint", "serve", 8080},
+		{"uint", "serve", meta.WebPort},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

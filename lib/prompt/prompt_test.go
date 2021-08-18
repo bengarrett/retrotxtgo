@@ -4,8 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/bengarrett/retrotxtgo/meta"
 )
 
 func ExampleYesNo() {
@@ -41,14 +44,15 @@ func Test_pport(t *testing.T) {
 }
 
 func TestPortValid(t *testing.T) {
+	port := strconv.Itoa(int(meta.WebPort))
 	tests := []struct {
 		name   string
 		port   uint
 		wantOk bool
 	}{
+		{port, meta.WebPort, true},
 		{"0", 0, false},
 		{"80", 80, true},
-		{"8080", 8080, true},
 		{"8888", 8888, true},
 		{"88888", 88888, false},
 	}

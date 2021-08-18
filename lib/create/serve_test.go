@@ -3,6 +3,8 @@ package create
 import (
 	"log"
 	"testing"
+
+	"github.com/bengarrett/retrotxtgo/meta"
 )
 
 func ExampleServe() {
@@ -10,7 +12,7 @@ func ExampleServe() {
 	b := []byte("hello world")
 	args := Args{}
 	args.Layout = "standard"
-	args.Port = 8080
+	args.Port = meta.WebPort
 
 	// The test argument will immediately shutdown
 	// the server after it successfully starts.

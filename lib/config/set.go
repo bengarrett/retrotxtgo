@@ -472,7 +472,7 @@ func portInfo() string {
 	port := ports{
 		max: prompt.PortMax,
 		min: prompt.PortMin,
-		rec: prompt.PortRec,
+		rec: meta.WebPort,
 	}
 	pm, px, pr := strconv.Itoa(int(port.min)), strconv.Itoa(int(port.max)), strconv.Itoa(int(port.rec))
 	return str.Cp(pm) + "-" + str.Cp(px) + fmt.Sprintf(" (suggestion: %s)", str.Cp(pr))

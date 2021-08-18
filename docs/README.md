@@ -34,11 +34,13 @@ retrotxt view ascii-logos.txt
 ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝   ╚═╝
 ```
 
-#### Or save it to a Unicode file that can be viewed with contemporary software.
+#### Or save it to a Unicode file and view it in contemporary software.
 
 ```sh
 retrotxt view ascii-logos.txt > ascii-logos-utf8.txt
 ```
+
+![Windows Notepad viewing ascii-logos-utf8.txt](img/ascii-logos-utf8.txt.png)
 
 #### Also turn the legacy text into a static website with accurate fonts and colors.
 
@@ -77,7 +79,7 @@ retrotxt create --layout=compact ascii-logos.txt
 ```sh
 retrotxt create -p0 ascii-logos.txt
 
-Web server is available at http://localhost:8080
+Web server is available at http://localhost:8086
 Press Ctrl+C to stop
 ```
 

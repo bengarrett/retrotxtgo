@@ -47,11 +47,11 @@ var createFlag = createFlags{
 var html create.Args
 
 var createExample = fmt.Sprintf(`  %s create file.txt -t "A text file" -d "Some text goes here"
-  %s create file1.txt file2.asc --save
-  %s create ~{{.}}Downloads{{.}}file.txt --archive
-  %s create file.txt --serve=8080
-  cat file.txt | %s create`,
-	meta.Bin, meta.Bin, meta.Bin, meta.Bin, meta.Bin)
+%s create file1.txt file2.asc --save
+%s create ~{{.}}Downloads{{.}}file.txt --archive
+%s create file.txt --serve=%d
+cat file.txt | %s create`,
+	meta.Bin, meta.Bin, meta.Bin, meta.Bin, meta.WebPort, meta.Bin)
 
 // createCmd represents the create command.
 var createCmd = &cobra.Command{
@@ -173,7 +173,8 @@ func (c *metaFlag) initBodyFlag(buf bytes.Buffer) bytes.Buffer {
 func (c *metaFlag) initFlags(buf bytes.Buffer) bytes.Buffer {
 	switch {
 	case c.key == "serve":
-		fmt.Fprint(&buf, "\nsupply a 0 value to use the default port, "+str.Example("-p0")+" or "+str.Example("--serve=0"))
+		fmt.Fprintf(&buf, "\ngive a 0 value, %s or %s, to use the default %d port",
+			str.Example("-p0"), str.Example("--serve=0"), meta.WebPort)
 		createCmd.Flags().UintVarP(c.i, c.name, c.short, viper.GetUint(c.key), buf.String())
 	case c.strg != nil:
 		createCmd.Flags().StringVarP(c.strg, c.name, c.short, viper.GetString(c.key), buf.String())

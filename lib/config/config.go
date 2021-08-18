@@ -13,8 +13,6 @@ import (
 )
 
 const (
-	httpPort uint = 8080
-
 	editor   = "editor"
 	fontEmb  = "html.font.embed"
 	fontFam  = "html.font.family"
@@ -60,7 +58,7 @@ func Reset() Defaults {
 		theme:    "",
 		title:    meta.Name,
 		saveDir:  "",
-		serve:    httpPort,
+		serve:    meta.WebPort,
 		stylei:   "dracula",
 		styleh:   "lovelace",
 	}

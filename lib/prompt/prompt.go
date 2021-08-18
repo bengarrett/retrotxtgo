@@ -23,7 +23,6 @@ type keys []string
 const (
 	PortMin  uint = 1 // port 0 is not valid as viper treats it as a null value
 	PortMax  uint = 65535
-	PortRec  uint = 8080
 	NoChange      = "no changes applied"
 )
 
