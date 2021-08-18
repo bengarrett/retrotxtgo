@@ -1,16 +1,14 @@
 ![Build](https://github.com/bengarrett/retrotxtgo/workflows/Go/badge.svg) ![Tests](https://github.com/bengarrett/retrotxtgo/workflows/Go%20tests/badge.svg)
 
-# RetroTxt on Go
+# RetroTxtGo
 
-[RetroTxt](https://github.com/bengarrett/retrotxt) for the terminal.
+### [RetroTxt](https://github.com/bengarrett/retrotxt) for the terminal.
 
-### _α_ - work-in-progress and feature incomplete
-
----
+###### version α, a work-in-progress with an incomplete feature set.
 
 ## About
 
-#### Text files created in the pre-Unicode days often fail to display on modern systems.
+#### Text art and files created without Unicode often fail to display on modern systems.
 
 ```sh
 cat samples/ascii-logos.txt
@@ -23,7 +21,7 @@ cat samples/ascii-logos.txt
 �ͼ  �ͼ������ͼ   �ͼ   �ͼ  �ͼ �����ͼ    �ͼ   �ͼ  �ͼ   �ͼ
 ```
 
-#### Use RetroTxt to print legacy encoded text on modern terminals.
+#### Use RetroTxtGo to print legacy text on modern terminals.
 
 ```sh
 retrotxt view ascii-logos.txt
@@ -36,13 +34,13 @@ retrotxt view ascii-logos.txt
 ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝   ╚═╝
 ```
 
-#### Or save it to a file.
+#### Or save it to a Unicode file that can be viewed with contemporary software.
 
 ```sh
 retrotxt view ascii-logos.txt > ascii-logos-utf8.txt
 ```
 
-#### Then turn the text into a static website with accurate fonts and colors.
+#### Also turn the legacy text into a static website with accurate fonts and colors.
 
 ```sh
 retrotxt create --layout=compact ascii-logos.txt
@@ -68,8 +66,7 @@ retrotxt create --layout=compact ascii-logos.txt
 ██████╔╝█████╗     ██║   ██████╔╝██║   ██║   ██║    ╚███╔╝    ██║
 ██╔══██╗██╔══╝     ██║   ██╔══██╗██║   ██║   ██║    ██╔██╗    ██║
 ██║  ██║███████╗   ██║   ██║  ██║╚██████╔╝   ██║   ██╔╝ ██╗   ██║
-╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝   ╚═╝</pre
-      >
+╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝   ╚═╝</pre>
     </main>
   </body>
 </html>
@@ -129,8 +126,7 @@ retrotxt create --layout=inline --font-embed
 ██████╔╝█████╗     ██║   ██████╔╝██║   ██║   ██║    ╚███╔╝    ██║
 ██╔══██╗██╔══╝     ██║   ██╔══██╗██║   ██║   ██║    ██╔██╗    ██║
 ██║  ██║███████╗   ██║   ██║  ██║╚██████╔╝   ██║   ██╔╝ ██╗   ██║
-╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝   ╚═╝</pre
-      >
+╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝   ╚═╝</pre>
     </main>
   </body>
 </html>
@@ -157,95 +153,104 @@ retrotxt create --layout=inline --font-embed
 ## Install
 
 There are [downloads](https://github.com/bengarrett/retrotxtgo/releases/latest/) available for
-[Windows](https://github.com/bengarrett/retrotxtgo/releases/download/v0.0.30/retrotxt_Windows_Intel.zip),
-[macOS Intel](https://github.com/bengarrett/retrotxtgo/releases/download/v0.0.30/retrotxt_macOS_Intel.tar.gz),
-[macOS M series](https://github.com/bengarrett/retrotxtgo/releases/download/v0.0.30/retrotxt_macOS_M-series.tar.gz),
-[Linux](https://github.com/bengarrett/retrotxtgo/releases/download/v0.0.30/retrotxt_Linux_Intel.tar.gz),
-[FreeBSD](https://github.com/bengarrett/retrotxtgo/releases/download/v0.0.30/retrotxt_FreeBSD_Intel.tar.gz) and the
-[Raspberry Pi](https://github.com/bengarrett/retrotxtgo/releases/download/v0.0.30/retrotxt_Linux_arm32_.tar.gz).
+[Windows](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_Windows_Intel.zip),
+[macOS Intel](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_macOS_Intel.tar.gz),
+[macOS M chips](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_macOS_M-series.tar.gz),
+[Linux](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_Linux_Intel.tar.gz),
+[FreeBSD](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_FreeBSD_Intel.tar.gz) and the
+[Raspberry Pi](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_Linux_arm32_.tar.gz).
 
-Otherwise these package manager methods are available.
+Otherwise these package manager installations are available.
 
 #### Windows [Scoop](https://scoop.sh/)
 
 ```ps
 scoop bucket add retrotxt https://github.com/bengarrett/retrotxtgo.git
 scoop install bengarrett/retrotxt
-retrotxt version
+retrotxt -v
 ```
 
 #### macOS [Homebrew](https://brew.sh/)
 
 ```sh
 brew cask install bengarrett/tap/retrotxt
-retrotxt version
+retrotxt -v
 ```
-
-```sh
-wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_raspberry_pi.deb
-dpkg -i retrotxt_raspberry_pi.deb
-retrotxt version
-```
-
 #### DEB (Debian package)
 
 ```sh
+# Intel
 wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_linux.deb
 dpkg -i retrotxt.deb
-retrotxt version
+retrotxt -v
 ```
+
+```sh
+# Raspberry Pi & ARM
+wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_raspberry_pi.deb
+dpkg -i retrotxt_raspberry_pi.deb
+retrotxt -v
+```
+
 
 #### RPM (Redhat package)
 
 ```sh
 wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_linux.rpm
 rpm -i retrotxt.rpm
-retrotxt version
+retrotxt -v
 ```
 
 #### APK (Alpine package)
 ```sh
 wget https://github.com/bengarrett/myip/releases/latest/download/retrotxt.apk
 apk add retrotxt.apk
-retrotxt version
+retrotxt -v
 ```
 
-### Building RetroTxt for other platforms
+### Building RetroTxtGo for other systems
 
-[Go](https://golang.org/doc/install) supports dozens of architectures and operating systems letting [RetroTxt to be built for most platforms](https://golang.org/doc/install/source#environment).
+[Go](https://golang.org/doc/install) supports [dozens of architectures and operating systems](https://golang.org/doc/install/source#environment).
 
 
-```sh
+#### Working on Windows, PowerShell
+
+```powershell
+# clone and access repo
+git clone https://github.com/bengarrett/retrotxtgo.git; cd retrotxtgo
+
+# build retrotxt for the host system
+go test ./...
+go build -o retrotxt.exe
+.\retrotxt.exe
+
 # to see a list of supported platforms
 go tool dist list
 
-# clone this repo
-git clone https://github.com/bengarrett/retrotxtgo.git
-cd retrotxtgo
+# to build retrotxt for windows/386, 32-bit Windows 7 and later
+$Env:GOOS="windows"; $Env:GOARCH="386"; go build -o .\retrotxt.exe
+```
 
-# access the repo
-cd retrotxtgo
+#### Working on other shells and platforms
+```bash
+# clone and access repo
+git clone https://github.com/bengarrett/retrotxtgo.git && cd retrotxtgo
 
-# target and build the app for the host system
+# build retrotxt for the host system
 go test ./...
-go build
+go build -o retrotxt
+./retrotxt -v
 
-# target and build for Windows 7+ 32-bit
-env GOOS=windows GOARCH=386 go build
-file retrotxt.exe
+# to see a list of supported platforms
+go tool dist list
 
-# target and build for OpenBSD
-env GOOS=openbsd GOARCH=amd64 go build
-file retrotxt
-
-# target and build for Linux on MIPS CPUs
-env GOOS=linux GOARCH=mips64 go build
-file retrotxt
+# build retrotxt for linux/386, 32-bit Linux
+env GOOS=linux GOARCH=386 && go build -o retrotxt && ./retrotxt -v
 ```
 
 ---
 
-### Why Go?
+### Why create RetroTxt using Go?
 
 - Native [Unicode](https://golang.org/pkg/unicode/), UTF 8/16/32 support.
 - [A large selection of native legacy text encodings](golang.org/x/text/encoding/charmap).
