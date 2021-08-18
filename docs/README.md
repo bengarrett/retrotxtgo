@@ -11,7 +11,7 @@
 #### Text art and files created without Unicode often fail to display on modern systems.
 
 ```sh
-cat samples/ascii-logos.txt
+cat ascii-logo.txt
 
 �����ۻ ������ۻ�������ۻ�����ۻ  �����ۻ �������ۻ�ۻ  �ۻ�������ۻ
 ������ۻ������ͼ�������ͼ������ۻ�������ۻ�������ͼ��ۻ��ɼ�������ͼ
@@ -24,7 +24,7 @@ cat samples/ascii-logos.txt
 #### Use RetroTxtGo to print legacy text on modern terminals.
 
 ```sh
-retrotxt view ascii-logos.txt
+retrotxt view ascii-logo.txt
 
 ██████╗ ███████╗████████╗██████╗  ██████╗ ████████╗██╗  ██╗████████╗
 ██╔══██╗██╔════╝╚══██╔══╝██╔══██╗██╔═══██╗╚══██╔══╝╚██╗██╔╝╚══██╔══╝
@@ -37,15 +37,15 @@ retrotxt view ascii-logos.txt
 #### Or save it to a Unicode file and view it in contemporary software.
 
 ```sh
-retrotxt view ascii-logos.txt > ascii-logos-utf8.txt
+retrotxt view ascii-logo.txt > ascii-logo-utf8.txt
 ```
 
-![Windows Notepad viewing ascii-logos-utf8.txt](img/ascii-logos-utf8.txt.png)
+![Windows Notepad viewing ascii-logo-utf8.txt](img/ascii-logo-utf8.txt.png)
 
 #### Also turn the legacy text into a static website with accurate fonts and colors.
 
 ```sh
-retrotxt create --layout=compact ascii-logos.txt
+retrotxt create ascii-logo.txt --layout=compact
 ```
 
 ```html
@@ -54,10 +54,9 @@ retrotxt create --layout=compact ascii-logos.txt
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>RetroTXT | ASCII logos</title>
+    <title>RetroTxtGo</title>
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="font.css" />
-    <script src="scripts.js" defer></script>
   </head>
 
   <body>
@@ -77,31 +76,31 @@ retrotxt create --layout=compact ascii-logos.txt
 #### Easily serve it over its own HTTP server.
 
 ```sh
-retrotxt create -p0 ascii-logos.txt
+retrotxt create ascii-logo.txt -p0
 
 Web server is available at http://localhost:8086
 Press Ctrl+C to stop
 ```
 
-- insert browser screenshot
+![Chrome browser viewing ascii-logo.txt as a website](img/ascii-logo.png)
 
 #### Save the files as a ready to use webpage.
 
 ```sh
-retrotxt create --save ascii-logs.txt
+retrotxt create ascii-logo.txt --save
 
-saving to /home/ben/scripts.js
-saving to /home/ben/styles.css
-saving to /home/ben/index.html
-saving to /home/ben/ibm-vga8.woff2
-saving to /home/ben/font.css
+saving to scripts.js
+saving to styles.css
+saving to index.html
+saving to ibm-vga8.woff2
+saving to font.css
 ...
 ```
 
 #### Inline all the assets into a single HTML file for easier sharing.
 
 ```sh
-retrotxt create --layout=inline --font-embed
+retrotxt create ascii-logo.txt --layout=inline --font-embed --title="ASCII logo"
 ```
 
 ```html
@@ -110,7 +109,7 @@ retrotxt create --layout=inline --font-embed
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>RetroTXT | ASCII logos</title>
+    <title>ASCII logo</title>
     <style type="text/css">
       body{background-color:#000;display:flex;flex-dir...}
       @font-face{font-family:vga;src:url(data:application/font-woff2;charset=utf-8;base64,d09GMgA...)}
