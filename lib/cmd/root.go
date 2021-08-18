@@ -12,7 +12,6 @@ import (
 	"strings"
 	"text/tabwriter"
 	"text/template"
-	"time"
 
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/convert"
@@ -73,32 +72,24 @@ func Execute() {
 }
 
 func version() string {
-	years := func() string {
-		const year = 2020
-		y, _, _ := time.Now().Date()
-		if y > year {
-			return fmt.Sprintf("%d-%s", year, time.Now().Format("06"))
-		}
-		return fmt.Sprintf("%d", year)
-	}
-	const tabWidth, copyright = 8, "\u00A9"
-	check, newVer := chkRelease()
+	const tabWidth, copyright, years = 8, "\u00A9", "2020-21"
 	exe, err := self()
 	if err != nil {
 		exe = err.Error()
 	}
+	newVer, v := chkRelease()
 	var b bytes.Buffer
 	w := new(tabwriter.Writer)
 	w.Init(&b, 0, tabWidth, 0, '\t', 0)
 	fmt.Fprintf(w, "%s %s\n", meta.Name, meta.Print())
-	fmt.Fprintf(w, "%s %s Ben Garrett\n", copyright, years())
+	fmt.Fprintf(w, "%s %s Ben Garrett\n", copyright, years)
 	fmt.Fprintln(w, color.Primary.Sprint(meta.URL))
 	fmt.Fprintf(w, "\n%s\t%s %s (%s)\n", color.Secondary.Sprint("build:"), runtime.Compiler, meta.App.BuiltBy, meta.App.Date)
 	fmt.Fprintf(w, "%s\t%s/%s\n", color.Secondary.Sprint("platform:"), runtime.GOOS, runtime.GOARCH)
 	fmt.Fprintf(w, "%s\t%s\n", color.Secondary.Sprint("go:"), strings.Replace(runtime.Version(), "go", "v", 1))
 	fmt.Fprintf(w, "%s\t%s\n", color.Secondary.Sprint("path:"), exe)
-	if check {
-		fmt.Fprintf(w, "\n%s\n", newRelease(meta.App.Version, newVer))
+	if newVer {
+		fmt.Fprintf(w, "\n%s\n", newRelease(meta.App.Version, v))
 	}
 	w.Flush()
 	return b.String()

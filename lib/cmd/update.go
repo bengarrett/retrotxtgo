@@ -30,32 +30,35 @@ type Cache struct {
 
 const cacheFile = "api.github.cache"
 
-// chkRelease checks to see if the active executable matches the version hosted on GitHub.
-// The ver value contains the result returned from the GitHub releases/latest API.
-func chkRelease() (ok bool, ver string) {
-	etag, ver := cacheGet()
+// chkRelease returns true if the latest GitHub repo tag is newer than the program version.
+// The returned v string is the latest GitHub repo tag.
+func chkRelease() (newRel bool, v string) {
+	if meta.App.Version == meta.GoBuild {
+		return false, ""
+	}
+	etag, v := cacheGet()
 	cache, data, err := online.Endpoint(online.ReleaseAPI, etag)
 	if err != nil {
 		logs.Save(err)
-		return false, ver
+		return false, v
 	}
 	if !cache {
-		ver = fmt.Sprint(data["tag_name"])
-		if ver == "" {
-			return false, ver
+		v = fmt.Sprint(data["tag_name"])
+		if v == "" {
+			return false, v
 		}
 		if fmt.Sprintf("%T", data["etag"]) == "string" {
 			if data["etag"].(string) != "" {
-				if err = cacheSet(data["etag"].(string), ver); err != nil {
+				if err = cacheSet(data["etag"].(string), v); err != nil {
 					logs.Save(err)
 				}
 			}
 		}
 	}
-	if comp := compare(meta.App.Version, ver); comp {
-		return true, ver
+	if comp := compare(meta.App.Version, v); comp {
+		return true, v
 	}
-	return false, ver
+	return false, v
 }
 
 // CacheGet returns the stored Github API ETag HTTP header and release version.
