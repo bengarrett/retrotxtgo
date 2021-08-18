@@ -85,7 +85,7 @@ nfpms:
     vendor: Ben Garrett.
     homepage: https://retrotxt.com/go
     maintainer: Ben Garrett <code.by.ben@gmail.com>
-    description: RetroTxt is the tool that turns ANSI, ASCII, NFO text into in-browser HTML.
+    description: RetroTxtGo is the tool that turns ANSI, ASCII, NFO text into in-browser HTML.
     license: LGPL 3.0
     formats:
       - apk
@@ -105,7 +105,7 @@ scoop:
 
   homepage: https://retrotxt.com/go
 
-  description: RetroTxt is the tool that turns ANSI, ASCII, NFO text into in-browser HTML.
+  description: RetroTxtGo is the tool that turns ANSI, ASCII, NFO text into in-browser HTML.
 
   license: LGPL 3.0
 
