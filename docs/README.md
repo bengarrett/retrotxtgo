@@ -222,16 +222,18 @@ git clone https://github.com/bengarrett/retrotxtgo.git; cd retrotxtgo
 # build retrotxt for the host system
 go test ./...
 go build -o retrotxt.exe
-.\retrotxt.exe
+.\retrotxt.exe -v
 
 # to see a list of supported platforms
 go tool dist list
 
 # to build retrotxt for windows/386, 32-bit Windows 7 and later
-$Env:GOOS="windows"; $Env:GOARCH="386"; go build -o .\retrotxt.exe
+$Env:GOOS="windows"; $Env:GOARCH="386"; go build -o retrotxt.exe; .\retrotxt.exe -v
+# be sure to remove or revert these environment vars
+$Env:GOOS=""; $Env:GOARCH="";
 ```
 
-#### Working on other shells and platforms
+#### Working with other shells and platforms
 ```bash
 # clone and access repo
 git clone https://github.com/bengarrett/retrotxtgo.git && cd retrotxtgo
