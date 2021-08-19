@@ -9,24 +9,29 @@ import (
 	"github.com/gookit/color"
 )
 
-// Alert prints "problem:" in Error color.
+// Alert prints "Problem:\n" using the Error color.
 func Alert() string {
-	s := "problem:"
+	s := "Problem:"
 	e := color.Error.Sprint(s)
 	if e == "" {
-		return s
+		return fmt.Sprintf("%s\n", s)
 	}
-	return e
+	return fmt.Sprintf("%s\n", e)
 }
 
-// Info prints "info:" in Info color.
+// Info prints "Information:\n" using the Info color.
 func Info() string {
-	s := "info:"
+	s := "Information:"
 	e := color.Info.Sprint(s)
 	if e == "" {
-		return s
+		return fmt.Sprintf("%s\n", s)
 	}
-	return e
+	return fmt.Sprintf("%s\n", e)
+}
+
+// Example prints the string using the Debug color.
+func Example(s string) string {
+	return color.Debug.Sprint(s)
 }
 
 // color aliases.
@@ -83,11 +88,6 @@ func Bool(b bool) string {
 // Default appends (default ...) to the usage string.
 func Default(s, def string) string {
 	return fmt.Sprintf("%s (default \"%s\")", s, def)
-}
-
-// Example is intended for the cobra.Command Example fields.
-func Example(s string) string {
-	return color.Info.Sprint(s)
 }
 
 // Options appends options: ... to the usage string.
