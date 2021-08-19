@@ -1,14 +1,20 @@
 // nolint:goconst
 package config
 
+// TODO: check file is open elsewhere before attempting to save/edit.
+// Otherwise the file gets corrupted.
+// Go through setup and ctrl-c at every prompt to fix the ones that corrupt the config file.
+
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -30,7 +36,12 @@ type update struct {
 	value interface{}
 }
 
-const skipped = ` ↵ skipped`
+func skipped() string {
+	if runtime.GOOS == "darwin" {
+		return str.Cs(` ↩ skipped`)
+	}
+	return str.Cs(` ↵ skipped`)
+}
 
 // ColorCSS prints colored CSS syntax highlighting.
 func ColorCSS(elm string) string {
@@ -117,7 +128,7 @@ func Update(name string, setup bool) {
 		return
 	}
 	if !setup {
-		PrintLocation()
+		fmt.Print(Location())
 	}
 	// print the current status of the named setting
 	value := viper.Get(name)
@@ -141,35 +152,33 @@ func Update(name string, setup bool) {
 func updateBool(b bool, name string) {
 	switch b {
 	case true:
-		fmt.Printf("\n  %s is in use\n", str.Cf(name))
+		fmt.Printf("\n  The %s is enabled.\n", str.Cf(name))
 	default:
-		fmt.Printf("\n  %s is currently not in use\n", str.Cf(name))
+		fmt.Printf("\n  The %s is not in use.\n", str.Cf(name))
 	}
 }
 
 func updateString(s, name, value string) {
 	switch s {
 	case "":
-		fmt.Printf("\n  %s is currently not in use\n", str.Cf(name))
+		fmt.Printf("\n  The empty %s setting is not in use.\n", str.Cf(name))
 	default:
-		fmt.Printf("\n  %s is set to %q", str.Cf(name), value)
+		fmt.Printf("\n  The %s is set to %q.", str.Cf(name), value)
 		// print the operating system's ability to use the existing set values
 		// does the 'editor' exist in the env path, does the save-directory exist?
 		switch name {
 		case "editor":
 			_, err := exec.LookPath(value)
 			fmt.Print(" ", str.Bool(err == nil))
-			fmt.Println()
 		case "save-directory":
 			f := false
 			if _, err := os.Stat(value); !os.IsNotExist(err) {
 				f = true
 			}
 			fmt.Print(" ", str.Bool(f))
-			fmt.Println()
 		default:
-			fmt.Println("skipped")
 		}
+		fmt.Println()
 	}
 }
 
@@ -234,9 +243,7 @@ func metaPrompts(u update) {
 	case "html.meta.retrotxt":
 		setRetroTxt(u.value.(bool))
 	case "html.title":
-		previewTitle(u.value.(string))
-		fmt.Println(" Choose a new " + Tip()[u.name] + ":")
-		setString(u.name, u.setup)
+		setTitle(u.name, u.value.(string), u.setup)
 	default:
 		log.Fatalln("config is not configured:", u.name)
 	}
@@ -245,32 +252,37 @@ func metaPrompts(u update) {
 // PromptColorScheme prompts the user for the color scheme setting.
 func promptColorScheme(u update) {
 	previewMeta(u.name, u.value.(string))
-	ccc := create.ColorScheme()
-	var prints = make([]string, len(ccc[:]))
-	copy(prints, ccc[:])
-	fmt.Println(" " + str.UnderlineKeys(prints...) + recommend(""))
-	setShortStrings(u.name, u.setup, ccc[:]...)
+	c := create.ColorScheme()
+	prints := make([]string, len(c[:]))
+	copy(prints, c[:])
+	fmt.Printf("  %s%s",
+		str.UnderlineKeys(prints...), recommend(""))
+	setShortStrings(u.name, u.setup, c[:]...)
 }
 
 // PromptEditor prompts the user for the editor setting.
 func promptEditor(u update) {
-	s := fmt.Sprint("Set a " + Tip()[u.name])
+	s := fmt.Sprint("  Set a " + Tip()[u.name])
 	if u.value.(string) != "" {
 		s = fmt.Sprint(s, " or use a dash [-] to remove")
-	} else if Editor() != "" {
-		fmt.Printf("instead the %s editor will be run\n\n", str.Cp(Editor()))
+	} else if ed := Editor(); ed != "" {
+		s = fmt.Sprintf("  Instead %s found %s and will use this editor.\n\n%s",
+			meta.Name, str.Cp(ed), s)
 	}
-	fmt.Printf(" %s:\n", s)
+	fmt.Printf("%s:\n", s)
 	setEditor(u.name, u.setup)
 }
 
 // PromptLayout prompts the user for the layout setting.
 func promptLayout(u update) {
-	fmt.Println("\n  standard: uses external CSS, JS and woff2 fonts and is the recommended layout for web servers")
-	fmt.Println("  inline:   includes both the CSS and JS as inline elements but is not recommended")
-	fmt.Println("  compact:  is the same as the standard layout but without any <meta> tags")
-	fmt.Println("  none:     no template is used, instead only the generated markup is returned")
-	fmt.Println("\n Choose a " + str.Options(Tip()[u.name], true, create.Layouts()...) + " (suggestion: " + str.Cp("standard") + ")")
+	fmt.Printf("\n%s\n%s\n%s\n%s\n",
+		"  Standard: Recommended, uses external CSS, JS and woff2 fonts and is the recommended layout for online hosting.",
+		"  Inline:   Not recommended as it includes both the CSS and JS as inline elements that cannot be cached.",
+		"  Compact:  The same as the standard layout but without any <meta> tags.",
+		"  None:     No template is used and instead only the generated markup is returned.")
+	fmt.Printf("\n%s%s%s\n",
+		"  Choose a ", str.Options(Tip()[u.name], true, create.Layouts()...),
+		fmt.Sprintf(" (suggestion: %s)", str.Cp("standard")))
 	setShortStrings(u.name, u.setup, create.Layouts()...)
 }
 
@@ -504,19 +516,56 @@ func previewMetaPrint(name, value string) {
 	case len(s) != req, s[0] != "html", s[1] != "meta":
 		return
 	}
-	elm := fmt.Sprintf("<head>\n  <meta name=\"%s\" value=\"%s\">", s[2], value)
-	fmt.Print(ColorHTML(elm))
+	element := func() string {
+		v := value
+		if v == "" {
+			v = metaDefaults(name)
+		}
+		return fmt.Sprintf("%s\n%s\n%s\n",
+			"  <head>",
+			fmt.Sprintf("    <meta name=\"%s\" value=\"%s\">", s[2], v),
+			"  </head>")
+	}
+	fmt.Print(ColorHTML(element()))
 	h := strings.Split(Tip()[name], " ")
-	fmt.Println(str.Cf("\nAbout this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name"))
-	fmt.Printf("\n %s %s.", strings.Title(h[0]), strings.Join(h[1:], " "))
+	fmt.Printf("%s\n  %s %s.",
+		str.Cf("  About this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name"),
+		strings.Title(h[0]), strings.Join(h[1:], " "))
 }
 
-// PreviewTitle previews and prompts for the title element.
-func previewTitle(value string) {
-	elm := fmt.Sprintf("<head>\n  <title>%s</title>", value)
+func metaDefaults(name string) string {
+	switch name {
+	case "html.meta.author":
+		return "Your name goes here"
+	case "html.meta.color-scheme":
+		return "normal"
+	case "html.meta.description":
+		return "A brief description of the page could go here."
+	case "html.meta.keywords":
+		return "some, keywords, go here"
+	case "html.meta.referrer":
+		return "same-origin"
+	case "html.meta.robots":
+		return "noindex"
+	case "html.meta.theme-color":
+		return "ghostwhite"
+	case "html.title":
+		return "A page title foes here."
+	}
+	return ""
+}
+
+// setTitle previews and prompts for the title element.
+func setTitle(name, value string, setup bool) {
+	elm := fmt.Sprintf("%s\n%s\n%s\n",
+		"  <head>",
+		fmt.Sprintf("    <title>%s</title>", value),
+		"  </head>")
 	fmt.Print(ColorHTML(elm))
-	fmt.Println(str.Cf("\nAbout this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title"))
-	fmt.Println()
+	fmt.Printf("%s\n%s\n",
+		str.Cf("  About this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title"),
+		fmt.Sprintf("  Choose a new %s:", Tip()[name]))
+	setString(name, setup)
 }
 
 func previewPrompt(name, value string) string {
@@ -533,9 +582,9 @@ func previewPromptPrint(name, value string) (p string) {
 		}
 	}
 	if value != "" {
-		return fmt.Sprintf(" %s, leave blank to keep as-is or use a dash [-] to remove", p)
+		return fmt.Sprintf("  %s, leave blank to keep as-is or use a dash [-] to remove", p)
 	}
-	return fmt.Sprintf(" %s or leave blank to keep it unused", p)
+	return fmt.Sprintf("  %s or leave blank to keep it unused", p)
 }
 
 func recommendMeta(name, value, suggest string) {
@@ -612,47 +661,51 @@ func setEditor(name string, setup bool) {
 		save(name, setup, "")
 		return
 	case "":
-		fmt.Println(skipped)
+		fmt.Println(skipped())
 		return
 	}
 	if _, err := exec.LookPath(val); err != nil {
-		fmt.Printf("%s this editor choice is not accessible by %s\n%s\n",
-			str.Info(), meta.Name, err.Error())
+		fmt.Printf("%s%s\nThe %s editor is not usable by %s.\n",
+			str.Alert(), errors.Unwrap(err), val, meta.Name)
 	}
 	save(name, setup, val)
 }
 
 // SetFont previews and saves a default font setting.
 func setFont(value string, setup bool) {
-	var (
-		b bytes.Buffer
-		f = create.Family(value)
-	)
+	b, f := bytes.Buffer{}, create.Family(value)
 	if f == create.Automatic {
 		f = create.VGA
 	}
-	fmt.Fprintln(&b, "@font-face {")
-	fmt.Fprintf(&b, "  font-family: \"%s\";\n", f.String())
-	fmt.Fprintf(&b, "  src: url(\"%s.woff2\") format(\"woff2\");\n", f.String())
-	fmt.Fprintln(&b, "  font-display: swap;\n}")
+	fmt.Fprintf(&b, "%s\n%s\n%s\n%s\n",
+		"  @font-face {",
+		fmt.Sprintf("    font-family: \"%s\";", f),
+		fmt.Sprintf("    src: url(\"%s.woff2\") format(\"woff2\");", f),
+		"  }")
 	fmt.Print(ColorCSS(b.String()))
-	fmt.Println(str.Cf("About font families: https://developer.mozilla.org/en-US/docs/Web/CSS/font-family") + "\n")
-	fmt.Println(" Choose a font:")
-	fmt.Println(" " + str.UnderlineKeys(create.Fonts()...) + " (suggestion: " + str.Cp("automatic") + ")")
+	fmt.Printf("%s\n%s\n  %s %s\n",
+		str.Cf("  About font families: https://developer.mozilla.org/en-US/docs/Web/CSS/font-family"),
+		"  Choose a font:",
+		str.UnderlineKeys(create.Fonts()...),
+		fmt.Sprintf("(suggestion: %s)", str.Cp("automatic")))
 	setShortStrings("html.font.family", setup, create.Fonts()...)
 }
 
 // SetFont previews and saves the embed Base64 font setting.
 func setFontEmbed(value, setup bool) {
-	name := "html.font.embed"
-	elm := `@font-face{
-  font-family: vga8;
-  src: url(data:font/woff2;base64,[a large font binary will be embedded here]...) format('woff2');
-}`
-	fmt.Println(ColorCSS(elm))
-	q := "This is not recommended, unless you need self-contained files for distribution.\n Embed the font as base64 data in the HTML"
+	const name = "html.font.embed"
+	elm := fmt.Sprintf("  %s\n  %s\n  %s\n",
+		"@font-face{",
+		"  font-family: vga8;",
+		"  src: url(data:font/woff2;base64,[a large font binary will be embedded here]...) format('woff2');",
+	)
+	fmt.Print(ColorCSS(elm))
+	q := fmt.Sprintf("%s\n%s\n%s",
+		"  The use of this setting not recommended,",
+		"  unless you always want large, self-contained HTML files for distribution.",
+		"  Embed the font as Base64 text within the HTML")
 	if value {
-		q = "Keep the embedded font option"
+		q = "  Keep the embedded font option"
 	}
 	q += recommend("no")
 	val := prompt.YesNo(q, viper.GetBool(name))
@@ -662,14 +715,17 @@ func setFontEmbed(value, setup bool) {
 // SetGenerator previews and prompts the custom program generator meta tag.
 func setGenerator(value bool) {
 	const name = "html.meta.generator"
-	elm := fmt.Sprintf("<head>\n  <meta name=\"generator\" content=\"%s %s, %s\">",
-		meta.Name, meta.Print(), meta.App.Date)
-	fmt.Println(ColorHTML(elm))
+	elm := fmt.Sprintf("  %s\n    %s\n  %s\n",
+		"<head>",
+		fmt.Sprintf("<meta name=\"generator\" content=\"%s %s, %s\">",
+			meta.Name, meta.Print(), meta.App.Date),
+		"</head>")
+	fmt.Print(ColorHTML(elm))
 	p := "Enable the generator element"
 	if value {
 		p = "Keep the generator element"
 	}
-	p += recommend("yes")
+	p = fmt.Sprintf("  %s%s", p, recommend("yes"))
 	viper.Set(name, prompt.YesNo(p, viper.GetBool(name)))
 	if err := UpdateConfig("", false); err != nil {
 		logs.SaveFatal(err)
@@ -689,15 +745,18 @@ func setIndex(name string, setup bool, data ...string) {
 // and Google meta elemenet.
 func setNoTranslate(value, setup bool) {
 	name := "html.meta.notranslate"
-	elm := "<html translate=\"no\">\n  <head>\n    <meta name=\"google\" content=\"notranslate\">"
-	fmt.Println(ColorHTML(elm))
+	elm := fmt.Sprintf("  %s\n    %s\n      %s\n",
+		"<html translate=\"no\">",
+		"<head>",
+		"<meta name=\"google\" content=\"notranslate\">")
+	fmt.Print(ColorHTML(elm))
 	q := "Enable the no translate option"
 	if value {
 		q = "Keep the translate option"
 	}
-	q += recommend("no")
-	val := prompt.YesNo(q, viper.GetBool(name))
-	save(name, setup, val)
+	q = fmt.Sprintf("  %s%s", q, recommend("no"))
+	p := prompt.YesNo(q, viper.GetBool(name))
+	save(name, setup, p)
 }
 
 // SetPort prompts for and saves HTTP port.
@@ -712,13 +771,16 @@ func setPort(name string, setup bool) {
 // setRetroTxt previews and prompts the custom retrotxt meta tag.
 func setRetroTxt(value bool) {
 	name := "html.meta.retrotxt"
-	elm := "<head>\n  <meta name=\"retrotxt\" content=\"encoding: IBM437; linebreak: CRLF; length: 50; width: 80; name: file.txt\">"
-	fmt.Println(ColorHTML(elm))
+	elm := fmt.Sprintf("%s\n%s\n%s\n",
+		"  <head>",
+		"    <meta name=\"retrotxt\" content=\"encoding: IBM437; linebreak: CRLF; length: 50; width: 80; name: file.txt\">",
+		"  </head>")
+	fmt.Print(ColorHTML(elm))
 	p := "Enable the retrotxt element"
 	if value {
 		p = "Keep the retrotxt element"
 	}
-	p += recommend("yes")
+	p = fmt.Sprintf("  %s%s", p, recommend("yes"))
 	viper.Set(name, prompt.YesNo(p, viper.GetBool(name)))
 	if err := UpdateConfig("", false); err != nil {
 		logs.SaveFatal(err)
@@ -732,7 +794,7 @@ func setShortStrings(name string, setup bool, data ...string) {
 	case "-":
 		val = ""
 	case "":
-		fmt.Println(skipped)
+		fmt.Println(skipped())
 		return
 	}
 	save(name, setup, val)

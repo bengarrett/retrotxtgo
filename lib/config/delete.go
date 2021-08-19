@@ -5,30 +5,31 @@ import (
 	"os"
 
 	"github.com/bengarrett/retrotxtgo/lib/prompt"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/spf13/viper"
 )
 
 // Delete a configuration file.
 func Delete() error {
-	cfg := viper.ConfigFileUsed()
-	if cfg == "" {
+	name := viper.ConfigFileUsed()
+	if name == "" {
 		configMissing(cmdPath(), "delete")
 		os.Exit(1)
 	}
-	var err error
-	if _, err = os.Stat(cfg); os.IsNotExist(err) {
+	_, err := os.Stat(name)
+	if os.IsNotExist(err) {
 		configMissing(cmdPath(), "delete")
 		os.Exit(1)
 	}
 	if err != nil {
-		return fmt.Errorf("failed to stat the config file: %w", err)
+		return fmt.Errorf("failed to access the config file: %w", err)
 	}
-	PrintLocation()
-	if prompt.YesNo("Confirm the configuration file deletion", false) {
-		if err := os.Remove(cfg); err != nil {
+	fmt.Printf("%s%s", str.Confirm(), Location())
+	if prompt.YesNo("Delete this file", false) {
+		if err := os.Remove(name); err != nil {
 			return fmt.Errorf("failed to remove config file: %w", err)
 		}
-		fmt.Println("The config is gone")
+		fmt.Println("File is deleted")
 	}
 	return nil
 }

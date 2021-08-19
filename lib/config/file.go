@@ -51,10 +51,10 @@ func Path() string {
 	return dir
 }
 
-// PrintLocation prints the location of the current configuration file.
-func PrintLocation() {
-	s := str.Cb(fmt.Sprintf("Config file: %s",
-		viper.ConfigFileUsed()))
+// Location returns the absolute path of the current configuration file
+// and the status of any missing settings.
+func Location() string {
+	s := fmt.Sprintf("Config file: %s", str.Path(viper.ConfigFileUsed()))
 	if diff := len(Missing()); diff > 0 {
 		if diff == 1 {
 			s += str.Cb(" (1 setting is missing)")
@@ -62,7 +62,7 @@ func PrintLocation() {
 			s += str.Cb(fmt.Sprintf(" (%d settings are missing)", diff))
 		}
 	}
-	fmt.Println(s)
+	return fmt.Sprintln(s)
 }
 
 // SetConfig reads and loads a configuration file.
@@ -110,7 +110,7 @@ func SetConfig(flag string) (err error) {
 			// except when the config command is in use
 			return nil
 		}
-		PrintLocation()
+		fmt.Print(Location())
 	}
 	// otherwise settings are loaded from default config
 	return nil

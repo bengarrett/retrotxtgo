@@ -6,12 +6,14 @@ import (
 	"os/exec"
 	"runtime"
 
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/spf13/viper"
 )
 
 // Edit a configuration file.
 func Edit() error {
-	PrintLocation()
+	fmt.Printf("%s%s",
+		str.Info(), Location())
 	file := viper.ConfigFileUsed()
 	if file == "" {
 		configMissing(cmdPath(), "edit")

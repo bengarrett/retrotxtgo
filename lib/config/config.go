@@ -85,7 +85,7 @@ func Tip() Hints {
 		bot:           "behavor that crawlers from Google, Bing and other engines should use with the page",
 		theme:         "indicates a suggested color that user agents should use to customize the display of the page",
 		title:         "page title that is shown in a browser title bar or tab",
-		saveDir:       fmt.Sprintf("directory to store %s created HTML files", meta.Name),
+		saveDir:       fmt.Sprintf("directory to store HTML assets created by %s", meta.Name),
 		serve:         "serve files using an internal web server with this port",
 		stylei:        "syntax highlighter for the config info output",
 		styleh:        "syntax highlighter for html previews",

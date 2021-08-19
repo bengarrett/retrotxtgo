@@ -20,7 +20,7 @@ func Test_configInfo(t *testing.T) {
 	}
 }
 
-func Test_configSet(t *testing.T) {
+func Test_configListAll(t *testing.T) {
 	tests := []struct {
 		name string
 		flag bool
@@ -32,8 +32,8 @@ func Test_configSet(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			configFlag.configs = tt.flag
-			if got := configSet(); got != tt.want {
-				t.Errorf("configSet() = %v, want %v", got, tt.want)
+			if got := configListAll(); got != tt.want {
+				t.Errorf("configListAll() = %v, want %v", got, tt.want)
 			}
 		})
 	}

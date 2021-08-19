@@ -19,6 +19,20 @@ func Alert() string {
 	return fmt.Sprintf("%s\n", e)
 }
 
+func Confirm() string {
+	s := "Confirm:"
+	e := color.Question.Sprint(s)
+	if e == "" {
+		return fmt.Sprintf("%s\n", s)
+	}
+	return fmt.Sprintf("%s\n", e)
+}
+
+// Example prints the string using the Debug color.
+func Example(s string) string {
+	return color.Debug.Sprint(s)
+}
+
 // Info prints "Information:\n" using the Info color.
 func Info() string {
 	s := "Information:"
@@ -29,9 +43,8 @@ func Info() string {
 	return fmt.Sprintf("%s\n", e)
 }
 
-// Example prints the string using the Debug color.
-func Example(s string) string {
-	return color.Debug.Sprint(s)
+func Path(name string) string {
+	return color.Secondary.Sprint(name)
 }
 
 // color aliases.
@@ -102,7 +115,7 @@ func Options(s string, shorthand bool, opts ...string) (usage string) {
 	} else {
 		keys = strings.Join(opts, ", ")
 	}
-	return fmt.Sprintf("%s\n options: %s", s, color.Info.Sprint(keys))
+	return fmt.Sprintf("%s.\n  options: %s", s, color.Info.Sprint(keys))
 }
 
 // Required appends (required) to the usage string.

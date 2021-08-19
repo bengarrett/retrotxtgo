@@ -44,32 +44,35 @@ var configCreateCmd = &cobra.Command{
 	Use:     "create",
 	Aliases: []string{"c"},
 	Short:   "Create or reset the config file",
+	Long:    fmt.Sprintf("Create or reset the %s configuration file.", meta.Name),
 	Run: func(cmd *cobra.Command, args []string) {
-		if configCreate() {
+		if err := config.New(configFlag.ow); err != nil {
+			logs.Problemf(logs.ErrCfgCreate, err)
 			os.Exit(1)
 		}
 	},
-}
-
-func configCreate() bool {
-	if err := config.Create(viper.ConfigFileUsed(), configFlag.ow); err != nil {
-		logs.Problemf(logs.ErrCfgCreate, err)
-		return true
-	}
-	fmt.Println("New config file:", viper.ConfigFileUsed())
-	return false
 }
 
 var configDeleteCmd = &cobra.Command{
 	Use:     "delete",
 	Aliases: []string{"d", "del", "rm"},
 	Short:   "Remove the config file",
+	Long:    fmt.Sprintf("Remove the %s configuration file.", meta.Name),
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := config.Delete(); err != nil {
 			logs.Fatal(err)
 		}
 	},
 }
+
+var configEditLong = fmt.Sprintf("%s\n\n%s\n%s\n%s\n%s\n",
+	fmt.Sprintf("Edit the %s configuration file.", meta.Name),
+	"To change the editor program, either:",
+	fmt.Sprintf("  1. Configure one by creating a %s shell environment variable.",
+		str.Example("$EDITOR")),
+	"  2. Set an editor in the configuration file:",
+	str.Example(fmt.Sprintf("     %s config set --name=editor", meta.Bin)),
+)
 
 // Note: Previously I inserted the results of config.Editor() into
 // the Short and Long fields. This will cause a logic error because
@@ -79,13 +82,7 @@ var configEditCmd = &cobra.Command{
 	Use:     "edit",
 	Aliases: []string{"e"},
 	Short:   "Edit the config file\n",
-	Long: `Edit the config file
-
-To switch editors either:
-  Set one by creating or changing the ` + str.Example("$EDITOR") +
-		` environment variable in your shell configuration.
-  Set an editor in the configuration file, ` +
-		str.Example(fmt.Sprintf("%s config set --name=editor", meta.Bin)),
+	Long:    configEditLong,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := config.Edit(); err != nil {
 			logs.Fatal(err)
@@ -93,17 +90,18 @@ To switch editors either:
 	},
 }
 
-var configInfoExample = fmt.Sprintf(`  %s config info   # to list the default setting values
-%s config set -c # to list the settings and help hints`, meta.Bin, meta.Bin)
+var configInfoExample = fmt.Sprintf(`  %s config info   # List the default setting values
+%s config set -c # List the settings and help hints`, meta.Bin, meta.Bin)
 
 var configInfoCmd = &cobra.Command{
 	Use:     "info",
 	Aliases: []string{"i"},
 	Example: exampleCmd(configInfoExample),
 	Short:   "List all the settings in use",
+	Long:    fmt.Sprintf("List all the %s settings in use.", meta.Name),
 	Run: func(cmd *cobra.Command, args []string) {
 		if configInfo() {
-			os.Exit(0)
+			return
 		}
 	},
 }
@@ -113,7 +111,6 @@ func configInfo() (exit bool) {
 		if err := config.List(); err != nil {
 			logs.ProblemCmdFatal("config info", "list", err)
 		}
-		return true
 	}
 	if configFlag.styles {
 		str.JSONStyles(fmt.Sprintf("%s info --style", meta.Bin))
@@ -142,11 +139,11 @@ var configSetCmd = &cobra.Command{
 	Use:     "set [setting names]",
 	Aliases: []string{"s"},
 	Short:   "Edit a setting",
-	Long:    fmt.Sprintf("Edit an individual %s setting.", meta.Name),
+	Long:    fmt.Sprintf("Edit a %s setting.", meta.Name),
 	Example: exampleCmd(configSetExample),
 	Run: func(cmd *cobra.Command, args []string) {
-		if configSet() {
-			os.Exit(0)
+		if configListAll() {
+			return
 		}
 		if !printUsage(cmd, args...) {
 			for _, arg := range args {
@@ -156,7 +153,7 @@ var configSetCmd = &cobra.Command{
 	},
 }
 
-func configSet() bool {
+func configListAll() bool {
 	if configFlag.configs {
 		if err := config.List(); err != nil {
 			logs.ProblemCmdFatal("config", "list", err)
@@ -169,8 +166,10 @@ func configSet() bool {
 var configSetupCmd = &cobra.Command{
 	Use:   "setup",
 	Short: "Walk through all the settings",
+	Long:  fmt.Sprintf("Walk through all of the %s settings.", meta.Name),
 	Run: func(cmd *cobra.Command, args []string) {
-		config.Setup()
+		const startAt = 16
+		config.Setup(startAt)
 	},
 }
 

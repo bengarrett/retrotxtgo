@@ -11,6 +11,17 @@ import (
 	"github.com/spf13/viper"
 )
 
+// New creates a new configuration file and prints the results.
+func New(overwrite bool) error {
+	if err := Create(viper.ConfigFileUsed(), overwrite); err != nil {
+		return err
+	}
+	fmt.Printf("%s%s\n%s%s\n",
+		str.Info(), "A new file was created.",
+		"Config file: ", str.Path(viper.ConfigFileUsed()))
+	return nil
+}
+
 // Create a named configuration file.
 func Create(name string, ow bool) error {
 	if name == "" {
@@ -22,7 +33,7 @@ func Create(name string, ow bool) error {
 		configDoesExist(cmdPath(), "create")
 		os.Exit(1)
 	case os.IsNotExist(err):
-		// a missing named file is okay
+		return createNew(name)
 	case err != nil:
 		return fmt.Errorf("%s: %q: %w", errMsg("access"), name, err)
 	}

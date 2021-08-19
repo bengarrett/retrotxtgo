@@ -12,8 +12,10 @@ import (
 
 // Info prints the content of a configuration file.
 func Info(style string) error {
-	fmt.Println(str.Cp(fmt.Sprintf("%s default configurations when no flags are given.", meta.Name)))
-	PrintLocation()
+	fmt.Printf("%s%s\n%s%s\n\n", str.Info(),
+		Location(),
+		meta.Name, " default settings in use.",
+	)
 	out, err := json.MarshalIndent(Enabled(), "", " ")
 	if err != nil {
 		return fmt.Errorf("failed to read configuration in yaml syntax: %w", err)
@@ -31,21 +33,33 @@ func Info(style string) error {
 		if err != nil {
 			return fmt.Errorf("failed to run highlighter: %w", err)
 		}
-		fmt.Println()
 	}
-	if m := Missing(); len(m) > 0 {
-		s := "These settings are missing and should be configured"
-		if len(m) == 1 {
-			s = "This setting is missing and should be configured"
-		}
-		fmt.Printf("\n\n%s:\n%s\n\n%s:\n", color.Warn.Sprint(s),
-			strings.Join(m, ", "), color.Warn.Sprint("To repair"))
-		const tries = 5
-		if len(m) < tries {
-			fmt.Print(str.Example(fmt.Sprintf("%s config set %s\n", meta.Bin, strings.Join(m, " "))))
-		} else {
-			fmt.Print(str.Example(fmt.Sprintf("%s config set setup\n", meta.Bin)))
-		}
+	if s := missing(Missing()...); s != "" {
+		fmt.Print(s)
 	}
 	return nil
+}
+
+func missing(list ...string) string {
+	const tries = 5
+	l := len(list)
+	if l == 0 {
+		return ""
+	}
+	t := "These settings are missing and should be configured"
+	if l == 1 {
+		t = "This setting is missing and should be configured"
+	}
+	s := ""
+	if l < tries {
+		s = str.Example(fmt.Sprintf("%s config set %s\n",
+			meta.Bin, strings.Join(list, " ")))
+	} else {
+		s = str.Example(fmt.Sprintf("%s config set setup\n",
+			meta.Bin))
+	}
+	return fmt.Sprintf("\n\n%s:\n%s\n\n%s:\n%s",
+		color.Warn.Sprint(t),
+		strings.Join(list, ", "),
+		color.Warn.Sprint("To repair"), s)
 }
