@@ -23,14 +23,15 @@ type configFlags struct {
 
 var (
 	configFlag    configFlags
-	configExample = fmt.Sprintf(`  %s config setup  # to start the setup walkthrough
-%s config set -c # to list all available settings`, meta.Bin, meta.Bin)
+	configExample = fmt.Sprintf("  %s %s %s\n%s %s %s",
+		meta.Bin, "config setup", "# Walk through all the settings",
+		meta.Bin, "config set --list", "# List all the settings in use")
 )
 
 var configCmd = &cobra.Command{
 	Use:     "config",
 	Aliases: []string{"cfg"},
-	Short:   fmt.Sprintf("%s configuration and save settings", meta.Name),
+	Short:   fmt.Sprintf("%s configuration and defaults.", meta.Name),
 	Example: exampleCmd(configExample),
 	Run: func(cmd *cobra.Command, args []string) {
 		if !printUsage(cmd, args...) {
@@ -42,7 +43,7 @@ var configCmd = &cobra.Command{
 var configCreateCmd = &cobra.Command{
 	Use:     "create",
 	Aliases: []string{"c"},
-	Short:   "Create a new or reset the config file",
+	Short:   "Create or reset the config file",
 	Run: func(cmd *cobra.Command, args []string) {
 		if configCreate() {
 			os.Exit(1)
@@ -77,7 +78,7 @@ var configDeleteCmd = &cobra.Command{
 var configEditCmd = &cobra.Command{
 	Use:     "edit",
 	Aliases: []string{"e"},
-	Short:   "Edit the config file",
+	Short:   "Edit the config file\n",
 	Long: `Edit the config file
 
 To switch editors either:
@@ -99,7 +100,7 @@ var configInfoCmd = &cobra.Command{
 	Use:     "info",
 	Aliases: []string{"i"},
 	Example: exampleCmd(configInfoExample),
-	Short:   "View all the settings configured in the config file",
+	Short:   "List all the settings in use",
 	Run: func(cmd *cobra.Command, args []string) {
 		if configInfo() {
 			os.Exit(0)
@@ -131,13 +132,17 @@ func configInfo() (exit bool) {
 	return false
 }
 
-var configSetExample = fmt.Sprintf(`  %s config set html.meta.description # to change the meta description setting
-%s config set style.info style.html # to set the color styles`, meta.Bin, meta.Bin)
+var configSetExample = fmt.Sprintf("  %s %s %s\n%s %s %s\n%s %s %s",
+	meta.Bin, "config set --list", "# List the available settings",
+	meta.Bin, "config set html.meta.description", "# Edit the meta description setting",
+	meta.Bin, "config set style.info style.html", fmt.Sprintf("# Edit both the %s color styles", meta.Name),
+)
 
 var configSetCmd = &cobra.Command{
 	Use:     "set [setting names]",
 	Aliases: []string{"s"},
-	Short:   fmt.Sprintf("Change individual %s settings", meta.Name),
+	Short:   "Edit a setting",
+	Long:    fmt.Sprintf("Edit an individual %s setting.", meta.Name),
 	Example: exampleCmd(configSetExample),
 	Run: func(cmd *cobra.Command, args []string) {
 		if configSet() {
@@ -163,7 +168,7 @@ func configSet() bool {
 
 var configSetupCmd = &cobra.Command{
 	Use:   "setup",
-	Short: fmt.Sprintf("Setup all the available %s settings", meta.Name),
+	Short: "Walk through all the settings",
 	Run: func(cmd *cobra.Command, args []string) {
 		config.Setup()
 	},

@@ -49,18 +49,25 @@ func List() (err error) {
 	capitalize := func(s string) string {
 		return strings.Title(s[:1]) + s[1:]
 	}
+	suffix := func(s string) string {
+		if strings.HasSuffix(s, "?") {
+			return s
+		}
+		return fmt.Sprintf("%s.", s)
+	}
 	keys := Keys()
 	const minWidth, tabWidth, tabs = 2, 2, "\t\t\t\t"
 	w := tabwriter.NewWriter(os.Stdout, minWidth, tabWidth, 0, ' ', 0)
 	cmds := fmt.Sprintf(" %s config set ", meta.Bin)
-	title := fmt.Sprintf("  Available %s configurations and settings", meta.Name)
+	title := fmt.Sprintf("  Available %s Configurations and Settings.", meta.Name)
 	fmt.Fprintln(w, "\n"+str.Cp(title))
 	fmt.Fprintln(w, str.HR(len(title)))
 	fmt.Fprintln(w, tabs)
-	fmt.Fprintf(w, "Alias\t\tName value\t\tHint\n")
+	fmt.Fprintf(w, "Alias\t\tName\t\tHint\n")
 	for i, key := range keys {
+		tip := Tip()[key]
 		fmt.Fprintln(w, tabs)
-		fmt.Fprintf(w, " %d\t\t%s\t\t%s", i, key, capitalize(Tip()[key]))
+		fmt.Fprintf(w, " %d\t\t%s\t\t%s", i, key, suffix(capitalize(tip)))
 		switch key {
 		case "html.layout":
 			fmt.Fprintf(w, "\n%schoices: %s (suggestion: %s)",
@@ -73,11 +80,11 @@ func List() (err error) {
 	}
 	fmt.Fprintln(w, tabs)
 	fmt.Fprintln(w, str.HR(len(title)))
-	fmt.Fprintln(w, "\nEither the Name value or the Alias can be used as the setting name")
-	fmt.Fprintf(w, "\n%s to change the meta description setting\n",
+	fmt.Fprintln(w, "\nEither the setting Name or the Alias can be used.")
+	fmt.Fprintf(w, "\n%s # To change the meta description setting\n",
 		str.Example(cmds+"html.meta.description"))
-	fmt.Fprintf(w, "%s will also change the meta description setting\n", str.Example(cmds+"6"))
-	fmt.Fprintln(w, "\nMultiple settings are supported")
+	fmt.Fprintf(w, "%s # Will also change the meta description setting\n", str.Example(cmds+"6"))
+	fmt.Fprintln(w, "\nMultiple settings are supported.")
 	fmt.Fprintf(w, "\n%s\n", str.Example(cmds+"style.html style.info"))
 	return w.Flush()
 }
