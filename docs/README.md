@@ -1,5 +1,3 @@
-![Build](https://github.com/bengarrett/retrotxtgo/workflows/Go/badge.svg) ![Tests](https://github.com/bengarrett/retrotxtgo/workflows/Go%20tests/badge.svg)
-
 # RetroTxtGo
 
 ### [RetroTxt](https://github.com/bengarrett/retrotxt) for the terminal.
@@ -11,7 +9,7 @@
 #### Text art and files created without Unicode often fail to display on modern systems.
 
 ```sh
-cat ascii-logo.txt
+type ascii-logo.txt # or, cat ascii-logo.txt
 
 �����ۻ ������ۻ�������ۻ�����ۻ  �����ۻ �������ۻ�ۻ  �ۻ�������ۻ
 ������ۻ������ͼ�������ͼ������ۻ�������ۻ�������ͼ��ۻ��ɼ�������ͼ
@@ -73,10 +71,10 @@ retrotxt create ascii-logo.txt --layout=compact
 </html>
 ```
 
-#### Easily serve it over its own HTTP server.
+#### Easily test and serve it over a HTTP server.
 
 ```sh
-retrotxt create ascii-logo.txt -p0
+retrotxt create ascii-logo.txt -p0 --title="ASCII logo"
 
 Web server is available at http://localhost:8086
 Press Ctrl+C to stop
@@ -89,7 +87,6 @@ Press Ctrl+C to stop
 ```sh
 retrotxt create ascii-logo.txt --save
 
-saving to scripts.js
 saving to styles.css
 saving to index.html
 saving to ibm-vga8.woff2
@@ -97,7 +94,7 @@ saving to font.css
 ...
 ```
 
-#### Inline all the assets into a single HTML file for easier sharing.
+#### Or inline all the website assets into a single HTML file for easier sharing.
 
 ```sh
 retrotxt create ascii-logo.txt --layout=inline --font-embed --title="ASCII logo"
@@ -114,9 +111,6 @@ retrotxt create ascii-logo.txt --layout=inline --font-embed --title="ASCII logo"
       body{background-color:#000;display:flex;flex-dir...}
       @font-face{font-family:vga;src:url(data:application/font-woff2;charset=utf-8;base64,d09GMgA...)}
     </style>
-    <script defer>
-      ...
-    </script>
   </head>
 
   <body>
@@ -260,7 +254,7 @@ env GOOS=linux GOARCH=386 && go build -o retrotxt && ./retrotxt -v
 - Native [Unicode](https://golang.org/pkg/unicode/), UTF 8/16/32 support.
 - [A large selection of native legacy text encodings](golang.org/x/text/encoding/charmap).
 - Builds a standalone binary with no dependencies.
-- [Wide Operating system and CPU architecture support](https://gist.github.com/asukakenji/f15ba7e588ac42795f421b48b8aede63).
+- [Wide operating system and CPU architecture support](https://gist.github.com/asukakenji/f15ba7e588ac42795f421b48b8aede63).
 - Uses a simple, compact standard library with extremely fast compiling.
 - The standard library has helpful and safe web templating such as HTML, JSON, XML.
 - It is a language I know. 😉
