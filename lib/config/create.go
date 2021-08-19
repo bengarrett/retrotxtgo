@@ -12,38 +12,50 @@ import (
 )
 
 // Create a named configuration file.
-func Create(name string, ow bool) (err error) {
+func Create(name string, ow bool) error {
 	if name == "" {
 		return fmt.Errorf("create configuration: %w", logs.ErrNameNil)
 	}
-	_, err = os.Stat(name)
+	_, err := os.Stat(name)
 	switch {
-	case !os.IsNotExist(err) && !ow:
+	case !ow && !os.IsNotExist(err):
 		configDoesExist(cmdPath(), "create")
 		os.Exit(1)
 	case os.IsNotExist(err):
 		// a missing named file is okay
 	case err != nil:
-		return fmt.Errorf("could not access the configuration file: %q: %w", name, err)
+		return fmt.Errorf("%s: %q: %w", errMsg("access"), name, err)
 	}
-	// create a new config file
+	return createNew(name)
+}
+
+// createNew creates a new config file.
+func createNew(name string) error {
 	path, err := filesystem.Touch(name)
 	if err != nil {
-		return fmt.Errorf("could not create the configuration file: %q: %w", name, err)
+		return fmt.Errorf("%s: %q: %w", errMsg("create"), name, err)
 	}
 	InitDefaults()
 	err = UpdateConfig(path, false)
 	if err != nil {
-		return fmt.Errorf("could not update the configuration file: %q: %w", name, err)
+		return fmt.Errorf("%s: %q: %w", errMsg("update"), name, err)
 	}
 	return nil
 }
 
 func configDoesExist(name, suffix string) {
-	cmd := strings.TrimSuffix(name, suffix)
-	fmt.Printf("%s a config file exists: %s\n",
-		str.Info(), str.Cf(viper.ConfigFileUsed()))
-	fmt.Printf(" edit it: %s\n", str.Cp(cmd+" edit"))
-	fmt.Printf("  delete: %s\n", str.Cp(cmd+" delete"))
-	fmt.Printf("   reset: %s\n", str.Cp(cmd+" create --overwrite"))
+	example := func(s string) string {
+		x := fmt.Sprintf("%s %s", strings.TrimSuffix(name, suffix), s)
+		return str.Example(x)
+	}
+	fmt.Printf("%sA config file already exists: %s\n%s\n",
+		str.Info(), str.Cf(viper.ConfigFileUsed()),
+		"Use the following commands to modify it.")
+	fmt.Printf("Edit:\t%s\n", example("edit"))
+	fmt.Printf("Delete:\t%s\n", example("delete"))
+	fmt.Printf("Reset:\t%s\n", example("create --overwrite"))
+}
+
+func errMsg(verb string) string {
+	return fmt.Sprintf("could not %s the configuration file", verb)
 }
