@@ -1,10 +1,6 @@
 // nolint:goconst
 package config
 
-// TODO: check file is open elsewhere before attempting to save/edit.
-// Otherwise the file gets corrupted.
-// Go through setup and ctrl-c at every prompt to fix the ones that corrupt the config file.
-
 import (
 	"bytes"
 	"errors"
@@ -617,12 +613,31 @@ func save(name string, setup bool, value interface{}) {
 		fmt.Print(skipSet(setup))
 		return
 	}
+	switch v := value.(type) {
+	case string:
+		if v == "-" {
+			value = ""
+		}
+	default:
+	}
 	viper.Set(name, value)
 	if err := UpdateConfig("", false); err != nil {
 		logs.SaveFatal(err)
 	}
-	fmt.Printf(" %s %s is set to \"%v\"\n",
-		str.Bool(true), str.Cs(name), value)
+	switch v := value.(type) {
+	case string:
+		if v == "" {
+			fmt.Printf("  %s is now unused\n",
+				str.Cs(name))
+			if !setup {
+				os.Exit(0)
+			}
+			return
+		}
+	default:
+	}
+	fmt.Printf("  %s is set to \"%v\"\n",
+		str.Cs(name), value)
 	if !setup {
 		os.Exit(0)
 	}
@@ -675,7 +690,7 @@ func setDirectory(name string, setup bool) (ok bool) {
 		os.Exit(0)
 	}
 	if s == "-" {
-		save(name, setup, "")
+		save(name, setup, "-")
 		return true
 	}
 	if _, err := os.Stat(s); err != nil {
@@ -699,7 +714,7 @@ func setEditor(name string, setup bool) {
 	s := prompt.String()
 	switch s {
 	case "-":
-		save(name, setup, "")
+		save(name, setup, "-")
 		return
 	case "":
 		fmt.Print(skipSet(setup))
@@ -826,10 +841,10 @@ func setRetroTxt(value bool) {
 
 // setShortStrings prompts and saves setting values that support 1 character aliases.
 func setShortStrings(name string, setup bool, data ...string) {
-	s := prompt.ShortStrings(&data)
-	if s == "-" {
-		s = ""
+	if name == "" {
+		logs.SaveFatal(fmt.Errorf("set short string: %w", logs.ErrNameNil))
 	}
+	s := prompt.ShortStrings(&data)
 	save(name, setup, s)
 }
 
@@ -839,9 +854,6 @@ func setString(name string, setup bool) {
 		logs.SaveFatal(fmt.Errorf("set string: %w", logs.ErrNameNil))
 	}
 	s := prompt.String()
-	if s == "-" {
-		s = ""
-	}
 	save(name, setup, s)
 }
 
@@ -851,8 +863,5 @@ func setStrings(name string, setup bool, data ...string) {
 		logs.SaveFatal(fmt.Errorf("set strings: %w", logs.ErrNameNil))
 	}
 	s := prompt.Strings(&data, setup)
-	if s == "-" {
-		s = ""
-	}
 	save(name, setup, s)
 }
