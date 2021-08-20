@@ -9,23 +9,41 @@ import (
 	"github.com/gookit/color"
 )
 
-// Alert prints "Problem:\n" using the Error color.
-func Alert() string {
-	s := "Problem:"
-	e := color.Error.Sprint(s)
-	if e == "" {
+type verbs uint
+
+const (
+	confirm verbs = iota
+	info
+	problem
+)
+
+func sprint(v verbs) string {
+	s, c := "", ""
+	switch v {
+	case confirm:
+		s = "Confirm:"
+		c = color.Question.Sprint(s)
+	case info:
+		s = "Information:"
+		c = color.Info.Sprint(s)
+	case problem:
+		s = "Problem:"
+		c = color.Error.Sprint(s)
+	}
+	if c == "" {
 		return fmt.Sprintf("%s\n", s)
 	}
-	return fmt.Sprintf("%s\n", e)
+	return fmt.Sprintf("%s\n", c)
 }
 
+// Alert prints "Problem" using the Error color.
+func Alert() string {
+	return sprint(problem)
+}
+
+// Confirm prints the "Confirm" string using the Question color.
 func Confirm() string {
-	s := "Confirm:"
-	e := color.Question.Sprint(s)
-	if e == "" {
-		return fmt.Sprintf("%s\n", s)
-	}
-	return fmt.Sprintf("%s\n", e)
+	return sprint(confirm)
 }
 
 // Example prints the string using the Debug color.
@@ -33,18 +51,47 @@ func Example(s string) string {
 	return color.Debug.Sprint(s)
 }
 
-// Info prints "Information:\n" using the Info color.
+// Info prints "Information" using the Info color.
 func Info() string {
-	s := "Information:"
-	e := color.Info.Sprint(s)
-	if e == "" {
-		return fmt.Sprintf("%s\n", s)
-	}
-	return fmt.Sprintf("%s\n", e)
+	return sprint(info)
 }
 
 func Path(name string) string {
 	return color.Secondary.Sprint(name)
+}
+
+// Bool returns a checkmark ✓ when true or a cross ✗ when false.
+func Bool(b bool) string {
+	const check, cross = "✓", "✗"
+	if b {
+		return color.Success.Sprint(check)
+	}
+	return color.Warn.Sprint(cross)
+}
+
+// Default appends (default ...) to the usage string.
+func Default(s, def string) string {
+	return fmt.Sprintf("%s (default \"%s\")", s, def)
+}
+
+// Options appends options: ... to the usage string.
+func Options(s string, shorthand bool, opts ...string) (usage string) {
+	var keys string
+	if len(opts) == 0 {
+		return s
+	}
+	sort.Strings(opts)
+	if shorthand {
+		keys = UnderlineKeys(opts...)
+	} else {
+		keys = strings.Join(opts, ", ")
+	}
+	return fmt.Sprintf("%s.\n  Options: %s", s, color.Info.Sprint(keys))
+}
+
+// Required appends (required) to the usage string.
+func Required(s string) (usage string) {
+	return fmt.Sprintf("%s (required)", color.Primary.Sprint(s))
 }
 
 // color aliases.
@@ -87,38 +134,4 @@ func Cp(t string) string {
 // Cs returns a string in the color named success.
 func Cs(t string) string {
 	return color.Success.Sprint(t)
-}
-
-// Bool returns a checkmark ✓ when true or a cross ✗ when false.
-func Bool(b bool) string {
-	const check, cross = "✓", "✗"
-	if b {
-		return color.Success.Sprint(check)
-	}
-	return color.Warn.Sprint(cross)
-}
-
-// Default appends (default ...) to the usage string.
-func Default(s, def string) string {
-	return fmt.Sprintf("%s (default \"%s\")", s, def)
-}
-
-// Options appends options: ... to the usage string.
-func Options(s string, shorthand bool, opts ...string) (usage string) {
-	var keys string
-	if len(opts) == 0 {
-		return s
-	}
-	sort.Strings(opts)
-	if shorthand {
-		keys = UnderlineKeys(opts...)
-	} else {
-		keys = strings.Join(opts, ", ")
-	}
-	return fmt.Sprintf("%s.\n  Options: %s", s, color.Info.Sprint(keys))
-}
-
-// Required appends (required) to the usage string.
-func Required(s string) (usage string) {
-	return fmt.Sprintf("%s (required)", color.Primary.Sprint(s))
 }
