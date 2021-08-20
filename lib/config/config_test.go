@@ -29,7 +29,7 @@ func Test_getBool(t *testing.T) {
 		key  string
 		want bool
 	}{
-		{"bool", "html.meta.generator", true},
+		{"bool", genr, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -46,7 +46,7 @@ func Test_getUint(t *testing.T) {
 		key  string
 		want uint
 	}{
-		{"uint", "serve", meta.WebPort},
+		{"uint", serve, meta.WebPort},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -63,7 +63,7 @@ func Test_getString(t *testing.T) {
 		key  string
 		want string
 	}{
-		{"string", "html.layout", "standard"},
+		{"string", layoutTmpl, "standard"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -118,7 +118,7 @@ func TestKeySort(t *testing.T) {
 	if lenG != lenK {
 		t.Errorf("KeySort() length = %d, want %d", lenG, lenK)
 	}
-	want := "html.font.family"
+	want := fontFamily
 	if s := got[0]; s != want {
 		t.Errorf("KeySort()[0] = %s, want %s", s, want)
 	}

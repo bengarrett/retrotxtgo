@@ -13,25 +13,25 @@ import (
 )
 
 const (
-	editor   = "editor"
-	fontEmb  = "html.font.embed"
-	fontFam  = "html.font.family"
-	layout   = "html.layout"
-	author   = "html.meta.author"
-	scheme   = "html.meta.color-scheme"
-	desc     = "html.meta.description"
-	genr     = "html.meta.generator"
-	keywords = "html.meta.keywords"
-	notlate  = "html.meta.notranslate"
-	referr   = "html.meta.referrer"
-	rtx      = "html.meta.retrotxt"
-	bot      = "html.meta.robots"
-	theme    = "html.meta.theme-color"
-	title    = "html.title"
-	saveDir  = "save-directory"
-	serve    = "serve"
-	stylei   = "style.info"
-	styleh   = "style.html"
+	editor     = "editor"
+	fontEmbed  = "html.font.embed"
+	fontFamily = "html.font.family"
+	layoutTmpl = "html.layout"
+	author     = "html.meta.author"
+	scheme     = "html.meta.color-scheme"
+	desc       = "html.meta.description"
+	genr       = "html.meta.generator"
+	keywords   = "html.meta.keywords"
+	notlate    = "html.meta.notranslate"
+	referr     = "html.meta.referrer"
+	rtx        = "html.meta.retrotxt"
+	bot        = "html.meta.robots"
+	theme      = "html.meta.theme-color"
+	title      = "html.title"
+	saveDir    = "save-directory"
+	serve      = "serve"
+	stylei     = "style.info"
+	styleh     = "style.html"
 )
 
 // Defaults for setting keys.
@@ -42,25 +42,25 @@ func Reset() Defaults {
 	// these will be the default values when a setting is deleted
 	// or when a new config file is created
 	return Defaults{
-		editor:   "",
-		fontEmb:  false,
-		fontFam:  "vga",
-		layout:   "standard",
-		author:   "",
-		scheme:   "",
-		desc:     "",
-		genr:     true,
-		keywords: "",
-		notlate:  false,
-		referr:   "",
-		rtx:      true,
-		bot:      "",
-		theme:    "",
-		title:    meta.Name,
-		saveDir:  "",
-		serve:    meta.WebPort,
-		stylei:   "dracula",
-		styleh:   "lovelace",
+		editor:     "",
+		fontEmbed:  false,
+		fontFamily: "vga",
+		layoutTmpl: "standard",
+		author:     "",
+		scheme:     "",
+		desc:       "",
+		genr:       true,
+		keywords:   "",
+		notlate:    false,
+		referr:     "",
+		rtx:        true,
+		bot:        "",
+		theme:      "",
+		title:      meta.Name,
+		saveDir:    "",
+		serve:      meta.WebPort,
+		stylei:     "dracula",
+		styleh:     "lovelace",
 	}
 }
 
@@ -70,25 +70,25 @@ type Hints map[string]string
 // Tip provides a brief help on the config file configurations.
 func Tip() Hints {
 	return Hints{
-		editor:        "text editor to launch when using " + str.Example("config edit"),
-		fontEmb:       "encode and embed the font as Base64 binary-to-text within the CSS",
-		fontFam:       "specifies the font to use with the HTML",
-		"html.layout": "HTML template for the layout of CSS, JS and fonts",
-		author:        "defines the name of the page authors",
-		scheme:        "specifies one or more color schemes with which the page is compatible",
-		desc:          "a short and accurate summary of the content of the page",
-		genr:          fmt.Sprintf("include the %s version and page generation date?", meta.Name),
-		keywords:      "words relevant to the page content",
-		notlate:       "used to declare that the page should not be translated by Google Translate",
-		referr:        "controls the Referer HTTP header attached to requests sent from the page",
-		rtx:           "include a custom tag containing the meta information of the source textfile",
-		bot:           "behavor that crawlers from Google, Bing and other engines should use with the page",
-		theme:         "indicates a suggested color that user agents should use to customize the display of the page",
-		title:         "page title that is shown in the browser tab",
-		saveDir:       fmt.Sprintf("directory to store HTML assets created by %s", meta.Name),
-		serve:         "serve files using an internal web server with this port",
-		stylei:        "syntax highlighter for the config info output",
-		styleh:        "syntax highlighter for html previews",
+		editor:     "text editor to launch when using " + str.Example("config edit"),
+		fontEmbed:  "encode and embed the font as Base64 binary-to-text within the CSS",
+		fontFamily: "specifies the font to use with the HTML",
+		layoutTmpl: "HTML template for the layout of CSS, JS and fonts",
+		author:     "defines the name of the page authors",
+		scheme:     "specifies one or more color schemes with which the page is compatible",
+		desc:       "a short and accurate summary of the content of the page",
+		genr:       fmt.Sprintf("include the %s version and page generation date?", meta.Name),
+		keywords:   "words relevant to the page content",
+		notlate:    "used to declare that the page should not be translated by Google Translate",
+		referr:     "controls the Referer HTTP header attached to requests sent from the page",
+		rtx:        "include a custom tag containing the meta information of the source textfile",
+		bot:        "behavor that crawlers from Google, Bing and other engines should use with the page",
+		theme:      "indicates a suggested color that user agents should use to customize the display of the page",
+		title:      "page title that is shown in the browser tab",
+		saveDir:    fmt.Sprintf("directory to store HTML assets created by %s", meta.Name),
+		serve:      "serve files using an internal web server with this port",
+		stylei:     "syntax highlighter for the config info output",
+		styleh:     "syntax highlighter for html previews",
 	}
 }
 
@@ -174,8 +174,8 @@ func Keys() []string {
 // KeySort list all the available configuration setting names sorted by hand.
 func KeySort() []string {
 	all := Keys()
-	keys := []string{"html.font.family", "html.title", "html.layout", "html.font.embed",
-		"save-directory", "serve", "editor", "style.html", "style.info"}
+	keys := []string{fontFamily, title, layoutTmpl, fontEmbed,
+		saveDir, serve, editor, styleh, stylei}
 	for _, key := range all {
 		found := false
 		for _, used := range keys {
@@ -206,11 +206,11 @@ func (sc *Settings) marshals(key string) error { // nolint:gocyclo
 	switch key {
 	case editor:
 		sc.Editor = getString(key)
-	case fontEmb:
+	case fontEmbed:
 		sc.HTML.Font.Embed = getBool(key)
-	case fontFam:
+	case fontFamily:
 		sc.HTML.Font.Family = getString(key)
-	case layout:
+	case layoutTmpl:
 		sc.HTML.Layout = getString(key)
 	case author:
 		sc.HTML.Meta.Author = getString(key)

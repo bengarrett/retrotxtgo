@@ -49,7 +49,7 @@ func Setup(start int) {
 	fmt.Printf("The %s setup and configuration is complete.\n", meta.Name)
 }
 
-// EnterKey returns the appropriate Setup instructions based on the user's platform.
+// enterKey returns the appropriate Setup instructions based on the user's platform.
 func enterKey() string {
 	if runtime.GOOS == "darwin" {
 		return "To quit setup, press ↩ return to skip the question or ⌃ control-C."
@@ -57,7 +57,7 @@ func enterKey() string {
 	return "To quit setup, press ⏎ return to skip the question or Ctrl-C."
 }
 
-// Logo prints the ANSI logo.
+// logo prints the ANSI logo.
 func logo() string {
 	const clear, reset, n = "\033c", "\033[0m", "text/retrotxt.utf8ans"
 	b, err := static.Text.ReadFile(n)

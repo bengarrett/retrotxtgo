@@ -25,19 +25,6 @@ func InitDefaults() {
 	}
 }
 
-// configMissing prints an error notice and exits.
-func configMissing(name, suffix string) {
-	cmd := strings.TrimSuffix(name, suffix) + " create"
-	used := viper.ConfigFileUsed()
-	if used != "" {
-		fmt.Printf("%s %q config file is missing\ncreate it: %s\n",
-			str.Info(), used, str.Cp(cmd+" --config="+used))
-		return
-	}
-	fmt.Printf("%s no config file is in use\ncreate it: %s\n",
-		str.Info(), str.Cp(cmd))
-}
-
 // Path is the absolute path and filename of the configuration file.
 func Path() string {
 	dir, err := gap.NewScope(gap.User, meta.Dir).ConfigPath(namedFile)
@@ -139,4 +126,17 @@ func UpdateConfig(name string, stdout bool) (err error) {
 		fmt.Println("The change is saved")
 	}
 	return nil
+}
+
+// configMissing prints an error notice and exits.
+func configMissing(name, suffix string) {
+	cmd := strings.TrimSuffix(name, suffix) + " create"
+	used := viper.ConfigFileUsed()
+	if used != "" {
+		fmt.Printf("%s %q config file is missing\ncreate it: %s\n",
+			str.Info(), used, str.Cp(cmd+" --config="+used))
+		return
+	}
+	fmt.Printf("%s no config file is in use\ncreate it: %s\n",
+		str.Info(), str.Cp(cmd))
 }

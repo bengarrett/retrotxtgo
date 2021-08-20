@@ -33,13 +33,13 @@ type update struct {
 
 // ColorCSS prints colored CSS syntax highlighting.
 func ColorCSS(elm string) string {
-	style := viper.GetString("style.html")
+	style := viper.GetString(styleh)
 	return colorElm(elm, "css", style, true)
 }
 
 // ColorHTML prints colored syntax highlighting to HTML elements.
 func ColorHTML(elm string) string {
-	style := viper.GetString("style.html")
+	style := viper.GetString(styleh)
 	return colorElm(elm, "html", style, true)
 }
 
@@ -68,10 +68,10 @@ func List() (err error) {
 		fmt.Fprintln(w, tabs)
 		fmt.Fprintf(w, " %d\t\t%s\t\t%s", i, key, suffix(capitalize(tip)))
 		switch key {
-		case "html.layout":
+		case layoutTmpl:
 			fmt.Fprintf(w, "\n%schoices: %s (suggestion: %s)",
 				tabs, str.Cp(strings.Join(create.Layouts(), ", ")), str.Example("standard"))
-		case "serve":
+		case serve:
 			fmt.Fprintf(w, "\n%schoices: %s",
 				tabs, portInfo())
 		}
@@ -81,7 +81,7 @@ func List() (err error) {
 	fmt.Fprintln(w, str.HR(len(title)))
 	fmt.Fprintln(w, "\nEither the setting Name or the Alias can be used.")
 	fmt.Fprintf(w, "\n%s # To change the meta description setting\n",
-		str.Example(cmds+"html.meta.description"))
+		str.Example(cmds+desc))
 	fmt.Fprintf(w, "%s # Will also change the meta description setting\n", str.Example(cmds+"6"))
 	fmt.Fprintln(w, "\nMultiple settings are supported.")
 	fmt.Fprintf(w, "\n%s\n", str.Example(cmds+"style.html style.info"))
@@ -157,7 +157,7 @@ func updateBool(b bool, name string) {
 }
 
 func updateString(s, name, value string) {
-	const sd = "save-directory"
+	const sd = saveDir
 	switch s {
 	case "":
 		fmt.Printf("\n  The empty %s setting is not in use.\n",
@@ -198,13 +198,13 @@ func updatePrompt(u update) {
 	switch u.name {
 	case "editor":
 		promptEditor(u)
-	case "save-directory":
+	case saveDir:
 		promptSaveDir(u)
-	case "serve":
+	case serve:
 		promptServe(u)
-	case "style.html":
+	case styleh:
 		promptStyleHTML(u)
-	case "style.info":
+	case stylei:
 		promptStyleInfo(u)
 	default:
 		metaPrompts(u)
@@ -214,39 +214,39 @@ func updatePrompt(u update) {
 // metaPrompts prompts the user for a meta setting.
 func metaPrompts(u update) {
 	switch u.name {
-	case "html.font.embed":
+	case fontEmbed:
 		setFontEmbed(u.value.(bool), u.setup)
-	case "html.font.family":
+	case fontFamily:
 		setFont(u.value.(string), u.setup)
-	case "html.layout":
+	case layoutTmpl:
 		promptLayout(u)
-	case "html.meta.author",
-		"html.meta.description",
-		"html.meta.keywords":
+	case author,
+		desc,
+		keywords:
 		previewMeta(u.name, u.value.(string))
 		setString(u.name, u.setup)
-	case "html.meta.theme-color":
+	case theme:
 		recommendMeta(u.name, u.value.(string), "")
 		setString(u.name, u.setup)
-	case "html.meta.color-scheme":
+	case scheme:
 		promptColorScheme(u)
-	case "html.meta.generator":
+	case genr:
 		setGenerator(u.value.(bool))
-	case "html.meta.notranslate":
+	case notlate:
 		setNoTranslate(u.value.(bool), u.setup)
-	case "html.meta.referrer":
+	case referr:
 		recommendMeta(u.name, u.value.(string), "")
 		cr := create.Referrer()
 		fmt.Printf("%s\n  ", str.NumberizeKeys(cr[:]...))
 		setIndex(u.name, u.setup, cr[:]...)
-	case "html.meta.robots":
+	case bot:
 		recommendMeta(u.name, u.value.(string), "")
 		cr := create.Robots()
 		fmt.Printf("%s\n  ", str.NumberizeKeys(cr[:]...))
 		setIndex(u.name, u.setup, cr[:]...)
-	case "html.meta.retrotxt":
+	case rtx:
 		setRetroTxt(u.value.(bool))
-	case "html.title":
+	case title:
 		setTitle(u.name, u.value.(string), u.setup)
 	default:
 		log.Fatalln("config is not configured:", u.name)
@@ -314,7 +314,7 @@ func promptSaveDir(u update) {
 func promptServe(u update) {
 	reset := func() {
 		var p uint
-		if u, ok := Reset()["serve"].(uint); ok {
+		if u, ok := Reset()[serve].(uint); ok {
 			p = u
 		}
 		save(u.name, false, p)
@@ -539,21 +539,21 @@ func previewMetaPrint(name, value string) {
 
 func metaDefaults(name string) string {
 	switch name {
-	case "html.meta.author":
+	case author:
 		return "Your name goes here"
-	case "html.meta.color-scheme":
+	case scheme:
 		return "normal"
-	case "html.meta.description":
+	case desc:
 		return "A brief description of the page could go here."
-	case "html.meta.keywords":
+	case keywords:
 		return "some, keywords, go here"
-	case "html.meta.referrer":
+	case referr:
 		return "same-origin"
-	case "html.meta.robots":
+	case bot:
 		return "noindex"
-	case "html.meta.theme-color":
+	case theme:
 		return "ghostwhite"
-	case "html.title":
+	case title:
 		return "A page title foes here."
 	}
 	return ""
@@ -579,7 +579,7 @@ func previewPrompt(name, value string) string {
 // previewPromptPrint returns the available input options.
 func previewPromptPrint(name, value string) (p string) {
 	p = "Set a new value"
-	if name == "html.meta.keywords" {
+	if name == keywords {
 		p = "Set some comma-separated keywords"
 		if value != "" {
 			p = "Replace the current keywords"
@@ -660,7 +660,7 @@ func skipSave(name string, value interface{}) bool {
 		if viper.Get(name).(int) == int(v) {
 			return true
 		}
-		if name == "serve" && v == 0 {
+		if name == serve && v == 0 {
 			return true
 		}
 	default:
@@ -744,12 +744,12 @@ func setFont(value string, setup bool) {
 		"  Choose a font, ",
 		str.UnderlineKeys(create.Fonts()...),
 		fmt.Sprintf("(suggestion: %s)", str.Example("automatic")))
-	setShortStrings("html.font.family", setup, create.Fonts()...)
+	setShortStrings(fontFamily, setup, create.Fonts()...)
 }
 
 // setFont previews and saves the embed Base64 font setting.
 func setFontEmbed(value, setup bool) {
-	const name = "html.font.embed"
+	const name = fontEmbed
 	elm := fmt.Sprintf("  %s\n  %s\n  %s\n",
 		"@font-face{",
 		"  font-family: vga8;",
@@ -770,7 +770,7 @@ func setFontEmbed(value, setup bool) {
 
 // SetGenerator previews and prompts the custom program generator meta tag.
 func setGenerator(value bool) {
-	const name = "html.meta.generator"
+	const name = genr
 	elm := fmt.Sprintf("  %s\n    %s\n  %s\n",
 		"<head>",
 		fmt.Sprintf("<meta name=\"generator\" content=\"%s %s, %s\">",
@@ -798,7 +798,7 @@ func setIndex(name string, setup bool, data ...string) {
 // setNoTranslate previews and prompts for the notranslate HTML attribute
 // and Google meta elemenet.
 func setNoTranslate(value, setup bool) {
-	name := "html.meta.notranslate"
+	const name = notlate
 	elm := fmt.Sprintf("  %s\n    %s\n      %s\n",
 		"<html translate=\"no\">",
 		"<head>",
@@ -824,7 +824,7 @@ func setPort(name string, setup bool) {
 
 // setRetroTxt previews and prompts the custom retrotxt meta tag.
 func setRetroTxt(value bool) {
-	name := "html.meta.retrotxt"
+	const name = rtx
 	elm := fmt.Sprintf("%s\n%s\n%s\n",
 		"  <head>",
 		"    <meta name=\"retrotxt\" content=\"encoding: IBM437; linebreak: CRLF; length: 50; width: 80; name: file.txt\">",

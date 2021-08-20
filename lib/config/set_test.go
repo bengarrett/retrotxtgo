@@ -12,16 +12,16 @@ import (
 func Example_updateBool() {
 	color.Enable = false
 	updateBool(false, "example")
-	// Output: example is currently not in use
+	// Output: The example is not in use.
 }
 
 func Example_updateString() {
 	color.Enable = false
 	updateString("", "example", "")
-	updateString("x", "save-directory", "")
-	// Output: example is currently not in use
+	updateString("x", saveDir, "")
+	// Output: The empty example setting is not in use.
 	//
-	//   save-directory is set to "" ✗
+	//   The save-directory is set to "". ✗
 }
 
 func Example_recommend() {
@@ -156,7 +156,7 @@ func Test_previewPrompt(t *testing.T) {
 		wantP string
 	}{
 		{"empty", args{}, "Set"},
-		{"key", args{"html.meta.keywords", "ooooh"}, "Replace"},
+		{"key", args{keywords, "ooooh"}, "Replace"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
