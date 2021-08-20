@@ -84,7 +84,7 @@ func Tip() Hints {
 		rtx:           "include a custom tag containing the meta information of the source textfile",
 		bot:           "behavor that crawlers from Google, Bing and other engines should use with the page",
 		theme:         "indicates a suggested color that user agents should use to customize the display of the page",
-		title:         "page title that is shown in a browser title bar or tab",
+		title:         "page title that is shown in the browser tab",
 		saveDir:       fmt.Sprintf("directory to store HTML assets created by %s", meta.Name),
 		serve:         "serve files using an internal web server with this port",
 		stylei:        "syntax highlighter for the config info output",
@@ -150,7 +150,7 @@ func Format() Formats {
 // Enabled returns all the Viper keys holding a value that are used.
 // This will hide all unrecognized manual edits to the configuration file.
 func Enabled() map[string]interface{} {
-	var sets = make(map[string]interface{})
+	sets := make(map[string]interface{})
 	for _, key := range viper.AllKeys() {
 		if d := Reset()[key]; d != nil {
 			sets[key] = viper.Get(key)
@@ -159,9 +159,9 @@ func Enabled() map[string]interface{} {
 	return sets
 }
 
-// Keys list all the available configuration setting names sorted.
+// Keys list all the available configuration setting names sorted alphabetically.
 func Keys() []string {
-	var keys = make([]string, len(Reset()))
+	keys := make([]string, len(Reset()))
 	i := 0
 	for key := range Reset() {
 		keys[i] = key
@@ -171,9 +171,29 @@ func Keys() []string {
 	return keys
 }
 
+// KeySort list all the available configuration setting names sorted by hand.
+func KeySort() []string {
+	all := Keys()
+	keys := []string{"html.font.family", "html.title", "html.layout", "html.font.embed",
+		"save-directory", "serve", "editor", "style.html", "style.info"}
+	for _, key := range all {
+		found := false
+		for _, used := range keys {
+			if key == used {
+				found = true
+				break
+			}
+		}
+		if !found {
+			keys = append(keys, key)
+		}
+	}
+	return keys
+}
+
 // Marshal default values for use in a YAML configuration file.
 func Marshal() (interface{}, error) {
-	var sc = Settings{}
+	sc := Settings{}
 	for key := range Reset() {
 		if err := sc.marshals(key); err != nil {
 			return sc, err
@@ -223,7 +243,7 @@ func (sc *Settings) marshals(key string) error { // nolint:gocyclo
 	case styleh:
 		sc.Style.HTML = getString(key)
 	default:
-		return fmt.Errorf("mashal %q: %w", key, logs.ErrCfgName)
+		return fmt.Errorf("marshals %q: %w", key, logs.ErrCfgName)
 	}
 	return nil
 }
@@ -271,8 +291,7 @@ func getString(key string) string {
 // This could be due to new features being added after the file was generated
 // or because of manual edits.
 func Missing() (list []string) {
-	d, l := len(Reset()), len(viper.AllSettings())
-	if d == l {
+	if len(Reset()) == len(viper.AllSettings()) {
 		return list
 	}
 	for key := range Reset() {

@@ -168,7 +168,7 @@ var configSetupCmd = &cobra.Command{
 	Short: "Walk through all the settings",
 	Long:  fmt.Sprintf("Walk through all of the %s settings.", meta.Name),
 	Run: func(cmd *cobra.Command, args []string) {
-		const startAt = 16
+		const startAt = 0
 		config.Setup(startAt)
 	},
 }

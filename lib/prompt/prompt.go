@@ -15,6 +15,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/bengarrett/retrotxtgo/meta"
 )
 
 type keys []string
@@ -26,10 +27,29 @@ const (
 	NoChange      = "no changes applied"
 )
 
+// CtrlC intercepts any Ctrl-C keyboard input and exits to the shell.
+func CtrlC() {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		fmt.Fprintf(os.Stdout, "%s has quit.", meta.Name)
+		os.Exit(0)
+	}()
+}
+
 // IndexStrings asks for a numeric index position and returns a single choice from a string of keys.
 func IndexStrings(options *[]string, setup bool) (key string) {
 	var k keys = *options
 	return k.prompt(os.Stdin, setup)
+}
+
+// SkipSet returns a skipped setting string for the setup walk through.
+func SkipSet(setup bool) string {
+	if !setup {
+		return ""
+	}
+	return str.Cs("  skipped setting")
 }
 
 // Port asks for and returns a HTTP port value.
@@ -55,8 +75,8 @@ func ShortStrings(options *[]string) (key string) {
 // String asks for and returns a multi-word string.
 // Inputting ⏎ the Enter/Return key exits the program,
 // or returns an empty value when in SetupMode.
-func String(setup bool) (words string) {
-	return pstring(os.Stdin, setup)
+func String() (words string) {
+	return pstring(os.Stdin)
 }
 
 // Strings asks for and returns a single choice from a string of keys.
@@ -71,10 +91,12 @@ func YesNo(ask string, yesDefault bool) bool {
 	if !yesDefault {
 		y, n = "y", "N"
 	}
-	if !strings.HasSuffix(ask, "?") {
+	if !strings.HasSuffix(ask, "?") && !strings.HasSuffix(ask, ")") {
 		ask = fmt.Sprintf("%s?", ask)
 	}
-	fmt.Printf("%s [%s/%s] ", ask, y, n)
+	yes, _ := str.UnderlineChar(y)
+	no, _ := str.UnderlineChar(n)
+	fmt.Printf("%s [%ses/%so] ", ask, yes, no)
 	input, err := promptRead(os.Stdin)
 	if err != nil {
 		logs.SaveFatal(err)
@@ -102,7 +124,6 @@ func pport(r io.Reader, validate, setup bool) (port uint) {
 	const baseTen = 10
 	input, prompts := "", 0
 	scanner := bufio.NewScanner(r)
-	watch()
 	for scanner.Scan() {
 		prompts++
 		input = scanner.Text()
@@ -156,25 +177,14 @@ func parseYN(input string, yesDefault bool) bool {
 	return false
 }
 
-// PString parses the reader input for any os exit commands.
-func pstring(r io.Reader, setup bool) (words string) {
+// pstring parses the reader input for any os exit commands.
+func pstring(r io.Reader) (words string) {
 	if r == nil {
 		logs.ProblemFatal(ErrPString, ErrNoReader)
 	}
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
-		words = scanner.Text()
-		switch words {
-		case "-":
-			return "-"
-		case "":
-			if setup {
-				return ""
-			}
-			os.Exit(0)
-		default:
-			return words
-		}
+		return scanner.Text()
 	}
 	if err := scanner.Err(); err != nil {
 		logs.ProblemFatal(ErrPString, err)
@@ -202,7 +212,6 @@ func (k keys) numeric(input string) (key string) {
 func (k keys) prompt(r io.Reader, setup bool) (key string) {
 	prompts := 0
 	scanner := bufio.NewScanner(r)
-	watch()
 	for scanner.Scan() {
 		prompts++
 		key = scanner.Text()
@@ -226,9 +235,7 @@ func (k keys) prompt(r io.Reader, setup bool) (key string) {
 
 // ShortPrompt parses the reader input for a valid key or alias of the key.
 func (k keys) shortPrompt(r io.Reader) (key string) {
-	prompts := 0
-	scanner := bufio.NewScanner(r)
-	watch()
+	prompts, scanner := 0, bufio.NewScanner(r)
 	for scanner.Scan() {
 		prompts++
 		key = scanner.Text()
@@ -290,16 +297,4 @@ func (k keys) validate(key string) (ok bool) {
 		return false
 	}
 	return true
-}
-
-// Watch intercepts any Ctrl-C keyboard input
-// and exits to the operating system.
-func watch() {
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-c
-		fmt.Printf("\n\n%s\n", NoChange)
-		os.Exit(0)
-	}()
 }

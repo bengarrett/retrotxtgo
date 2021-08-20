@@ -107,3 +107,19 @@ func TestMissing(t *testing.T) {
 		})
 	}
 }
+
+func TestKeySort(t *testing.T) {
+	got, keys := KeySort(), Keys()
+	lenG, lenK := len(got), len(keys)
+	if lenG == 0 {
+		t.Errorf("KeySort() is empty")
+		return
+	}
+	if lenG != lenK {
+		t.Errorf("KeySort() length = %d, want %d", lenG, lenK)
+	}
+	want := "html.font.family"
+	if s := got[0]; s != want {
+		t.Errorf("KeySort()[0] = %s, want %s", s, want)
+	}
+}

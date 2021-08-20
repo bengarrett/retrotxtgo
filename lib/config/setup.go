@@ -11,21 +11,31 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/bengarrett/retrotxtgo/static"
-	"github.com/spf13/viper"
 )
+
+// CtrlC intercepts Ctrl-C key combinations to exit out of the Setup.
+func CtrlC() {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		fmt.Printf("  exited from the %s setup", meta.Name)
+		os.Exit(0)
+	}()
+}
 
 // Setup walks through all the settings and saves them to the configuration file.
 // Use start to begin the walk through at the question number, or leave it at 0.
 func Setup(start int) {
 	const width = 80
-	keys := Keys()
+	keys := KeySort()
 	fmt.Printf("%s\n%s\n%s\n%s\n\n",
 		logo(),
 		fmt.Sprintf("Walk through all of the %s settings.", meta.Name),
 		Location(),
 		enterKey())
 	fmt.Println(str.HRPadded(width))
-	watch()
+	CtrlC()
 	for i, key := range keys {
 		if start > i+1 {
 			continue
@@ -36,15 +46,15 @@ func Setup(start int) {
 		Update(key, true)
 		fmt.Println(str.HRPadded(width))
 	}
-	fmt.Println(Info(viper.GetString("style.info")))
+	fmt.Printf("The %s setup and configuration is complete.\n", meta.Name)
 }
 
 // EnterKey returns the appropriate Setup instructions based on the user's platform.
 func enterKey() string {
 	if runtime.GOOS == "darwin" {
-		return "At any time press ↩ return to skip the question or ⌃ control-c to quit setup."
+		return "To quit setup, press ↩ return to skip the question or ⌃ control-C."
 	}
-	return "At any time press ⏎ return to skip the question or Ctrl-c to quit setup."
+	return "To quit setup, press ⏎ return to skip the question or Ctrl-C."
 }
 
 // Logo prints the ANSI logo.
@@ -56,15 +66,4 @@ func logo() string {
 	}
 	// the terminal screen needs to be cleared if the logo is to display correctly
 	return fmt.Sprint(clear + string(b) + reset)
-}
-
-// Watch intercepts Ctrl-C key combinations to exit out of the Setup.
-func watch() {
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-c
-		fmt.Printf("\n\n%s Quit setup\n", str.Info())
-		os.Exit(0)
-	}()
 }

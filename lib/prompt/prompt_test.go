@@ -9,7 +9,12 @@ import (
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/meta"
+	"github.com/gookit/color"
 )
+
+func init() {
+	color.Enable = false
+}
 
 func ExampleYesNo() {
 	yn := YesNo("Say hello", true)
@@ -196,8 +201,7 @@ func Test_keys_shortValidate(t *testing.T) {
 
 func Test_pstring(t *testing.T) {
 	type args struct {
-		r     io.Reader
-		setup bool
+		r io.Reader
 	}
 	a := strings.NewReader("my request")
 	b := strings.NewReader("-")
@@ -207,13 +211,13 @@ func Test_pstring(t *testing.T) {
 		args      args
 		wantWords string
 	}{
-		{"input", args{a, false}, "my request"},
-		{"remove", args{b, false}, "-"},
-		{"enter", args{c, true}, ""},
+		{"input", args{a}, "my request"},
+		{"remove", args{b}, "-"},
+		{"enter", args{c}, ""},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotWords := pstring(tt.args.r, tt.args.setup); gotWords != tt.wantWords {
+			if gotWords := pstring(tt.args.r); gotWords != tt.wantWords {
 				t.Errorf("pstring() = %v, want %v", gotWords, tt.wantWords)
 			}
 		})
