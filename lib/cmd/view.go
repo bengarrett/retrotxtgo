@@ -45,11 +45,12 @@ var viewCmd = &cobra.Command{
 	Example: exampleCmd(viewExample),
 	Run: func(cmd *cobra.Command, args []string) {
 		viewParsePipe(cmd)
-		viewParseArgs(cmd, args)
+		viewParseArgs(cmd, args...)
 	},
 }
 
-func viewParseArgs(cmd *cobra.Command, args []string) {
+// viewParseArgs parses the arguments supplied with the view command.
+func viewParseArgs(cmd *cobra.Command, args ...string) {
 	conv := convert.Convert{}
 	conv.Flags = convert.Flags{
 		Controls:  viewFlag.controls,
@@ -75,6 +76,7 @@ func viewParseArgs(cmd *cobra.Command, args []string) {
 	}
 }
 
+// viewParseArg parses an argument supplied with the view command.
 func viewParseArg(cmd *cobra.Command, conv *convert.Convert, i int, arg string) (skip bool, r []rune) {
 	const halfPage = 40
 	conv.Output = convert.Output{} // output must be reset
@@ -108,9 +110,10 @@ func viewParseArg(cmd *cobra.Command, conv *convert.Convert, i int, arg string) 
 	if i > 0 {
 		fmt.Println(str.HRPadded(halfPage))
 	}
-	return viewParseBytes(cmd, conv, arg, b)
+	return viewParseBytes(cmd, conv, arg, b...)
 }
 
+// viewParsePipe parses piped the standard input (stdin) for the view command.
 func viewParsePipe(cmd *cobra.Command) {
 	if !filesystem.IsPipe() {
 		return
@@ -140,12 +143,13 @@ func viewParsePipe(cmd *cobra.Command) {
 	if err != nil {
 		logs.ProblemMarkFatal("view", logs.ErrPipe, err)
 	}
-	_, r := viewParseBytes(cmd, &conv, "piped", b)
+	_, r := viewParseBytes(cmd, &conv, "piped", b...)
 	fmt.Print(string(r))
 	os.Exit(0)
 }
 
-func viewParseBytes(cmd *cobra.Command, conv *convert.Convert, arg string, b []byte) (skip bool, r []rune) {
+// viewParseBytes parses byte data.
+func viewParseBytes(cmd *cobra.Command, conv *convert.Convert, arg string, b ...byte) (skip bool, r []rune) {
 	// configure source encoding
 	name := "CP437"
 	cp := cmd.Flags().Lookup("encode")
@@ -158,7 +162,6 @@ func viewParseBytes(cmd *cobra.Command, conv *convert.Convert, arg string, b []b
 		logs.ProblemMarkFatal(arg, logs.ErrEncode, err)
 	}
 	conv.Source.E = f.From
-
 	// make sure the file source isn't already encoded as UTF-8
 	if utf8.Valid(b) {
 		fmt.Println(string(b))
@@ -184,7 +187,6 @@ func viewParseBytes(cmd *cobra.Command, conv *convert.Convert, arg string, b []b
 }
 
 func init() {
-	// view cmd
 	rootCmd.AddCommand(viewCmd)
 	flagEncode(&viewFlag.encode, viewCmd)
 	flagControls(&viewFlag.controls, viewCmd)
@@ -194,7 +196,7 @@ func init() {
 	viewCmd.Flags().SortFlags = false
 }
 
-// viewToFlag prints the results of viewEncode().
+// viewToFlag prints the output of viewEncode.
 func viewToFlag(r ...rune) (success bool) {
 	newer, err := viewEncode(viewFlag.to, r...)
 	if err != nil {

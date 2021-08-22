@@ -116,7 +116,7 @@ func init() {
 }
 
 // initConfig reads in the config file and ENV variables if set.
-// This init can be run twice due to the Cobra initializer registers.
+// This init might be run twice due to the Cobra initializer registers.
 func initConfig() {
 	// read in environment variables
 	viper.SetEnvPrefix("env")

@@ -9,16 +9,16 @@ import (
 
 func Example_listTable() {
 	color.Enable = false
-	args := []string{"cp437"}
-	t := listTable(args)
+	names := []string{"cp437"}
+	t := listTable(names...)
 	fmt.Printf("%d characters in the table", len(t))
-	// Output: 1690 characters in the table
+	// Output: 1689 characters in the table
 }
-func Example_listTables() {
+func Example_listTbls() {
 	color.Enable = false
-	t := listAllTables()
+	t := listTbls()
 	fmt.Printf("%d characters in the table", len(t))
-	// Output: 74975 characters in the table
+	// Output: 74928 characters in the table
 }
 
 func Test_examples(t *testing.T) {
@@ -29,19 +29,19 @@ func Test_examples(t *testing.T) {
 	})
 }
 
-func Test_skipTable(t *testing.T) {
+func Test_usableTbl(t *testing.T) {
 	tests := []struct {
 		n    string
 		name string
 		want bool
 	}{
 		{"empty", "", false},
-		{"utf", "UTF-32Be", true},
+		{"utf", "UTF-32Be", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.n, func(t *testing.T) {
-			if got := skipTable(tt.name); got != tt.want {
-				t.Errorf("skipTable() = %v, want %v", got, tt.want)
+			if got := usableTbl(tt.name); got != tt.want {
+				t.Errorf("usableTbl() = %v, want %v", got, tt.want)
 			}
 		})
 	}

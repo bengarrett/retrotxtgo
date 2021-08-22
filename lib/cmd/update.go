@@ -54,7 +54,7 @@ func chkRelease() (newRel bool, v string) {
 	return false, v
 }
 
-// CacheGet returns the stored Github API ETag HTTP header and release version.
+// cacheGet reads the stored GitHub API, HTTP ETag header and release version.
 func cacheGet() (etag, ver string) {
 	cf, err := home().DataPath(cacheFile)
 	if err != nil {
@@ -81,7 +81,7 @@ func cacheGet() (etag, ver string) {
 	return cache.Etag, cache.Ver
 }
 
-// CacheSet saves the Github API ETag HTTP header and release version.
+// cacheSet saves the Github API, ETag HTTP header and release version.
 func cacheSet(etag, ver string) error {
 	if etag == "" || ver == "" {
 		return nil
@@ -104,8 +104,7 @@ func cacheSet(etag, ver string) error {
 	return nil
 }
 
-// Compare the version of this executable program against
-// the latest version hosted on GitHub.
+// compare the version value of this executable program against the latest version hosted on GitHub.
 func compare(current, fetched string) bool {
 	cur := meta.Semantic(current)
 	if !cur.Valid() {
@@ -127,7 +126,7 @@ func compare(current, fetched string) bool {
 	return false
 }
 
-// Home returns the user's home directory determined by the host operating system.
+// home returns the user home directory.
 func home() *gap.Scope {
 	return gap.NewScope(gap.User, meta.Dir)
 }

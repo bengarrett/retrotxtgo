@@ -45,7 +45,7 @@ var listCmdCodepages = &cobra.Command{
 	Long: fmt.Sprintf("List the available legacy codepages that %s can convert to UTF-8.",
 		meta.Name),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(convert.List())
+		fmt.Print(convert.List())
 	},
 }
 
@@ -65,7 +65,7 @@ var listCmdExamples = &cobra.Command{
 		str.Example("create"), str.Example("save"), str.Example("info"), str.Example("view")),
 	Example: exampleCmd(listExpExample),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(examples())
+		fmt.Print(examples())
 	},
 }
 
@@ -127,19 +127,20 @@ var listCmdTable = &cobra.Command{
 	Example: exampleCmd(listTableExample),
 	Run: func(cmd *cobra.Command, args []string) {
 		if !printUsage(cmd, args...) {
-			fmt.Println(listTable(args))
+			fmt.Print(listTable(args...))
 		}
 	},
 }
 
-func listTable(args []string) (s string) {
-	for _, arg := range args {
-		table, err := convert.Table(arg)
+// listTable returns one or more named encodings in a tabled format.
+func listTable(names ...string) (s string) {
+	for _, name := range names {
+		table, err := convert.Table(name)
 		if err != nil {
-			logs.ProblemMark(arg, ErrTable, err)
+			logs.ProblemMark(name, ErrTable, err)
 			continue
 		}
-		s += fmt.Sprintln(table.String())
+		s = fmt.Sprintf("%s%s", s, table.String())
 	}
 	return s
 }
@@ -149,11 +150,12 @@ var listCmdTables = &cobra.Command{
 	Short: "Display the characters of every codepage table inuse",
 	Long:  "Display the characters of every codepage table inuse.",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Print(listAllTables())
+		fmt.Print(listTbls())
 	},
 }
 
-func listAllTables() (s string) {
+// listTbls returns all the supported encodings in a tabled format.
+func listTbls() (s string) {
 	for _, e := range convert.Encodings() {
 		var (
 			err  error
@@ -169,7 +171,7 @@ func listAllTables() (s string) {
 				continue
 			}
 		}
-		if skipTable(name) {
+		if !usableTbl(name) {
 			continue
 		}
 		table, err := convert.Table(name)
@@ -177,29 +179,24 @@ func listAllTables() (s string) {
 			logs.ProblemMark(name, ErrTable, err)
 			continue
 		}
-		s += fmt.Sprintln(table.String())
+		s = fmt.Sprintf("%s%s", s, table.String())
 	}
 	return s
 }
 
-func init() {
-	// list cmd
-	rootCmd.AddCommand(listCmd)
-	// codepages cmd
-	listCmd.AddCommand(listCmdCodepages)
-	// examples cmd
-	listCmd.AddCommand(listCmdExamples)
-	// table cmd
-	listCmd.AddCommand(listCmdTable)
-	// tables cmd
-	listCmd.AddCommand(listCmdTables)
+// usableTbl returns true if the named encoding be shown in an 8-bit table.
+func usableTbl(name string) bool {
+	switch strings.ToLower(name) {
+	case "", "utf-16", "utf-16be", "utf-16le", "utf-32", "utf-32be", "utf-32le":
+		return false
+	}
+	return true
 }
 
-// skipTable ignores encodings that cannot be correctly shown in an 8-bit table.
-func skipTable(name string) bool {
-	switch strings.ToLower(name) {
-	case "utf-16", "utf-16be", "utf-16le", "utf-32", "utf-32be", "utf-32le":
-		return true
-	}
-	return false
+func init() {
+	rootCmd.AddCommand(listCmd)
+	listCmd.AddCommand(listCmdCodepages)
+	listCmd.AddCommand(listCmdExamples)
+	listCmd.AddCommand(listCmdTable)
+	listCmd.AddCommand(listCmdTables)
 }
