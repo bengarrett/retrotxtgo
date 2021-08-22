@@ -31,20 +31,20 @@ type update struct {
 	value interface{}
 }
 
-// ColorCSS prints colored CSS syntax highlighting.
+// ColorCSS returns the element colored using CSS syntax highlights.
 func ColorCSS(elm string) string {
 	style := viper.GetString(styleh)
 	return colorElm(elm, "css", style, true)
 }
 
-// ColorHTML prints colored syntax highlighting to HTML elements.
+// ColorHTML returns the element colored using HTML syntax highlights.
 func ColorHTML(elm string) string {
 	style := viper.GetString(styleh)
 	return colorElm(elm, "html", style, true)
 }
 
 // List and print all the available configurations.
-func List() (err error) {
+func List() error {
 	capitalize := func(s string) string {
 		return strings.Title(s[:1]) + s[1:]
 	}
@@ -88,7 +88,7 @@ func List() (err error) {
 	return w.Flush()
 }
 
-// Names lists the chroma style names.
+// Names returns the chroma style names.
 func Names(lexer string) string {
 	var s names = styles.Names()
 	return s.string(true, lexer)
@@ -147,6 +147,7 @@ func Validate(key string) (ok bool) {
 	return true
 }
 
+// updateBool the boolean value of the named setting.
 func updateBool(b bool, name string) {
 	switch b {
 	case true:
@@ -156,6 +157,7 @@ func updateBool(b bool, name string) {
 	}
 }
 
+// updateString the string value of the named setting.
 func updateString(s, name, value string) {
 	const sd = saveDir
 	switch s {
@@ -186,6 +188,7 @@ func updateString(s, name, value string) {
 	}
 }
 
+// recommend uses the s value as a user input suggestion.
 func recommend(s string) string {
 	if s == "" {
 		return fmt.Sprintf(" (suggestion: %s)", str.Example("do not use"))
@@ -193,7 +196,7 @@ func recommend(s string) string {
 	return fmt.Sprintf(" (suggestion: %s)", str.Example(s))
 }
 
-// updatePrompt prompts the user for a config setting input.
+// updatePrompt prompts the user for input to a config file setting.
 func updatePrompt(u update) {
 	switch u.name {
 	case "editor":
@@ -435,7 +438,7 @@ func (n names) string(theme bool, lexer string) string {
 }
 
 // dirExpansion traverses the named directory to apply shell-like expansions.
-// It currently supports limited Bash tilde, shell dot and double dot syntax.
+// It supports limited Bash tilde, shell dot and double dot syntax.
 func dirExpansion(name string) (dir string) {
 	const sep, homeDir, currentDir, parentDir = string(os.PathSeparator), "~", ".", ".."
 	if name == "" || name == sep {
@@ -481,7 +484,7 @@ func dirExpansion(name string) (dir string) {
 	return dir
 }
 
-// portInfo returns valid and recommended HTTP port values.
+// portInfo returns recommended and valid HTTP port values.
 func portInfo() string {
 	type ports struct {
 		max uint
@@ -559,7 +562,7 @@ func metaDefaults(name string) string {
 	return ""
 }
 
-// setTitle previews and prompts for the title element.
+// setTitle prompts for and previews a HTML title element value.
 func setTitle(name, value string, setup bool) {
 	elm := fmt.Sprintf("%s\n%s\n%s\n",
 		"  <head>",
@@ -572,13 +575,13 @@ func setTitle(name, value string, setup bool) {
 	setString(name, setup)
 }
 
+// previewPrompt returns the available options for the named setting.
 func previewPrompt(name, value string) string {
 	return fmt.Sprintf("%s:", previewPromptPrint(name, value))
 }
 
-// previewPromptPrint returns the available input options.
-func previewPromptPrint(name, value string) (p string) {
-	p = "Set a new value"
+func previewPromptPrint(name, value string) string {
+	p := "Set a new value"
 	if name == keywords {
 		p = "Set some comma-separated keywords"
 		if value != "" {
@@ -601,7 +604,7 @@ func recommendPrompt(name, value, suggest string) string {
 	return fmt.Sprintf("%s%s:", p, recommend(suggest))
 }
 
-// save value to the named configuration.
+// save the value of the named setting to the configuration file.
 func save(name string, setup bool, value interface{}) {
 	if name == "" {
 		logs.SaveFatal(fmt.Errorf("save: %w", logs.ErrNameNil))
@@ -643,6 +646,7 @@ func save(name string, setup bool, value interface{}) {
 	}
 }
 
+// skipSave returns true if the named value doesn't need updating.
 func skipSave(name string, value interface{}) bool {
 	switch v := value.(type) {
 	case bool:
@@ -747,7 +751,7 @@ func setFont(value string, setup bool) {
 	setShortStrings(fontFamily, setup, create.Fonts()...)
 }
 
-// setFont previews and saves the embed Base64 font setting.
+// setFont previews and saves the embedded Base64 font setting.
 func setFontEmbed(value, setup bool) {
 	const name = fontEmbed
 	elm := fmt.Sprintf("  %s\n  %s\n  %s\n",
@@ -768,7 +772,7 @@ func setFontEmbed(value, setup bool) {
 	save(name, setup, b)
 }
 
-// SetGenerator previews and prompts the custom program generator meta tag.
+// SetGenerator prompts for and previews the custom program generator meta tag.
 func setGenerator(value bool) {
 	const name = genr
 	elm := fmt.Sprintf("  %s\n    %s\n  %s\n",

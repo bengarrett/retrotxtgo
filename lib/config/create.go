@@ -22,7 +22,7 @@ func New(overwrite bool) error {
 	return nil
 }
 
-// Create a named configuration file.
+// Create a named configuration file with the option to overwrite any existing files.
 func Create(name string, ow bool) error {
 	if name == "" {
 		return fmt.Errorf("create configuration: %w", logs.ErrNameNil)
@@ -54,6 +54,7 @@ func createNew(name string) error {
 	return nil
 }
 
+// configDoesExist prints a how-to message when a config file already exists.
 func configDoesExist(name, suffix string) {
 	example := func(s string) string {
 		x := fmt.Sprintf("%s %s", strings.TrimSuffix(name, suffix), s)

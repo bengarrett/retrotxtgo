@@ -198,6 +198,7 @@ func Marshal() (interface{}, error) {
 	return sc, nil
 }
 
+// marshals sets the default value for the key.
 func (sc *Settings) marshals(key string) error { // nolint:gocyclo
 	switch key {
 	case editor:
@@ -244,6 +245,7 @@ func (sc *Settings) marshals(key string) error { // nolint:gocyclo
 	return nil
 }
 
+// getBool returns the default boolean value for the key.
 func getBool(key string) bool {
 	if v := viper.Get(key); v != nil {
 		return v.(bool)
@@ -257,6 +259,7 @@ func getBool(key string) bool {
 	return false
 }
 
+// getUint returns the default integer value for the key.
 func getUint(key string) uint {
 	if v := viper.GetUint(key); v != 0 {
 		return v
@@ -270,6 +273,7 @@ func getUint(key string) uint {
 	return 0
 }
 
+// getString returns the default string value for the key.
 func getString(key string) string {
 	if v := viper.GetString(key); v != "" {
 		return v
@@ -283,9 +287,9 @@ func getString(key string) string {
 	return ""
 }
 
-// Missing lists the settings that are not found in the configuration file.
+// Missing returns the settings that are not found in the configuration file.
 // This could be due to new features being added after the file was generated
-// or because of manual edits.
+// or because of manual file edits.
 func Missing() (list []string) {
 	if len(Reset()) == len(viper.AllSettings()) {
 		return list

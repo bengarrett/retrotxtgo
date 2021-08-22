@@ -25,7 +25,7 @@ func CtrlC() {
 }
 
 // Setup walks through all the settings and saves them to the configuration file.
-// Use start to begin the walk through at the question number, or leave it at 0.
+// Start the walk through at the provided question number or leave it at 0.
 func Setup(start int) {
 	const width = 80
 	keys := KeySort()
@@ -57,13 +57,14 @@ func enterKey() string {
 	return "To quit setup, press ⏎ return to skip the question or Ctrl-C."
 }
 
-// logo prints the ANSI logo.
+// logo returns the 256-color, ANSI logo.
 func logo() string {
-	const clear, reset, n = "\033c", "\033[0m", "text/retrotxt.utf8ans"
+	const clearScreen, resetScreen, n = "\033c", "\033[0m", "text/retrotxt.utf8ans"
 	b, err := static.Text.ReadFile(n)
 	if err != nil {
 		logs.ProblemMarkFatal(n, logs.ErrSampFile, ErrLogo)
 	}
 	// the terminal screen needs to be cleared if the logo is to display correctly
-	return fmt.Sprint(clear + string(b) + reset)
+	return fmt.Sprintf("%s%s%s",
+		clearScreen, string(b), resetScreen)
 }

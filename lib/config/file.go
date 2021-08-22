@@ -25,7 +25,7 @@ func InitDefaults() {
 	}
 }
 
-// Path is the absolute path and filename of the configuration file.
+// Path returns the absolute path of the configuration file.
 func Path() string {
 	dir, err := gap.NewScope(gap.User, meta.Dir).ConfigPath(namedFile)
 	if err != nil {
@@ -53,14 +53,14 @@ func Location() string {
 }
 
 // SetConfig reads and loads a configuration file.
-func SetConfig(flag string) (err error) {
+func SetConfig(flag string) error {
 	viper.SetConfigType("yaml")
 	path := flag
 	if flag == "" {
 		path = Path()
 	}
 	viper.SetConfigFile(path)
-	if err = viper.ReadInConfig(); err != nil {
+	if err := viper.ReadInConfig(); err != nil {
 		if flag == "" {
 			if errors.Is(err, os.ErrNotExist) {
 				// auto-generate new config except when the --config flag is used
@@ -104,7 +104,7 @@ func SetConfig(flag string) (err error) {
 }
 
 // UpdateConfig saves all viper settings to the named file.
-func UpdateConfig(name string, stdout bool) (err error) {
+func UpdateConfig(name string, stdout bool) error {
 	if name == "" {
 		name = viper.ConfigFileUsed()
 	}
@@ -128,7 +128,7 @@ func UpdateConfig(name string, stdout bool) (err error) {
 	return nil
 }
 
-// configMissing prints an error notice and exits.
+// configMissing prints an config file error notice and exits.
 func configMissing(name, suffix string) {
 	cmd := strings.TrimSuffix(name, suffix) + " create"
 	used := viper.ConfigFileUsed()

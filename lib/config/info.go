@@ -40,6 +40,7 @@ func Info(style string) error {
 	return nil
 }
 
+// missing returns a printed list of missing settings in the config file.
 func missing(list ...string) string {
 	const tries = 5
 	l := len(list)

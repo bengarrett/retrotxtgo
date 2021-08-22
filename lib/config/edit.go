@@ -35,8 +35,8 @@ func Edit() error {
 }
 
 // Editor returns the path of a configured or discovered text editor.
-func Editor() (edit string) {
-	edit = viper.GetString("editor")
+func Editor() string {
+	edit := viper.GetString("editor")
 	_, err := exec.LookPath(edit)
 	if err != nil {
 		if edit != "" {
@@ -53,12 +53,14 @@ func Editor() (edit string) {
 	return edit
 }
 
-func lookEdit() (edit string) {
+// lookEdit attempts to find any known text editors on the host system.
+func lookEdit() string {
 	editors := [5]string{"nano", "vim", "emacs"}
 	if runtime.GOOS == "windows" {
 		editors[3] = "notepad++.exe"
 		editors[4] = "notepad.exe"
 	}
+	edit := ""
 	for _, editor := range editors {
 		if editor == "" {
 			continue
