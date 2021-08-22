@@ -106,6 +106,7 @@ var configInfoCmd = &cobra.Command{
 	},
 }
 
+// configInfo is the "config info" run command.
 func configInfo() (exit bool) {
 	if configFlag.configs {
 		if err := config.List(); err != nil {
@@ -153,7 +154,8 @@ var configSetCmd = &cobra.Command{
 	},
 }
 
-func configListAll() bool {
+// configListAll is the "config set --list" command run.
+func configListAll() (ok bool) {
 	if configFlag.configs {
 		if err := config.List(); err != nil {
 			logs.ProblemCmdFatal("config", "list", err)
@@ -173,8 +175,11 @@ var configSetupCmd = &cobra.Command{
 	},
 }
 
+// init is always called by the Cobra library to be used for global flags and commands.
 func init() {
-	if str.Term(str.GetEnv("COLORTERM"), str.GetEnv("TERM")) == "none" {
+	const highColor, basicColor = "COLORTERM", "TERM"
+	if str.Term(str.GetEnv(highColor), str.GetEnv(basicColor)) == "none" {
+		// disable all color output
 		color.Enable = false
 	}
 	rootCmd.AddCommand(configCmd)

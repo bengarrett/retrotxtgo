@@ -59,6 +59,7 @@ var createExample = fmt.Sprintf("  %s%s\n%s%s\n%s%s\n%s%s\n%s%s",
 	"# pipe a HTML file created from file.txt\n",
 	fmt.Sprintf("%s create file.txt | %s", meta.Bin, catCmd()))
 
+// catCmd returns the os command name to concatenate a file to standard output.
 func catCmd() string {
 	s := "cat"
 	if runtime.GOOS == "windows" {
@@ -273,8 +274,8 @@ func initFlags() map[int]metaFlag {
 	}
 }
 
-// parseBody is a hidden function used for debugging.
-// It takes the supplied text and uses it as the content of the generated HTML <pre></pre> elements.
+// parseBody is a hidden debugging feature.
+// It takes the supplied text and uses for the HTML <pre></pre> elements text content.
 func parseBody(cmd *cobra.Command) {
 	// hidden --body flag ignores most other args
 	if body := cmd.Flags().Lookup("body"); body.Changed {
@@ -380,8 +381,7 @@ func appendSAUCE(src *[]byte) {
 	}
 }
 
-// staticTextfile fetches a static text file from `/static/text`
-// and uses it as the input source text.
+// staticTextfile fetches an embed text file from the `/static/text` directory, for use as an input file.
 func staticTextfile(f sample.Flags, conv *convert.Convert, arg string, changed bool) (src []byte, cont bool) {
 	var err error
 	if ok := sample.Valid(arg); ok {

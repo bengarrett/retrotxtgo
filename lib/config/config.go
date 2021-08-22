@@ -32,15 +32,18 @@ const (
 	serve      = "serve"
 	stylei     = "style.info"
 	styleh     = "style.html"
+
+	filemode  os.FileMode = 0660
+	namedFile             = "config.yaml"
 )
 
 // Defaults for setting keys.
 type Defaults map[string]interface{}
 
 // Reset configuration values.
+// These are the default values whenever a setting is deleted,
+// or when a new configuration file is created.
 func Reset() Defaults {
-	// these will be the default values when a setting is deleted
-	// or when a new config file is created
 	return Defaults{
 		editor:     "",
 		fontEmbed:  false,
@@ -92,7 +95,7 @@ func Tip() Hints {
 	}
 }
 
-// Settings types and names to be saved in YAML.
+// Settings types and names to be saved as YAML.
 type Settings struct {
 	Editor string
 	HTML   struct {
@@ -124,26 +127,19 @@ type Settings struct {
 	}
 }
 
-const (
-	filemode  os.FileMode = 0660
-	namedFile             = "config.yaml"
-)
-
 func cmdPath() string {
 	return fmt.Sprintf("%s config", meta.Bin)
 }
 
 // Formats choices for flags.
 type Formats struct {
-	Info    [5]string
-	Version [4]string
+	Info [5]string
 }
 
-// Format flag choices for info and version commands.
+// Format flag choices for the info command.
 func Format() Formats {
 	return Formats{
-		Info:    [5]string{"color", "json", "json.min", "text", "xml"},
-		Version: [4]string{"color", "json", "json.min", "text"},
+		Info: [5]string{"color", "json", "json.min", "text", "xml"},
 	}
 }
 
