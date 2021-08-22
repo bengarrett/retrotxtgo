@@ -87,7 +87,7 @@ func Options(s string, shorthand, flagHelp bool, opts ...string) (usage string) 
 		keys = strings.Join(opts, ", ")
 	}
 	if flagHelp {
-		return fmt.Sprintf("%s.\nflag options: %s", s, color.Info.Sprint(keys))
+		return fmt.Sprintf("%s\nflag options: %s", s, color.Info.Sprint(keys))
 	}
 	return fmt.Sprintf("%s.\n  Options: %s", s, color.Info.Sprint(keys))
 }

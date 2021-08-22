@@ -24,10 +24,8 @@ var infoFlag struct {
 }
 
 var infoExample = fmt.Sprintf("  %s %s\n%s %s",
-	meta.Bin,
-	"info text.asc logo.jpg # multiple files",
-	meta.Bin,
-	"info file.txt --format=json # different syntax")
+	meta.Bin, "info text.asc logo.jpg # print the information of multiple files",
+	meta.Bin, "info file.txt --format=json # print the information using a structured syntax")
 
 // infoCmd represents the info command.
 var infoCmd = &cobra.Command{
@@ -77,7 +75,7 @@ func init() {
 	rootCmd.AddCommand(infoCmd)
 	i := config.Format().Info
 	infoCmd.Flags().StringVarP(&infoFlag.format, "format", "f", "color",
-		str.Options("output format", true, true, i[:]...))
+		str.Options("print format or syntax", true, true, i[:]...))
 }
 
 // infoSample extracts and saves an embed sample file then returns its location.
