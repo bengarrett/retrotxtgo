@@ -163,8 +163,7 @@ func exampleCmd(tmpl string) string {
 	// color the example text except text following
 	// the last hash #, which is treated as a comment
 	const cmmt, sentence = "#", 2
-	var s string
-	scanner := bufio.NewScanner(&b)
+	scanner, s := bufio.NewScanner(&b), ""
 	for scanner.Scan() {
 		ss := strings.Split(scanner.Text(), cmmt)
 		l := len(ss)
@@ -183,7 +182,8 @@ func exampleCmd(tmpl string) string {
 // flagControls handles the controls flag.
 func flagControls(p *[]string, cc *cobra.Command) {
 	cc.Flags().StringSliceVarP(p, "controls", "c", []string{},
-		`use these control codes
+		`implement these control codes (default "eof,tab")
+separate multiple controls with commas
   eof    end of file mark
   tab    horizontal tab
   bell   bell or terminal alert
@@ -191,9 +191,7 @@ func flagControls(p *[]string, cc *cobra.Command) {
   lf     line feed
   bs backspace, del delete character, esc escape character
   ff formfeed, vt vertical tab
-(default eof,tab)
-separate multiple controls with commas
-`+str.Example("--controls=eof,tab,bell")+"\n")
+`)
 }
 
 // flagEncode handles the encode flag.
@@ -201,7 +199,7 @@ func flagEncode(p *string, cc *cobra.Command) {
 	cc.Flags().StringVarP(p, "encode", "e", "",
 		fmt.Sprintf(`character encoding used by the filename(s)
 this flag is silently ignored if Unicode text is detected
-otherwise the default is used (default CP437)
+otherwise the default is used (default "CP437")
 see the list of encode values %s%s`,
 			str.Example(meta.Bin+" list codepages"), "\n"))
 }
@@ -209,26 +207,28 @@ see the list of encode values %s%s`,
 // flagRunes handles the swap-chars flag.
 func flagRunes(p *[]int, cc *cobra.Command) {
 	cc.Flags().IntSliceVarP(p, "swap-chars", "x", []int{},
-		`swap out these characters with UTF8 alternatives
+		`swap out these characters with UTF8 alternatives (default "0,124")
+separate multiple values with commas
   0    C null for a space
   124  Unicode vertical bar | for the IBM broken pipe ¦
   127  IBM house ⌂ for the Greek capital delta Δ
   178  Box pipe │ for the Unicode integral extension ⎮
   251  Square root √ for the Unicode check mark ✓
-(default 0,124)
-separate multiple values with commas
-`+str.Example("--swap-chars=0,124,127")+"\n")
+`)
 }
 
 // flagTo handles the to flag.
 func flagTo(p *string, cc *cobra.Command) {
-	cc.Flags().StringVar(p, "to", "", fmt.Sprintf(`alternative character encoding to print to stdout
+	cc.Flags().StringVar(p, "to", "",
+		fmt.Sprintf(`alternative character encoding to print to stdout
 modern terminals and %s use UTF8 encoding
 this flag is unreliable and not recommended
-see the list of usable values %s%s`, meta.Name, str.Example(meta.Bin+" list codepages"), "\n"))
+see the list of usable values %s%s`,
+			meta.Name, str.Example(meta.Bin+" list codepages"), "\n"))
 }
 
 // flagWidth handles the width flag.
 func flagWidth(p *int, cc *cobra.Command) {
-	cc.Flags().IntVarP(p, "width", "w", viewFlag.width, "maximum document character/column width")
+	cc.Flags().IntVarP(p, "width", "w", viewFlag.width,
+		"maximum document character/column width")
 }

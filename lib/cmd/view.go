@@ -31,15 +31,17 @@ var viewFlag = viewFlags{
 	width:    0,
 }
 
-var viewExample = fmt.Sprintf(`  %s view file.txt -e latin1
-  %s view file1.txt file2.txt --encode="iso-8859-1"
-  cat file.txt | %s view`, meta.Bin, meta.Bin, meta.Bin)
+var viewExample = fmt.Sprintf("  %s\n%s\n%s",
+	fmt.Sprintf("%s view file.txt -e latin1", meta.Bin),
+	fmt.Sprintf("%s view file1.txt file2.txt --encode=\"iso-8859-1\"", meta.Bin),
+	fmt.Sprintf("cat file.txt | %s view", meta.Bin))
 
 // viewCmd represents the view command.
 var viewCmd = &cobra.Command{
 	Use:     "view [filenames]",
 	Aliases: []string{"v"},
-	Short:   "Print a text file to the terminal using the standard output",
+	Short:   "Print a text file to the terminal using standard output",
+	Long:    "Print a text file to the terminal using standard output.",
 	Example: exampleCmd(viewExample),
 	Run: func(cmd *cobra.Command, args []string) {
 		viewParsePipe(cmd)
@@ -74,11 +76,11 @@ func viewParseArgs(cmd *cobra.Command, args []string) {
 }
 
 func viewParseArg(cmd *cobra.Command, conv *convert.Convert, i int, arg string) (skip bool, r []rune) {
-	var err error
 	const halfPage = 40
 	conv.Output = convert.Output{} // output must be reset
 	f := sample.Flags{}
 	// internal example file
+	var err error
 	if ok := sample.Valid(arg); ok {
 		var p sample.File
 		if p, err = f.Open(arg, conv); err != nil {

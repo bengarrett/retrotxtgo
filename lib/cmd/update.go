@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -14,12 +13,6 @@ import (
 	"github.com/bengarrett/retrotxtgo/meta"
 	gap "github.com/muesli/go-app-paths"
 	yaml "gopkg.in/yaml.v2"
-)
-
-var (
-	ErrCacheYaml = errors.New("set cache cannot marshal yaml")
-	ErrCacheData = errors.New("set cache cannot create a data path")
-	ErrCacheSave = errors.New("set cache cannot save data")
 )
 
 // Cache the version data.

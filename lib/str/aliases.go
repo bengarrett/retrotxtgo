@@ -75,7 +75,7 @@ func Default(s, def string) string {
 }
 
 // Options appends options: ... to the usage string.
-func Options(s string, shorthand bool, opts ...string) (usage string) {
+func Options(s string, shorthand, flagHelp bool, opts ...string) (usage string) {
 	var keys string
 	if len(opts) == 0 {
 		return s
@@ -85,6 +85,9 @@ func Options(s string, shorthand bool, opts ...string) (usage string) {
 		keys = UnderlineKeys(opts...)
 	} else {
 		keys = strings.Join(opts, ", ")
+	}
+	if flagHelp {
+		return fmt.Sprintf("%s.\nflag options: %s", s, color.Info.Sprint(keys))
 	}
 	return fmt.Sprintf("%s.\n  Options: %s", s, color.Info.Sprint(keys))
 }

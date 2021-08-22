@@ -17,4 +17,8 @@ var (
 
 	ErrBody    = errors.New("could not parse the body flag")
 	ErrServeIn = errors.New("could not serve stdin over HTTP")
+
+	ErrCacheYaml = errors.New("set cache cannot marshal yaml")
+	ErrCacheData = errors.New("set cache cannot create a data path")
+	ErrCacheSave = errors.New("set cache cannot save data")
 )

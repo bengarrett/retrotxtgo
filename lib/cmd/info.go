@@ -23,13 +23,18 @@ var infoFlag struct {
 	format string
 }
 
-var infoExample = fmt.Sprintf("  %s info text.asc logo.jpg\n  %s info file.txt --format=json", meta.Bin, meta.Bin)
+var infoExample = fmt.Sprintf("  %s %s\n%s %s",
+	meta.Bin,
+	"info text.asc logo.jpg # multiple files",
+	meta.Bin,
+	"info file.txt --format=json # different syntax")
 
 // infoCmd represents the info command.
 var infoCmd = &cobra.Command{
 	Use:     "info [filenames]",
 	Aliases: []string{"i"},
 	Short:   "Information on a text file",
+	Long:    "Discover details and information about any text or text art file.",
 	Example: exampleCmd(infoExample),
 	Run: func(cmd *cobra.Command, args []string) {
 		// piped input from other programs
@@ -72,12 +77,12 @@ func init() {
 	rootCmd.AddCommand(infoCmd)
 	i := config.Format().Info
 	infoCmd.Flags().StringVarP(&infoFlag.format, "format", "f", "color",
-		str.Options("output format", true, i[:]...))
+		str.Options("output format", true, true, i[:]...))
 }
 
 // infoSample extracts and saves an embed sample file then returns its location.
 func infoSample(name string) (filename string, err error) {
-	var s = strings.ToLower(name)
+	s := strings.ToLower(name)
 	if _, err = os.Stat(s); !os.IsNotExist(err) {
 		return "", nil
 	}

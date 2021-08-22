@@ -18,13 +18,17 @@ import (
 	"golang.org/x/text/encoding/ianaindex"
 )
 
-var listExample = fmt.Sprintf("  %s list codepages\n  %s list examples\n  %s list table cp437 cp1252 \n  %s list tables",
-	meta.Bin, meta.Bin, meta.Bin, meta.Bin)
+var listExample = fmt.Sprintf("  %s\n%s\n%s\n%s",
+	fmt.Sprintf("%s list codepages", meta.Bin),
+	fmt.Sprintf("%s list examples", meta.Bin),
+	fmt.Sprintf("%s list table cp437 cp1252", meta.Bin),
+	fmt.Sprintf("%s list tables", meta.Bin))
 
 var listCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"l"},
-	Short:   "Available built-in examples, codepages and tabled datasets",
+	Short:   "Available inbuilt examples, codepages and tabled datasets",
+	Long:    "List the available inbuilt text art and text documents, codepages and their tabled values.",
 	Example: exampleCmd(listExample),
 	Run: func(cmd *cobra.Command, args []string) {
 		if !printUsage(cmd, args...) {
@@ -36,17 +40,30 @@ var listCmd = &cobra.Command{
 var listCmdCodepages = &cobra.Command{
 	Use:     "codepages",
 	Aliases: []string{"c", "cp"},
-	Short:   fmt.Sprintf("List available legacy codepages that %s can convert into UTF-8", meta.Name),
+	Short: fmt.Sprintf("List the legacy codepages that %s can convert to UTF-8",
+		meta.Name),
+	Long: fmt.Sprintf("List the available legacy codepages that %s can convert to UTF-8.",
+		meta.Name),
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(convert.List())
 	},
 }
 
+var listExpExample = fmt.Sprintf("  %s\n%s\n%s\n%s\n%s",
+	fmt.Sprintf("%s list examples # list the builtin examples", meta.Bin),
+	fmt.Sprintf("%s info ascii    # information on the buildin ascii example", meta.Bin),
+	fmt.Sprintf("%s view ascii    # view the ascii example", meta.Bin),
+	fmt.Sprintf("%s create ascii  # create the ascii example", meta.Bin),
+	fmt.Sprintf("%s save ascii    # save the ascii example", meta.Bin))
+
 var listCmdExamples = &cobra.Command{
 	Use:     "examples",
 	Aliases: []string{"e"},
-	Short: "List pre-packaged text files for use with the " +
-		str.Example("create") + ", " + str.Example("save") + ", " + str.Example("info") + " and " + str.Example("view") + " commands",
+	Short: fmt.Sprintf("List builtin text files available for use with the %s, %s, %s and %s commands",
+		str.Example("create"), str.Example("save"), str.Example("info"), str.Example("view")),
+	Long: fmt.Sprintf("List builtin text art and documents available for use with the %s, %s, %s and %s commands.",
+		str.Example("create"), str.Example("save"), str.Example("info"), str.Example("view")),
+	Example: exampleCmd(listExpExample),
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(examples())
 	},
@@ -97,13 +114,16 @@ func examples() *bytes.Buffer {
 	return &buf
 }
 
-var listTableExample = fmt.Sprintf("  %s table cp437\n  %s table cp437 latin1 windows-1252\n  %s table iso-8859-15",
-	meta.Bin, meta.Bin, meta.Bin)
+var listTableExample = fmt.Sprintf("  %s\n%s\n%s",
+	fmt.Sprintf("%s table cp437", meta.Bin),
+	fmt.Sprintf("%s table cp437 latin1 windows-1252", meta.Bin),
+	fmt.Sprintf("%s table iso-8859-15", meta.Bin))
 
 var listCmdTable = &cobra.Command{
 	Use:     "table [codepage names or aliases]",
 	Aliases: []string{"t"},
-	Short:   "Display one or more tables showing the codepage and all their characters",
+	Short:   "Display one or more codepage tables showing all the characters in use",
+	Long:    "Display one or more codepage tables showing all the characters in use.",
 	Example: exampleCmd(listTableExample),
 	Run: func(cmd *cobra.Command, args []string) {
 		if !printUsage(cmd, args...) {
@@ -126,7 +146,8 @@ func listTable(args []string) (s string) {
 
 var listCmdTables = &cobra.Command{
 	Use:   "tables",
-	Short: "Display tables showing known codepages and characters",
+	Short: "Display the characters of every codepage table inuse",
+	Long:  "Display the characters of every codepage table inuse.",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Print(listAllTables())
 	},

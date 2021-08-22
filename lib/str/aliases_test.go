@@ -66,9 +66,10 @@ func ExampleDefault() {
 }
 
 func ExampleOptions() {
-	fmt.Print(Options("this is an example of a list of options", false, "option3", "option2", "option1"))
-	// Output:this is an example of a list of options
-	//  options: option1, option2, option3
+	fmt.Print(Options("this is an example of a list of options",
+		false, false, "option3", "option2", "option1"))
+	// Output:this is an example of a list of options.
+	//   Options: option1, option2, option3
 }
 
 func ExampleRequired() {

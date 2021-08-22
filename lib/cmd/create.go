@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"runtime"
 	"sort"
 
 	"github.com/bengarrett/retrotxtgo/lib/config"
@@ -46,18 +47,32 @@ var createFlag = createFlags{
 // flags container.
 var html create.Args
 
-var createExample = fmt.Sprintf(`  %s create file.txt -t "A text file" -d "Some text goes here"
-%s create file1.txt file2.asc --save
-%s create ~{{.}}Downloads{{.}}file.txt --archive
-%s create file.txt --serve=%d
-cat file.txt | %s create`,
-	meta.Bin, meta.Bin, meta.Bin, meta.Bin, meta.WebPort, meta.Bin)
+var createExample = fmt.Sprintf("  %s%s\n%s%s\n%s%s\n%s%s\n%s%s",
+	"# print a HTML file created from file.txt\n",
+	fmt.Sprintf("%s create file.txt --title \"A text file\" --description \"Some text goes here\"", meta.Bin),
+	"# save HTML files created from file1.txt and file2.asc\n",
+	fmt.Sprintf("%s create file1.txt file2.asc --save", meta.Bin),
+	"# save and compress a HTML file created from file.txt in Downloads.\n",
+	fmt.Sprintf("%s create ~{{.}}Downloads{{.}}file.txt --compress", meta.Bin),
+	"# host the HTML file created from file.txt\n",
+	fmt.Sprintf("%s create file.txt --serve=%d", meta.Bin, meta.WebPort),
+	"# pipe a HTML file created from file.txt\n",
+	fmt.Sprintf("%s create file.txt | %s", meta.Bin, catCmd()))
+
+func catCmd() string {
+	s := "cat"
+	if runtime.GOOS == "windows" {
+		s = "type"
+	}
+	return s
+}
 
 // createCmd represents the create command.
 var createCmd = &cobra.Command{
 	Use:     "create [filenames]",
 	Aliases: []string{"c", "html"},
-	Short:   "Create a HTML document from a text file",
+	Short:   "Create a HTML document from text files",
+	Long:    "Create a HTML document from text documents and text art files.",
 	Example: exampleCmd(createExample),
 	Run: func(cmd *cobra.Command, args []string) {
 		f := convert.Flags{
@@ -97,7 +112,7 @@ var createCmd = &cobra.Command{
 // 2) the flag has a new value to overwrite viper default.
 // 3) a blank flag value is given to overwrite viper default with an empty/disable value.
 func stringFlags(cmd *cobra.Command) {
-	var changed = func(key string) bool {
+	changed := func(key string) bool {
 		l := cmd.Flags().Lookup(key)
 		if l == nil {
 			return false
@@ -146,7 +161,8 @@ func init() {
 		buf = c.initBodyFlag(buf)
 		buf = c.initFlags(buf)
 	}
-	createCmd.Flags().BoolVarP(&html.SauceData.Use, "sauce", "", true, "use any found SAUCE metadata as HTML meta tags")
+	createCmd.Flags().BoolVarP(&html.SauceData.Use, "sauce", "", true,
+		"use any found SAUCE metadata as HTML meta tags")
 	if err := createCmd.Flags().MarkHidden("body"); err != nil {
 		logs.ProblemMarkFatal("body", ErrHideCreate, err)
 	}
@@ -164,7 +180,7 @@ func (c *metaFlag) initBodyFlag(buf bytes.Buffer) bytes.Buffer {
 	case len(c.opts) == 0:
 		fmt.Fprint(&buf, config.Tip()[c.key])
 	default:
-		fmt.Fprint(&buf, str.Options(config.Tip()[c.key], true, c.opts...))
+		fmt.Fprint(&buf, str.Options(config.Tip()[c.key], true, true, c.opts...))
 	}
 	return buf
 }

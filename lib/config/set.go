@@ -285,7 +285,7 @@ func promptLayout(u update) {
 		"  Compact:  The same as the standard layout but without any <meta> tags.",
 		"  None:     No template is used and instead only the generated markup is returned.")
 	fmt.Printf("\n%s%s%s ",
-		"  Choose a ", str.Options(Tip()[u.name], true, create.Layouts()...),
+		"  Choose a ", str.Options(Tip()[u.name], true, false, create.Layouts()...),
 		fmt.Sprintf(" (suggestion: %s):", str.Example("standard")))
 	setShortStrings(u.name, u.setup, create.Layouts()...)
 }
