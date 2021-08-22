@@ -4,7 +4,7 @@
 
 ###### version α, a work-in-progress with an incomplete feature set.
 
-## About
+## Quick Usage
 
 #### Text art and files created without Unicode often fail to display on modern systems.
 
@@ -129,19 +129,19 @@ retrotxt create ascii-logo.txt --layout=inline --font-embed --title="ASCII logo"
 
 ---
 
-# Features
+## Features
 
-- [x] Convert ASCII text to HTML.
+- Convert ASCII text to HTML.
 - [ ] Convert ANSI text to HTML.
 - [ ] Convert BBS text to HTML.
-- [x] List or export (JSON, text, XML) meta details of a text file.
-- [x] List or export SAUCE metadata of a file.
-- [x] Transform the encoding of a text file. CP437 -> UTF8, UTF8 -> ISO8859-1 ...
-- [x] View any legacy encoded text file in a UTF8 terminal by converting on the fly.
-- [x] Extensive customizations through command flags or a configuration file with a setup.
-- [ ] ANSI compatibility tests, output 16, 88, 256, high and true-color tables.
-- [x] Multi-platform support including Windows, macOS, Linux, Raspberry Pi and FreeBSD.
-- [x] IO redirection with piping support.
+- List or export (JSON, text, XML) meta details of a text file.
+- List or export SAUCE metadata of a file.
+- Transform the encoding of a text file. CP437 -> UTF8, UTF8 -> ISO8859-1 ...
+- View any legacy encoded text file in a UTF8 terminal by converting on the fly.
+- Extensive customizations through command flags or a configuration file with a setup.
+- ANSI compatibility tests, output 16, 88, 256, high and true-color tables.
+- Multi-platform support including Windows, macOS, Linux, Raspberry Pi and FreeBSD.
+- IO redirection with piping support.
 
 ---
 
@@ -201,6 +201,54 @@ retrotxt -v
 wget https://github.com/bengarrett/myip/releases/latest/download/retrotxt.apk
 apk add retrotxt.apk
 retrotxt -v
+```
+
+### Even More Uses
+
+#### Print legacy codepage tables in the terminal.
+
+```
+retrotext list table cp437 latin1
+
+ ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+         IBM Code Page 437 (DOS, OEM-US) - Extended ASCII
+     0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
+ 0 |   | ☺ | ☻ | ♥ | ♦ | ♣ | ♠ | • | ◘ | ○ | ◙ | ♂ | ♀ | ♪ | ♫ | ☼ |
+ 1 | ► | ◄ | ↕ | ‼ | ¶ | § | ▬ | ↨ | ↑ | ↓ | → | ← | ∟ | ↔ | ▲ | ▼ |
+ 2 |   | ! | " | # | $ | % | & | ' | ( | ) | * | + | , | - | . | / |
+ 3 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | : | ; | < | = | > | ? |
+ 4 | @ | A | B | C | D | E | F | G | H | I | J | K | L | M | N | O |
+ 5 | P | Q | R | S | T | U | V | W | X | Y | Z | [ | \ | ] | ^ | _ |
+ 6 | ` | a | b | c | d | e | f | g | h | i | j | k | l | m | n | o |
+ 7 | p | q | r | s | t | u | v | w | x | y | z | { | | | } | ~ | ⌂ |
+ 8 | Ç | ü | é | â | ä | à | å | ç | ê | ë | è | ï | î | ì | Ä | Å |
+ 9 | É | æ | Æ | ô | ö | ò | û | ù |   | Ö | Ü | ¢ | £ | ¥ | ₧ | ƒ |
+ A | á | í | ó | ú | ñ | Ñ | ª | º | ¿ | ⌐ | ¬ | ½ | ¼ | ¡ | « | » |
+ B | ░ | ▒ | ▓ | │ | ┤ | ╡ | ╢ | ╖ | ╕ | ╣ | ║ | ╗ | ╝ | ╜ | ╛ | ┐ |
+ C | └ | ┴ | ┬ | ├ | ─ | ┼ | ╞ | ╟ | ╚ | ╔ | ╩ | ╦ | ╠ | ═ | ╬ | ╧ |
+ D | ╨ | ╤ | ╥ | ╙ | ╘ | ╒ | ╓ | ╫ | ╪ | ┘ | ┌ | █ | ▄ | ▌ | ▐ | ▀ |
+ E | α | ß | Γ | π | Σ | σ | µ | τ | Φ | Θ | Ω | δ | ∞ | φ | ε | ∩ |
+ F | ≡ | ± | ≥ | ≤ | ⌠ | ⌡ | ÷ | ≈ | ° | ∙ | · | √ | ⁿ | ² | ■ |   |
+
+ ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+          ISO 8859-1 (Western European) - Extended ASCII
+     0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
+ 0 |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+ 1 |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+ 2 |   | ! | " | # | $ | % | & | ' | ( | ) | * | + | , | - | . | / |
+ 3 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | : | ; | < | = | > | ? |
+ 4 | @ | A | B | C | D | E | F | G | H | I | J | K | L | M | N | O |
+ 5 | P | Q | R | S | T | U | V | W | X | Y | Z | [ | \ | ] | ^ | _ |
+ 6 | ` | a | b | c | d | e | f | g | h | i | j | k | l | m | n | o |
+ 7 | p | q | r | s | t | u | v | w | x | y | z | { | | | } | ~ |   |
+ 8 |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+ 9 |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+ A |   | ¡ | ¢ | £ | ¤ | ¥ | ¦ | § | ¨ | © | ª | « | ¬ | ­  | ® | ¯ |
+ B | ° | ± | ² | ³ | ´ | µ | ¶ | · | ¸ | ¹ | º | » | ¼ | ½ | ¾ | ¿ |
+ C | À | Á | Â | Ã | Ä | Å | Æ | Ç | È | É | Ê | Ë | Ì | Í | Î | Ï |
+ D | Ð | Ñ | Ò | Ó | Ô | Õ | Ö | × | Ø | Ù | Ú | Û | Ü | Ý | Þ | ß |
+ E | à | á | â | ã | ä | å | æ | ç | è | é | ê | ë | ì | í | î | ï |
+ F | ð | ñ | ò | ó | ô | õ | ö | ÷ | ø | ù | ú | û | ü | ý | þ | ÿ |
 ```
 
 ### Building RetroTxtGo for other systems
