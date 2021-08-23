@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"os"
+	"path/filepath"
 	"regexp"
 	"time"
 
@@ -19,14 +20,16 @@ import (
 	"github.com/tdewolff/minify/js"
 )
 
-// Marshal transforms bytes into UTF-8, creates the page meta and template data.
-func (args *Args) marshal(b *[]byte) (p PageData, err error) {
+// marshal transforms bytes into UTF-8, creates the page meta and template data.
+func (args *Args) marshal(b *[]byte) (PageData, error) {
 	if b == nil {
 		return PageData{}, fmt.Errorf("pagedata: %w", ErrNilByte)
 	}
+	p := PageData{}
 	// templates are found in the dir static/html/*.gohtml
 	switch args.layout {
 	case Inline:
+		var err error
 		if p, err = args.marshalInline(b); err != nil {
 			return p, err
 		}
@@ -50,27 +53,28 @@ func (args *Args) marshal(b *[]byte) (p PageData, err error) {
 	return p, nil
 }
 
-// MarshalCompact is used by the compact layout argument.
+// marshalCompact is used by the compact layout argument.
 func (args *Args) marshalCompact(p *PageData) PageData {
 	p.PageTitle = args.pageTitle()
 	p.MetaGenerator = false
 	return *p
 }
 
-// MarshalInline is used by the inline layout argument.
-func (args *Args) marshalInline(b *[]byte) (p PageData, err error) {
+// marshalInline is used by the inline layout argument.
+func (args *Args) marshalInline(b *[]byte) (PageData, error) {
 	if b == nil {
 		return PageData{}, fmt.Errorf("pagedata: %w", ErrNilByte)
 	}
-	p.ExternalEmbed = true
+	p := PageData{
+		ExternalEmbed: true,
+	}
 	m := minify.New()
 	m.AddFunc("text/css", css.Minify)
 	m.AddFuncRegexp(regexp.MustCompile("^(application|text)/(x-)?(java|ecma)script$"), js.Minify)
 	// styles
 	s := bytes.TrimSpace(static.Styles)
 	// font
-	var f []byte
-	f, err = FontCSS(args.FontFamily.Value, args.Source.Encoding, args.FontEmbed)
+	f, err := FontCSS(args.FontFamily.Value, args.Source.Encoding, args.FontEmbed)
 	if err != nil {
 		return p, fmt.Errorf("pagedata font error: %w", err)
 	}
@@ -93,7 +97,7 @@ func (args *Args) marshalInline(b *[]byte) (p PageData, err error) {
 	return p, nil
 }
 
-// MarshalStandard is used by the standard layout argument.
+// marshalStandard is used by the standard layout argument.
 func (args *Args) marshalStandard(p *PageData) PageData {
 	p.FontEmbed = args.FontEmbed
 	p.FontFamily = args.fontFamily()
@@ -123,8 +127,9 @@ func (args *Args) marshalStandard(p *PageData) PageData {
 	return *p
 }
 
-// MarshalTextTransform marshals the bytes data with the HTML template.
-func (args *Args) marshalTextTransform(b *[]byte) (buf bytes.Buffer, err error) {
+// marshalTextTransform marshals the bytes data with the HTML template.
+func (args *Args) marshalTextTransform(b *[]byte) (bytes.Buffer, error) {
+	buf := bytes.Buffer{}
 	tmpl, err := args.newTemplate()
 	if err != nil {
 		return buf, fmt.Errorf("stdout new template failure: %w", err)
@@ -139,7 +144,7 @@ func (args *Args) marshalTextTransform(b *[]byte) (buf bytes.Buffer, err error) 
 	return buf, nil
 }
 
-// NewTemplate creates and parses a new template file.
+// newTemplate creates and parses a new template file.
 func (args *Args) newTemplate() (*template.Template, error) {
 	if err := args.templateCache(); err != nil {
 		return nil, fmt.Errorf("using existing template cache: %w", err)
@@ -182,30 +187,35 @@ func (args *Args) newTemplate() (*template.Template, error) {
 	return t, nil
 }
 
-// TemplateCache creates a filepath for the cache templates.
-func (args *Args) templateCache() (err error) {
-	l := args.layout.Pack()
-	if l == "" {
+// templateCache creates a filepath for the cache templates.
+func (args *Args) templateCache() error {
+	const ext = ".gohtml"
+	name := args.layout.Pack()
+	if name == "" {
 		return fmt.Errorf("template cache %q: %w", args.layout, logs.ErrTmplNil)
 	}
-	args.tmpl, err = gap.NewScope(gap.User, meta.Dir).DataPath(l + ".gohtml")
+	var err error
+	filename := name + ext
+	args.tmpl, err = gap.NewScope(gap.User, meta.Dir).DataPath(filename)
 	if err != nil {
 		return fmt.Errorf("template cache path: %q: %w", args.tmpl, err)
 	}
 	return nil
 }
 
-// TemplatePack creates a filepath for the embedded templates.
+// templatePack creates a filepath for the embedded templates.
 func (args *Args) templatePack() error {
-	l := args.layout.Pack()
-	if l == "" {
+	const dir, ext = "html", ".gohtml"
+	name := args.layout.Pack()
+	if name == "" {
 		return fmt.Errorf("template pack %q: %w", args.layout, logs.ErrTmplNil)
 	}
-	args.pack = fmt.Sprintf("html/%s.gohtml", l)
+	filename := name + ext
+	args.pack = filepath.Join(dir, filename)
 	return nil
 }
 
-// TemplateData reads and returns an embedded file.
+// templateData reads and returns an embedded file.
 func (args *Args) templateData() (*[]byte, error) {
 	b, err := static.Tmpl.ReadFile(args.pack)
 	if err != nil {
@@ -214,7 +224,7 @@ func (args *Args) templateData() (*[]byte, error) {
 	return &b, nil
 }
 
-// TemplateSave saves an embedded template.
+// templateSave saves an embedded template.
 func (args *Args) templateSave() error {
 	err := args.templatePack()
 	if err != nil {
@@ -230,7 +240,7 @@ func (args *Args) templateSave() error {
 	return nil
 }
 
-// Comment content for the meta retrotxt attribute.
+// comment content for the meta retrotxt attribute.
 func (args *Args) comment(lb filesystem.LB, r ...rune) string {
 	l, w, f := 0, 0, "n/a"
 	b, lbs, e := []byte(string(r)),
@@ -250,7 +260,7 @@ func (args *Args) comment(lb filesystem.LB, r ...rune) string {
 	return fmt.Sprintf("encoding: %s; line break: %s; length: %d; width: %d; name: %s", e, lbs, l, w, f)
 }
 
-// FontFamily value for the CSS font face.
+// fontFamily value for the CSS font face.
 func (args *Args) fontFamily() string {
 	if args.FontFamily.Flag {
 		return args.FontFamily.Value
@@ -258,7 +268,7 @@ func (args *Args) fontFamily() string {
 	return viper.GetString("html.font.family")
 }
 
-// MetaAuthor content for the meta sauce-data attribute.
+// metaAuthor content for the meta sauce-data attribute.
 func (args *Args) metaAuthor() string {
 	if args.Metadata.Author.Flag {
 		return args.Metadata.Author.Value
@@ -266,7 +276,7 @@ func (args *Args) metaAuthor() string {
 	return viper.GetString("html.meta.author")
 }
 
-// MetaColorScheme content for the meta color-scheme attribute.
+// metaColorScheme content for the meta color-scheme attribute.
 func (args *Args) metaColorScheme() string {
 	if args.Metadata.ColorScheme.Flag {
 		return args.Metadata.ColorScheme.Value
@@ -274,7 +284,7 @@ func (args *Args) metaColorScheme() string {
 	return viper.GetString("html.meta.color-scheme")
 }
 
-// MetaAuthor content for the meta sauce-description attribute.
+// metaAuthor content for the meta sauce-description attribute.
 func (args *Args) metaDesc() string {
 	if args.Metadata.Description.Flag {
 		return args.Metadata.Description.Value
@@ -282,7 +292,7 @@ func (args *Args) metaDesc() string {
 	return viper.GetString("html.meta.description")
 }
 
-// MetaKeywords content for the meta keywords attribute.
+// metaKeywords content for the meta keywords attribute.
 func (args *Args) metaKeywords() string {
 	if args.Metadata.Keywords.Flag {
 		return args.Metadata.Keywords.Value
@@ -290,7 +300,7 @@ func (args *Args) metaKeywords() string {
 	return viper.GetString("html.meta.keywords")
 }
 
-// MetaReferrer content for the meta referrer attribute.
+// metaReferrer content for the meta referrer attribute.
 func (args *Args) metaReferrer() string {
 	if args.Metadata.Referrer.Flag {
 		return args.Metadata.Referrer.Value
@@ -298,7 +308,7 @@ func (args *Args) metaReferrer() string {
 	return viper.GetString("html.meta.referrer")
 }
 
-// MetaRobots content for the meta robots attribute.
+// metaRobots content for the meta robots attribute.
 func (args *Args) metaRobots() string {
 	if args.Metadata.Robots.Flag {
 		return args.Metadata.Robots.Value
@@ -306,7 +316,7 @@ func (args *Args) metaRobots() string {
 	return viper.GetString("html.meta.robots")
 }
 
-// MetaRobots content for the meta theme-color attribute.
+// metaRobots content for the meta theme-color attribute.
 func (args *Args) metaThemeColor() string {
 	if args.Metadata.ThemeColor.Flag {
 		return args.Metadata.ThemeColor.Value
@@ -314,7 +324,7 @@ func (args *Args) metaThemeColor() string {
 	return viper.GetString("html.meta.theme-color")
 }
 
-// PageTitle value for the title element.
+// pageTitle value for the title element.
 func (args *Args) pageTitle() string {
 	if args.Title.Flag {
 		return args.Title.Value

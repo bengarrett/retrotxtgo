@@ -94,7 +94,7 @@ func (args *Args) saveFont(c chan error) {
 	c <- nil
 }
 
-// saveFont creates and save the font styles CSS file.
+// saveFontCSS creates and save the font styles CSS file.
 func (args *Args) saveFontCSS(name string) error {
 	name, err := args.destination(name)
 	if err != nil {
@@ -164,7 +164,7 @@ func (args *Args) saveJS(c chan error) {
 	c <- nil
 }
 
-// SaveHTML creates and save the HTML file.
+// saveHTML creates and save the HTML file.
 func (args *Args) saveHTML(b *[]byte, c chan error) {
 	name, err := args.destination(nameHTML)
 	if err != nil {
@@ -199,7 +199,7 @@ func (args *Args) saveHTML(b *[]byte, c chan error) {
 	c <- nil
 }
 
-// BytesStats humanizes, colorizes and prints the filename and size.
+// bytesStats humanizes, colorizes and prints the filename and size.
 func bytesStats(name string, nn int) string {
 	const kB = 1000
 	if nn == 0 {
@@ -216,7 +216,7 @@ func bytesStats(name string, nn int) string {
 	return s
 }
 
-// Destination validate and returns the path of the named file.
+// destination validate and returns the path of the named file.
 func (args *Args) destination(name string) (string, error) {
 	dir := filesystem.DirExpansion(args.Save.Destination)
 	path := dir

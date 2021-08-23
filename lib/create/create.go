@@ -20,7 +20,7 @@ import (
 	"golang.org/x/text/transform"
 )
 
-// Args holds arguments and options sourced from user flags or the config file.
+// Args holds arguments and options sourced from user flags and the config file.
 type Args struct {
 	Source struct {
 		Encoding   encoding.Encoding // Original encoding of the text source
@@ -54,7 +54,7 @@ type Args struct {
 	}
 	layout    Layout // layout flag interpretation
 	Port      uint   // Port for HTTP server
-	FontEmbed bool
+	FontEmbed bool   // embed the font as Base64 data
 	Test      bool   // unit test mode
 	Layout    string // Layout of the HTML
 	Syntax    string // Syntax and color theming printing HTML
@@ -186,12 +186,12 @@ func (l Layout) Pack() string {
 }
 
 // Create handles the target output command arguments.
-func (args *Args) Create(b *[]byte) (err error) {
+func (args *Args) Create(b *[]byte) error {
+	var err error
 	args.layout, err = layout(args.Layout)
 	if err != nil {
 		return fmt.Errorf("create command layout %q: %w", args.Layout, err)
 	}
-
 	switch {
 	case args.Save.AsFiles:
 		if err := args.saveAssets(b); err != nil {
@@ -241,15 +241,12 @@ func (args *Args) saveAssets(b *[]byte) error {
 	return nil
 }
 
-// ZipAssets compresses all assets into a single zip archive.
+// zipAssets compresses all assets into a single zip archive.
 // An empty destination directory argument will save the zip file to the user working directory.
 func (args *Args) zipAssets(destDir string, b *[]byte) {
-	var err error
-
 	defer func() {
-		var m bool
 		dir := args.Save.Destination
-		m, err = filepath.Match(filepath.Join(os.TempDir(), "*"), dir)
+		m, err := filepath.Match(filepath.Join(os.TempDir(), "*"), dir)
 		if err != nil {
 			logs.ProblemMark("*", logs.ErrTmpDir, err)
 		}
@@ -259,22 +256,19 @@ func (args *Args) zipAssets(destDir string, b *[]byte) {
 			}
 		}
 	}()
-
+	var err error
 	args.Save.Destination, err = ioutil.TempDir(os.TempDir(), "*-zip")
 	if err != nil {
 		logs.ProblemMarkFatal("temporary", logs.ErrDirSave, err)
 	}
-
 	if err = args.saveAssets(b); err != nil {
 		logs.Problemf(logs.ErrFileSave, err)
 		return
 	}
-
 	name := zipName
 	if destDir != "" {
 		name = filepath.Join(destDir, zipName)
 	}
-
 	zip := filesystem.Zip{
 		Name:      name,
 		Root:      args.Save.Destination,
@@ -294,12 +288,7 @@ func (args *Args) Stdout(b *[]byte) error {
 	if err != nil {
 		return fmt.Errorf("stdout: %w", err)
 	}
-	// js
-	js := static.Scripts
-	// css
-	css := static.Styles
-	// font
-	ff := args.FontFamily.Value
+	js, css, ff := static.Scripts, static.Styles, args.FontFamily.Value
 	f := Family(ff).String()
 	if f == "" {
 		return fmt.Errorf("create.saveFontCSS %q: %w", ff, ErrFont)
@@ -327,34 +316,34 @@ func (args *Args) Stdout(b *[]byte) error {
 	switch args.Syntax {
 	case "", none:
 		noSyntax()
-	default:
-		if !str.Valid(args.Syntax) {
-			fmt.Printf("unknown style %q, so using none\n", args.Syntax)
-			noSyntax()
-			return nil
-		}
-		fmt.Printf(fJS, nameJS)
-		if err = str.Highlight(string(js), "js", args.Syntax, true); err != nil {
-			return fmt.Errorf("stdout js highlight: %w", err)
-		}
-		fmt.Printf(fCSS, nameCSS)
-		if err = str.Highlight(string(css), "css", args.Syntax, true); err != nil {
-			return fmt.Errorf("stdout css highlight: %w", err)
-		}
-		fmt.Printf(fFont, f, nameFont)
-		if err = str.Highlight(string(font), "css", args.Syntax, true); err != nil {
-			return fmt.Errorf("stdout font css highlight: %w", err)
-		}
-		fmt.Printf(fHTML, nameHTML)
-		if err = str.Highlight(buf.String(), "html", args.Syntax, true); err != nil {
-			return fmt.Errorf("stdout html highlight: %w", err)
-		}
+		return nil
+	}
+	if !str.Valid(args.Syntax) {
+		fmt.Printf("unknown style %q, so using none\n", args.Syntax)
+		noSyntax()
+		return nil
+	}
+	fmt.Printf(fJS, nameJS)
+	if err = str.Highlight(string(js), "js", args.Syntax, true); err != nil {
+		return fmt.Errorf("stdout js highlight: %w", err)
+	}
+	fmt.Printf(fCSS, nameCSS)
+	if err = str.Highlight(string(css), "css", args.Syntax, true); err != nil {
+		return fmt.Errorf("stdout css highlight: %w", err)
+	}
+	fmt.Printf(fFont, f, nameFont)
+	if err = str.Highlight(string(font), "css", args.Syntax, true); err != nil {
+		return fmt.Errorf("stdout font css highlight: %w", err)
+	}
+	fmt.Printf(fHTML, nameHTML)
+	if err = str.Highlight(buf.String(), "html", args.Syntax, true); err != nil {
+		return fmt.Errorf("stdout html highlight: %w", err)
 	}
 	return nil
 }
 
 // Normalize runes into bytes by making adjustments to text control codes.
-func Normalize(e encoding.Encoding, r ...rune) (b []byte) {
+func Normalize(e encoding.Encoding, r ...rune) []byte {
 	s := ""
 	switch e {
 	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
@@ -369,7 +358,7 @@ func Normalize(e encoding.Encoding, r ...rune) (b []byte) {
 	return []byte(s)
 }
 
-// Destination determines if user supplied arguments are a valid file or directory destination.
+// destination determines if user supplied arguments are a valid file or directory destination.
 func destination(args ...string) (path string, err error) {
 	if len(args) == 0 {
 		return path, nil
@@ -388,7 +377,7 @@ func destination(args ...string) (path string, err error) {
 	return strings.Join(part, string(os.PathSeparator)), nil
 }
 
-// Dirs parses and expand special directory characters.
+// dirs parses and expand special directory characters.
 func dirs(dir string) (path string, err error) {
 	const (
 		homeDir    = "~"
@@ -408,7 +397,7 @@ func dirs(dir string) (path string, err error) {
 	return "", nil
 }
 
-// Layout parses possible --layout argument values.
+// layout parses possible --layout argument values.
 func layout(name string) (Layout, error) {
 	switch name {
 	case standard, "s":
@@ -423,7 +412,7 @@ func layout(name string) (Layout, error) {
 	return 0, logs.ErrTmplNil
 }
 
-// Replace EBCDIC newlines with Unicode linefeeds.
+// replaceNELs replace EBCDIC newlines with Unicode linefeeds.
 func replaceNELs() runes.Transformer {
 	return runes.Map(func(r rune) rune {
 		if r == filesystem.NextLine {
