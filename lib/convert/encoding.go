@@ -213,7 +213,7 @@ func Encoding(name string) (encoding.Encoding, error) {
 	return enc, nil
 }
 
-// Encode32 initializes common UTF-32 encodings.
+// encode32 initializes common UTF-32 encodings.
 func encode32(a string) encoding.Encoding {
 	// UTF-32... doesn't return a match in ianaindex.IANA
 	switch strings.ToUpper(a) {
@@ -235,7 +235,7 @@ func Humanize(name string) string {
 	return encodingAlias(shorten(name))
 }
 
-// Shorten name to a custom/common names or aliases.
+// shorten the name to a custom name, a common name or an alias.
 func shorten(name string) string { // nolint:gocyclo
 	n, l := strings.ToLower(name), len(name)
 	switch {
@@ -265,11 +265,12 @@ func shorten(name string) string { // nolint:gocyclo
 	return ""
 }
 
-// EncodingAlias returns a valid IANA index encoding name from a shorten name or alias.
-func encodingAlias(name string) (n string) {
+// encodingAlias returns a valid IANA index encoding name from a shorten name or alias.
+func encodingAlias(name string) string {
 	// list of valid tables
 	// https://github.com/golang/text/blob/v0.3.2/encoding/charmap/maketables.go
 	// a switch is used instead of a map to avoid typos with duplicate values
+	n := ""
 	if n = encodingIBM(name); n != "" {
 		return n
 	}
@@ -288,8 +289,9 @@ func encodingAlias(name string) (n string) {
 	return n
 }
 
-// EncodingIBM returns a valid IANA index encoding name for IBM codepages using a custom alias.
-func encodingIBM(name string) (n string) {
+// encodingIBM returns a valid IANA index encoding name for IBM codepages using a custom alias.
+func encodingIBM(name string) string {
+	n := ""
 	switch name {
 	case "37", "037":
 		n = cp037
@@ -321,8 +323,9 @@ func encodingIBM(name string) (n string) {
 	return n
 }
 
-// EncodingMisc returns a valid IANA index encoding name using a custom alias.
-func encodingMisc(name string) (n string) {
+// encodingMisc returns a valid IANA index encoding name using a custom alias.
+func encodingMisc(name string) string {
+	n := ""
 	switch name {
 	case "878", "20866", "koi8r":
 		n = "KOI8-R"
@@ -341,8 +344,9 @@ func encodingMisc(name string) (n string) {
 	return n
 }
 
-// EncodingIBM returns a valid IANA index encoding name for Microsoft codepages using a custom alias.
-func encodingWin(name string) (n string) {
+// encodingIBM returns a valid IANA index encoding name for Microsoft codepages using a custom alias.
+func encodingWin(name string) string {
+	n := ""
 	switch name {
 	case "874":
 		n = "Windows-874"
@@ -368,8 +372,9 @@ func encodingWin(name string) (n string) {
 	return n
 }
 
-// EncodingIBM returns a valid IANA index encoding name for ISO codepages using a custom alias.
-func encodingISO(name string) (n string) {
+// encodingIBM returns a valid IANA index encoding name for ISO codepages using a custom alias.
+func encodingISO(name string) string {
+	n := ""
 	switch name {
 	case "5", "1124", "28595":
 		n = "ISO-8859-5"
@@ -401,8 +406,9 @@ func encodingISO(name string) (n string) {
 	return n
 }
 
-// EncodingIBM returns a valid IANA index encoding name for Latin codepages using a custom alias.
-func encodingEurope(name string) (n string) {
+// encodingIBM returns a valid IANA index encoding name for Latin codepages using a custom alias.
+func encodingEurope(name string) string {
+	n := ""
 	switch name {
 	case "1", "819", "28591":
 		n = "ISO-8859-1"
@@ -416,8 +422,9 @@ func encodingEurope(name string) (n string) {
 	return n
 }
 
-// EncodingIBM returns a valid IANA index encoding name for Unicode using a custom alias.
-func encodingUnicode(name string) (n string) {
+// encodingIBM returns a valid IANA index encoding name for Unicode using a custom alias.
+func encodingUnicode(name string) string {
+	n := ""
 	switch strings.ToLower(name) {
 	case "utf16":
 		n = "UTF-16" // Go will use the byte-order-mark
@@ -509,7 +516,9 @@ func (c *Convert) ANSIControls() {
 		}
 		if r == LeftwardsArrow && c.Output.R[i+1] == LeftSquareBracket {
 			c.Output.R[i] = ESC // replace ←[
-		} else if r == SymbolESC && c.Output.R[i+1] == LeftSquareBracket {
+			continue
+		}
+		if r == SymbolESC && c.Output.R[i+1] == LeftSquareBracket {
 			c.Output.R[i] = ESC // replace ␛[
 		}
 	}
@@ -521,7 +530,7 @@ func (c *Convert) LineBreaks() {
 	c.Source.lineBreak = filesystem.LineBreaks(true, c.Output.R...)
 }
 
-// RunesControls switches out C0 and C1 ASCII controls with Unicode picture represenations.
+// RunesControls switches out C0 and C1 ASCII controls with Unicode Control Picture represenations.
 func (c *Convert) RunesControls() {
 	if len(c.Output.R) == 0 {
 		return
@@ -545,7 +554,7 @@ func (c *Convert) RunesControls() {
 	}
 }
 
-// RunesControlsEBCDIC switches out EBCDIC controls with Unicode picture represenations.
+// RunesControlsEBCDIC switches out EBCDIC controls with Unicode Control Picture represenations.
 func (c *Convert) RunesControlsEBCDIC() {
 	if len(c.Output.R) == 0 {
 		return
@@ -590,9 +599,11 @@ func (c *Convert) RunesDOS() {
 		case r >= NUL && r <= US:
 			c.Output.R[i], _ = utf8.DecodeRuneInString(ctrls[r]) // c0, c1 controllers
 		case r == DEL:
-			c.Output.R[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0x82}) // ⌂
+			house := [3]byte{0xe2, 0x8c, 0x82} // ⌂
+			c.Output.R[i], _ = utf8.DecodeRune(house[:])
 		case r == NBSP:
-			c.Output.R[i], _ = utf8.DecodeRune([]byte{0xc2, 0xa0}) // NBSP
+			noBreakSpace := [2]byte{0xc2, 0xa0} // NBSP
+			c.Output.R[i], _ = utf8.DecodeRune(noBreakSpace[:])
 		}
 	}
 }
@@ -614,7 +625,7 @@ func (c *Convert) RunesEBCDIC() {
 	}
 }
 
-// Control switches out an EBCDIC IBM mainframe control with Unicode picture representation.
+// control switches out an EBCDIC IBM mainframe control with Unicode picture representation.
 func (c *Convert) control(i int, r rune) bool { // nolint:gocyclo
 	const (
 		ht  = 0x89
@@ -676,12 +687,13 @@ func (c *Convert) control(i int, r rune) bool { // nolint:gocyclo
 	return false
 }
 
-// MiscCtrls switches out an EBCDIC control with Unicode picture representation.
+// miscCtrls switches out an EBCDIC control with Unicode Control Picture representation.
 // Controls included those shared with ASCII C0+C1, NBSP and unprintables.
 func (c *Convert) miscCtrls(i int, r rune) {
 	switch r {
 	case Nbsp:
-		c.Output.R[i], _ = utf8.DecodeRune([]byte{0xc2, 0xa0})
+		noBreakSpace := [2]byte{0xc2, 0xa0}
+		c.Output.R[i], _ = utf8.DecodeRune(noBreakSpace[:])
 	case NUL, SOH, STX, ETX, VT, FF, CR, SO, SI, DLE, DC1, DC2, DC3, CAN, EM, FS, GS, RS, US:
 		// shared controls with ASCII C0+C1
 		c.Output.R[i] = decode(row8 + byte(r))
@@ -695,7 +707,7 @@ func (c *Convert) miscCtrls(i int, r rune) {
 	}
 }
 
-// OutOfRange replaces EBCDIC runes that are out of range of
+// outOfRange replaces EBCDIC runes that are out of range of
 // valid 8-bit ASCII tables with a space placeholder.
 func (c *Convert) outOfRange(i int, r rune) {
 	const skipA, skipB, skipC, skipD = 0xA0, 0xBF, 0xC0, 0xFF
@@ -755,12 +767,13 @@ func (c *Convert) RunesLatin() {
 
 // RunesMacintosh replaces specific Mac OS Roman characters with Unicode picture represenations.
 func (c *Convert) RunesMacintosh() {
-	const z = byte(row8)
 	const (
 		command = iota + 17 // ⌘
 		shift               // ⇧
 		option              // ⌥
 		control             // ⌃
+
+		z = byte(row8)
 	)
 	for i := 0; i < c.Output.len; i++ {
 		r := c.Output.R[i]
@@ -770,13 +783,17 @@ func (c *Convert) RunesMacintosh() {
 		}
 		switch r {
 		case command:
-			c.Output.R[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0x98})
+			commandR := [3]byte{0xe2, 0x8c, 0x98}
+			c.Output.R[i], _ = utf8.DecodeRune(commandR[:])
 		case shift:
-			c.Output.R[i], _ = utf8.DecodeRune([]byte{0xe2, 0x87, 0xa7})
+			shiftR := [3]byte{0xe2, 0x87, 0xa7}
+			c.Output.R[i], _ = utf8.DecodeRune(shiftR[:])
 		case option:
-			c.Output.R[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0xa5})
+			optionR := [3]byte{0xe2, 0x8c, 0xa5}
+			c.Output.R[i], _ = utf8.DecodeRune(optionR[:])
 		case control:
-			c.Output.R[i], _ = utf8.DecodeRune([]byte{0xe2, 0x8c, 0x83})
+			controlR := [3]byte{0xe2, 0x8c, 0x83}
+			c.Output.R[i], _ = utf8.DecodeRune(controlR[:])
 		case DEL:
 			c.Output.R[i] = SymbolDEL
 		case Replacement:
@@ -837,14 +854,15 @@ func (c *Convert) RunesUTF8() {
 	}
 }
 
-// Decode converts a byte to a UTF-8 rune.
-func decode(b byte) (r rune) {
-	utf8Sequence := []byte{0xe2, 0x90}
-	r, _ = utf8.DecodeRune(append(utf8Sequence, b))
+// decode converts a byte value to a Unicode Control Picture rune.
+func decode(b byte) rune {
+	// code points U+2400 to U+243F
+	controlPicture := [3]byte{0xe2, 0x90, b}
+	r, _ := utf8.DecodeRune(controlPicture[:])
 	return r
 }
 
-// EqualLB reports whether r matches the single or multi-byte, line break character runes.
+// equalLB returns true when r matches the single or multi-byte, line break character runes.
 func equalLB(r, nl [2]rune) bool {
 	// single-byte line break
 	if nl[1] == 0 {
@@ -855,7 +873,7 @@ func equalLB(r, nl [2]rune) bool {
 		[]byte{byte(nl[0]), byte(nl[1])})
 }
 
-// SkipLineBreaks determines if rune is a linebreak.
+// skipLineBreaks returns true if rune is a linebreak.
 func (c *Convert) skipLineBreaks(i int) bool {
 	if !c.Output.lineBreaks {
 		return false
@@ -915,7 +933,7 @@ func (c *Convert) swap(r rune) bool {
 	return false
 }
 
-// SkipIgnores determines if the rune should be ignored and skipped.
+// skipIgnores returns true if the rune should be skipped.
 func (c *Convert) skipIgnores(i int) bool {
 	for _, ign := range c.Output.ignores {
 		if c.Output.R[i] == ign {

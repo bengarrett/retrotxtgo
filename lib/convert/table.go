@@ -39,18 +39,18 @@ func Table(name string) (*bytes.Buffer, error) {
 	fmt.Fprintln(w, color.Primary.Sprint(str.Center(width, h)))
 	const start, end, max = 0, 15, 255
 	for i := 0; i < 16; i++ {
-		switch {
-		case i == start:
+		switch i {
+		case start:
 			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf("     %X  ", i))
-		case i == end:
+		case end:
 			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf(" %X  \n", i))
 		default:
 			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf(" %X  ", i))
 		}
 	}
-	var conv = Convert{}
+	conv := Convert{}
 	conv.Source.E = cp
-	var b, row = MakeBytes(), 0
+	b, row := MakeBytes(), 0
 	runes, err := conv.Chars(&b)
 	if err != nil {
 		return nil, fmt.Errorf("table convert bytes error: %w", err)
@@ -104,10 +104,10 @@ func tblEncode(name string) (encoding.Encoding, error) {
 	return cp, nil
 }
 
-// Character converts rune to an encoded string.
+// character converts rune to an encoded string.
 func character(i int, r rune, cp encoding.Encoding) string {
 	// ISO-8859-11 is not included in Go so a user defined charmap is used.
-	var iso8859_11 = charmap.XUserDefined
+	iso8859_11 := charmap.XUserDefined
 	if cp == iso8859_11 {
 		const PAD, NBSP = 128, 160
 		if i >= PAD && i < NBSP {
@@ -142,7 +142,7 @@ func character(i int, r rune, cp encoding.Encoding) string {
 	return string(r)
 }
 
-// CharmapAlias humanizes ISO encodings.
+// charmapAlias humanizes encodings.
 func charmapAlias(cp encoding.Encoding) string { // nolint:gocyclo
 	if c := charmapDOS(cp); c != "" {
 		return c
@@ -189,7 +189,7 @@ func charmapAlias(cp encoding.Encoding) string { // nolint:gocyclo
 	return ""
 }
 
-// CharmapDOS humanizes DOS encodings.
+// charmapDOS humanizes DOS encodings.
 func charmapDOS(cp encoding.Encoding) string {
 	switch cp {
 	case charmap.CodePage037:
@@ -218,7 +218,7 @@ func charmapDOS(cp encoding.Encoding) string {
 	return ""
 }
 
-// CharmapDOS humanizes encodings.
+// charmapMisc humanizes miscellaneous encodings.
 func charmapMisc(cp encoding.Encoding) string {
 	switch cp {
 	case charmap.KOI8R:
@@ -235,7 +235,7 @@ func charmapMisc(cp encoding.Encoding) string {
 	return ""
 }
 
-// CharmapDOS humanizes common encodings.
+// charmapStandard humanizes common encodings.
 func charmapStandard(cp encoding.Encoding) string {
 	switch cp {
 	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:

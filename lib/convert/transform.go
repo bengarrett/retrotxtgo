@@ -18,13 +18,13 @@ import (
 // ANSI transforms legacy encoded ANSI into modern UTF-8 text.
 // It displays ASCII control codes as characters.
 // It obeys the end of file marker.
-func (c *Convert) ANSI(b *[]byte) (utf []rune, err error) {
+func (c *Convert) ANSI(b *[]byte) ([]rune, error) {
 	c.Output.lineBreaks = true
 	c.Flags.SwapChars = nil
 	c.Source.B = *b
 	c.unicodeControls()
 	c.Source.B = EndOfFile(*b...)
-	if err = c.Transform(); err != nil {
+	if err := c.Transform(); err != nil {
 		return nil, fmt.Errorf("dump transform failed: %w", err)
 	}
 	c.Swap().ANSIControls()
@@ -35,10 +35,10 @@ func (c *Convert) ANSI(b *[]byte) (utf []rune, err error) {
 // Chars transforms legacy encoded characters and text control codes into UTF-8 characters.
 // It displays both ASCII and ANSI control codes as characters.
 // It ignores the end of file marker.
-func (c *Convert) Chars(b *[]byte) (utf []rune, err error) {
+func (c *Convert) Chars(b *[]byte) ([]rune, error) {
 	c.Source.table = true
 	c.Source.B = *b
-	if err = c.Transform(); err != nil {
+	if err := c.Transform(); err != nil {
 		return nil, fmt.Errorf("chars transform failed: %w", err)
 	}
 	c.Swap()
@@ -49,11 +49,11 @@ func (c *Convert) Chars(b *[]byte) (utf []rune, err error) {
 // Dump transforms legacy encoded text or ANSI into modern UTF-8 text.
 // It obeys common ASCII control codes.
 // It ignores the end of file marker.
-func (c *Convert) Dump(b *[]byte) (utf []rune, err error) {
+func (c *Convert) Dump(b *[]byte) ([]rune, error) {
 	c.Output.lineBreaks = true
 	c.Source.B = *b
 	c.unicodeControls()
-	if err = c.Transform(); err != nil {
+	if err := c.Transform(); err != nil {
 		return nil, fmt.Errorf("dump transform failed: %w", err)
 	}
 	c.Swap().ANSIControls()
@@ -64,12 +64,12 @@ func (c *Convert) Dump(b *[]byte) (utf []rune, err error) {
 // Text transforms legacy encoded text or ANSI into modern UTF-8 text.
 // It obeys common ASCII control codes.
 // It obeys the end of file marker.
-func (c *Convert) Text(b *[]byte) (utf []rune, err error) {
+func (c *Convert) Text(b *[]byte) ([]rune, error) {
 	c.Output.lineBreaks = true
 	c.Source.B = *b
 	c.unicodeControls()
 	c.Source.B = EndOfFile(*b...)
-	if err = c.Transform(); err != nil {
+	if err := c.Transform(); err != nil {
 		return nil, fmt.Errorf("text transform failed: %w", err)
 	}
 	c.Swap().ANSIControls()
@@ -87,7 +87,8 @@ func (c *Convert) Transform() error {
 	}
 	if err := c.transformUnicode(); err != nil {
 		return err
-	} else if c.Output.len > 0 {
+	}
+	if c.Output.len > 0 {
 		return nil
 	}
 	c.transformFixJISTable()
@@ -106,7 +107,7 @@ func (c *Convert) Transform() error {
 	return nil
 }
 
-// TransformFixJISTable blanks invalid ShiftJIS characters while printing 8-bit tables.
+// transformFixJISTable blanks invalid ShiftJIS characters while printing 8-bit tables.
 func (c *Convert) transformFixJISTable() {
 	if c.Source.E == japanese.ShiftJIS && c.Source.table {
 		// this is only for the table command,
@@ -121,7 +122,7 @@ func (c *Convert) transformFixJISTable() {
 	}
 }
 
-// Decode transforms Source bytes into Output runes.
+// decode transforms Source bytes into Output runes.
 func (c *Convert) decode(e encoding.Encoding) error {
 	result, err := e.NewDecoder().Bytes(c.Source.B)
 	if err != nil {
@@ -132,7 +133,7 @@ func (c *Convert) decode(e encoding.Encoding) error {
 	return nil
 }
 
-// TransformUnicode transforms Unicode-16 or Unicode-32 text into UTF-8 encoded Unicode.
+// transformUnicode transforms Unicode-16 or Unicode-32 text into UTF-8 encoded Unicode.
 func (c *Convert) transformUnicode() error {
 	var (
 		u16be  = unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM)
@@ -164,7 +165,7 @@ func (c *Convert) transformUnicode() error {
 	return c.transformU32(c.Source.E)
 }
 
-// TransformU32 transforms Unicode-32 text into UTF-8 encoded Unicode.
+// transformU32 transforms Unicode-32 text into UTF-8 encoded Unicode.
 func (c *Convert) transformU32(e encoding.Encoding) error {
 	var (
 		u32be  = utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM)
@@ -193,7 +194,7 @@ func (c *Convert) transformU32(e encoding.Encoding) error {
 	return nil
 }
 
-// Width enforces a row length by inserting newline characters.
+// width enforces a row length by inserting newline characters.
 func (c *Convert) width(max int) {
 	if max < 1 {
 		return
@@ -226,7 +227,7 @@ func (c *Convert) width(max int) {
 	c.Output.R = []rune(w.String())
 }
 
-// UnicodeControls flags standard control characters to be ignored.
+// unicodeControls marks standard control characters to be ignored.
 func (c *Convert) unicodeControls() {
 	const (
 		bell = iota + 7 // BEL = x07
@@ -264,6 +265,7 @@ func (c *Convert) unicodeControls() {
 	}
 }
 
+// ignore adds the rune to an ignore runes list.
 func (c *Convert) ignore(r rune) {
 	c.Output.ignores = append(c.Output.ignores, r)
 }

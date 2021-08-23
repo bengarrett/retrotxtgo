@@ -101,12 +101,14 @@ func List() *bytes.Buffer {
 	return &buf
 }
 
-// Cells return character encoding details for use in a text table.
-func cells(e encoding.Encoding) (c cell) {
+// cells return character encoding details for use in a text table.
+func cells(e encoding.Encoding) cell {
 	if e == nil {
 		return cell{}
 	}
-	c.name = fmt.Sprint(e)
+	c := cell{
+		name: fmt.Sprint(e),
+	}
 	var err error
 	if c.value, err = htmlindex.Name(e); err == nil {
 		c.alias, err = ianaindex.MIME.Name(e)
@@ -130,10 +132,10 @@ func cells(e encoding.Encoding) (c cell) {
 	return c
 }
 
-// Alias return character encoding aliases.
+// alias return character encoding aliases.
 func alias(s, val string, e encoding.Encoding) string {
 	a := strings.ToLower(s)
-	if val == a {
+	if a == val {
 		a = ""
 	}
 	if a == "" {
@@ -169,12 +171,13 @@ func alias(s, val string, e encoding.Encoding) string {
 	return a
 }
 
-// Uniform formats MIME values.
-func uniform(mime string) (s string) {
-	s = mime
-	s = strings.Replace(s, "IBM00", "CP", 1)
-	s = strings.Replace(s, "IBM01", "CP1", 1)
-	s = strings.Replace(s, "IBM", "CP", 1)
-	s = strings.Replace(s, "windows-", "CP", 1)
+// uniform formats MIME values.
+func uniform(mime string) string {
+	const limit = 1
+	s := mime
+	s = strings.Replace(s, "IBM00", "CP", limit)
+	s = strings.Replace(s, "IBM01", "CP1", limit)
+	s = strings.Replace(s, "IBM", "CP", limit)
+	s = strings.Replace(s, "windows-", "CP", limit)
 	return s
 }
