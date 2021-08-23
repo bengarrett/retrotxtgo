@@ -157,12 +157,12 @@ func (n Names) Info(name, format string) error {
 	return nil
 }
 
-// Language tag used for numeric syntax formatting.
+// lang returns the English Language tag used for numeric syntax formatting.
 func lang() language.Tag {
 	return language.English
 }
 
-// Output converts the --format argument value to a format type.
+// output converts the --format argument value to a format type.
 func output(argument string) (f Format, err error) {
 	switch argument {
 	case "color", "c", "":
@@ -179,10 +179,10 @@ func output(argument string) (f Format, err error) {
 	return f, logs.ErrFmt
 }
 
-// Marshal the meta and operating system details of a file.
-func Marshal(filename string, f Format, i, length int) error {
+// Marshal the metadata and system details of a named file.
+func Marshal(name string, f Format, i, length int) error {
 	var d Detail
-	if err := d.read(filename); err != nil {
+	if err := d.read(name); err != nil {
 		return err
 	}
 	d.index, d.length = i, length
@@ -190,26 +190,26 @@ func Marshal(filename string, f Format, i, length int) error {
 		var g errgroup.Group
 		g.Go(func() error {
 			var err error
-			if d.LineBreak.Decimals, err = filesystem.ReadLineBreaks(filename); err != nil {
+			if d.LineBreak.Decimals, err = filesystem.ReadLineBreaks(name); err != nil {
 				return err
 			}
 			d.linebreaks(d.LineBreak.Decimals)
 			return nil
 		})
 		g.Go(func() error {
-			return d.ctrls(filename)
+			return d.ctrls(name)
 		})
 		g.Go(func() error {
-			return d.width(filename)
+			return d.width(name)
 		})
 		g.Go(func() error {
-			return d.lines(filename)
+			return d.lines(name)
 		})
 		g.Go(func() error {
-			return d.width(filename)
+			return d.width(name)
 		})
 		g.Go(func() error {
-			return d.words(filename)
+			return d.words(name)
 		})
 		if err := g.Wait(); err != nil {
 			return err
@@ -293,8 +293,7 @@ func Stdin(format string, b ...byte) error {
 	return nil
 }
 
-// Printf prints the bytes as text and
-// appends a newline to JSON and XML text.
+// printf prints the bytes as text and appends a newline to JSON and XML text.
 func printf(f Format, b ...byte) {
 	switch f {
 	case ColorText, PlainText:

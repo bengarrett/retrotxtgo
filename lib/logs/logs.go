@@ -14,11 +14,10 @@ import (
 )
 
 const (
-	filename = "errors.log"
-	// posix permissions for the configuration file and directory.
-	filemode os.FileMode = 0600
-	dirmode  os.FileMode = 0700
-	// Panic uses log.Panic to print all saved errors.
+	filename             = "errors.log"
+	fileMode os.FileMode = 0600
+	dirMode  os.FileMode = 0700
+
 	Panic = false
 )
 
@@ -95,11 +94,12 @@ func save(err error, name string) error {
 	}
 	p := filepath.Dir(name)
 	if _, e := os.Stat(p); os.IsNotExist(e) {
-		if e := os.MkdirAll(p, dirmode); e != nil {
+		if e := os.MkdirAll(p, dirMode); e != nil {
 			return e
 		}
 	}
-	file, e := os.OpenFile(name, os.O_APPEND|os.O_CREATE|os.O_WRONLY, filemode)
+	const appendFile = os.O_APPEND | os.O_CREATE | os.O_WRONLY
+	file, e := os.OpenFile(name, appendFile, fileMode)
 	if e != nil {
 		return e
 	}

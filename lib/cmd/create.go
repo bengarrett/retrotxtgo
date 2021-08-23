@@ -360,7 +360,7 @@ func createHTML(cmd *cobra.Command, flags convert.Flags, src *[]byte) []byte {
 		r, err = conv.Dump(src)
 	}
 	if err != nil {
-		logs.Problemf(ErrCreate, err)
+		fmt.Println(logs.Problemf(ErrCreate, err))
 		return nil
 	}
 	return []byte(string(r))

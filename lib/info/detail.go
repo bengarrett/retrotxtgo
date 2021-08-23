@@ -40,9 +40,9 @@ const (
 	nel        = 133
 )
 
-// Ctrls counts the number of ANSI escape controls in the file.
-func (d *Detail) ctrls(filename string) (err error) {
-	f, err := os.Open(filename)
+// ctrls counts the number of ANSI escape controls in the named file.
+func (d *Detail) ctrls(name string) error {
+	f, err := os.Open(name)
 	if err != nil {
 		return err
 	}
@@ -55,9 +55,9 @@ func (d *Detail) ctrls(filename string) (err error) {
 	return f.Close()
 }
 
-// Lines counts the number of lines in the file.
-func (d *Detail) lines(filename string) (err error) {
-	f, err := os.Open(filename)
+// lines counts the totals lines in the named file.
+func (d *Detail) lines(name string) error {
+	f, err := os.Open(name)
 	if err != nil {
 		return err
 	}
@@ -70,8 +70,10 @@ func (d *Detail) lines(filename string) (err error) {
 	return f.Close()
 }
 
-// Marshal the detail to a format.
-func (d *Detail) marshal(f Format) (b []byte, err error) {
+// marshal the Detail data to a text format syntax.
+func (d *Detail) marshal(f Format) ([]byte, error) {
+	var err error
+	var b []byte
 	switch f {
 	case ColorText:
 		return d.printMarshal(true), nil
@@ -98,29 +100,30 @@ func (d *Detail) marshal(f Format) (b []byte, err error) {
 	return b, nil
 }
 
-// MimeUnknown detects non-Standard legacy data.
+// mimeUnknown detects non-Standard legacy data.
 func (d *Detail) mimeUnknown() {
-	if d.Mime.Commt == "unknown" {
-		if d.Count.Controls > 0 {
-			d.Mime.Commt = "Text document with ANSI controls"
+	if d.Mime.Commt != "unknown" {
+		return
+	}
+	if d.Count.Controls > 0 {
+		d.Mime.Commt = "Text document with ANSI controls"
+		return
+	}
+	switch d.LineBreak.Decimals {
+	case [2]rune{21}, [2]rune{133}:
+		d.Mime.Commt = "EBCDIC encoded text document"
+		return
+	}
+	if d.Mime.Type == octetStream {
+		if !d.Utf8 && d.Count.Words > 0 {
+			d.Mime.Commt = "US-ASCII encoded text document"
 			return
-		}
-		switch d.LineBreak.Decimals {
-		case [2]rune{21}, [2]rune{133}:
-			d.Mime.Commt = "EBCDIC encoded text document"
-			return
-		}
-		if d.Mime.Type == octetStream {
-			if !d.Utf8 && d.Count.Words > 0 {
-				d.Mime.Commt = "US-ASCII encoded text document"
-				return
-			}
 		}
 	}
 }
 
-// Parse the file and the raw data content.
-func (d *Detail) parse(name string, stat os.FileInfo, data ...byte) (err error) {
+// parse the file and the raw data content.
+func (d *Detail) parse(name string, stat os.FileInfo, data ...byte) error {
 	const routines = 8
 	var wg sync.WaitGroup
 	wg.Add(routines)
@@ -139,6 +142,7 @@ func (d *Detail) parse(name string, stat os.FileInfo, data ...byte) (err error) 
 		d.Mime.Type = fmt.Sprintf("%s/%s", mm.Media, mm.Subtype)
 		d.Mime.Commt = mm.Comment
 		if d.validText() {
+			var err error
 			if d.Count.Chars, err = filesystem.Runes(bytes.NewBuffer(data)); err != nil {
 				fmt.Printf("mine sniffer failure, %s\n", err)
 			}
@@ -182,10 +186,10 @@ func (d *Detail) parse(name string, stat os.FileInfo, data ...byte) (err error) 
 		d.Utf8 = utf8.Valid(data)
 	}()
 	wg.Wait()
-	return err
+	return nil
 }
 
-// Input parses simple statistical data on the file.
+// input parses simple statistical data on the file.
 func (d *Detail) input(data int, stat fs.FileInfo) {
 	if stat != nil {
 		b := stat.Size()
@@ -208,22 +212,20 @@ func (d *Detail) input(data int, stat fs.FileInfo) {
 	d.Modified.Epoch = time.Now().Unix()
 }
 
-// PrintMarshal returns the marshaled detail data as plain or color text.
+// printMarshal returns the marshaled detail data as plain or color text.
 func (d *Detail) printMarshal(color bool) []byte {
-	gookit.Enable = color
 	const padding, lightHorizontalBox = 10, "\u2500"
-	var (
-		buf  bytes.Buffer
-		info = func(t string) string {
-			return str.Cinf(fmt.Sprintf("%s\t", t))
-		}
-		hr = func(l int) string {
-			return fmt.Sprintf("\t%s\n", str.Cb(strings.Repeat(lightHorizontalBox, l)))
-		}
-		data = d.printMarshalData()
-		w    = new(tabwriter.Writer)
-		l    = len(fmt.Sprintf(" filename%s%s", strings.Repeat(" ", padding), data[0].v))
-	)
+	hr := func(l int) string {
+		return fmt.Sprintf("\t%s\n", str.Cb(strings.Repeat(lightHorizontalBox, l)))
+	}
+	info := func(t string) string {
+		return str.Cinf(fmt.Sprintf("%s\t", t))
+	}
+	gookit.Enable = color
+	buf := bytes.Buffer{}
+	data := d.printMarshalData()
+	w, l := new(tabwriter.Writer),
+		len(fmt.Sprintf(" filename%s%s", strings.Repeat(" ", padding), data[0].v))
 	const tabWidth = 8
 	w.Init(&buf, 0, tabWidth, 0, '\t', 0)
 	fmt.Fprint(w, hr(l))
@@ -264,7 +266,7 @@ func (d *Detail) printMarshal(color bool) []byte {
 	return buf.Bytes()
 }
 
-// MarshalDataValid validates the key and value data.
+// marshalDataValid returns true if the key and value data validates.
 func (d *Detail) marshalDataValid(k, v string) bool {
 	if !d.validText() {
 		switch k {
@@ -294,7 +296,7 @@ func (d *Detail) marshalDataValid(k, v string) bool {
 	return true
 }
 
-// Linebreaks determines the new lines characters found in the rune pair.
+// linebreaks determines the new lines characters found in the rune pair.
 func (d *Detail) linebreaks(r [2]rune) {
 	a, e := "", ""
 	switch r {
@@ -319,7 +321,7 @@ func (d *Detail) linebreaks(r [2]rune) {
 	d.LineBreak.Escape = e
 }
 
-// PrintMarshalData returns the data structure used for print marshaling.
+// printMarshalData returns the data structure used for print marshaling.
 func (d *Detail) printMarshalData() (data []struct{ k, v string }) {
 	const (
 		noBreakSpace     = "\u00A0"
@@ -374,8 +376,8 @@ func (d *Detail) printMarshalData() (data []struct{ k, v string }) {
 	return data
 }
 
-// Read and parse a named file and the file content.
-func (d *Detail) read(name string) (err error) {
+// read and parse the named file and content.
+func (d *Detail) read(name string) error {
 	// Get the file details
 	stat, err := os.Stat(name)
 	if err != nil {
@@ -389,7 +391,7 @@ func (d *Detail) read(name string) (err error) {
 	return d.parse(name, stat, data...)
 }
 
-// ValidText checks the MIME content-type value for valid text files.
+// validText returns true if the MIME content-type value is valid for text files.
 func (d *Detail) validText() bool {
 	s := strings.Split(d.Mime.Type, "/")
 	const req = 2
@@ -405,9 +407,9 @@ func (d *Detail) validText() bool {
 	return false
 }
 
-// Width counts the number of characters used per line in the file.
-func (d *Detail) width(filename string) (err error) {
-	f, err := os.Open(filename)
+// width counts the number of characters used per line in the named file.
+func (d *Detail) width(name string) error {
+	f, err := os.Open(name)
 	if err != nil {
 		return err
 	}
@@ -422,9 +424,9 @@ func (d *Detail) width(filename string) (err error) {
 	return f.Close()
 }
 
-// Words counts the number of words used in the file.
-func (d *Detail) words(filename string) (err error) {
-	f, err := os.Open(filename)
+// words counts the number of words used in the named file.
+func (d *Detail) words(name string) error {
+	f, err := os.Open(name)
 	if err != nil {
 		return err
 	}

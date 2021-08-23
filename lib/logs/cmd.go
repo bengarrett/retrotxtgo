@@ -40,7 +40,6 @@ func Execute(err error, args ...string) { //nolint:gocyclo,funlen
 		unknownFlag    = "unknown flag:"
 		unknownShort   = "unknown shorthand"
 	)
-
 	words := strings.Split(fmt.Sprintf("%s", err), " ")
 	argsCnt, wordCnt := len(args), len(words)
 	if wordCnt < minWords {
@@ -49,7 +48,6 @@ func Execute(err error, args ...string) { //nolint:gocyclo,funlen
 	if argsCnt == 0 {
 		SaveFatal(fmt.Errorf("cmd error err: %w", ErrEmpty))
 	}
-
 	mark, name := words[wordCnt-1], args[0]
 	if mark == name {
 		name = rt

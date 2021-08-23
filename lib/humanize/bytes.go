@@ -13,20 +13,19 @@ import (
 )
 
 const (
+	_ = 1.0 << (binaryBase * iota)
+	kib
+	mib
+	gib
+	tib
+
 	oneDecimalPoint  = "%.1f %s"
 	twoDecimalPoints = "%.2f %s"
 	binaryBase       = 10
-	kB               = 1000
-	mB               = kB * kB
-	gB               = mB * kB
-	tB               = gB * kB
-)
-const (
-	_ = 1.0 << (binaryBase * iota) // ignore first value by assigning to blank identifier
-	kiB
-	miB
-	giB
-	tiB
+	kb               = 1000
+	mb               = kb * kb
+	gb               = mb * kb
+	tb               = gb * kb
 )
 
 // Binary formats bytes integer to localized readable string.
@@ -34,17 +33,17 @@ func binary(b int64, t language.Tag) string {
 	p := message.NewPrinter(t)
 	multiple, value := "", float64(b)
 	switch {
-	case b >= tiB:
-		value /= tiB
+	case b >= tib:
+		value /= tib
 		multiple = "TiB"
-	case b >= giB:
-		value /= giB
+	case b >= gib:
+		value /= gib
 		multiple = "GiB"
-	case b >= miB:
-		value /= miB
+	case b >= mib:
+		value /= mib
 		multiple = "MiB"
-	case b >= kiB:
-		value /= kiB
+	case b >= kib:
+		value /= kib
 		return p.Sprintf(oneDecimalPoint, value, "KiB")
 	case b == 0:
 		return "0"
@@ -59,17 +58,17 @@ func decimal(b int64, t language.Tag) string {
 	p := message.NewPrinter(t)
 	multiple, value := "", float64(b)
 	switch {
-	case b >= tB:
-		value /= tB
+	case b >= tb:
+		value /= tb
 		multiple = "TB"
-	case b >= gB:
-		value /= gB
+	case b >= gb:
+		value /= gb
 		multiple = "GB"
-	case b >= mB:
-		value /= mB
+	case b >= mb:
+		value /= mb
 		multiple = "MB"
-	case b >= kB:
-		value /= kB
+	case b >= kb:
+		value /= kb
 		return p.Sprintf(oneDecimalPoint, value, "kB")
 	case b == 0:
 		return "0"

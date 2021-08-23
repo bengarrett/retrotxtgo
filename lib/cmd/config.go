@@ -47,7 +47,7 @@ var configCreateCmd = &cobra.Command{
 	Long:    fmt.Sprintf("Create or reset the %s configuration file.", meta.Name),
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := config.New(configFlag.ow); err != nil {
-			logs.Problemf(logs.ErrCfgCreate, err)
+			fmt.Println(logs.Problemf(logs.ErrCfgCreate, err))
 			os.Exit(1)
 		}
 	},
