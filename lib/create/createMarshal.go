@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"html/template"
 	"os"
-	"path/filepath"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
@@ -205,13 +205,14 @@ func (args *Args) templateCache() error {
 
 // templatePack creates a filepath for the embedded templates.
 func (args *Args) templatePack() error {
-	const dir, ext = "html", ".gohtml"
+	// sep should be kept as-is, regardless of platform
+	const dir, ext, sep = "html", ".gohtml", "/"
 	name := args.layout.Pack()
 	if name == "" {
 		return fmt.Errorf("template pack %q: %w", args.layout, logs.ErrTmplNil)
 	}
 	filename := name + ext
-	args.pack = filepath.Join(dir, filename)
+	args.pack = strings.Join([]string{dir, filename}, sep)
 	return nil
 }
 
@@ -219,7 +220,7 @@ func (args *Args) templatePack() error {
 func (args *Args) templateData() (*[]byte, error) {
 	b, err := static.Tmpl.ReadFile(args.pack)
 	if err != nil {
-		return nil, fmt.Errorf("template data %q: %w", args.pack, err)
+		return nil, fmt.Errorf("template data %s: %w", args.pack, err)
 	}
 	return &b, nil
 }

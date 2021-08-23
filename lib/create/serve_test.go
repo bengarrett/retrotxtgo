@@ -10,17 +10,15 @@ import (
 func ExampleServe() {
 	// Initialize the bare minimum configuration.
 	b := []byte("hello world")
-	args := Args{}
-	args.Layout = "standard"
-	args.Port = meta.WebPort
-
+	args := Args{
+		Layout: "standard",
+		Port:   meta.WebPort,
+	}
 	// The test argument will immediately shutdown
 	// the server after it successfully starts.
 	args.Test = true
-
 	// Run the HTTP server
-	err := args.Serve(&b)
-	if err != nil {
+	if err := args.Serve(&b); err != nil {
 		log.Println(err)
 	}
 	// Output:Server example was successful

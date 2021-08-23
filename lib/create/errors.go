@@ -3,6 +3,7 @@ package create
 import "errors"
 
 var (
+	ErrCleanPath = errors.New("cleanup temporary path match failed")
 	ErrFileExist = errors.New("filename already exists")
 	ErrFileNil   = errors.New("filename cannot be empty")
 	ErrFont      = errors.New("unknown font name or family")

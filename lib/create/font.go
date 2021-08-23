@@ -44,12 +44,13 @@ func AutoFont(e encoding.Encoding) Font {
 
 // Family returns the named font.
 func Family(name string) Font {
+	const a, m, v = "a", "m", "v"
 	switch strings.ToLower(name) {
-	case Automatic.String(), "a":
+	case Automatic.String(), a:
 		return Automatic
-	case Mona.String(), "m":
+	case Mona.String(), m:
 		return Mona
-	case VGA.String(), "v":
+	case VGA.String(), v:
 		return VGA
 	default:
 		return Automatic
@@ -62,9 +63,9 @@ func Fonts() []string {
 }
 
 // FontCSS creates the CSS required for customized fonts.
-func FontCSS(name string, e encoding.Encoding, embed bool) (b []byte, err error) {
+func FontCSS(name string, e encoding.Encoding, embed bool) ([]byte, error) {
 	f := Family(name)
-	if Family(name) == Automatic {
+	if f == Automatic {
 		f = AutoFont(e)
 	}
 	const css = `@font-face {
@@ -92,8 +93,7 @@ main pre {
 		Name: f.String(),
 	}
 	if embed {
-		url := ""
-		url, err = fontBase64(f)
+		url, err := fontBase64(f)
 		if err != nil {
 			return nil, fmt.Errorf("binary font to base64 failed: %w", err)
 		}
@@ -113,7 +113,7 @@ main pre {
 	return out.Bytes(), nil
 }
 
-// FontBase64 encodes a font using the Base64 binary-to-text encoding scheme,
+// fontBase64 encodes a font using the Base64 binary-to-text encoding scheme,
 // for embedding into HTML or CSS textfiles.
 func fontBase64(f Font) (string, error) {
 	name := fmt.Sprintf("font/%s", f.File())

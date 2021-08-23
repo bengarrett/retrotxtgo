@@ -173,6 +173,7 @@ func (args *Args) saveHTML(b *[]byte, c chan error) {
 	if name == "" {
 		c <- ErrFileNil
 	}
+	// check directory
 	file, err := os.Create(name)
 	if err != nil {
 		c <- err

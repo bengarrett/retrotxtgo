@@ -69,25 +69,22 @@ func Test_zipAssets(t *testing.T) {
 			t.Errorf("saveAssets make temp dir: %w", err)
 		}
 		defer os.RemoveAll(tmpDir)
-
 		// Initialize
-		a := Args{}
-		a.layout = Standard
+		a := Args{
+			layout: Standard,
+			Test:   true,
+		}
 		a.Save.Destination = tmpDir
-		a.Test = true
-
 		// Create a zip file
 		name := filepath.Join(os.TempDir(), zipName)
 		b := []byte("hello")
 		a.zipAssets(os.TempDir(), &b)
 		defer os.Remove(name)
-
 		// Print the filename of the new zip file
 		file, err := os.Stat(name)
 		if err != nil {
 			t.Errorf("stat file: %w", err)
 		}
-
 		const want = "retrotxt.zip"
 		if got := file.Name(); got != want {
 			t.Errorf("zipAssets() filename = %v, want %v", got, want)
@@ -127,7 +124,7 @@ func TestSave(t *testing.T) {
 			go a.saveHTML(&tt.args.data, ch)
 			err := <-ch
 			if (err != nil) != tt.wantErr {
-				fmt.Println("dir:", tmpDir)
+				fmt.Println("TestSave dir:", tmpDir)
 				t.Errorf("Save(%s) error = %v, wantErr %v", tt.name, err, tt.wantErr)
 			}
 		})

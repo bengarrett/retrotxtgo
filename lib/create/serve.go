@@ -41,13 +41,13 @@ func (args *Args) Serve(b *[]byte) error {
 	if port == 0 || !prompt.PortValid(port) {
 		port = uint(viper.GetInt("serve"))
 	}
-	max := 10
-	for tries := 0; tries <= max; tries++ {
+	const maxTries = 10
+	for tries := 0; tries <= maxTries; tries++ {
 		switch {
 		case !Port(port):
 			port++
 			continue
-		case tries >= max:
+		case tries >= maxTries:
 			return fmt.Errorf("serve http ports %d-%d: %w", args.Port, port, ErrPorts)
 		default:
 			args.Port = port
@@ -57,16 +57,14 @@ func (args *Args) Serve(b *[]byte) error {
 	if err := args.createDir(b); err != nil {
 		return fmt.Errorf("serve create directory: %w", err)
 	}
-
 	args.serveDir()
-
 	return nil
 }
 
-// Override the user flag values which are not yet implemented.
+// override the user flag values which are not yet implemented.
 func (args *Args) override() {
 	const embed = false
-	var s = []string{}
+	s := []string{}
 	if args.layout != Standard {
 		s = append(s, fmt.Sprintf("%s HTML layout", Standard))
 		args.layout = Standard
@@ -88,28 +86,27 @@ func (args *Args) override() {
 	fmt.Printf("Using %s\n", strings.Join(s, " and "))
 }
 
-// CreateDir creates a temporary save directory destination.
-func (args *Args) createDir(b *[]byte) (err error) {
+// createDir creates a temporary save directory destination.
+func (args *Args) createDir(b *[]byte) error {
 	args.Save.AsFiles, args.Save.OW = true, true
+	var err error
 	args.Save.Destination, err = ioutil.TempDir(os.TempDir(), "*-serve")
 	if err != nil {
 		return fmt.Errorf("failed to make a temporary serve directory: %w", err)
 	}
-	err = args.Create(b)
-	if err != nil {
+	if err := args.Create(b); err != nil {
 		return fmt.Errorf("failed to create files in the temporary directory: %w", err)
 	}
 	return nil
 }
 
-// ServeDir hosts the named souce directory on the internal HTTP server.
+// serveDir hosts the named souce directory on the internal HTTP server.
 func (args *Args) serveDir() {
-	const timeout = 5
+	const timeout = 5 * time.Second
 	srv := &http.Server{
 		Addr: fmt.Sprintf(":%v", args.Port),
 	}
 	http.Handle("/", http.FileServer(http.Dir(args.Save.Destination)))
-
 	var ctx context.Context
 	var cancel context.CancelFunc
 	if args.Test {
@@ -123,9 +120,8 @@ func (args *Args) serveDir() {
 		cancel()
 	} else {
 		// listen for Ctrl+C keyboard interrupt
-		done := make(chan os.Signal, 1)
-		signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-
+		ctrlC := make(chan os.Signal, 1)
+		signal.Notify(ctrlC, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 		go func() {
 			fmt.Printf("\nWeb server is available at %s\n",
 				str.Cp(fmt.Sprintf("http://localhost%v", srv.Addr)))
@@ -135,16 +131,13 @@ func (args *Args) serveDir() {
 				log.Fatalf("tcp listen and serve failed: %s\n", err)
 			}
 		}()
-
-		<-done
-		ctx, cancel = context.WithTimeout(context.Background(), timeout*time.Second)
+		<-ctrlC
+		ctx, cancel = context.WithTimeout(context.Background(), timeout)
 	}
-
 	defer func() {
 		cancel()
 		args.cleanup()
 	}()
-
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Printf("http server shutdown failed: %s\n", err)
 	} else if args.Test {
@@ -152,9 +145,7 @@ func (args *Args) serveDir() {
 	}
 }
 
-var ErrCleanPath = errors.New("cleanup temporary path match failed")
-
-// Cleanup the temporary files and directories.
+// cleanup the temporary files and directories.
 func (args *Args) cleanup() {
 	if !args.Test {
 		fmt.Printf("\n\nServer shutdown and directory removal of: %s\n", args.Save.Destination)
