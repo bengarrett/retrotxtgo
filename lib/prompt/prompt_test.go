@@ -19,7 +19,7 @@ func init() {
 func ExampleYesNo() {
 	yn := YesNo("Say hello", true)
 	fmt.Print(yn)
-	// Output:Say hello? [Y/n] true
+	// Output:Say hello? [Yes/no] true
 }
 
 func Test_pport(t *testing.T) {

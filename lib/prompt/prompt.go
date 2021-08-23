@@ -16,6 +16,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/meta"
+	"github.com/gookit/color"
 )
 
 type keys []string
@@ -94,8 +95,11 @@ func YesNo(ask string, yesDefault bool) bool {
 	if !strings.HasSuffix(ask, "?") && !strings.HasSuffix(ask, ")") {
 		ask = fmt.Sprintf("%s?", ask)
 	}
-	yes, _ := str.UnderlineChar(y)
-	no, _ := str.UnderlineChar(n)
+	yes, no := y, n
+	if color.Enable {
+		yes, _ = str.UnderlineChar(y)
+		no, _ = str.UnderlineChar(n)
+	}
 	fmt.Printf("%s [%ses/%so] ", ask, yes, no)
 	input, err := promptRead(os.Stdin)
 	if err != nil {
