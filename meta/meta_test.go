@@ -68,7 +68,7 @@ func TestVersion_String(t *testing.T) {
 		v    Version
 		want string
 	}{
-		{"empty", Version{}, "α0.0.0"},
+		{"empty", Version{}, "x0.0.0"},
 		{"alpha", Version{0, 0, 1}, "α0.0.1"},
 		{"beta", Version{0, 5, 11}, "β0.5.11"},
 		{"release", Version{10, 0, 9}, "10.0.9"},
