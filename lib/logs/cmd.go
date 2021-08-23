@@ -14,18 +14,16 @@ import (
 func InvalidCommand(usage string, args ...string) {
 	err := fmt.Errorf("%w: %s", ErrCmdExist, args[0])
 	args = append(args, usage)
-	Execute(err, args...)
-}
-
-func InvalidChoice(name, value string, choices ...string) {
-	c := ProblemFlag(name, value, ErrFlagChoice)
-	fmt.Println(c)
-	fmt.Printf("          choices: %s\n", strings.Join(choices, ", "))
-	os.Exit(1)
+	if s := Execute(err, false, args...); s != "" {
+		os.Exit(1)
+	}
 }
 
 // Execute is the error handler for command flags and arguments.
-func Execute(err error, args ...string) { //nolint:gocyclo,funlen
+func Execute(err error, test bool, args ...string) string { //nolint:gocyclo,funlen
+	if err == nil {
+		return ""
+	}
 	const (
 		minWords       = 3
 		rt             = meta.Bin
@@ -43,10 +41,18 @@ func Execute(err error, args ...string) { //nolint:gocyclo,funlen
 	words := strings.Split(fmt.Sprintf("%s", err), " ")
 	argsCnt, wordCnt := len(args), len(words)
 	if wordCnt < minWords {
-		SaveFatal(fmt.Errorf("cmd error args: %w", ErrShort))
+		e := fmt.Errorf("cmd error args: %w", ErrShort)
+		if test {
+			return e.Error()
+		}
+		SaveFatal(e)
 	}
 	if argsCnt == 0 {
-		SaveFatal(fmt.Errorf("cmd error err: %w", ErrEmpty))
+		e := fmt.Errorf("cmd error err: %w", ErrEmpty)
+		if test {
+			return e.Error()
+		}
+		SaveFatal(e)
 	}
 	mark, name := words[wordCnt-1], args[0]
 	if mark == name {
@@ -62,7 +68,10 @@ func Execute(err error, args ...string) { //nolint:gocyclo,funlen
 		c = ProblemFlag(name, mark, ErrNotNil)
 	case invalidType:
 		// retroxt --help=foo
-		mark = strings.Join(words[4:6], " ")
+		const min = 6
+		if len(words) >= min {
+			mark = strings.Join(words[4:6], " ")
+		}
 		c = parseType(name, mark, err)
 	case invalidSlice:
 		c = "invalidSlice placeholder"
@@ -101,10 +110,10 @@ func Execute(err error, args ...string) { //nolint:gocyclo,funlen
 		c = Errorf(err)
 	}
 	if c != "" {
-		fmt.Println(c)
-		os.Exit(1)
+		return c
 	}
 	log.Panic(err)
+	return ""
 }
 
 func parseType(name, flag string, err error) string {

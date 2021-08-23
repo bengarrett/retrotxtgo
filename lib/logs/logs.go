@@ -23,34 +23,36 @@ const (
 
 // Save by appending the error to the logfile.
 func Save(err error) {
-	if err != nil {
-		// save error to log file
-		if err = save(err, ""); err != nil {
-			log.Fatalf("%s %s", color.Danger.Sprint("!"), err)
-		}
+	if err == nil {
+		return
+	}
+	// save error to log file
+	if err = save(err, ""); err != nil {
+		log.Fatalf("%s %s", color.Danger.Sprint("!"), err)
 	}
 }
 
 // SaveFatal saves the error to the logfile and exits.
 func SaveFatal(err error) {
-	if err != nil {
-		// save error to log file
-		if err = save(err, ""); err != nil {
-			log.Fatalf("%s %s", color.Danger.Sprint("!"), err)
-		}
-		// print error
-		switch Panic {
-		case true:
-			log.Println(fmt.Sprintf("error type: %T\tmsg: %v", err, err))
-			log.Panic(err)
-		default:
-			ProblemFatal(ErrLogSave, err)
-		}
+	if err == nil {
+		return
+	}
+	// save error to log file
+	if err = save(err, ""); err != nil {
+		log.Fatalf("%s %s", color.Danger.Sprint("!"), err)
+	}
+	// print error
+	switch Panic {
+	case true:
+		log.Println(fmt.Sprintf("error type: %T\tmsg: %v", err, err))
+		log.Panic(err)
+	default:
+		ProblemFatal(ErrLogSave, err)
 	}
 }
 
 // LastEntry returns the last and newest saved entry in the error log file.
-func LastEntry() (entry string, err error) {
+func LastEntry() (s string, err error) {
 	name := Name()
 	file, err := os.Open(name)
 	if err != nil {
@@ -60,25 +62,25 @@ func LastEntry() (entry string, err error) {
 	scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
-		entry = scanner.Text()
+		s = scanner.Text()
 	}
 	if err = scanner.Err(); err != nil {
 		return "", fmt.Errorf("read tail could scan file bytes: %q: %w", name, err)
 	}
-	return entry, file.Close()
+	return s, file.Close()
 }
 
 // Name is the absolute path and filename of the error log file.
 func Name() string {
 	fp, err := gap.NewScope(gap.User, "df2").LogPath(filename)
-	if err != nil {
-		h, err := os.UserHomeDir()
-		if err != nil {
-			log.Fatal(fmt.Errorf("log path userhomedir: %w", err))
-		}
-		return path.Join(h, filename)
+	if err == nil {
+		return fp
 	}
-	return fp
+	h, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatal(fmt.Errorf("log path userhomedir: %w", err))
+	}
+	return path.Join(h, filename)
 }
 
 // Save an error to the log directory.
