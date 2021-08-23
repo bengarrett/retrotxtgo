@@ -112,12 +112,12 @@ func GetEnv(key string) string {
 }
 
 // Highlight and print the syntax of the source string except when piped to stdout.
-func Highlight(source, lexer, style string, ansi bool) (err error) {
+func Highlight(source, lexer, style string, ansi bool) error {
 	return HighlightWriter(os.Stdout, source, lexer, style, ansi)
 }
 
 // HighlightWriter writes the highlight syntax of the source string except when piped to stdout.
-func HighlightWriter(w io.Writer, source, lexer, style string, ansi bool) (err error) {
+func HighlightWriter(w io.Writer, source, lexer, style string, ansi bool) error {
 	term := Term(GetEnv("COLORTERM"), GetEnv("TERM"))
 	// detect piping for text output or ansi for printing
 	// source: https://stackoverflow.com/questions/43947363/detect-if-a-command-is-piped-or-not
@@ -205,21 +205,21 @@ func Term(colorEnv, env string) string {
 }
 
 // UnderlineChar uses ANSI to underline the first character of a string.
-func UnderlineChar(c string) (s string, err error) {
+func UnderlineChar(c string) (string, error) {
 	if c == "" {
 		return "", nil
 	}
 	if !utf8.ValidString(c) {
-		return s, fmt.Errorf("underlinechar %q: %w", c, ErrRune)
+		return "", fmt.Errorf("underlinechar %q: %w", c, ErrRune)
 	}
 	var buf bytes.Buffer
 	r, _ := utf8.DecodeRuneInString(c)
 	t, err := template.New("underline").Parse("{{define \"TEXT\"}}\033[0m\033[4m{{.}}\033[0m{{end}}")
 	if err != nil {
-		return s, fmt.Errorf("underlinechar new template: %w", err)
+		return "", fmt.Errorf("underlinechar new template: %w", err)
 	}
 	if err = t.ExecuteTemplate(&buf, "TEXT", string(r)); err != nil {
-		return s, fmt.Errorf("underlinechar execute template: %w", err)
+		return "", fmt.Errorf("underlinechar execute template: %w", err)
 	}
 	return buf.String(), nil
 }

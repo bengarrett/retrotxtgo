@@ -92,8 +92,8 @@ func Options(s string, shorthand, flagHelp bool, opts ...string) (usage string) 
 	return fmt.Sprintf("%s.\n  Options: %s", s, color.Info.Sprint(keys))
 }
 
-// Required appends (required) to the usage string.
-func Required(s string) (usage string) {
+// Required appends (required) to the string.
+func Required(s string) string {
 	return fmt.Sprintf("%s (required)", color.Primary.Sprint(s))
 }
 

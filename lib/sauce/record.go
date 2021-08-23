@@ -51,12 +51,12 @@ func (t tInfoS) String() string {
 	return s
 }
 
-func (r record) extract() (d data) {
+func (r record) extract() data {
 	i := Scan(r...)
 	if i == -1 {
-		return d
+		return data{}
 	}
-	d = data{
+	d := data{
 		id:       r.id(i),
 		version:  r.version(i),
 		title:    r.title(i),

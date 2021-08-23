@@ -49,7 +49,7 @@ type Sizes struct {
 	Binary  string `json:"binary" xml:"binary,attr"`
 }
 
-// DataTypes, both the SAUCE DataType value and name.
+// DataTypes both the SAUCE DataType value and name.
 type DataTypes struct {
 	Type DataType `json:"type" xml:"type"`
 	Name string   `json:"name" xml:"name"`
@@ -112,9 +112,9 @@ type ANSIFlags struct {
 	Interpretations string     `json:"-" xml:"-"`
 }
 
-func (a *ANSIFlags) String() (s string) {
+func (a *ANSIFlags) String() string {
 	if a.Decimal == 0 {
-		return s
+		return ""
 	}
 	b, ls, ar := a.B.Info, a.LS.Info, a.AR.Info
 	l := []string{}
@@ -134,9 +134,15 @@ func (a *ANSIFlags) String() (s string) {
 type Flags uint8
 
 func (f Flags) parse() ANSIFlags {
-	const binary5Bits = "%05b"
+	const binary5Bits, minLen = "%05b", 6
 	bin := fmt.Sprintf(binary5Bits, f)
 	r := []rune(bin)
+	if len(r) < minLen {
+		return ANSIFlags{
+			Decimal: f,
+			Binary:  bin,
+		}
+	}
 	b, ls, ar := string(r[0]), string(r[1:3]), string(r[3:5])
 	return ANSIFlags{
 		Decimal: f,
@@ -156,10 +162,11 @@ type ANSIFlagB struct {
 type bBit string
 
 func (b bBit) String() string {
+	const blink, non = "0", "1"
 	switch b {
-	case "0":
+	case blink:
 		return "blink mode"
-	case "1":
+	case non:
 		return "non-blink mode"
 	default:
 		return invalid
@@ -175,12 +182,13 @@ type ANSIFlagLS struct {
 type lsBit string
 
 func (ls lsBit) String() string {
+	const none, eight, nine = "00", "01", "10"
 	switch ls {
-	case "00":
+	case none:
 		return noPref
-	case "01":
+	case eight:
 		return "select 8 pixel font"
-	case "10":
+	case nine:
 		return "select 9 pixel font"
 	default:
 		return invalid
@@ -196,12 +204,13 @@ type ANSIFlagAR struct {
 type arBit string
 
 func (ar arBit) String() string {
+	const none, strect, square = "00", "01", "10"
 	switch ar {
-	case "00":
+	case none:
 		return noPref
-	case "01":
+	case strect:
 		return "stretch pixels"
-	case "10":
+	case square:
 		return "square pixels"
 	default:
 		return invalid
@@ -434,7 +443,7 @@ func (e Executable) String() string {
 func Scan(b ...byte) (index int) {
 	const sauceSize, maximum = 128, 512
 	id, l := []byte(sauceID), len(b)
-	var backwardsLoop = func(i int) int {
+	backwardsLoop := func(i int) int {
 		return l - 1 - i
 	}
 	// search for the id sequence in b

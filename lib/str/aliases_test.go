@@ -14,11 +14,11 @@ func init() {
 
 func ExampleAlert() {
 	fmt.Print(Alert())
-	// Output:problem:
+	// Output:Problem:
 }
 func ExampleInfo() {
 	fmt.Print(Info())
-	// Output:info:
+	// Output:Information:
 }
 
 func ExampleCb() {

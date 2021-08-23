@@ -15,7 +15,7 @@ import (
 
 var ErrDate = errors.New("parse date to integer conversion")
 
-// this data struct intentionally shares the SAUCE key names with the type key names.
+// data struct intentionally shares the SAUCE key names with the type key names.
 type data struct {
 	id       id
 	version  version
