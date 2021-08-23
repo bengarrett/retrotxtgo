@@ -40,7 +40,10 @@ func CtrlC() {
 }
 
 // IndexStrings asks for a numeric index position and returns a single choice from a string of keys.
-func IndexStrings(options *[]string, setup bool) (key string) {
+func IndexStrings(options *[]string, setup bool) string {
+	if options == nil {
+		return ""
+	}
 	var k keys = *options
 	return k.prompt(os.Stdin, setup)
 }
@@ -68,7 +71,10 @@ func PortValid(port uint) (ok bool) {
 
 // ShortStrings asks for and returns a single choice from a string of keys.
 // Either the first letter or the full name of the key are accepted.
-func ShortStrings(options *[]string) (key string) {
+func ShortStrings(options *[]string) string {
+	if options == nil {
+		return ""
+	}
 	var k keys = *options
 	return k.shortPrompt(os.Stdin)
 }
@@ -81,7 +87,10 @@ func String() (words string) {
 }
 
 // Strings asks for and returns a single choice from a string of keys.
-func Strings(options *[]string, setup bool) (key string) {
+func Strings(options *[]string, setup bool) string {
+	if options == nil {
+		return ""
+	}
 	var k keys = *options
 	return k.prompt(os.Stdin, setup)
 }
@@ -197,28 +206,28 @@ func pstring(r io.Reader) (words string) {
 }
 
 // Numeric checks input string for a valid int value and returns a matching slice.
-func (k keys) numeric(input string) (key string) {
+func (k keys) numeric(input string) string {
 	if input == "" {
-		return key
+		return ""
 	}
 	i, err := strconv.Atoi(input)
 	if err != nil {
-		return key
+		return ""
 	}
 	if i >= len(k) || i < 0 {
-		return key
+		return ""
 	}
 	sort.Strings(k)
 	return k[i]
 }
 
 // Prompt parses the reader input for a valid key.
-func (k keys) prompt(r io.Reader, setup bool) (key string) {
+func (k keys) prompt(r io.Reader, setup bool) string {
 	prompts := 0
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		prompts++
-		key = scanner.Text()
+		key := scanner.Text()
 		if key == "-" {
 			return ""
 		}
@@ -238,11 +247,11 @@ func (k keys) prompt(r io.Reader, setup bool) (key string) {
 }
 
 // ShortPrompt parses the reader input for a valid key or alias of the key.
-func (k keys) shortPrompt(r io.Reader) (key string) {
+func (k keys) shortPrompt(r io.Reader) string {
 	prompts, scanner := 0, bufio.NewScanner(r)
 	for scanner.Scan() {
 		prompts++
-		key = scanner.Text()
+		key := scanner.Text()
 		switch key {
 		case "", "-":
 			return key
