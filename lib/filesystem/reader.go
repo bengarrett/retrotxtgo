@@ -70,7 +70,7 @@ func Columns(r io.Reader, lb LB) (width int, err error) {
 		if err != nil && err != io.EOF {
 			return -1, fmt.Errorf("columns could not read buffer: %w", err)
 		}
-		var pos int
+		pos := 0
 		for {
 			if size == pos {
 				break
@@ -100,7 +100,7 @@ func Controls(r io.Reader) (count int, err error) {
 		if err != nil && err != io.EOF {
 			return 0, fmt.Errorf("controls could not read buffer: %w", err)
 		}
-		var pos int
+		pos := 0
 		for {
 			i := bytes.Index(buf[pos:], lineBreak)
 			if size == pos {
@@ -121,7 +121,7 @@ func Controls(r io.Reader) (count int, err error) {
 
 // Lines counts the number of lines in the interface.
 func Lines(r io.Reader, lb LB) (count int, err error) {
-	var lineBreak = []byte{byte(lb[0]), byte(lb[1])}
+	lineBreak := []byte{byte(lb[0]), byte(lb[1])}
 	if lb[1] == 0 {
 		lineBreak = []byte{byte(lb[0])}
 	}
@@ -131,7 +131,7 @@ func Lines(r io.Reader, lb LB) (count int, err error) {
 		if err != nil && err != io.EOF {
 			return 0, fmt.Errorf("lines could not read buffer: %w", err)
 		}
-		var pos int
+		pos := 0
 		for {
 			i := bytes.Index(buf[pos:], lineBreak)
 			if size == pos {

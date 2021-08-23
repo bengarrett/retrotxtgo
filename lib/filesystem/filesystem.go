@@ -16,10 +16,8 @@ import (
 )
 
 const (
-	// posix permission bits for files.
-	filemode os.FileMode = 0660
-	// posix permission bits for directories.
-	dirmode os.FileMode = 0700
+	fileMode os.FileMode = 0660
+	dirMode  os.FileMode = 0700
 )
 
 // ErrStdErr could not print to stderr.
@@ -34,20 +32,19 @@ func Clean(name string) {
 	}
 }
 
-// DirExpansion traverses the named directory to apply shell-like expansions.
+// DirExpansion returns the absolute directory path from a named path using shell-like expansions.
 // It currently supports limited Bash tilde, shell dot and double dot syntax.
-func DirExpansion(name string) (dir string) {
+func DirExpansion(name string) string {
 	if name == "" {
-		return dir
+		return ""
 	}
-	const homeDir, currentDir, parentDir = "~", ".", ".."
-	var root = func() bool {
+	root := func() bool {
 		return name[:1] == string(os.PathSeparator)
 	}
-
+	const homeDir, currentDir, parentDir = "~", ".", ".."
 	var err error
 	// Bash tilde expension http://www.gnu.org/software/bash/manual/html_node/Tilde-Expansion.html
-	paths := strings.Split(name, string(os.PathSeparator))
+	dir, paths := "", strings.Split(name, string(os.PathSeparator))
 	for i, s := range paths {
 		p := ""
 		switch s {
@@ -87,7 +84,7 @@ func DirExpansion(name string) (dir string) {
 	return dir
 }
 
-// WinDir appends Windows style syntax to the directory.
+// winDir appends Windows style syntax to the directory.
 func winDir(i int, p, platform, dir string) (s string, cont bool) {
 	if platform == "windows" {
 		if len(p) == 2 && p[1:] == ":" {
@@ -102,39 +99,40 @@ func winDir(i int, p, platform, dir string) (s string, cont bool) {
 	return dir, false
 }
 
-// Save bytes to a named file location.
-func Save(name string, b ...byte) (nn int, path string, err error) {
+// Save bytes to the named file location.
+func Save(name string, b ...byte) (written int, path string, err error) {
 	path, err = dir(name)
 	if err != nil {
-		return nn, path, fmt.Errorf("save could not open directory %q: %w", name, err)
+		return 0, path, fmt.Errorf("save could not open directory %q: %w", name, err)
 	}
 	path = name
-	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, filemode)
+	const overwrite = os.O_RDWR | os.O_CREATE | os.O_TRUNC
+	file, err := os.OpenFile(path, overwrite, fileMode)
 	if err != nil {
-		return nn, path, fmt.Errorf("save could not open file %q: %w", path, err)
+		return 0, path, fmt.Errorf("save could not open file %q: %w", path, err)
 	}
 	defer file.Close()
 	// bufio is the most performant
 	writer := bufio.NewWriter(file)
 	for i, c := range b {
-		nn = i
+		written = i
 		if err = writer.WriteByte(c); err != nil {
-			return nn, path, fmt.Errorf("save could not write bytes: %w", err)
+			return 0, path, fmt.Errorf("save could not write bytes: %w", err)
 		}
 	}
 	if err = writer.Flush(); err != nil {
-		return nn, path, fmt.Errorf("save could not flush the writer: %w", err)
+		return 0, path, fmt.Errorf("save could not flush the writer: %w", err)
 	}
 	path, err = filepath.Abs(file.Name())
 	if err != nil {
-		return nn, path, fmt.Errorf("save could not find the absolute filename: %w", err)
+		return 0, path, fmt.Errorf("save could not find the absolute filename: %w", err)
 	}
-	return nn, path, file.Close()
+	return written, path, file.Close()
 }
 
 // SaveTemp saves bytes to a named temporary file.
-func SaveTemp(filename string, b ...byte) (path string, err error) {
-	_, path, err = Save(tempFile(filename), b...)
+func SaveTemp(name string, b ...byte) (path string, err error) {
+	_, path, err = Save(tempFile(name), b...)
 	if err != nil {
 		return path, fmt.Errorf("could not save the temporary file: %w", err)
 	}
@@ -210,17 +208,18 @@ func Touch(name string) (path string, err error) {
 	return path, nil
 }
 
+// dir creates the named path directory if it doesn't exist.
 func dir(name string) (path string, err error) {
 	path = filepath.Dir(name)
 	if _, err = os.Stat(path); os.IsNotExist(err) {
-		if err = os.MkdirAll(path, dirmode); err != nil {
-			return "", fmt.Errorf("dir could not make the directory: %s %s: %w", dirmode, path, err)
+		if err = os.MkdirAll(path, dirMode); err != nil {
+			return "", fmt.Errorf("dir could not make the directory: %s %s: %w", dirMode, path, err)
 		}
 	}
 	return path, err
 }
 
-// LineBreak returns line break character for the system platform.
+// lineBreak returns line break character for the system platform.
 func lineBreak(platform lineBreaks) string {
 	switch platform {
 	case dos, win:
@@ -235,7 +234,7 @@ func lineBreak(platform lineBreaks) string {
 	return "\n"
 }
 
-// TempFile returns a path to the named file
+// tempFile returns a path to the named file
 // if it was stored in the system's temporary directory.
 func tempFile(name string) (path string) {
 	path = name
