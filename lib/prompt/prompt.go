@@ -193,14 +193,14 @@ func parseYN(input string, yesDefault bool) bool {
 // pstring parses the reader input for any os exit commands.
 func pstring(r io.Reader) (words string) {
 	if r == nil {
-		logs.ProblemFatal(ErrPString, ErrNoReader)
+		logs.FatalWrap(ErrPString, ErrNoReader)
 	}
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		return scanner.Text()
 	}
 	if err := scanner.Err(); err != nil {
-		logs.ProblemFatal(ErrPString, err)
+		logs.FatalWrap(ErrPString, err)
 	}
 	return words
 }

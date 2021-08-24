@@ -109,7 +109,7 @@ func examples() *bytes.Buffer {
 	fmt.Fprintf(w, "\nMultiple examples used together are supported.\n%s\n",
 		str.Example(bin+"view ansi ascii ansi.rgb"))
 	if err := w.Flush(); err != nil {
-		logs.ProblemFatal(logs.ErrTabFlush, err)
+		logs.FatalWrap(logs.ErrTabFlush, err)
 	}
 	return &buf
 }

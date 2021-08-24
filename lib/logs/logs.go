@@ -47,7 +47,7 @@ func SaveFatal(err error) {
 		log.Println(fmt.Sprintf("error type: %T\tmsg: %v", err, err))
 		log.Panic(err)
 	default:
-		ProblemFatal(ErrLogSave, err)
+		FatalWrap(ErrLogSave, err)
 	}
 }
 

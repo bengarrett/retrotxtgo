@@ -284,7 +284,7 @@ func parseBody(cmd *cobra.Command) {
 		if h := serveBytes(0, serve, &b); !h {
 			err := html.Create(&b)
 			if err != nil {
-				logs.ProblemFatal(ErrBody, err)
+				logs.FatalWrap(ErrBody, err)
 			}
 		}
 		os.Exit(0)
@@ -312,7 +312,7 @@ func parseFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 		if h := serveBytes(i, serve, &b); !h {
 			err := html.Create(&b)
 			if err != nil {
-				logs.ProblemFatal(fmt.Errorf("%s: %w", arg, ErrServeIn), err)
+				logs.FatalWrap(fmt.Errorf("%s: %w", arg, ErrServeIn), err)
 			}
 		}
 	}
@@ -322,14 +322,14 @@ func parseFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 func parsePipe(cmd *cobra.Command, flags convert.Flags) {
 	src, err := filesystem.ReadPipe()
 	if err != nil {
-		logs.ProblemFatal(logs.ErrPipe, err)
+		logs.FatalWrap(logs.ErrPipe, err)
 	}
 	b := createHTML(cmd, flags, &src)
 	serve := cmd.Flags().Lookup("serve").Changed
 	if h := serveBytes(0, serve, &b); !h {
 		err := html.Create(&b)
 		if err != nil {
-			logs.ProblemFatal(fmt.Errorf("stdin: %w", ErrServeIn), err)
+			logs.FatalWrap(fmt.Errorf("stdin: %w", ErrServeIn), err)
 		}
 	}
 	os.Exit(0)
@@ -346,7 +346,7 @@ func createHTML(cmd *cobra.Command, flags convert.Flags, src *[]byte) []byte {
 	// encode and convert the source text
 	if cp := cmd.Flags().Lookup("encode"); cp.Changed {
 		if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
-			logs.ProblemFatal(logs.ErrEncode, err)
+			logs.FatalWrap(logs.ErrEncode, err)
 		}
 		conv.Source.E = f.From
 	}
@@ -360,7 +360,7 @@ func createHTML(cmd *cobra.Command, flags convert.Flags, src *[]byte) []byte {
 		r, err = conv.Dump(src)
 	}
 	if err != nil {
-		fmt.Println(logs.Problemf(ErrCreate, err))
+		fmt.Println(logs.PrintfWrap(ErrCreate, err))
 		return nil
 	}
 	return []byte(string(r))

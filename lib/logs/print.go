@@ -38,8 +38,14 @@ func FatalFlag(cmd, flag string, err error) {
 }
 
 // FatalMark formats the errors, highlights the value and exits.
-func FatalMark(value string, err, errs error) {
-	fmt.Println(PrintfMark(value, err, errs))
+func FatalMark(mark string, err, wrap error) {
+	fmt.Println(PrintfMark(mark, err, wrap))
+	os.Exit(OSErrCode)
+}
+
+// FatalWrap formats the errors and exits.
+func FatalWrap(err, wrap error) {
+	fmt.Println(PrintfWrap(err, wrap))
 	os.Exit(OSErrCode)
 }
 
@@ -76,25 +82,19 @@ func PrintfFlag(cmd, flag string, err error) string {
 }
 
 // PrintfMark formats the errors and highlights the value.
-func PrintfMark(value string, err, errs error) string {
-	if value == "" || err == nil || errs == nil {
+func PrintfMark(mark string, err, wrap error) string {
+	if mark == "" || err == nil || wrap == nil {
 		return ""
 	}
 	return fmt.Sprintf("%s %s %q: %s",
-		str.Alert(), str.Cf(fmt.Sprintf("%v", err)), value, str.Cf(fmt.Sprintf("%v", errs)))
+		str.Alert(), str.Cf(fmt.Sprintf("%v", err)), mark, str.Cf(fmt.Sprintf("%v", wrap)))
 }
 
-// Problemf formats the errors.
-func Problemf(err, errs error) string {
-	if err == nil || errs == nil {
+// PrintfWrap formats the errors.
+func PrintfWrap(err, wrap error) string {
+	if err == nil || wrap == nil {
 		return ""
 	}
-	e := fmt.Errorf("%s: %w", err, errs)
-	return fmt.Sprintf("%s%s", str.Alert(), e)
-}
-
-// Problemf formats the errors and exits.
-func ProblemFatal(err, errs error) {
-	fmt.Println(Problemf(err, errs))
-	os.Exit(OSErrCode)
+	return fmt.Sprintf("%s%s",
+		str.Alert(), fmt.Errorf("%s: %w", err, wrap))
 }

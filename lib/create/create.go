@@ -262,7 +262,7 @@ func (args *Args) zipAssets(destDir string, b *[]byte) {
 		logs.FatalMark("temporary", logs.ErrDirSave, err)
 	}
 	if err = args.saveAssets(b); err != nil {
-		fmt.Println(logs.Problemf(logs.ErrFileSave, err))
+		fmt.Println(logs.PrintfWrap(logs.ErrFileSave, err))
 		return
 	}
 	name := zipName

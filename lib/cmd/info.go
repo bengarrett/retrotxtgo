@@ -63,7 +63,7 @@ var infoCmd = &cobra.Command{
 					continue
 				}
 				if err = cmd.Usage(); err != nil {
-					fmt.Println(logs.Problemf(ErrUsage, err))
+					fmt.Println(logs.PrintfWrap(ErrUsage, err))
 				}
 				logs.Fatal(err)
 			}

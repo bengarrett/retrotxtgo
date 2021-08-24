@@ -153,7 +153,7 @@ func (args *Args) cleanup() {
 	tmp, err := path.Match(fmt.Sprintf("%s%s*",
 		string(os.PathSeparator), os.TempDir()), args.Save.Destination)
 	if err != nil {
-		logs.ProblemFatal(ErrCleanPath, err)
+		logs.FatalWrap(ErrCleanPath, err)
 	}
 	if tmp {
 		if err := os.RemoveAll(args.Save.Destination); err != nil {

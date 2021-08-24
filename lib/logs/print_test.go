@@ -137,7 +137,7 @@ func TestPrintfMark(t *testing.T) {
 	}
 }
 
-func TestProblemf(t *testing.T) {
+func TestPrintfWrap(t *testing.T) {
 	type args struct {
 		err  error
 		errs error
@@ -153,8 +153,8 @@ func TestProblemf(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Problemf(tt.args.err, tt.args.errs); got != tt.want {
-				t.Errorf("Problemf() = %v, want %v", got, tt.want)
+			if got := PrintfWrap(tt.args.err, tt.args.errs); got != tt.want {
+				t.Errorf("PrintfWrap() = %v, want %v", got, tt.want)
 			}
 		})
 	}

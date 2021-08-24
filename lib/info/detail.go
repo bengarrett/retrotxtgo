@@ -261,7 +261,7 @@ func (d *Detail) printMarshal(color bool) []byte {
 		fmt.Fprint(w, hr(l))
 	}
 	if err := w.Flush(); err != nil {
-		logs.ProblemFatal(logs.ErrTabFlush, err)
+		logs.FatalWrap(logs.ErrTabFlush, err)
 	}
 	return buf.Bytes()
 }
