@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"math"
-	"strings"
 	"text/tabwriter"
 	"unicode"
 
@@ -33,10 +32,9 @@ func Table(name string) (*bytes.Buffer, error) {
 	h += charmapAlias(cp)
 	h += charmapStandard(cp)
 	var buf bytes.Buffer
-	const tabWidth, horizontalBar = 8, "\u2015"
+	const tabWidth = 8
 	w := new(tabwriter.Writer).Init(&buf, 0, tabWidth, 0, '\t', 0)
-	fmt.Fprintln(w, " "+color.OpFuzzy.Sprint(strings.Repeat(horizontalBar, width)))
-	fmt.Fprintln(w, color.Primary.Sprint(str.Center(width, h)))
+	fmt.Fprint(w, " "+str.HeadDark(width, h))
 	const start, end, max = 0, 15, 255
 	for i := 0; i < 16; i++ {
 		switch i {

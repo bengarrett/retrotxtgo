@@ -36,6 +36,8 @@ const (
 	Term256
 	// Term16M ANSI high-color.
 	Term16M
+	// HBar is a the Unicode horizontal bar character.
+	HBar = "\u2500"
 	none = "none"
 	term = "terminal"
 )
@@ -144,15 +146,34 @@ func HighlightWriter(w io.Writer, source, lexer, style string, ansi bool) error 
 	return nil
 }
 
+// Head returns a colored and underlined string for use as a header.
+// Provide a fixed width value for the underline border or set to zero.
+func Head(width int, s string) string {
+	const div, padding = 2, 4
+	h, r, p := ColPri(s), "", ""
+	if width == 0 {
+		r = strings.Repeat(HBar, len(s)+padding)
+		p = strings.Repeat(" ", padding/div)
+	} else {
+		r = strings.Repeat(HBar, width)
+		p = strings.Repeat(" ", (width-len(s))/div)
+	}
+	return fmt.Sprintf("\n%s%s%s\n%s", p, h, p, r)
+}
+
+func HeadDark(width int, s string) string {
+	r := color.OpFuzzy.Sprint(strings.Repeat(HBar, width))
+	h := color.Primary.Sprint(Center(width, s))
+	return fmt.Sprintf("%s\n%s\n", r, h)
+}
+
 // HR returns a horizontal ruler or line break.
 func HR(width int) string {
-	const horizontalBar = "\u2500"
-	return fmt.Sprintf(" %s", ColSec(strings.Repeat(horizontalBar, width)))
+	return fmt.Sprintf(" %s", ColSec(strings.Repeat(HBar, width)))
 }
 
 func HRPad(width int) string {
-	const horizontalBar = "\u2500"
-	return fmt.Sprintf(" \n%s\n", ColSec(strings.Repeat(horizontalBar, width)))
+	return fmt.Sprintf(" \n%s\n", ColSec(strings.Repeat(HBar, width)))
 }
 
 // NumberizeKeys uses ANSI to underline and prefix a sequential number in front of each key.

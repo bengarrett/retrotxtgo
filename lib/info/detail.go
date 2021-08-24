@@ -214,12 +214,9 @@ func (d *Detail) input(data int, stat fs.FileInfo) {
 
 // printMarshal returns the marshaled detail data as plain or color text.
 func (d *Detail) printMarshal(color bool) []byte {
-	const padding, lightHorizontalBox = 10, "\u2500"
-	hr := func(l int) string {
-		return fmt.Sprintf("\t%s\n", str.ColSec(strings.Repeat(lightHorizontalBox, l)))
-	}
-	info := func(t string) string {
-		return str.ColInf(fmt.Sprintf("%s\t", t))
+	const padding, width = 10, 80
+	info := func(s string) string {
+		return fmt.Sprintf("%s\t", s)
 	}
 	gookit.Enable = color
 	buf := bytes.Buffer{}
@@ -228,26 +225,27 @@ func (d *Detail) printMarshal(color bool) []byte {
 		len(fmt.Sprintf(" filename%s%s", strings.Repeat(" ", padding), data[0].v))
 	const tabWidth = 8
 	w.Init(&buf, 0, tabWidth, 0, '\t', 0)
-	fmt.Fprint(w, hr(l))
+	fmt.Fprint(w, str.HeadDark(width, "File information"))
 	for _, x := range data {
 		if !d.marshalDataValid(x.k, x.v) {
 			continue
 		}
 		if x.k == zipComment {
 			if x.v != "" {
-				fmt.Fprintf(w, "\t \t   -───-\n%s\n", x.v)
+				fmt.Fprintln(w, str.HR(l))
+				fmt.Fprintln(w, x.v)
 				if d.sauceIndex <= 0 {
 					break
 				}
 				// divider for sauce metadata
-				fmt.Fprint(w, "\t \t   -───-\n")
+				fmt.Fprintln(w, str.HR(l))
 				continue
 			}
 			if d.sauceIndex <= 0 {
 				break
 			}
 			// divider for sauce metadata
-			fmt.Fprint(w, "\t \t   -───-\n")
+			fmt.Fprintln(w, str.HR(l))
 			continue
 		}
 		fmt.Fprintf(w, "\t %s\t  %s\n", x.k, info(x.v))
@@ -256,9 +254,6 @@ func (d *Detail) printMarshal(color bool) []byte {
 				break
 			}
 		}
-	}
-	if d.length > -1 && d.index == d.length {
-		fmt.Fprint(w, hr(l))
 	}
 	if err := w.Flush(); err != nil {
 		logs.FatalWrap(logs.ErrTabFlush, err)

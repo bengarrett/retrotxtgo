@@ -49,15 +49,14 @@ func Encodings() (e []encoding.Encoding) {
 
 // List returns a tabled list of supported IANA character set encodings.
 func List() *bytes.Buffer {
-	const header, title = "Formal name\tNamed value\tNumeric value\tAlias value\t",
+	const header, title = " Formal name\t Named value\t Numeric value\t Alias value\t",
 		" Supported legacy code pages and character encodings "
 	var buf bytes.Buffer
 	flags := tabwriter.Debug // tabwriter.AlignRight | tabwriter.Debug
 	const padding, tblWidth = 2, 73
 	w := tabwriter.NewWriter(&buf, 0, 0, padding, ' ', flags)
-	fmt.Fprintf(w, "\n%s\n", str.ColPri(title))
-	fmt.Fprintln(w, strings.Repeat("-", tblWidth))
-	fmt.Fprintln(w, header)
+	fmt.Fprint(w, str.Head(tblWidth, title))
+	fmt.Fprintf(w, "\n%s\n", header)
 	for _, e := range Encodings() {
 		if e == charmap.XUserDefined {
 			continue
