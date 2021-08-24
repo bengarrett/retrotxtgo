@@ -35,7 +35,7 @@ var configCmd = &cobra.Command{
 	Example: exampleCmd(configExample),
 	Run: func(cmd *cobra.Command, args []string) {
 		if !printUsage(cmd, args...) {
-			logs.InvalidCommand("config", args...)
+			logs.FatalCmd("config", args...)
 		}
 	},
 }

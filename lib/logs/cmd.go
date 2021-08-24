@@ -10,12 +10,12 @@ import (
 	"github.com/bengarrett/retrotxtgo/meta"
 )
 
-// InvalidCommand prints a problem highlighting the unsupported command.
-func InvalidCommand(usage string, args ...string) {
+// FatalCmd prints a problem highlighting the unsupported command.
+func FatalCmd(usage string, args ...string) {
 	err := fmt.Errorf("%w: %s", ErrCmdExist, args[0])
 	args = append(args, usage)
 	if s := Execute(err, false, args...); s != "" {
-		os.Exit(1)
+		os.Exit(OSErrCode)
 	}
 }
 

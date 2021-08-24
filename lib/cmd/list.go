@@ -32,7 +32,7 @@ var listCmd = &cobra.Command{
 	Example: exampleCmd(listExample),
 	Run: func(cmd *cobra.Command, args []string) {
 		if !printUsage(cmd, args...) {
-			logs.InvalidCommand("list", args...)
+			logs.FatalCmd("list", args...)
 		}
 	},
 }
