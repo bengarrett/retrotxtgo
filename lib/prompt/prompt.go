@@ -53,7 +53,7 @@ func SkipSet(setup bool) string {
 	if !setup {
 		return ""
 	}
-	return str.Cs("  skipped setting")
+	return str.ColSuc("  skipped setting")
 }
 
 // Port asks for and returns a HTTP port value.

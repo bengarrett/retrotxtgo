@@ -44,9 +44,9 @@ func Location() string {
 	s := fmt.Sprintf("Config file: %s", str.Path(viper.ConfigFileUsed()))
 	if diff := len(Missing()); diff > 0 {
 		if diff == 1 {
-			s += str.Cb(" (1 setting is missing)")
+			s += str.ColSec(" (1 setting is missing)")
 		} else {
-			s += str.Cb(fmt.Sprintf(" (%d settings are missing)", diff))
+			s += str.ColSec(fmt.Sprintf(" (%d settings are missing)", diff))
 		}
 	}
 	return fmt.Sprintln(s)
@@ -134,9 +134,9 @@ func configMissing(name, suffix string) {
 	used := viper.ConfigFileUsed()
 	if used != "" {
 		fmt.Printf("%s %q config file is missing\ncreate it: %s\n",
-			str.Info(), used, str.Cp(cmd+" --config="+used))
+			str.Info(), used, str.ColPri(cmd+" --config="+used))
 		return
 	}
 	fmt.Printf("%s no config file is in use\ncreate it: %s\n",
-		str.Info(), str.Cp(cmd))
+		str.Info(), str.ColPri(cmd))
 }

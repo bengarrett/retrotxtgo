@@ -124,8 +124,8 @@ func (args *Args) serveDir() {
 		signal.Notify(ctrlC, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 		go func() {
 			fmt.Printf("\nWeb server is available at %s\n",
-				str.Cp(fmt.Sprintf("http://localhost%v", srv.Addr)))
-			fmt.Println(str.Cinf("Press Ctrl+C to stop\n"))
+				str.ColPri(fmt.Sprintf("http://localhost%v", srv.Addr)))
+			fmt.Println(str.ColInf("Press Ctrl+C to stop\n"))
 
 			if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 				log.Fatalf("tcp listen and serve failed: %s\n", err)

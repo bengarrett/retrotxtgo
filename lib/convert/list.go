@@ -55,7 +55,7 @@ func List() *bytes.Buffer {
 	flags := tabwriter.Debug // tabwriter.AlignRight | tabwriter.Debug
 	const padding, tblWidth = 2, 73
 	w := tabwriter.NewWriter(&buf, 0, 0, padding, ' ', flags)
-	fmt.Fprintf(w, "\n%s\n", str.Cp(title))
+	fmt.Fprintf(w, "\n%s\n", str.ColPri(title))
 	fmt.Fprintln(w, strings.Repeat("-", tblWidth))
 	fmt.Fprintln(w, header)
 	for _, e := range Encodings() {
@@ -75,24 +75,24 @@ func List() *bytes.Buffer {
 		// do not use ANSI colors in cells as it will break the table layout
 		fmt.Fprintf(w, " %s\t %s\t %s\t %s\t\n", c.name, c.value, c.numeric, c.alias)
 	}
-	fmt.Fprintln(w, "\n"+str.Cinf("*")+" EBCDIC encoding, is in use on IBM mainframes and not ASCII compatible.")
+	fmt.Fprintln(w, "\n"+str.ColInf("*")+" EBCDIC encoding, is in use on IBM mainframes and not ASCII compatible.")
 	fmt.Fprintln(w, "\nEither named, numeric or alias values are valid codepage arguments.")
 	fmt.Fprintln(w, "  These values all match ISO 8859-1.")
 	cmds := fmt.Sprintf("%s list table ", meta.Bin)
 	fmt.Fprintf(w, "  %s%s  %s\n",
-		str.Example(cmds), str.Cc("iso-8859-1"), str.Cf("# named"))
+		str.Example(cmds), str.ColCmt("iso-8859-1"), str.ColFuz("# named"))
 	fmt.Fprintf(w, "  %s%s           %s\n",
-		str.Example(cmds), str.Cc("1"), str.Cf("# numeric"))
+		str.Example(cmds), str.ColCmt("1"), str.ColFuz("# numeric"))
 	fmt.Fprintf(w, "  %s%s      %s\n",
-		str.Example(cmds), str.Cc("latin1"), str.Cf("# alias"))
+		str.Example(cmds), str.ColCmt("latin1"), str.ColFuz("# alias"))
 	fmt.Fprintf(w, "\n  IBM Code Page 437 (%s) is commonly used on MS-DOS and ANSI art.\n",
-		str.Cc("cp437"))
+		str.ColCmt("cp437"))
 	fmt.Fprintf(w, "  ISO 8859-1 (%s) is found on legacy Unix, Amiga and the early Internet.\n",
-		str.Cc("latin1"))
+		str.ColCmt("latin1"))
 	fmt.Fprintf(w, "  Windows 1252 (%s) is found on legacy Windows 9x and earlier systems.\n",
-		str.Cc("cp1252"))
+		str.ColCmt("cp1252"))
 	fmt.Fprintf(w, "  Macintosh (%s) is found on Mac OS 9 and earlier systems.\n",
-		str.Cc("macintosh"))
+		str.ColCmt("macintosh"))
 	fmt.Fprintf(w, "\n%s, PCs and the web today use Unicode UTF-8. As a subset of ISO 8895-1,\n", meta.Name)
 	fmt.Fprintln(w, "UTF-8 is backwards compatible with it and US-ASCII.")
 	if err := w.Flush(); err != nil {

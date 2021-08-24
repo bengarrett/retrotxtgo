@@ -17,7 +17,7 @@ const (
 	problem
 )
 
-func sprint(v verbs) string {
+func (v verbs) String() string {
 	s, c := "", ""
 	switch v {
 	case confirm:
@@ -38,12 +38,12 @@ func sprint(v verbs) string {
 
 // Alert prints "Problem" using the Error color.
 func Alert() string {
-	return sprint(problem)
+	return problem.String()
 }
 
 // Confirm prints the "Confirm" string using the Question color.
 func Confirm() string {
-	return sprint(confirm)
+	return confirm.String()
 }
 
 // Example prints the string using the Debug color.
@@ -53,11 +53,11 @@ func Example(s string) string {
 
 // Info prints "Information" using the Info color.
 func Info() string {
-	return sprint(info)
+	return info.String()
 }
 
-func Path(name string) string {
-	return color.Secondary.Sprint(name)
+func Path(s string) string {
+	return color.Secondary.Sprint(s)
 }
 
 // Bool returns a checkmark ✓ when true or a cross ✗ when false.
@@ -70,8 +70,8 @@ func Bool(b bool) string {
 }
 
 // Default appends (default ...) to the usage string.
-func Default(s, def string) string {
-	return fmt.Sprintf("%s (default \"%s\")", s, def)
+func Default(s, val string) string {
+	return fmt.Sprintf("%s (default \"%s\")", s, val)
 }
 
 // Options appends options: ... to the usage string.
@@ -99,42 +99,37 @@ func Required(s string) string {
 
 // color aliases.
 
-// Cb returns a string in the color named secondary.
-func Cb(t string) string {
-	return color.Secondary.Sprint(t)
+// Italic returns a string in the italic style.
+func Italic(s string) string {
+	return color.OpItalic.Sprint(s)
 }
 
-// Cc returns a string in the color named comment.
-func Cc(t string) string {
-	return color.Comment.Sprint(t)
+// ColCmt returns a string in the comment color.
+func ColCmt(s string) string {
+	return color.Comment.Sprint(s)
 }
 
-// Ce returns a string in the color named warn.
-func Ce(t string) string {
-	return color.Warn.Sprint(t)
+// ColFuz returns a string in the fuzzy color.
+func ColFuz(s string) string {
+	return color.OpFuzzy.Sprint(s)
 }
 
-// Cf returns a string in the style named fuzzy.
-func Cf(t string) string {
-	return color.OpFuzzy.Sprint(t)
+// ColInf returns a string in the info color.
+func ColInf(s string) string {
+	return color.Info.Sprint(s)
 }
 
-// Ci returns a string in the style named italic.
-func Ci(t string) string {
-	return color.OpItalic.Sprint(t)
+// ColPri returns a string in the primary color.
+func ColPri(s string) string {
+	return color.Primary.Sprint(s)
 }
 
-// Cinf returns a string in the color named info.
-func Cinf(t string) string {
-	return color.Info.Sprint(t)
+// ColSec returns a string in the secondary color.
+func ColSec(s string) string {
+	return color.Secondary.Sprint(s)
 }
 
-// Cp returns a string in the color named primary.
-func Cp(t string) string {
-	return color.Primary.Sprint(t)
-}
-
-// Cs returns a string in the color named success.
-func Cs(t string) string {
-	return color.Success.Sprint(t)
+// ColSuc returns a string in the success color.
+func ColSuc(s string) string {
+	return color.Success.Sprint(s)
 }

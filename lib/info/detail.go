@@ -216,10 +216,10 @@ func (d *Detail) input(data int, stat fs.FileInfo) {
 func (d *Detail) printMarshal(color bool) []byte {
 	const padding, lightHorizontalBox = 10, "\u2500"
 	hr := func(l int) string {
-		return fmt.Sprintf("\t%s\n", str.Cb(strings.Repeat(lightHorizontalBox, l)))
+		return fmt.Sprintf("\t%s\n", str.ColSec(strings.Repeat(lightHorizontalBox, l)))
 	}
 	info := func(t string) string {
-		return str.Cinf(fmt.Sprintf("%s\t", t))
+		return str.ColInf(fmt.Sprintf("%s\t", t))
 	}
 	gookit.Enable = color
 	buf := bytes.Buffer{}

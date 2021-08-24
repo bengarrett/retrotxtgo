@@ -21,36 +21,32 @@ func ExampleInfo() {
 	// Output:Information:
 }
 
-func ExampleCb() {
-	fmt.Print(Cb("Hi"))
+func ExampleColSec() {
+	fmt.Print(ColSec("Hi"))
 	// Output:Hi
 }
-func ExampleCc() {
-	fmt.Print(Cc("Hi"))
+func ExampleColCmt() {
+	fmt.Print(ColCmt("Hi"))
 	// Output:Hi
 }
-func ExampleCe() {
-	fmt.Print(Ce("Hi"))
+func ExampleColFuz() {
+	fmt.Print(ColFuz("Hi"))
 	// Output:Hi
 }
-func ExampleCf() {
-	fmt.Print(Cf("Hi"))
+func ExampleItalic() {
+	fmt.Print(Italic("Hi"))
 	// Output:Hi
 }
-func ExampleCi() {
-	fmt.Print(Ci("Hi"))
+func ExampleColInf() {
+	fmt.Print(ColInf("Hi"))
 	// Output:Hi
 }
-func ExampleCinf() {
-	fmt.Print(Cinf("Hi"))
+func ExampleColPri() {
+	fmt.Print(ColPri("Hi"))
 	// Output:Hi
 }
-func ExampleCp() {
-	fmt.Print(Cp("Hi"))
-	// Output:Hi
-}
-func ExampleCs() {
-	fmt.Print(Cs("Hi"))
+func ExampleColSuc() {
+	fmt.Print(ColSuc("Hi"))
 	// Output:Hi
 }
 

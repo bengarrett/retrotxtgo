@@ -61,7 +61,7 @@ func configDoesExist(name, suffix string) {
 		return str.Example(x)
 	}
 	fmt.Printf("%sA config file already exists: %s\n%s\n",
-		str.Info(), str.Cf(viper.ConfigFileUsed()),
+		str.Info(), str.ColFuz(viper.ConfigFileUsed()),
 		"Use the following commands to modify it.")
 	fmt.Printf("Edit:\t%s\n", example("edit"))
 	fmt.Printf("Delete:\t%s\n", example("delete"))

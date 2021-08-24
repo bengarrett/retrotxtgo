@@ -34,7 +34,7 @@ func Setup(start int) {
 		fmt.Sprintf("Walk through all of the %s settings.", meta.Name),
 		Location(),
 		enterKey())
-	fmt.Println(str.HRPadded(width))
+	fmt.Println(str.HRPad(width))
 	CtrlC()
 	for i, key := range keys {
 		if start > i+1 {
@@ -44,7 +44,7 @@ func Setup(start int) {
 			i+1, len(keys), meta.Name, key)
 		fmt.Println(h)
 		Update(key, true)
-		fmt.Println(str.HRPadded(width))
+		fmt.Println(str.HRPad(width))
 	}
 	fmt.Printf("The %s setup and configuration is complete.\n", meta.Name)
 }

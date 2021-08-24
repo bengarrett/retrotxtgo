@@ -87,7 +87,7 @@ func PrintfMark(mark string, err, wrap error) string {
 		return ""
 	}
 	return fmt.Sprintf("%s %s %q: %s",
-		str.Alert(), str.Cf(fmt.Sprintf("%v", err)), mark, str.Cf(fmt.Sprintf("%v", wrap)))
+		str.Alert(), str.ColFuz(fmt.Sprintf("%v", err)), mark, str.ColFuz(fmt.Sprintf("%v", wrap)))
 }
 
 // PrintfWrap formats the errors.

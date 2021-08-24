@@ -168,12 +168,12 @@ func exampleCmd(tmpl string) string {
 		ss := strings.Split(scanner.Text(), cmmt)
 		l := len(ss)
 		if l < sentence {
-			s += str.Cinf(scanner.Text()) + "\n  "
+			s += str.ColInf(scanner.Text()) + "\n  "
 			continue
 		}
 		// do not the last hash as a comment
 		ex := strings.Join(ss[:l-1], cmmt)
-		s += str.Cinf(ex)
+		s += str.ColInf(ex)
 		s += fmt.Sprintf("%s%s\n  ", cmmt, ss[l-1])
 	}
 	return s

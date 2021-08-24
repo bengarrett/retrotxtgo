@@ -59,7 +59,7 @@ func List() error {
 	w := tabwriter.NewWriter(os.Stdout, minWidth, tabWidth, 0, ' ', 0)
 	cmds := fmt.Sprintf(" %s config set ", meta.Bin)
 	title := fmt.Sprintf("  Available %s Configurations and Settings.", meta.Name)
-	fmt.Fprintln(w, "\n"+str.Cp(title))
+	fmt.Fprintln(w, "\n"+str.ColPri(title))
 	fmt.Fprintln(w, str.HR(len(title)))
 	fmt.Fprintln(w, tabs)
 	fmt.Fprintf(w, "Alias\t\tName\t\tHint\n")
@@ -70,7 +70,7 @@ func List() error {
 		switch key {
 		case layoutTmpl:
 			fmt.Fprintf(w, "\n%schoices: %s (suggestion: %s)",
-				tabs, str.Cp(strings.Join(create.Layouts(), ", ")), str.Example("standard"))
+				tabs, str.ColPri(strings.Join(create.Layouts(), ", ")), str.Example("standard"))
 		case serve:
 			fmt.Fprintf(w, "\n%schoices: %s",
 				tabs, portInfo())
@@ -151,9 +151,9 @@ func Validate(key string) (ok bool) {
 func updateBool(b bool, name string) {
 	switch b {
 	case true:
-		fmt.Printf("\n  The %s is enabled.\n", str.Cf(name))
+		fmt.Printf("\n  The %s is enabled.\n", str.ColFuz(name))
 	default:
-		fmt.Printf("\n  The %s is not in use.\n", str.Cf(name))
+		fmt.Printf("\n  The %s is not in use.\n", str.ColFuz(name))
 	}
 }
 
@@ -163,13 +163,13 @@ func updateString(s, name, value string) {
 	switch s {
 	case "":
 		fmt.Printf("\n  The empty %s setting is not in use.\n",
-			str.Cf(name))
+			str.ColFuz(name))
 		if name == sd {
 			fmt.Printf("  Files created by %s will always be saved to the active directory.\n",
 				meta.Name)
 		}
 	default:
-		fmt.Printf("\n  The %s is set to %q.", str.Cf(name), value)
+		fmt.Printf("\n  The %s is set to %q.", str.ColFuz(name), value)
 		// print the operating system's ability to use the existing set values
 		// does the 'editor' exist in the env path, does the save-directory exist?
 		switch name {
@@ -274,7 +274,7 @@ func promptEditor(u update) {
 		s = fmt.Sprint(s, " or use a dash [-] to remove")
 	} else if ed := Editor(); ed != "" {
 		s = fmt.Sprintf("  Instead %s found %s and will use this editor.\n\n%s",
-			meta.Name, str.Cp(ed), s)
+			meta.Name, str.ColPri(ed), s)
 	}
 	fmt.Printf("%s:\n  ", s)
 	setEditor(u.name, u.setup)
@@ -336,9 +336,9 @@ func promptServe(u update) {
 	}
 	check := str.Bool(create.Port(p))
 	fmt.Printf("\n  Internal HTTP server port number: %s%d %s\n",
-		str.Cb("http://localhost:"), p, check)
+		str.ColSec("http://localhost:"), p, check)
 	fmt.Printf("\t\t\t\t    %s%d %s\n",
-		str.Cb("http://127.0.0.1:"), p, check)
+		str.ColSec("http://127.0.0.1:"), p, check)
 	fmt.Printf("\n  Port %s is reserved, port numbers less than %s are are not recommended.\n",
 		str.Example("0"), str.Example("1024"))
 	fmt.Printf("  Set a HTTP port number, choices %s: ", portInfo())
@@ -352,7 +352,7 @@ func promptStyleHTML(u update) {
 		d = s
 	}
 	fmt.Printf("\n%s\n\n  Choose the number to set a new HTML syntax style%s: ",
-		str.Ci(Names("css")), recommend(d))
+		str.Italic(Names("css")), recommend(d))
 	setStrings(u.name, u.setup, styles.Names()...)
 }
 
@@ -363,7 +363,7 @@ func promptStyleInfo(u update) {
 		d = s
 	}
 	fmt.Printf("\n%s\n\n  Choose the number to set a new %s syntax style%s: ",
-		str.Ci(Names("json")), str.Example("config info"), recommend(d))
+		str.Italic(Names("json")), str.Example("config info"), recommend(d))
 	setStrings(u.name, u.setup, styles.Names()...)
 }
 
@@ -536,7 +536,7 @@ func previewMetaPrint(name, value string) {
 	fmt.Print(ColorHTML(element()))
 	h := strings.Split(Tip()[name], " ")
 	fmt.Printf("%s\n  %s %s.",
-		str.Cf("  About this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name"),
+		str.ColFuz("  About this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name"),
 		strings.Title(h[0]), strings.Join(h[1:], " "))
 }
 
@@ -570,7 +570,7 @@ func setTitle(name, value string, setup bool) {
 		"  </head>")
 	fmt.Print(ColorHTML(elm))
 	fmt.Printf("%s\n%s\n  ",
-		str.Cf("  About this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title"),
+		str.ColFuz("  About this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title"),
 		fmt.Sprintf("  Choose a new %s:", Tip()[name]))
 	setString(name, setup)
 }
@@ -631,7 +631,7 @@ func save(name string, setup bool, value interface{}) {
 	case string:
 		if v == "" {
 			fmt.Printf("  %s is now unused\n",
-				str.Cs(name))
+				str.ColSuc(name))
 			if !setup {
 				os.Exit(0)
 			}
@@ -640,7 +640,7 @@ func save(name string, setup bool, value interface{}) {
 	default:
 	}
 	fmt.Printf("  %s is set to \"%v\"\n",
-		str.Cs(name), value)
+		str.ColSuc(name), value)
 	if !setup {
 		os.Exit(0)
 	}
@@ -677,7 +677,7 @@ func skipSet(setup bool) string {
 	if !setup {
 		return ""
 	}
-	return str.Cs("\r  skipped setting")
+	return str.ColSuc("\r  skipped setting")
 }
 
 // SetDirectory prompts for, checks and saves the directory path.
@@ -744,7 +744,7 @@ func setFont(value string, setup bool) {
 		"  }")
 	fmt.Print(ColorCSS(b.String()))
 	fmt.Printf("%s\n%s%s %s: ",
-		str.Cf("  About font families: https://developer.mozilla.org/en-US/docs/Web/CSS/font-family"),
+		str.ColFuz("  About font families: https://developer.mozilla.org/en-US/docs/Web/CSS/font-family"),
 		"  Choose a font, ",
 		str.UnderlineKeys(create.Fonts()...),
 		fmt.Sprintf("(suggestion: %s)", str.Example("automatic")))

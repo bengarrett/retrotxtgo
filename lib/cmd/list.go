@@ -81,7 +81,7 @@ func examples() *bytes.Buffer {
 	w := tabwriter.NewWriter(&buf, 0, 0, padding, ' ', 0)
 	bin := fmt.Sprintf("  %s ", meta.Bin)
 	title := fmt.Sprintf("\n Packaged example text and ANSI files to test and play with %s ", meta.Name)
-	fmt.Fprintln(w, str.Cp(title))
+	fmt.Fprintln(w, str.ColPri(title))
 	fmt.Fprintln(w, strings.Repeat("-", len(title)))
 	for _, k := range keys {
 		fmt.Fprintf(w, "%s\t%s\t\n", k, m[k].Description)

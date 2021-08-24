@@ -95,7 +95,7 @@ func viewParseArg(cmd *cobra.Command, conv *convert.Convert, i int, arg string) 
 			}
 		}
 		if i > 0 {
-			fmt.Println(str.HRPadded(halfPage))
+			fmt.Println(str.HRPad(halfPage))
 		}
 		fmt.Println(string(p.Runes))
 		return true, nil
@@ -106,7 +106,7 @@ func viewParseArg(cmd *cobra.Command, conv *convert.Convert, i int, arg string) 
 		logs.FatalMark(arg, logs.ErrFileOpen, err)
 	}
 	if i > 0 {
-		fmt.Println(str.HRPadded(halfPage))
+		fmt.Println(str.HRPad(halfPage))
 	}
 	return viewParseBytes(cmd, conv, arg, b...)
 }

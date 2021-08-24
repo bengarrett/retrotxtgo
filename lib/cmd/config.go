@@ -89,8 +89,9 @@ var configEditCmd = &cobra.Command{
 	},
 }
 
-var configInfoExample = fmt.Sprintf(`  %s config info   # List the default setting values
-%s config set -c # List the settings and help hints`, meta.Bin, meta.Bin)
+var configInfoExample = fmt.Sprintf("  %s\n%s",
+	fmt.Sprintf("%s config info   # List the default setting values", meta.Bin),
+	fmt.Sprintf("%s config set -c # List the settings and help hints", meta.Bin))
 
 var configInfoCmd = &cobra.Command{
 	Use:     "info",
@@ -106,7 +107,7 @@ var configInfoCmd = &cobra.Command{
 }
 
 // configInfo is the "config info" run command.
-func configInfo() (exit bool) {
+func configInfo() (quit bool) {
 	if configFlag.configs {
 		if err := config.List(); err != nil {
 			logs.FatalFlag("config info", "list", err)

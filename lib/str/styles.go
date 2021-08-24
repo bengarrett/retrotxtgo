@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
 	"io"
@@ -19,6 +20,8 @@ import (
 	"github.com/alecthomas/chroma/styles"
 	"github.com/gookit/color"
 )
+
+var ErrRune = errors.New("invalid encoded rune")
 
 type terminal int
 
@@ -66,10 +69,10 @@ func (s JSONExample) String(flag string) {
 	}
 }
 
-// Border wraps text around a single line border.
-func Border(text string) *bytes.Buffer {
+// Border wraps the string around a single line border.
+func Border(s string) *bytes.Buffer {
 	const split = 2
-	maxLen, scanner := 0, bufio.NewScanner(strings.NewReader(text))
+	maxLen, scanner := 0, bufio.NewScanner(strings.NewReader(s))
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
 		l := utf8.RuneCountInString(scanner.Text())
@@ -78,7 +81,7 @@ func Border(text string) *bytes.Buffer {
 		}
 	}
 	maxLen += split
-	scanner = bufio.NewScanner(strings.NewReader(text))
+	scanner = bufio.NewScanner(strings.NewReader(s))
 	scanner.Split(bufio.ScanLines)
 	var b bytes.Buffer
 	fmt.Fprintln(&b, ("┌" + strings.Repeat("─", maxLen) + "┐"))
@@ -96,14 +99,14 @@ func Border(text string) *bytes.Buffer {
 	return &b
 }
 
-// Center align text to the width.
-func Center(width int, text string) string {
+// Center align text to a the width of an area.
+func Center(width int, s string) string {
 	const split, space = 2, "\u0020"
-	w := (width - len(text)) / split
+	w := (width - len(s)) / split
 	if w > 0 {
-		return strings.Repeat(space, w) + text
+		return strings.Repeat(space, w) + s
 	}
-	return text
+	return s
 }
 
 // GetEnv gets and formats the value of the environment variable named in the key.
@@ -144,12 +147,12 @@ func HighlightWriter(w io.Writer, source, lexer, style string, ansi bool) error 
 // HR returns a horizontal ruler or line break.
 func HR(width int) string {
 	const horizontalBar = "\u2500"
-	return fmt.Sprintf(" %s", Cb(strings.Repeat(horizontalBar, width)))
+	return fmt.Sprintf(" %s", ColSec(strings.Repeat(horizontalBar, width)))
 }
 
-func HRPadded(width int) string {
+func HRPad(width int) string {
 	const horizontalBar = "\u2500"
-	return fmt.Sprintf(" \n%s\n", Cb(strings.Repeat(horizontalBar, width)))
+	return fmt.Sprintf(" \n%s\n", ColSec(strings.Repeat(horizontalBar, width)))
 }
 
 // NumberizeKeys uses ANSI to underline and prefix a sequential number in front of each key.
