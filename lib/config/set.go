@@ -453,7 +453,7 @@ func dirExpansion(name string) (dir string) {
 		case homeDir:
 			p, err = os.UserHomeDir()
 			if err != nil {
-				logs.SaveFatal(err)
+				logs.FatalSave(err)
 			}
 		case currentDir:
 			if i != 0 {
@@ -461,7 +461,7 @@ func dirExpansion(name string) (dir string) {
 			}
 			p, err = os.Getwd()
 			if err != nil {
-				logs.SaveFatal(err)
+				logs.FatalSave(err)
 			}
 		case parentDir:
 			if i != 0 {
@@ -470,7 +470,7 @@ func dirExpansion(name string) (dir string) {
 			}
 			wd, err := os.Getwd()
 			if err != nil {
-				logs.SaveFatal(err)
+				logs.FatalSave(err)
 			}
 			p = filepath.Dir(wd)
 		default:
@@ -512,10 +512,10 @@ func previewMeta(name, value string) {
 
 func previewMetaPrint(name, value string) {
 	if name == "" {
-		logs.SaveFatal(fmt.Errorf("preview meta: %w", logs.ErrNameNil))
+		logs.FatalSave(fmt.Errorf("preview meta: %w", logs.ErrNameNil))
 	}
 	if !Validate(name) {
-		logs.SaveFatal(fmt.Errorf("preview meta %q: %w", name, logs.ErrCfgName))
+		logs.FatalSave(fmt.Errorf("preview meta %q: %w", name, logs.ErrCfgName))
 	}
 	s := strings.Split(name, ".")
 	const splits = 3
@@ -607,10 +607,10 @@ func recommendPrompt(name, value, suggest string) string {
 // save the value of the named setting to the configuration file.
 func save(name string, setup bool, value interface{}) {
 	if name == "" {
-		logs.SaveFatal(fmt.Errorf("save: %w", logs.ErrNameNil))
+		logs.FatalSave(fmt.Errorf("save: %w", logs.ErrNameNil))
 	}
 	if !Validate(name) {
-		logs.SaveFatal(fmt.Errorf("save %q: %w", name, logs.ErrCfgName))
+		logs.FatalSave(fmt.Errorf("save %q: %w", name, logs.ErrCfgName))
 	}
 	if skipSave(name, value) {
 		fmt.Print(skipSet(setup))
@@ -625,7 +625,7 @@ func save(name string, setup bool, value interface{}) {
 	}
 	viper.Set(name, value)
 	if err := UpdateConfig("", false); err != nil {
-		logs.SaveFatal(err)
+		logs.FatalSave(err)
 	}
 	switch v := value.(type) {
 	case string:
@@ -668,7 +668,7 @@ func skipSave(name string, value interface{}) bool {
 			return true
 		}
 	default:
-		logs.SaveFatal(fmt.Errorf("name: %s, type: %T, %w", name, value, ErrSaveType))
+		logs.FatalSave(fmt.Errorf("name: %s, type: %T, %w", name, value, ErrSaveType))
 	}
 	return false
 }
@@ -683,7 +683,7 @@ func skipSet(setup bool) string {
 // SetDirectory prompts for, checks and saves the directory path.
 func setDirectory(name string, setup bool) (ok bool) {
 	if name == "" {
-		logs.SaveFatal(fmt.Errorf("set directory: %w", logs.ErrNameNil))
+		logs.FatalSave(fmt.Errorf("set directory: %w", logs.ErrNameNil))
 	}
 	s := dirExpansion(prompt.String())
 	if s == "" {
@@ -713,7 +713,7 @@ func setDirectory(name string, setup bool) (ok bool) {
 // and saves it as a configuration regardless of the result.
 func setEditor(name string, setup bool) {
 	if name == "" {
-		logs.SaveFatal(fmt.Errorf("set editor: %w", logs.ErrNameNil))
+		logs.FatalSave(fmt.Errorf("set editor: %w", logs.ErrNameNil))
 	}
 	s := prompt.String()
 	switch s {
@@ -793,7 +793,7 @@ func setGenerator(value bool) {
 // setIndex prompts for a value from a list of valid choices and saves the result.
 func setIndex(name string, setup bool, data ...string) {
 	if name == "" {
-		logs.SaveFatal(fmt.Errorf("set index: %w", logs.ErrNameNil))
+		logs.FatalSave(fmt.Errorf("set index: %w", logs.ErrNameNil))
 	}
 	s := prompt.IndexStrings(&data, setup)
 	save(name, setup, s)
@@ -820,7 +820,7 @@ func setNoTranslate(value, setup bool) {
 // SetPort prompts for and saves HTTP port.
 func setPort(name string, setup bool) {
 	if name == "" {
-		logs.SaveFatal(fmt.Errorf("set port: %w", logs.ErrNameNil))
+		logs.FatalSave(fmt.Errorf("set port: %w", logs.ErrNameNil))
 	}
 	u := prompt.Port(true, setup)
 	save(name, setup, u)
@@ -846,7 +846,7 @@ func setRetroTxt(value bool) {
 // setShortStrings prompts and saves setting values that support 1 character aliases.
 func setShortStrings(name string, setup bool, data ...string) {
 	if name == "" {
-		logs.SaveFatal(fmt.Errorf("set short string: %w", logs.ErrNameNil))
+		logs.FatalSave(fmt.Errorf("set short string: %w", logs.ErrNameNil))
 	}
 	s := prompt.ShortStrings(&data)
 	save(name, setup, s)
@@ -855,7 +855,7 @@ func setShortStrings(name string, setup bool, data ...string) {
 // setString prompts and saves a single word setting value.
 func setString(name string, setup bool) {
 	if name == "" {
-		logs.SaveFatal(fmt.Errorf("set string: %w", logs.ErrNameNil))
+		logs.FatalSave(fmt.Errorf("set string: %w", logs.ErrNameNil))
 	}
 	s := prompt.String()
 	save(name, setup, s)
@@ -864,7 +864,7 @@ func setString(name string, setup bool) {
 // setStrings prompts and saves a string of text setting value.
 func setStrings(name string, setup bool, data ...string) {
 	if name == "" {
-		logs.SaveFatal(fmt.Errorf("set strings: %w", logs.ErrNameNil))
+		logs.FatalSave(fmt.Errorf("set strings: %w", logs.ErrNameNil))
 	}
 	s := prompt.Strings(&data, setup)
 	save(name, setup, s)

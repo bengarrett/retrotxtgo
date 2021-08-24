@@ -9,6 +9,7 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/gookit/color"
 	gap "github.com/muesli/go-app-paths"
 )
@@ -21,19 +22,8 @@ const (
 	Panic = false
 )
 
-// Save by appending the error to the logfile.
-func Save(err error) {
-	if err == nil {
-		return
-	}
-	// save error to log file
-	if err = save(err, ""); err != nil {
-		log.Fatalf("%s %s", color.Danger.Sprint("!"), err)
-	}
-}
-
-// SaveFatal saves the error to the logfile and exits.
-func SaveFatal(err error) {
+// FatalSave saves the error to the logfile and exits.
+func FatalSave(err error) {
 	if err == nil {
 		return
 	}
@@ -51,7 +41,18 @@ func SaveFatal(err error) {
 	}
 }
 
-// LastEntry returns the last and newest saved entry in the error log file.
+// Save by appending the error to the logfile.
+func Save(err error) {
+	if err == nil {
+		return
+	}
+	// save error to log file
+	if err = save(err, ""); err != nil {
+		log.Fatalf("%s %s", color.Danger.Sprint("!"), err)
+	}
+}
+
+// LastEntry returns the most recent saved entry in the error log file.
 func LastEntry() (s string, err error) {
 	name := Name()
 	file, err := os.Open(name)
@@ -72,7 +73,7 @@ func LastEntry() (s string, err error) {
 
 // Name is the absolute path and filename of the error log file.
 func Name() string {
-	fp, err := gap.NewScope(gap.User, "df2").LogPath(filename)
+	fp, err := gap.NewScope(gap.User, meta.Dir).LogPath(filename)
 	if err == nil {
 		return fp
 	}

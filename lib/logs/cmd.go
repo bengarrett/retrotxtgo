@@ -45,14 +45,14 @@ func Execute(err error, test bool, args ...string) string { //nolint:gocyclo,fun
 		if test {
 			return e.Error()
 		}
-		SaveFatal(e)
+		FatalSave(e)
 	}
 	if argsCnt == 0 {
 		e := fmt.Errorf("cmd error err: %w", ErrEmpty)
 		if test {
 			return e.Error()
 		}
-		SaveFatal(e)
+		FatalSave(e)
 	}
 	mark, name := words[wordCnt-1], args[0]
 	if mark == name {
