@@ -86,8 +86,7 @@ func viewParseArg(cmd *cobra.Command, conv *convert.Convert, i int, arg string) 
 	if ok := sample.Valid(arg); ok {
 		var p sample.File
 		if p, err = f.Open(arg, conv); err != nil {
-			logs.ProblemMark(arg, logs.ErrSampView, err)
-			return true, nil
+			logs.FatalMark(arg, logs.ErrSampView, err)
 		}
 		// --to flag is currently ignored
 		if to := cmd.Flags().Lookup("to"); to.Changed {
@@ -104,8 +103,7 @@ func viewParseArg(cmd *cobra.Command, conv *convert.Convert, i int, arg string) 
 	// read file
 	b, err := filesystem.Read(arg)
 	if err != nil {
-		logs.ProblemMark(arg, logs.ErrFileOpen, err)
-		return true, nil
+		logs.FatalMark(arg, logs.ErrFileOpen, err)
 	}
 	if i > 0 {
 		fmt.Println(str.HRPadded(halfPage))
@@ -135,13 +133,13 @@ func viewParsePipe(cmd *cobra.Command) {
 	if cp := cmd.Flags().Lookup("encode"); cp.Changed {
 		f := sample.Flags{}
 		if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
-			logs.ProblemMarkFatal("pipe", logs.ErrEncode, err)
+			logs.FatalMark("pipe", logs.ErrEncode, err)
 		}
 		conv.Source.E = f.From
 	}
 	b, err := filesystem.ReadPipe()
 	if err != nil {
-		logs.ProblemMarkFatal("view", logs.ErrPipe, err)
+		logs.FatalMark("view", logs.ErrPipe, err)
 	}
 	_, r := viewParseBytes(cmd, &conv, "piped", b...)
 	fmt.Print(string(r))
@@ -159,7 +157,7 @@ func viewParseBytes(cmd *cobra.Command, conv *convert.Convert, arg string, b ...
 	var f = sample.Flags{}
 	var err error
 	if f.From, err = convert.Encoding(name); err != nil {
-		logs.ProblemMarkFatal(arg, logs.ErrEncode, err)
+		logs.FatalMark(arg, logs.ErrEncode, err)
 	}
 	conv.Source.E = f.From
 	// make sure the file source isn't already encoded as UTF-8
@@ -174,8 +172,7 @@ func viewParseBytes(cmd *cobra.Command, conv *convert.Convert, arg string, b ...
 		r, err = conv.Dump(&b)
 	}
 	if err != nil {
-		logs.ProblemMark(arg, ErrUTF8, err)
-		return true, nil
+		logs.FatalMark(arg, ErrUTF8, err)
 	}
 	// to flag
 	if to := cmd.Flags().Lookup("to"); to.Changed {
@@ -200,8 +197,7 @@ func init() {
 func viewToFlag(r ...rune) (success bool) {
 	newer, err := viewEncode(viewFlag.to, r...)
 	if err != nil {
-		logs.ProblemMark(viewFlag.to, ErrEncode, err)
-		return false
+		logs.FatalMark(viewFlag.to, ErrEncode, err)
 	}
 	fmt.Println(string(newer))
 	return true

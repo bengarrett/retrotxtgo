@@ -9,10 +9,20 @@ import (
 	"github.com/gookit/color"
 )
 
+const status = "exit status 1"
+
 var ErrTest = errors.New("error")
 
 func init() {
 	color.Enable = false
+}
+
+func ExamplePrintf() {
+	fmt.Println(Printf(ErrTest))
+	fmt.Println(status)
+	//Output: Problem:
+	//  error
+	// exit status 1
 }
 
 func TestHint_String(t *testing.T) {
@@ -56,7 +66,7 @@ func TestPrintf(t *testing.T) {
 	}
 }
 
-func TestProblemCmd(t *testing.T) {
+func TestPrintfCmd(t *testing.T) {
 	type args struct {
 		name string
 		err  error
@@ -72,14 +82,14 @@ func TestProblemCmd(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ProblemCmd(tt.args.name, tt.args.err); got != tt.want {
-				t.Errorf("ProblemCmd() = %v, want %v", got, tt.want)
+			if got := PrintfCmd(tt.args.name, tt.args.err); got != tt.want {
+				t.Errorf("PrintfCmd() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestProblemFlag(t *testing.T) {
+func TestPrintfFlag(t *testing.T) {
 	type args struct {
 		name string
 		flag string
@@ -96,14 +106,14 @@ func TestProblemFlag(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ProblemFlag(tt.args.name, tt.args.flag, tt.args.err); got != tt.want {
-				t.Errorf("ProblemFlag() = %v, want %v", got, tt.want)
+			if got := PrintfFlag(tt.args.name, tt.args.flag, tt.args.err); got != tt.want {
+				t.Errorf("PrintfFlag() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestProblemMark(t *testing.T) {
+func TestPrintfMark(t *testing.T) {
 	type args struct {
 		value string
 		err   error
@@ -120,8 +130,8 @@ func TestProblemMark(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ProblemMark(tt.args.value, tt.args.err, tt.args.errs); got != tt.want {
-				t.Errorf("ProblemMark() = %v, want %v", got, tt.want)
+			if got := PrintfMark(tt.args.value, tt.args.err, tt.args.errs); got != tt.want {
+				t.Errorf("PrintfMark() = %v, want %v", got, tt.want)
 			}
 		})
 	}
