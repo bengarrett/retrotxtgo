@@ -67,9 +67,7 @@ func Execute() {
 				logs.FatalMark("rootCmd", ErrUsage, err1)
 			}
 		}
-		if s := logs.Execute(err, false, os.Args[1:]...); s != "" {
-			os.Exit(1)
-		}
+		logs.FatalExecute(err, os.Args[1:]...)
 	}
 }
 

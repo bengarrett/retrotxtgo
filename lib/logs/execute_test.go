@@ -12,7 +12,7 @@ var (
 	ErrBoolType = errors.New("invalid argument test flag strconv.ParseBool")
 )
 
-func TestExecute(t *testing.T) {
+func Test_execute(t *testing.T) {
 	type args struct {
 		err  error
 		args []string
@@ -31,8 +31,8 @@ func TestExecute(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Execute(tt.args.err, true, tt.args.args...); got != tt.want {
-				t.Errorf("Execute() = %v, want %v", got, tt.want)
+			if got := execute(tt.args.err, true, tt.args.args...); got != tt.want {
+				t.Errorf("execute() = %v, want %v", got, tt.want)
 			}
 		})
 	}

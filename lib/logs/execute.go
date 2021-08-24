@@ -14,13 +14,20 @@ import (
 func FatalCmd(usage string, args ...string) {
 	err := fmt.Errorf("%w: %s", ErrCmdExist, args[0])
 	args = append(args, usage)
-	if s := Execute(err, false, args...); s != "" {
+	if s := execute(err, false, args...); s != "" {
 		os.Exit(OSErrCode)
 	}
 }
 
-// Execute is the error handler for command flags and arguments.
-func Execute(err error, test bool, args ...string) string { //nolint:gocyclo,funlen
+// FatalExecute is the error handler for the root command flags and arguments.
+func FatalExecute(err error, args ...string) {
+	if s := execute(err, false, args...); s != "" {
+		os.Exit(OSErrCode)
+	}
+}
+
+// execute is the error handler for command flags and arguments.
+func execute(err error, test bool, args ...string) string { //nolint:gocyclo,funlen
 	if err == nil {
 		return ""
 	}
