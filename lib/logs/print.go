@@ -11,32 +11,32 @@ import (
 
 const errorCode = 1
 
-// Errorf formats and returns the error.
-func Errorf(err error) string {
-	if err == nil {
-		return ""
-	}
-	return fmt.Sprintf("%s %s", str.Alert(), err)
-}
-
-// Fatal prints a formatted error and exits.
-func Fatal(err error) {
-	if err != nil {
-		fmt.Println(Errorf(err))
-	}
-	os.Exit(errorCode)
-}
-
 // Hint formats and returns the error with a usage suggestion or hint.
 func Hint(s string, err error) string {
 	if err == nil {
 		return ""
 	}
 	if s == "" {
-		return Errorf(err)
+		return Printf(err)
 	}
 	return fmt.Sprintf("%s\n run %s",
-		Errorf(err), str.Example(fmt.Sprintf("%s %s", meta.Bin, s)))
+		Printf(err), str.Example(fmt.Sprintf("%s %s", meta.Bin, s)))
+}
+
+// Fatal prints a formatted error and exits.
+func Fatal(err error) {
+	if err != nil {
+		fmt.Println(Printf(err))
+	}
+	os.Exit(errorCode)
+}
+
+// Printf formats and returns the error.
+func Printf(err error) string {
+	if err == nil {
+		return ""
+	}
+	return fmt.Sprintf("%s %s", str.Alert(), err)
 }
 
 // ProblemCmd returns the command does not exist.

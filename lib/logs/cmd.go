@@ -107,7 +107,7 @@ func Execute(err error, test bool, args ...string) string { //nolint:gocyclo,fun
 			c = Hint(fmt.Sprintf("%s --help", mark), ErrCmdExist)
 			break
 		}
-		c = Errorf(err)
+		c = Printf(err)
 	}
 	if c != "" {
 		return c

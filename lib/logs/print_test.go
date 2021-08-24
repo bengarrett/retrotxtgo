@@ -38,7 +38,7 @@ func TestHint_String(t *testing.T) {
 	}
 }
 
-func TestErrorf(t *testing.T) {
+func TestPrintf(t *testing.T) {
 	tests := []struct {
 		name string
 		err  error
@@ -49,8 +49,8 @@ func TestErrorf(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Errorf(tt.err); got != tt.want {
-				t.Errorf("Errorf() = %v, want %v", got, tt.want)
+			if got := Printf(tt.err); got != tt.want {
+				t.Errorf("Printf() = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -3,7 +3,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
@@ -48,8 +47,7 @@ var configCreateCmd = &cobra.Command{
 	Long:    fmt.Sprintf("Create or reset the %s configuration file.", meta.Name),
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := config.New(configFlag.ow); err != nil {
-			fmt.Println(logs.Problemf(logs.ErrCfgCreate, err))
-			os.Exit(1)
+			logs.ProblemFatal(logs.ErrCfgCreate, err)
 		}
 	},
 }
