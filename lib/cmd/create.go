@@ -322,7 +322,7 @@ func parseFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 func parsePipe(cmd *cobra.Command, flags convert.Flags) {
 	src, err := filesystem.ReadPipe()
 	if err != nil {
-		logs.FatalWrap(logs.ErrPipe, err)
+		logs.FatalWrap(logs.ErrPipeRead, err)
 	}
 	b := createHTML(cmd, flags, &src)
 	serve := cmd.Flags().Lookup("serve").Changed
@@ -388,7 +388,7 @@ func staticTextfile(f sample.Flags, conv *convert.Convert, arg string, changed b
 		var p sample.File
 		p, err = f.Open(arg, conv)
 		if err != nil {
-			logs.FatalMark(arg, logs.ErrSampHTML, err)
+			logs.FatalMark(arg, logs.ErrSampleHTML, err)
 		}
 		src = create.Normalize(p.Encoding, p.Runes...)
 		if changed {

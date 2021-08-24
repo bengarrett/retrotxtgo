@@ -84,13 +84,13 @@ func SetConfig(flag string) error {
 		}
 		// user given config file fail
 		if strings.Contains(err.Error(), "found character that cannot start any token") {
-			return logs.ErrCfg
+			return logs.ErrConfigRead
 		}
 		return err
 	}
 	if flag != "" {
 		if len(viper.AllKeys()) == 0 {
-			return fmt.Errorf("set config: %w", logs.ErrCfg)
+			return fmt.Errorf("set config: %w", logs.ErrConfigRead)
 		}
 		// always print the config location when the --config flag is used
 		if len(os.Args) > 0 && os.Args[1] == "config" {

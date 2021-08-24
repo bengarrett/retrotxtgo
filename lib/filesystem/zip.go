@@ -171,7 +171,7 @@ func UniqueName(name string) (string, error) {
 		return name, err
 	}
 	if s.IsDir() {
-		return "", fmt.Errorf("unique name is a directory %q: %w", name, logs.ErrDirSave)
+		return "", fmt.Errorf("unique name is a directory %q: %w", name, logs.ErrFileSaveD)
 	}
 	i := 1
 	for {

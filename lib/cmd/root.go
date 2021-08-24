@@ -123,7 +123,7 @@ func initConfig() {
 	viper.AutomaticEnv()
 	// configuration file
 	if err := config.SetConfig(rootFlag.config); err != nil {
-		logs.FatalMark(viper.ConfigFileUsed(), logs.ErrCfgFile, err)
+		logs.FatalMark(viper.ConfigFileUsed(), logs.ErrConfigOpen, err)
 	}
 }
 

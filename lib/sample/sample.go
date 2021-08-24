@@ -115,11 +115,11 @@ func Open(name string) ([]byte, error) {
 	name = strings.ToLower(name)
 	samp, exist := Map()[name]
 	if !exist {
-		return nil, logs.ErrSampFile
+		return nil, logs.ErrSampleName
 	}
 	b, err := static.File.ReadFile(samp.Name)
 	if err != nil {
-		return nil, fmt.Errorf("open sample %q: %w", samp.Name, logs.ErrSampFile)
+		return nil, fmt.Errorf("open sample %q: %w", samp.Name, logs.ErrSampleName)
 	}
 	return b, nil
 }
@@ -132,11 +132,11 @@ func (f Flags) Open(name string, conv *convert.Convert) (s File, err error) {
 	}
 	samp, exist := Map()[name]
 	if !exist {
-		return s, logs.ErrSampFile
+		return s, logs.ErrSampleName
 	}
 	b, err := static.File.ReadFile(samp.Name)
 	if err != nil {
-		return s, fmt.Errorf("open sample %q: %w", samp.Name, logs.ErrSampFile)
+		return s, fmt.Errorf("open sample %q: %w", samp.Name, logs.ErrSampleName)
 	}
 	if conv == nil {
 		return s, ErrConvNil

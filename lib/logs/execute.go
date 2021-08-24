@@ -12,7 +12,7 @@ import (
 
 // FatalCmd prints a problem highlighting the unsupported command.
 func FatalCmd(usage string, args ...string) {
-	err := fmt.Errorf("%w: %s", ErrCmdExist, args[0])
+	err := fmt.Errorf("%w: %s", ErrCmd, args[0])
 	args = append(args, usage)
 	if s := execute(err, false, args...); s != "" {
 		os.Exit(OSErrCode)
@@ -84,14 +84,14 @@ func execute(err error, test bool, args ...string) string { //nolint:gocyclo,fun
 		c = "invalidSlice placeholder"
 	case invalidCommand:
 		// retrotxt config foo
-		c = Hint(fmt.Sprintf("%s --help", mark), ErrCmdExist)
+		c = Hint(fmt.Sprintf("%s --help", mark), ErrCmd)
 	case flagRequired:
 		// retrotxt config shell
 		c = PrintfCmd(mark, ErrFlagNil)
 	case unknownCmd:
 		// retrotxt foo
 		mark = words[2]
-		c = Hint("--help", fmt.Errorf("%w: %s", ErrCmdExist, mark))
+		c = Hint("--help", fmt.Errorf("%w: %s", ErrCmd, mark))
 	case unknownFlag:
 		// retrotxt --foo
 		mark = words[2]
@@ -109,9 +109,9 @@ func execute(err error, test bool, args ...string) string { //nolint:gocyclo,fun
 	case flagChoice:
 		c = "flagChoice placeholder"
 	default:
-		if errors.As(err, &ErrCmdExist) {
+		if errors.As(err, &ErrCmd) {
 			mark = strings.Join(args[1:], " ")
-			c = Hint(fmt.Sprintf("%s --help", mark), ErrCmdExist)
+			c = Hint(fmt.Sprintf("%s --help", mark), ErrCmd)
 			break
 		}
 		c = Printf(err)

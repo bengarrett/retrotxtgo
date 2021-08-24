@@ -37,7 +37,7 @@ func FatalSave(err error) {
 		log.Println(fmt.Sprintf("error type: %T\tmsg: %v", err, err))
 		log.Panic(err)
 	default:
-		FatalWrap(ErrLogSave, err)
+		FatalWrap(ErrSave, err)
 	}
 }
 
@@ -88,7 +88,7 @@ func Name() string {
 // An optional named file is available for unit tests.
 func save(err error, name string) error {
 	if err == nil || fmt.Sprintf("%v", err) == "" {
-		return fmt.Errorf("logs save: %w", ErrNil)
+		return fmt.Errorf("logs save: %w", ErrErrorNil)
 	}
 	// use UTC date and times in the log file
 	log.SetFlags(log.Ldate | log.Ltime | log.LUTC)

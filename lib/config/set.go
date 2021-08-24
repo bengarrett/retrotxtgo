@@ -112,7 +112,7 @@ func Set(name string) {
 // Update edits and saves a named setting within a configuration file.
 func Update(name string, setup bool) {
 	if !Validate(name) {
-		fmt.Println(logs.Hint("config set --list", logs.ErrCfgName))
+		fmt.Println(logs.Hint("config set --list", logs.ErrConfigName))
 		return
 	}
 	if !setup {
@@ -515,7 +515,7 @@ func previewMetaPrint(name, value string) {
 		logs.FatalSave(fmt.Errorf("preview meta: %w", logs.ErrNameNil))
 	}
 	if !Validate(name) {
-		logs.FatalSave(fmt.Errorf("preview meta %q: %w", name, logs.ErrCfgName))
+		logs.FatalSave(fmt.Errorf("preview meta %q: %w", name, logs.ErrConfigName))
 	}
 	s := strings.Split(name, ".")
 	const splits = 3
@@ -610,7 +610,7 @@ func save(name string, setup bool, value interface{}) {
 		logs.FatalSave(fmt.Errorf("save: %w", logs.ErrNameNil))
 	}
 	if !Validate(name) {
-		logs.FatalSave(fmt.Errorf("save %q: %w", name, logs.ErrCfgName))
+		logs.FatalSave(fmt.Errorf("save %q: %w", name, logs.ErrConfigName))
 	}
 	if skipSave(name, value) {
 		fmt.Print(skipSet(setup))

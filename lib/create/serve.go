@@ -157,7 +157,7 @@ func (args *Args) cleanup() {
 	}
 	if tmp {
 		if err := os.RemoveAll(args.Save.Destination); err != nil {
-			logs.FatalMark(args.Save.Destination, logs.ErrTmpClean, err)
+			logs.FatalMark(args.Save.Destination, logs.ErrTmpRMD, err)
 		}
 	}
 }

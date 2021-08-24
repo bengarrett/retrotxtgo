@@ -86,7 +86,7 @@ func viewParseArg(cmd *cobra.Command, conv *convert.Convert, i int, arg string) 
 	if ok := sample.Valid(arg); ok {
 		var p sample.File
 		if p, err = f.Open(arg, conv); err != nil {
-			logs.FatalMark(arg, logs.ErrSampView, err)
+			logs.FatalMark(arg, logs.ErrSampleOpen, err)
 		}
 		// --to flag is currently ignored
 		if to := cmd.Flags().Lookup("to"); to.Changed {
@@ -139,7 +139,7 @@ func viewParsePipe(cmd *cobra.Command) {
 	}
 	b, err := filesystem.ReadPipe()
 	if err != nil {
-		logs.FatalMark("view", logs.ErrPipe, err)
+		logs.FatalMark("view", logs.ErrPipeRead, err)
 	}
 	_, r := viewParseBytes(cmd, &conv, "piped", b...)
 	fmt.Print(string(r))

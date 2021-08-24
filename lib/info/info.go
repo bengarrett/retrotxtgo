@@ -124,7 +124,7 @@ func (n Names) Info(name, format string) error {
 	}
 	s, err := os.Stat(name)
 	if os.IsNotExist(err) {
-		return fmt.Errorf("%s: %w", err1, logs.ErrFileNil)
+		return fmt.Errorf("%s: %w", err1, logs.ErrFileName)
 	}
 	if err != nil {
 		return fmt.Errorf("%s: %w", err1, err)

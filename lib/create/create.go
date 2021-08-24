@@ -213,7 +213,7 @@ func (args *Args) saveAssets(b *[]byte) error {
 	if args.Save.Destination == "" {
 		dir := []string{viper.GetString("save-directory")}
 		if args.Save.Destination, err = destination(dir...); err != nil {
-			logs.FatalMark(args.Save.Destination, logs.ErrDirSave, err)
+			logs.FatalMark(args.Save.Destination, logs.ErrFileSaveD, err)
 		}
 	}
 	ch := make(chan error)
@@ -248,18 +248,18 @@ func (args *Args) zipAssets(destDir string, b *[]byte) {
 		dir := args.Save.Destination
 		m, err := filepath.Match(filepath.Join(os.TempDir(), "*"), dir)
 		if err != nil {
-			logs.FatalMark("*", logs.ErrTmpDir, err)
+			logs.FatalMark("*", logs.ErrTmpSaveD, err)
 		}
 		if m {
 			if err = os.RemoveAll(dir); err != nil {
-				logs.FatalMark(dir, logs.ErrTmpClean, err)
+				logs.FatalMark(dir, logs.ErrTmpRMD, err)
 			}
 		}
 	}()
 	var err error
 	args.Save.Destination, err = ioutil.TempDir(os.TempDir(), "*-zip")
 	if err != nil {
-		logs.FatalMark("temporary", logs.ErrDirSave, err)
+		logs.FatalMark("temporary", logs.ErrFileSaveD, err)
 	}
 	if err = args.saveAssets(b); err != nil {
 		fmt.Println(logs.PrintfWrap(logs.ErrFileSave, err))
@@ -409,7 +409,7 @@ func layout(name string) (Layout, error) {
 	case none, "n":
 		return None, nil
 	}
-	return 0, logs.ErrTmplNil
+	return 0, logs.ErrTmplName
 }
 
 // replaceNELs replace EBCDIC newlines with Unicode linefeeds.

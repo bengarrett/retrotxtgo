@@ -55,11 +55,11 @@ var infoCmd = &cobra.Command{
 				arg = filename
 			}
 			if err := n.Info(arg, infoFlag.format); err != nil {
-				if errors.As(logs.ErrFileNil, &err) {
+				if errors.As(logs.ErrFileName, &err) {
 					if n.Length <= 1 {
 						logs.Fatal(err)
 					}
-					fmt.Println(logs.PrintfMark(arg, logs.ErrFileNil, err))
+					fmt.Println(logs.PrintfMark(arg, logs.ErrFileName, err))
 					continue
 				}
 				if err = cmd.Usage(); err != nil {
@@ -109,7 +109,7 @@ func infoSample(name string) (filename string, err error) {
 func infoPipe() {
 	b, err := filesystem.ReadPipe()
 	if err != nil {
-		logs.FatalMark("info", logs.ErrPipe, err)
+		logs.FatalMark("info", logs.ErrPipeRead, err)
 	}
 	if err = info.Stdin(infoFlag.format, b...); err != nil {
 		logs.FatalMark("info", logs.ErrPipeParse, err)

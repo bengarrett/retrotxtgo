@@ -41,7 +41,7 @@ func (args *Args) marshal(b *[]byte) (PageData, error) {
 	case None:
 		// do nothing
 	default:
-		return PageData{}, fmt.Errorf("pagedata %s: %w", args.layout, logs.ErrTmplNil)
+		return PageData{}, fmt.Errorf("pagedata %s: %w", args.layout, logs.ErrTmplName)
 	}
 	// convert bytes into utf8
 	r := bytes.Runes(*b)
@@ -163,7 +163,7 @@ func (args *Args) newTemplate() (*template.Template, error) {
 		case err != nil:
 			return nil, err
 		case s.IsDir():
-			return nil, fmt.Errorf("new template %q: %w", args.tmpl, logs.ErrTmplDir)
+			return nil, fmt.Errorf("new template %q: %w", args.tmpl, logs.ErrTmplIsDir)
 		}
 	}
 	// to avoid a potential panic, Stat again in case os.IsNotExist() is true
@@ -192,7 +192,7 @@ func (args *Args) templateCache() error {
 	const ext = ".gohtml"
 	name := args.layout.Pack()
 	if name == "" {
-		return fmt.Errorf("template cache %q: %w", args.layout, logs.ErrTmplNil)
+		return fmt.Errorf("template cache %q: %w", args.layout, logs.ErrTmplName)
 	}
 	var err error
 	filename := name + ext
@@ -209,7 +209,7 @@ func (args *Args) templatePack() error {
 	const dir, ext, sep = "html", ".gohtml", "/"
 	name := args.layout.Pack()
 	if name == "" {
-		return fmt.Errorf("template pack %q: %w", args.layout, logs.ErrTmplNil)
+		return fmt.Errorf("template pack %q: %w", args.layout, logs.ErrTmplName)
 	}
 	filename := name + ext
 	args.pack = strings.Join([]string{dir, filename}, sep)
