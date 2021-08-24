@@ -31,7 +31,8 @@ var (
 var configCmd = &cobra.Command{
 	Use:     "config",
 	Aliases: []string{"cfg"},
-	Short:   fmt.Sprintf("%s configuration and defaults.", meta.Name),
+	Short:   fmt.Sprintf("%s configuration and defaults", meta.Name),
+	Long:    fmt.Sprintf("%s settings, setup and default configurations.", meta.Name),
 	Example: exampleCmd(configExample),
 	Run: func(cmd *cobra.Command, args []string) {
 		if !printUsage(cmd, args...) {
