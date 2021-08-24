@@ -109,7 +109,7 @@ var configInfoCmd = &cobra.Command{
 func configInfo() (exit bool) {
 	if configFlag.configs {
 		if err := config.List(); err != nil {
-			logs.ProblemCmdFatal("config info", "list", err)
+			logs.FatalFlag("config info", "list", err)
 		}
 	}
 	if configFlag.styles {
@@ -157,7 +157,7 @@ var configSetCmd = &cobra.Command{
 func configListAll() (ok bool) {
 	if configFlag.configs {
 		if err := config.List(); err != nil {
-			logs.ProblemCmdFatal("config", "list", err)
+			logs.FatalFlag("config", "list", err)
 		}
 		return true
 	}

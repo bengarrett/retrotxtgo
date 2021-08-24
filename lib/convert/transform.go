@@ -202,8 +202,7 @@ func (c *Convert) width(max int) {
 	cnt := len(c.Output.R)
 	cols, err := filesystem.Columns(bytes.NewReader(c.Source.B), c.Source.lineBreak)
 	if err != nil {
-		logs.ProblemMark(fmt.Sprint(c.Source.lineBreak), ErrWidth, err)
-		return
+		logs.FatalMark(fmt.Sprint(c.Source.lineBreak), ErrWidth, err)
 	}
 	if cols <= max {
 		return

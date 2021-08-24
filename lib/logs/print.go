@@ -9,7 +9,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/meta"
 )
 
-const errorCode = 1
+const OSErrCode = 1
 
 // Hint formats and returns the error with a usage suggestion or hint.
 func Hint(s string, err error) string {
@@ -28,7 +28,19 @@ func Fatal(err error) {
 	if err != nil {
 		fmt.Println(Printf(err))
 	}
-	os.Exit(errorCode)
+	os.Exit(OSErrCode)
+}
+
+// FatalFlag prints a problem with the flag and exits.
+func FatalFlag(cmd, flag string, err error) {
+	fmt.Println(PrintfFlag(cmd, flag, err))
+	os.Exit(OSErrCode)
+}
+
+// FatalMark formats the errors, highlights the value and exits.
+func FatalMark(value string, err, errs error) {
+	fmt.Println(PrintfMark(value, err, errs))
+	os.Exit(OSErrCode)
 }
 
 // Printf formats and returns the error.
@@ -39,24 +51,18 @@ func Printf(err error) string {
 	return fmt.Sprintf("%s %s", str.Alert(), err)
 }
 
-// ProblemCmd returns the command does not exist.
-func ProblemCmd(name string, err error) string {
-	if name == "" || err == nil {
+// PrintfCmd returns the command does not exist.
+func PrintfCmd(cmd string, err error) string {
+	if cmd == "" || err == nil {
 		return ""
 	}
 	return fmt.Sprintf("%s the command %s does not exist, %s",
-		str.Alert(), name, err)
+		str.Alert(), cmd, err)
 }
 
-// ProblemCmdFatal prints a problem with the flag and exits.
-func ProblemCmdFatal(name, flag string, err error) {
-	fmt.Println(ProblemFlag(name, flag, err))
-	os.Exit(errorCode)
-}
-
-// ProblemFlag prints a problem with the flag.
-func ProblemFlag(name, flag string, err error) string {
-	if name == "" || err == nil {
+// PrintfFlag prints a problem with the flag.
+func PrintfFlag(cmd, flag string, err error) string {
+	if cmd == "" || err == nil {
 		return ""
 	}
 	alert, toggle := str.Alert(), "--"
@@ -66,22 +72,16 @@ func ProblemFlag(name, flag string, err error) string {
 		toggle = "-"
 	}
 	return fmt.Sprintf("%s with the %s %s%s flag, %s",
-		alert, name, toggle, flag, err)
+		alert, cmd, toggle, flag, err)
 }
 
-// ProblemMark formats the errors and highlights the value.
-func ProblemMark(value string, err, errs error) string {
+// PrintfMark formats the errors and highlights the value.
+func PrintfMark(value string, err, errs error) string {
 	if value == "" || err == nil || errs == nil {
 		return ""
 	}
 	return fmt.Sprintf("%s %s %q: %s",
 		str.Alert(), str.Cf(fmt.Sprintf("%v", err)), value, str.Cf(fmt.Sprintf("%v", errs)))
-}
-
-// ProblemMark formats the errors, highlights the value and exits.
-func ProblemMarkFatal(value string, err, errs error) {
-	fmt.Println(ProblemMark(value, err, errs))
-	os.Exit(errorCode)
 }
 
 // Problemf formats the errors.
@@ -96,5 +96,5 @@ func Problemf(err, errs error) string {
 // Problemf formats the errors and exits.
 func ProblemFatal(err, errs error) {
 	fmt.Println(Problemf(err, errs))
-	os.Exit(errorCode)
+	os.Exit(OSErrCode)
 }

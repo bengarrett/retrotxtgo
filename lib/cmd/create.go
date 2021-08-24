@@ -165,10 +165,10 @@ func init() {
 	createCmd.Flags().BoolVarP(&html.SauceData.Use, "sauce", "", true,
 		"use any found SAUCE metadata as HTML meta tags")
 	if err := createCmd.Flags().MarkHidden("body"); err != nil {
-		logs.ProblemMarkFatal("body", ErrHideCreate, err)
+		logs.FatalMark("body", ErrHideCreate, err)
 	}
 	if err := createCmd.Flags().MarkHidden("cache"); err != nil {
-		logs.ProblemMarkFatal("cache", ErrHideCreate, err)
+		logs.FatalMark("cache", ErrHideCreate, err)
 	}
 	createCmd.Flags().SortFlags = false
 }
@@ -388,8 +388,7 @@ func staticTextfile(f sample.Flags, conv *convert.Convert, arg string, changed b
 		var p sample.File
 		p, err = f.Open(arg, conv)
 		if err != nil {
-			logs.ProblemMark(arg, logs.ErrSampHTML, err)
-			return nil, true
+			logs.FatalMark(arg, logs.ErrSampHTML, err)
 		}
 		src = create.Normalize(p.Encoding, p.Runes...)
 		if changed {
@@ -400,7 +399,7 @@ func staticTextfile(f sample.Flags, conv *convert.Convert, arg string, changed b
 	// read file
 	if src == nil {
 		if src, err = filesystem.Read(arg); err != nil {
-			logs.ProblemMarkFatal(arg, logs.ErrFileOpen, err)
+			logs.FatalMark(arg, logs.ErrFileOpen, err)
 		}
 	}
 	return src, false

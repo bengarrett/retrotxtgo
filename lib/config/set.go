@@ -375,7 +375,7 @@ func colorElm(elm, lexer, style string, color bool) string {
 	var b bytes.Buffer
 	_ = io.Writer(&b)
 	if err := str.HighlightWriter(&b, elm, lexer, style, color); err != nil {
-		logs.ProblemMarkFatal(fmt.Sprint("html ", lexer), logs.ErrHighlight, err)
+		logs.FatalMark(fmt.Sprint("html ", lexer), logs.ErrHighlight, err)
 	}
 	return fmt.Sprintf("\n%s\n", b.String())
 }
@@ -404,7 +404,7 @@ func (n names) string(theme bool, lexer string) string {
 			b = bytes.Buffer{}
 			t = fmt.Sprintf("{ %q:%q }%s", name, name, strings.Repeat(" ", pad+space))
 			if err := str.HighlightWriter(&b, t, lexer, name, true); err != nil {
-				logs.ProblemMark(name, logs.ErrHighlight, err)
+				logs.FatalMark(name, logs.ErrHighlight, err)
 			}
 			s = append(s, fmt.Sprintf("%2d %s", i, b.String()))
 			if split+i >= len(n) {
@@ -413,7 +413,7 @@ func (n names) string(theme bool, lexer string) string {
 			b = bytes.Buffer{}
 			t = fmt.Sprintf("{ %q:%q }\n", n[split+i], n[split+i])
 			if err := str.HighlightWriter(&b, t, lexer, name, true); err != nil {
-				logs.ProblemMark(name, logs.ErrHighlight, err)
+				logs.FatalMark(name, logs.ErrHighlight, err)
 			}
 			s = append(s, fmt.Sprintf("%2d %s", split+i, b.String()))
 			continue
@@ -421,7 +421,7 @@ func (n names) string(theme bool, lexer string) string {
 		b = bytes.Buffer{}
 		t = fmt.Sprintf("<%s=%q>%s", name, name, strings.Repeat(" ", pad+space))
 		if err := str.HighlightWriter(&b, t, lexer, name, true); err != nil {
-			logs.ProblemMark(name, logs.ErrHighlight, err)
+			logs.FatalMark(name, logs.ErrHighlight, err)
 		}
 		s = append(s, fmt.Sprintf("%2d %s", i, b.String()))
 		if split+i >= len(n) {
@@ -430,7 +430,7 @@ func (n names) string(theme bool, lexer string) string {
 		b = bytes.Buffer{}
 		t = fmt.Sprintf("<%s=%q>\n", n[split+i], n[split+i])
 		if err := str.HighlightWriter(&b, t, lexer, name, true); err != nil {
-			logs.ProblemMark(name, logs.ErrHighlight, err)
+			logs.FatalMark(name, logs.ErrHighlight, err)
 		}
 		s = append(s, fmt.Sprintf("%2d %s", split+i, b.String()))
 	}

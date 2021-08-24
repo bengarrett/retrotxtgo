@@ -254,7 +254,7 @@ func getBool(key string) bool {
 	case bool:
 		return Reset()[key].(bool)
 	default:
-		logs.ProblemMarkFatal(key, ErrBool, logs.ErrCfgName)
+		logs.FatalMark(key, ErrBool, logs.ErrCfgName)
 	}
 	return false
 }
@@ -268,7 +268,7 @@ func getUint(key string) uint {
 	case uint:
 		return Reset()[key].(uint)
 	default:
-		logs.ProblemMarkFatal(key, ErrUint, logs.ErrCfgName)
+		logs.FatalMark(key, ErrUint, logs.ErrCfgName)
 	}
 	return 0
 }
@@ -282,7 +282,7 @@ func getString(key string) string {
 	case string:
 		return Reset()[key].(string)
 	default:
-		logs.ProblemMarkFatal(key, ErrString, logs.ErrCfgName)
+		logs.FatalMark(key, ErrString, logs.ErrCfgName)
 	}
 	return ""
 }
