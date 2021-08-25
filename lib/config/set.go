@@ -58,7 +58,7 @@ func List() error {
 	const minWidth, tabWidth, tabs = 2, 2, "\t\t\t\t"
 	w := tabwriter.NewWriter(os.Stdout, minWidth, tabWidth, 0, ' ', 0)
 	cmds := fmt.Sprintf(" %s config set ", meta.Bin)
-	title := fmt.Sprintf("  Available %s Configurations and Settings.", meta.Name)
+	title := fmt.Sprintf("  Available %s configurations and settings", meta.Name)
 	fmt.Fprintln(w, "\n"+str.ColPri(title))
 	fmt.Fprintln(w, str.HR(len(title)))
 	fmt.Fprintln(w, tabs)
@@ -339,7 +339,7 @@ func promptServe(u update) {
 		str.ColSec("http://localhost:"), p, check)
 	fmt.Printf("\t\t\t\t    %s%d %s\n",
 		str.ColSec("http://127.0.0.1:"), p, check)
-	fmt.Printf("\n  Port %s is reserved, port numbers less than %s are are not recommended.\n",
+	fmt.Printf("\n  Port %s is reserved, port numbers less than %s are not recommended.\n",
 		str.Example("0"), str.Example("1024"))
 	fmt.Printf("  Set a HTTP port number, choices %s: ", portInfo())
 	setPort(u.name, u.setup)

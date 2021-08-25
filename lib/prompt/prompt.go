@@ -122,11 +122,11 @@ func check(prompts int) {
 	const info, max = 2, 4
 	switch {
 	case prompts == info:
-		if i, err := fmt.Println("Ctrl+C to keep the existing value"); err != nil {
+		if i, err := fmt.Print("\r  Ctrl+C to keep the existing value\n"); err != nil {
 			log.Fatalf("prompt check println at %dB: %s", i, err)
 		}
 	case prompts >= max:
-		fmt.Println(NoChange)
+		fmt.Printf("\r  %s", NoChange)
 		os.Exit(0)
 	}
 }
