@@ -1,61 +1,76 @@
 
-### From here onwards the following text are developer notes that will eventually be removed
+## Developer notes
 
-#### References
+These will eventually be removed.
 
-- [SAUCE](http://www.acid.org/info/sauce/sauce.htm)
-- packages: [Cobra](https://pkg.go.dev/github.com/spf13/cobra)/[Viper](https://pkg.go.dev/mod/github.com/spf13/viper)
-- go pkg: [utf8](https://golang.org/pkg/unicode/utf8/)/[unicode](https://golang.org/pkg/unicode/),
-  [x-text](https://pkg.go.dev/golang.org/x/text@v0.3.2?tab=subdirectories), [x-charmap](https://pkg.go.dev/golang.org/x/text@v0.3.2/encoding/charmap?tab=doc), [x-encoding](https://pkg.go.dev/golang.org/x/text@v0.3.2/encoding?tab=doc)
+### References
 
-### Go libraries
+#### Text files
+- [SAUCE](http://www.acid.org/info/sauce/sauce.htm) (ANSI/ASCII metadata)
 
-- [Package xstrings: A collection of useful string functions in Go](https://github.com/huandu/xstrings)
-  includes center, capitalize, justify, reverse text.
+#### Go libraries
+- [Cobra](https://pkg.go.dev/github.com/spf13/cobra), CLI interface
+- [Viper](https://pkg.go.dev/mod/github.com/spf13/viper), configuration file
+- [chroma](https://github.com/alecthomas/chroma), general purpose syntax highlighter
+- [gookit/color](https://github.com/gookit/color), terminal color rendering library
+- [godirwalk](https://github.com/karrick/godirwalk), fast directory traversal, last update Aug, 2020
+- [go-app-paths](https://github.com/muesli/go-app-paths), retrieve platform-specific paths
+- [minify](https://github.com/tdewolff/minify), minifiers for web formats
+- [mimemagic](https://github.com/zRedShift/mimemagic), powerful and versatile MIME sniffing package
 
-- [A collection of common regular expressions for Go](https://github.com/mingrammer/commonregex)
-  use for dynamically hyperlinking emails, links. wrap hash values around `<code>` tags. parse known ports.
+#### Go packages
 
-- [Devd - A local webserver for developers](https://github.com/cortesi/devd)
-  replacement for the current internal webserver?
+#### [Standard library](https://pkg.go.dev/std)
 
+- [Sub-repositories](https://pkg.go.dev/golang.org/x/)
+
+#### Unicode
+- [unicode](https://golang.org/pkg/unicode/) Package unicode provides data and functions to test some properties of Unicode code points.
+- [utf8](https://golang.org/pkg/unicode/utf8/) Package utf8 implements functions and constants to support text encoded in UTF-8. It includes functions to translate between runes and UTF-8 byte sequences.
+- [utf16](https://pkg.go.dev/unicode/utf16) Package utf16 implements encoding and decoding of UTF-16 sequences.
+- [x-utf32](https://pkg.go.dev/golang.org/x/text/encoding/unicode/utf32) Package utf32 provides the UTF-32 Unicode encoding.
 ---
+- [x-unicode/norm](https://pkg.go.dev/golang.org/x/text/unicode/norm) Package norm contains types and functions for normalizing Unicode strings.
+- [x-unicode/rangetable](https://pkg.go.dev/golang.org/x/text/unicode/rangetable) Package rangetable provides utilities for creating and inspecting unicode.RangeTables.
+- [x-runes](https://pkg.go.dev/golang.org/x/text/runes) Package runes provide transforms for UTF-8 encoded text.
+- [x-unicode/runenames](https://pkg.go.dev/golang.org/x/text/unicode/runenames) Package runenames provides rune names from the Unicode Character Database. For example, the name for '\u0100' is "LATIN CAPITAL LETTER A WITH MACRON".
 
-### Future CLI commands
 
-- [ ] add optional argument for destination (dir or file) that overrides the dir configuration.
-- - `retrotxt create somefile.txt . # would create index.html in the current directory`
-- - `retrotxt create somefile.txt somefile.html # create sometfile.htm`
-- [ ] add a flag to --export `create` command results to a tar or zip archive.
-- [ ] option for generated HTML naming convention, either use index.html ... index_1.html, index_2.html etc.
-      or filename.html, another-file-1.html, etc. When generating multiple HTML files, an index.html proof-sheet
-      should be created with hyperlinks to all the other files. Maybe list their file/sauce details and a screenshot.
-- [ ] both the `create/view` commands should support walking both directories and file archives.
-
+#### Text
+- [text](https://pkg.go.dev/golang.org/x/text) Text is a repository of text-related packages related to internationalization (i18n) and localization (l10n), such as character encodings, text transformations, and locale-specific text handling.
+- [htmlindex](https://pkg.go.dev/golang.org/x/text/encoding/htmlindex) Package htmlindex maps character set encoding names to Encodings as recommended by the W3C for use in HTML 5.
+- [ianaindex](https://pkg.go.dev/golang.org/x/text/encoding/ianaindex) Package ianaindex maps names to Encodings as specified by the IANA registry. This includes both the MIME and IANA names.
+- [japanese](https://pkg.go.dev/golang.org/x/text/encoding/japanese) Package japanese provides Japanese encodings such as EUC-JP and Shift JIS.
 ---
+- [number](https://pkg.go.dev/golang.org/x/text/number) Package number formats numbers according to the customs of different locales.
+- [search](https://pkg.go.dev/golang.org/x/text/search) Package search provides language-specific search and string matching. Natural language matching can be intricate. For example, Danish will insist "Århus" and "Aarhus" are the same name and Turkish will match I to ı (note the lack of a dot) in a case-insensitive match. This package handles such language-specific details.
+- [width](https://pkg.go.dev/golang.org/x/text/width) Package width provides functionality for handling different widths in text. Wide characters behave like ideographs; they tend to allow line breaks after each character and remain upright in vertical text layout. Narrow characters are kept together in words or runs that are rotated sideways in vertical text layout.
 
-### TODOs - changes to the existing code
+#### Encoding
+- [x-encoding](https://pkg.go.dev/golang.org/x/encoding)
+- [x-charmap](https://pkg.go.dev/golang.org/x/encoding/charmap) Package charmap provides simple character encodings such as IBM Code Page 437 and Windows 1252.
 
-- [ ] config shell should have a `--append/source/or` flag to save shell auto-completion?
-- [ ] scan for supported but current shell configuration.
-- [ ] scan for unique color codes like 24-bit, xterm and aix colors.
-- [ ] scan and linkify any http/s, ftp, mailto links in HTML.
+#### Language
+- [plural](https://pkg.go.dev/golang.org/x/text/feature/plural) Package plural provides utilities for handling linguistic plurals in text.
+- [display](https://pkg.go.dev/golang.org/x/text/language/display) Package display provides display names for languages, scripts and regions in a requested language.
 
-```sh
-// TODO: env
-// Indicates which language, character set, and sort order to use for messages, datatype conversions, and datetime formats.
-// 1. LC_NUMERIC="en_GB.UTF-8"
-// 1. LC_TIME="en_GB.UTF-8"
-// 2. LC_ALL=""
-// 3. LANG=""
-// 4. LANGUAGE=""
-// 4. US
-```
+##### Sys
+- [execabs](https://pkg.go.dev/golang.org/x/sys/execabs) Package execabs is a drop-in replacement for os/exec that requires PATH lookups to find absolute paths.
 
----
+#### Functions
 
-### Submission to distribution package managers
+##### [strconv](https://pkg.go.dev/strconv)
 
-[Chocolatey](https://chocolatey.org/docs/createpackages)
-
-Snap [snapcraft](https://snapcraft.io/first-snap#go), flathub is not for terminal apps.
+- AppendQuote
+- AppendQuoteRune
+- AppendQuoteRuneToASCII
+- FormatBool
+- FormatFloat
+- FormatInt/FormatUint
+- ParseBool(str) (bool,error)
+- ParseFloat(s, bitSize int) (float64, error)
+- ParseInt(s, base int, bitSize int) (int64, error)
+- Quote(s) string
+- QuoteRune(r) string
+- QuoteRuneToASCII(r) '\u263a'
+- Unquote(s string) (string, error)
