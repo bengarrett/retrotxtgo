@@ -252,6 +252,44 @@ retrotext list table cp437 latin1
  F | ð | ñ | ò | ó | ô | õ | ö | ÷ | ø | ù | ú | û | ü | ý | þ | ÿ |
 ```
 
+#### Print file information and embedded SAUCE metadata
+
+```
+retrotxt info retrotxt.ans
+
+────────────────────────────────────────────────────────────────────────────────
+                                File information
+ slug             retrotxt-ans
+ filename         retrotxt.ans
+ filetype         Text document with ANSI controls
+ UTF-8            ✗
+ line break       CRLF (Windows, DOS)
+ characters       8,074
+ ANSI controls    892
+ words            59
+ size             8.1 kB
+ lines            23
+ width            8,065
+ modified         15 Aug 2021 23:33
+ media mime type  application/octet-stream
+ SHA256 checksum  ca1b69fa5ed2c01837b66f03402569f84c43fd308d8399abc85737e2abef2c1f
+ CRC64 ECMA       1e8495be4c0edf25
+ CRC32            7aeb63ec
+ MD5              5adb64b98a10a87ba9bd02435112b049
+ ───────────────────────────────
+ title            RetroTxt logo
+ author           Zeus II
+ group            Blocktronics, FUEL
+ date             1 Jul 2020
+ original size    7.8 kB
+ file type        ANSI color text
+ data type        text or character stream
+ description      ANSI text file with coloring codes and cursor positioning.
+ character width  80
+ number of lines  31
+ comment          The app that lets you view works of ANSI art, ASCII and NFO text in terminal or as HTML. LGPL and available for Windows, Linux, Unix & macOS.
+```
+
 ### Building RetroTxtGo for other systems
 
 [Go](https://golang.org/doc/install) supports [dozens of architectures and operating systems](https://golang.org/doc/install/source#environment).
