@@ -252,7 +252,7 @@ retrotext list table cp437 latin1
  F | ð | ñ | ò | ó | ô | õ | ö | ÷ | ø | ù | ú | û | ü | ý | þ | ÿ |
 ```
 
-#### Print file information and embedded SAUCE metadata
+#### Print file information and embedded SAUCE metadata.d
 
 ```
 retrotxt info retrotxt.ans
@@ -287,7 +287,8 @@ retrotxt info retrotxt.ans
  description      ANSI text file with coloring codes and cursor positioning.
  character width  80
  number of lines  31
- comment          The app that lets you view works of ANSI art, ASCII and NFO text in terminal or as HTML. LGPL and available for Windows, Linux, Unix & macOS.
+ comment          The app that lets you view works of ANSI art,  ASCII and NFO
+ text in terminal or as HTML. LGPL and available for Windows, Linux, Unix & macOS.
 ```
 
 ### Building RetroTxtGo for other systems
