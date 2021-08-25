@@ -4,6 +4,7 @@
 
 ###### version α, a work-in-progress with an incomplete feature set.
 
+[Developer notes](DEV.md), [Dependencies project](https://github.com/bengarrett/retrotxtgo/projects/2), [TO-DO project](https://github.com/bengarrett/retrotxtgo/projects/1)
 ## Quick Usage
 
 #### Text art and files created without Unicode often fail to display on modern systems.
