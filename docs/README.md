@@ -95,6 +95,15 @@ saving to font.css
 ...
 ```
 
+#### Save the files to a ZIP archive.
+
+```sh
+retrotxt create ascii-logo.txt --compress
+
+...
+created zip file: retrotxt.zip 22.1 kB
+```
+
 #### Or inline all the website assets into a single HTML file for easier sharing.
 
 ```sh
@@ -109,8 +118,12 @@ retrotxt create ascii-logo.txt --layout=inline --font-embed --title="ASCII logo"
     <meta charset="utf-8" />
     <title>ASCII logo</title>
     <style type="text/css">
-      body{background-color:#000;display:flex;flex-dir...}
-      @font-face{font-family:vga;src:url(data:application/font-woff2;charset=utf-8;base64,d09GMgA...)}
+      body{background-color:#000;display:flex;flex-direction:column;text-shadow:none;color:
+      var(--vgagray)}main{display:inline-block;letter-spacing:0;min-width:640px;order:2...}
+      @font-face{font-family:vga;src:url(data:application/font-woff2;charset=utf-8;base64,
+      d09GMgABAAAAADkcAA0AAAABE3AAADjAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP0ZGVE0cGiYGYACNThEI
+      CoPBGILVJwuMHgABNgIkA4wkBCAFigEHsTobd9Z3xN13CsndqlJoJsgwEiFsHIxmBPMTbox8UzbTaPb///+fl
+      mwcgRWuBPDebxsDSNVg3JCNeeFKtWkB70aFWWXONQ...)}
     </style>
   </head>
 
@@ -204,6 +217,10 @@ apk add retrotxt.apk
 retrotxt -v
 ```
 
+
+#### [Building RetroTxtGo for other systems](BUILD.md)
+
+---
 ### Even More Uses
 
 #### Print legacy codepage tables in the terminal.
@@ -308,51 +325,6 @@ retrotxt info retrotxt.ans --format=json
     ...
 ```
 
-### Building RetroTxtGo for other systems
-
-[Go](https://golang.org/doc/install) supports [dozens of architectures and operating systems](https://golang.org/doc/install/source#environment).
-
-Note: The version string returned by `retrotxt -v` will always be `x0.0.0` for user builds.
-
-#### Working on Windows, PowerShell
-
-```powershell
-# clone and access repo
-git clone https://github.com/bengarrett/retrotxtgo.git; cd retrotxtgo
-
-# build retrotxt for the host system
-go test ./...
-go build -o retrotxt.exe
-.\retrotxt.exe -v
-
-# to see a list of supported platforms
-go tool dist list
-
-# to build retrotxt for windows/386, 32-bit Windows 7 and later
-$Env:GOOS="windows"; $Env:GOARCH="386"; go build -o retrotxt.exe; .\retrotxt.exe -v
-
-# be sure to remove or revert these two temporary environment vars
-$Env:GOOS=""; $Env:GOARCH="";
-```
-
-#### Working with other shells and platforms
-```bash
-# clone and access repo
-git clone https://github.com/bengarrett/retrotxtgo.git && cd retrotxtgo
-
-# build retrotxt for the host system
-go test ./...
-go build -o retrotxt
-./retrotxt -v
-
-# to see a list of supported platforms
-go tool dist list
-
-# build retrotxt for linux/386, 32-bit Linux
-env GOOS=linux GOARCH=386 && go build -o retrotxt && ./retrotxt -v
-```
-
----
 
 ### Why create RetroTxt using Go?
 
