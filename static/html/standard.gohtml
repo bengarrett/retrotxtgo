@@ -48,7 +48,7 @@
     {{- end }}
   </head>
 
-  <body>
+  {{if .MetaNoTranslate}}<body class="notranslate">{{else}}<body>{{- end}}
     <main>
       <pre>{{.PreText}}</pre>
     </main>

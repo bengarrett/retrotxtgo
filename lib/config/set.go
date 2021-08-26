@@ -803,10 +803,11 @@ func setIndex(name string, setup bool, data ...string) {
 // and Google meta elemenet.
 func setNoTranslate(value, setup bool) {
 	const name = notlate
-	elm := fmt.Sprintf("  %s\n    %s\n      %s\n",
-		"<html translate=\"no\">",
+	elm := fmt.Sprintf("  %s\n    %s\n  %s\n  %s\n",
 		"<head>",
-		"<meta name=\"google\" content=\"notranslate\">")
+		"<meta name=\"google\" content=\"notranslate\">",
+		"</head>",
+		"<body class=\"notranslate\">")
 	fmt.Print(ColorHTML(elm))
 	q := "Enable the no translate option?"
 	if value {
