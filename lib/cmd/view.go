@@ -38,7 +38,7 @@ var viewExample = fmt.Sprintf("  %s\n%s\n%s",
 
 // viewCmd represents the view command.
 var viewCmd = &cobra.Command{
-	Use:     "view [filenames]",
+	Use:     fmt.Sprintf("view %s", filenames),
 	Aliases: []string{"v"},
 	Short:   "Print a text file to the terminal using standard output",
 	Long:    "Print a text file to the terminal using standard output.",

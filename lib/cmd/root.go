@@ -32,12 +32,26 @@ const (
 	tab         = "tab"
 	null        = 0
 	verticalBar = 124
+	filenames   = "[filenames]"
 
 	// silence can be set to false to debug cmd/flag feedback from Viper.
 	silence = false
 )
 
 var rootFlag = rootFlags{}
+
+var rootCmdExample = fmt.Sprintf("  %s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s",
+	"# save the text files as webpages",
+	fmt.Sprintf("%s create %s", filenames, meta.Bin),
+	"# save the text files as webpages stored in a zip file",
+	fmt.Sprintf("%s create %s --compress", filenames, meta.Bin),
+	"# print detailed information about the text files",
+	fmt.Sprintf("%s info   %s", filenames, meta.Bin),
+	"# print the text files as Unicode text",
+	fmt.Sprintf("%s view   %s", filenames, meta.Bin),
+	fmt.Sprintf("# configure the %s flags and settings", meta.Name),
+	fmt.Sprintf("%s config setup", meta.Bin),
+)
 
 // rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
@@ -46,6 +60,7 @@ var rootCmd = &cobra.Command{
 	Long: fmt.Sprintf(`Turn many pieces of ANSI art, ASCII and NFO texts into HTML5 using %s.
 It is the platform agnostic tool that takes nostalgic text files and stylises
 them into a more modern, useful format to view or copy in a web browser.`, meta.Name),
+	Example: exampleCmd(rootCmdExample),
 	Run: func(cmd *cobra.Command, args []string) {
 		// Do nothing other than print the help.
 		// This func must remain otherwise root command flags are ignored by Cobra.
@@ -110,9 +125,17 @@ func self() (string, error) {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+	// create and hide custom configuration file location flag.
 	rootCmd.PersistentFlags().StringVar(&rootFlag.config, "config", "",
 		"optional config file location")
+	if err := rootCmd.PersistentFlags().MarkHidden("config"); err != nil {
+		logs.FatalMark("config", ErrHide, err)
+	}
+	// create a version flag that only works on root.
 	rootCmd.LocalNonPersistentFlags().BoolP("version", "v", false, "")
+	// hide the cobra introduced help command.
+	// https://github.com/spf13/cobra/issues/587#issuecomment-810159087
+	rootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
 }
 
 // initConfig reads in the config file and ENV variables if set.
@@ -174,9 +197,9 @@ func exampleCmd(tmpl string) string {
 		// do not the last hash as a comment
 		ex := strings.Join(ss[:l-1], cmmt)
 		s += str.ColInf(ex)
-		s += fmt.Sprintf("%s%s\n  ", cmmt, ss[l-1])
+		s += fmt.Sprintf("%s%s\n  ", color.Secondary.Sprint(cmmt), ss[l-1])
 	}
-	return s
+	return strings.TrimSpace(s)
 }
 
 // flagControls handles the controls flag.

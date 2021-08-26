@@ -29,7 +29,7 @@ var infoExample = fmt.Sprintf("  %s %s\n%s %s",
 
 // infoCmd represents the info command.
 var infoCmd = &cobra.Command{
-	Use:     "info [filenames]",
+	Use:     fmt.Sprintf("info %s", filenames),
 	Aliases: []string{"i"},
 	Short:   "Information on a text file",
 	Long:    "Discover details and information about any text or text art file.",

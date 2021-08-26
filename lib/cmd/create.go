@@ -70,7 +70,7 @@ func catCmd() string {
 
 // createCmd represents the create command.
 var createCmd = &cobra.Command{
-	Use:     "create [filenames]",
+	Use:     fmt.Sprintf("create %s", filenames),
 	Aliases: []string{"c", "html"},
 	Short:   "Create a HTML document from text files",
 	Long:    "Create a HTML document from text documents and text art files.",
@@ -165,10 +165,10 @@ func init() {
 	createCmd.Flags().BoolVarP(&html.SauceData.Use, "sauce", "", true,
 		"use any found SAUCE metadata as HTML meta tags")
 	if err := createCmd.Flags().MarkHidden("body"); err != nil {
-		logs.FatalMark("body", ErrHideCreate, err)
+		logs.FatalMark("body", ErrHide, err)
 	}
 	if err := createCmd.Flags().MarkHidden("cache"); err != nil {
-		logs.FatalMark("cache", ErrHideCreate, err)
+		logs.FatalMark("cache", ErrHide, err)
 	}
 	createCmd.Flags().SortFlags = false
 }

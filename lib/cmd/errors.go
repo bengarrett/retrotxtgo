@@ -4,7 +4,7 @@ import "errors"
 
 var (
 	ErrHelp        = errors.New("command help could not display")
-	ErrHideCreate  = errors.New("could not hide the create flag")
+	ErrHide        = errors.New("could not hide the flag")
 	ErrMarkRequire = errors.New("command flag could not be marked as required")
 	ErrTable       = errors.New("could not display the table")
 	ErrUsage       = errors.New("command usage could not display")
