@@ -127,6 +127,9 @@ func (a *ANSIFlags) String() string {
 	if ar != noPref {
 		l = append(l, ar)
 	}
+	if strings.TrimSpace(strings.Join(l, "")) == "" {
+		return ""
+	}
 	return strings.Join(l, ", ")
 }
 
