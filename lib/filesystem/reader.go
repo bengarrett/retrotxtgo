@@ -5,7 +5,9 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"runtime"
 	"sort"
+	"strings"
 	"unicode"
 	"unicode/utf8"
 
@@ -259,7 +261,7 @@ func LineBreak(r LB, extraInfo bool) string {
 	}
 	switch r {
 	case LF():
-		return "LF (Linux, macOS, Unix)"
+		return fmt.Sprintf("LF (%s)", lfNix())
 	case CR():
 		return "CR (8-bit microcomputers)"
 	case CRLF():
@@ -272,6 +274,24 @@ func LineBreak(r LB, extraInfo bool) string {
 		return "NEL (EBCDIC to Unicode)"
 	}
 	return "??"
+}
+
+func lfNix() string {
+	const mac, linux, unix = "macOS", "Linux", "Unix"
+	s := strings.Join([]string{mac, linux, unix}, ", ")
+	switch runtime.GOOS {
+	case "linux":
+		s = linux
+	case "darwin":
+		s = mac
+	case "dragonfly", "illumos", "solaris":
+		s = unix
+	default:
+		if strings.HasSuffix(runtime.GOOS, "bsd") {
+			s = unix
+		}
+	}
+	return s
 }
 
 // Runes returns the number of runes in the reader interface.
