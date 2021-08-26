@@ -291,6 +291,23 @@ retrotxt info retrotxt.ans
  text in terminal or as HTML. LGPL and available for Windows, Linux, Unix & macOS.
 ```
 
+```
+retrotxt info retrotxt.ans --format=json
+
+{
+    "filename": "retrotxt.ans",
+    "utf8": false,
+    "lineBreak": {
+        "string": "CRLF",
+        "escape": "\r\n",
+        "decimals": [
+            13,
+            10
+        ]
+    },
+    ...
+```
+
 ### Building RetroTxtGo for other systems
 
 [Go](https://golang.org/doc/install) supports [dozens of architectures and operating systems](https://golang.org/doc/install/source#environment).
@@ -339,7 +356,7 @@ env GOOS=linux GOARCH=386 && go build -o retrotxt && ./retrotxt -v
 
 ### Why create RetroTxt using Go?
 
-- Native [Unicode](https://golang.org/pkg/unicode/), UTF 8/16/32 support.
+- Native [Unicode](https://golang.org/pkg/unicode/) support.
 - [A large selection of native legacy text encodings](golang.org/x/text/encoding/charmap).
 - Builds a standalone binary with no dependencies.
 - [Wide operating system and CPU architecture support](https://gist.github.com/asukakenji/f15ba7e588ac42795f421b48b8aede63).
