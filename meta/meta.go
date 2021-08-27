@@ -51,6 +51,11 @@ const (
 	WebPort uint = 8086
 )
 
+// IsGoBuild returns true if this version of RetroTxt was manually built.
+func IsGoBuild() bool {
+	return Semantic(App.Version) == Semantic(GoBuild)
+}
+
 // Print the release version string.
 func Print() string {
 	return Semantic(App.Version).String()

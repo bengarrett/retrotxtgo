@@ -104,8 +104,6 @@ type PageData struct {
 	MetaGenerator    bool
 	MetaNoTranslate  bool
 	MetaRetroTxt     bool
-	BuildDate        string
-	BuildName        string
 	BuildVersion     string
 	CacheRefresh     string
 	Comment          string

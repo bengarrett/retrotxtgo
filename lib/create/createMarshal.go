@@ -120,11 +120,18 @@ func (args *Args) marshalStandard(p *PageData) PageData {
 	p.SauceWidth = args.SauceData.Width
 	p.SauceLines = args.SauceData.Lines
 	// generate data
-	t := time.Now().UTC()
-	p.BuildDate = t.Format(time.RFC3339)
-	p.BuildName = meta.Name
-	p.BuildVersion = meta.App.Version
+	p.BuildVersion = metaAppVersion()
 	return *p
+}
+
+func metaAppVersion() string {
+	t := time.Now().UTC()
+	date := t.Format(time.RFC3339)
+	if !meta.IsGoBuild() {
+		return fmt.Sprintf("%s %s; %s",
+			meta.Name, meta.Print(), date)
+	}
+	return fmt.Sprintf("%s; %s", meta.Name, date)
 }
 
 // marshalTextTransform marshals the bytes data with the HTML template.

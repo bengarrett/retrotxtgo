@@ -777,9 +777,16 @@ func setGenerator(value bool) {
 	const name = genr
 	elm := fmt.Sprintf("  %s\n    %s\n  %s\n",
 		"<head>",
-		fmt.Sprintf("<meta name=\"generator\" content=\"%s %s, %s\">",
-			meta.Name, meta.Print(), meta.App.Date),
+		fmt.Sprintf("<meta name=\"generator\" content=\"%s, %s\">",
+			meta.Name, meta.App.Date),
 		"</head>")
+	if !meta.IsGoBuild() {
+		elm = fmt.Sprintf("  %s\n    %s\n  %s\n",
+			"<head>",
+			fmt.Sprintf("<meta name=\"generator\" content=\"%s %s, %s\">",
+				meta.Name, meta.Print(), meta.App.Date),
+			"</head>")
+	}
 	fmt.Print(ColorHTML(elm))
 	p := "Enable the generator element?"
 	if value {
