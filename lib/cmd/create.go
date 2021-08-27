@@ -391,7 +391,7 @@ func staticTextfile(f sample.Flags, conv *convert.Convert, arg string, changed b
 			logs.FatalMark(arg, logs.ErrSampleHTML, err)
 		}
 		src = create.Normalize(p.Encoding, p.Runes...)
-		if changed {
+		if !changed {
 			// only apply the sample font when the --font-family flag is unused
 			html.FontFamily.Value = p.Font.String()
 		}

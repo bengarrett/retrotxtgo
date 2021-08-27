@@ -125,38 +125,39 @@ func Open(name string) ([]byte, error) {
 }
 
 // Open and convert a sample textfile.
-func (f Flags) Open(name string, conv *convert.Convert) (s File, err error) {
+func (flag Flags) Open(name string, conv *convert.Convert) (File, error) {
+	var f File
 	name = strings.ToLower(name)
-	if _, err = os.Stat(name); !os.IsNotExist(err) {
-		return s, nil
+	if _, err := os.Stat(name); !os.IsNotExist(err) {
+		return File{}, nil
 	}
 	samp, exist := Map()[name]
 	if !exist {
-		return s, logs.ErrSampleName
+		return File{}, logs.ErrSampleName
 	}
 	b, err := static.File.ReadFile(samp.Name)
 	if err != nil {
-		return s, fmt.Errorf("open sample %q: %w", samp.Name, logs.ErrSampleName)
+		return File{}, fmt.Errorf("open sample %q: %w", samp.Name, logs.ErrSampleName)
 	}
 	if conv == nil {
-		return s, ErrConvNil
+		return File{}, ErrConvNil
 	}
-	s.Encoding = samp.encoding
-	s.Font = samp.Font
-	if f.From == nil {
-		conv.Source.E = s.Encoding
+	f.Encoding = samp.encoding
+	f.Font = samp.Font
+	if flag.From == nil {
+		conv.Source.E = f.Encoding
 	}
-	if f.To != nil {
+	if flag.To != nil {
 		// sample items that break the NewEncoder
 		switch name {
 		case "037", "shiftjis", "utf16.be", "utf16.le":
-			return s, nil
+			return File{}, nil
 		}
-		err = printT(f.From, b...)
+		err = printT(flag.From, b...)
 		if err != nil {
-			return s, err
+			return File{}, err
 		}
-		return s, nil
+		return File{}, nil
 	}
 	// default overrides
 	switch name {
@@ -166,32 +167,34 @@ func (f Flags) Open(name string, conv *convert.Convert) (s File, err error) {
 			conv.Flags.Controls = nil
 		}
 	}
-	return samp.transform(&b, conv)
+	f, err = samp.transform(&f, conv, &b)
+	return f, err
 }
 
 // Transform converts the raw byte data of the textfile into UTF8 runes.
-func (samp Sample) transform(b *[]byte, conv *convert.Convert) (s File, err error) {
+func (samp *Sample) transform(f *File, conv *convert.Convert, b *[]byte) (File, error) {
+	var err error
 	switch samp.convert {
 	case ansi:
-		if s.Runes, err = conv.ANSI(b); err != nil {
-			return s, err
+		if f.Runes, err = conv.ANSI(b); err != nil {
+			return File{}, err
 		}
 	case char:
-		if s.Runes, err = conv.Chars(b); err != nil {
-			return s, err
+		if f.Runes, err = conv.Chars(b); err != nil {
+			return File{}, err
 		}
 	case dump:
-		if s.Runes, err = conv.Dump(b); err != nil {
-			return s, err
+		if f.Runes, err = conv.Dump(b); err != nil {
+			return File{}, err
 		}
 	case text:
-		if s.Runes, err = conv.Text(b); err != nil {
-			return s, err
+		if f.Runes, err = conv.Text(b); err != nil {
+			return File{}, err
 		}
 	default:
-		return s, fmt.Errorf("transform sample %q: %w", samp.convert, ErrConvert)
+		return File{}, fmt.Errorf("transform sample %q: %w", samp.convert, ErrConvert)
 	}
-	return s, nil
+	return *f, nil
 }
 
 // Valid textfile name.
