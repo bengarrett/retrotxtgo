@@ -30,10 +30,10 @@ func (args *Args) marshal(b *[]byte) (PageData, error) {
 	switch args.layout {
 	case Inline:
 		var err error
-		if p, err = args.marshalInline(b); err != nil {
-			return p, err
+		p, err = args.marshalInline(&p)
+		if err != nil {
+			return PageData{}, err
 		}
-		p = args.marshalStandard(&p)
 	case Standard:
 		p = args.marshalStandard(&p)
 	case Compact: // disables all meta tags
@@ -61,13 +61,9 @@ func (args *Args) marshalCompact(p *PageData) PageData {
 }
 
 // marshalInline is used by the inline layout argument.
-func (args *Args) marshalInline(b *[]byte) (PageData, error) {
-	if b == nil {
-		return PageData{}, fmt.Errorf("pagedata: %w", ErrNilByte)
-	}
-	p := PageData{
-		ExternalEmbed: true,
-	}
+func (args *Args) marshalInline(p *PageData) (PageData, error) {
+	*p = args.marshalStandard(p)
+	p.ExternalEmbed = true
 	m := minify.New()
 	m.AddFunc("text/css", css.Minify)
 	m.AddFuncRegexp(regexp.MustCompile("^(application|text)/(x-)?(java|ecma)script$"), js.Minify)
@@ -76,25 +72,26 @@ func (args *Args) marshalInline(b *[]byte) (PageData, error) {
 	// font
 	f, err := FontCSS(args.FontFamily.Value, args.Source.Encoding, args.FontEmbed)
 	if err != nil {
-		return p, fmt.Errorf("pagedata font error: %w", err)
+		return PageData{}, fmt.Errorf("pagedata font error: %w", err)
 	}
 	f = bytes.TrimSpace(f)
 	// merge
+	var embed []byte
 	c := [][]byte{s, []byte("/* font */"), f}
-	*b = bytes.Join(c, []byte("\n\n"))
+	embed = bytes.Join(c, []byte("\n\n"))
 	// compress & embed
-	*b, err = m.Bytes("text/css", *b)
+	embed, err = m.Bytes("text/css", embed)
 	if err != nil {
-		return p, fmt.Errorf("pagedata minify css: %w", err)
+		return PageData{}, fmt.Errorf("pagedata minify css: %w", err)
 	}
-	p.CSSEmbed = template.CSS(string(*b))
+	p.CSSEmbed = template.CSS(string(embed))
 	jsp := static.Scripts
 	jsp, err = m.Bytes("application/javascript", jsp)
 	if err != nil {
-		return p, fmt.Errorf("pagedata minify javascript: %w", err)
+		return PageData{}, fmt.Errorf("pagedata minify javascript: %w", err)
 	}
 	p.ScriptEmbed = template.JS(string(jsp)) // nolint:gosec
-	return p, nil
+	return *p, nil
 }
 
 // marshalStandard is used by the standard layout argument.

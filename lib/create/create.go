@@ -196,7 +196,8 @@ func (args *Args) Create(b *[]byte) error {
 			return fmt.Errorf("create could not save file: %w", err)
 		}
 	case args.Save.Compress:
-		args.zipAssets("", b)
+		const noDestination = ""
+		args.zipAssets(noDestination, b)
 	default:
 		// print to terminal
 		if err := args.Stdout(b); err != nil {
@@ -219,22 +220,22 @@ func (args *Args) saveAssets(b *[]byte) error {
 	}
 	ch := make(chan error)
 	go args.saveHTML(b, ch)
-	if args.useCSS() {
+	if useCSS(args.layout) {
 		go args.saveCSS(ch)
 	} else {
 		go skip(ch)
 	}
-	if args.useFont() {
+	if useFontCSS(args.layout) {
 		go args.saveFont(ch)
 	} else {
 		go skip(ch)
 	}
-	if args.useJS() {
+	if useJS(args.layout) {
 		go args.saveJS(ch)
 	} else {
 		go skip(ch)
 	}
-	if args.useIcon() {
+	if useIcon(args.layout) {
 		go args.saveFavIcon(ch)
 	} else {
 		go skip(ch)
@@ -259,19 +260,37 @@ func (args *Args) saveAssets(b *[]byte) error {
 	return errs
 }
 
-func (args *Args) useCSS() bool {
-	return args.layout == Standard
+func useCSS(l Layout) bool {
+	switch l {
+	case Standard, Compact:
+		return true
+	case Inline, None:
+		return false
+	}
+	return false
 }
 
-func (args *Args) useFont() bool {
-	return args.layout == Standard
+func useFontCSS(l Layout) bool {
+	switch l {
+	case Standard, Compact:
+		return true
+	case Inline, None:
+		return false
+	}
+	return false
 }
 
-func (args *Args) useIcon() bool {
-	return args.layout == Standard
+func useIcon(l Layout) bool {
+	switch l {
+	case Standard, Compact:
+		return true
+	case Inline, None:
+		return false
+	}
+	return false
 }
 
-func (args *Args) useJS() bool {
+func useJS(l Layout) bool {
 	return false
 }
 
@@ -318,11 +337,12 @@ func (args *Args) zipAssets(destDir string, b *[]byte) {
 // Stdout creates and prints the HTML template.
 func (args *Args) Stdout(b *[]byte) error {
 	// html
-	buf, err := args.marshalTextTransform(b)
+	html, err := args.marshalTextTransform(b)
 	if err != nil {
 		return fmt.Errorf("stdout: %w", err)
 	}
-	js, css, ff := static.Scripts, static.Styles, args.FontFamily.Value
+	// font css
+	ff := args.FontFamily.Value
 	f := Family(ff).String()
 	if f == "" {
 		return fmt.Errorf("create.saveFontCSS %q: %w", ff, ErrFont)
@@ -331,47 +351,69 @@ func (args *Args) Stdout(b *[]byte) error {
 	if err != nil {
 		return err
 	}
-	const (
-		fJS   = "\nJS file: %s\n"
-		fCSS  = "\nCSS file: %s\n"
-		fFont = "\nFont %q file: %s\n"
-		fHTML = "\nHTML file: %s\n"
-	)
-	var noSyntax = func() {
-		fmt.Printf(fJS, nameJS)
-		fmt.Println(string(js))
-		fmt.Printf(fCSS, nameCSS)
-		fmt.Println(string(css))
-		fmt.Printf(fFont, f, nameFont)
-		fmt.Println(string(font))
-		fmt.Printf(fHTML, nameHTML)
-		fmt.Println(buf.String())
+	// print assets
+	if errj := args.printJS(&static.Scripts); errj != nil {
+		return errj
 	}
-	switch args.Syntax {
+	if errc := args.printCSS(&static.Styles); errc != nil {
+		return errc
+	}
+	if errf := args.printFontCSS(f, &font); errf != nil {
+		return errf
+	}
+	// always print the HTML
+	fmt.Printf("\nHTML file: %s\n\n", nameHTML)
+	if err = str.Highlight(html.String(), "html", args.Syntax, true); err != nil {
+		return fmt.Errorf("stdout html highlight: %w", err)
+	}
+	return nil
+}
+
+func colorSyntax(s string) bool {
+	switch s {
 	case "", none:
-		noSyntax()
+		return false
+	}
+	return str.Valid(s)
+}
+
+func (args *Args) printCSS(b *[]byte) error {
+	if !useCSS(args.layout) {
 		return nil
 	}
-	if !str.Valid(args.Syntax) {
-		fmt.Printf("unknown style %q, so using none\n", args.Syntax)
-		noSyntax()
+	fmt.Printf("\nCSS file: %s\n\n", nameCSS)
+	if !colorSyntax(args.Syntax) {
+		fmt.Println(string(*b))
 		return nil
 	}
-	fmt.Printf(fJS, nameJS)
-	if err = str.Highlight(string(js), "js", args.Syntax, true); err != nil {
-		return fmt.Errorf("stdout js highlight: %w", err)
-	}
-	fmt.Printf(fCSS, nameCSS)
-	if err = str.Highlight(string(css), "css", args.Syntax, true); err != nil {
+	if err := str.Highlight(string(*b), "css", args.Syntax, true); err != nil {
 		return fmt.Errorf("stdout css highlight: %w", err)
 	}
-	fmt.Printf(fFont, f, nameFont)
-	if err = str.Highlight(string(font), "css", args.Syntax, true); err != nil {
+	return nil
+}
+
+func (args *Args) printFontCSS(name string, b *[]byte) error {
+	if !useFontCSS(args.layout) {
+		return nil
+	}
+	fmt.Printf("\nCSS for %s font file: %s\n\n", name, nameFont)
+	if err := str.Highlight(string(*b), "css", args.Syntax, true); err != nil {
 		return fmt.Errorf("stdout font css highlight: %w", err)
 	}
-	fmt.Printf(fHTML, nameHTML)
-	if err = str.Highlight(buf.String(), "html", args.Syntax, true); err != nil {
-		return fmt.Errorf("stdout html highlight: %w", err)
+	return nil
+}
+
+func (args *Args) printJS(b *[]byte) error {
+	if !useJS(args.layout) {
+		return nil
+	}
+	fmt.Printf("\nJS file: %s\n\n", nameJS)
+	if !colorSyntax(args.Syntax) {
+		fmt.Println(string(*b))
+		return nil
+	}
+	if err := str.Highlight(string(*b), "js", args.Syntax, true); err != nil {
+		return fmt.Errorf("stdout js highlight: %w", err)
 	}
 	return nil
 }
