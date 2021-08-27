@@ -24,11 +24,6 @@ const (
 
 // saveCSS creates and save the styles CSS file.
 func (args *Args) saveCSS(c chan error) {
-	switch args.layout {
-	case Standard:
-	case Compact, Inline, None:
-		c <- nil
-	}
 	name, err := args.destination(nameCSS)
 	if err != nil {
 		c <- err
@@ -49,11 +44,6 @@ func (args *Args) saveCSS(c chan error) {
 
 // saveFavIcon read and save the favorite icon to a file.
 func (args *Args) saveFavIcon(c chan error) {
-	switch args.layout {
-	case Standard:
-	case Compact, Inline, None:
-		c <- nil
-	}
 	name, err := args.destination(nameFav)
 	if err != nil {
 		c <- err
@@ -84,12 +74,8 @@ func (args *Args) saveFont(c chan error) {
 			c <- err
 		}
 	}
-	switch args.layout {
-	case Standard:
-		if err := args.saveFontCSS("font.css"); err != nil {
-			c <- err
-		}
-	case Compact, Inline, None:
+	if err := args.saveFontCSS("font.css"); err != nil {
+		c <- err
 	}
 	c <- nil
 }
@@ -140,12 +126,6 @@ func (args *Args) saveFontWoff2(name, packName string) error {
 
 // saveJS creates and save the JS file.
 func (args *Args) saveJS(c chan error) {
-	switch args.layout {
-	case Standard:
-	case Compact, Inline, None:
-		c <- nil
-		return
-	}
 	name, err := args.destination(nameJS)
 	if err != nil {
 		c <- err

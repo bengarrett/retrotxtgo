@@ -207,36 +207,72 @@ func (args *Args) Create(b *[]byte) error {
 }
 
 func (args *Args) saveAssets(b *[]byte) error {
-	var err error
+	skip := func(c chan error) {
+		c <- nil
+	}
 	if args.Save.Destination == "" {
 		dir := []string{viper.GetString("save-directory")}
+		var err error
 		if args.Save.Destination, err = destination(dir...); err != nil {
 			logs.FatalMark(args.Save.Destination, logs.ErrFileSaveD, err)
 		}
 	}
 	ch := make(chan error)
-	go args.saveCSS(ch)
-	go args.saveFont(ch)
 	go args.saveHTML(b, ch)
-	go args.saveJS(ch)
-	go args.saveFavIcon(ch)
+	if args.useCSS() {
+		go args.saveCSS(ch)
+	} else {
+		go skip(ch)
+	}
+	if args.useFont() {
+		go args.saveFont(ch)
+	} else {
+		go skip(ch)
+	}
+	if args.useJS() {
+		go args.saveJS(ch)
+	} else {
+		go skip(ch)
+	}
+	if args.useIcon() {
+		go args.saveFavIcon(ch)
+	} else {
+		go skip(ch)
+	}
+	var errs error
 	err1, err2, err3, err4, err5 := <-ch, <-ch, <-ch, <-ch, <-ch
 	if err1 != nil {
-		return err
+		errs = fmt.Errorf("%v, %w", errs, err1)
 	}
 	if err2 != nil {
-		return err
+		errs = fmt.Errorf("%v, %w", errs, err2)
 	}
 	if err3 != nil {
-		return err
+		errs = fmt.Errorf("%v, %w", errs, err3)
 	}
 	if err4 != nil {
-		return err
+		errs = fmt.Errorf("%v, %w", errs, err4)
 	}
 	if err5 != nil {
-		return err
+		errs = fmt.Errorf("%v, %w", errs, err5)
 	}
-	return nil
+	return errs
+}
+
+func (args *Args) useCSS() bool {
+	return args.layout == Standard
+}
+
+func (args *Args) useFont() bool {
+	return args.layout == Standard
+}
+
+func (args *Args) useIcon() bool {
+	return args.layout == Standard
+}
+
+func (args *Args) useJS() bool {
+	return false
 }
 
 // zipAssets compresses all assets into a single zip archive.
