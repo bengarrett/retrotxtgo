@@ -131,7 +131,7 @@ func viewParsePipe(cmd *cobra.Command) {
 	var err error
 	if cp := cmd.Flags().Lookup("encode"); cp.Changed {
 		f := sample.Flags{}
-		if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
+		if f.From, err = convert.Encoder(cp.Value.String()); err != nil {
 			logs.FatalMark("pipe", logs.ErrEncode, err)
 		}
 		conv.Input.Encoding = f.From
@@ -155,7 +155,7 @@ func viewParseBytes(cmd *cobra.Command, conv *convert.Convert, arg string, b ...
 	}
 	var f = sample.Flags{}
 	var err error
-	if f.From, err = convert.Encoding(name); err != nil {
+	if f.From, err = convert.Encoder(name); err != nil {
 		logs.FatalMark(arg, logs.ErrEncode, err)
 	}
 	conv.Input.Encoding = f.From
@@ -204,7 +204,7 @@ func viewToFlag(r ...rune) (success bool) {
 
 // viewEncode encodes runes into the named encoding.
 func viewEncode(name string, r ...rune) (b []byte, err error) {
-	encode, err := convert.Encoding(name)
+	encode, err := convert.Encoder(name)
 	if err != nil {
 		return b, fmt.Errorf("encoding not known or supported %s: %w", encode, err)
 	}

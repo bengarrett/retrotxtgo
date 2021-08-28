@@ -169,8 +169,8 @@ func Characters() Chars {
 	}
 }
 
-// Encoding returns the named character set encoding.
-func Encoding(name string) (encoding.Encoding, error) {
+// Encoder returns the named character set encoder.
+func Encoder(name string) (encoding.Encoding, error) {
 	// use charmap string
 	for _, c := range charmap.All {
 		if fmt.Sprint(c) == name {
@@ -194,7 +194,7 @@ func Encoding(name string) (encoding.Encoding, error) {
 		// https://en.wikipedia.org/wiki/ISO/IEC_8859-11#Code_page_874_(IBM)_/_9066
 		return charmap.Windows874, nil
 	}
-	if ee := encode32(a); ee != nil {
+	if ee := encodeUTF32(a); ee != nil {
 		return ee, nil
 	}
 	enc, err := ianaindex.IANA.Encoding(s)
@@ -213,8 +213,8 @@ func Encoding(name string) (encoding.Encoding, error) {
 	return enc, nil
 }
 
-// encode32 initializes common UTF-32 encodings.
-func encode32(name string) encoding.Encoding {
+// encodeUTF32 initializes common UTF-32 encodings.
+func encodeUTF32(name string) encoding.Encoding {
 	// UTF-32... doesn't return a match in ianaindex.IANA
 	switch strings.ToUpper(name) {
 	case u32:
@@ -229,7 +229,7 @@ func encode32(name string) encoding.Encoding {
 
 // Humanize the encoding by using an shorter, less formal name.
 func Humanize(name string) string {
-	if _, err := Encoding(name); err != nil {
+	if _, err := Encoder(name); err != nil {
 		return ""
 	}
 	return encodingAlias(shorten(name))

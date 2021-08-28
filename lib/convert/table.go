@@ -85,7 +85,7 @@ func Table(name string) (*bytes.Buffer, error) {
 }
 
 func tblEncode(name string) (encoding.Encoding, error) {
-	cp, err := Encoding(name)
+	cp, err := Encoder(name)
 	if err != nil {
 		return nil, fmt.Errorf("table encoding error: %w", err)
 	}

@@ -344,7 +344,7 @@ func createHTML(cmd *cobra.Command, flags convert.Flag, src *[]byte) []byte {
 	f := sample.Flags{}
 	// encode and convert the source text
 	if cp := cmd.Flags().Lookup("encode"); cp.Changed {
-		if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
+		if f.From, err = convert.Encoder(cp.Value.String()); err != nil {
 			logs.FatalWrap(logs.ErrEncode, err)
 		}
 		conv.Input.Encoding = f.From

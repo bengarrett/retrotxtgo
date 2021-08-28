@@ -120,7 +120,7 @@ func TestANSI(t *testing.T) {
 	}
 }
 
-func TestEncoding(t *testing.T) {
+func TestEncoder(t *testing.T) {
 	tests := []struct {
 		name    string
 		want    encoding.Encoding
@@ -180,13 +180,13 @@ func TestEncoding(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Encoding(tt.name)
+			got, err := Encoder(tt.name)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Encoding() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Encoder() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Encoding() = %v, want %v", got, tt.want)
+				t.Errorf("Encoder() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -429,7 +429,7 @@ func Test_equalLB(t *testing.T) {
 	}
 }
 
-func Test_encode32(t *testing.T) {
+func Test_encodeUTF32(t *testing.T) {
 	tests := []struct {
 		name string
 		a    string
@@ -440,8 +440,8 @@ func Test_encode32(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := encode32(tt.a); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("encode32() = %v, want %v", got, tt.want)
+			if got := encodeUTF32(tt.a); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("encodeUTF32() = %v, want %v", got, tt.want)
 			}
 		})
 	}
