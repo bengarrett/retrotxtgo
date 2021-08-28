@@ -98,11 +98,9 @@ func (c *Convert) Transform() error {
 		return nil
 	}
 	var err error
-	fmt.Print(string(c.Input.Bytes))
 	if c.Input.Bytes, err = c.Input.Encoding.NewDecoder().Bytes(c.Input.Bytes); err != nil {
 		return fmt.Errorf("transform new decoder error: %w", err)
 	}
-	fmt.Print(string(c.Input.Bytes))
 	c.Output = bytes.Runes(c.Input.Bytes)
 	return nil
 }
