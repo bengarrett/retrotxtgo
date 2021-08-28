@@ -22,13 +22,13 @@ func (c *Convert) ANSI(b ...byte) ([]rune, error) {
 	c.lineBreaks = true
 	c.Flags.SwapChars = nil
 	c.Input.Bytes = b
-	c.unicodeControls()
+	c.ignoreControls()
 	c.Input.Bytes = EndOfFile(b)
 	if err := c.Transform(); err != nil {
 		return nil, fmt.Errorf("dump transform failed: %w", err)
 	}
 	c.Swap().ANSIControls()
-	c.width(c.Flags.MaxWidth)
+	c.wrapWidth(c.Flags.MaxWidth)
 	return c.Output, nil
 }
 
@@ -42,7 +42,7 @@ func (c *Convert) Chars(b ...byte) ([]rune, error) {
 		return nil, fmt.Errorf("chars transform failed: %w", err)
 	}
 	c.Swap()
-	c.width(c.Flags.MaxWidth)
+	c.wrapWidth(c.Flags.MaxWidth)
 	return c.Output, nil
 }
 
@@ -52,12 +52,12 @@ func (c *Convert) Chars(b ...byte) ([]rune, error) {
 func (c *Convert) Dump(b ...byte) ([]rune, error) {
 	c.lineBreaks = true
 	c.Input.Bytes = b
-	c.unicodeControls()
+	c.ignoreControls()
 	if err := c.Transform(); err != nil {
 		return nil, fmt.Errorf("dump transform failed: %w", err)
 	}
 	c.Swap().ANSIControls()
-	c.width(c.Flags.MaxWidth)
+	c.wrapWidth(c.Flags.MaxWidth)
 	return c.Output, nil
 }
 
@@ -67,13 +67,13 @@ func (c *Convert) Dump(b ...byte) ([]rune, error) {
 func (c *Convert) Text(b ...byte) ([]rune, error) {
 	c.lineBreaks = true
 	c.Input.Bytes = b
-	c.unicodeControls()
+	c.ignoreControls()
 	c.Input.Bytes = EndOfFile(b)
 	if err := c.Transform(); err != nil {
 		return nil, fmt.Errorf("text transform failed: %w", err)
 	}
 	c.Swap().ANSIControls()
-	c.width(c.Flags.MaxWidth)
+	c.wrapWidth(c.Flags.MaxWidth)
 	return c.Output, nil
 }
 
@@ -190,8 +190,8 @@ func (c *Convert) transformU32(e encoding.Encoding) error {
 	return nil
 }
 
-// width enforces a row length by inserting newline characters.
-func (c *Convert) width(max int) {
+// wrapWidth enforces a row length by inserting newline characters.
+func (c *Convert) wrapWidth(max int) {
 	if max < 1 {
 		return
 	}
@@ -214,16 +214,16 @@ func (c *Convert) width(max int) {
 			a, b := (i-1)*max, i*max
 			if b >= cnt {
 				fmt.Fprintf(&w, "%s\n", string(c.Output[a:cnt]))
-			} else {
-				fmt.Fprintf(&w, "%s\n", string(c.Output[a:b]))
+				continue
 			}
+			fmt.Fprintf(&w, "%s\n", string(c.Output[a:b]))
 		}
 	}
 	c.Output = []rune(w.String())
 }
 
-// unicodeControls marks standard control characters to be ignored.
-func (c *Convert) unicodeControls() {
+// ignoreControls marks standard control characters to be ignored.
+func (c *Convert) ignoreControls() {
 	const (
 		bell = iota + 7 // BEL = x07
 		bs

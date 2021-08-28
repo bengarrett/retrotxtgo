@@ -3,8 +3,10 @@ package filesystem
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
+	"reflect"
 	"runtime"
 	"sort"
 	"strings"
@@ -60,8 +62,13 @@ func NEL() LB {
 	return LB{NextLine}
 }
 
+var ErrLB = errors.New("linebreak runes cannot be empty")
+
 // Columns counts the number of characters used per line in the reader interface.
 func Columns(r io.Reader, lb LB) (width int, err error) {
+	if reflect.DeepEqual(lb, LB{}) {
+		return 0, ErrLB
+	}
 	var lineBreak = []byte{byte(lb[0]), byte(lb[1])}
 	if lb[1] == 0 {
 		lineBreak = []byte{byte(lb[0])}

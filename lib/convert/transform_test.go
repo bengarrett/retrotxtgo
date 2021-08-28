@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestConvert_controls(t *testing.T) {
+func Test_ignoreControls(t *testing.T) {
 	tests := []struct {
 		name string
 		ctrl []string
@@ -20,9 +20,9 @@ func TestConvert_controls(t *testing.T) {
 			var c = Convert{}
 			c.lineBreaks = true
 			c.Flags.Controls = tt.ctrl
-			c.unicodeControls()
+			c.ignoreControls()
 			if got := c.ignores; string(got) != string(tt.want) {
-				t.Errorf("Convert.unicodeControls() got = %v, want %v", got, tt.want)
+				t.Errorf("Convert.ignoreControls() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
