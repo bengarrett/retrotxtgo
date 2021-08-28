@@ -7,18 +7,7 @@ import (
 
 const etag = `W/"3715383704fac6f3568e9039b347937a`
 
-func ExamplecacheGet() {
-	if err := cacheSet(etag, "0.0.1"); err != nil {
-		fmt.Println(err)
-	}
-	e, v := cacheGet()
-	fmt.Println("Etag", e)
-	fmt.Println("Version", v)
-	// Output: Etag W/"3715383704fac6f3568e9039b347937a
-	// Version 0.0.1
-}
-
-func ExamplecacheSet() {
+func Example_cacheSet() {
 	if err := cacheSet(etag, "0.0.1"); err != nil {
 		fmt.Println(err)
 	}

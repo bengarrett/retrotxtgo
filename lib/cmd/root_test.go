@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/lib/config"
@@ -37,14 +38,14 @@ func Test_exampleCmd(t *testing.T) {
 		want string
 	}{
 		{"empty", "", ""},
-		{"word", "Hello", "Hello\n  "},
-		{"words", "Hello world", "Hello world\n  "},
-		{"comment", "Hello # world", "Hello # world\n  "},
-		{"comments", "Hello # hash # world", "Hello # hash # world\n  "},
+		{"word", "Hello", "Hello"},
+		{"words", "Hello world", "Hello world"},
+		{"comment", "Hello # world", "Hello # world"},
+		{"comments", "Hello # hash # world", "Hello # hash # world"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := exampleCmd(tt.tmpl); got != tt.want {
+			if got := exampleCmd(tt.tmpl); strings.TrimSpace(got) != tt.want {
 				t.Errorf("exampleCmd() = %v, want %v", got, tt.want)
 			}
 		})
