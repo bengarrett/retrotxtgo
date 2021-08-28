@@ -103,12 +103,12 @@ func tblEncode(name string) (encoding.Encoding, error) {
 }
 
 // character converts rune to an encoded string.
-func character(i int, r rune, cp encoding.Encoding) string {
+func character(pos int, r rune, cp encoding.Encoding) string {
 	// ISO-8859-11 is not included in Go so a user defined charmap is used.
 	iso8859_11 := charmap.XUserDefined
 	if cp == iso8859_11 {
 		const PAD, NBSP = 128, 160
-		if i >= PAD && i < NBSP {
+		if pos >= PAD && pos < NBSP {
 			return " "
 		}
 	}
@@ -130,10 +130,10 @@ func character(i int, r rune, cp encoding.Encoding) string {
 	if cp == uni.UTF8 || cp == uni.UTF8BOM {
 		const PAD, NBSP = 128, 160
 		switch {
-		case i >= PAD && i < NBSP:
+		case pos >= PAD && pos < NBSP:
 			return " "
-		case i >= NBSP:
-			return string(rune(i))
+		case pos >= NBSP:
+			return string(rune(pos))
 		}
 	}
 	// rune to string
