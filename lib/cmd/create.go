@@ -76,7 +76,7 @@ var createCmd = &cobra.Command{
 	Long:    "Create a HTML document from text documents and text art files.",
 	Example: exampleCmd(createExample),
 	Run: func(cmd *cobra.Command, args []string) {
-		f := convert.Flags{
+		f := convert.Flag{
 			Controls:  createFlag.controls,
 			SwapChars: createFlag.swap,
 		}
@@ -293,7 +293,7 @@ func parseBody(cmd *cobra.Command) {
 
 // parseFiles parses the flags to create the HTML document or website.
 // The generated HTML and associated files will either be served, saved or printed.
-func parseFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
+func parseFiles(cmd *cobra.Command, flags convert.Flag, args ...string) {
 	conv := convert.Convert{
 		Flags: flags,
 	}
@@ -319,7 +319,7 @@ func parseFiles(cmd *cobra.Command, flags convert.Flags, args ...string) {
 }
 
 // parsePipe creates HTML content using the standard input (stdio) of the operating system.
-func parsePipe(cmd *cobra.Command, flags convert.Flags) {
+func parsePipe(cmd *cobra.Command, flags convert.Flag) {
 	src, err := filesystem.ReadPipe()
 	if err != nil {
 		logs.FatalWrap(logs.ErrPipeRead, err)
@@ -336,7 +336,7 @@ func parsePipe(cmd *cobra.Command, flags convert.Flags) {
 }
 
 // createHTML applies a HTML template to src text.
-func createHTML(cmd *cobra.Command, flags convert.Flags, src *[]byte) []byte {
+func createHTML(cmd *cobra.Command, flags convert.Flag, src *[]byte) []byte {
 	var err error
 	conv := convert.Convert{
 		Flags: flags,

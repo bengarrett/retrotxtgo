@@ -16,7 +16,7 @@ func Example_viewToFlag() {
 }
 
 func Example_endOfFile() {
-	var f convert.Flags
+	var f convert.Flag
 	f.Controls = []string{eof}
 	fmt.Print(endOfFile(f))
 	// Output: true

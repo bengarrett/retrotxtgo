@@ -52,7 +52,7 @@ var viewCmd = &cobra.Command{
 // viewParseArgs parses the arguments supplied with the view command.
 func viewParseArgs(cmd *cobra.Command, args ...string) {
 	conv := convert.Convert{}
-	conv.Flags = convert.Flags{
+	conv.Flags = convert.Flag{
 		Controls:  viewFlag.controls,
 		SwapChars: viewFlag.swap,
 		MaxWidth:  viewFlag.width,
@@ -116,7 +116,7 @@ func viewParsePipe(cmd *cobra.Command) {
 		return
 	}
 	conv := convert.Convert{}
-	conv.Flags = convert.Flags{
+	conv.Flags = convert.Flag{
 		Controls:  viewFlag.controls,
 		SwapChars: viewFlag.swap,
 		MaxWidth:  viewFlag.width,

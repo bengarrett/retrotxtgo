@@ -162,7 +162,7 @@ func printUsage(cmd *cobra.Command, args ...string) bool {
 }
 
 // endOfFile determines if an EOF marker should be obeyed.
-func endOfFile(flags convert.Flags) bool {
+func endOfFile(flags convert.Flag) bool {
 	for _, c := range flags.Controls {
 		if c == eof {
 			return true

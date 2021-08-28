@@ -10,7 +10,7 @@ import (
 
 // Convert 8-bit legacy or other Unicode text to UTF-8.
 type Convert struct {
-	Flags      Flags  // Command supplied flag values.
+	Flags      Flag   // Command supplied flag values.
 	Input      In     // Input text for conversion.
 	Output     []rune // Output text as UTF-8 runes.
 	ignores    []rune // runes to ignore.
@@ -25,8 +25,8 @@ type In struct {
 	table     bool              // flag this text as a codepage table.
 }
 
-// Flags are the user supplied values.
-type Flags struct {
+// Flag are the user supplied values.
+type Flag struct {
 	Controls  []string // Always use these control codes.
 	SwapChars []int    // Swap out these characters with UTF-8 alternatives.
 	MaxWidth  int      // Maximum text width per-line.
