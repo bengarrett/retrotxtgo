@@ -177,6 +177,8 @@ func TestEncoder(t *testing.T) {
 		{"oem-1256", charmap.Windows1256, false},
 		{"oem-1257", charmap.Windows1257, false},
 		{"oem-1258", charmap.Windows1258, false},
+		// custom
+		{iso11, charmap.Windows874, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -414,6 +416,7 @@ func Test_equalLB(t *testing.T) {
 		args args
 		want bool
 	}{
+		{"empty", args{}, true},
 		{"negative", args{n, lf}, false},
 		{"nil lf", args{o, lf}, false},
 		{"nil win", args{o, win}, false},
@@ -442,6 +445,131 @@ func Test_encodeUTF32(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := encodeUTF32(tt.a); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("encodeUTF32() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestHumanize(t *testing.T) {
+	type args struct {
+		name string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{"empty", args{}, ""},
+		{"cp437", args{"CP-437"}, "IBM437"},
+		{"win", args{"windows-1252"}, "Windows-1252"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Humanize(tt.args.name); got != tt.want {
+				t.Errorf("Humanize() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_shorten(t *testing.T) {
+	type args struct {
+		name string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{"empty", args{}, ""},
+		{"cp437", args{"CP-437"}, "437"},
+		{"win", args{"windows-1252"}, "1252"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := shorten(tt.args.name); got != tt.want {
+				t.Errorf("shorten() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestConvert_swaps(t *testing.T) {
+	hi := []rune("hello world 😃 ⌂")
+	tests := []struct {
+		name   string
+		output []rune
+		swaps  []int
+		want   []rune
+	}{
+		{"empty", nil, nil, nil},
+		{"hi", hi, nil, hi},
+		{"replace DEL", hi, []int{SquareRoot, DEL}, []rune("hello world 😃 Δ")},
+		{"replace NULLS", []rune("hello\u0000world"), []int{NUL}, []rune("hello world")},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := Convert{
+				Output: tt.output,
+			}
+			c.Flags.SwapChars = tt.swaps
+			c.swaps()
+			if got := c.Output; !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Convert.swaps() = %v, want %v", string(got), string(tt.want))
+			}
+		})
+	}
+}
+
+func Test_picture(t *testing.T) {
+	const err = 65533
+	type args struct {
+		b byte
+	}
+	tests := []struct {
+		name string
+		args args
+		want rune
+	}{
+		{"empty", args{}, err},
+		{"Q", args{byte(51)}, err},
+		{"NULL", args{byte(0 + row8)}, 9216},
+		{"SOH", args{byte(1 + row8)}, 9217},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := picture(tt.args.b); got != tt.want {
+				t.Errorf("picture() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestConvert_skipIgnores(t *testing.T) {
+	type args struct {
+		i      int
+		output []rune
+		ignore []rune
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{"empty", args{}, false},
+		{"ign h", args{0, []rune("hello"), []rune("h")}, true},
+		{"ign H", args{1, []rune("hello"), []rune("h")}, false},
+		{"ign H", args{0, []rune("hello"), []rune("H")}, false},
+		{"ign 📙", args{1, []rune(" 📙 "), []rune("abcde📙")}, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := Convert{
+				Output:  tt.args.output,
+				ignores: tt.args.ignore,
+			}
+			if got := c.skipIgnores(tt.args.i); got != tt.want {
+				t.Errorf("Convert.skipIgnores() = %v, want %v", got, tt.want)
 			}
 		})
 	}

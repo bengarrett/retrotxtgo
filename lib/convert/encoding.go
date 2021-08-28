@@ -108,7 +108,7 @@ const (
 	// PlusMinus ±.
 	PlusMinus = 177
 	// LightVertical light vertical │.
-	LightVertical = 179 // TODO: test 178 vs 179
+	LightVertical = 179
 	// SquareRoot Square root √.
 	SquareRoot = 251
 	// NBSP Non-breaking space.
@@ -528,7 +528,7 @@ func (c *Convert) RunesControls() {
 			continue
 		}
 		if r >= NUL && r <= US {
-			c.Output[i] = decode(byte(rune(z) + r))
+			c.Output[i] = picture(byte(rune(z) + r))
 		}
 	}
 }
@@ -545,7 +545,7 @@ func (c *Convert) RunesControlsEBCDIC() {
 			continue
 		}
 		if r >= NUL && r <= US {
-			c.Output[i] = decode(byte(rune(z) + r))
+			c.Output[i] = picture(byte(rune(z) + r))
 		}
 	}
 }
@@ -556,7 +556,7 @@ func (c *Convert) RunesDOS() {
 		return
 	}
 	// ASCII C0 = row 1, C1 = row 2
-	var ctrls = [32]string{string(decode(row8 + byte(0))),
+	var ctrls = [32]string{string(picture(row8 + byte(0))),
 		"\u263A", "\u263B", "\u2665", "\u2666", "\u2663", "\u2660",
 		"\u2022", "\u25D8", "\u25CB", "\u25D9", "\u2642", "\u2640",
 		"\u266A", "\u266B", "\u263C", "\u25BA", "\u25C4", "\u2195",
@@ -605,7 +605,10 @@ func (c *Convert) RunesEBCDIC() {
 }
 
 // control switches out an EBCDIC IBM mainframe control with Unicode picture representation.
-func (c *Convert) control(i int, r rune) bool { // nolint:gocyclo
+func (c *Convert) control(i int, r rune) (skip bool) { // nolint:gocyclo
+	if i > len(c.Output) {
+		return false
+	}
 	const (
 		ht  = 0x89
 		del = 0xa1
@@ -626,40 +629,40 @@ func (c *Convert) control(i int, r rune) bool { // nolint:gocyclo
 	)
 	switch r {
 	case HT:
-		c.Output[i] = decode(ht)
+		c.Output[i] = picture(ht)
 	case DEL:
-		c.Output[i] = decode(del)
+		c.Output[i] = picture(del)
 	case nel:
 		if c.lineBreaks {
 			// Go will automatically convert this to CRLF on Windows
 			c.Output[i] = LF
 			return true
 		}
-		c.Output[i] = decode(nl)
+		c.Output[i] = picture(nl)
 	case BS:
-		c.Output[i] = decode(bs)
+		c.Output[i] = picture(bs)
 	case LF:
-		c.Output[i] = decode(lf)
+		c.Output[i] = picture(lf)
 	case ETB:
-		c.Output[i] = decode(etb)
+		c.Output[i] = picture(etb)
 	case ESC:
-		c.Output[i] = decode(esc)
+		c.Output[i] = picture(esc)
 	case ENQ:
-		c.Output[i] = decode(enq)
+		c.Output[i] = picture(enq)
 	case ACK:
-		c.Output[i] = decode(ack)
+		c.Output[i] = picture(ack)
 	case BEL:
-		c.Output[i] = decode(bel)
+		c.Output[i] = picture(bel)
 	case SYN:
-		c.Output[i] = decode(syn)
+		c.Output[i] = picture(syn)
 	case Dash:
-		c.Output[i] = decode(eot)
+		c.Output[i] = picture(eot)
 	case DC4:
-		c.Output[i] = decode(dc4)
+		c.Output[i] = picture(dc4)
 	case NAK:
-		c.Output[i] = decode(nak)
+		c.Output[i] = picture(nak)
 	case SUB:
-		c.Output[i] = decode(sub)
+		c.Output[i] = picture(sub)
 	default:
 		c.miscCtrls(i, r)
 	}
@@ -675,12 +678,12 @@ func (c *Convert) miscCtrls(i int, r rune) {
 		c.Output[i], _ = utf8.DecodeRune(noBreakSpace[:])
 	case NUL, SOH, STX, ETX, VT, FF, CR, SO, SI, DLE, DC1, DC2, DC3, CAN, EM, FS, GS, RS, US:
 		// shared controls with ASCII C0+C1
-		c.Output[i] = decode(row8 + byte(r))
+		c.Output[i] = picture(row8 + byte(r))
 	case EOT, InvertedExclamation:
 		// unprintable controls
 		c.Output[i] = rune(SP)
 	case Cent, Negation, PlusMinus:
-		// keep these symbols
+		return
 	default:
 		c.outOfRange(i, r)
 	}
@@ -779,7 +782,7 @@ func (c *Convert) RunesMacintosh() {
 			c.Output[i] = rune(SP)
 		default:
 			if r >= NUL && r <= US {
-				c.Output[i] = decode(byte(rune(z) + r))
+				c.Output[i] = picture(byte(rune(z) + r))
 			}
 		}
 	}
@@ -801,7 +804,7 @@ func (c *Convert) RunesShiftJIS() {
 		case r == tilde:
 			c.Output[i] = rune(overline)
 		case r == DEL:
-			c.Output[i] = decode(del)
+			c.Output[i] = picture(del)
 		case r > DEL && r <= rowA,
 			r >= rowE && r <= NBSP:
 			c.Output[i] = rune(SP)
@@ -833,10 +836,11 @@ func (c *Convert) RunesUTF8() {
 	}
 }
 
-// decode converts a byte value to a Unicode Control Picture rune.
-func decode(b byte) rune {
+// picture converts a byte value to a Unicode Control Picture rune.
+func picture(b byte) rune {
 	// code points U+2400 to U+243F
 	controlPicture := [3]byte{0xe2, 0x90, b}
+	fmt.Println(controlPicture)
 	r, _ := utf8.DecodeRune(controlPicture[:])
 	return r
 }
