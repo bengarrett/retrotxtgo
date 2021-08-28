@@ -145,7 +145,7 @@ func (flag Flags) Open(name string, conv *convert.Convert) (File, error) {
 	f.Encoding = samp.encoding
 	f.Font = samp.Font
 	if flag.From == nil {
-		conv.Source.Encoding = f.Encoding
+		conv.Input.Encoding = f.Encoding
 	}
 	if flag.To != nil {
 		// sample items that break the NewEncoder
@@ -167,28 +167,28 @@ func (flag Flags) Open(name string, conv *convert.Convert) (File, error) {
 			conv.Flags.Controls = nil
 		}
 	}
-	f, err = samp.transform(&f, conv, &b)
+	f, err = samp.transform(&f, conv, b...)
 	return f, err
 }
 
 // Transform converts the raw byte data of the textfile into UTF8 runes.
-func (samp *Sample) transform(f *File, conv *convert.Convert, b *[]byte) (File, error) {
+func (samp *Sample) transform(f *File, conv *convert.Convert, b ...byte) (File, error) {
 	var err error
 	switch samp.convert {
 	case ansi:
-		if f.Runes, err = conv.ANSI(b); err != nil {
+		if f.Runes, err = conv.ANSI(b...); err != nil {
 			return File{}, err
 		}
 	case char:
-		if f.Runes, err = conv.Chars(b); err != nil {
+		if f.Runes, err = conv.Chars(b...); err != nil {
 			return File{}, err
 		}
 	case dump:
-		if f.Runes, err = conv.Dump(b); err != nil {
+		if f.Runes, err = conv.Dump(b...); err != nil {
 			return File{}, err
 		}
 	case text:
-		if f.Runes, err = conv.Text(b); err != nil {
+		if f.Runes, err = conv.Text(b...); err != nil {
 			return File{}, err
 		}
 	default:

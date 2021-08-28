@@ -55,7 +55,7 @@ func viewParseArgs(cmd *cobra.Command, args ...string) {
 	conv.Flags = convert.Flags{
 		Controls:  viewFlag.controls,
 		SwapChars: viewFlag.swap,
-		Width:     viewFlag.width,
+		MaxWidth:  viewFlag.width,
 	}
 	if c := cmd.Flags().Lookup("controls"); !c.Changed {
 		conv.Flags.Controls = []string{eof, tab}
@@ -78,8 +78,7 @@ func viewParseArgs(cmd *cobra.Command, args ...string) {
 
 // viewParseArg parses an argument supplied with the view command.
 func viewParseArg(cmd *cobra.Command, conv *convert.Convert, i int, arg string) (skip bool, r []rune) {
-	const halfPage = 40
-	conv.Output = convert.Output{} // output must be reset
+	const halfPage = 40 // output must be reset
 	f := sample.Flags{}
 	// internal example file
 	var err error
@@ -120,7 +119,7 @@ func viewParsePipe(cmd *cobra.Command) {
 	conv.Flags = convert.Flags{
 		Controls:  viewFlag.controls,
 		SwapChars: viewFlag.swap,
-		Width:     viewFlag.width,
+		MaxWidth:  viewFlag.width,
 	}
 	if c := cmd.Flags().Lookup("controls"); !c.Changed {
 		conv.Flags.Controls = []string{eof, tab}
@@ -135,7 +134,7 @@ func viewParsePipe(cmd *cobra.Command) {
 		if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
 			logs.FatalMark("pipe", logs.ErrEncode, err)
 		}
-		conv.Source.Encoding = f.From
+		conv.Input.Encoding = f.From
 	}
 	b, err := filesystem.ReadPipe()
 	if err != nil {
@@ -159,7 +158,7 @@ func viewParseBytes(cmd *cobra.Command, conv *convert.Convert, arg string, b ...
 	if f.From, err = convert.Encoding(name); err != nil {
 		logs.FatalMark(arg, logs.ErrEncode, err)
 	}
-	conv.Source.Encoding = f.From
+	conv.Input.Encoding = f.From
 	// make sure the file source isn't already encoded as UTF-8
 	if utf8.Valid(b) {
 		fmt.Println(string(b))
@@ -167,9 +166,9 @@ func viewParseBytes(cmd *cobra.Command, conv *convert.Convert, arg string, b ...
 	}
 	// convert text
 	if endOfFile(conv.Flags) {
-		r, err = conv.Text(&b)
+		r, err = conv.Text(b...)
 	} else {
-		r, err = conv.Dump(&b)
+		r, err = conv.Dump(b...)
 	}
 	if err != nil {
 		logs.FatalMark(arg, ErrUTF8, err)

@@ -10,32 +10,26 @@ import (
 
 // Convert 8-bit legacy or other Unicode text to UTF-8.
 type Convert struct {
-	Source Source // Source text for conversion.
-	Output Output // Output UTF-8 text.
-	Flags  Flags  // User supplied flag values.
+	Flags      Flags  // Command supplied flag values.
+	Input      In     // Input text for conversion.
+	Output     []rune // Output text as UTF-8 runes.
+	ignores    []rune // runes to ignore.
+	lineBreaks bool   // use line break controls?
 }
 
-// Source text for conversion.
-type Source struct {
-	B         []byte            // Source text as bytes.
-	Encoding  encoding.Encoding // Text encoding.
-	table     bool              // flag Source.B as text for display as a codepage table.
+// In is the text input for conversion.
+type In struct {
+	Encoding  encoding.Encoding // Bytes text encoding.
+	Bytes     []byte            // Input text as bytes.
 	lineBreak [2]rune           // line break controls used by the text.
-}
-
-// Output UTF-8 text.
-type Output struct {
-	R          []rune // Output text as runes.
-	ignores    []rune // runes to be ignored.
-	len        int    // R (runes) count.
-	lineBreaks bool   // use line break controls.
+	table     bool              // flag this text as a codepage table.
 }
 
 // Flags are the user supplied values.
 type Flags struct {
 	Controls  []string // Always use these control codes.
 	SwapChars []int    // Swap out these characters with UTF-8 alternatives.
-	Width     int      // Maximum text width per-line.
+	MaxWidth  int      // Maximum text width per-line.
 }
 
 const (
@@ -45,7 +39,8 @@ const (
 
 // BOM is the UTF-8 byte order mark prefix.
 func BOM() []byte {
-	return []byte{239, 187, 191} // 0xEF,0xBB,0xBF
+	const ef, bb, bf = 239, 187, 191
+	return []byte{ef, bb, bf}
 }
 
 // EndOfFile will cut text at the first DOS end-of-file marker.

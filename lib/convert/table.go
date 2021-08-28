@@ -47,9 +47,9 @@ func Table(name string) (*bytes.Buffer, error) {
 		}
 	}
 	conv := Convert{}
-	conv.Source.Encoding = cp
+	conv.Input.Encoding = cp
 	b, row := MakeBytes(), 0
-	runes, err := conv.Chars(&b)
+	runes, err := conv.Chars(b...)
 	if err != nil {
 		return nil, fmt.Errorf("table convert bytes error: %w", err)
 	}

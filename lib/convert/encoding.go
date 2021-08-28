@@ -444,19 +444,19 @@ func encodingUnicode(name string) string {
 
 // Swap transforms character map and control codes into UTF-8 unicode runes.
 func (c *Convert) Swap() *Convert {
-	if c.Output.len == 0 {
+	if len(c.Output) == 0 {
 		return nil
 	}
 	const debug = false
-	if c.Output.lineBreaks {
+	if c.lineBreaks {
 		c.LineBreaks()
 	}
 	if debug {
-		println(fmt.Sprintf("line break detected: %+v", c.Output.lineBreaks))
+		println(fmt.Sprintf("line break detected: %+v", c.lineBreaks))
 	}
-	switch c.Source.Encoding {
+	switch c.Input.Encoding {
 	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
-		if c.Source.table {
+		if c.Input.table {
 			c.RunesEBCDIC()
 		}
 		c.RunesControlsEBCDIC()
@@ -493,9 +493,9 @@ func (c *Convert) Swap() *Convert {
 
 func (c *Convert) swaps() *Convert {
 	if len(c.Flags.SwapChars) > 0 {
-		for i := 0; i < c.Output.len; i++ {
-			if s := c.runeSwap(c.Output.R[i]); s >= 0 {
-				c.Output.R[i] = s
+		for i := 0; i < len(c.Output); i++ {
+			if s := c.runeSwap(c.Output[i]); s >= 0 {
+				c.Output[i] = s
 			}
 		}
 	}
@@ -507,19 +507,19 @@ func (c *Convert) ANSIControls() {
 	if c == nil {
 		return
 	}
-	if c.Output.len == 0 {
+	if len(c.Output) == 0 {
 		log.Fatal(ErrChainANSI)
 	}
-	for i, r := range c.Output.R {
-		if i+1 >= c.Output.len {
+	for i, r := range c.Output {
+		if i+1 >= len(c.Output) {
 			continue
 		}
-		if r == LeftwardsArrow && c.Output.R[i+1] == LeftSquareBracket {
-			c.Output.R[i] = ESC // replace ←[
+		if r == LeftwardsArrow && c.Output[i+1] == LeftSquareBracket {
+			c.Output[i] = ESC // replace ←[
 			continue
 		}
-		if r == SymbolESC && c.Output.R[i+1] == LeftSquareBracket {
-			c.Output.R[i] = ESC // replace ␛[
+		if r == SymbolESC && c.Output[i+1] == LeftSquareBracket {
+			c.Output[i] = ESC // replace ␛[
 		}
 	}
 }
@@ -527,53 +527,53 @@ func (c *Convert) ANSIControls() {
 // LineBreaks will try to guess the line break representation as a 2 byte value.
 // A guess of Unix will return [10, 0], Windows [13, 10], otherwise a [0, 0] value is returned.
 func (c *Convert) LineBreaks() {
-	c.Source.lineBreak = filesystem.LineBreaks(true, c.Output.R...)
+	c.Input.lineBreak = filesystem.LineBreaks(true, c.Output...)
 }
 
 // RunesControls switches out C0 and C1 ASCII controls with Unicode Control Picture represenations.
 func (c *Convert) RunesControls() {
-	if len(c.Output.R) == 0 {
+	if len(c.Output) == 0 {
 		return
 	}
 	const z = byte(row8)
-	for i := 0; i < c.Output.len; i++ {
-		r := c.Output.R[i]
+	for i := 0; i < len(c.Output); i++ {
+		r := c.Output[i]
 		if c.skipIgnores(i) {
 			continue
 		}
 		if c.skipLineBreaks(i) {
-			if c.Source.lineBreak == [2]rune{CR, 0} {
-				c.Output.R[i] = LF
+			if c.Input.lineBreak == [2]rune{CR, 0} {
+				c.Output[i] = LF
 			}
 			i++
 			continue
 		}
 		if r >= NUL && r <= US {
-			c.Output.R[i] = decode(byte(rune(z) + r))
+			c.Output[i] = decode(byte(rune(z) + r))
 		}
 	}
 }
 
 // RunesControlsEBCDIC switches out EBCDIC controls with Unicode Control Picture represenations.
 func (c *Convert) RunesControlsEBCDIC() {
-	if len(c.Output.R) == 0 {
+	if len(c.Output) == 0 {
 		return
 	}
 	const z = byte(row8)
-	for i := 0; i < c.Output.len; i++ {
-		r := c.Output.R[i]
+	for i := 0; i < len(c.Output); i++ {
+		r := c.Output[i]
 		if c.skipIgnores(i) {
 			continue
 		}
 		if r >= NUL && r <= US {
-			c.Output.R[i] = decode(byte(rune(z) + r))
+			c.Output[i] = decode(byte(rune(z) + r))
 		}
 	}
 }
 
 // RunesDOS switches out C0, C1 and other controls with PC/MS-DOS picture glyphs.
 func (c *Convert) RunesDOS() {
-	if len(c.Output.R) == 0 {
+	if len(c.Output) == 0 {
 		return
 	}
 	// ASCII C0 = row 1, C1 = row 2
@@ -583,27 +583,27 @@ func (c *Convert) RunesDOS() {
 		"\u266A", "\u266B", "\u263C", "\u25BA", "\u25C4", "\u2195",
 		"\u203C", "\u00B6", "\u00A7", "\u25AC", "\u21A8", "\u2191",
 		"\u2193", "\u2192", "\u2190", "\u221F", "\u2194", "\u25B2", "\u25BC"}
-	for i := 0; i < c.Output.len; i++ {
-		r := c.Output.R[i]
+	for i := 0; i < len(c.Output); i++ {
+		r := c.Output[i]
 		if c.skipIgnores(i) {
 			continue
 		}
 		if c.skipLineBreaks(i) {
-			if c.Source.lineBreak == [2]rune{13, 0} {
-				c.Output.R[i] = LF // swap CR with LF
+			if c.Input.lineBreak == [2]rune{13, 0} {
+				c.Output[i] = LF // swap CR with LF
 			}
 			i++
 			continue
 		}
 		switch {
 		case r >= NUL && r <= US:
-			c.Output.R[i], _ = utf8.DecodeRuneInString(ctrls[r]) // c0, c1 controllers
+			c.Output[i], _ = utf8.DecodeRuneInString(ctrls[r]) // c0, c1 controllers
 		case r == DEL:
 			house := [3]byte{0xe2, 0x8c, 0x82} // ⌂
-			c.Output.R[i], _ = utf8.DecodeRune(house[:])
+			c.Output[i], _ = utf8.DecodeRune(house[:])
 		case r == NBSP:
 			noBreakSpace := [2]byte{0xc2, 0xa0} // NBSP
-			c.Output.R[i], _ = utf8.DecodeRune(noBreakSpace[:])
+			c.Output[i], _ = utf8.DecodeRune(noBreakSpace[:])
 		}
 	}
 }
@@ -611,11 +611,11 @@ func (c *Convert) RunesDOS() {
 // RunesEBCDIC switches out EBCDIC IBM mainframe controls with Unicode picture represenations.
 // Where no appropriate picture exists a space placeholder is used.
 func (c *Convert) RunesEBCDIC() {
-	if len(c.Output.R) == 0 {
+	if len(c.Output) == 0 {
 		return
 	}
-	for i := 0; i < c.Output.len; i++ {
-		r := c.Output.R[i]
+	for i := 0; i < len(c.Output); i++ {
+		r := c.Output[i]
 		if c.skipIgnores(i) {
 			continue
 		}
@@ -647,40 +647,40 @@ func (c *Convert) control(i int, r rune) bool { // nolint:gocyclo
 	)
 	switch r {
 	case HT:
-		c.Output.R[i] = decode(ht)
+		c.Output[i] = decode(ht)
 	case DEL:
-		c.Output.R[i] = decode(del)
+		c.Output[i] = decode(del)
 	case nel:
-		if c.Output.lineBreaks {
+		if c.lineBreaks {
 			// Go will automatically convert this to CRLF on Windows
-			c.Output.R[i] = LF
+			c.Output[i] = LF
 			return true
 		}
-		c.Output.R[i] = decode(nl)
+		c.Output[i] = decode(nl)
 	case BS:
-		c.Output.R[i] = decode(bs)
+		c.Output[i] = decode(bs)
 	case LF:
-		c.Output.R[i] = decode(lf)
+		c.Output[i] = decode(lf)
 	case ETB:
-		c.Output.R[i] = decode(etb)
+		c.Output[i] = decode(etb)
 	case ESC:
-		c.Output.R[i] = decode(esc)
+		c.Output[i] = decode(esc)
 	case ENQ:
-		c.Output.R[i] = decode(enq)
+		c.Output[i] = decode(enq)
 	case ACK:
-		c.Output.R[i] = decode(ack)
+		c.Output[i] = decode(ack)
 	case BEL:
-		c.Output.R[i] = decode(bel)
+		c.Output[i] = decode(bel)
 	case SYN:
-		c.Output.R[i] = decode(syn)
+		c.Output[i] = decode(syn)
 	case Dash:
-		c.Output.R[i] = decode(eot)
+		c.Output[i] = decode(eot)
 	case DC4:
-		c.Output.R[i] = decode(dc4)
+		c.Output[i] = decode(dc4)
 	case NAK:
-		c.Output.R[i] = decode(nak)
+		c.Output[i] = decode(nak)
 	case SUB:
-		c.Output.R[i] = decode(sub)
+		c.Output[i] = decode(sub)
 	default:
 		c.miscCtrls(i, r)
 	}
@@ -693,13 +693,13 @@ func (c *Convert) miscCtrls(i int, r rune) {
 	switch r {
 	case Nbsp:
 		noBreakSpace := [2]byte{0xc2, 0xa0}
-		c.Output.R[i], _ = utf8.DecodeRune(noBreakSpace[:])
+		c.Output[i], _ = utf8.DecodeRune(noBreakSpace[:])
 	case NUL, SOH, STX, ETX, VT, FF, CR, SO, SI, DLE, DC1, DC2, DC3, CAN, EM, FS, GS, RS, US:
 		// shared controls with ASCII C0+C1
-		c.Output.R[i] = decode(row8 + byte(r))
+		c.Output[i] = decode(row8 + byte(r))
 	case EOT, InvertedExclamation:
 		// unprintable controls
-		c.Output.R[i] = rune(SP)
+		c.Output[i] = rune(SP)
 	case Cent, Negation, PlusMinus:
 		// keep these symbols
 	default:
@@ -717,50 +717,50 @@ func (c *Convert) outOfRange(i int, r rune) {
 		r >= skipC && r <= skipD,
 		r >= row8 && r <= row8f,
 		r >= row9 && r <= row9f:
-		c.Output.R[i] = rune(SP)
+		c.Output[i] = rune(SP)
 	}
 }
 
 // RunesKOI8 blanks out unused C0, C1 and other controls spaces for Russian sets.
 func (c *Convert) RunesKOI8() {
-	if len(c.Output.R) == 0 {
+	if len(c.Output) == 0 {
 		return
 	}
-	for i := 0; i < c.Output.len; i++ {
-		r := c.Output.R[i]
+	for i := 0; i < len(c.Output); i++ {
+		r := c.Output[i]
 		if c.skipLineBreaks(i) {
 			i++
 			continue
 		}
 		switch {
 		case r >= NUL && r <= US:
-			c.Output.R[i] = rune(SP)
+			c.Output[i] = rune(SP)
 		case r == DEL:
-			c.Output.R[i] = rune(SP)
+			c.Output[i] = rune(SP)
 		case r == Replacement:
-			c.Output.R[i] = rune(SP)
+			c.Output[i] = rune(SP)
 		}
 	}
 }
 
 // RunesLatin blanks out unused C0, C1 and other controls spaces for ISO Latin sets.
 func (c *Convert) RunesLatin() {
-	if len(c.Output.R) == 0 {
+	if len(c.Output) == 0 {
 		return
 	}
-	for i := 0; i < c.Output.len; i++ {
-		r := c.Output.R[i]
+	for i := 0; i < len(c.Output); i++ {
+		r := c.Output[i]
 		if c.skipLineBreaks(i) {
 			i++
 			continue
 		}
 		switch {
 		case r >= NUL && r <= US:
-			c.Output.R[i] = rune(SP)
+			c.Output[i] = rune(SP)
 		case r >= DEL && r <= row9f:
-			c.Output.R[i] = rune(SP)
+			c.Output[i] = rune(SP)
 		case r == Replacement:
-			c.Output.R[i] = rune(SP)
+			c.Output[i] = rune(SP)
 		}
 	}
 }
@@ -775,8 +775,8 @@ func (c *Convert) RunesMacintosh() {
 
 		z = byte(row8)
 	)
-	for i := 0; i < c.Output.len; i++ {
-		r := c.Output.R[i]
+	for i := 0; i < len(c.Output); i++ {
+		r := c.Output[i]
 		if c.skipLineBreaks(i) {
 			i++
 			continue
@@ -784,23 +784,23 @@ func (c *Convert) RunesMacintosh() {
 		switch r {
 		case command:
 			commandR := [3]byte{0xe2, 0x8c, 0x98}
-			c.Output.R[i], _ = utf8.DecodeRune(commandR[:])
+			c.Output[i], _ = utf8.DecodeRune(commandR[:])
 		case shift:
 			shiftR := [3]byte{0xe2, 0x87, 0xa7}
-			c.Output.R[i], _ = utf8.DecodeRune(shiftR[:])
+			c.Output[i], _ = utf8.DecodeRune(shiftR[:])
 		case option:
 			optionR := [3]byte{0xe2, 0x8c, 0xa5}
-			c.Output.R[i], _ = utf8.DecodeRune(optionR[:])
+			c.Output[i], _ = utf8.DecodeRune(optionR[:])
 		case control:
 			controlR := [3]byte{0xe2, 0x8c, 0x83}
-			c.Output.R[i], _ = utf8.DecodeRune(controlR[:])
+			c.Output[i], _ = utf8.DecodeRune(controlR[:])
 		case DEL:
-			c.Output.R[i] = SymbolDEL
+			c.Output[i] = SymbolDEL
 		case Replacement:
-			c.Output.R[i] = rune(SP)
+			c.Output[i] = rune(SP)
 		default:
 			if r >= NUL && r <= US {
-				c.Output.R[i] = decode(byte(rune(z) + r))
+				c.Output[i] = decode(byte(rune(z) + r))
 			}
 		}
 	}
@@ -815,41 +815,41 @@ func (c *Convert) RunesShiftJIS() {
 		overline  = 0x203e // ‾
 		del       = 0xa1   // del
 	)
-	for i, r := range c.Output.R {
+	for i, r := range c.Output {
 		switch {
 		case r == backslash:
-			c.Output.R[i] = rune(yen)
+			c.Output[i] = rune(yen)
 		case r == tilde:
-			c.Output.R[i] = rune(overline)
+			c.Output[i] = rune(overline)
 		case r == DEL:
-			c.Output.R[i] = decode(del)
+			c.Output[i] = decode(del)
 		case r > DEL && r <= rowA,
 			r >= rowE && r <= NBSP:
-			c.Output.R[i] = rune(SP)
+			c.Output[i] = rune(SP)
 		}
 	}
 }
 
 // RunesWindows tweaks some Unicode picture represenations for Windows-125x sets.
 func (c *Convert) RunesWindows() {
-	for i, r := range c.Output.R {
+	for i, r := range c.Output {
 		switch r {
 		case DEL:
-			c.Output.R[i] = SymbolDEL
+			c.Output[i] = SymbolDEL
 		case Replacement:
-			c.Output.R[i] = rune(SP)
+			c.Output[i] = rune(SP)
 		}
 	}
 }
 
 // RunesUTF8 tweaks some Unicode picture represenations for UTF-8 Basic Latin.
 func (c *Convert) RunesUTF8() {
-	for i, r := range c.Output.R {
+	for i, r := range c.Output {
 		switch {
 		case r == DEL:
-			c.Output.R[i] = SymbolDEL
+			c.Output[i] = SymbolDEL
 		case r > DEL && r < rowA:
-			c.Output.R[i] = rune(SP)
+			c.Output[i] = rune(SP)
 		}
 	}
 }
@@ -875,15 +875,15 @@ func equalLB(r, nl [2]rune) bool {
 
 // skipLineBreaks returns true if rune is a linebreak.
 func (c *Convert) skipLineBreaks(i int) bool {
-	if !c.Output.lineBreaks {
+	if !c.lineBreaks {
 		return false
 	}
-	var l, r0, r1 = c.Output.len - 1, c.Output.R[i], rune(0)
+	var l, r0, r1 = len(c.Output) - 1, c.Output[i], rune(0)
 	if i < l {
 		// check for multi-byte line breaks
-		r1 = c.Output.R[i+1]
+		r1 = c.Output[i+1]
 	}
-	if equalLB([2]rune{r0, r1}, c.Source.lineBreak) {
+	if equalLB([2]rune{r0, r1}, c.Input.lineBreak) {
 		return true
 	}
 	return false
@@ -935,8 +935,8 @@ func (c *Convert) swap(r rune) bool {
 
 // skipIgnores returns true if the rune should be skipped.
 func (c *Convert) skipIgnores(i int) bool {
-	for _, ign := range c.Output.ignores {
-		if c.Output.R[i] == ign {
+	for _, ign := range c.ignores {
+		if c.Output[i] == ign {
 			return true
 		}
 	}

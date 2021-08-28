@@ -342,22 +342,21 @@ func createHTML(cmd *cobra.Command, flags convert.Flags, src *[]byte) []byte {
 		Flags: flags,
 	}
 	f := sample.Flags{}
-	conv.Output = convert.Output{}
 	// encode and convert the source text
 	if cp := cmd.Flags().Lookup("encode"); cp.Changed {
 		if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
 			logs.FatalWrap(logs.ErrEncode, err)
 		}
-		conv.Source.Encoding = f.From
+		conv.Input.Encoding = f.From
 	}
 	// obtain any appended SAUCE metadata
 	appendSAUCE(src)
 	// convert the source text into web friendly UTF8
 	var r []rune
 	if endOfFile(conv.Flags) {
-		r, err = conv.Text(src)
+		r, err = conv.Text(*src...)
 	} else {
-		r, err = conv.Dump(src)
+		r, err = conv.Dump(*src...)
 	}
 	if err != nil {
 		fmt.Println(logs.PrintfWrap(ErrCreate, err))
