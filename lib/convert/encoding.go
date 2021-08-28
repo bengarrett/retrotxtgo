@@ -155,20 +155,6 @@ const (
 	win   = "windows"
 )
 
-// Chars are characters with alternative runes.
-type Chars map[int]rune
-
-// Characters map code page 437 characters with alternative runes.
-func Characters() Chars {
-	return Chars{
-		NUL:           SP,
-		VerticalBar:   BrokenBar,
-		DEL:           Delta,             // Δ
-		LightVertical: IntegralExtension, // ⎮
-		SquareRoot:    CheckMark,         // ✓
-	}
-}
-
 // Encoder returns the named character set encoder.
 func Encoder(name string) (encoding.Encoding, error) {
 	// use charmap string
@@ -438,7 +424,7 @@ func encodingUnicode(name string) string {
 // Swap transforms character map and control codes into UTF-8 unicode runes.
 func (c *Convert) Swap() *Convert {
 	if len(c.Output) == 0 {
-		return nil
+		return c
 	}
 	const debug = false
 	if c.lineBreaks {
@@ -882,6 +868,16 @@ func (c *Convert) skipLineBreaks(i int) bool {
 	return false
 }
 
+func swap(code int) rune {
+	return map[int]rune{
+		NUL:           SP,
+		VerticalBar:   BrokenBar,
+		DEL:           Delta,             // Δ
+		LightVertical: IntegralExtension, // ⎮
+		SquareRoot:    CheckMark,         // ✓
+	}[code]
+}
+
 func (c *Convert) runeSwap(r rune) rune {
 	// todo: use transform
 	// https://play.golang.org/p/unix7YjB8Dw
@@ -891,17 +887,17 @@ func (c *Convert) runeSwap(r rune) rune {
 	}
 	switch {
 	case r == NUL:
-		return Characters()[0]
+		return swap(NUL)
 	case r == SymbolNUL:
-		return Characters()[0]
+		return swap(NUL)
 	case r == VerticalBar:
-		return Characters()[VerticalBar]
+		return swap(VerticalBar)
 	case r == House:
-		return Characters()[DEL]
+		return swap(DEL)
 	case r == LightVerticalU:
-		return Characters()[LightVertical]
+		return swap(LightVertical)
 	case r == SquareRootU:
-		return Characters()[SquareRoot]
+		return swap(SquareRoot)
 	}
 	return -1
 }

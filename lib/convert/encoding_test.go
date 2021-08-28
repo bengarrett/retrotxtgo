@@ -14,9 +14,9 @@ import (
 	"golang.org/x/text/encoding/unicode/utf32"
 )
 
-func ExampleCharacters() {
-	fmt.Print(string(Characters()[DEL]))
-	fmt.Print(string(Characters()[SquareRoot]))
+func Example_swap() {
+	fmt.Print(string(swap(DEL)))
+	fmt.Print(string(swap(SquareRoot)))
 	// Output: Δ✓
 }
 
