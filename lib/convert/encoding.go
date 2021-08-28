@@ -290,155 +290,149 @@ func encodeAlias(name string) string {
 
 // encodingIBM returns a valid IANA index encoding name for IBM codepages using a custom alias.
 func encodingIBM(name string) string {
-	n := ""
 	switch name {
 	case "37", "037":
-		n = cp037
+		return cp037
 	case "437", "dos", "ibmpc", msdos, "us", "pc-8", "latin-us":
-		n = "IBM437"
+		return "IBM437"
 	case "850", "latini":
-		n = "IBM850"
+		return "IBM850"
 	case "852", "latinii":
-		n = "IBM852"
+		return "IBM852"
 	case "855":
-		n = "IBM855"
+		return "IBM855"
 	case "858":
-		n = cp858
+		return cp858
 	case "860":
-		n = "IBM860"
+		return "IBM860"
 	case "862":
-		n = "IBM862"
+		return "IBM862"
 	case "863":
-		n = "IBM863"
+		return "IBM863"
 	case "865":
-		n = "IBM865"
+		return "IBM865"
 	case "866":
-		n = "IBM866"
+		return "IBM866"
 	case "1047":
-		n = "IBM1047"
+		return "IBM1047"
 	case "1140", "ibm1140":
-		n = "IBM01140"
+		return "IBM01140"
 	}
-	return n
+	return ""
 }
 
 // encodingMisc returns a valid IANA index encoding name using a custom alias.
 func encodingMisc(name string) string {
-	n := ""
 	switch name {
 	case "878", "20866", "koi8r":
-		n = "KOI8-R"
+		return "KOI8-R"
 	case "1168", "21866", "koi8u":
-		n = "KOI8-U"
+		return "KOI8-U"
 	case "10000", "macroman", "mac-roman", "mac os roman":
-		n = "Macintosh"
+		return "Macintosh"
 	case "shift jis", "shiftjis":
-		n = "shift_jis"
+		return "shift_jis"
 	case "ebcdic", ibm:
-		n = cp037
+		return cp037
 	case "iso88598e", "iso88598i", "iso88596e", "iso88596i":
 		l := len(name)
-		n = fmt.Sprintf("ISO-8859-%v-%v", name[l-2:l-1], name[l-1:])
+		return fmt.Sprintf("ISO-8859-%v-%v", name[l-2:l-1], name[l-1:])
 	}
-	return n
+	return ""
 }
 
 // encodingIBM returns a valid IANA index encoding name for Microsoft codepages using a custom alias.
 func encodingWin(name string) string {
-	n := ""
 	switch name {
 	case "874":
-		n = "Windows-874"
+		return "Windows-874"
 	case "1250":
-		n = "Windows-1250"
+		return "Windows-1250"
 	case "1251":
-		n = "Windows-1251"
+		return "Windows-1251"
 	case "1252", "1004", "win", win:
-		n = "Windows-1252"
+		return "Windows-1252"
 	case "1253":
-		n = "Windows-1253"
+		return "Windows-1253"
 	case "1254":
-		n = "Windows-1254"
+		return "Windows-1254"
 	case "1255":
-		n = "Windows-1255"
+		return "Windows-1255"
 	case "1256":
-		n = "Windows-1256"
+		return "Windows-1256"
 	case "1257":
-		n = "Windows-1257"
+		return "Windows-1257"
 	case "1258":
-		n = "Windows-1258"
+		return "Windows-1258"
 	}
-	return n
+	return ""
 }
 
 // encodingIBM returns a valid IANA index encoding name for ISO codepages using a custom alias.
 func encodingISO(name string) string {
-	n := ""
 	switch name {
 	case "5", "1124", "28595":
-		n = "ISO-8859-5"
+		return "ISO-8859-5"
 	case "6", "1089", "28596":
-		n = "ISO-8859-6"
+		return "ISO-8859-6"
 	case "7", "813", "28597":
-		n = "ISO-8859-7"
+		return "ISO-8859-7"
 	case "8", "916", "1125", "28598":
-		n = "ISO-8859-8"
+		return "ISO-8859-8"
 	case "9", "920", "28599":
-		n = "ISO-8859-9"
+		return "ISO-8859-9"
 	case "10", "919", "28600":
-		n = "ISO-8859-10"
+		return "ISO-8859-10"
 	case "11", iso11:
-		n = strings.ToUpper(iso11)
+		return strings.ToUpper(iso11)
 	case "13", "921", "28603":
-		n = "ISO-8859-13"
+		return "ISO-8859-13"
 	case "14", "28604":
-		n = "ISO-8859-14"
+		return "ISO-8859-14"
 	case "15", "923", "28605":
-		n = "ISO-8859-15"
+		return "ISO-8859-15"
 	case "16", "28606", "iso885916":
-		n = "ISO-8859-16"
+		return "ISO-8859-16"
 	default:
-		if n = encodingEurope(name); n != "" {
+		if n := encodingEurope(name); n != "" {
 			return n
 		}
 	}
-	return n
+	return ""
 }
 
 // encodingIBM returns a valid IANA index encoding name for Latin codepages using a custom alias.
 func encodingEurope(name string) string {
-	n := ""
 	switch name {
 	case "1", "819", "28591":
-		n = "ISO-8859-1"
+		return "ISO-8859-1"
 	case "2", "1111", "28592":
-		n = "ISO-8859-2"
+		return "ISO-8859-2"
 	case "3", "913", "28593":
-		n = "ISO-8859-3"
+		return "ISO-8859-3"
 	case "4", "914", "28594":
-		n = "ISO-8859-4"
+		return "ISO-8859-4"
 	}
-	return n
+	return ""
 }
 
 // encodingIBM returns a valid IANA index encoding name for Unicode using a custom alias.
 func encodingUnicode(name string) string {
-	n := ""
 	switch strings.ToLower(name) {
 	case "utf16":
-		n = "UTF-16" // Go will use the byte-order-mark
+		return "UTF-16" // Go will use the byte-order-mark
 	case "16be", "utf16b", "utf16be", "utf-16-be":
-		n = "UTF-16BE"
+		return "UTF-16BE"
 	case "16le", "utf16l", "utf16le", "utf-16-le":
-		n = "UTF-16LE"
+		return "UTF-16LE"
 	case "utf32", "utf-32":
-		n = u32 // Go will use the byte-order-mark
+		return u32 // Go will use the byte-order-mark
 	case "32be", "utf32b", "utf32be", "utf-32be", "utf-32-be":
-		n = u32be
+		return u32be
 	case "32le", "utf32l", "utf32le", "utf-32le", "utf-32-le":
-		n = u32le
+		return u32le
 	}
-	return n
+	return ""
 }
 
 // Swap transforms character map and control codes into UTF-8 unicode runes.
