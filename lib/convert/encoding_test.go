@@ -74,7 +74,7 @@ func TestSet_Transform(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			data := Convert{}
 			data.Source.B = tt.text
-			data.Source.E = tt.codepage
+			data.Source.Encoding = tt.codepage
 			err := data.Transform()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
@@ -106,7 +106,7 @@ func TestANSI(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			data := Convert{}
 			data.Source.B = []byte(tt.str)
-			data.Source.E = tt.codepage
+			data.Source.Encoding = tt.codepage
 			err := data.Transform()
 			data.Swap().ANSIControls()
 			if (err != nil) != tt.wantErr {
@@ -214,7 +214,7 @@ func TestRunesControls(t *testing.T) {
 	for _, tt := range tests {
 		d := Convert{}
 		d.Source.B = []byte(tt.text)
-		d.Source.E = cp1252
+		d.Source.Encoding = cp1252
 		if err := d.Transform(); err != nil {
 			t.Error(err)
 		}
@@ -242,7 +242,7 @@ func TestRunesKOI8(t *testing.T) {
 	for _, tt := range tests {
 		d := Convert{}
 		d.Source.B = []byte(tt.text)
-		d.Source.E = koi
+		d.Source.Encoding = koi
 		if err := d.Transform(); err != nil {
 			t.Error(err)
 		}
@@ -269,7 +269,7 @@ func TestRunesLatin(t *testing.T) {
 	for _, tt := range tests {
 		d := Convert{}
 		d.Source.B = []byte(tt.text)
-		d.Source.E = iso1
+		d.Source.Encoding = iso1
 		if err := d.Transform(); err != nil {
 			t.Error(err)
 		}
@@ -295,7 +295,7 @@ func TestRunesDOS(t *testing.T) {
 	for _, tt := range tests {
 		d := Convert{}
 		d.Source.B = []byte(tt.text)
-		d.Source.E = cp437
+		d.Source.Encoding = cp437
 		if err := d.Transform(); err != nil {
 			t.Error(err)
 		}
@@ -321,7 +321,7 @@ func TestRunesMacintosh(t *testing.T) {
 	for _, tt := range tests {
 		d := Convert{}
 		d.Source.B = []byte(tt.text)
-		d.Source.E = mac
+		d.Source.Encoding = mac
 		if err := d.Transform(); err != nil {
 			t.Error(err)
 		}
@@ -349,7 +349,7 @@ func TestRunesWindows(t *testing.T) {
 	for _, tt := range tests {
 		d := Convert{}
 		d.Source.B = []byte(tt.text)
-		d.Source.E = cp1252
+		d.Source.Encoding = cp1252
 		if err := d.Transform(); err != nil {
 			t.Error(err)
 		}
@@ -389,7 +389,7 @@ func TestRunesEBCDIC(t *testing.T) {
 		c := tt.text
 		d := Convert{}
 		d.Source.B = c
-		d.Source.E = charmap.CodePage037
+		d.Source.Encoding = charmap.CodePage037
 		if err := d.Transform(); err != nil {
 			t.Error(err)
 		}

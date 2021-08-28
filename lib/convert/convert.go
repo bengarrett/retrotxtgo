@@ -18,7 +18,7 @@ type Convert struct {
 // Source text for conversion.
 type Source struct {
 	B         []byte            // Source text as bytes.
-	E         encoding.Encoding // Text encoding.
+	Encoding  encoding.Encoding // Text encoding.
 	table     bool              // flag Source.B as text for display as a codepage table.
 	lineBreak [2]rune           // line break controls used by the text.
 }

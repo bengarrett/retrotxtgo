@@ -47,7 +47,7 @@ func Table(name string) (*bytes.Buffer, error) {
 		}
 	}
 	conv := Convert{}
-	conv.Source.E = cp
+	conv.Source.Encoding = cp
 	b, row := MakeBytes(), 0
 	runes, err := conv.Chars(&b)
 	if err != nil {

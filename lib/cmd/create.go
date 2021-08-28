@@ -348,7 +348,7 @@ func createHTML(cmd *cobra.Command, flags convert.Flags, src *[]byte) []byte {
 		if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
 			logs.FatalWrap(logs.ErrEncode, err)
 		}
-		conv.Source.E = f.From
+		conv.Source.Encoding = f.From
 	}
 	// obtain any appended SAUCE metadata
 	appendSAUCE(src)

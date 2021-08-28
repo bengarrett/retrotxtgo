@@ -145,7 +145,7 @@ func (flag Flags) Open(name string, conv *convert.Convert) (File, error) {
 	f.Encoding = samp.encoding
 	f.Font = samp.Font
 	if flag.From == nil {
-		conv.Source.E = f.Encoding
+		conv.Source.Encoding = f.Encoding
 	}
 	if flag.To != nil {
 		// sample items that break the NewEncoder

@@ -135,7 +135,7 @@ func viewParsePipe(cmd *cobra.Command) {
 		if f.From, err = convert.Encoding(cp.Value.String()); err != nil {
 			logs.FatalMark("pipe", logs.ErrEncode, err)
 		}
-		conv.Source.E = f.From
+		conv.Source.Encoding = f.From
 	}
 	b, err := filesystem.ReadPipe()
 	if err != nil {
@@ -159,7 +159,7 @@ func viewParseBytes(cmd *cobra.Command, conv *convert.Convert, arg string, b ...
 	if f.From, err = convert.Encoding(name); err != nil {
 		logs.FatalMark(arg, logs.ErrEncode, err)
 	}
-	conv.Source.E = f.From
+	conv.Source.Encoding = f.From
 	// make sure the file source isn't already encoded as UTF-8
 	if utf8.Valid(b) {
 		fmt.Println(string(b))

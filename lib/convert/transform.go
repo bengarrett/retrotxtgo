@@ -79,8 +79,8 @@ func (c *Convert) Text(b *[]byte) ([]rune, error) {
 
 // Transform byte data from named character map encoded text into UTF-8.
 func (c *Convert) Transform() error {
-	if c.Source.E == nil {
-		c.Source.E = unicode.UTF8
+	if c.Source.Encoding == nil {
+		c.Source.Encoding = unicode.UTF8
 	}
 	if len(c.Source.B) == 0 {
 		return nil
@@ -99,9 +99,11 @@ func (c *Convert) Transform() error {
 		return nil
 	}
 	var err error
-	if c.Source.B, err = c.Source.E.NewDecoder().Bytes(c.Source.B); err != nil {
+	fmt.Print(string(c.Source.B))
+	if c.Source.B, err = c.Source.Encoding.NewDecoder().Bytes(c.Source.B); err != nil {
 		return fmt.Errorf("transform new decoder error: %w", err)
 	}
+	fmt.Print(string(c.Source.B))
 	c.Output.R = bytes.Runes(c.Source.B)
 	c.Output.len = len(c.Output.R)
 	return nil
@@ -109,7 +111,7 @@ func (c *Convert) Transform() error {
 
 // transformFixJISTable blanks invalid ShiftJIS characters while printing 8-bit tables.
 func (c *Convert) transformFixJISTable() {
-	if c.Source.E == japanese.ShiftJIS && c.Source.table {
+	if c.Source.Encoding == japanese.ShiftJIS && c.Source.table {
 		// this is only for the table command,
 		// it will break normal shift-jis encode text
 		for i, b := range c.Source.B {
@@ -141,7 +143,7 @@ func (c *Convert) transformUnicode() error {
 		u16le  = unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM)
 		u16leB = unicode.UTF16(unicode.LittleEndian, unicode.ExpectBOM)
 	)
-	switch c.Source.E {
+	switch c.Source.Encoding {
 	case unicode.UTF8, unicode.UTF8BOM:
 		c.Output.R = bytes.Runes(c.Source.B)
 		c.Output.len = len(c.Output.R)
@@ -162,7 +164,7 @@ func (c *Convert) transformUnicode() error {
 			return err
 		}
 	}
-	return c.transformU32(c.Source.E)
+	return c.transformU32(c.Source.Encoding)
 }
 
 // transformU32 transforms Unicode-32 text into UTF-8 encoded Unicode.
