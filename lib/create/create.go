@@ -243,21 +243,28 @@ func (args *Args) saveAssets(b *[]byte) error {
 	var errs error
 	err1, err2, err3, err4, err5 := <-ch, <-ch, <-ch, <-ch, <-ch
 	if err1 != nil {
-		errs = fmt.Errorf("%v, %w", errs, err1)
+		errs = appendErr(errs, err1)
 	}
 	if err2 != nil {
-		errs = fmt.Errorf("%v, %w", errs, err2)
+		errs = appendErr(errs, err2)
 	}
 	if err3 != nil {
-		errs = fmt.Errorf("%v, %w", errs, err3)
+		errs = appendErr(errs, err3)
 	}
 	if err4 != nil {
-		errs = fmt.Errorf("%v, %w", errs, err4)
+		errs = appendErr(errs, err4)
 	}
 	if err5 != nil {
-		errs = fmt.Errorf("%v, %w", errs, err5)
+		errs = appendErr(errs, err5)
 	}
 	return errs
+}
+
+func appendErr(errs, err error) error {
+	if errs == nil {
+		return err
+	}
+	return fmt.Errorf("%v, %w", errs, err)
 }
 
 func useCSS(l Layout) bool {
