@@ -39,9 +39,11 @@ func Test_saveAssets(t *testing.T) {
 		}
 		defer os.RemoveAll(tmpDir)
 		// Initialize
-		a := Args{}
+		a := Args{
+			Test:   true,
+			layout: Compact,
+		}
 		a.Save.Destination = tmpDir
-		a.Test = true
 		// Save files
 		b := []byte("hello")
 		if err := a.saveAssets(&b); err != nil {
