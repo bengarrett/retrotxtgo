@@ -62,7 +62,7 @@ func MakeBytes() []byte {
 }
 
 // Mark adds a UTF-8 byte order mark to the text if it doesn't already exist.
-func Mark(b ...byte) []byte {
+func Mark(b []byte) []byte {
 	const min = 3
 	if len(b) >= min {
 		if t := b[:3]; bytes.Equal(t, BOM()) {
