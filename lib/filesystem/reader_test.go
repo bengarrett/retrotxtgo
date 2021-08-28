@@ -98,3 +98,32 @@ func TestLines(t *testing.T) {
 		})
 	}
 }
+
+func TestColumns(t *testing.T) {
+	type args struct {
+		r  io.Reader
+		lb LB
+	}
+	tests := []struct {
+		name      string
+		args      args
+		wantWidth int
+		wantErr   bool
+	}{
+		{"empty", args{}, 0, true},
+		{"4 chars", args{strings.NewReader("abcd\n"), LF()}, 4, false},
+		{"4 runes", args{bytes.NewReader([]byte("😁😋😃🤫\n")), LF()}, 16, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotWidth, err := Columns(tt.args.r, tt.args.lb)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Columns() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotWidth != tt.wantWidth {
+				t.Errorf("Columns() = %v, want %v", gotWidth, tt.wantWidth)
+			}
+		})
+	}
+}
