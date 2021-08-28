@@ -214,9 +214,9 @@ func Encoding(name string) (encoding.Encoding, error) {
 }
 
 // encode32 initializes common UTF-32 encodings.
-func encode32(a string) encoding.Encoding {
+func encode32(name string) encoding.Encoding {
 	// UTF-32... doesn't return a match in ianaindex.IANA
-	switch strings.ToUpper(a) {
+	switch strings.ToUpper(name) {
 	case u32:
 		return utf32.UTF32(utf32.LittleEndian, utf32.UseBOM)
 	case u32be:

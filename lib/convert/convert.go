@@ -10,7 +10,7 @@ import (
 
 // Convert 8-bit legacy or other Unicode text to UTF-8.
 type Convert struct {
-	Flags      Flag   // Command supplied flag values.
+	Flags      Flag   // Commandline supplied flag values.
 	Input      In     // Input text for conversion.
 	Output     []rune // Output text as UTF-8 runes.
 	ignores    []rune // runes to ignore.
@@ -52,9 +52,9 @@ func EndOfFile(b ...byte) []byte {
 }
 
 // MakeBytes generates a 256 character or 8-bit container ready to hold legacy code point values.
-func MakeBytes() (m []byte) {
+func MakeBytes() []byte {
 	const max = 256
-	m = make([]byte, max)
+	m := make([]byte, max)
 	for i := 0; i < max; i++ {
 		m[i] = byte(i)
 	}

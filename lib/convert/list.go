@@ -30,8 +30,8 @@ type cell struct {
 const latin = "isolatin"
 
 // Encodings returns all the supported legacy text encodings.
-func Encodings() (e []encoding.Encoding) {
-	a := charmap.All
+func Encodings() []encoding.Encoding {
+	a, e := charmap.All, []encoding.Encoding{}
 	a = append(a, japanese.All...)
 	a = append(a, unicode.All...)
 	a = append(a, utf32.All...)

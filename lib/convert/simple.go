@@ -14,11 +14,11 @@ import (
 func DString(s string, c *charmap.Charmap) ([]byte, error) {
 	decoder := c.NewDecoder()
 	reader := transform.NewReader(strings.NewReader(s), decoder)
-	result, err := ioutil.ReadAll(reader)
+	b, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return nil, fmt.Errorf("dstring ioutil readall error: %w", err)
 	}
-	return result, nil
+	return b, nil
 }
 
 // EString encodes text into a simple character encoding.
@@ -28,27 +28,27 @@ func EString(s string, c *charmap.Charmap) ([]byte, error) {
 	}
 	encoder := c.NewEncoder()
 	reader := transform.NewReader(strings.NewReader(s), encoder)
-	result, err := ioutil.ReadAll(reader)
+	b, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return nil, fmt.Errorf("estring ioutil readall error: %w", err)
 	}
-	return result, nil
+	return b, nil
 }
 
 // D437 decodes IBM Code Page 437 encoded text.
 func D437(s string) ([]byte, error) {
-	result, err := DString(s, charmap.CodePage437)
+	b, err := DString(s, charmap.CodePage437)
 	if err != nil {
 		return nil, fmt.Errorf("decode code page 437: %w", err)
 	}
-	return result, nil
+	return b, nil
 }
 
 // E437 encodes text into IBM Code Page 437.
 func E437(s string) ([]byte, error) {
-	result, err := EString(s, charmap.CodePage437)
+	b, err := EString(s, charmap.CodePage437)
 	if err != nil {
 		return nil, fmt.Errorf("encode code page 437: %w", err)
 	}
-	return result, nil
+	return b, nil
 }
