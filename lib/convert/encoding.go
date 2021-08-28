@@ -424,7 +424,7 @@ func encodingUnicode(name string) string {
 // Swap transforms character map and control codes into UTF-8 unicode runes.
 func (c *Convert) Swap() *Convert {
 	if len(c.Output) == 0 {
-		return c
+		return nil
 	}
 	const debug = false
 	if c.lineBreaks {
