@@ -1,10 +1,11 @@
 package convert
 
 import (
+	"reflect"
 	"testing"
 )
 
-func Test_ignoreControls(t *testing.T) {
+func Test_skipCtrlCodes(t *testing.T) {
 	tests := []struct {
 		name string
 		ctrl []string
@@ -20,9 +21,9 @@ func Test_ignoreControls(t *testing.T) {
 			var c = Convert{}
 			c.lineBreaks = true
 			c.Flags.Controls = tt.ctrl
-			c.ignoreControls()
+			c.skipCtrlCodes()
 			if got := c.ignores; string(got) != string(tt.want) {
-				t.Errorf("Convert.ignoreControls() got = %v, want %v", got, tt.want)
+				t.Errorf("Convert.skipCtrlCodes() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -53,26 +54,53 @@ func TestArgs_Dump(t *testing.T) {
 	}
 }
 
-func TestArgs_Text(t *testing.T) {
+// func TestArgs_Text(t *testing.T) {
+// 	tests := []struct {
+// 		name    string
+// 		b       []byte
+// 		want    string
+// 		wantErr bool
+// 	}{
+// 		{"empty", []byte(""), "", false},
+// 		{"hi", []byte("hello\nworld"), "hello\nworld", false},
+// 	}
+// 	for _, tt := range tests {
+// 		var a = Convert{}
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			gotUtf8, err := a.Text(tt.b...)
+// 			if (err != nil) != tt.wantErr {
+// 				t.Errorf("Args.Text() error = %v, wantErr %v", err, tt.wantErr)
+// 				return
+// 			}
+// 			if string(gotUtf8) != tt.want {
+// 				t.Errorf("Args.Text() = %v, want %v", gotUtf8, tt.want)
+// 			}
+// 		})
+// 	}
+// }
+
+func TestConvert_ANSI(t *testing.T) {
+	type args struct {
+		b []byte
+	}
 	tests := []struct {
 		name    string
-		b       []byte
-		want    string
+		c       *Convert
+		args    args
+		want    []rune
 		wantErr bool
 	}{
-		{"empty", []byte(""), "", false},
-		{"hi", []byte("hello\nworld"), "hello\nworld", false},
+		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
-		var a = Convert{}
 		t.Run(tt.name, func(t *testing.T) {
-			gotUtf8, err := a.Text(tt.b...)
+			got, err := tt.c.ANSI(tt.args.b...)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Args.Text() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Convert.ANSI() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if string(gotUtf8) != tt.want {
-				t.Errorf("Args.Text() = %v, want %v", gotUtf8, tt.want)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Convert.ANSI() = %v, want %v", got, tt.want)
 			}
 		})
 	}

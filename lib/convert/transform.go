@@ -21,14 +21,11 @@ import (
 func (c *Convert) ANSI(b ...byte) ([]rune, error) {
 	c.lineBreaks = true
 	c.Flags.SwapChars = nil
-	c.Input.Bytes = b
-	c.ignoreControls()
 	c.Input.Bytes = EndOfFile(b)
-	if err := c.Transform(); err != nil {
+	if err := c.skipCtrlCodes().Transform(); err != nil {
 		return nil, fmt.Errorf("dump transform failed: %w", err)
 	}
-	c.Swap().ANSIControls()
-	c.wrapWidth(c.Flags.MaxWidth)
+	c.Swap().ANSIControls().wrapWidth(c.Flags.MaxWidth)
 	return c.Output, nil
 }
 
@@ -41,8 +38,7 @@ func (c *Convert) Chars(b ...byte) ([]rune, error) {
 	if err := c.Transform(); err != nil {
 		return nil, fmt.Errorf("chars transform failed: %w", err)
 	}
-	c.Swap()
-	c.wrapWidth(c.Flags.MaxWidth)
+	c.Swap().wrapWidth(c.Flags.MaxWidth)
 	return c.Output, nil
 }
 
@@ -52,12 +48,10 @@ func (c *Convert) Chars(b ...byte) ([]rune, error) {
 func (c *Convert) Dump(b ...byte) ([]rune, error) {
 	c.lineBreaks = true
 	c.Input.Bytes = b
-	c.ignoreControls()
-	if err := c.Transform(); err != nil {
+	if err := c.skipCtrlCodes().Transform(); err != nil {
 		return nil, fmt.Errorf("dump transform failed: %w", err)
 	}
-	c.Swap().ANSIControls()
-	c.wrapWidth(c.Flags.MaxWidth)
+	c.Swap().ANSIControls().wrapWidth(c.Flags.MaxWidth)
 	return c.Output, nil
 }
 
@@ -66,14 +60,11 @@ func (c *Convert) Dump(b ...byte) ([]rune, error) {
 // It obeys the end of file marker.
 func (c *Convert) Text(b ...byte) ([]rune, error) {
 	c.lineBreaks = true
-	c.Input.Bytes = b
-	c.ignoreControls()
 	c.Input.Bytes = EndOfFile(b)
-	if err := c.Transform(); err != nil {
+	if err := c.skipCtrlCodes().Transform(); err != nil {
 		return nil, fmt.Errorf("text transform failed: %w", err)
 	}
-	c.Swap().ANSIControls()
-	c.wrapWidth(c.Flags.MaxWidth)
+	c.Swap().ANSIControls().wrapWidth(c.Flags.MaxWidth)
 	return c.Output, nil
 }
 
@@ -222,8 +213,9 @@ func (c *Convert) wrapWidth(max int) {
 	c.Output = []rune(w.String())
 }
 
-// ignoreControls marks standard control characters to be ignored.
-func (c *Convert) ignoreControls() {
+// skipCtrlCodes marks control characters to be ignored.
+// It needs to be applied before Convert.transform().
+func (c *Convert) skipCtrlCodes() *Convert {
 	const (
 		bell = iota + 7 // BEL = x07
 		bs
@@ -258,6 +250,7 @@ func (c *Convert) ignoreControls() {
 			c.ignore(del)
 		}
 	}
+	return c
 }
 
 // ignore adds the rune to an ignore runes list.

@@ -482,9 +482,9 @@ func (c *Convert) swaps() *Convert {
 }
 
 // ANSIControls replaces out all ←[ and ␛[ character matches with functional ANSI escape controls.
-func (c *Convert) ANSIControls() {
+func (c *Convert) ANSIControls() *Convert {
 	if c == nil {
-		return
+		return nil
 	}
 	if len(c.Output) == 0 {
 		log.Fatal(ErrChainANSI)
@@ -501,6 +501,7 @@ func (c *Convert) ANSIControls() {
 			c.Output[i] = ESC // replace ␛[
 		}
 	}
+	return c
 }
 
 // LineBreaks will try to guess the line break representation as a 2 byte value.
