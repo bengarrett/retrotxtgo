@@ -194,7 +194,7 @@ func TestEncoding(t *testing.T) {
 
 func TestEndOfFileX(t *testing.T) {
 	b := []byte("hello\x1aworld")
-	if got := EndOfFile(b...); string(got) != "hello" {
+	if got := EndOfFile(b); string(got) != "hello" {
 		t.Errorf("TestEndOfFile() = %v, want %v", string(got), "hello")
 	}
 }

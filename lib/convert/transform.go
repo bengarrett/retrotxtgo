@@ -23,7 +23,7 @@ func (c *Convert) ANSI(b ...byte) ([]rune, error) {
 	c.Flags.SwapChars = nil
 	c.Input.Bytes = b
 	c.unicodeControls()
-	c.Input.Bytes = EndOfFile(b...)
+	c.Input.Bytes = EndOfFile(b)
 	if err := c.Transform(); err != nil {
 		return nil, fmt.Errorf("dump transform failed: %w", err)
 	}
@@ -68,7 +68,7 @@ func (c *Convert) Text(b ...byte) ([]rune, error) {
 	c.lineBreaks = true
 	c.Input.Bytes = b
 	c.unicodeControls()
-	c.Input.Bytes = EndOfFile(b...)
+	c.Input.Bytes = EndOfFile(b)
 	if err := c.Transform(); err != nil {
 		return nil, fmt.Errorf("text transform failed: %w", err)
 	}

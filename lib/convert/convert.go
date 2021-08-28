@@ -44,7 +44,7 @@ func BOM() []byte {
 }
 
 // EndOfFile will cut text at the first DOS end-of-file marker.
-func EndOfFile(b ...byte) []byte {
+func EndOfFile(b []byte) []byte {
 	if cut := bytes.IndexByte(b, EOF); cut > 0 {
 		return b[:cut]
 	}
