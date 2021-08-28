@@ -153,10 +153,11 @@ func (flag Flags) Open(name string, conv *convert.Convert) (File, error) {
 		case "037", "shiftjis", "utf16.be", "utf16.le":
 			return File{}, nil
 		}
-		err = printT(flag.From, b...)
-		if err != nil {
-			return File{}, err
+		s, errB := stringB(flag.From, b...)
+		if errB != nil {
+			return File{}, errB
 		}
+		fmt.Println(s)
 		return File{}, nil
 	}
 	// default overrides
@@ -167,12 +168,12 @@ func (flag Flags) Open(name string, conv *convert.Convert) (File, error) {
 			conv.Flags.Controls = nil
 		}
 	}
-	f, err = samp.transform(&f, conv, b...)
+	f, err = samp.transform(&f, conv, b)
 	return f, err
 }
 
 // Transform converts the raw byte data of the textfile into UTF8 runes.
-func (samp *Sample) transform(f *File, conv *convert.Convert, b ...byte) (File, error) {
+func (samp *Sample) transform(f *File, conv *convert.Convert, b []byte) (File, error) {
 	var err error
 	switch samp.convert {
 	case ansi:
@@ -205,21 +206,22 @@ func Valid(name string) bool {
 	return true
 }
 
-// PrintT encodes and prints the bytes as a string.
-func printT(e encoding.Encoding, b ...byte) error {
+// stringB encodes the bytes as a string.
+func stringB(e encoding.Encoding, b ...byte) (string, error) {
 	if e == nil {
-		fmt.Println(string(b))
-		return nil
+		return string(b), nil
 	}
 	b, err := encode(e, b...)
 	if err != nil {
-		return err
+		return "", err
 	}
-	fmt.Println(string(b))
-	return nil
+	return string(b), nil
 }
 
 func encode(e encoding.Encoding, b ...byte) ([]byte, error) {
+	if e == nil {
+		return nil, ErrEncode
+	}
 	nb, err := e.NewEncoder().Bytes(b)
 	if err != nil {
 		if len(nb) == 0 {

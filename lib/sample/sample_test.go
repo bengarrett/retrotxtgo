@@ -4,7 +4,9 @@ package sample
 import (
 	"fmt"
 	"log"
+	"reflect"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/bengarrett/retrotxtgo/lib/convert"
 	"golang.org/x/text/encoding"
@@ -84,6 +86,68 @@ func TestValid(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := Valid(tt.args.name); got != tt.want {
 				t.Errorf("Valid() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_encode(t *testing.T) {
+	hi := []byte("hello world")
+	dos := []byte("▒▓█")
+	type args struct {
+		e encoding.Encoding
+		b []byte
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []byte
+		wantErr bool
+	}{
+		{"empty", args{}, nil, true},
+		{"no encoding", args{nil, hi}, nil, true},
+		{"no text", args{charmap.CodePage437, nil}, []byte{}, false},
+		{"ascii text", args{charmap.CodePage437, hi}, hi, false},
+		{"dos text", args{charmap.CodePage437, dos}, []byte{177, 178, 219}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := encode(tt.args.e, tt.args.b...)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("encode() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("encode() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestOpen(t *testing.T) {
+	type args struct {
+		name string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantLen int
+		wantErr bool
+	}{
+		{"empty", args{}, 0, true},
+		{"name error", args{"name that doesn't exist"}, 0, true},
+		{"865", args{"865"}, 117, false},
+		{"utf8", args{"utf8"}, 128, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := Open(tt.args.name)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Open() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotLen := utf8.RuneCount(got); gotLen != tt.wantLen {
+				t.Errorf("Open() = %v, want %v", gotLen, tt.wantLen)
 			}
 		})
 	}
