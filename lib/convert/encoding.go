@@ -187,7 +187,7 @@ func Encoder(name string) (encoding.Encoding, error) {
 		return enc, nil
 	}
 	s := shorten(name)
-	a := encodingAlias(s)
+	a := encodeAlias(s)
 	if a == iso11 {
 		// ISO-8859-11 uses the same characters as Windows 847
 		// except for 9 characters in rows 8 and 9.
@@ -202,7 +202,7 @@ func Encoder(name string) (encoding.Encoding, error) {
 		enc, err = ianaindex.IANA.Encoding(a)
 	}
 	if err != nil {
-		enc, err = ianaindex.IANA.Encoding(encodingAlias(name))
+		enc, err = ianaindex.IANA.Encoding(encodeAlias(name))
 	}
 	if err != nil || enc == nil {
 		if a == "" {
@@ -232,7 +232,7 @@ func Humanize(name string) string {
 	if _, err := Encoder(name); err != nil {
 		return ""
 	}
-	return encodingAlias(shorten(name))
+	return encodeAlias(shorten(name))
 }
 
 // shorten the name to a custom name, a common name or an alias.
@@ -265,28 +265,27 @@ func shorten(name string) string { // nolint:gocyclo
 	return ""
 }
 
-// encodingAlias returns a valid IANA index encoding name from a shorten name or alias.
-func encodingAlias(name string) string {
+// encodeAlias returns a valid IANA index encoding name from a shorten name or alias.
+func encodeAlias(name string) string {
 	// list of valid tables
 	// https://github.com/golang/text/blob/v0.3.2/encoding/charmap/maketables.go
 	// a switch is used instead of a map to avoid typos with duplicate values
-	n := ""
-	if n = encodingIBM(name); n != "" {
+	if n := encodingIBM(name); n != "" {
 		return n
 	}
-	if n = encodingMisc(name); n != "" {
+	if n := encodingMisc(name); n != "" {
 		return n
 	}
-	if n = encodingWin(name); n != "" {
+	if n := encodingWin(name); n != "" {
 		return n
 	}
-	if n = encodingISO(name); n != "" {
+	if n := encodingISO(name); n != "" {
 		return n
 	}
-	if n = encodingUnicode(name); n != "" {
+	if n := encodingUnicode(name); n != "" {
 		return n
 	}
-	return n
+	return ""
 }
 
 // encodingIBM returns a valid IANA index encoding name for IBM codepages using a custom alias.

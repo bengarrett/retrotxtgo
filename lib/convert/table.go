@@ -25,7 +25,7 @@ func Table(name string) (*bytes.Buffer, error) {
 		return nil, err
 	}
 	h := fmt.Sprintf("%s", cp)
-	if a := encodingAlias(shorten(name)); a == "iso-8859-11" {
+	if a := encodeAlias(shorten(name)); a == "iso-8859-11" {
 		h = "ISO 8859-11"
 		cp = charmap.XUserDefined
 	}
@@ -85,11 +85,11 @@ func Table(name string) (*bytes.Buffer, error) {
 }
 
 func tblEncode(name string) (encoding.Encoding, error) {
-	cp, err := Encoder(name)
+	enc, err := Encoder(name)
 	if err != nil {
 		return nil, fmt.Errorf("table encoding error: %w", err)
 	}
-	switch cp {
+	switch enc {
 	case uni.UTF16(uni.BigEndian, uni.UseBOM),
 		uni.UTF16(uni.BigEndian, uni.IgnoreBOM),
 		uni.UTF16(uni.LittleEndian, uni.IgnoreBOM):
@@ -99,7 +99,7 @@ func tblEncode(name string) (encoding.Encoding, error) {
 		utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM):
 		return nil, ErrUTF32
 	}
-	return cp, nil
+	return enc, nil
 }
 
 // character converts rune to an encoded string.
