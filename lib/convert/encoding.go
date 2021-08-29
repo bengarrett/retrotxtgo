@@ -164,13 +164,13 @@ func Encoder(name string) (encoding.Encoding, error) {
 		}
 	}
 	// use iana names or alias
-	if enc, err := ianaindex.IANA.Encoding(name); err == nil && enc != nil {
-		return enc, nil
+	if e, err := ianaindex.IANA.Encoding(name); err == nil && e != nil {
+		return e, nil
 	}
 	// use html index name (only used with HTML compatible encodings)
 	// https://encoding.spec.whatwg.org/#names-and-labels
-	if enc, err := htmlindex.Get(name); err == nil && enc != nil {
-		return enc, nil
+	if e, err := htmlindex.Get(name); err == nil && e != nil {
+		return e, nil
 	}
 	s := shorten(name)
 	a := encodeAlias(s)
@@ -180,23 +180,23 @@ func Encoder(name string) (encoding.Encoding, error) {
 		// https://en.wikipedia.org/wiki/ISO/IEC_8859-11#Code_page_874_(IBM)_/_9066
 		return charmap.Windows874, nil
 	}
-	if ee := encodeUTF32(a); ee != nil {
-		return ee, nil
+	if e := encodeUTF32(a); e != nil {
+		return e, nil
 	}
-	enc, err := ianaindex.IANA.Encoding(s)
+	e, err := ianaindex.IANA.Encoding(s)
 	if err != nil {
-		enc, err = ianaindex.IANA.Encoding(a)
+		e, err = ianaindex.IANA.Encoding(a)
 	}
 	if err != nil {
-		enc, err = ianaindex.IANA.Encoding(encodeAlias(name))
+		e, err = ianaindex.IANA.Encoding(encodeAlias(name))
 	}
-	if err != nil || enc == nil {
+	if err != nil || e == nil {
 		if a == "" {
-			return enc, fmt.Errorf("%q: %w", name, ErrName)
+			return e, fmt.Errorf("%q: %w", name, ErrName)
 		}
-		return enc, fmt.Errorf("name %q or alias %q: %w", name, a, ErrName)
+		return e, fmt.Errorf("name %q or alias %q: %w", name, a, ErrName)
 	}
-	return enc, nil
+	return e, nil
 }
 
 // encodeUTF32 initializes common UTF-32 encodings.
@@ -256,20 +256,20 @@ func encodeAlias(name string) string {
 	// list of valid tables
 	// https://github.com/golang/text/blob/v0.3.2/encoding/charmap/maketables.go
 	// a switch is used instead of a map to avoid typos with duplicate values
-	if n := encodingIBM(name); n != "" {
-		return n
+	if s := encodingIBM(name); s != "" {
+		return s
 	}
-	if n := encodingMisc(name); n != "" {
-		return n
+	if s := encodingMisc(name); s != "" {
+		return s
 	}
-	if n := encodingWin(name); n != "" {
-		return n
+	if s := encodingWin(name); s != "" {
+		return s
 	}
-	if n := encodingISO(name); n != "" {
-		return n
+	if s := encodingISO(name); s != "" {
+		return s
 	}
-	if n := encodingUnicode(name); n != "" {
-		return n
+	if s := encodingUnicode(name); s != "" {
+		return s
 	}
 	return ""
 }
@@ -380,8 +380,8 @@ func encodingISO(name string) string {
 	case "16", "28606", "iso885916":
 		return "ISO-8859-16"
 	default:
-		if n := encodingEurope(name); n != "" {
-			return n
+		if s := encodingEurope(name); s != "" {
+			return s
 		}
 	}
 	return ""
