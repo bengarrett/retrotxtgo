@@ -247,10 +247,14 @@ func (args *Args) templateSave() error {
 
 // comment content for the meta retrotxt attribute.
 func (args *Args) comment(lb filesystem.LB, r ...rune) string {
-	l, w, f := 0, 0, "n/a"
-	b, lbs, e := []byte(string(r)),
-		filesystem.LineBreak(lb, false),
-		args.Source.Encoding
+	const na = "n/a"
+	l, w, name, b := 0, 0, na, []byte(string(r))
+
+	e := na
+	if args.Source.Encoding != nil {
+		e = fmt.Sprint(args.Source.Encoding)
+	}
+	lbs := filesystem.LineBreak(lb, false)
 	l, err := filesystem.Lines(bytes.NewReader(b), lb)
 	if err != nil {
 		l = -1
@@ -260,9 +264,10 @@ func (args *Args) comment(lb filesystem.LB, r ...rune) string {
 		w = -1
 	}
 	if args.Source.Name != "" {
-		f = args.Source.Name
+		name = args.Source.Name
 	}
-	return fmt.Sprintf("encoding: %s; line break: %s; length: %d; width: %d; name: %s", e, lbs, l, w, f)
+	return fmt.Sprintf("encoding: %s; line break: %s; length: %d; width: %d; name: %s",
+		e, lbs, l, w, name)
 }
 
 // fontFamily value for the CSS font face.
