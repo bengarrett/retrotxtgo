@@ -3,6 +3,7 @@ package convert
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"math"
 	"strings"
 	"unicode/utf8"
@@ -18,11 +19,11 @@ import (
 
 // ANSI transforms legacy encoded ANSI into modern UTF-8 text.
 // It displays ASCII control codes as characters.
-// It obeys the end of file marker.
+// It obeys the DOS end of file marker.
 func (c *Convert) ANSI(b ...byte) ([]rune, error) {
 	c.lineBreaks = true
 	c.Flags.SwapChars = nil
-	c.Input.Bytes = EndOfFile(b)
+	c.Input.Bytes = TrimEOF(b)
 	if err := c.skipCtrlCodes().Transform(); err != nil {
 		return nil, fmt.Errorf("dump transform failed: %w", err)
 	}
@@ -32,7 +33,7 @@ func (c *Convert) ANSI(b ...byte) ([]rune, error) {
 
 // Chars transforms legacy encoded characters and text control codes into UTF-8 characters.
 // It displays both ASCII and ANSI control codes as characters.
-// It ignores the end of file marker.
+// It ignores the DOS end of file marker.
 func (c *Convert) Chars(b ...byte) ([]rune, error) {
 	c.Input.table = true
 	c.Input.Bytes = b
@@ -45,7 +46,7 @@ func (c *Convert) Chars(b ...byte) ([]rune, error) {
 
 // Dump transforms legacy encoded text or ANSI into modern UTF-8 text.
 // It obeys common ASCII control codes.
-// It ignores the end of file marker.
+// It ignores the DOS end of file marker.
 func (c *Convert) Dump(b ...byte) ([]rune, error) {
 	c.lineBreaks = true
 	c.Input.Bytes = b
@@ -58,10 +59,10 @@ func (c *Convert) Dump(b ...byte) ([]rune, error) {
 
 // Text transforms legacy encoded text or ANSI into modern UTF-8 text.
 // It obeys common ASCII control codes.
-// It obeys the end of file marker.
+// It obeys the DOS end of file marker.
 func (c *Convert) Text(b ...byte) ([]rune, error) {
 	c.lineBreaks = true
-	c.Input.Bytes = EndOfFile(b)
+	c.Input.Bytes = TrimEOF(b)
 	if err := c.skipCtrlCodes().Transform(); err != nil {
 		return nil, fmt.Errorf("text transform failed: %w", err)
 	}
@@ -72,7 +73,7 @@ func (c *Convert) Text(b ...byte) ([]rune, error) {
 // Transform byte data from named character map encoded text into UTF-8.
 func (c *Convert) Transform() error {
 	if c.Input.Encoding == nil {
-		return ErrEncoding // or c.Input.Encoding = unicode.UTF8
+		return ErrEncoding
 	}
 	if len(c.Input.Bytes) == 0 {
 		return ErrBytes
@@ -111,7 +112,7 @@ func (c *Convert) fixJISTable() {
 			switch {
 			case b > 0x7f && b <= 0xa0,
 				b >= 0xe0 && b <= 0xff:
-				c.Input.Bytes[i] = 32
+				c.Input.Bytes[i] = SP
 			}
 		}
 	}
@@ -141,7 +142,7 @@ func unicodeDecoder(e encoding.Encoding, input []byte) ([]rune, error) {
 	)
 	switch e {
 	case unicode.UTF8, unicode.UTF8BOM:
-		return bytes.Runes(input), nil // c.Input.Bytes
+		return bytes.Runes(input), nil
 	case u16be:
 		return decode(u16be, input)
 	case u16le:
@@ -164,6 +165,9 @@ func unicodeDecoder(e encoding.Encoding, input []byte) ([]rune, error) {
 
 // wrapWidth enforces a row length by inserting newline characters.
 func (c *Convert) wrapWidth(max int) {
+	if len(c.Output) == 0 {
+		log.Fatal(ErrChainWrap)
+	}
 	if max < 1 {
 		return
 	}
@@ -197,38 +201,26 @@ func (c *Convert) wrapWidth(max int) {
 // skipCtrlCodes marks control characters to be ignored.
 // It needs to be applied before Convert.transform().
 func (c *Convert) skipCtrlCodes() *Convert {
-	const (
-		bell = iota + 7 // BEL = x07
-		bs
-		tab
-		lf
-		vt
-		ff
-		cr
-
-		esc = 27
-		del = 127
-	)
 	for _, v := range c.Flags.Controls {
 		switch strings.ToLower(v) {
 		case "bell", "bel", "b":
-			c.ignore(bell)
+			c.ignore(BEL)
 		case "backspace", "bs":
-			c.ignore(bs)
+			c.ignore(BS)
 		case "tab", "ht", "t":
-			c.ignore(tab)
+			c.ignore(HT)
 		case "lf", "l":
-			c.ignore(lf)
+			c.ignore(LF)
 		case "vtab", "vt", "v":
-			c.ignore(vt)
+			c.ignore(VT)
 		case "formfeed", "ff", "f":
-			c.ignore(ff)
+			c.ignore(FF)
 		case "cr", "c":
-			c.ignore(cr)
+			c.ignore(CR)
 		case "esc", "e":
-			c.ignore(esc)
+			c.ignore(ESC)
 		case "del", "d":
-			c.ignore(del)
+			c.ignore(DEL)
 		}
 	}
 	return c

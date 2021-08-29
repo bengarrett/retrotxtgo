@@ -13,7 +13,7 @@ func ExampleBOM() {
 	// Output: EFBBBF
 }
 
-func TestEndOfFile(t *testing.T) {
+func TestTrimEOF(t *testing.T) {
 	tests := []struct {
 		name string
 		b    []byte
@@ -26,8 +26,8 @@ func TestEndOfFile(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := EndOfFile(tt.b); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("EndOfFile() = %v, want %v", got, tt.want)
+			if got := TrimEOF(tt.b); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("TrimEOF() = %v, want %v", got, tt.want)
 			}
 		})
 	}

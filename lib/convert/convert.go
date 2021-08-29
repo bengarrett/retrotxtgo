@@ -33,8 +33,8 @@ type Flag struct {
 }
 
 const (
-	// EOF end of file character.
-	EOF = 26
+	// EOF is the substitute character that in DOS and CP/M is used as an end-of-file marker.
+	EOF = SUB
 )
 
 // BOM is the UTF-8 byte order mark prefix.
@@ -43,8 +43,8 @@ func BOM() []byte {
 	return []byte{ef, bb, bf}
 }
 
-// EndOfFile will cut text at the first DOS end-of-file marker.
-func EndOfFile(b []byte) []byte {
+// TrimEOF will cut text at the first occurrence of the SUB character, used by DOS and CP/M as an end-of-file marker.
+func TrimEOF(b []byte) []byte {
 	if cut := bytes.IndexByte(b, EOF); cut > 0 {
 		return b[:cut]
 	}

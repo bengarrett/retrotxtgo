@@ -1,9 +1,22 @@
 package convert
 
 import (
+	"bytes"
+	"reflect"
 	"testing"
 
-	"golang.org/x/text/encoding/unicode"
+	"github.com/bengarrett/retrotxtgo/lib/filesystem"
+	"golang.org/x/text/encoding/charmap"
+	"golang.org/x/text/encoding/japanese"
+)
+
+const (
+	ascii    = "Hello world!"
+	abc      = "\x00 \x01 \x02\x0D\x0A\x1b[0mA B C"
+	eof      = "Hello\x1Aworld!"
+	wantAbc  = "␀ ☺ ☻♪◙←[0mA B C"
+	wantEOF1 = "Hello"
+	wantEOF0 = "Hello→world!"
 )
 
 func Test_skipCtrlCodes(t *testing.T) {
@@ -30,30 +43,176 @@ func Test_skipCtrlCodes(t *testing.T) {
 	}
 }
 
-func TestArgs_Dump(t *testing.T) {
+func TestConvert_ANSI(t *testing.T) {
+	const wantHi = "\x1b[0m\x0D\x0A" +
+		"\x1b[1;33m  ╓──────────────╖\x1b[0m\x0D\x0A" +
+		"\x1b[1;33m  ║\x1b[0m  Hello world \x1b[1;33m║\x1b[0m\x0D\x0A" +
+		"\x1b[1;33m  ╙──────────────╜\x1b[0m\x0D\x0A"
+	ba := []byte(ascii)
+	be := []byte(eof)
+	hi, err := filesystem.Read("static/test-hello_world.ans")
+	if err != nil {
+		t.Error(err)
+	}
+	type args struct {
+		b []byte
+	}
 	tests := []struct {
 		name    string
-		b       []byte
-		want    string
+		args    args
+		want    []rune
 		wantErr bool
 	}{
-		{"empty", []byte(""), "", true},
-		{"hi", []byte("hello\nworld"), "hello\nworld", false},
+		{"empty", args{}, nil, true},
+		{"ascii", args{ba}, bytes.Runes(ba), false},
+		{"eof", args{be}, bytes.Runes([]byte(wantEOF1)), false},
+		{"ansi", args{hi}, bytes.Runes([]byte(wantHi)), false},
 	}
-	for _, tt := range tests {
-		var a = Convert{}
-		if len(tt.b) > 0 {
-			a.Input.Encoding = unicode.UTF8
-		}
+	for _, tt := range tests { //nolint: dupl
 		t.Run(tt.name, func(t *testing.T) {
-			gotUtf8, err := a.Dump(tt.b...)
+			c := Convert{}
+			c.Input.Encoding = charmap.CodePage437
+			got, err := c.ANSI(tt.args.b...)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Args.Dump() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Convert.ANSI() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if string(gotUtf8) != tt.want {
-				t.Errorf("Args.Dump() gotUtf8 = %v, want %v", string(gotUtf8), tt.want)
+			if !reflect.DeepEqual(got, tt.want) {
+				g, w := string(got), string(tt.want)
+				t.Errorf("Convert.ANSI() = %s (%d), want %s (%d)",
+					g, len(g), w, len(w))
 			}
 		})
+	}
+}
+
+func TestConvert_Chars(t *testing.T) {
+	type args struct {
+		b []byte
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []rune
+		wantErr bool
+	}{
+		{"empty", args{}, nil, true},
+		{"ascii", args{[]byte(ascii)}, bytes.Runes([]byte(ascii)), false},
+		{"eof", args{[]byte(eof)}, bytes.Runes([]byte(wantEOF0)), false},
+		{"ansi", args{[]byte(abc)}, bytes.Runes([]byte(wantAbc)), false},
+	}
+	for _, tt := range tests { //nolint: dupl
+		t.Run(tt.name, func(t *testing.T) {
+			c := Convert{}
+			c.Input.Encoding = charmap.CodePage437
+			got, err := c.Chars(tt.args.b...)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Convert.Chars() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				g, w := string(got), string(tt.want)
+				t.Errorf("Convert.Chars() = %s (%d), want %s (%d)",
+					g, len(g), w, len(w))
+			}
+		})
+	}
+}
+
+func TestConvert_Dump(t *testing.T) {
+	bhi := []byte("hello\nworld")
+	type args struct {
+		b []byte
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []rune
+		wantErr bool
+	}{
+		{"empty", args{}, nil, true},
+		{"nl", args{bhi}, bytes.Runes(bhi), false},
+		{"ascii", args{[]byte(ascii)}, bytes.Runes([]byte(ascii)), false},
+		{"eof", args{[]byte(eof)}, bytes.Runes([]byte(wantEOF0)), false},
+		{"abc", args{[]byte(abc)}, []rune("␀ ☺ ☻\r\n[0mA B C"), false},
+	}
+	for _, tt := range tests { //nolint: dupl
+		t.Run(tt.name, func(t *testing.T) {
+			c := Convert{}
+			c.Input.Encoding = charmap.CodePage437
+			got, err := c.Dump(tt.args.b...)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Convert.Dump() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				g, w := string(got), string(tt.want)
+				t.Errorf("Convert.Dump() = %q (%dB), want %q (%dB)",
+					g, len(g), w, len(w))
+			}
+		})
+	}
+}
+
+func TestConvert_Text(t *testing.T) {
+	const wantHi = "\x1b[0m\x0D\x0A" +
+		"\x1b[1;33m  ╓──────────────╖\x1b[0m\x0D\x0A" +
+		"\x1b[1;33m  ║\x1b[0m  Hello world \x1b[1;33m║\x1b[0m\x0D\x0A" +
+		"\x1b[1;33m  ╙──────────────╜\x1b[0m\x0D\x0A"
+	ba := []byte(ascii)
+	be := []byte(eof)
+	hi, err := filesystem.Read("static/test-hello_world.ans")
+	if err != nil {
+		t.Error(err)
+	}
+	type args struct {
+		b []byte
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []rune
+		wantErr bool
+	}{
+		{"empty", args{}, nil, true},
+		{"ascii", args{ba}, bytes.Runes(ba), false},
+		{"eof", args{be}, bytes.Runes([]byte(wantEOF1)), false},
+		{"ansi", args{hi}, bytes.Runes([]byte(wantHi)), false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			const verticalBar = 124
+			c := Convert{}
+			c.Flags.SwapChars = []int{NUL, verticalBar}
+			c.Input.Encoding = charmap.CodePage437
+			got, err := c.Text(tt.args.b...)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Convert.Text() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				g, w := string(got), string(tt.want)
+				t.Errorf("Convert.Text() = %s (%d), want %s (%d)",
+					g, len(g), w, len(w))
+			}
+		})
+	}
+}
+
+func TestConvert_fixJISTable(t *testing.T) {
+	fix := []byte("\x7f\xa0\xe0\xff")
+	c := Convert{}
+	c.Input.Bytes = fix
+	c.Input.table = true
+	c.fixJISTable()
+	if !reflect.DeepEqual(c.Input.Bytes, fix) {
+		t.Errorf("Convert.fixJISTable() = %s, want %s", c.Input.Bytes, fix)
+	}
+	c.Input.Encoding = japanese.ShiftJIS
+	c.Input.Bytes = fix
+	c.fixJISTable()
+	want := []byte("\u007f   ")
+	if !reflect.DeepEqual(c.Input.Bytes, want) {
+		t.Errorf("Convert.fixJISTable() = %q, want %q", c.Input.Bytes, want)
 	}
 }
