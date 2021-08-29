@@ -41,7 +41,7 @@ func Read(name string) ([]byte, error) {
 
 // ReadAllBytes reads the named file and returns the content as a byte array.
 // Create a word and random character generator to make files larger than 64k.
-func ReadAllBytes(name string) (data []byte, err error) {
+func ReadAllBytes(name string) ([]byte, error) {
 	file, err := os.Open(name)
 	if err != nil {
 		return nil, fmt.Errorf("read all bytes could not open file: %q: %w", name, err)
@@ -53,26 +53,28 @@ func ReadAllBytes(name string) (data []byte, err error) {
 	// Go by default will scan 64 * 1024 bytes (64KB) per iteration
 	const KB = 1024
 	const max = 64 * KB
-	scanner.Buffer(data, max)
+	buf := []byte{}
+	scanner.Buffer(buf, max)
 	// required, split scan into Buffer(data, x) sized byte chuncks
 	// otherwise scanner will panic on files larger than 64 * 1024 bytes
 	scanner.Split(bufio.ScanBytes)
 	for scanner.Scan() {
-		data = append(data, scanner.Bytes()...)
+		buf = append(buf, scanner.Bytes()...)
 	}
 	if err = scanner.Err(); err != nil {
-		return data, fmt.Errorf("read all bytes could not scan file: %q: %w", name, err)
+		return nil, fmt.Errorf("read all bytes could not scan file: %q: %w", name, err)
 	}
-	return data, file.Close()
+	return buf, file.Close()
 }
 
 // ReadChunk reads and returns the start of the named file.
-func ReadChunk(name string, chars int) (data []byte, err error) {
+func ReadChunk(name string, chars int) ([]byte, error) {
 	file, err := os.Open(name)
 	if err != nil {
 		return nil, fmt.Errorf("read chunk could not open file: %q: %w", name, err)
 	}
 	defer file.Close()
+	buf := []byte{}
 	scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanRunes)
 	count := 0
@@ -81,12 +83,12 @@ func ReadChunk(name string, chars int) (data []byte, err error) {
 		if count > chars {
 			break
 		}
-		data = append(data, scanner.Bytes()...)
+		buf = append(buf, scanner.Bytes()...)
 	}
 	if err = scanner.Err(); err != nil {
-		return data, fmt.Errorf("read chunk could not scan file: %q: %w", name, err)
+		return nil, fmt.Errorf("read chunk could not scan file: %q: %w", name, err)
 	}
-	return data, file.Close()
+	return buf, file.Close()
 }
 
 // ReadColumns counts the number of characters used per line in the named file.
@@ -122,22 +124,22 @@ func ReadControls(name string) (count int, err error) {
 }
 
 // ReadLine reads a named file location or a named temporary file and returns its content.
-func ReadLine(name string, lb lineBreaks) (text string, err error) {
+func ReadLine(name string, lb lineBreaks) (string, error) {
 	var path, n = tempFile(name), lineBreak(lb)
 	file, err := os.OpenFile(path, os.O_RDONLY, fileMode)
 	if err != nil {
-		return text, fmt.Errorf("read line could not open file: %q: %w", name, err)
+		return "", fmt.Errorf("read line could not open file: %q: %w", name, err)
 	}
 	defer file.Close()
 	// bufio is the most performant
-	scanner := bufio.NewScanner(file)
+	s, scanner := "", bufio.NewScanner(file)
 	for scanner.Scan() {
-		text += fmt.Sprintf("%s%s", scanner.Text(), n)
+		s += fmt.Sprintf("%s%s", scanner.Text(), n)
 	}
 	if err = scanner.Err(); err != nil {
-		return text, fmt.Errorf("read line could not scan file: %w", err)
+		return "", fmt.Errorf("read line could not scan file: %w", err)
 	}
-	return text, file.Close()
+	return s, file.Close()
 }
 
 // ReadLines counts the number of lines in the named file.
@@ -175,17 +177,18 @@ func ReadLineBreaks(name string) ([2]rune, error) {
 
 // ReadPipe reads data piped by the operating system's STDIN.
 // If no data is detected the program will exit.
-func ReadPipe() (b []byte, err error) {
+func ReadPipe() ([]byte, error) {
+	b := []byte{}
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		b = append(b, scanner.Bytes()...)
 		b = append(b, []byte("\n")...)
 	}
-	if err = scanner.Err(); err != nil {
-		return b, fmt.Errorf("read pipe could not scan stdin: %w", err)
+	if err := scanner.Err(); err != nil {
+		return nil, fmt.Errorf("read pipe could not scan stdin: %w", err)
 	}
 	if len(b) == 0 {
-		os.Exit(0)
+		return nil, logs.ErrPipeEmpty
 	}
 	return b, nil
 }

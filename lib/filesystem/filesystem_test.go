@@ -297,7 +297,7 @@ func TestReadChunk(t *testing.T) {
 		{"invalid", args{"/invalid-file", 0}, nil, true},
 		{"dir", args{os.TempDir(), 0}, nil, true},
 		{"range 0", args{"", 10}, nil, true},
-		{"range -", args{f2, -20}, nil, false},
+		{"range -", args{f2, -20}, []byte{}, false},
 		{"range +", args{f2, 20}, []byte(T()["Symbols"]), false},
 		{"nl", args{f1, 4}, []byte("a\nb\n"), false},
 		{"utf8", args{f2, 4}, []byte("[☠|☮"), false},

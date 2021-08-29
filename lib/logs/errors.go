@@ -37,6 +37,7 @@ var (
 	ErrConfigRead = errors.New("could not parse or use the configuration file")
 
 	// pipe/stdin.
+	ErrPipeEmpty = errors.New("empty text stream from piped stdin (standard input)")
 	ErrPipeRead  = errors.New("could not read text stream from piped stdin (standard input)")
 	ErrPipeParse = errors.New("could not parse the text stream from piped stdin (standard input)")
 

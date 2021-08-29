@@ -1,6 +1,7 @@
 package filesystem
 
 import (
+	"bytes"
 	"os"
 	"testing"
 )
@@ -201,6 +202,72 @@ func TestReadWords(t *testing.T) {
 			}
 			if gotCount != tt.wantCount {
 				t.Errorf("ReadWords() = %v, want %v", gotCount, tt.wantCount)
+			}
+		})
+	}
+}
+
+// mockInput uses the os pipe to mock the user input.
+// os.Pipe() https://stackoverflow.com/questions/46365221/fill-os-stdin-for-function-that-reads-from-it
+func mockInput(input string) (*os.File, error) {
+	/*
+		Usage:
+		r, err := mockInput(tt.args.input)
+		if err != nil {
+			t.Error(err)
+		}
+		stdin := os.Stdin
+		defer func() {
+			os.Stdin = stdin
+		}()
+		os.Stdin = r
+	*/
+	s := []byte(input)
+	r, w, err := os.Pipe()
+	if err != nil {
+		return r, err
+	}
+	_, err = w.Write(s)
+	if err != nil {
+		return r, err
+	}
+	w.Close()
+	return r, nil
+}
+
+func TestReadPipe(t *testing.T) {
+	type args struct {
+		input string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []byte
+		wantErr bool
+	}{
+		{"empty", args{}, nil, true},
+		{"hi", args{"hello world"}, []byte("hello world\n"), false},
+		{"nl", args{"hello\nworld"}, []byte("hello\nworld\n"), false},
+		{"utf8", args{"hello 😄"}, []byte("hello 😄\n"), false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r, err := mockInput(tt.args.input)
+			if err != nil {
+				t.Error(err)
+			}
+			stdin := os.Stdin
+			defer func() {
+				os.Stdin = stdin
+			}()
+			os.Stdin = r
+			gotB, err := ReadPipe()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ReadPipe() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !bytes.Equal(gotB, tt.want) {
+				t.Errorf("ReadPipe() = %v, want %v", gotB, tt.want)
 			}
 		})
 	}
