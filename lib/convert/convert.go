@@ -11,8 +11,8 @@ import (
 // Convert 8-bit legacy or other Unicode text to UTF-8.
 type Convert struct {
 	Flags      Flag   // Commandline supplied flag values.
-	Input      In     // Input text for conversion.
-	Output     []rune // Output text as UTF-8 runes.
+	Input      In     // Input text for transformation.
+	Output     []rune // Transformed UTF-8 runes.
 	ignores    []rune // runes to ignore.
 	lineBreaks bool   // use line break controls?
 }

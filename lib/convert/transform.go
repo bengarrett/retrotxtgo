@@ -13,6 +13,7 @@ import (
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/encoding/unicode/utf32"
+	"golang.org/x/text/transform"
 )
 
 // ANSI transforms legacy encoded ANSI into modern UTF-8 text.
@@ -71,33 +72,38 @@ func (c *Convert) Text(b ...byte) ([]rune, error) {
 // Transform byte data from named character map encoded text into UTF-8.
 func (c *Convert) Transform() error {
 	if c.Input.Encoding == nil {
-		c.Input.Encoding = unicode.UTF8
+		return ErrEncoding // or c.Input.Encoding = unicode.UTF8
 	}
 	if len(c.Input.Bytes) == 0 {
-		return nil
+		return ErrBytes
 	}
-	if err := c.transformUnicode(); err != nil {
+	// transform unicode encodings
+	if r, err := unicodeDecoder(c.Input.Encoding, c.Input.Bytes); err != nil {
 		return err
-	}
-	if len(c.Output) > 0 {
+	} else if len(r) > 0 {
+		c.Output = r
 		return nil
 	}
-	c.transformFixJISTable()
-	// return the source as runes if it is already in UTF-8 Unicode
+	// use the input bytes if they are already valid UTF-8 runes
 	if utf8.Valid(c.Input.Bytes) {
 		c.Output = bytes.Runes(c.Input.Bytes)
 		return nil
 	}
-	var err error
-	if c.Input.Bytes, err = c.Input.Encoding.NewDecoder().Bytes(c.Input.Bytes); err != nil {
-		return fmt.Errorf("transform new decoder error: %w", err)
+	// transform the input bytes into UTF-8 runes
+	c.fixJISTable()
+	b := bytes.Buffer{}
+	t := transform.NewWriter(&b, c.Input.Encoding.NewDecoder())
+	_, err := t.Write(c.Input.Bytes)
+	if err != nil {
+		return err
 	}
-	c.Output = bytes.Runes(c.Input.Bytes)
+	defer t.Close()
+	c.Output = bytes.Runes(b.Bytes())
 	return nil
 }
 
-// transformFixJISTable blanks invalid ShiftJIS characters while printing 8-bit tables.
-func (c *Convert) transformFixJISTable() {
+// fixJISTable blanks invalid ShiftJIS characters while printing 8-bit tables.
+func (c *Convert) fixJISTable() {
 	if c.Input.Encoding == japanese.ShiftJIS && c.Input.table {
 		// this is only for the table command,
 		// it will break normal shift-jis encode text
@@ -111,74 +117,49 @@ func (c *Convert) transformFixJISTable() {
 	}
 }
 
-// decode transforms Source bytes into Output runes.
-func (c *Convert) decode(e encoding.Encoding) error {
-	result, err := e.NewDecoder().Bytes(c.Input.Bytes)
+// decode transforms encoded input bytes into UTF-8 runes.
+func decode(e encoding.Encoding, input []byte) ([]rune, error) {
+	b, err := e.NewDecoder().Bytes(input)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	c.Output = bytes.Runes(result)
-	return nil
+	// c.Output
+	return bytes.Runes(b), nil
 }
 
-// transformUnicode transforms Unicode-16 or Unicode-32 text into UTF-8 encoded Unicode.
-func (c *Convert) transformUnicode() error {
+// unicodeDecoder transforms UTF-8, UTF-16 or UTF-32 bytes into UTF-8 runes.
+func unicodeDecoder(e encoding.Encoding, input []byte) ([]rune, error) {
 	var (
 		u16be  = unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM)
 		u16beB = unicode.UTF16(unicode.BigEndian, unicode.ExpectBOM)
 		u16le  = unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM)
 		u16leB = unicode.UTF16(unicode.LittleEndian, unicode.ExpectBOM)
-	)
-	switch c.Input.Encoding {
-	case unicode.UTF8, unicode.UTF8BOM:
-		c.Output = bytes.Runes(c.Input.Bytes)
-	case u16be:
-		if err := c.decode(u16be); err != nil {
-			return err
-		}
-	case u16le:
-		if err := c.decode(u16le); err != nil {
-			return err
-		}
-	case u16beB:
-		if err := c.decode(u16beB); err != nil {
-			return err
-		}
-	case u16leB:
-		if err := c.decode(u16leB); err != nil {
-			return err
-		}
-	}
-	return c.transformU32(c.Input.Encoding)
-}
-
-// transformU32 transforms Unicode-32 text into UTF-8 encoded Unicode.
-func (c *Convert) transformU32(e encoding.Encoding) error {
-	var (
 		u32be  = utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM)
 		u32beB = utf32.UTF32(utf32.BigEndian, utf32.UseBOM)
 		u32le  = utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM)
 		u32leB = utf32.UTF32(utf32.LittleEndian, utf32.UseBOM)
 	)
 	switch e {
+	case unicode.UTF8, unicode.UTF8BOM:
+		return bytes.Runes(input), nil // c.Input.Bytes
+	case u16be:
+		return decode(u16be, input)
+	case u16le:
+		return decode(u16le, input)
+	case u16beB:
+		return decode(u16beB, input)
+	case u16leB:
+		return decode(u16leB, input)
 	case u32be:
-		if err := c.decode(u32be); err != nil {
-			return err
-		}
+		return decode(u32be, input)
 	case u32beB:
-		if err := c.decode(u32beB); err != nil {
-			return err
-		}
+		return decode(u32beB, input)
 	case u32le:
-		if err := c.decode(u32le); err != nil {
-			return err
-		}
+		return decode(u32le, input)
 	case u32leB:
-		if err := c.decode(u32leB); err != nil {
-			return err
-		}
+		return decode(u32leB, input)
 	}
-	return nil
+	return nil, nil
 }
 
 // wrapWidth enforces a row length by inserting newline characters.

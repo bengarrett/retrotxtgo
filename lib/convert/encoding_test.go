@@ -194,13 +194,6 @@ func TestEncoder(t *testing.T) {
 	}
 }
 
-func TestEndOfFileX(t *testing.T) {
-	b := []byte("hello\x1aworld")
-	if got := EndOfFile(b); string(got) != "hello" {
-		t.Errorf("TestEndOfFile() = %v, want %v", string(got), "hello")
-	}
-}
-
 func TestRunesControls(t *testing.T) {
 	tests := []struct {
 		name string
@@ -232,21 +225,23 @@ func TestRunesControls(t *testing.T) {
 
 func TestRunesKOI8(t *testing.T) {
 	tests := []struct {
-		name string
-		text string
-		want string
+		name    string
+		text    string
+		want    string
+		wantErr bool
 	}{
-		{"empty", "", ""},
-		{"hi", "hello world", "hello world"},
-		{"lines", "\x82\x80\x80hi\x80\x80\x83", "┌──hi──┐"},
-		{"invalid", "\x00=NULL & \x1f=?", " =NULL &  =?"},
+		{"empty", "", "", true},
+		{"hi", "hello world", "hello world", false},
+		{"lines", "\x82\x80\x80hi\x80\x80\x83", "┌──hi──┐", false},
+		{"invalid", "\x00=NULL & \x1f=?", " =NULL &  =?", false},
 	}
 	for _, tt := range tests {
 		d := Convert{}
 		d.Input.Bytes = []byte(tt.text)
 		d.Input.Encoding = koi
-		if err := d.Transform(); err != nil {
-			t.Error(err)
+		err := d.Transform()
+		if (err != nil) != tt.wantErr {
+			t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
 		}
 		d.RunesKOI8()
 		t.Run(tt.name, func(t *testing.T) {
@@ -259,21 +254,23 @@ func TestRunesKOI8(t *testing.T) {
 
 func TestRunesLatin(t *testing.T) {
 	tests := []struct {
-		name string
-		text string
-		want string
+		name    string
+		text    string
+		want    string
+		wantErr bool
 	}{
-		{"empty", "", ""},
-		{"hi", "hello world", "hello world"},
-		{"high", "\xbd of 5 is 2.5", "½ of 5 is 2.5"},
-		{"invalid", "\x00=NULL & \x9f=?", " =NULL &  =?"},
+		{"empty", "", "", true},
+		{"hi", "hello world", "hello world", false},
+		{"high", "\xbd of 5 is 2.5", "½ of 5 is 2.5", false},
+		{"invalid", "\x00=NULL & \x9f=?", " =NULL &  =?", false},
 	}
 	for _, tt := range tests {
 		d := Convert{}
 		d.Input.Bytes = []byte(tt.text)
 		d.Input.Encoding = iso1
-		if err := d.Transform(); err != nil {
-			t.Error(err)
+		err := d.Transform()
+		if (err != nil) != tt.wantErr {
+			t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
 		}
 		d.RunesLatin()
 		t.Run(tt.name, func(t *testing.T) {
@@ -286,20 +283,22 @@ func TestRunesLatin(t *testing.T) {
 
 func TestRunesDOS(t *testing.T) {
 	tests := []struct {
-		name string
-		text string
-		want string
+		name    string
+		text    string
+		want    string
+		wantErr bool
 	}{
-		{"empty", "", ""},
-		{"hi", "\x01hello world\x7f", "☺hello world⌂"},
-		{"dos pipes", "|!\x7c", "|!|"},
+		{"empty", "", "", true},
+		{"hi", "\x01hello world\x7f", "☺hello world⌂", false},
+		{"dos pipes", "|!\x7c", "|!|", false},
 	}
 	for _, tt := range tests {
 		d := Convert{}
 		d.Input.Bytes = []byte(tt.text)
 		d.Input.Encoding = cp437
-		if err := d.Transform(); err != nil {
-			t.Error(err)
+		err := d.Transform()
+		if (err != nil) != tt.wantErr {
+			t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
 		}
 		d.RunesDOS()
 		t.Run(tt.name, func(t *testing.T) {
@@ -312,20 +311,22 @@ func TestRunesDOS(t *testing.T) {
 
 func TestRunesMacintosh(t *testing.T) {
 	tests := []struct {
-		name string
-		text string
-		want string
+		name    string
+		text    string
+		want    string
+		wantErr bool
 	}{
-		{"empty", "", ""},
-		{"hi", "hello world", "hello world"},
-		{"controls", "\x11+\x12+Z", "⌘+⇧+Z"},
+		{"empty", "", "", true},
+		{"hi", "hello world", "hello world", false},
+		{"controls", "\x11+\x12+Z", "⌘+⇧+Z", false},
 	}
 	for _, tt := range tests {
 		d := Convert{}
 		d.Input.Bytes = []byte(tt.text)
 		d.Input.Encoding = mac
-		if err := d.Transform(); err != nil {
-			t.Error(err)
+		err := d.Transform()
+		if (err != nil) != tt.wantErr {
+			t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
 		}
 		d.RunesMacintosh()
 		t.Run(tt.name, func(t *testing.T) {
@@ -338,22 +339,24 @@ func TestRunesMacintosh(t *testing.T) {
 
 func TestRunesWindows(t *testing.T) {
 	tests := []struct {
-		name string
-		text string
-		want string
+		name    string
+		text    string
+		want    string
+		wantErr bool
 	}{
-		{"empty", "", ""},
-		{"hi", "hello world", "hello world"},
-		{"ansi control example", "\x1b[0m;", "\x1b[0m;"},
-		{"DEL", "\x7f", "␡"},
-		{"invalid", "\x90", " "},
+		{"empty", "", "", true},
+		{"hi", "hello world", "hello world", false},
+		{"ansi control example", "\x1b[0m;", "\x1b[0m;", false},
+		{"DEL", "\x7f", "␡", false},
+		{"invalid", "\x90", " ", false},
 	}
 	for _, tt := range tests {
 		d := Convert{}
 		d.Input.Bytes = []byte(tt.text)
 		d.Input.Encoding = cp1252
-		if err := d.Transform(); err != nil {
-			t.Error(err)
+		err := d.Transform()
+		if (err != nil) != tt.wantErr {
+			t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
 		}
 		d.RunesWindows()
 		t.Run(tt.name, func(t *testing.T) {
@@ -371,29 +374,31 @@ func TestRunesEBCDIC(t *testing.T) {
 		t.Error(err)
 	}
 	tests := []struct {
-		name   string
-		text   []byte
-		want   string
-		encode bool
+		name    string
+		text    []byte
+		want    string
+		encode  bool
+		wantErr bool
 	}{
-		{"empty", []byte{}, "", true},
-		{"nul", []byte{0}, "\u2400", true},
-		{"ht", []byte{9}, "\u2409", true},
-		{"invalid", []byte{4}, "\u0020", false},
-		{"bell", []byte{7}, "␇", false},
-		{"Æ", []byte{158}, " ", false},
-		{"ring", []byte("ring my bell"), "ring my bell", true},
-		{"ring symbol", append(tx, []byte{7}...), "ring my ␡", false},
-		{"c ben", []byte{180, 64, 194, 133, 149}, "  Ben", false},
-		{"c ben", []byte("© Ben"), "  Ben", true},
+		{"empty", []byte{}, "", true, true},
+		{"nul", []byte{0}, "\u2400", true, false},
+		{"ht", []byte{9}, "\u2409", true, false},
+		{"invalid", []byte{4}, "\u0020", false, false},
+		{"bell", []byte{7}, "␇", false, false},
+		{"Æ", []byte{158}, " ", false, false},
+		{"ring", []byte("ring my bell"), "ring my bell", true, false},
+		{"ring symbol", append(tx, []byte{7}...), "ring my ␡", false, false},
+		{"c ben", []byte{180, 64, 194, 133, 149}, "  Ben", false, false},
+		{"c ben", []byte("© Ben"), "  Ben", true, false},
 	}
 	for _, tt := range tests {
 		c := tt.text
 		d := Convert{}
 		d.Input.Bytes = c
 		d.Input.Encoding = charmap.CodePage037
-		if err := d.Transform(); err != nil {
-			t.Error(err)
+		err := d.Transform()
+		if (err != nil) != tt.wantErr {
+			t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
 		}
 		d.RunesEBCDIC()
 		t.Run(tt.name, func(t *testing.T) {

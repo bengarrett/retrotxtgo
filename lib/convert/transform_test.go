@@ -1,8 +1,9 @@
 package convert
 
 import (
-	"reflect"
 	"testing"
+
+	"golang.org/x/text/encoding/unicode"
 )
 
 func Test_skipCtrlCodes(t *testing.T) {
@@ -36,11 +37,14 @@ func TestArgs_Dump(t *testing.T) {
 		want    string
 		wantErr bool
 	}{
-		{"empty", []byte(""), "", false},
+		{"empty", []byte(""), "", true},
 		{"hi", []byte("hello\nworld"), "hello\nworld", false},
 	}
 	for _, tt := range tests {
 		var a = Convert{}
+		if len(tt.b) > 0 {
+			a.Input.Encoding = unicode.UTF8
+		}
 		t.Run(tt.name, func(t *testing.T) {
 			gotUtf8, err := a.Dump(tt.b...)
 			if (err != nil) != tt.wantErr {
@@ -48,59 +52,7 @@ func TestArgs_Dump(t *testing.T) {
 				return
 			}
 			if string(gotUtf8) != tt.want {
-				t.Errorf("Args.Dump() = %v, want %v", string(gotUtf8), tt.want)
-			}
-		})
-	}
-}
-
-// func TestArgs_Text(t *testing.T) {
-// 	tests := []struct {
-// 		name    string
-// 		b       []byte
-// 		want    string
-// 		wantErr bool
-// 	}{
-// 		{"empty", []byte(""), "", false},
-// 		{"hi", []byte("hello\nworld"), "hello\nworld", false},
-// 	}
-// 	for _, tt := range tests {
-// 		var a = Convert{}
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			gotUtf8, err := a.Text(tt.b...)
-// 			if (err != nil) != tt.wantErr {
-// 				t.Errorf("Args.Text() error = %v, wantErr %v", err, tt.wantErr)
-// 				return
-// 			}
-// 			if string(gotUtf8) != tt.want {
-// 				t.Errorf("Args.Text() = %v, want %v", gotUtf8, tt.want)
-// 			}
-// 		})
-// 	}
-// }
-
-func TestConvert_ANSI(t *testing.T) {
-	type args struct {
-		b []byte
-	}
-	tests := []struct {
-		name    string
-		c       *Convert
-		args    args
-		want    []rune
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.c.ANSI(tt.args.b...)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Convert.ANSI() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Convert.ANSI() = %v, want %v", got, tt.want)
+				t.Errorf("Args.Dump() gotUtf8 = %v, want %v", string(gotUtf8), tt.want)
 			}
 		})
 	}
