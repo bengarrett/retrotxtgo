@@ -26,8 +26,8 @@ func Test_skipCtrlCodes(t *testing.T) {
 		want []rune
 	}{
 		{"nil", []string{}, []rune{}},
-		{"bs", []string{"bs"}, []rune{8}},
-		{"v,del", []string{"v", "del"}, []rune{11, 127}},
+		{"bs", []string{"bs"}, []rune{BS}},
+		{"v,del", []string{"v", "del"}, []rune{VT, DEL}},
 		{"invalid", []string{"xxx"}, []rune{}},
 	}
 	for _, tt := range tests {
@@ -214,5 +214,38 @@ func TestConvert_fixJISTable(t *testing.T) {
 	want := []byte("\u007f   ")
 	if !reflect.DeepEqual(c.Input.Bytes, want) {
 		t.Errorf("Convert.fixJISTable() = %q, want %q", c.Input.Bytes, want)
+	}
+}
+
+func TestConvert_wrapWidth(t *testing.T) {
+	type args struct {
+		max   int
+		input string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{"empty", args{}, "", true},
+		{"no string", args{80, ""}, "", true},
+		{"string", args{80, "abcdefghi"}, "abcdefghi", false},
+		{"3 chrs", args{3, "abcdefghi"}, "abc\ndef\nghi\n", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := Convert{}
+			c.Input.Encoding = charmap.CodePage437
+			c.Flags.MaxWidth = tt.args.max
+			c.Input.lineBreak = [2]rune{13, 0}
+			r, err := c.Chars([]byte(tt.args.input)...)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Convert.wrapWidth() error = %v, want %v", err, tt.wantErr)
+			}
+			if string(r) != tt.want {
+				t.Errorf("Convert.wrapWidth(%d) = %q, want %q", c.Flags.MaxWidth, string(r), tt.want)
+			}
+		})
 	}
 }

@@ -86,6 +86,7 @@ func Columns(r io.Reader, lb LB) (width int, err error) {
 			}
 			i := bytes.Index(buf[pos:], lineBreak)
 			if i == -1 {
+				width = size
 				break
 			}
 			pos += i + len(lineBreak)

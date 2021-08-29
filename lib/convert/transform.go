@@ -165,17 +165,19 @@ func unicodeDecoder(e encoding.Encoding, input []byte) ([]rune, error) {
 
 // wrapWidth enforces a row length by inserting newline characters.
 func (c *Convert) wrapWidth(max int) {
-	if len(c.Output) == 0 {
+	cnt := len(c.Output)
+	if cnt == 0 {
 		log.Fatal(ErrChainWrap)
 	}
 	if max < 1 {
 		return
 	}
-	cnt := len(c.Output)
-	cols, err := filesystem.Columns(bytes.NewReader(c.Input.Bytes), c.Input.lineBreak)
+	r := strings.NewReader(string(c.Output))
+	cols, err := filesystem.Columns(r, c.Input.lineBreak)
 	if err != nil {
 		logs.FatalMark(fmt.Sprint(c.Input.lineBreak), ErrWidth, err)
 	}
+	fmt.Println("COL:", cols, "-->", max, "==>", string(c.Output))
 	if cols <= max {
 		return
 	}
