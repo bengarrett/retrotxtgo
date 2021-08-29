@@ -8,6 +8,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
+	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/htmlindex"
@@ -15,6 +16,8 @@ import (
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/encoding/unicode/utf32"
+	"golang.org/x/text/runes"
+	"golang.org/x/text/transform"
 )
 
 const (
@@ -471,14 +474,44 @@ func (c *Convert) Swap() *Convert {
 }
 
 func (c *Convert) swaps() *Convert {
-	if len(c.Flags.SwapChars) > 0 {
-		for i := 0; i < len(c.Output); i++ {
-			if s := c.runeSwap(c.Output[i]); s >= 0 {
-				c.Output[i] = s
-			}
-		}
+	if len(c.Flags.SwapChars) == 0 {
+		return c
 	}
+	replace := runes.Map(swapRune)
+	s, _, err := transform.String(replace, string(c.Output))
+	if err != nil {
+		logs.Fatal(err)
+	}
+	c.Output = []rune(s)
 	return c
+}
+
+func swapRune(r rune) rune {
+	switch {
+	case r == NUL:
+		return swap(NUL)
+	case r == SymbolNUL:
+		return swap(NUL)
+	case r == VerticalBar:
+		return swap(VerticalBar)
+	case r == House:
+		return swap(DEL)
+	case r == LightVerticalU:
+		return swap(LightVertical)
+	case r == SquareRootU:
+		return swap(SquareRoot)
+	}
+	return r
+}
+
+func swap(code int) rune {
+	return map[int]rune{
+		NUL:           SP,
+		VerticalBar:   BrokenBar,
+		DEL:           Delta,             // Δ
+		LightVertical: IntegralExtension, // ⎮
+		SquareRoot:    CheckMark,         // ✓
+	}[code]
 }
 
 // ANSIControls replaces out all ←[ and ␛[ character matches with functional ANSI escape controls.
@@ -579,10 +612,10 @@ func (c *Convert) RunesDOS() {
 		case r >= NUL && r <= US:
 			c.Output[i], _ = utf8.DecodeRuneInString(ctrls[r]) // c0, c1 controllers
 		case r == DEL:
-			house := [3]byte{0xe2, 0x8c, 0x82} // ⌂
+			house := [3]byte{0xE2, 0x8C, 0x82} // ⌂
 			c.Output[i], _ = utf8.DecodeRune(house[:])
 		case r == NBSP:
-			noBreakSpace := [2]byte{0xc2, 0xa0} // NBSP
+			noBreakSpace := [2]byte{0xC2, 0xA0} // NBSP
 			c.Output[i], _ = utf8.DecodeRune(noBreakSpace[:])
 		}
 	}
@@ -612,8 +645,8 @@ func (c *Convert) control(i int, r rune) (skip bool) { // nolint:gocyclo
 	}
 	const (
 		ht  = 0x89
-		del = 0xa1
-		nl  = 0xa4
+		del = 0xA1
+		nl  = 0xA4
 		bs  = 0x88
 		lf  = 0x8A
 		etb = 0x97
@@ -675,7 +708,7 @@ func (c *Convert) control(i int, r rune) (skip bool) { // nolint:gocyclo
 func (c *Convert) miscCtrls(i int, r rune) {
 	switch r {
 	case Nbsp:
-		noBreakSpace := [2]byte{0xc2, 0xa0}
+		noBreakSpace := [2]byte{0xC2, 0xA0}
 		c.Output[i], _ = utf8.DecodeRune(noBreakSpace[:])
 	case NUL, SOH, STX, ETX, VT, FF, CR, SO, SI, DLE, DC1, DC2, DC3, CAN, EM, FS, GS, RS, US:
 		// shared controls with ASCII C0+C1
@@ -766,16 +799,16 @@ func (c *Convert) RunesMacintosh() {
 		}
 		switch r {
 		case command:
-			commandR := [3]byte{0xe2, 0x8c, 0x98}
+			commandR := [3]byte{0xE2, 0x8C, 0x98}
 			c.Output[i], _ = utf8.DecodeRune(commandR[:])
 		case shift:
-			shiftR := [3]byte{0xe2, 0x87, 0xa7}
+			shiftR := [3]byte{0xE2, 0x87, 0xA7}
 			c.Output[i], _ = utf8.DecodeRune(shiftR[:])
 		case option:
-			optionR := [3]byte{0xe2, 0x8c, 0xa5}
+			optionR := [3]byte{0xE2, 0x8C, 0xA5}
 			c.Output[i], _ = utf8.DecodeRune(optionR[:])
 		case control:
-			controlR := [3]byte{0xe2, 0x8c, 0x83}
+			controlR := [3]byte{0xE2, 0x8C, 0x83}
 			c.Output[i], _ = utf8.DecodeRune(controlR[:])
 		case DEL:
 			c.Output[i] = SymbolDEL
@@ -840,7 +873,7 @@ func (c *Convert) RunesUTF8() {
 // picture converts a byte value to a Unicode Control Picture rune.
 func picture(b byte) rune {
 	// code points U+2400 to U+243F
-	controlPicture := [3]byte{0xe2, 0x90, b}
+	controlPicture := [3]byte{0xE2, 0x90, b}
 	fmt.Println(controlPicture)
 	r, _ := utf8.DecodeRune(controlPicture[:])
 	return r
@@ -869,60 +902,6 @@ func (c *Convert) skipLineBreaks(i int) bool {
 	}
 	if equalLB([2]rune{r0, r1}, c.Input.lineBreak) {
 		return true
-	}
-	return false
-}
-
-func swap(code int) rune {
-	return map[int]rune{
-		NUL:           SP,
-		VerticalBar:   BrokenBar,
-		DEL:           Delta,             // Δ
-		LightVertical: IntegralExtension, // ⎮
-		SquareRoot:    CheckMark,         // ✓
-	}[code]
-}
-
-func (c *Convert) runeSwap(r rune) rune {
-	// todo: use transform
-	// https://play.golang.org/p/unix7YjB8Dw
-	// https://pkg.go.dev/golang.org/x/text/runes
-	if !c.swap(r) {
-		return -1
-	}
-	switch {
-	case r == NUL:
-		return swap(NUL)
-	case r == SymbolNUL:
-		return swap(NUL)
-	case r == VerticalBar:
-		return swap(VerticalBar)
-	case r == House:
-		return swap(DEL)
-	case r == LightVerticalU:
-		return swap(LightVertical)
-	case r == SquareRootU:
-		return swap(SquareRoot)
-	}
-	return -1
-}
-
-func (c *Convert) swap(r rune) bool {
-	chk := NUL
-	switch r {
-	case VerticalBar:
-		chk = VerticalBar
-	case House:
-		chk = DEL
-	case LightVerticalU:
-		chk = LightVertical
-	case SquareRootU:
-		chk = SquareRoot
-	}
-	for _, c := range c.Flags.SwapChars {
-		if c == chk {
-			return true
-		}
 	}
 	return false
 }
