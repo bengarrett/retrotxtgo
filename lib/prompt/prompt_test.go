@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/gookit/color"
 )
@@ -257,22 +258,6 @@ func TestSkipSet(t *testing.T) {
 	}
 }
 
-// mockInput uses the os pipe to mock the user input.
-// os.Pipe() https://stackoverflow.com/questions/46365221/fill-os-stdin-for-function-that-reads-from-it
-func mockInput(input string) (*os.File, error) {
-	s := []byte(input)
-	r, w, err := os.Pipe()
-	if err != nil {
-		return r, err
-	}
-	_, err = w.Write(s)
-	if err != nil {
-		return r, err
-	}
-	w.Close()
-	return r, nil
-}
-
 func TestPort(t *testing.T) {
 	type args struct {
 		validate bool
@@ -290,7 +275,7 @@ func TestPort(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r, err := mockInput(tt.args.input)
+			r, err := filesystem.MockInput(tt.args.input)
 			if err != nil {
 				t.Error(err)
 			}
@@ -324,7 +309,7 @@ func TestIndexStrings(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r, err := mockInput(tt.args.input)
+			r, err := filesystem.MockInput(tt.args.input)
 			if err != nil {
 				t.Error(err)
 			}
@@ -357,7 +342,7 @@ func TestShortStrings(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r, err := mockInput(tt.args.input)
+			r, err := filesystem.MockInput(tt.args.input)
 			if err != nil {
 				t.Error(err)
 			}
@@ -385,7 +370,7 @@ func TestString(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r, err := mockInput(tt.input)
+			r, err := filesystem.MockInput(tt.input)
 			if err != nil {
 				t.Error(err)
 			}
@@ -418,7 +403,7 @@ func TestStrings(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r, err := mockInput(tt.args.input)
+			r, err := filesystem.MockInput(tt.args.input)
 			if err != nil {
 				t.Error(err)
 			}

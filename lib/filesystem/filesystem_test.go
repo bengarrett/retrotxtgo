@@ -3,16 +3,12 @@ package filesystem
 import (
 	"fmt"
 	"log"
-	"math"
-	"math/rand"
 	"os"
 	"path/filepath"
 	"reflect"
 	"runtime"
 	"testing"
 )
-
-const windows = "windows"
 
 func ExampleTar() {
 	tmpTar := tempFile("tar_test.tar")
@@ -32,65 +28,6 @@ func ExampleTar() {
 	}
 	fmt.Printf("%s, %d", f.Name(), f.Size())
 	// Output:tar_test.tar, 1536
-}
-
-// fileExample the string to a text file.
-func fileExample(s string, i int) (path string) {
-	name := fmt.Sprintf("rt_fs_save%d.txt", i)
-	path, err := SaveTemp(name, []byte(s)...)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return path
-}
-
-// largeExample generates and saves a 800k file of random us-ascii text.
-func largeExample() (path string) {
-	const name = "rs_mega_example_save.txt"
-	_, s := filler(0.8)
-	path, err := SaveTemp(name, []byte(s)...)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return path
-}
-
-// megaExample generates and saves a 1.5MB file of random us-ascii text.
-func megaExample() (path string) {
-	const name = "rs_giga_mega_save.txt"
-	_, s := filler(1.5)
-	path, err := SaveTemp(name, []byte(s)...)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return path
-}
-
-// filler generates random us-ascii text.
-func filler(sizeMB float64) (length int, random string) {
-	if sizeMB <= 0 {
-		return length, random
-	}
-	// make characters to randomize
-	const (
-		// ascii code points (rune codes)
-		start    = 33  // "!"
-		end      = 122 // "z"
-		charsLen = end - start + 1
-	)
-	chars := make([]rune, charsLen)
-	for c, i := 0, start; i <= end; i++ {
-		chars[c] = rune(i)
-		c++
-	}
-	// initialize rune slice
-	f := (math.Pow(1000, 2) * sizeMB)
-	s := make([]rune, int(f))
-	// generate random string
-	for i := range s {
-		s[i] = chars[rand.Intn(charsLen)] // nolint:gosec
-	}
-	return len(s), string(s)
 }
 
 func BenchmarkReadLarge(b *testing.B) {
@@ -139,41 +76,6 @@ func Test_filler(t *testing.T) {
 				t.Errorf("filler() = %v, want %v", gotLength, tt.wantLength)
 			}
 		})
-	}
-}
-
-type dirTests []struct {
-	name    string
-	wantDir string
-}
-
-// nolint:dupl
-func windowsTests(h, hp, s, w, wp string) dirTests {
-	return dirTests{
-		{fmt.Sprintf("C:%shome%suser", s, s), fmt.Sprintf("C:%shome%suser", s, s)},
-		{"~", h},
-		{filepath.Join("~", "foo"), filepath.Join(h, "foo")},
-		{".", w},
-		{fmt.Sprintf(".%sfoo", s), filepath.Join(w, "foo")},
-		{fmt.Sprintf("..%sfoo", s), filepath.Join(wp, "foo")},
-		{fmt.Sprintf("~%s..%sfoo", s, s), filepath.Join(hp, "foo")},
-		{fmt.Sprintf("d:%sroot%sfoo%s..%sblah", s, s, s, s), fmt.Sprintf("D:%sroot%sblah", s, s)},
-		{fmt.Sprintf("z:%sroot%sfoo%s.%sblah", s, s, s, s), fmt.Sprintf("Z:%sroot%sfoo%sblah", s, s, s)},
-	}
-}
-
-// nolint:dupl
-func nixTests(h, hp, s, w, wp string) dirTests {
-	return dirTests{
-		{fmt.Sprintf("%shome%suser", s, s), fmt.Sprintf("%shome%suser", s, s)},
-		{"~", h},
-		{filepath.Join("~", "foo"), filepath.Join(h, "foo")},
-		{".", w},
-		{fmt.Sprintf(".%sfoo", s), filepath.Join(w, "foo")},
-		{fmt.Sprintf("..%sfoo", s), filepath.Join(wp, "foo")},
-		{fmt.Sprintf("~%s..%sfoo", s, s), filepath.Join(hp, "foo")},
-		{fmt.Sprintf("%sroot%sfoo%s..%sblah", s, s, s, s), fmt.Sprintf("%sroot%sblah", s, s)},
-		{fmt.Sprintf("%sroot%sfoo%s.%sblah", s, s, s, s), fmt.Sprintf("%sroot%sfoo%sblah", s, s, s)},
 	}
 }
 
