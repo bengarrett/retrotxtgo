@@ -6,7 +6,7 @@ import (
 	"errors"
 )
 
-var ErrNotFound = errors.New("static file was not found")
+var ErrNotFound = errors.New("internal embed file is not found")
 
 //go:embed *
 var File embed.FS

@@ -54,7 +54,9 @@ func Printf(err error) string {
 	if err == nil {
 		return ""
 	}
-	return fmt.Sprintf("%s %s", str.Alert(), err)
+	elms := strings.Split(err.Error(), ";")
+	s := strings.Join(elms, ".\n")
+	return fmt.Sprintf("%s%s.", str.Alert(), s)
 }
 
 // PrintfCmd returns the command does not exist.
