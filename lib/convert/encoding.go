@@ -874,7 +874,6 @@ func (c *Convert) RunesUTF8() {
 func picture(b byte) rune {
 	// code points U+2400 to U+243F
 	controlPicture := [3]byte{0xE2, 0x90, b}
-	fmt.Println(controlPicture)
 	r, _ := utf8.DecodeRune(controlPicture[:])
 	return r
 }
