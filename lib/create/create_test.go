@@ -133,7 +133,7 @@ func TestSave(t *testing.T) {
 	}
 	// clean-up
 	if wd, err := os.Getwd(); err == nil {
-		p := filepath.Join(wd, "index.html")
+		p := filepath.Join(wd, htmlFn.write())
 		if err := os.Remove(p); err != nil && !os.IsNotExist(err) {
 			t.Error(err)
 		}

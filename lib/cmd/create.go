@@ -311,8 +311,7 @@ func parseFiles(cmd *cobra.Command, flags convert.Flag, args ...string) {
 		}
 		h := serveBytes(i, serve, &b)
 		if !h {
-			err := html.Create(&b)
-			if err != nil {
+			if err := html.Create(&b); err != nil {
 				logs.Fatal(err)
 			}
 		}
@@ -329,8 +328,7 @@ func parsePipe(cmd *cobra.Command, flags convert.Flag) {
 	serve := cmd.Flags().Lookup("serve").Changed
 	h := serveBytes(0, serve, &b)
 	if !h {
-		err := html.Create(&b)
-		if err != nil {
+		if err := html.Create(&b); err != nil {
 			logs.Fatal(err)
 		}
 	}

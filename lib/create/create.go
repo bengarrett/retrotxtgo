@@ -2,6 +2,7 @@
 package create
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -188,12 +189,18 @@ func (args *Args) Create(b *[]byte) error {
 	var err error
 	args.layout, err = layout(args.Layout)
 	if err != nil {
-		return fmt.Errorf("create command layout %q: %w", args.Layout, err)
+		return err
 	}
 	switch {
 	case args.Save.AsFiles:
 		if err := args.saveAssets(b); err != nil {
-			return fmt.Errorf("create could not save file: %w", err)
+			// --overwrite hint
+			if errors.As(err, &ErrFileExist) {
+				fmt.Println(logs.Hint("create [filenames] --overwrite", ErrFileExist))
+				fmt.Println(str.Info() + "Use the overwrite flag to replace any existing files.")
+				os.Exit(logs.OSErrCode)
+			}
+			return nil
 		}
 	case args.Save.Compress:
 		const noDestination = ""
@@ -201,7 +208,7 @@ func (args *Args) Create(b *[]byte) error {
 	default:
 		// print to terminal
 		if err := args.Stdout(b); err != nil {
-			return fmt.Errorf("create stdout failure: %w", err)
+			return err
 		}
 	}
 	return nil
@@ -261,10 +268,15 @@ func (args *Args) saveAssets(b *[]byte) error {
 }
 
 func appendErr(errs, err error) error {
+	// handle first error
 	if errs == nil {
 		return err
 	}
-	return fmt.Errorf("%v, %w", errs, err)
+	// skip duplicate errors
+	if !errors.Is(err, ErrFileExist) && errors.As(errs, &err) {
+		return errs
+	}
+	return fmt.Errorf("%s;%w", errs, err)
 }
 
 func useCSS(l Layout) bool {
@@ -369,7 +381,7 @@ func (args *Args) Stdout(b *[]byte) error {
 		return errf
 	}
 	// always print the HTML
-	fmt.Printf("\nHTML file: %s\n\n", nameHTML)
+	fmt.Printf("\nHTML file: %s\n\n", htmlFn.write())
 	if err = str.Highlight(html.String(), "html", args.Syntax, true); err != nil {
 		return fmt.Errorf("stdout html highlight: %w", err)
 	}
@@ -388,7 +400,7 @@ func (args *Args) printCSS(b *[]byte) error {
 	if !useCSS(args.layout) {
 		return nil
 	}
-	fmt.Printf("\nCSS file: %s\n\n", nameCSS)
+	fmt.Printf("\nCSS file: %s\n\n", cssFn.write())
 	if !colorSyntax(args.Syntax) {
 		fmt.Println(string(*b))
 		return nil
@@ -403,7 +415,7 @@ func (args *Args) printFontCSS(name string, b *[]byte) error {
 	if !useFontCSS(args.layout) {
 		return nil
 	}
-	fmt.Printf("\nCSS for %s font file: %s\n\n", name, nameFont)
+	fmt.Printf("\nCSS for %s font file: %s\n\n", name, fontFn.write())
 	if err := str.Highlight(string(*b), "css", args.Syntax, true); err != nil {
 		return fmt.Errorf("stdout font css highlight: %w", err)
 	}
@@ -414,7 +426,7 @@ func (args *Args) printJS(b *[]byte) error {
 	if !useJS(args.layout) {
 		return nil
 	}
-	fmt.Printf("\nJS file: %s\n\n", nameJS)
+	fmt.Printf("\nJS file: %s\n\n", jsFn.write())
 	if !colorSyntax(args.Syntax) {
 		fmt.Println(string(*b))
 		return nil
