@@ -37,10 +37,12 @@ type metaFlag struct {
 	opts  []string // flag choices for display in the usage string
 }
 
+const encodingDef = "CP437"
+
 // createFlag contain default values.
 var createFlag = createFlags{
 	controls: []string{eof, tab},
-	encode:   "CP437",
+	encode:   encodingDef,
 	swap:     []int{null, verticalBar},
 }
 
@@ -343,8 +345,12 @@ func createHTML(cmd *cobra.Command, flags convert.Flag, src *[]byte) []byte {
 	}
 	f := sample.Flags{}
 	// encode and convert the source text
-	if cp := cmd.Flags().Lookup("encode"); cp.Changed {
-		if f.From, err = convert.Encoder(cp.Value.String()); err != nil {
+	if cp := cmd.Flags().Lookup("encode"); cp != nil {
+		name := encodingDef
+		if cp.Changed {
+			name = cp.Value.String()
+		}
+		if f.From, err = convert.Encoder(name); err != nil {
 			logs.FatalWrap(logs.ErrEncode, err)
 		}
 		conv.Input.Encoding = f.From
