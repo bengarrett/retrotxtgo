@@ -1,20 +1,8 @@
 package cmd
 
 import (
-	"fmt"
 	"testing"
-
-	"github.com/bengarrett/retrotxtgo/lib/convert"
-	"github.com/bengarrett/retrotxtgo/lib/sample"
 )
-
-func Example_staticTextfile() {
-	var f sample.Flags
-	var conv convert.Convert
-	b, _ := staticTextfile(f, &conv, "iso-1", false)
-	fmt.Print(len(b), " characters")
-	// Output: 109 characters
-}
 
 func Test_infoSample(t *testing.T) {
 	tests := []struct {

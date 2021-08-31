@@ -3,13 +3,8 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"unicode/utf8"
 
-	"github.com/bengarrett/retrotxtgo/lib/convert"
-	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
-	"github.com/bengarrett/retrotxtgo/lib/sample"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/spf13/cobra"
@@ -44,142 +39,34 @@ var viewCmd = &cobra.Command{
 	Long:    "Print a text file to the terminal using standard output.",
 	Example: exampleCmd(viewExample),
 	Run: func(cmd *cobra.Command, args []string) {
-		viewParsePipe(cmd)
 		viewParseArgs(cmd, args...)
 	},
 }
 
 // viewParseArgs parses the arguments supplied with the view command.
 func viewParseArgs(cmd *cobra.Command, args ...string) {
-	conv := convert.Convert{}
-	conv.Flags = convert.Flag{
-		Controls:  viewFlag.controls,
-		SwapChars: viewFlag.swap,
-		MaxWidth:  viewFlag.width,
+	args, conv, samp, err := initArgs(cmd, args...)
+	if err != nil {
+		logs.Fatal(err)
 	}
-	if c := cmd.Flags().Lookup("controls"); !c.Changed {
-		conv.Flags.Controls = []string{eof, tab}
-	}
-	if s := cmd.Flags().Lookup("swap-chars"); !s.Changed {
-		conv.Flags.SwapChars = []int{null, verticalBar}
-	}
-	printUsage(cmd, args...)
 	for i, arg := range args {
-		skip, r := viewParseArg(cmd, &conv, i, arg)
-		if skip {
-			continue
-		}
-		fmt.Println(string(r))
-		if i < len(args) {
-			fmt.Println("")
-		}
-	}
-}
-
-// viewParseArg parses an argument supplied with the view command.
-func viewParseArg(cmd *cobra.Command, conv *convert.Convert, i int, arg string) (skip bool, r []rune) {
-	const halfPage = 40 // output must be reset
-	f := sample.Flags{}
-	// internal example file
-	var err error
-	if ok := sample.Valid(arg); ok {
-		var p sample.File
-		if p, err = f.Open(arg, conv); err != nil {
-			logs.FatalMark(arg, logs.ErrSampleOpen, err)
-		}
-		// --to flag is currently ignored
-		if to := cmd.Flags().Lookup("to"); to.Changed {
-			if viewToFlag(p.Runes...) {
-				return true, nil
-			}
-		}
-		if i > 0 {
+		if i > 0 && i < len(arg) {
+			const halfPage = 40 // output must be reset
 			fmt.Println(str.HRPad(halfPage))
 		}
-		fmt.Println(string(p.Runes))
-		return true, nil
-	}
-	// read file
-	b, err := filesystem.Read(arg)
-	if err != nil {
-		logs.FatalMark(arg, logs.ErrFileOpen, err)
-	}
-	if i > 0 {
-		fmt.Println(str.HRPad(halfPage))
-	}
-	return viewParseBytes(cmd, conv, arg, b...)
-}
-
-// viewParsePipe parses piped the standard input (stdin) for the view command.
-func viewParsePipe(cmd *cobra.Command) {
-	if !filesystem.IsPipe() {
-		return
-	}
-	conv := convert.Convert{}
-	conv.Flags = convert.Flag{
-		Controls:  viewFlag.controls,
-		SwapChars: viewFlag.swap,
-		MaxWidth:  viewFlag.width,
-	}
-	if c := cmd.Flags().Lookup("controls"); !c.Changed {
-		conv.Flags.Controls = []string{eof, tab}
-	}
-	if s := cmd.Flags().Lookup("swap-chars"); !s.Changed {
-		conv.Flags.SwapChars = []int{null, verticalBar}
-	}
-	// piped input from other programs
-	var err error
-	if cp := cmd.Flags().Lookup("encode"); cp.Changed {
-		f := sample.Flags{}
-		if f.From, err = convert.Encoder(cp.Value.String()); err != nil {
-			logs.FatalMark("pipe", logs.ErrEncode, err)
+		fmt.Printf("%d. temp string: %s\n\n", i, arg)
+		b, err := openArg(arg, samp, conv)
+		if err != nil {
+			fmt.Println(logs.Printf(err))
+			continue
 		}
-		conv.Input.Encoding = f.From
-	}
-	b, err := filesystem.ReadPipe()
-	if err != nil {
-		logs.FatalMark("view", logs.ErrPipeRead, err)
-	}
-	_, r := viewParseBytes(cmd, &conv, "piped", b...)
-	fmt.Print(string(r))
-	os.Exit(0)
-}
-
-// viewParseBytes parses byte data.
-func viewParseBytes(cmd *cobra.Command, conv *convert.Convert, arg string, b ...byte) (skip bool, r []rune) {
-	// configure source encoding
-	name := "CP437"
-	cp := cmd.Flags().Lookup("encode")
-	if cp.Changed && cp.Value.String() != "" {
-		name = cp.Value.String()
-	}
-	var f = sample.Flags{}
-	var err error
-	if f.From, err = convert.Encoder(name); err != nil {
-		logs.FatalMark(arg, logs.ErrEncode, err)
-	}
-	conv.Input.Encoding = f.From
-	// make sure the file source isn't already encoded as UTF-8
-	if utf8.Valid(b) {
-		fmt.Println(string(b))
-		return true, nil
-	}
-	// convert text
-	if endOfFile(conv.Flags) {
-		r, err = conv.Text(b...)
-	} else {
-		r, err = conv.Dump(b...)
-	}
-	if err != nil {
-		logs.FatalMark(arg, ErrUTF8, err)
-	}
-	// to flag
-	if to := cmd.Flags().Lookup("to"); to.Changed {
-		if viewToFlag(r...) {
-			return true, nil
+		r, err := openBytes(samp, conv, b...)
+		if err != nil {
+			fmt.Println(logs.Printf(err))
+			continue
 		}
+		fmt.Println("arg end:\n", string(r))
 	}
-	return false, r
 }
 
 func init() {
@@ -190,31 +77,4 @@ func init() {
 	flagTo(&viewFlag.to, viewCmd)
 	flagWidth(&viewFlag.width, viewCmd)
 	viewCmd.Flags().SortFlags = false
-}
-
-// viewToFlag prints the output of viewEncode.
-func viewToFlag(r ...rune) (success bool) {
-	newer, err := viewEncode(viewFlag.to, r...)
-	if err != nil {
-		logs.FatalMark(viewFlag.to, ErrEncode, err)
-	}
-	fmt.Println(string(newer))
-	return true
-}
-
-// viewEncode encodes runes into the named encoding.
-func viewEncode(name string, r ...rune) (b []byte, err error) {
-	encode, err := convert.Encoder(name)
-	if err != nil {
-		return b, fmt.Errorf("encoding not known or supported %s: %w", encode, err)
-	}
-	b = []byte(string(r))
-	newer, err := encode.NewEncoder().Bytes(b)
-	if err != nil {
-		if len(newer) == 0 {
-			return b, fmt.Errorf("encoder could not convert bytes to %s: %w", encode, err)
-		}
-		return newer, nil
-	}
-	return newer, nil
 }

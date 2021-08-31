@@ -95,12 +95,14 @@ var createCmd = &cobra.Command{
 		// handle standard input (stdio)
 		if filesystem.IsPipe() {
 			parsePipe(cmd, f)
+			return
 		}
 		// handle the hidden --body flag value,
 		// used for debugging, it ignores most other flags and
 		// overrides the <pre></pre> content before exiting
 		if body := cmd.Flags().Lookup("body"); body.Changed {
 			parseBody(cmd)
+			return
 		}
 		if !printUsage(cmd, args...) {
 			// parse the flags to create the HTML
@@ -290,28 +292,28 @@ func parseBody(cmd *cobra.Command) {
 				logs.FatalWrap(ErrBody, err)
 			}
 		}
-		os.Exit(0)
 	}
 }
 
 // parseFiles parses the flags to create the HTML document or website.
 // The generated HTML and associated files will either be served, saved or printed.
 func parseFiles(cmd *cobra.Command, flags convert.Flag, args ...string) {
-	conv := convert.Convert{
-		Flags: flags,
+	args, conv, samp, err := initArgs(cmd, args...)
+	if err != nil {
+		logs.Fatal(err)
 	}
-	f, ff := sample.Flags{}, cmd.Flags().Lookup("font-family")
-	serve := cmd.Flags().Lookup("serve").Changed
 	for i, arg := range args {
-		src, cont := staticTextfile(f, &conv, arg, ff.Changed)
-		if cont {
+		fmt.Printf("%d. temp string: %s\n\n", i, arg)
+		b, err := openArg(arg, samp, conv)
+		if err != nil {
+			fmt.Println(logs.Printf(err))
 			continue
 		}
-		b := createHTML(cmd, flags, &src)
+		b = createHTML(cmd, flags, &b)
 		if b == nil {
 			continue
 		}
-		h := serveBytes(i, serve, &b)
+		h := serveBytes(i, cmd.Flags().Lookup("serve").Changed, &b)
 		if !h {
 			if err := html.Create(&b); err != nil {
 				logs.Fatal(err)
@@ -334,7 +336,6 @@ func parsePipe(cmd *cobra.Command, flags convert.Flag) {
 			logs.Fatal(err)
 		}
 	}
-	os.Exit(0)
 }
 
 // createHTML applies a HTML template to src text.
@@ -384,30 +385,6 @@ func appendSAUCE(src *[]byte) {
 			html.SauceData.Lines = uint(s.Info.Info2.Value)
 		}
 	}
-}
-
-// staticTextfile fetches an embed text file from the `/static/text` directory, for use as an input file.
-func staticTextfile(f sample.Flags, conv *convert.Convert, arg string, changed bool) (src []byte, cont bool) {
-	var err error
-	if ok := sample.Valid(arg); ok {
-		var p sample.File
-		p, err = f.Open(arg, conv)
-		if err != nil {
-			logs.FatalMark(arg, logs.ErrSampleHTML, err)
-		}
-		src = create.Normalize(p.Encoding, p.Runes...)
-		if !changed {
-			// only apply the sample font when the --font-family flag is unused
-			html.FontFamily.Value = p.Font.String()
-		}
-	}
-	// read file
-	if src == nil {
-		if src, err = filesystem.Read(arg); err != nil {
-			logs.FatalMark(arg, logs.ErrFileOpen, err)
-		}
-	}
-	return src, false
 }
 
 // serveBytes hosts the HTML using an internal HTTP server.

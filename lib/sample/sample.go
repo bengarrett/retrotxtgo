@@ -142,9 +142,10 @@ func (flag Flags) Open(name string, conv *convert.Convert) (File, error) {
 	if conv == nil {
 		return File{}, ErrConvNil
 	}
-	f.Encoding = samp.encoding
 	f.Font = samp.Font
-	if flag.From == nil {
+	f.Encoding = samp.encoding
+	conv.Input.Encoding = flag.From
+	if conv.Input.Encoding == nil {
 		conv.Input.Encoding = f.Encoding
 	}
 	if flag.To != nil {

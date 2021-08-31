@@ -439,18 +439,15 @@ func (args *Args) printJS(b *[]byte) error {
 
 // Normalize runes into bytes by making adjustments to text control codes.
 func Normalize(e encoding.Encoding, r ...rune) []byte {
-	s := ""
 	switch e {
 	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
-		var err error
-		s, _, err = transform.String(replaceNELs(), string(r))
+		s, _, err := transform.String(replaceNELs(), string(r))
 		if err != nil {
-			s = string(r)
+			return []byte(string(r))
 		}
-	default:
-		s = string(r)
+		return []byte(s)
 	}
-	return []byte(s)
+	return []byte(string(r))
 }
 
 // destination determines if user supplied arguments are a valid file or directory destination.
