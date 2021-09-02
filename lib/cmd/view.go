@@ -2,7 +2,9 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
+	"log"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
@@ -13,7 +15,7 @@ import (
 type viewFlags struct {
 	controls []string
 	encode   string
-	swap     []int
+	swap     []string
 	to       string
 	width    int
 }
@@ -21,7 +23,7 @@ type viewFlags struct {
 var viewFlag = viewFlags{
 	controls: []string{eof, tab},
 	encode:   "CP437",
-	swap:     []int{null, verticalBar},
+	swap:     []string{null, verticalBar},
 	to:       "",
 	width:    0,
 }
@@ -39,34 +41,40 @@ var viewCmd = &cobra.Command{
 	Long:    "Print a text file to the terminal using standard output.",
 	Example: exampleCmd(viewExample),
 	Run: func(cmd *cobra.Command, args []string) {
-		viewParseArgs(cmd, args...)
+		b, err := viewCmdRun(cmd, args...)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Print(b)
 	},
 }
 
-// viewParseArgs parses the arguments supplied with the view command.
-func viewParseArgs(cmd *cobra.Command, args ...string) {
+// viewCmdRun parses the arguments supplied with the view command.
+func viewCmdRun(cmd *cobra.Command, args ...string) (*bytes.Buffer, error) {
 	args, conv, samp, err := initArgs(cmd, args...)
 	if err != nil {
-		logs.Fatal(err)
+		return nil, err
 	}
+	w := new(bytes.Buffer)
 	for i, arg := range args {
 		if i > 0 && i < len(arg) {
-			const halfPage = 40 // output must be reset
-			fmt.Println(str.HRPad(halfPage))
+			const halfPage = 40
+			fmt.Fprintln(w, str.HRPad(halfPage))
 		}
-		fmt.Printf("%d. temp string: %s\n\n", i, arg)
-		b, err := openArg(arg, samp, conv)
+		b, err := readArg(arg, cmd, conv, samp)
 		if err != nil {
-			fmt.Println(logs.Printf(err))
+			fmt.Fprintln(w, logs.Printf(err))
 			continue
 		}
-		r, err := openBytes(samp, conv, b...)
+		fmt.Println("==>", conv.Flags.Controls)
+		r, err := transform(conv, samp, b...)
 		if err != nil {
-			fmt.Println(logs.Printf(err))
+			fmt.Fprintln(w, logs.Printf(err))
 			continue
 		}
-		fmt.Println("arg end:\n", string(r))
+		fmt.Fprint(w, string(r))
 	}
+	return w, nil
 }
 
 func init() {

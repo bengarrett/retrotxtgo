@@ -30,8 +30,8 @@ type rootFlags struct {
 const (
 	eof         = "eof"
 	tab         = "tab"
-	null        = 0
-	verticalBar = 124
+	null        = "null" // 0
+	verticalBar = "bar"  // 124
 	filenames   = "[filenames]"
 
 	// silence can be set to false to debug cmd/flag feedback from Viper.
@@ -64,7 +64,9 @@ them into a more modern, useful format to view or copy in a web browser.`, meta.
 	Run: func(cmd *cobra.Command, args []string) {
 		// Do nothing other than print the help.
 		// This func must remain otherwise root command flags are ignored by Cobra.
-		printUsage(cmd)
+		if err := printUsage(cmd); err != nil {
+			logs.Fatal(err)
+		}
 	},
 }
 
@@ -151,17 +153,17 @@ func initConfig() {
 }
 
 // printUsage will print the help and exit when no arguments are supplied.
-func printUsage(cmd *cobra.Command, args ...string) bool {
+func printUsage(cmd *cobra.Command, args ...string) error {
 	if len(args) == 0 {
 		if err := cmd.Help(); err != nil {
-			logs.FatalMark("checkUse", ErrHelp, err)
+			return err
 		}
 		os.Exit(0)
 	}
-	return false
+	return nil
 }
 
-// endOfFile determines if an EOF marker should be obeyed.
+// endOfFile determines if the end-of-file control flag was requested.
 func endOfFile(flags convert.Flag) bool {
 	for _, c := range flags.Controls {
 		if c == eof {
@@ -220,24 +222,24 @@ separate multiple controls with commas
 // flagEncode handles the encode flag.
 func flagEncode(p *string, cc *cobra.Command) {
 	cc.Flags().StringVarP(p, "encode", "e", "",
-		fmt.Sprintf(`character encoding used by the filename(s)
-this flag is silently ignored if Unicode text is detected
-otherwise the default is used (default "CP437")
-see the list of encode values %s%s`,
-			str.Example(meta.Bin+" list codepages"), "\n"))
+		fmt.Sprintf("character encoding used by the filename(s) (default \"CP437\")\n%s\n%s%s\n",
+			color.Info.Sprint("the flag is ignored if Unicode or EBCDIC text is detected"),
+			"see the list of encode values ",
+			str.Example(meta.Bin+" list codepages")))
 }
 
 // flagRunes handles the swap-chars flag.
-func flagRunes(p *[]int, cc *cobra.Command) {
-	cc.Flags().IntSliceVarP(p, "swap-chars", "x", []int{},
-		`swap out these characters with UTF8 alternatives (default "0,124")
+func flagRunes(p *[]string, cc *cobra.Command) {
+	cc.Flags().StringSliceVarP(p, "swap-chars", "x", []string{},
+		`swap out these characters with UTF8 alternatives (default "null,bar")
 separate multiple values with commas
-  0    C null for a space
-  124  Unicode vertical bar | for the IBM broken pipe ¦
-  127  IBM house ⌂ for the Greek capital delta Δ
-  178  Box pipe │ for the Unicode integral extension ⎮
-  251  Square root √ for the Unicode check mark ✓
-`)
+  null	C null for a space
+  bar	Unicode vertical bar | for the IBM broken pipe ¦
+  house	IBM house ⌂ for the Greek capital delta Δ
+  pipe	Box pipe │ for the Unicode integral extension ⎮
+  root	Square root √ for the Unicode check mark ✓
+  space	Space for the Unicode open box ␣
+  `)
 }
 
 // flagTo handles the to flag.

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"strings"
 	"testing"
 
 	"golang.org/x/text/encoding"
@@ -196,22 +197,26 @@ func TestEncoder(t *testing.T) {
 
 func TestRunesControls(t *testing.T) {
 	tests := []struct {
-		name string
-		text string
-		want string
+		name    string
+		text    string
+		want    string
+		wantErr bool
 	}{
-		// {"empty", "", ""}, // returns two different empty values?
-		{"hi", "hello world", "hello world"},
-		{"nul", "\x00", "␀"},
-		{"us", "\x1f", "␟"},
-		{"device controls", "\x10\x11", "␐␑"},
+		{"empty", "", "", true},
+		{"hi", "hello world", "hello world", false},
+		{"nul", "\x00", "␀", false},
+		{"us", "\x1f", "␟", false},
+		{"device controls", "\x10\x11", "␐␑", false},
 	}
 	for _, tt := range tests {
 		d := Convert{}
 		d.Input.Bytes = []byte(tt.text)
 		d.Input.Encoding = cp1252
 		if err := d.Transform(); err != nil {
-			t.Error(err)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("TestRunesControls() error = %v", err)
+			}
+			continue
 		}
 		d.Swap()
 		t.Run(tt.name, func(t *testing.T) {
@@ -366,6 +371,7 @@ func TestRunesWindows(t *testing.T) {
 		})
 	}
 }
+
 func TestRunesEBCDIC(t *testing.T) {
 	// EBCDIC codepages are not compatible with ISO/IEC 646 (ASCII)
 	// so a number of these tests either convert input UTF-8 text into CP037
@@ -504,13 +510,16 @@ func TestConvert_swaps(t *testing.T) {
 	tests := []struct {
 		name   string
 		output []rune
-		swaps  []int
+		swaps  []string
 		want   []rune
 	}{
 		{"empty", nil, nil, nil},
-		{"hi", hi, nil, hi},
-		{"replace DEL", hi, []int{SquareRoot, DEL}, []rune("hello world 😃 Δ")},
-		{"replace NULLS", []rune("hello\u0000world"), []int{NUL}, []rune("hello world")},
+		{"nil swap", hi, nil, hi},
+		{"empty swap", hi, []string{}, hi},
+		{"replace DEL", hi, []string{"root"}, hi},
+		{"replace Home", hi, []string{"house"}, []rune("hello world 😃 Δ")},
+		{"replace Home", hi, strings.Split("n,b,h,p,r", ","), []rune("hello world 😃 Δ")},
+		{"replace NULLS", []rune("hello\u0000world"), []string{"null"}, []rune("hello world")},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -39,7 +39,9 @@ var infoCmd = &cobra.Command{
 		if filesystem.IsPipe() {
 			infoPipe()
 		}
-		printUsage(cmd, args...)
+		if err := printUsage(cmd, args...); err != nil {
+			logs.Fatal(err)
+		}
 		var n info.Names
 		n.Length = len(args)
 		for i, arg := range args {

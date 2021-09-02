@@ -181,9 +181,8 @@ func TestConvert_Text(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			const verticalBar = 124
 			c := Convert{}
-			c.Flags.SwapChars = []int{NUL, verticalBar}
+			c.Flags.SwapChars = []string{"null", "bar"}
 			c.Input.Encoding = charmap.CodePage437
 			got, err := c.Text(tt.args.b...)
 			if (err != nil) != tt.wantErr {

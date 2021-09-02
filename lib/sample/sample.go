@@ -164,10 +164,8 @@ func (flag Flags) Open(name string, conv *convert.Convert) (File, error) {
 	// default overrides
 	switch name {
 	case "437", "437.cr", "437.lf":
-		if conv.Flags.Controls != nil {
-			fmt.Printf("\nTo correctly display all %q table cells the --controls flag is ignored\n", name)
-			conv.Flags.Controls = nil
-		}
+		fmt.Printf("\nTo correctly display all %q table cells the --controls flag is ignored\n", name)
+		conv.Flags.Controls = []string{""}
 	}
 	f, err = samp.transform(&f, conv, b)
 	return f, err

@@ -138,6 +138,8 @@ const (
 	CheckMark = 10003
 	// Replacement character �.
 	Replacement = 65533
+	// Open Box ␣.
+	OpenBox = 9251
 )
 
 const (
@@ -429,12 +431,9 @@ func (c *Convert) Swap() *Convert {
 	if len(c.Output) == 0 {
 		return nil
 	}
-	const debug = false
+	c = c.swaps()
 	if c.lineBreaks {
 		c.LineBreaks()
-	}
-	if debug {
-		println(fmt.Sprintf("line break detected: %+v", c.lineBreaks))
 	}
 	switch c.Input.Encoding {
 	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
@@ -470,14 +469,23 @@ func (c *Convert) Swap() *Convert {
 		c.RunesUTF8()
 	default:
 	}
-	return c.swaps()
+	return c
 }
 
 func (c *Convert) swaps() *Convert {
 	if len(c.Flags.SwapChars) == 0 {
 		return c
 	}
-	replace := runes.Map(swapRune)
+	replacers := []rune{}
+	for _, val := range c.Flags.SwapChars {
+		replacers = append(replacers, newReplacer(val)...)
+	}
+	replace := runes.Map(func(r rune) rune {
+		if !replacer(r, replacers...) {
+			return r
+		}
+		return swap(r)
+	})
 	s, _, err := transform.String(replace, string(c.Output))
 	if err != nil {
 		logs.Fatal(err)
@@ -486,31 +494,50 @@ func (c *Convert) swaps() *Convert {
 	return c
 }
 
-func swapRune(r rune) rune {
-	switch {
-	case r == NUL:
-		return swap(NUL)
-	case r == SymbolNUL:
-		return swap(NUL)
-	case r == VerticalBar:
-		return swap(VerticalBar)
-	case r == House:
-		return swap(DEL)
-	case r == LightVerticalU:
-		return swap(LightVertical)
-	case r == SquareRootU:
-		return swap(SquareRoot)
+func replacer(r rune, replacers ...rune) bool {
+	for _, s := range replacers {
+		if s == r {
+			return true
+		}
 	}
-	return r
+	return false
 }
 
-func swap(code int) rune {
-	return map[int]rune{
-		NUL:           SP,
-		VerticalBar:   BrokenBar,
-		DEL:           Delta,             // Δ
-		LightVertical: IntegralExtension, // ⎮
-		SquareRoot:    CheckMark,         // ✓
+func newReplacer(s string) []rune {
+	switch strings.ToLower(s) {
+	case "n", "nul", "null", "00", "0":
+		return []rune{NUL, SymbolNUL}
+	case "b", "bar", "7c", "124":
+		return []rune{VerticalBar}
+	case "h", "house", "home", "7f", "127":
+		return []rune{DEL, House}
+	case "p", "pipe", "b3", "179":
+		return []rune{LightVertical, LightVerticalU}
+	case "r", "root", "squareroot", "fb", "251":
+		return []rune{SquareRoot, SquareRootU}
+	case "s", "space", "20", "32":
+		return []rune{SP}
+	}
+	return []rune{}
+}
+
+func swap(code rune) rune {
+	return map[rune]rune{
+		NUL:       SP,
+		SymbolNUL: SP,
+		// ¦
+		VerticalBar: BrokenBar,
+		// Δ
+		DEL:   Delta,
+		House: Delta,
+		// ⎮
+		LightVertical:  IntegralExtension,
+		LightVerticalU: IntegralExtension,
+		// ✓
+		SquareRoot:  CheckMark,
+		SquareRootU: CheckMark,
+		// ␣
+		SP: OpenBox,
 	}[code]
 }
 

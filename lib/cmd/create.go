@@ -24,7 +24,7 @@ import (
 type createFlags struct {
 	controls []string // character encoding used by the filename
 	encode   string   // use these control codes
-	swap     []int    // swap out these characters with UTF8 alternatives
+	swap     []string // swap out these characters with UTF8 alternatives
 }
 
 type metaFlag struct {
@@ -43,7 +43,7 @@ const encodingDef = "CP437"
 var createFlag = createFlags{
 	controls: []string{eof, tab},
 	encode:   encodingDef,
-	swap:     []int{null, verticalBar},
+	swap:     []string{null, verticalBar},
 }
 
 // flags container.
@@ -88,7 +88,7 @@ var createCmd = &cobra.Command{
 		}
 		// handle defaults, swap out these characters with UTF8 alternatives
 		if s := cmd.Flags().Lookup("swap-chars"); !s.Changed {
-			f.SwapChars = []int{null, verticalBar}
+			f.SwapChars = []string{null, verticalBar}
 		}
 		// handle the defaults for most other flags
 		stringFlags(cmd)
@@ -104,10 +104,10 @@ var createCmd = &cobra.Command{
 			parseBody(cmd)
 			return
 		}
-		if !printUsage(cmd, args...) {
-			// parse the flags to create the HTML
-			parseFiles(cmd, f, args...)
+		if err := printUsage(cmd, args...); err != nil {
+			logs.Fatal(err)
 		}
+		parseFiles(cmd, f, args...)
 	},
 }
 
@@ -304,7 +304,7 @@ func parseFiles(cmd *cobra.Command, flags convert.Flag, args ...string) {
 	}
 	for i, arg := range args {
 		fmt.Printf("%d. temp string: %s\n\n", i, arg)
-		b, err := openArg(arg, samp, conv)
+		b, err := readArg(arg, cmd, conv, samp)
 		if err != nil {
 			fmt.Println(logs.Printf(err))
 			continue

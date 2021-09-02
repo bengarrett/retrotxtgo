@@ -4,6 +4,7 @@ package convert
 
 import (
 	"bytes"
+	"strings"
 
 	"golang.org/x/text/encoding"
 )
@@ -28,13 +29,13 @@ type In struct {
 // Flag are the user supplied values.
 type Flag struct {
 	Controls  []string // Always use these control codes.
-	SwapChars []int    // Swap out these characters with UTF-8 alternatives.
+	SwapChars []string // Swap out these characters with UTF-8 alternatives.
 	MaxWidth  int      // Maximum text width per-line.
 }
 
 const (
-	// EOF is the substitute character that in DOS and CP/M is used as an end-of-file marker.
-	EOF = SUB
+	DosSUB    = 8594
+	SymbolSUB = 9242
 )
 
 // BOM is the UTF-8 byte order mark prefix.
@@ -43,10 +44,20 @@ func BOM() []byte {
 	return []byte{ef, bb, bf}
 }
 
-// TrimEOF will cut text at the first occurrence of the SUB character, used by DOS and CP/M as an end-of-file marker.
+// TrimEOF will cut text at the first occurrence of the SUB character.
+// The SUB is used by DOS and CP/M as an end-of-file marker.
 func TrimEOF(b []byte) []byte {
-	if cut := bytes.IndexByte(b, EOF); cut > 0 {
+	// ASCII control code
+	if cut := bytes.IndexByte(b, SUB); cut > 0 {
 		return b[:cut]
+	}
+	// UTF-8 symbol for substitute character
+	if cut := strings.IndexRune(string(b), SymbolSUB); cut > 0 {
+		return []byte(string(b)[:cut])
+	}
+	// UTF-8 right-arrow which is displayed for the CP-437 substitute character code point 26
+	if cut := strings.IndexRune(string(b), DosSUB); cut > 0 {
+		return []byte(string(b)[:cut])
 	}
 	return b
 }

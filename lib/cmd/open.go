@@ -2,48 +2,43 @@ package cmd
 
 import (
 	"fmt"
-	"unicode/utf8"
 
 	"github.com/bengarrett/retrotxtgo/lib/convert"
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
+	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/sample"
 	"github.com/spf13/cobra"
 	"golang.org/x/text/encoding"
 )
 
+// initArgs initializes the command arguments and flags.
 func initArgs(cmd *cobra.Command, args ...string) ([]string, *convert.Convert, sample.Flags, error) {
-	if len(args) == 0 {
-		args = []string{""}
-	}
 	conv := convert.Convert{}
 	conv.Flags = convert.Flag{
 		Controls:  viewFlag.controls,
 		SwapChars: viewFlag.swap,
 		MaxWidth:  viewFlag.width,
 	}
+	l := len(args)
+
 	if c := cmd.Flags().Lookup("controls"); !c.Changed {
 		conv.Flags.Controls = []string{eof, tab}
 	}
 	if s := cmd.Flags().Lookup("swap-chars"); !s.Changed {
-		conv.Flags.SwapChars = []int{null, verticalBar}
+		conv.Flags.SwapChars = []string{null, verticalBar}
 	}
-
-	// html is a global flag, create.Args
-	// if !changed {
-	// 	only apply the sample font when the --font-family flag is unused
-	// 	html.FontFamily.Value = p.Font.String()
-	// }
-
 	if filesystem.IsPipe() {
 		if e := cmd.Flags().Lookup("encode"); e.Changed {
 			fmt.Println("--encode flag is ignored when piped text is in use")
 		}
-		if args[0] != "" {
+		if l == 0 {
 			fmt.Println("[filenames] are ignored when piped text is in use")
-			args = []string{""}
 		}
-	} else {
-		printUsage(cmd, args...)
+	} else if err := printUsage(cmd, args...); err != nil {
+		logs.Fatal(err)
+	}
+	if l == 0 {
+		args = []string{""}
 	}
 	samp, err := initEncodings(cmd, "")
 	if err != nil {
@@ -53,13 +48,13 @@ func initArgs(cmd *cobra.Command, args ...string) ([]string, *convert.Convert, s
 }
 
 // initEncodings applies the --encode and --to encoding values to embed sample data.
-func initEncodings(cmd *cobra.Command, deft string) (sample.Flags, error) {
+func initEncodings(cmd *cobra.Command, def string) (sample.Flags, error) {
 	encode := func(flag string) (encoding.Encoding, error) {
 		cp := cmd.Flags().Lookup(flag)
-		name := deft
+		name := def
 		if cp.Changed {
 			name = cp.Value.String()
-		} else if deft == "" {
+		} else if def == "" {
 			return nil, nil
 		}
 		return convert.Encoder(name)
@@ -78,7 +73,8 @@ func initEncodings(cmd *cobra.Command, deft string) (sample.Flags, error) {
 	return sample.Flags{From: frm, To: to}, err
 }
 
-func openArg(arg string, f sample.Flags, c *convert.Convert) ([]byte, error) {
+// readArg returns the content of argument supplied filepath, embed sample file or piped data.
+func readArg(arg string, cmd *cobra.Command, c *convert.Convert, f sample.Flags) ([]byte, error) {
 	var (
 		b   []byte
 		err error
@@ -91,21 +87,17 @@ func openArg(arg string, f sample.Flags, c *convert.Convert) ([]byte, error) {
 		}
 		return b, nil
 	}
-	// first attempt to see if arg is a embed sample file request
-	b, err = openSample(arg, c, f)
-	if err != nil {
+	// attempt to see if arg is a embed sample file request
+	if b, err = openSample(arg, cmd, c, f); err != nil {
 		return nil, err
 	} else if b != nil {
 		return b, nil
 	}
-	// otherwise, the arg should be a filepath
+	// the arg should be a filepath
 	b, err = openFile(arg)
 	if err != nil {
 		return nil, err
 	}
-	// handle flags
-	//
-	// return
 	return b, nil
 }
 
@@ -117,7 +109,7 @@ func openFile(arg string) ([]byte, error) {
 	return b, nil
 }
 
-func openSample(arg string, c *convert.Convert, f sample.Flags) ([]byte, error) {
+func openSample(arg string, cmd *cobra.Command, c *convert.Convert, f sample.Flags) ([]byte, error) {
 	if ok := sample.Valid(arg); !ok {
 		return nil, nil
 	}
@@ -125,18 +117,19 @@ func openSample(arg string, c *convert.Convert, f sample.Flags) ([]byte, error) 
 	if err != nil {
 		return nil, err
 	}
-
+	// handle flags
+	if ff := cmd.Flags().Lookup("font-family"); ff != nil && !ff.Changed {
+		// only apply the sample font when the --font-family flag is unused
+		// html is a global flag, create.Args
+		html.FontFamily.Value = p.Font.String()
+	}
 	// TODO: handle encoding or use p.Encoding as fallback
-	// this was used in staticTextfile() but seems to break things too
 	//return create.Normalize(p.Encoding, p.Runes...), nil
+
 	return []byte(string(p.Runes)), nil
 }
 
-func openBytes(f sample.Flags, conv *convert.Convert, b ...byte) ([]rune, error) {
-	// make sure the file source isn't already encoded as UTF-8
-	if utf8.Valid(b) {
-		return []rune(string(b)), nil
-	}
+func transform(conv *convert.Convert, f sample.Flags, b ...byte) ([]rune, error) {
 	// handle input source encoding
 	if f.From != nil {
 		conv.Input.Encoding = f.From
@@ -156,11 +149,9 @@ func openBytes(f sample.Flags, conv *convert.Convert, b ...byte) ([]rune, error)
 	}
 	// return UTF-8 runes
 	if f.To == nil {
-		fmt.Println("returning utf-8")
 		return r, nil
 	}
 	// re-encode text
-	fmt.Println("re-encode text")
 	newer, err := f.To.NewEncoder().String(string(r))
 	if err != nil {
 		return []rune(newer), err

@@ -31,9 +31,10 @@ var listCmd = &cobra.Command{
 	Long:    "List the available inbuilt text art and text documents, codepages and their tabled values.",
 	Example: exampleCmd(listExample),
 	Run: func(cmd *cobra.Command, args []string) {
-		if !printUsage(cmd, args...) {
-			logs.FatalCmd("list", args...)
+		if err := printUsage(cmd, args...); err != nil {
+			logs.Fatal(err)
 		}
+		logs.FatalCmd("list", args...)
 	},
 }
 
@@ -125,9 +126,10 @@ var listCmdTable = &cobra.Command{
 	Long:    "Display one or more codepage tables showing all the characters in use.",
 	Example: exampleCmd(listTableExample),
 	Run: func(cmd *cobra.Command, args []string) {
-		if !printUsage(cmd, args...) {
-			fmt.Print(listTable(args...))
+		if err := printUsage(cmd, args...); err != nil {
+			logs.Fatal(err)
 		}
+		fmt.Print(listTable(args...))
 	},
 }
 

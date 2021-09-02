@@ -1,21 +1,35 @@
-Document encoding: CP437 (OEM-US)
-RetroTxt US-ASCII test
+Document encoding: OEM-US or compatible
+RetroTxt US-ASCII controls test
 
 C0 controls
+
+[	]	Horizontal tab
 
 []	Bell
 
 [
-]Line feed
+]	Carriage return
 
 [
-]Carriage return & Line feed
+]	Line feed
 
-[]Carriage return
+[
+]	Carriage return & Line feed
+
+[]	Backspace should remove the left-bracket
+
+[]	Delete the right-bracket
+
+()	Escape
+
+[]	Form feed page brake
+
+[]	Vertical tab
 
 []	Shift out
 []	Shift in
 
 []	Cancel
 
-[	]	Horizontal tab
+[]	Text after the substitute EOF character will be hidden 
+	from CP/M and DOS viewers

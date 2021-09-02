@@ -34,7 +34,7 @@ var configCmd = &cobra.Command{
 	Long:    fmt.Sprintf("%s settings, setup and default configurations.", meta.Name),
 	Example: exampleCmd(configExample),
 	Run: func(cmd *cobra.Command, args []string) {
-		if !printUsage(cmd, args...) {
+		if err := printUsage(cmd, args...); err != nil {
 			logs.FatalCmd("config", args...)
 		}
 	},
@@ -146,10 +146,11 @@ var configSetCmd = &cobra.Command{
 		if configListAll() {
 			return
 		}
-		if !printUsage(cmd, args...) {
-			for _, arg := range args {
-				config.Set(arg)
-			}
+		if err := printUsage(cmd, args...); err != nil {
+			logs.Fatal(err)
+		}
+		for _, arg := range args {
+			config.Set(arg)
 		}
 	},
 }
