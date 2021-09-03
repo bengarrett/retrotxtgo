@@ -21,4 +21,7 @@ var (
 	ErrCacheYaml = errors.New("set cache cannot marshal yaml")
 	ErrCacheData = errors.New("set cache cannot create a data path")
 	ErrCacheSave = errors.New("set cache cannot save data")
+
+	ErrFlagE     = errors.New("ignoring encode flag")
+	ErrFilenames = errors.New("ignoring [filenames]")
 )

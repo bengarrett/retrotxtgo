@@ -9,6 +9,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/sample"
 	"github.com/spf13/cobra"
 	"golang.org/x/text/encoding"
+	uni "golang.org/x/text/encoding/unicode"
 )
 
 // initArgs initializes the command arguments and flags.
@@ -28,11 +29,17 @@ func initArgs(cmd *cobra.Command, args ...string) ([]string, *convert.Convert, s
 		conv.Flags.SwapChars = []string{null, verticalBar}
 	}
 	if filesystem.IsPipe() {
-		if e := cmd.Flags().Lookup("encode"); e.Changed {
-			fmt.Println("--encode flag is ignored when piped text is in use")
+		var err error
+		if e := cmd.Flags().Lookup("encode"); !e.Changed {
+			// TODO: detect platform to determine BOM and LE/BE?
+			conv.Input.Encoding = uni.UTF16(uni.BigEndian, uni.UseBOM)
 		}
-		if l == 0 {
-			fmt.Println("[filenames] are ignored when piped text is in use")
+		if l > 0 {
+			err = fmt.Errorf("%v;%w for piped text", err, ErrFilenames)
+			args = []string{""}
+		}
+		if err != nil {
+			fmt.Println(logs.Printf(err))
 		}
 	} else if err := printUsage(cmd, args...); err != nil {
 		logs.Fatal(err)
