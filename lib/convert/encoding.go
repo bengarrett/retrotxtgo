@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"unicode/utf8"
 
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/htmlindex"
@@ -476,9 +478,16 @@ func (c *Convert) swaps() *Convert {
 	if len(c.Flags.SwapChars) == 0 {
 		return c
 	}
-	replacers := []rune{}
+	replacers, unknown := []rune{}, []string{}
 	for _, val := range c.Flags.SwapChars {
-		replacers = append(replacers, newReplacer(val)...)
+		nr := newReplacer(val)
+		if nr == nil {
+			unknown = append(unknown, val)
+		}
+		replacers = append(replacers, nr...)
+	}
+	if len(unknown) > 0 {
+		fmt.Fprintln(os.Stderr, str.Info(), "unsupported --swap-chars values:", strings.Join(unknown, ","))
 	}
 	replace := runes.Map(func(r rune) rune {
 		if !replacer(r, replacers...) {
@@ -518,7 +527,7 @@ func newReplacer(s string) []rune {
 	case "s", "space", "20", "32":
 		return []rune{SP}
 	}
-	return []rune{}
+	return nil
 }
 
 func swap(code rune) rune {

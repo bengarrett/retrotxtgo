@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"os"
 	"strings"
 	"unicode/utf8"
 
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/encoding/unicode"
@@ -202,6 +204,7 @@ func (c *Convert) wrapWidth(max int) {
 // skipCtrlCodes marks control characters to be ignored.
 // It needs to be applied before Convert.transform().
 func (c *Convert) skipCtrlCodes() *Convert {
+	unknown := []string{}
 	for _, v := range c.Flags.Controls {
 		switch strings.ToLower(v) {
 		case "bell", "bel", "b":
@@ -222,7 +225,15 @@ func (c *Convert) skipCtrlCodes() *Convert {
 			c.ignore(ESC)
 		case "del", "d":
 			c.ignore(DEL)
+		default:
+			if v == "=" {
+				continue
+			}
+			unknown = append(unknown, v)
 		}
+	}
+	if len(unknown) > 0 {
+		fmt.Fprintln(os.Stderr, str.Info(), "unsupported --control values:", strings.Join(unknown, ","))
 	}
 	return c
 }
