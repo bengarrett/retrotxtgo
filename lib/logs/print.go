@@ -11,7 +11,7 @@ import (
 
 const OSErrCode = 1
 
-// Hint formats and returns the error with a usage suggestion or hint.
+// Hint returns a formatted error with a usage suggestion or hint.
 func Hint(s string, err error) string {
 	if err == nil {
 		return ""
@@ -33,19 +33,19 @@ func Fatal(err error) {
 
 // FatalFlag prints a problem with the flag and exits.
 func FatalFlag(cmd, flag string, err error) {
-	fmt.Fprintln(os.Stderr, PrintfFlag(cmd, flag, err))
+	fmt.Fprintln(os.Stderr, SprintFlag(cmd, flag, err))
 	os.Exit(OSErrCode)
 }
 
 // FatalMark formats the errors, highlights the value and exits.
 func FatalMark(mark string, err, wrap error) {
-	fmt.Fprintln(os.Stderr, PrintfMark(mark, err, wrap))
+	fmt.Fprintln(os.Stderr, SprintMark(mark, err, wrap))
 	os.Exit(OSErrCode)
 }
 
 // FatalWrap formats the errors and exits.
 func FatalWrap(err, wrap error) {
-	fmt.Fprintln(os.Stderr, PrintfWrap(err, wrap))
+	fmt.Fprintln(os.Stderr, SprintWrap(err, wrap))
 	os.Exit(OSErrCode)
 }
 
@@ -64,8 +64,8 @@ func Sprint(err error) string {
 	return fmt.Sprintf("%s%s.", str.Alert(), strings.Join(seps, ".\n"))
 }
 
-// PrintfCmd returns the command does not exist.
-func PrintfCmd(cmd string, err error) string {
+// SprintCmd returns the command does not exist.
+func SprintCmd(cmd string, err error) string {
 	if cmd == "" || err == nil {
 		return ""
 	}
@@ -73,8 +73,8 @@ func PrintfCmd(cmd string, err error) string {
 		str.Alert(), cmd, err)
 }
 
-// PrintfFlag prints a problem with the flag.
-func PrintfFlag(cmd, flag string, err error) string {
+// SprintFlag returns a problem with the flag.
+func SprintFlag(cmd, flag string, err error) string {
 	if cmd == "" || err == nil {
 		return ""
 	}
@@ -88,8 +88,8 @@ func PrintfFlag(cmd, flag string, err error) string {
 		alert, cmd, toggle, flag, err)
 }
 
-// PrintfMark formats the errors and highlights the value.
-func PrintfMark(mark string, err, wrap error) string {
+// SprintMark formats and returns the errors and highlights the marked string.
+func SprintMark(mark string, err, wrap error) string {
 	if mark == "" || err == nil || wrap == nil {
 		return ""
 	}
@@ -97,8 +97,8 @@ func PrintfMark(mark string, err, wrap error) string {
 		str.Alert(), str.ColFuz(fmt.Sprintf("%v", err)), mark, str.ColFuz(fmt.Sprintf("%v", wrap)))
 }
 
-// PrintfWrap formats the errors.
-func PrintfWrap(err, wrap error) string {
+// SprintWrap returns the formatted errors.
+func SprintWrap(err, wrap error) string {
 	if err == nil || wrap == nil {
 		return ""
 	}

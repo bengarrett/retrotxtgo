@@ -49,7 +49,7 @@ var infoCmd = &cobra.Command{
 			// embed sample filename
 			filename, err := infoSample(arg)
 			if err != nil {
-				fmt.Println(logs.PrintfMark(arg, ErrInfo, err))
+				fmt.Println(logs.SprintMark(arg, ErrInfo, err))
 				continue
 			}
 			if filename != "" {
@@ -61,11 +61,11 @@ var infoCmd = &cobra.Command{
 					if n.Length <= 1 {
 						logs.Fatal(err)
 					}
-					fmt.Println(logs.PrintfMark(arg, logs.ErrFileName, err))
+					fmt.Println(logs.SprintMark(arg, logs.ErrFileName, err))
 					continue
 				}
 				if err = cmd.Usage(); err != nil {
-					fmt.Println(logs.PrintfWrap(ErrUsage, err))
+					fmt.Println(logs.SprintWrap(ErrUsage, err))
 				}
 				logs.Fatal(err)
 			}

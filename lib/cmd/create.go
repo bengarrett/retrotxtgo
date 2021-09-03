@@ -365,7 +365,7 @@ func createHTML(cmd *cobra.Command, flags convert.Flag, src *[]byte) []byte {
 		r, err = conv.Dump(*src...)
 	}
 	if err != nil {
-		fmt.Println(logs.PrintfWrap(ErrCreate, err))
+		fmt.Println(logs.SprintWrap(ErrCreate, err))
 		return nil
 	}
 	return []byte(string(r))

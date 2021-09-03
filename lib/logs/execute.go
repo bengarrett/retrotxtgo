@@ -69,10 +69,10 @@ func execute(err error, test bool, args ...string) string { //nolint:gocyclo,fun
 	var c string
 	switch problem {
 	case flagSyntax:
-		c = PrintfFlag(name, mark, err)
+		c = SprintFlag(name, mark, err)
 	case invalidFlag:
 		// retroxt config shell -i
-		c = PrintfFlag(name, mark, ErrNotNil)
+		c = SprintFlag(name, mark, ErrNotNil)
 	case invalidType:
 		// retroxt --help=foo
 		const min = 6
@@ -87,7 +87,7 @@ func execute(err error, test bool, args ...string) string { //nolint:gocyclo,fun
 		c = Hint(fmt.Sprintf("%s --help", mark), ErrCmd)
 	case flagRequired:
 		// retrotxt config shell
-		c = PrintfCmd(mark, ErrFlagNil)
+		c = SprintCmd(mark, ErrFlagNil)
 	case unknownCmd:
 		// retrotxt foo
 		mark = words[2]
@@ -98,14 +98,14 @@ func execute(err error, test bool, args ...string) string { //nolint:gocyclo,fun
 		if mark == name {
 			name = rt
 		}
-		c = PrintfFlag(name, mark, ErrFlag)
+		c = SprintFlag(name, mark, ErrFlag)
 	case unknownShort:
 		// retrotxt -foo
 		mark = words[5]
 		if mark == name {
 			name = rt
 		}
-		c = PrintfFlag(name, mark, ErrFlag)
+		c = SprintFlag(name, mark, ErrFlag)
 	case flagChoice:
 		c = "flagChoice placeholder"
 	default:
@@ -132,12 +132,12 @@ func parseType(name, flag string, err error) string {
 	s := err.Error()
 	switch {
 	case strings.Contains(s, invalidBool):
-		return PrintfFlag(name, flag, ErrNotBool)
+		return SprintFlag(name, flag, ErrNotBool)
 	case strings.Contains(s, invalidInt):
-		return PrintfFlag(name, flag, ErrNotInt)
+		return SprintFlag(name, flag, ErrNotInt)
 	case strings.Contains(s, invalidStr):
-		return PrintfFlag(name, flag, ErrNotInts)
+		return SprintFlag(name, flag, ErrNotInts)
 	default:
-		return PrintfFlag(name, flag, err)
+		return SprintFlag(name, flag, err)
 	}
 }

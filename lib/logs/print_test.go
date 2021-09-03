@@ -17,11 +17,11 @@ func init() {
 	color.Enable = false
 }
 
-func ExamplePrintf() {
+func ExampleSprint() {
 	fmt.Println(Sprint(ErrTest))
 	fmt.Println(status)
 	//Output: Problem:
-	//  error
+	// error.
 	// exit status 1
 }
 
@@ -37,7 +37,7 @@ func TestHint_String(t *testing.T) {
 	}{
 		{"empty", fields{}, ""},
 		{"text", fields{nil, "hint"}, ""},
-		{"text", fields{ErrTest, "hint"}, fmt.Sprintf("Problem:\n error\n run %s hint", meta.Bin)},
+		{"text", fields{ErrTest, "hint"}, fmt.Sprintf("Problem:\nerror.\n run %s hint", meta.Bin)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -66,7 +66,7 @@ func TestSprint(t *testing.T) {
 	}
 }
 
-func TestPrintfCmd(t *testing.T) {
+func TestSprintCmd(t *testing.T) {
 	type args struct {
 		name string
 		err  error
@@ -82,14 +82,14 @@ func TestPrintfCmd(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := PrintfCmd(tt.args.name, tt.args.err); got != tt.want {
-				t.Errorf("PrintfCmd() = %v, want %v", got, tt.want)
+			if got := SprintCmd(tt.args.name, tt.args.err); got != tt.want {
+				t.Errorf("SprintCmd() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestPrintfFlag(t *testing.T) {
+func TestSprintFlag(t *testing.T) {
 	type args struct {
 		name string
 		flag string
@@ -106,14 +106,14 @@ func TestPrintfFlag(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := PrintfFlag(tt.args.name, tt.args.flag, tt.args.err); got != tt.want {
-				t.Errorf("PrintfFlag() = %v, want %v", got, tt.want)
+			if got := SprintFlag(tt.args.name, tt.args.flag, tt.args.err); got != tt.want {
+				t.Errorf("SprintFlag() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestPrintfMark(t *testing.T) {
+func TestSprintMark(t *testing.T) {
 	type args struct {
 		value string
 		err   error
@@ -130,14 +130,14 @@ func TestPrintfMark(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := PrintfMark(tt.args.value, tt.args.err, tt.args.errs); got != tt.want {
-				t.Errorf("PrintfMark() = %v, want %v", got, tt.want)
+			if got := SprintMark(tt.args.value, tt.args.err, tt.args.errs); got != tt.want {
+				t.Errorf("SprintMark() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestPrintfWrap(t *testing.T) {
+func TestSprintWrap(t *testing.T) {
 	type args struct {
 		err  error
 		errs error
@@ -153,8 +153,8 @@ func TestPrintfWrap(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := PrintfWrap(tt.args.err, tt.args.errs); got != tt.want {
-				t.Errorf("PrintfWrap() = %v, want %v", got, tt.want)
+			if got := SprintWrap(tt.args.err, tt.args.errs); got != tt.want {
+				t.Errorf("SprintWrap() = %v, want %v", got, tt.want)
 			}
 		})
 	}

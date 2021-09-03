@@ -138,7 +138,7 @@ func listTable(names ...string) (s string) {
 	for _, name := range names {
 		table, err := convert.Table(name)
 		if err != nil {
-			fmt.Println(logs.PrintfMark(name, ErrTable, err))
+			fmt.Println(logs.SprintMark(name, ErrTable, err))
 			continue
 		}
 		s = fmt.Sprintf("%s%s", s, table.String())
@@ -168,7 +168,7 @@ func listTbls() (s string) {
 		if name == "" {
 			name, err = ianaindex.MIME.Name(e)
 			if err != nil {
-				fmt.Println(logs.PrintfMark(fmt.Sprint(e), ErrIANA, err))
+				fmt.Println(logs.SprintMark(fmt.Sprint(e), ErrIANA, err))
 				continue
 			}
 		}
@@ -177,7 +177,7 @@ func listTbls() (s string) {
 		}
 		table, err := convert.Table(name)
 		if err != nil {
-			fmt.Println(logs.PrintfMark(name, ErrTable, err))
+			fmt.Println(logs.SprintMark(name, ErrTable, err))
 			continue
 		}
 		s = fmt.Sprintf("%s%s", s, table.String())
