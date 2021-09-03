@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/bengarrett/retrotxtgo/lib/convert"
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
@@ -36,7 +37,7 @@ func initArgs(cmd *cobra.Command, args ...string) ([]string, *convert.Convert, s
 			args = []string{""}
 		}
 		if err != nil {
-			fmt.Println(logs.Printf(err))
+			fmt.Fprintln(os.Stderr, logs.Sprint(err))
 		}
 	} else if err := printUsage(cmd, args...); err != nil {
 		logs.Fatal(err)

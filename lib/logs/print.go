@@ -17,40 +17,40 @@ func Hint(s string, err error) string {
 		return ""
 	}
 	if s == "" {
-		return Printf(err)
+		return Sprint(err)
 	}
 	return fmt.Sprintf("%s\n run %s",
-		Printf(err), str.Example(fmt.Sprintf("%s %s", meta.Bin, s)))
+		Sprint(err), str.Example(fmt.Sprintf("%s %s", meta.Bin, s)))
 }
 
 // Fatal prints a formatted error and exits.
 func Fatal(err error) {
 	if err != nil {
-		fmt.Println(Printf(err))
+		fmt.Fprintln(os.Stderr, Sprint(err))
 	}
 	os.Exit(OSErrCode)
 }
 
 // FatalFlag prints a problem with the flag and exits.
 func FatalFlag(cmd, flag string, err error) {
-	fmt.Println(PrintfFlag(cmd, flag, err))
+	fmt.Fprintln(os.Stderr, PrintfFlag(cmd, flag, err))
 	os.Exit(OSErrCode)
 }
 
 // FatalMark formats the errors, highlights the value and exits.
 func FatalMark(mark string, err, wrap error) {
-	fmt.Println(PrintfMark(mark, err, wrap))
+	fmt.Fprintln(os.Stderr, PrintfMark(mark, err, wrap))
 	os.Exit(OSErrCode)
 }
 
 // FatalWrap formats the errors and exits.
 func FatalWrap(err, wrap error) {
-	fmt.Println(PrintfWrap(err, wrap))
+	fmt.Fprintln(os.Stderr, PrintfWrap(err, wrap))
 	os.Exit(OSErrCode)
 }
 
-// Printf formats and returns the error.
-func Printf(err error) string {
+// Sprint formats and returns the error.
+func Sprint(err error) string {
 	if err == nil {
 		return ""
 	}

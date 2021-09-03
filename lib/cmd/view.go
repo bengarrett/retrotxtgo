@@ -62,12 +62,12 @@ func viewCmdRun(cmd *cobra.Command, args ...string) (*bytes.Buffer, error) {
 		}
 		b, err := readArg(arg, cmd, conv, samp)
 		if err != nil {
-			fmt.Fprintln(w, logs.Printf(err))
+			fmt.Fprintln(w, logs.Sprint(err))
 			continue
 		}
 		r, err := transform(conv, samp, b...)
 		if err != nil {
-			fmt.Fprintln(w, logs.Printf(err))
+			fmt.Fprintln(w, logs.Sprint(err))
 			continue
 		}
 		fmt.Fprint(w, string(r))

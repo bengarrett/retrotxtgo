@@ -18,7 +18,7 @@ func init() {
 }
 
 func ExamplePrintf() {
-	fmt.Println(Printf(ErrTest))
+	fmt.Println(Sprint(ErrTest))
 	fmt.Println(status)
 	//Output: Problem:
 	//  error
@@ -48,19 +48,19 @@ func TestHint_String(t *testing.T) {
 	}
 }
 
-func TestPrintf(t *testing.T) {
+func TestSprint(t *testing.T) {
 	tests := []struct {
 		name string
 		err  error
 		want string
 	}{
 		{"empty", nil, ""},
-		{"test", ErrTest, "Problem:\n error"},
+		{"test", ErrTest, "Problem:\nerror."},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Printf(tt.err); got != tt.want {
-				t.Errorf("Printf() = %v, want %v", got, tt.want)
+			if got := Sprint(tt.err); got != tt.want {
+				t.Errorf("Sprint() = %v, want %v", got, tt.want)
 			}
 		})
 	}

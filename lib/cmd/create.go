@@ -303,10 +303,9 @@ func parseFiles(cmd *cobra.Command, flags convert.Flag, args ...string) {
 		logs.Fatal(err)
 	}
 	for i, arg := range args {
-		fmt.Printf("%d. temp string: %s\n\n", i, arg)
 		b, err := readArg(arg, cmd, conv, samp)
 		if err != nil {
-			fmt.Println(logs.Printf(err))
+			fmt.Fprintln(os.Stderr, logs.Sprint(err))
 			continue
 		}
 		b = createHTML(cmd, flags, &b)
