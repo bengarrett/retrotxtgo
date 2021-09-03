@@ -114,7 +114,7 @@ func configInfo() (quit bool) {
 		}
 	}
 	if configFlag.styles {
-		str.JSONStyles(fmt.Sprintf("%s info --style", meta.Bin))
+		fmt.Print(str.JSONStyles(fmt.Sprintf("%s info --style", meta.Bin)))
 		return true
 	}
 	style := viper.GetString("style.info")

@@ -55,20 +55,22 @@ type JSONExample struct {
 	}
 }
 
-func (s JSONExample) String(flag string) {
-	fmt.Println()
+func (s JSONExample) String(flag string) string {
+	w := new(bytes.Buffer)
+	fmt.Fprintln(w)
 	// config is stored as YAML but printed as JSON
 	out, err := json.MarshalIndent(s, "", "  ")
 	if err != nil {
 		log.Fatalln(fmt.Errorf("json example marshal indent: %w", err))
 	}
 	if flag != "" {
-		fmt.Println("\n" + color.Secondary.Sprintf("%s=%q", flag, s.Style.Name))
+		fmt.Fprintln(w, "\n"+color.Secondary.Sprintf("%s=%q", flag, s.Style.Name))
 	}
-	if err := Highlight(string(out), "json", s.Style.Name, true); err != nil {
+	if err := HighlightWriter(w, string(out), "json", s.Style.Name, true); err != nil {
 		// cannot use the logs package as it causes an import cycle error
 		log.Fatalln(fmt.Errorf("json example highlight syntax error: %w", err))
 	}
+	return w.String()
 }
 
 // Border wraps the string around a single line border.
@@ -285,16 +287,18 @@ func UnderlineKeys(keys ...string) string {
 }
 
 // JSONStyles prints out a list of available YAML color styles.
-func JSONStyles(cmd string) {
+func JSONStyles(cmd string) string {
+	w := new(bytes.Buffer)
 	for i, s := range styles.Names() {
 		var example JSONExample
 		example.Style.Name, example.Style.Count = s, i
 		if s == "dracula" {
 			example.Style.Default = true
 		}
-		example.String(cmd)
+		fmt.Fprint(w, example.String(cmd))
 	}
-	fmt.Println()
+	fmt.Fprintln(w)
+	return w.String()
 }
 
 // Valid checks style name validity.
