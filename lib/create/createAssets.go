@@ -222,8 +222,13 @@ func (args *Args) destination(name string) (string, error) {
 		dst = filepath.Join(dir, name)
 	}
 	fs, err := os.Stat(dst)
-	// file exists and is greater than zero bytes
-	if fs.Size() > 0 && !args.Save.OW {
+	if os.IsNotExist(err) {
+		// expected, dst doesn't exist
+	} else if err != nil {
+		// unexpected, some other system err
+		return "", err
+	} else if fs.Size() > 0 && !args.Save.OW {
+		// unexpected, dst does exist
 		switch name {
 		case favFn.write(), jsFn.write(), "vga.woff2", "mona.woff2":
 			// existing static files can be ignored
