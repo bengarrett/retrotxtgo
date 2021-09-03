@@ -31,10 +31,6 @@ func initArgs(cmd *cobra.Command, args ...string) ([]string, *convert.Convert, s
 	}
 	if filesystem.IsPipe() {
 		var err error
-		if e := cmd.Flags().Lookup("encode"); !e.Changed {
-			// TODO: detect platform to determine BOM and LE/BE?
-			conv.Input.Encoding = uni.UTF16(uni.BigEndian, uni.UseBOM)
-		}
 		if l > 0 {
 			err = fmt.Errorf("%v;%w for piped text", err, ErrFilenames)
 			args = []string{""}
@@ -52,7 +48,17 @@ func initArgs(cmd *cobra.Command, args ...string) ([]string, *convert.Convert, s
 	if err != nil {
 		return nil, nil, samp, err
 	}
+	if conv.Input.Encoding == nil {
+		conv.Input.Encoding = dfaultInput()
+	}
 	return args, &conv, samp, nil
+}
+
+func dfaultInput() encoding.Encoding {
+	if filesystem.IsPipe() {
+		return uni.UTF16(uni.LittleEndian, uni.UseBOM)
+	}
+	return charmap.CodePage437
 }
 
 // initEncodings applies the public --encode and the hidden --to encoding values to embed sample data.
@@ -81,9 +87,6 @@ func initEncodings(cmd *cobra.Command, dfault string) (sample.Flags, error) {
 	frm, err := parse("encode")
 	if err != nil {
 		return sample.Flags{}, err
-	}
-	if frm == nil {
-		frm = charmap.CodePage437
 	}
 	// handle the hidden reencode (--to) flag
 	to, err = parse("to")
