@@ -147,10 +147,6 @@ func openSample(arg string, cmd *cobra.Command, c *convert.Convert, f sample.Fla
 		// html is a global flag, create.Args
 		html.FontFamily.Value = p.Font.String()
 	}
-
-	// TODO: handle encoding or use p.Encoding as fallback
-	//return create.Normalize(p.Encoding, p.Runes...), nil
-
 	return []byte(string(p.Runes)), nil
 }
 

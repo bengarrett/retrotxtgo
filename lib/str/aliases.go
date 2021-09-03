@@ -75,7 +75,7 @@ func Default(s, val string) string {
 }
 
 // Options appends options: ... to the usage string.
-func Options(s string, shorthand, flagHelp bool, opts ...string) (usage string) {
+func Options(s string, shorthand, flagHelp bool, opts ...string) string {
 	var keys string
 	if len(opts) == 0 {
 		return s
