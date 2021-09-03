@@ -55,6 +55,7 @@ func initArgs(cmd *cobra.Command, args ...string) ([]string, *convert.Convert, s
 	return args, &conv, samp, nil
 }
 
+// dfaultInput returns the default encoding when the --encoding flag is unused.
 func dfaultInput() encoding.Encoding {
 	if filesystem.IsPipe() {
 		return uni.UTF16(uni.LittleEndian, uni.UseBOM)
@@ -125,6 +126,7 @@ func readArg(arg string, cmd *cobra.Command, c *convert.Convert, f sample.Flags)
 	return b, nil
 }
 
+// openFile returns the content of the named file given via an argument.
 func openFile(arg string) ([]byte, error) {
 	b, err := filesystem.Read(arg)
 	if err != nil {
@@ -133,6 +135,7 @@ func openFile(arg string) ([]byte, error) {
 	return b, nil
 }
 
+// openSample returns the content of the named embed sample file given via an argument.
 func openSample(arg string, cmd *cobra.Command, c *convert.Convert, f sample.Flags) ([]byte, error) {
 	if ok := sample.Valid(arg); !ok {
 		return nil, nil
@@ -150,6 +153,7 @@ func openSample(arg string, cmd *cobra.Command, c *convert.Convert, f sample.Fla
 	return []byte(string(p.Runes)), nil
 }
 
+// transform the bytes into Unicode runes.
 func transform(conv *convert.Convert, f sample.Flags, b ...byte) ([]rune, error) {
 	// handle input source encoding
 	if f.From != nil {
@@ -166,7 +170,7 @@ func transform(conv *convert.Convert, f sample.Flags, b ...byte) ([]rune, error)
 			return nil, err
 		}
 	}
-	// convert text to UTF-8
+	// convert text to runes
 	if endOfFile(conv.Flags) {
 		r, err = conv.Text(b...)
 	} else {
