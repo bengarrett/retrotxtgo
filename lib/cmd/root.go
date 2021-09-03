@@ -204,7 +204,7 @@ func exampleCmd(tmpl string) string {
 	return strings.TrimSpace(s)
 }
 
-// flagControls handles the controls flag.
+// flagControls handles the --controls flag.
 func flagControls(p *[]string, cc *cobra.Command) {
 	cc.Flags().StringSliceVarP(p, "controls", "c", []string{},
 		`implement these control codes (default "eof,tab")
@@ -219,7 +219,7 @@ separate multiple controls with commas
 `)
 }
 
-// flagEncode handles the encode flag.
+// flagEncode handles the --encode flag.
 func flagEncode(p *string, cc *cobra.Command) {
 	cc.Flags().StringVarP(p, "encode", "e", "",
 		fmt.Sprintf("character encoding used by the filename(s) (default \"CP437\")\n%s\n%s%s\n",
@@ -228,7 +228,7 @@ func flagEncode(p *string, cc *cobra.Command) {
 			str.Example(meta.Bin+" list codepages")))
 }
 
-// flagRunes handles the swap-chars flag.
+// flagRunes handles the --swap-chars flag.
 func flagRunes(p *[]string, cc *cobra.Command) {
 	cc.Flags().StringSliceVarP(p, "swap-chars", "x", []string{},
 		`swap out these characters with UTF8 alternatives (default "null,bar")
@@ -242,17 +242,17 @@ separate multiple values with commas
   `)
 }
 
-// flagTo handles the to flag.
+// flagTo handles the hidden --to flag.
 func flagTo(p *string, cc *cobra.Command) {
-	cc.Flags().StringVar(p, "to", "",
-		fmt.Sprintf(`alternative character encoding to print to stdout
-modern terminals and %s use UTF8 encoding
-this flag is unreliable and not recommended
-see the list of usable values %s%s`,
-			meta.Name, str.Example(meta.Bin+" list codepages"), "\n"))
+	const name = "to"
+	cc.Flags().StringVar(p, name, "",
+		"alternative character encoding to print to stdout\nthis flag is unreliable and not recommended")
+	if err := cc.Flags().MarkHidden(name); err != nil {
+		logs.FatalMark(name, ErrHide, err)
+	}
 }
 
-// flagWidth handles the width flag.
+// flagWidth handles the --width flag.
 func flagWidth(p *int, cc *cobra.Command) {
 	cc.Flags().IntVarP(p, "width", "w", viewFlag.width,
 		"maximum document character/column width")

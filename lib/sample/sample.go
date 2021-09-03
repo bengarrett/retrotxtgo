@@ -148,32 +148,24 @@ func (flag Flags) Open(name string, conv *convert.Convert) (File, error) {
 	if conv.Input.Encoding == nil {
 		conv.Input.Encoding = f.Encoding
 	}
-	if flag.To != nil {
-		// sample items that break the NewEncoder
-		switch name {
-		case "037", "shiftjis", "utf16.be", "utf16.le":
-			return File{}, nil
-		}
-		s, errB := stringB(flag.From, b...)
-		if errB != nil {
-			return File{}, errB
-		}
-		fmt.Println(s)
-		return File{}, nil
-	}
-	// default overrides
+	// override --control flag values for codepage table samples
+	ignCtrlCodes := false
 	switch name {
 	case "437", "437.cr", "437.lf":
-		fmt.Printf("\nTo correctly display all %q table cells the --controls flag is ignored\n", name)
-		conv.Flags.Controls = []string{""}
+		ignCtrlCodes = true
+	default:
 	}
-	f, err = samp.transform(&f, conv, b)
+	f, err = samp.transform(&f, conv, ignCtrlCodes, b)
 	return f, err
 }
 
 // Transform converts the raw byte data of the textfile into UTF8 runes.
-func (samp *Sample) transform(f *File, conv *convert.Convert, b []byte) (File, error) {
+// Set the cc bool to true to ignore the --controls flag.
+func (samp *Sample) transform(f *File, conv *convert.Convert, cc bool, b []byte) (File, error) {
 	var err error
+	if cc {
+		conv.Flags.Controls = []string{}
+	}
 	switch samp.convert {
 	case ansi:
 		if f.Runes, err = conv.ANSI(b...); err != nil {

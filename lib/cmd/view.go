@@ -4,7 +4,6 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"log"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
@@ -43,7 +42,7 @@ var viewCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		b, err := viewCmdRun(cmd, args...)
 		if err != nil {
-			log.Fatal(err)
+			logs.Fatal(err)
 		}
 		fmt.Print(b)
 	},
@@ -66,7 +65,6 @@ func viewCmdRun(cmd *cobra.Command, args ...string) (*bytes.Buffer, error) {
 			fmt.Fprintln(w, logs.Printf(err))
 			continue
 		}
-		fmt.Println("==>", conv.Flags.Controls)
 		r, err := transform(conv, samp, b...)
 		if err != nil {
 			fmt.Fprintln(w, logs.Printf(err))

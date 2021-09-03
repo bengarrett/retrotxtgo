@@ -48,16 +48,19 @@ func initArgs(cmd *cobra.Command, args ...string) ([]string, *convert.Convert, s
 }
 
 // initEncodings applies the --encode and --to encoding values to embed sample data.
-func initEncodings(cmd *cobra.Command, def string) (sample.Flags, error) {
-	encode := func(flag string) (encoding.Encoding, error) {
-		cp := cmd.Flags().Lookup(flag)
-		name := def
+func initEncodings(cmd *cobra.Command, dfault string) (sample.Flags, error) {
+	parse := func(name string) (encoding.Encoding, error) {
+		cp := cmd.Flags().Lookup(name)
+		lookup := dfault
 		if cp.Changed {
-			name = cp.Value.String()
-		} else if def == "" {
+			lookup = cp.Value.String()
+		} else if dfault == "" {
 			return nil, nil
 		}
-		return convert.Encoder(name)
+		if lookup == "" {
+			return nil, nil
+		}
+		return convert.Encoder(lookup)
 	}
 	var (
 		frm encoding.Encoding
@@ -66,7 +69,11 @@ func initEncodings(cmd *cobra.Command, def string) (sample.Flags, error) {
 	if cmd == nil {
 		return sample.Flags{}, nil
 	}
-	frm, err := encode("encode")
+	frm, err := parse("encode")
+	if err != nil {
+		return sample.Flags{}, err
+	}
+	to, err = parse("to")
 	if err != nil {
 		return sample.Flags{}, err
 	}
@@ -123,6 +130,7 @@ func openSample(arg string, cmd *cobra.Command, c *convert.Convert, f sample.Fla
 		// html is a global flag, create.Args
 		html.FontFamily.Value = p.Font.String()
 	}
+
 	// TODO: handle encoding or use p.Encoding as fallback
 	//return create.Normalize(p.Encoding, p.Runes...), nil
 
@@ -134,11 +142,18 @@ func transform(conv *convert.Convert, f sample.Flags, b ...byte) ([]rune, error)
 	if f.From != nil {
 		conv.Input.Encoding = f.From
 	}
-	// convert text
 	var (
 		r   []rune
 		err error
 	)
+	// handle any output encoding BEFORE converting to Unicode
+	if f.To != nil {
+		b, err = f.To.NewDecoder().Bytes(b)
+		if err != nil {
+			return nil, err
+		}
+	}
+	// convert text to UTF-8
 	if endOfFile(conv.Flags) {
 		r, err = conv.Text(b...)
 	} else {
@@ -147,14 +162,5 @@ func transform(conv *convert.Convert, f sample.Flags, b ...byte) ([]rune, error)
 	if err != nil {
 		return nil, err
 	}
-	// return UTF-8 runes
-	if f.To == nil {
-		return r, nil
-	}
-	// re-encode text
-	newer, err := f.To.NewEncoder().String(string(r))
-	if err != nil {
-		return []rune(newer), err
-	}
-	return nil, nil
+	return r, nil
 }
