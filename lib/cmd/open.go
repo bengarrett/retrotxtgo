@@ -9,6 +9,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/sample"
 	"github.com/spf13/cobra"
 	"golang.org/x/text/encoding"
+	"golang.org/x/text/encoding/charmap"
 	uni "golang.org/x/text/encoding/unicode"
 )
 
@@ -54,7 +55,7 @@ func initArgs(cmd *cobra.Command, args ...string) ([]string, *convert.Convert, s
 	return args, &conv, samp, nil
 }
 
-// initEncodings applies the --encode and --to encoding values to embed sample data.
+// initEncodings applies the public --encode and the hidden --to encoding values to embed sample data.
 func initEncodings(cmd *cobra.Command, dfault string) (sample.Flags, error) {
 	parse := func(name string) (encoding.Encoding, error) {
 		cp := cmd.Flags().Lookup(name)
@@ -76,10 +77,15 @@ func initEncodings(cmd *cobra.Command, dfault string) (sample.Flags, error) {
 	if cmd == nil {
 		return sample.Flags{}, nil
 	}
+	// handle encode flag or apply the default
 	frm, err := parse("encode")
 	if err != nil {
 		return sample.Flags{}, err
 	}
+	if frm == nil {
+		frm = charmap.CodePage437
+	}
+	// handle the hidden reencode (--to) flag
 	to, err = parse("to")
 	if err != nil {
 		return sample.Flags{}, err
