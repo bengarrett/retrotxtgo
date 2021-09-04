@@ -6,6 +6,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"regexp"
 	"strings"
 	"unicode/utf8"
 
@@ -165,14 +166,22 @@ func unicodeDecoder(e encoding.Encoding, input []byte) ([]rune, error) {
 	return nil, nil
 }
 
+func replaceNL(r []rune) []rune {
+	re := regexp.MustCompile(`\r?\n`)
+	s := re.ReplaceAllString(string(r), "")
+	return []rune(s)
+}
+
 // wrapWidth enforces a row length by inserting newline characters.
 func (c *Convert) wrapWidth(max int) {
+	if max < 1 {
+		return
+	}
+	// remove newlines
+	c.Output = replaceNL(c.Output)
 	cnt := len(c.Output)
 	if cnt == 0 {
 		log.Fatal(ErrChainWrap)
-	}
-	if max < 1 {
-		return
 	}
 	r := strings.NewReader(string(c.Output))
 	cols, err := filesystem.Columns(r, c.Input.lineBreak)
@@ -207,28 +216,27 @@ func (c *Convert) skipCtrlCodes() *Convert {
 	unknown := []string{}
 	for _, v := range c.Flags.Controls {
 		switch strings.ToLower(v) {
-		case "bell", "bel", "b":
-			c.ignore(BEL)
-		case "backspace", "bs":
-			c.ignore(BS)
+		case "eof", "=":
+			continue
 		case "tab", "ht", "t":
 			c.ignore(HT)
-		case "lf", "l":
-			c.ignore(LF)
-		case "vtab", "vt", "v":
-			c.ignore(VT)
-		case "formfeed", "ff", "f":
-			c.ignore(FF)
+		case "bell", "bel", "b":
+			c.ignore(BEL)
 		case "cr", "c":
 			c.ignore(CR)
-		case "esc", "e":
-			c.ignore(ESC)
+		case "lf", "l":
+			c.ignore(LF)
+		case "backspace", "bs":
+			c.ignore(BS)
 		case "del", "d":
 			c.ignore(DEL)
+		case "esc", "e":
+			c.ignore(ESC)
+		case "formfeed", "ff", "f":
+			c.ignore(FF)
+		case "vtab", "vt", "v":
+			c.ignore(VT)
 		default:
-			if v == "=" {
-				continue
-			}
 			unknown = append(unknown, v)
 		}
 	}
