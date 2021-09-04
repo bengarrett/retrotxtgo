@@ -44,9 +44,9 @@ func TestFlags_Open(t *testing.T) {
 		{"no conv", fields{}, args{nil, "037"}, false, true},
 		{"okay 037", fields{}, args{&file, "037"}, true, false},
 		{"okay 1252", fields{nil, nil}, args{&file, "1252"}, true, false},
-		{"no convert", fields{nil, charmap.CodePage1047}, args{&file, "037"}, false, false},
-		{"convert 1252", fields{nil, charmap.CodePage437}, args{&file, "1252"}, false, false},
-		{"convert to cp437", fields{charmap.Windows1252, charmap.CodePage437}, args{&file, "1252"}, false, true},
+		{"no convert", fields{nil, charmap.CodePage1047}, args{&file, "037"}, true, false},
+		{"convert 1252", fields{nil, charmap.CodePage437}, args{&file, "1252"}, true, false},
+		{"convert to cp437", fields{charmap.Windows1252, charmap.CodePage437}, args{&file, "1252"}, true, false},
 		{"ansi", fields{}, args{&file, "ansi"}, true, false},
 		{"cp437 dump", fields{}, args{&file, "437.cr"}, true, false},
 	}

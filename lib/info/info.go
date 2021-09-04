@@ -187,15 +187,13 @@ func Marshal(name string, f Format, i, length int) error {
 	}
 	d.index, d.length = i, length
 	if d.validText() {
+		var err error
+		// get the required linebreaks chars before running the multiple tasks
+		if d.LineBreak.Decimals, err = filesystem.ReadLineBreaks(name); err != nil {
+			return err
+		}
+		d.linebreaks(d.LineBreak.Decimals)
 		var g errgroup.Group
-		g.Go(func() error {
-			var err error
-			if d.LineBreak.Decimals, err = filesystem.ReadLineBreaks(name); err != nil {
-				return err
-			}
-			d.linebreaks(d.LineBreak.Decimals)
-			return nil
-		})
 		g.Go(func() error {
 			return d.ctrls(name)
 		})
@@ -238,11 +236,8 @@ func Stdin(format string, b ...byte) error {
 		return err
 	}
 	if d.validText() {
+		d.linebreaks(filesystem.LineBreaks(true, []rune(string(b))...))
 		var g errgroup.Group
-		g.Go(func() error {
-			d.linebreaks(filesystem.LineBreaks(true, []rune(string(b))...))
-			return nil
-		})
 		g.Go(func() error {
 			var err error
 			if d.Count.Controls, err = filesystem.Controls(bytes.NewReader(b)); err != nil {
