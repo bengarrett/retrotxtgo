@@ -42,13 +42,13 @@ var rootFlag = rootFlags{}
 
 var rootCmdExample = fmt.Sprintf("  %s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s",
 	"# save the text files as webpages",
-	fmt.Sprintf("%s create %s", filenames, meta.Bin),
+	fmt.Sprintf("%s create %s", meta.Bin, filenames),
 	"# save the text files as webpages stored in a zip file",
-	fmt.Sprintf("%s create %s --compress", filenames, meta.Bin),
+	fmt.Sprintf("%s create %s --compress", meta.Bin, filenames),
 	"# print detailed information about the text files",
-	fmt.Sprintf("%s info   %s", filenames, meta.Bin),
+	fmt.Sprintf("%s info   %s", meta.Bin, filenames),
 	"# print the text files as Unicode text",
-	fmt.Sprintf("%s view   %s", filenames, meta.Bin),
+	fmt.Sprintf("%s view   %s", meta.Bin, filenames),
 	fmt.Sprintf("# configure the %s flags and settings", meta.Name),
 	fmt.Sprintf("%s config setup", meta.Bin),
 )
