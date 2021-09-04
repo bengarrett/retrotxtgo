@@ -197,18 +197,6 @@ func Valid(name string) bool {
 	return true
 }
 
-// stringB encodes the bytes as a string.
-func stringB(e encoding.Encoding, b ...byte) (string, error) {
-	if e == nil {
-		return string(b), nil
-	}
-	b, err := encode(e, b...)
-	if err != nil {
-		return "", err
-	}
-	return string(b), nil
-}
-
 func encode(e encoding.Encoding, b ...byte) ([]byte, error) {
 	if e == nil {
 		return nil, ErrEncode
