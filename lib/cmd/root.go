@@ -223,7 +223,7 @@ separate multiple controls with commas
 func flagEncode(p *string, cc *cobra.Command) {
 	cc.Flags().StringVarP(p, "encode", "e", "",
 		fmt.Sprintf("character encoding used by the filename(s) (default \"CP437\")\n%s\n%s%s\n",
-			color.Info.Sprint("the flag is ignored if Unicode or EBCDIC text is detected"),
+			color.Info.Sprint("this flag has no effect for Unicode and EBCDIC samples"),
 			"see the list of encode values ",
 			str.Example(meta.Bin+" list codepages")))
 }
