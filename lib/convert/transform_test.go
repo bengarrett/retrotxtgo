@@ -134,7 +134,7 @@ func TestConvert_Dump(t *testing.T) {
 		{"nl", args{bhi}, bytes.Runes(bhi), false},
 		{"ascii", args{[]byte(ascii)}, bytes.Runes([]byte(ascii)), false},
 		{"eof", args{[]byte(eof)}, bytes.Runes([]byte(wantEOF0)), false},
-		{"abc", args{[]byte(abc)}, []rune("␀ ☺ ☻\r\n[0mA B C"), false},
+		{"abc", args{[]byte(abc)}, []rune("␀ ☺ ☻\r\n\x1b[0mA B C"), false},
 	}
 	for _, tt := range tests { //nolint: dupl
 		t.Run(tt.name, func(t *testing.T) {

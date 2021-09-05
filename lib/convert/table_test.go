@@ -35,7 +35,7 @@ func TestTable(t *testing.T) {
 	}
 }
 
-func Test_tblEncode(t *testing.T) {
+func Test_defaultCP(t *testing.T) {
 	type args struct {
 		name string
 	}
@@ -51,13 +51,13 @@ func Test_tblEncode(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tblEncode(tt.args.name)
+			got, err := defaultCP(tt.args.name)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("tblEncode() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("defaultCP() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("tblEncode() = %v, want %v", got, tt.want)
+				t.Errorf("defaultCP() = %v, want %v", got, tt.want)
 			}
 		})
 	}

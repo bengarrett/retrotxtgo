@@ -18,7 +18,7 @@ func Example_listTbls() {
 	color.Enable = false
 	t := listTbls()
 	fmt.Printf("%d characters in the table", len(t))
-	// Output: 74928 characters in the table
+	// Output: 75088 characters in the table
 }
 
 func Test_examples(t *testing.T) {

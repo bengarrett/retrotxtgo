@@ -57,7 +57,9 @@ func List() *bytes.Buffer {
 	w := tabwriter.NewWriter(&buf, 0, 0, padding, ' ', flags)
 	fmt.Fprint(w, str.Head(tblWidth, title))
 	fmt.Fprintf(w, "\n%s\n", header)
-	for _, e := range Encodings() {
+	enc := Encodings()
+	enc = append(enc, AsaX34_1963, AsaX34_1965, AnsiX34_1967)
+	for _, e := range enc {
 		if e == charmap.XUserDefined {
 			continue
 		}
@@ -70,11 +72,15 @@ func List() *bytes.Buffer {
 		case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
 			fmt.Fprintf(w, " *%s\t %s\t %s\t %s\t\n", c.name, c.value, c.numeric, c.alias)
 			continue
+		case AsaX34_1963, AsaX34_1965, AnsiX34_1967:
+			fmt.Fprintf(w, " **%s\t %s\t %s\t %s\t\n", c.name, c.value, c.numeric, c.alias)
+			continue
 		}
 		// do not use ANSI colors in cells as it will break the table layout
 		fmt.Fprintf(w, " %s\t %s\t %s\t %s\t\n", c.name, c.value, c.numeric, c.alias)
 	}
-	fmt.Fprintln(w, "\n"+str.ColInf("*")+" EBCDIC encoding, is in use on IBM mainframes and not ASCII compatible.")
+	fmt.Fprintln(w, "\n "+str.ColInf("*")+" EBCDIC encoding, is in use on IBM mainframes and not ASCII compatible.")
+	fmt.Fprintln(w, str.ColInf("**")+" ANSI X3.2 encodings are only usable with the "+str.Example("list table")+" command.")
 	fmt.Fprintln(w, "\nEither named, numeric or alias values are valid codepage arguments.")
 	fmt.Fprintln(w, "  These values all match ISO 8859-1.")
 	cmds := fmt.Sprintf("%s list table ", meta.Bin)
@@ -107,6 +113,11 @@ func cells(e encoding.Encoding) cell {
 	}
 	c := cell{
 		name: fmt.Sprint(e),
+	}
+	switch e {
+	case AsaX34_1963, AsaX34_1965, AnsiX34_1967:
+		c.value = x34(e)
+		return c
 	}
 	var err error
 	if c.value, err = htmlindex.Name(e); err == nil {
