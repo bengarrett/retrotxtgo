@@ -68,7 +68,7 @@ func initEncodings(cmd *cobra.Command, dfault string) (sample.Flags, error) {
 	parse := func(name string) (encoding.Encoding, error) {
 		cp := cmd.Flags().Lookup(name)
 		lookup := dfault
-		if cp.Changed {
+		if cp != nil && cp.Changed {
 			lookup = cp.Value.String()
 		} else if dfault == "" {
 			return nil, nil
