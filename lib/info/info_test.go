@@ -238,6 +238,7 @@ func TestStdin(t *testing.T) {
 }
 
 func TestNames_Info(t *testing.T) {
+	const fileToTest = "detail.go"
 	type fields struct {
 		Index  int
 		Length int
@@ -254,7 +255,8 @@ func TestNames_Info(t *testing.T) {
 	}{
 		{"empty", fields{}, args{}, logs.ErrNameNil},
 		{"bad dir", fields{}, args{name: "some invalid filename"}, logs.ErrFileName},
-		{"temp dir", fields{}, args{name: os.TempDir(), format: "json.min"}, nil},
+		{"temp file", fields{}, args{name: fileToTest, format: "json.min"}, nil},
+		{"temp dir", fields{}, args{name: ".", format: "json.min"}, nil},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
