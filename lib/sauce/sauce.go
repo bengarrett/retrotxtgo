@@ -71,11 +71,20 @@ const (
 )
 
 func (d DataType) String() string {
-	s := [...]string{
-		"undefined", "text or character stream", "bitmap graphic or animation", "vector graphic",
-		"audio or music", "binary text", "extended binary text", "archive", "executable",
+	if d > executable {
+		return ""
+	}
+	return [...]string{
+		"undefined",
+		"text or character stream",
+		"bitmap graphic or animation",
+		"vector graphic",
+		"audio or music",
+		"binary text",
+		"extended binary text",
+		"archive",
+		"executable",
 	}[d]
-	return s
 }
 
 // FileTypes, both the SAUCE FileType value and name.

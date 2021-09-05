@@ -95,7 +95,7 @@ func Map() map[string]Sample {
 		"ansi.setmodes": {ansi, VGA, cp437, "text/ansi-setmodes.ans", "MS-DOS ANSI.SYS Set Mode examples"},
 		"iso-1":         {text, VGA, iso1, "text/iso-8859-1.txt", "ISO 8859-1 select characters"},
 		"iso-15":        {text, VGA, iso15, "text/iso-8859-15.txt", "ISO 8859-15 select characters"},
-		"sauce":         {text, VGA, cp437, "text/sauce.txt", "SAUCE metadata test"},
+		"sauce":         {dump, VGA, cp437, "text/sauce.txt", "SAUCE metadata test"},
 		"shiftjis":      {text, Mona, jis, "text/shiftjis.txt", "Shift-JIS and Mona font test"},
 		"us-ascii":      {dump, VGA, u8, "text/us-ascii.txt", "US-ASCII controls test"},
 		"utf8":          {text, VGA, u8, "text/utf-8.txt", "UTF-8 test with no Byte Order Mark"},
