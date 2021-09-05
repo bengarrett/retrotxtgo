@@ -56,7 +56,7 @@ func T() map[string]string {
 }
 
 // fileExample saves the string to a numbered text file.
-func fileExample(s string, i int) (path string) {
+func fileExample(s string, i int) string {
 	name := fmt.Sprintf("rt_fs_save%d.txt", i)
 	path, err := SaveTemp(name, []byte(s)...)
 	if err != nil {
@@ -66,7 +66,7 @@ func fileExample(s string, i int) (path string) {
 }
 
 // largeExample generates and saves a 800k file of random us-ascii text.
-func largeExample() (path string) {
+func largeExample() string {
 	const name, sizeMB = "rs_mega_example_save.txt", 0.8
 	_, s := filler(sizeMB)
 	path, err := SaveTemp(name, []byte(s)...)
@@ -77,7 +77,7 @@ func largeExample() (path string) {
 }
 
 // megaExample generates and saves a 1.5MB file of random us-ascii text.
-func megaExample() (path string) {
+func megaExample() string {
 	const name, sizeMB = "rs_giga_mega_save.txt", 1.5
 	_, s := filler(sizeMB)
 	path, err := SaveTemp(name, []byte(s)...)

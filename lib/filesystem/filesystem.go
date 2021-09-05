@@ -21,7 +21,10 @@ const (
 )
 
 // ErrStdErr could not print to stderr.
-var ErrStdErr = errors.New("failed to print to stderr")
+var (
+	ErrNotFound = errors.New("cannot find the file or sample file")
+	ErrStdErr   = errors.New("failed to print to stderr")
+)
 
 // Clean removes the named file or directory.
 func Clean(name string) {
@@ -131,8 +134,8 @@ func Save(name string, b ...byte) (written int, path string, err error) {
 }
 
 // SaveTemp saves bytes to a named temporary file.
-func SaveTemp(name string, b ...byte) (path string, err error) {
-	_, path, err = Save(tempFile(name), b...)
+func SaveTemp(name string, b ...byte) (string, error) {
+	_, path, err := Save(tempFile(name), b...)
 	if err != nil {
 		return path, fmt.Errorf("could not save the temporary file: %w", err)
 	}
@@ -184,8 +187,8 @@ func addTar(name string, w *tar.Writer) error {
 }
 
 // Touch creates an empty file at the named location.
-func Touch(name string) (path string, err error) {
-	_, path, err = Save(name, nil...)
+func Touch(name string) (string, error) {
+	_, path, err := Save(name, nil...)
 	if err != nil {
 		return path, fmt.Errorf("could not touch a new file: %w", err)
 	}
@@ -193,14 +196,14 @@ func Touch(name string) (path string, err error) {
 }
 
 // dir creates the named path directory if it doesn't exist.
-func dir(name string) (path string, err error) {
-	path = filepath.Dir(name)
-	if _, err = os.Stat(path); os.IsNotExist(err) {
+func dir(name string) (string, error) {
+	path := filepath.Dir(name)
+	if _, err := os.Stat(path); os.IsNotExist(err) {
 		if err = os.MkdirAll(path, dirMode); err != nil {
 			return "", fmt.Errorf("dir could not make the directory: %s %s: %w", dirMode, path, err)
 		}
 	}
-	return path, err
+	return path, nil
 }
 
 // lineBreak returns line break character for the system platform.
@@ -220,8 +223,8 @@ func lineBreak(platform lineBreaks) string {
 
 // tempFile returns a path to the named file
 // if it was stored in the system's temporary directory.
-func tempFile(name string) (path string) {
-	path = name
+func tempFile(name string) string {
+	path := name
 	if filepath.Base(name) == name {
 		path = filepath.Join(os.TempDir(), name)
 	}
