@@ -15,6 +15,7 @@ func FatalCmd(usage string, args ...string) {
 	err := fmt.Errorf("%w: %s", ErrCmd, args[0])
 	args = append(args, usage)
 	if s := execute(err, false, args...); s != "" {
+		fmt.Fprintln(os.Stderr, s)
 		os.Exit(OSErrCode)
 	}
 }
@@ -22,6 +23,7 @@ func FatalCmd(usage string, args ...string) {
 // FatalExecute is the error handler for the root command flags and arguments.
 func FatalExecute(err error, args ...string) {
 	if s := execute(err, false, args...); s != "" {
+		fmt.Fprintln(os.Stderr, s)
 		os.Exit(OSErrCode)
 	}
 }

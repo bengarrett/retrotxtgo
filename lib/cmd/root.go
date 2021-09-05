@@ -33,9 +33,6 @@ const (
 	null        = "null" // 0
 	verticalBar = "bar"  // 124
 	filenames   = "[filenames]"
-
-	// silence can be set to false to debug cmd/flag feedback from Viper.
-	silence = false
 )
 
 var rootFlag = rootFlags{}
@@ -74,7 +71,7 @@ them into a more modern, useful format to view or copy in a web browser.`, meta.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
-	rootCmd.SilenceErrors = silence
+	rootCmd.SilenceErrors = true // set to false to debug errors
 	rootCmd.Version = meta.Print()
 	rootCmd.SetVersionTemplate(version())
 	if err := rootCmd.Execute(); err != nil {
