@@ -7,6 +7,7 @@ require (
 	github.com/gookit/color v1.4.2
 	github.com/karrick/godirwalk v1.16.1
 	github.com/kr/text v0.2.0 // indirect
+	github.com/mattn/go-isatty v0.0.12
 	github.com/mozillazg/go-slugify v0.2.0
 	github.com/mozillazg/go-unidecode v0.1.1 // indirect
 	github.com/muesli/go-app-paths v0.2.1
@@ -21,6 +22,7 @@ require (
 	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20210823070655-63515b42dcdf // indirect
+	golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1
 	golang.org/x/text v0.3.7
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v2 v2.4.0
