@@ -38,6 +38,7 @@ const (
 	cr         = 13
 	nl         = 21
 	nel        = 133
+	uc8        = "UTF-8"
 )
 
 // ctrls counts the number of ANSI escape controls in the named file.
@@ -115,7 +116,7 @@ func (d *Detail) mimeUnknown() {
 		return
 	}
 	if d.Mime.Type == octetStream {
-		if !d.Utf8 && d.Count.Words > 0 {
+		if !d.utf8 && d.Count.Words > 0 {
 			d.Mime.Commt = "US-ASCII encoded text document"
 			return
 		}
@@ -136,26 +137,7 @@ func (d *Detail) parse(name string, stat os.FileInfo, data ...byte) error {
 	}()
 	go func() {
 		defer wg.Done()
-		mm := mimemagic.MatchMagic(data)
-		d.Mime.Media = mm.Media
-		d.Mime.Sub = mm.Subtype
-		d.Mime.Type = fmt.Sprintf("%s/%s", mm.Media, mm.Subtype)
-		d.Mime.Commt = mm.Comment
-		if d.validText() {
-			var err error
-			if d.Count.Chars, err = filesystem.Runes(bytes.NewBuffer(data)); err != nil {
-				fmt.Printf("mine sniffer failure, %s\n", err)
-			}
-			return
-		}
-		if d.Mime.Type == zipType {
-			r, e := zip.OpenReader(name)
-			if e != nil {
-				fmt.Printf("open zip file failure: %s\n", e)
-			}
-			defer r.Close()
-			d.ZipComment = r.Comment
-		}
+		d.mime(name, data...)
 	}()
 	go func() {
 		defer wg.Done()
@@ -183,10 +165,61 @@ func (d *Detail) parse(name string, stat os.FileInfo, data ...byte) error {
 	}()
 	go func() {
 		defer wg.Done()
-		d.Utf8 = utf8.Valid(data)
+		d.utf8 = utf8.Valid(data)
+		d.Unicode = unicode(&data, d.utf8)
 	}()
 	wg.Wait()
 	return nil
+}
+
+func (d *Detail) mime(name string, data ...byte) {
+	mm := mimemagic.MatchMagic(data)
+	d.Mime.Media = mm.Media
+	d.Mime.Sub = mm.Subtype
+	d.Mime.Type = fmt.Sprintf("%s/%s", mm.Media, mm.Subtype)
+	d.Mime.Commt = mm.Comment
+	if d.validText() {
+		var err error
+		if d.Count.Chars, err = filesystem.Runes(bytes.NewBuffer(data)); err != nil {
+			fmt.Printf("mine sniffer failure, %s\n", err)
+		}
+		return
+	}
+	if d.Mime.Type == zipType {
+		r, e := zip.OpenReader(name)
+		if e != nil {
+			fmt.Printf("open zip file failure: %s\n", e)
+		}
+		defer r.Close()
+		d.ZipComment = r.Comment
+	}
+}
+
+func unicode(b *[]byte, uni8 bool) string {
+	UTF8Bom := []byte{0xEF, 0xBB, 0xBF}
+	// little endianness, x86, ARM
+	UTF16LEBom := []byte{0xFF, 0xFE}
+	UTF32LEBom := []byte{0xFF, 0xFE, 0x00, 0x00}
+	// big endianness, legacy mainframes, RISC
+	UTF16BEBom := []byte{0xFE, 0xFF}
+	UTF32BEBom := []byte{0x00, 0x00, 0xFE, 0xFF}
+	switch {
+	case bytes.HasPrefix(*b, UTF8Bom):
+		return uc8
+	case bytes.HasPrefix(*b, UTF16LEBom):
+		return "UTF-16 LE"
+	case bytes.HasPrefix(*b, UTF16BEBom):
+		return "UTF-16 BE"
+	case bytes.HasPrefix(*b, UTF32LEBom):
+		return "UTF-32 LE"
+	case bytes.HasPrefix(*b, UTF32BEBom):
+		return "UTF-32 BE"
+	default:
+		if uni8 {
+			return "UTF-8 compatible"
+		}
+		return "no"
+	}
 }
 
 // input parses simple statistical data on the file.
@@ -265,7 +298,7 @@ func (d *Detail) printMarshal(color bool) []byte {
 func (d *Detail) marshalDataValid(k, v string) bool {
 	if !d.validText() {
 		switch k {
-		case "UTF-8", "line break", "characters", ans, "words", "lines", "width":
+		case uc8, "line break", "characters", ans, "words", "lines", "width":
 			return false
 		}
 	} else if k == ans {
@@ -329,7 +362,7 @@ func (d *Detail) printMarshalData() (data []struct{ k, v string }) {
 		{k: "slug", v: d.Slug},
 		{k: "filename", v: d.Name},
 		{k: "filetype", v: d.Mime.Commt},
-		{k: "UTF-8", v: str.Bool(d.Utf8)},
+		{k: "Unicode", v: d.Unicode},
 		{k: "line break", v: filesystem.LineBreak(d.LineBreak.Decimals, true)},
 		{k: "characters", v: p.Sprint(d.Count.Chars)},
 		{k: ans, v: p.Sprint(d.Count.Controls)},

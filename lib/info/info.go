@@ -30,7 +30,7 @@ const (
 type Detail struct {
 	XMLName    xml.Name     `json:"-" xml:"file"`
 	Name       string       `json:"filename" xml:"name"`
-	Utf8       bool         `json:"utf8" xml:"utf8,attr"`
+	Unicode    string       `json:"unicode" xml:"unicode,attr"`
 	LineBreak  LineBreaks   `json:"lineBreak" xml:"line_break"`
 	Count      Stats        `json:"counts" xml:"counts"`
 	Size       Sizes        `json:"size" xml:"size"`
@@ -42,6 +42,7 @@ type Detail struct {
 	Slug       string       `json:"slug" xml:"id,attr"`
 	Sauce      sauce.Record `json:"sauce" xml:"sauce"`
 	ZipComment string       `json:"zipComment" xml:"zip_comment"`
+	utf8       bool
 	index      int
 	length     int
 	sauceIndex int

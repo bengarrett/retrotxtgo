@@ -127,8 +127,8 @@ func Test_read(t *testing.T) {
 	if got.Mime.Type != "text/plain" {
 		t.Errorf("read() = %v, want %v", got.Mime, "text/plain")
 	}
-	if got.Utf8 != true {
-		t.Errorf("read() = %v, want %v", got.Utf8, true)
+	if got.utf8 != true {
+		t.Errorf("read() = %v, want %v", got.utf8, true)
 	}
 	const want = "883643f5e9ed278732c92d9b6f834b96"
 	if got.Sums.MD5 != want {
