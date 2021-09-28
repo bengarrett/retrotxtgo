@@ -4,8 +4,11 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"html/template"
 	"io"
+	"regexp"
 	"strconv"
+	"strings"
 )
 
 type BBS int
@@ -21,13 +24,28 @@ const (
 	WWIVHeart
 )
 
+type IntData struct {
+	Background int
+	Foreground int
+	Content    string
+}
+
+type StrData struct {
+	Background string
+	Foreground string
+	Content    string
+}
+
 const (
-	PCBClear = `@CLS@`
+	PCBClear           = `@CLS@`
+	celerityCodes      = "kbgcrmywdBGCRMYWS"
+	verticalBar        = byte('|')
+	lf            byte = 10
 )
 
 // String returns the BBS color format name and toggle characters.
-func (b BBS) String() string {
-	if b < ANSI || b > WWIVHeart {
+func (bbs BBS) String() string {
+	if bbs < ANSI || bbs > WWIVHeart {
 		return ""
 	}
 	return [...]string{
@@ -39,11 +57,11 @@ func (b BBS) String() string {
 		"Wildcat! @X",
 		"WWIV |#",
 		"WWIV ♥",
-	}[b]
+	}[bbs]
 }
 
 // Bytes returns the BBS color code toggle characters.
-func (b BBS) Bytes() []byte {
+func (bbs BBS) Bytes() []byte {
 	const (
 		etx               byte = 3  // CP437 ♥
 		esc               byte = 27 // CP437 ←
@@ -54,7 +72,7 @@ func (b BBS) Bytes() []byte {
 		verticalBar            = byte('|')
 		upperX                 = byte('X')
 	)
-	switch b {
+	switch bbs {
 	case ANSI:
 		return []byte{esc, leftSquareBracket}
 	case Celerity, Renegade:
@@ -72,6 +90,35 @@ func (b BBS) Bytes() []byte {
 	default:
 		return nil
 	}
+}
+
+func (bbs BBS) HTML(s string) string {
+	x := rmCLS(s)
+	switch bbs {
+	case ANSI:
+		return s
+	case Celerity:
+		return parseCelerity(x)
+	case PCBoard:
+		return parsePCBoard(x)
+	case Renegade:
+		return parseRenegade(x)
+	case Telegard:
+		return parseTelegard(x)
+	case Wildcat:
+		return parseWildcat(x)
+	case WWIVHash:
+		return parseWHash(x)
+	case WWIVHeart:
+		return parseWHeart(x)
+	default:
+		return s
+	}
+}
+
+func rmCLS(s string) string {
+	r := regexp.MustCompile(`@(CLS|CLS |PAUSE)@`)
+	return r.ReplaceAllString(s, "")
 }
 
 func Find(r io.Reader) BBS {
@@ -115,20 +162,7 @@ func Find(r io.Reader) BBS {
 }
 
 func findCelerity(b []byte) BBS {
-	const (
-		bb = byte('B')
-		c  = byte('C')
-		d  = byte('D')
-		g  = byte('G')
-		k  = byte('K')
-		m  = byte('M')
-		r  = byte('R')
-		s  = byte('S')
-		y  = byte('Y')
-		w  = byte('W')
-	)
-	codes := []byte{bb, c, d, g, k, m, r, s, y, w}
-	for _, code := range codes {
+	for _, code := range []byte(celerityCodes) {
 		if bytes.Contains(b, []byte{Celerity.Bytes()[0], code}) {
 			return Celerity
 		}
@@ -222,4 +256,239 @@ func findWWIVHeart(b []byte) BBS {
 		}
 	}
 	return -1
+}
+
+func (bbs BBS) validate(b []byte) bool {
+	if b == nil {
+		return false
+	}
+	switch bbs {
+	case Celerity:
+		return validateC(b[0])
+	case PCBoard:
+		return validateP(b[0])
+	case Renegade:
+		const min = 2
+		if len(b) < min {
+			return false
+		}
+		return validateR([2]byte{b[0], b[1]})
+	case ANSI:
+	case Telegard:
+	case Wildcat:
+	case WWIVHash:
+	case WWIVHeart:
+	}
+	return false
+}
+
+func validateC(b byte) bool {
+	return bytes.Contains([]byte(celerityCodes), []byte{b})
+}
+
+func validateP(b byte) bool {
+	if b == byte(' ') {
+		return false
+	}
+	const baseHex, bitSize = 16, 64
+	i, err := strconv.ParseInt(string(b), baseHex, bitSize)
+	if err != nil {
+		return false
+	}
+	if i < 0 || i > 16 {
+		return false
+	}
+	return true
+}
+
+func validateR(b [2]byte) bool {
+	const bgMin, fgMax = 0, 23
+	s := string(b[0]) + string(b[1])
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		return false
+	}
+	if i < bgMin || i > fgMax {
+		return false
+	}
+	return true
+}
+
+func parserBar(s string) (*bytes.Buffer, error) {
+	const idiomaticTpl = `<i class="P{{.Background}},P{{.Foreground}}">{{.Content}}</i>`
+	buf := bytes.Buffer{}
+	d := IntData{
+		Foreground: 0,
+		Background: 0,
+	}
+
+	subs := strings.Split(s, string(verticalBar))
+	if len(subs) <= 1 {
+		fmt.Fprint(&buf, s)
+		return &buf, nil
+	}
+
+	tmpl, err := template.New("idomatic").Parse(idiomaticTpl)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, sub := range subs {
+		if sub == "" {
+			continue
+		}
+		if sub[0] == lf {
+			continue
+		}
+		n, err := strconv.Atoi(sub[0:2])
+		if err != nil {
+			continue
+		}
+		if !Renegade.validate([]byte{sub[0], sub[1]}) {
+			fmt.Fprint(&buf, string(verticalBar))
+			continue
+		}
+
+		if n >= 0 && n <= 15 {
+			d.Foreground = n
+		} else if n >= 16 && n <= 23 {
+			d.Background = n
+		}
+		d.Content = sub[2:]
+
+		if err := tmpl.Execute(&buf, d); err != nil {
+			return nil, err
+		}
+	}
+	return &buf, nil
+}
+
+func parserCelerity(s string) (*bytes.Buffer, error) {
+	const idiomaticTpl, swap = `<i class="PB{{.Background}},PF{{.Foreground}}">{{.Content}}</i>`, "S"
+	buf, background := bytes.Buffer{}, false
+	d := StrData{
+		Foreground: "w",
+		Background: "k",
+	}
+
+	subs := strings.Split(s, string(verticalBar))
+	if len(subs) <= 1 {
+		fmt.Fprint(&buf, s)
+		return &buf, nil
+	}
+
+	tmpl, err := template.New("idomatic").Parse(idiomaticTpl)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, sub := range subs {
+		if sub == "" {
+			continue
+		}
+		if sub[0] == lf {
+			continue
+		}
+		if !Celerity.validate([]byte{sub[0]}) {
+			fmt.Fprint(&buf, string(verticalBar))
+			continue
+		}
+		if sub == swap {
+			background = !background
+			continue
+		}
+		if !background {
+			d.Foreground = string(sub[0])
+		} else {
+			d.Background = string(sub[0])
+		}
+		d.Content = sub[1:]
+
+		if err := tmpl.Execute(&buf, d); err != nil {
+			return nil, err
+		}
+	}
+	return &buf, nil
+}
+
+func parserPCBoard(s string) (*bytes.Buffer, error) {
+	const idiomaticTpl = `<i class="PB{{.Background}},PF{{.Foreground}}">{{.Content}}</i>`
+	buf := bytes.Buffer{}
+	d, b := StrData{}, PCBoard.Bytes()
+
+	codes := strings.Split(s, string(b))
+	if len(codes) <= 1 {
+		fmt.Fprint(&buf, s)
+		return &buf, nil
+	}
+
+	tmpl, err := template.New("idomatic").Parse(idiomaticTpl)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, code := range codes {
+		if code == "" {
+			continue
+		}
+		if code[0] == lf {
+			continue
+		}
+		if !PCBoard.validate([]byte{code[0]}) || !PCBoard.validate([]byte{code[1]}) {
+			fmt.Fprint(&buf, b)
+			continue
+		}
+
+		d.Background = string(code[0])
+		d.Foreground = string(code[1])
+		d.Content = code[2:]
+
+		if err := tmpl.Execute(&buf, d); err != nil {
+			return nil, err
+		}
+	}
+	return &buf, nil
+}
+
+func parseCelerity(s string) string {
+	buf, _ := parserCelerity(s)
+	return buf.String()
+}
+
+func parseRenegade(s string) string {
+	buf, _ := parserBar(s)
+	return buf.String()
+}
+
+func parsePCBoard(s string) string {
+	buf, _ := parserPCBoard(s)
+	return buf.String()
+}
+
+func parseTelegard(s string) string {
+	r := regexp.MustCompile("`([0-9|A-F])([0-9|A-F])")
+	x := r.ReplaceAllString(s, `@X$1$2`)
+	buf, _ := parserPCBoard(x)
+	return buf.String()
+}
+
+func parseWildcat(s string) string {
+	r := regexp.MustCompile(`@([0-9|A-F])([0-9|A-F])@`)
+	x := r.ReplaceAllString(s, `@X$1$2`)
+	buf, _ := parserPCBoard(x)
+	return buf.String()
+}
+
+func parseWHash(s string) string {
+	r := regexp.MustCompile(`\|#(\d)`)
+	x := r.ReplaceAllString(s, `|0$1`)
+	buf, _ := parserBar(x)
+	return buf.String()
+}
+
+func parseWHeart(s string) string {
+	r := regexp.MustCompile(`\x03(\d)`)
+	x := r.ReplaceAllString(s, `|0$1`)
+	buf, _ := parserBar(x)
+	return buf.String()
 }
