@@ -104,8 +104,8 @@ func Test_findCelerity(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := findCelerity(tt.args.b); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("findCelerity() = %v, want %v", got, tt.want)
+			if got := FindCelerity(tt.args.b); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("FindCelerity() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -128,8 +128,8 @@ func Test_findRenegade(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := findRenegade(tt.args.b); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("findRenegade() = %v, want %v", got, tt.want)
+			if got := FindRenegade(tt.args.b); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("FindRenegade() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -154,8 +154,8 @@ func Test_findPCBoard(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := findPCBoard(tt.args.b); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("findPCBoard() = %v, want %v", got, tt.want)
+			if got := FindPCBoard(tt.args.b); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("FindPCBoard() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -180,8 +180,8 @@ func Test_findWildcat(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := findWildcat(tt.args.b); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("findWildcat() = %v, want %v", got, tt.want)
+			if got := FindWildcat(tt.args.b); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("FindWildcat() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -205,8 +205,8 @@ func Test_findWWIVHeart(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := findWWIVHeart(tt.args.b); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("findWWIVHeart() = %v, want %v", got, tt.want)
+			if got := FindWWIVHeart(tt.args.b); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("FindWWIVHeart() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -232,8 +232,8 @@ func Test_findWWIVHash(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := findWWIVHash(tt.args.b); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("findWWIVHash() = %v, want %v", got, tt.want)
+			if got := FindWWIVHash(tt.args.b); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("FindWWIVHash() = %v, want %v", got, tt.want)
 			}
 		})
 	}

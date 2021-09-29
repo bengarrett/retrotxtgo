@@ -11,6 +11,7 @@ import (
 	"strings"
 )
 
+// Bulletin Board System color code format.
 type BBS int
 
 const (
@@ -24,12 +25,14 @@ const (
 	WWIVHeart
 )
 
+// IntData template data for integer based color codes.
 type IntData struct {
 	Background int
 	Foreground int
 	Content    string
 }
 
+// StrData template data for string based color codes.
 type StrData struct {
 	Background string
 	Foreground string
@@ -37,8 +40,8 @@ type StrData struct {
 }
 
 const (
-	PCBClear           = `@CLS@`
 	celerityCodes      = "kbgcrmywdBGCRMYWS"
+	pcbClear           = `@CLS@`
 	verticalBar        = byte('|')
 	lf            byte = 10
 )
@@ -92,6 +95,7 @@ func (bbs BBS) Bytes() []byte {
 	}
 }
 
+// HTML transforms the string containing BBS color codes into HTML <i> elements.
 func (bbs BBS) HTML(s string) string {
 	x := rmCLS(s)
 	switch bbs {
@@ -116,11 +120,13 @@ func (bbs BBS) HTML(s string) string {
 	}
 }
 
+// rmCLS removes common PCBoard BBS controls from the string.
 func rmCLS(s string) string {
 	r := regexp.MustCompile(`@(CLS|CLS |PAUSE)@`)
 	return r.ReplaceAllString(s, "")
 }
 
+// Find the format any known BBS color codes in the reader.
 func Find(r io.Reader) BBS {
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
@@ -129,9 +135,9 @@ func Find(r io.Reader) BBS {
 		if ts == nil {
 			return -1
 		}
-		const l = len(PCBClear)
+		const l = len(pcbClear)
 		if len(ts) > l {
-			if bytes.Equal(ts[0:l], []byte(PCBClear)) {
+			if bytes.Equal(ts[0:l], []byte(pcbClear)) {
 				b = ts[l:]
 			}
 		}
@@ -139,29 +145,32 @@ func Find(r io.Reader) BBS {
 		case bytes.Contains(b, ANSI.Bytes()):
 			return ANSI
 		case bytes.Contains(b, Celerity.Bytes()):
-			if f := findRenegade(b); f == Renegade {
+			if f := FindRenegade(b); f == Renegade {
 				return Renegade
 			}
-			if f := findCelerity(b); f == Celerity {
+			if f := FindCelerity(b); f == Celerity {
 				return Celerity
 			}
 			return -1
 		case bytes.Contains(b, PCBoard.Bytes()):
-			return findPCBoard(b)
+			return FindPCBoard(b)
 		case bytes.Contains(b, Telegard.Bytes()):
-			return findTelegard(b)
+			return FindTelegard(b)
 		case bytes.Contains(b, Wildcat.Bytes()):
-			return findWildcat(b)
+			return FindWildcat(b)
 		case bytes.Contains(b, WWIVHash.Bytes()):
-			return findWWIVHash(b)
+			return FindWWIVHash(b)
 		case bytes.Contains(b, WWIVHeart.Bytes()):
-			return findWWIVHeart(b)
+			return FindWWIVHeart(b)
 		}
 	}
 	return -1
 }
 
-func findCelerity(b []byte) BBS {
+// Find Celerity BBS format color codes.
+// The format uses the vertical bar "|" followed by a case sensitive single alphabetic character.
+// See the celerityCodes const for all the characters.
+func FindCelerity(b []byte) BBS {
 	for _, code := range []byte(celerityCodes) {
 		if bytes.Contains(b, []byte{Celerity.Bytes()[0], code}) {
 			return Celerity
@@ -170,16 +179,9 @@ func findCelerity(b []byte) BBS {
 	return -1
 }
 
-func findPCBoard(b []byte) BBS {
-	/*
-	   const inRange = (a = -1, b = -1) => {
-	     if (a >= 48 && b >= 48 && a <= 70 && b <= 70) return true
-	     return false
-	   }
-	   48 = 0; 0030
-	   70 = F; 0046
-	   "@X<Background><Foreground>"
-	*/
+// Find PCBoard BBS format color codes.
+// The format uses an "@X" prefix with a background and foreground, 4-bit hexadecimal color value.
+func FindPCBoard(b []byte) BBS {
 	const first, last = 0, 15
 	const hexxed = "%X%X"
 	for bg := first; bg <= last; bg++ {
@@ -194,8 +196,9 @@ func findPCBoard(b []byte) BBS {
 	return -1
 }
 
-func findRenegade(b []byte) BBS {
-	// |00 -> |23 (strconv)
+// Find Renegade BBS format color codes.
+// The format uses the vertical bar "|" followed by a padded, numeric value between 0 and 23.
+func FindRenegade(b []byte) BBS {
 	const first, last = 0, 23
 	const leadingZero = "%01d"
 	for i := first; i <= last; i++ {
@@ -208,8 +211,9 @@ func findRenegade(b []byte) BBS {
 	return -1
 }
 
-func findTelegard(b []byte) BBS {
-	// |00 -> |23 (strconv)
+// Find Telegard BBS format color codes.
+// The format uses the vertical bar "|" followed by a padded, numeric value between 0 and 23.
+func FindTelegard(b []byte) BBS {
 	const first, last = 0, 23
 	const leadingZero = "%01d"
 	for i := first; i <= last; i++ {
@@ -222,7 +226,9 @@ func findTelegard(b []byte) BBS {
 	return -1
 }
 
-func findWildcat(b []byte) BBS {
+// Find Wildcat BBS format color codes.
+// The format uses an a background and foreground, 4-bit hexadecimal color value enclosed by two at "@" characters.
+func FindWildcat(b []byte) BBS {
 	const first, last = 0, 15
 	for bg := first; bg <= last; bg++ {
 		for fg := first; fg <= last; fg++ {
@@ -236,7 +242,9 @@ func findWildcat(b []byte) BBS {
 	return -1
 }
 
-func findWWIVHash(b []byte) BBS {
+// Find WWIV BBS hash format color codes.
+// The format uses a vertical bar "|" with the hash "#" characters as a prefix with a numeric value between 0 and 9.
+func FindWWIVHash(b []byte) BBS {
 	const first, last = 0, 9
 	for i := first; i <= last; i++ {
 		subslice := append(WWIVHash.Bytes(), []byte(strconv.Itoa(i))...)
@@ -247,7 +255,10 @@ func findWWIVHash(b []byte) BBS {
 	return -1
 }
 
-func findWWIVHeart(b []byte) BBS {
+// Find WWIV BBS heart format color codes.
+// The format uses the ETX character as a prefix with a numeric value between 0 and 9.
+// The ETX (end-of-text) character in the MS-DOS Code Page 437 is substituted with a heart "♥" character.
+func FindWWIVHeart(b []byte) BBS {
 	const first, last = 0, 9
 	for i := first; i <= last; i++ {
 		subslice := append(WWIVHeart.Bytes(), []byte(strconv.Itoa(i))...)
@@ -258,6 +269,8 @@ func findWWIVHeart(b []byte) BBS {
 	return -1
 }
 
+// Validate that the bytes are valid BBS color codes.
+// Only Celerity, PCBoard or Renegade types are checked.
 func (bbs BBS) validate(b []byte) bool {
 	if b == nil {
 		return false
@@ -314,6 +327,7 @@ func validateR(b [2]byte) bool {
 	return true
 }
 
+// parserBar parses the string for BBS color codes that use vertical bar prefixes to apply a HTML template.
 func parserBar(s string) (*bytes.Buffer, error) {
 	const idiomaticTpl = `<i class="P{{.Background}},P{{.Foreground}}">{{.Content}}</i>`
 	buf := bytes.Buffer{}
@@ -363,6 +377,7 @@ func parserBar(s string) (*bytes.Buffer, error) {
 	return &buf, nil
 }
 
+// parserCelerity parses the string for the unique Celerity BBS color codes to apply a HTML template.
 func parserCelerity(s string) (*bytes.Buffer, error) {
 	const idiomaticTpl, swap = `<i class="PB{{.Background}},PF{{.Foreground}}">{{.Content}}</i>`, "S"
 	buf, background := bytes.Buffer{}, false
@@ -411,6 +426,7 @@ func parserCelerity(s string) (*bytes.Buffer, error) {
 	return &buf, nil
 }
 
+// parserPCBoard parses the string for the common PCBoard BBS color codes to apply a HTML template.
 func parserPCBoard(s string) (*bytes.Buffer, error) {
 	const idiomaticTpl = `<i class="PB{{.Background}},PF{{.Foreground}}">{{.Content}}</i>`
 	buf := bytes.Buffer{}
@@ -465,6 +481,8 @@ func parsePCBoard(s string) string {
 	return buf.String()
 }
 
+// parseTelegard parses the string for Telegard BBS color codes.
+// Internally it replaces all color codes with PCBoard codes and parses those with parserPCBoard.
 func parseTelegard(s string) string {
 	r := regexp.MustCompile("`([0-9|A-F])([0-9|A-F])")
 	x := r.ReplaceAllString(s, `@X$1$2`)
@@ -472,6 +490,8 @@ func parseTelegard(s string) string {
 	return buf.String()
 }
 
+// parseWildcat parses the string for Wildcat BBS color codes.
+// Internally it replaces all color codes with PCBoard codes and parses those with parserPCBoard.
 func parseWildcat(s string) string {
 	r := regexp.MustCompile(`@([0-9|A-F])([0-9|A-F])@`)
 	x := r.ReplaceAllString(s, `@X$1$2`)
@@ -479,6 +499,8 @@ func parseWildcat(s string) string {
 	return buf.String()
 }
 
+// parseWHash parses the string for WWIV hash color codes.
+// Internally it replaces all color codes with vertical bar codes and parses those with parserBar.
 func parseWHash(s string) string {
 	r := regexp.MustCompile(`\|#(\d)`)
 	x := r.ReplaceAllString(s, `|0$1`)
@@ -486,6 +508,8 @@ func parseWHash(s string) string {
 	return buf.String()
 }
 
+// parseWHeart parses the string for WWIV heart color codes.
+// Internally it replaces all color codes with vertical bar codes and parses those with parserBar.
 func parseWHeart(s string) string {
 	r := regexp.MustCompile(`\x03(\d)`)
 	x := r.ReplaceAllString(s, `|0$1`)
