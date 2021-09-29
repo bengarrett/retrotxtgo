@@ -18,6 +18,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/bengarrett/retrotxtgo/lib/bbs"
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/humanize"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
@@ -178,6 +179,12 @@ func (d *Detail) mime(name string, data ...byte) {
 	d.Mime.Sub = mm.Subtype
 	d.Mime.Type = fmt.Sprintf("%s/%s", mm.Media, mm.Subtype)
 	d.Mime.Commt = mm.Comment
+	if d.Mime.Commt == "plain text document" {
+		reader := bytes.NewReader(data)
+		if s := bbs.Find(reader).Name(); s != "" {
+			d.Mime.Commt += fmt.Sprintf(" with %s BBS color codes", s)
+		}
+	}
 	if d.validText() {
 		var err error
 		if d.Count.Chars, err = filesystem.Runes(bytes.NewBuffer(data)); err != nil {

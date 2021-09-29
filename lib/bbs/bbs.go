@@ -63,6 +63,23 @@ func (bbs BBS) String() string {
 	}[bbs]
 }
 
+// Name returns the BBS color format name.
+func (bbs BBS) Name() string {
+	if bbs < ANSI || bbs > WWIVHeart {
+		return ""
+	}
+	return [...]string{
+		"ANSI",
+		"Celerity",
+		"PCBoard",
+		"Renegade",
+		"Telegard",
+		"Wildcat!",
+		"WWIV #",
+		"WWIV ♥",
+	}[bbs]
+}
+
 // Bytes returns the BBS color code toggle characters.
 func (bbs BBS) Bytes() []byte {
 	const (
