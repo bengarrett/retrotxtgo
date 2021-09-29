@@ -66,23 +66,27 @@ func TestBBS_HTML(t *testing.T) {
 		s string
 	}
 	tests := []struct {
-		name string
-		bbs  BBS
-		args args
-		want string
+		name    string
+		bbs     BBS
+		args    args
+		want    string
+		wantErr bool
 	}{
-		{"empty", -1, args{}, ""},
-		{"plaintext", -1, args{"text"}, "text"},
-		{"plaintext", ANSI, args{"\x27\x91text"}, "\x27\x91text"},
+		{"empty", -1, args{}, "", true},
+		{"plaintext", -1, args{"text"}, "", true},
+		{"plaintext", ANSI, args{"\x27\x91text"}, "", true},
 		{"celerity", Celerity, args{"|S|gHello|Rworld"},
-			"<i class=\"PBg,PFw\">Hello</i><i class=\"PBR,PFw\">world</i>"},
+			"<i class=\"PBg,PFw\">Hello</i><i class=\"PBR,PFw\">world</i>", false},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.bbs.HTML(tt.args.s); got != tt.want {
-				t.Errorf("BBS.HTML() = %v, want %v", got, tt.want)
-			}
-		})
+		got, err := tt.bbs.HTML(tt.args.s)
+		if (err != nil) != tt.wantErr {
+			t.Errorf("BBS.HTML() %v error = %v, wantErr %v", tt.name, err, tt.wantErr)
+			return
+		}
+		if got.String() != tt.want {
+			t.Errorf("BBS.HTML() = %v, want %v", got, tt.want)
+		}
 	}
 }
 
@@ -308,19 +312,25 @@ func Test_parsePCBoard(t *testing.T) {
 		s string
 	}
 	tests := []struct {
-		name string
-		args args
-		want string
+		name    string
+		args    args
+		want    string
+		wantErr bool
 	}{
-		{"empty", args{""}, ""},
-		{"string", args{"hello world"}, "hello world"},
-		{"prefix", args{"@X07Hello world"}, "<i class=\"PB0,PF7\">Hello world</i>"},
-		{"multi", args{"@X07Hello @X11world"}, "<i class=\"PB0,PF7\">Hello </i><i class=\"PB1,PF1\">world</i>"},
-		{"newline", args{"@X07Hello\n@X11world"}, "<i class=\"PB0,PF7\">Hello\n</i><i class=\"PB1,PF1\">world</i>"},
+		{"empty", args{""}, "", false},
+		{"string", args{"hello world"}, "hello world", false},
+		{"prefix", args{"@X07Hello world"}, "<i class=\"PB0,PF7\">Hello world</i>", false},
+		{"multi", args{"@X07Hello @X11world"}, "<i class=\"PB0,PF7\">Hello </i><i class=\"PB1,PF1\">world</i>", false},
+		{"newline", args{"@X07Hello\n@X11world"}, "<i class=\"PB0,PF7\">Hello\n</i><i class=\"PB1,PF1\">world</i>", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := parsePCBoard(tt.args.s); got != tt.want {
+			got, err := parsePCBoard(tt.args.s)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("parsePCBoard() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got.String() != tt.want {
 				t.Errorf("parsePCBoard() = %v, want %v", got, tt.want)
 			}
 		})
@@ -332,17 +342,23 @@ func Test_parseTelegard(t *testing.T) {
 		s string
 	}
 	tests := []struct {
-		name string
-		args args
-		want string
+		name    string
+		args    args
+		want    string
+		wantErr bool
 	}{
-		{"empty", args{""}, ""},
-		{"string", args{"hello world"}, "hello world"},
-		{"prefix", args{"`07Hello world"}, "<i class=\"PB0,PF7\">Hello world</i>"},
+		{"empty", args{""}, "", false},
+		{"string", args{"hello world"}, "hello world", false},
+		{"prefix", args{"`07Hello world"}, "<i class=\"PB0,PF7\">Hello world</i>", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := parseTelegard(tt.args.s); got != tt.want {
+			got, err := parseTelegard(tt.args.s)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("parseTelegard() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got.String() != tt.want {
 				t.Errorf("parseTelegard() = %v, want %v", got, tt.want)
 			}
 		})
@@ -354,17 +370,23 @@ func Test_parseWHash(t *testing.T) {
 		s string
 	}
 	tests := []struct {
-		name string
-		args args
-		want string
+		name    string
+		args    args
+		want    string
+		wantErr bool
 	}{
-		{"empty", args{}, ""},
-		{"string", args{"hello world"}, "hello world"},
-		{"prefix", args{"|#7Hello world"}, "<i class=\"P0,P7\">Hello world</i>"},
+		{"empty", args{}, "", false},
+		{"string", args{"hello world"}, "hello world", false},
+		{"prefix", args{"|#7Hello world"}, "<i class=\"P0,P7\">Hello world</i>", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := parseWHash(tt.args.s); got != tt.want {
+			got, err := parseWHash(tt.args.s)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("parseWHash() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got.String() != tt.want {
 				t.Errorf("parseWHash() = %v, want %v", got, tt.want)
 			}
 		})
@@ -376,17 +398,23 @@ func Test_parseWHeart(t *testing.T) {
 		s string
 	}
 	tests := []struct {
-		name string
-		args args
-		want string
+		name    string
+		args    args
+		want    string
+		wantErr bool
 	}{
-		{"empty", args{}, ""},
-		{"string", args{"hello world"}, "hello world"},
-		{"prefix", args{"\x037Hello world"}, "<i class=\"P0,P7\">Hello world</i>"},
+		{"empty", args{}, "", false},
+		{"string", args{"hello world"}, "hello world", false},
+		{"prefix", args{"\x037Hello world"}, "<i class=\"P0,P7\">Hello world</i>", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := parseWHeart(tt.args.s); got != tt.want {
+			got, err := parseWHeart(tt.args.s)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("parseWHeart() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got.String() != tt.want {
 				t.Errorf("parseWHeart() = %v, want %v", got, tt.want)
 			}
 		})
@@ -398,20 +426,24 @@ func Test_parseWildcat(t *testing.T) {
 		s string
 	}
 	tests := []struct {
-		name string
-		args args
-		want string
+		name    string
+		args    args
+		want    string
+		wantErr bool
 	}{
-		{"empty", args{}, ""},
-		{"string", args{"hello world"}, "hello world"},
-		{"prefix", args{"@0F@Hello world"}, "<i class=\"PB0,PFF\">Hello world</i>"},
+		{"empty", args{}, "", false},
+		{"string", args{"hello world"}, "hello world", false},
+		{"prefix", args{"@0F@Hello world"}, "<i class=\"PB0,PFF\">Hello world</i>", false},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := parseWildcat(tt.args.s); got != tt.want {
-				t.Errorf("parseWildcat() = %v, want %v", got, tt.want)
-			}
-		})
+		got, err := parseWildcat(tt.args.s)
+		if (err != nil) != tt.wantErr {
+			t.Errorf("parseWildcat() error = %v, wantErr %v", err, tt.wantErr)
+			return
+		}
+		if got.String() != tt.want {
+			t.Errorf("parseWildcat() = %v, want %v", got, tt.want)
+		}
 	}
 }
 

@@ -3,12 +3,18 @@ package bbs
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"html/template"
 	"io"
 	"regexp"
 	"strconv"
 	"strings"
+)
+
+var (
+	ErrColorCodes = errors.New("no bbs color codes found in string")
+	ErrANSI       = errors.New("ansi escape code found in string")
 )
 
 // Bulletin Board System color code format.
@@ -113,11 +119,11 @@ func (bbs BBS) Bytes() []byte {
 }
 
 // HTML transforms the string containing BBS color codes into HTML <i> elements.
-func (bbs BBS) HTML(s string) string {
+func (bbs BBS) HTML(s string) (*bytes.Buffer, error) {
 	x := rmCLS(s)
 	switch bbs {
 	case ANSI:
-		return s
+		return &bytes.Buffer{}, ErrANSI
 	case Celerity:
 		return parseCelerity(x)
 	case PCBoard:
@@ -133,7 +139,7 @@ func (bbs BBS) HTML(s string) string {
 	case WWIVHeart:
 		return parseWHeart(x)
 	default:
-		return s
+		return &bytes.Buffer{}, ErrColorCodes
 	}
 }
 
@@ -483,53 +489,46 @@ func parserPCBoard(s string) (*bytes.Buffer, error) {
 	return &buf, nil
 }
 
-func parseCelerity(s string) string {
-	buf, _ := parserCelerity(s)
-	return buf.String()
+func parseCelerity(s string) (*bytes.Buffer, error) {
+	return parserCelerity(s)
 }
 
-func parseRenegade(s string) string {
-	buf, _ := parserBar(s)
-	return buf.String()
+func parseRenegade(s string) (*bytes.Buffer, error) {
+	return parserBar(s)
 }
 
-func parsePCBoard(s string) string {
-	buf, _ := parserPCBoard(s)
-	return buf.String()
+func parsePCBoard(s string) (*bytes.Buffer, error) {
+	return parserPCBoard(s)
 }
 
 // parseTelegard parses the string for Telegard BBS color codes.
 // Internally it replaces all color codes with PCBoard codes and parses those with parserPCBoard.
-func parseTelegard(s string) string {
+func parseTelegard(s string) (*bytes.Buffer, error) {
 	r := regexp.MustCompile("`([0-9|A-F])([0-9|A-F])")
 	x := r.ReplaceAllString(s, `@X$1$2`)
-	buf, _ := parserPCBoard(x)
-	return buf.String()
+	return parserPCBoard(x)
 }
 
 // parseWildcat parses the string for Wildcat BBS color codes.
 // Internally it replaces all color codes with PCBoard codes and parses those with parserPCBoard.
-func parseWildcat(s string) string {
+func parseWildcat(s string) (*bytes.Buffer, error) {
 	r := regexp.MustCompile(`@([0-9|A-F])([0-9|A-F])@`)
 	x := r.ReplaceAllString(s, `@X$1$2`)
-	buf, _ := parserPCBoard(x)
-	return buf.String()
+	return parserPCBoard(x)
 }
 
 // parseWHash parses the string for WWIV hash color codes.
 // Internally it replaces all color codes with vertical bar codes and parses those with parserBar.
-func parseWHash(s string) string {
+func parseWHash(s string) (*bytes.Buffer, error) {
 	r := regexp.MustCompile(`\|#(\d)`)
 	x := r.ReplaceAllString(s, `|0$1`)
-	buf, _ := parserBar(x)
-	return buf.String()
+	return parserBar(x)
 }
 
 // parseWHeart parses the string for WWIV heart color codes.
 // Internally it replaces all color codes with vertical bar codes and parses those with parserBar.
-func parseWHeart(s string) string {
+func parseWHeart(s string) (*bytes.Buffer, error) {
 	r := regexp.MustCompile(`\x03(\d)`)
 	x := r.ReplaceAllString(s, `|0$1`)
-	buf, _ := parserBar(x)
-	return buf.String()
+	return parserBar(x)
 }
