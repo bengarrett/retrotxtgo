@@ -120,10 +120,11 @@ func (bbs BBS) Bytes() []byte {
 
 // HTML transforms the string containing BBS color codes into HTML <i> elements.
 func (bbs BBS) HTML(s string) (*bytes.Buffer, error) {
+	empty := bytes.Buffer{}
 	x := rmCLS(s)
 	switch bbs {
 	case ANSI:
-		return &bytes.Buffer{}, ErrANSI
+		return &empty, ErrANSI
 	case Celerity:
 		return parseCelerity(x)
 	case PCBoard:
@@ -139,7 +140,7 @@ func (bbs BBS) HTML(s string) (*bytes.Buffer, error) {
 	case WWIVHeart:
 		return parseWHeart(x)
 	default:
-		return &bytes.Buffer{}, ErrColorCodes
+		return &empty, ErrColorCodes
 	}
 }
 
