@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/alecthomas/chroma v0.9.2
-	github.com/gookit/color v1.4.2
+	github.com/gookit/color v1.5.0
 	github.com/karrick/godirwalk v1.16.1
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.14
