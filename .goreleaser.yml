@@ -120,6 +120,6 @@ scoop:
   # Default is false.
   skip_upload: auto
 
-  changelog:
+changelog:
   skip: false
   use: git
