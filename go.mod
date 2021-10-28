@@ -3,15 +3,14 @@ module github.com/bengarrett/retrotxtgo
 go 1.17
 
 require (
-	github.com/alecthomas/chroma v0.9.2
-	github.com/gookit/color v1.4.2
+	github.com/alecthomas/chroma v0.9.4
+	github.com/gookit/color v1.5.0
 	github.com/karrick/godirwalk v1.16.1
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.14
 	github.com/mozillazg/go-slugify v0.2.0
 	github.com/mozillazg/go-unidecode v0.1.1 // indirect
 	github.com/muesli/go-app-paths v0.2.1
-	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.9.0
@@ -19,10 +18,10 @@ require (
 	github.com/tdewolff/parse v2.3.4+incompatible // indirect
 	github.com/tdewolff/test v1.0.6 // indirect
 	github.com/zRedShift/mimemagic v1.2.0
-	golang.org/x/net v0.0.0-20210924151903-3ad01bbaa167 // indirect
+	golang.org/x/net v0.0.0-20211020060615-d418f374d309 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/sys v0.0.0-20210925032602-92d5a993a665 // indirect
-	golang.org/x/term v0.0.0-20210916214954-140adaaadfaf
+	golang.org/x/sys v0.0.0-20211025201205-69cdffdb9359 // indirect
+	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211
 	golang.org/x/text v0.3.7
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v2 v2.4.0
@@ -30,7 +29,6 @@ require (
 )
 
 require (
-	github.com/danwakefield/fnmatch v0.0.0-20160403171240-cbb64ac3d964 // indirect
 	github.com/dlclark/regexp2 v1.4.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
