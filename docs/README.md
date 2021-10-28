@@ -5,6 +5,18 @@
 ###### version α, a work-in-progress with an incomplete feature set.
 
 [Developer notes](DEV.md), [Dependencies project](https://github.com/bengarrett/retrotxtgo/projects/2), [TO-DO project](https://github.com/bengarrett/retrotxtgo/projects/1)
+
+## Downloads
+
+There are [downloads](https://github.com/bengarrett/retrotxtgo/releases/latest/) available for
+[Windows](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_Windows_Intel.zip),
+[macOS](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_macOS_all.tar.gz),
+[Linux](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_Linux_Intel.tar.gz),
+[FreeBSD](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_FreeBSD_Intel.tar.gz) and the
+[Raspberry Pi](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_Linux_arm32_.tar.gz).
+
+Otherwise [these package manager installations are available](#installations).
+
 ## Quick Usage
 
 #### Text art and files created without Unicode often fail to display on modern systems.
@@ -161,16 +173,8 @@ retrotxt create ascii-logo.txt --layout=inline --font-embed --title="ASCII logo"
 
 ## Install
 
-There are [downloads](https://github.com/bengarrett/retrotxtgo/releases/latest/) available for
-[Windows](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_Windows_Intel.zip),
-[macOS Intel](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_macOS_Intel.tar.gz),
-[macOS M chips](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_macOS_M-series.tar.gz),
-[Linux](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_Linux_Intel.tar.gz),
-[FreeBSD](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_FreeBSD_Intel.tar.gz) and the
-[Raspberry Pi](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_Linux_arm32_.tar.gz).
-
-Otherwise these package manager installations are available.
-
+There are [download](https://github.com/bengarrett/retrotxtgo/releases/latest/) releases. Otherwise these package manager installations are available.
+<a id="installations"></a>
 #### Windows [Scoop](https://scoop.sh/)
 
 ```ps
