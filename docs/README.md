@@ -186,7 +186,7 @@ retrotxt -v
 #### macOS [Homebrew](https://brew.sh/)
 
 ```sh
-brew cask install bengarrett/tap/retrotxt
+brew install bengarrett/retrotxt/retrotxt
 retrotxt -v
 ```
 #### DEB (Debian package)
