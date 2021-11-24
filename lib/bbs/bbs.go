@@ -157,7 +157,7 @@ func Find(r io.Reader) BBS {
 		b := scanner.Bytes()
 		ts := bytes.TrimSpace(b)
 		if ts == nil {
-			return -1
+			continue
 		}
 		const l = len(pcbClear)
 		if len(ts) > l {

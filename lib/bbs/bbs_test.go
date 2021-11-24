@@ -50,6 +50,7 @@ func TestFind(t *testing.T) {
 		{"telegard", args{"Hello world\n`09This is a newline."}, Telegard},
 		{"wildcat", args{"Hello world\n@01@This is a newline."}, Wildcat},
 		{"wwiv ♥", args{"Hello world\n\x031This is a newline."}, WWIVHeart},
+		{"pcboard with nulls", args{"hello\n\n@X01world"}, PCBoard},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
