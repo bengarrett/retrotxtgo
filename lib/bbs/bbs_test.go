@@ -77,7 +77,9 @@ func TestBBS_HTML(t *testing.T) {
 		{"plaintext", -1, args{"text"}, "", true},
 		{"plaintext", ANSI, args{"\x27\x91text"}, "", true},
 		{"celerity", Celerity, args{"|S|gHello|Rworld"},
-			"<i class=\"PBg,PFw\">Hello</i><i class=\"PBR,PFw\">world</i>", false},
+			"<i class=\"PBg PFw\">Hello</i><i class=\"PBR PFw\">world</i>", false},
+		{"xss", Celerity, args{"|S|gABC<script>alert('xss');</script>D|REF"},
+			"<i class=\"PBg PFw\">ABC&lt;script&gt;alert(&#39;xss&#39;);&lt;/script&gt;D</i><i class=\"PBR PFw\">EF</i>", false},
 	}
 	for _, tt := range tests {
 		got, err := tt.bbs.HTML(tt.args.s)
