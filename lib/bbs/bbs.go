@@ -52,7 +52,7 @@ const (
 	lf            byte = 10
 )
 
-// String returns the BBS color format name and toggle characters.
+// String returns the BBS color format name and toggle sequence.
 func (bbs BBS) String() string {
 	if bbs < ANSI || bbs > WWIVHeart {
 		return ""
@@ -60,10 +60,10 @@ func (bbs BBS) String() string {
 	return [...]string{
 		"ANSI ←[",
 		"Celerity |",
-		"PCBoard @",
+		"PCBoard @X",
 		"Renegade |",
 		"Telegard `",
-		"Wildcat! @X",
+		"Wildcat! @@",
 		"WWIV |#",
 		"WWIV ♥",
 	}[bbs]
@@ -86,7 +86,7 @@ func (bbs BBS) Name() string {
 	}[bbs]
 }
 
-// Bytes returns the BBS color code toggle characters.
+// Bytes returns the BBS color code toggle sequence as bytes.
 func (bbs BBS) Bytes() []byte {
 	const (
 		etx               byte = 3  // CP437 ♥
@@ -118,7 +118,8 @@ func (bbs BBS) Bytes() []byte {
 	}
 }
 
-// HTML transforms the string containing BBS color codes into HTML <i> elements.
+// HTML transforms a string containing BBS color codes into a
+// collection of HTML <i> elements with matching CSS color classes.
 func (bbs BBS) HTML(s string) (*bytes.Buffer, error) {
 	empty := bytes.Buffer{}
 	x := trimPrefix(s)
