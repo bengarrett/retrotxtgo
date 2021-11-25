@@ -21,14 +21,14 @@ var (
 type BBS int
 
 const (
-	ANSI BBS = iota
-	Celerity
-	PCBoard
-	Renegade
-	Telegard
-	Wildcat
-	WWIVHash
-	WWIVHeart
+	ANSI      BBS = iota // ANSI escape sequences.
+	Celerity             // Celerity BBS pipe codes.
+	PCBoard              // PCBoard BBS @ codes.
+	Renegade             // Renegade BBS pipe codes.
+	Telegard             // Telegard BBS grave accent codes.
+	Wildcat              // Wildcat! BBS @ codes.
+	WWIVHash             // WWIV BBS # codes.
+	WWIVHeart            // WWIV BBS ♥ codes.
 )
 
 // IntData template data for integer based color codes.
