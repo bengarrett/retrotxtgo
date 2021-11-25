@@ -247,7 +247,7 @@ func Test_findWWIVHash(t *testing.T) {
 	}
 }
 
-func Test_parserBar(t *testing.T) {
+func Test_parserBars(t *testing.T) {
 	type args struct {
 		s string
 	}
@@ -268,7 +268,7 @@ func Test_parserBar(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := parserBar(tt.args.s)
+			got, err := parserBars(tt.args.s)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parserBar() error = %v, wantErr %v", err, tt.wantErr)
 				return
