@@ -121,7 +121,7 @@ func (bbs BBS) Bytes() []byte {
 // HTML transforms the string containing BBS color codes into HTML <i> elements.
 func (bbs BBS) HTML(s string) (*bytes.Buffer, error) {
 	empty := bytes.Buffer{}
-	x := rmCLS(s)
+	x := trimPrefix(s)
 	switch bbs {
 	case ANSI:
 		return &empty, ErrANSI
@@ -144,8 +144,8 @@ func (bbs BBS) HTML(s string) (*bytes.Buffer, error) {
 	}
 }
 
-// rmCLS removes common PCBoard BBS controls from the string.
-func rmCLS(s string) string {
+// trimPrefix removes common PCBoard BBS controls from the string.
+func trimPrefix(s string) string {
 	r := regexp.MustCompile(`@(CLS|CLS |PAUSE)@`)
 	return r.ReplaceAllString(s, "")
 }
@@ -295,7 +295,7 @@ func FindWWIVHeart(b []byte) BBS {
 
 // Validate that the bytes are valid BBS color codes.
 // Only Celerity, PCBoard or Renegade types are checked.
-func (bbs BBS) validate(b []byte) bool {
+func (bbs BBS) Validate(b []byte) bool {
 	if b == nil {
 		return false
 	}
@@ -382,7 +382,7 @@ func parserBar(s string) (*bytes.Buffer, error) {
 		if err != nil {
 			continue
 		}
-		if !Renegade.validate([]byte{sub[0], sub[1]}) {
+		if !Renegade.Validate([]byte{sub[0], sub[1]}) {
 			fmt.Fprint(&buf, string(verticalBar))
 			continue
 		}
@@ -428,7 +428,7 @@ func parserCelerity(s string) (*bytes.Buffer, error) {
 		if sub[0] == lf {
 			continue
 		}
-		if !Celerity.validate([]byte{sub[0]}) {
+		if !Celerity.Validate([]byte{sub[0]}) {
 			fmt.Fprint(&buf, string(verticalBar))
 			continue
 		}
@@ -450,39 +450,45 @@ func parserCelerity(s string) (*bytes.Buffer, error) {
 	return &buf, nil
 }
 
+// SplitPCBoard slices s into substrings separated by PCBoard @X codes.
+// The first two bytes of each substrings will contain a background
+// and foreground hex colour value. An empty slice is returned if
+// there are no valid @X code values exist in s.
+func SplitPCBoard(s string) []string {
+	const sep rune = 65535
+	m := regexp.MustCompile("(?i)@X([0-9A-F][0-9A-F])")
+	repl := fmt.Sprintf("%s$1", string(sep))
+	res := m.ReplaceAllString(s, repl)
+	if !strings.ContainsRune(res, sep) {
+		return []string{}
+	}
+	return strings.Split(res, string(sep))
+}
+
 // parserPCBoard parses the string for the common PCBoard BBS color codes to apply a HTML template.
 func parserPCBoard(s string) (*bytes.Buffer, error) {
 	const idiomaticTpl = `<i class="PB{{.Background}} PF{{.Foreground}}">{{.Content}}</i>`
-	buf := bytes.Buffer{}
-	d, b := StrData{}, PCBoard.Bytes()
-
-	codes := strings.Split(s, string(b))
-	if len(codes) <= 1 {
-		fmt.Fprint(&buf, s)
-		return &buf, nil
-	}
-
 	tmpl, err := template.New("idomatic").Parse(idiomaticTpl)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, code := range codes {
-		if code == "" {
+	buf, d := bytes.Buffer{}, StrData{}
+	xcodes := SplitPCBoard(s)
+	if len(xcodes) == 0 {
+		fmt.Fprint(&buf, s)
+		return &buf, nil
+	}
+	for _, color := range xcodes {
+		if color == "" {
 			continue
 		}
-		if code[0] == lf {
+		if color[0] == lf {
 			continue
 		}
-		if !PCBoard.validate([]byte{code[0]}) || !PCBoard.validate([]byte{code[1]}) {
-			fmt.Fprint(&buf, b)
-			continue
-		}
-
-		d.Background = string(code[0])
-		d.Foreground = string(code[1])
-		d.Content = code[2:]
-
+		d.Background = strings.ToUpper(string(color[0]))
+		d.Foreground = strings.ToUpper(string(color[1]))
+		d.Content = color[2:]
 		if err := tmpl.Execute(&buf, d); err != nil {
 			return nil, err
 		}

@@ -156,6 +156,7 @@ func Test_findPCBoard(t *testing.T) {
 		{"first", args{[]byte("@X00Hello world")}, PCBoard},
 		{"end", args{[]byte("@XFFHello world")}, PCBoard},
 		{"newline", args{[]byte("Hello world\n@X00This is a newline.")}, PCBoard},
+		{"false pos", args{[]byte("PCBoard @X code")}, -1},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -313,16 +314,23 @@ func Test_parsePCBoard(t *testing.T) {
 		s string
 	}
 	tests := []struct {
-		name    string
-		args    args
+		name string
+		args args
+
 		want    string
 		wantErr bool
 	}{
 		{"empty", args{""}, "", false},
 		{"string", args{"hello world"}, "hello world", false},
-		{"prefix", args{"@X07Hello world"}, "<i class=\"PB0,PF7\">Hello world</i>", false},
-		{"multi", args{"@X07Hello @X11world"}, "<i class=\"PB0,PF7\">Hello </i><i class=\"PB1,PF1\">world</i>", false},
-		{"newline", args{"@X07Hello\n@X11world"}, "<i class=\"PB0,PF7\">Hello\n</i><i class=\"PB1,PF1\">world</i>", false},
+		{"prefix", args{"@X07Hello world"}, "<i class=\"PB0 PF7\">Hello world</i>", false},
+		{"casing", args{"@xaBHello world"}, "<i class=\"PBA PFB\">Hello world</i>", false},
+		{"multi", args{"@X07Hello @X11world"}, "<i class=\"PB0 PF7\">Hello </i><i class=\"PB1 PF1\">world</i>", false},
+		{"newline", args{"@X07Hello\n@X11world"}, "<i class=\"PB0 PF7\">Hello\n</i><i class=\"PB1 PF1\">world</i>", false},
+		{"false pos 0", args{"@X code for PCBoard"}, "@X code for PCBoard", false},
+		{"false pos 1", args{"PCBoard @X code"}, "PCBoard @X code", false},
+		{"false pos 2", args{"PCBoard @Xcode"}, "PCBoard @Xcode", false},
+		{"false pos 3", args{"Does PCBoard @X code offer a red @X?"}, "Does PCBoard @X code offer a red @X?", false},
+		{"combo", args{"@X07@Xcodes combo"}, "<i class=\"PB0 PF7\">@Xcodes combo</i>", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
