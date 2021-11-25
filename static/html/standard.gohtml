@@ -42,15 +42,15 @@
     <style type="text/css">{{.CSSEmbed}}</style>
     <script defer>{{.ScriptEmbed}}</script>
     {{- else}}
-    <link rel="stylesheet" href="styles.css{{.CacheRefresh}}" />
     <link rel="stylesheet" href="font.css{{.CacheRefresh}}" />
-    <script src="scripts.js{{.CacheRefresh}}" defer></script>
+    <link rel="stylesheet" href="styles.css{{.CacheRefresh}}" />
+    <link rel="stylesheet" href="text_pcboard.css{{.CacheRefresh}}" />
     {{- end }}
   </head>
 
   {{if .MetaNoTranslate}}<body class="notranslate">{{else}}<body>{{- end}}
     <main>
-      <pre>{{.PreText}}</pre>
+      {{if .HTMLEmbed}}<article>{{.HTMLEmbed}}</article>{{- else}}<pre>{{.PreText}}</pre>{{- end}}
     </main>
   </body>
 </html>

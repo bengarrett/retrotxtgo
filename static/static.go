@@ -26,5 +26,16 @@ var Text embed.FS
 //go:embed js/scripts.js
 var Scripts []byte
 
+// CSS
+
 //go:embed css/styles.css
-var Styles []byte
+var CSSStyles []byte
+
+//go:embed css/text_bbs.css
+var CSSBBS []byte
+
+//go:embed css/text_blink.css
+var CSSBlink []byte
+
+//go:embed css/text_pcboard.css
+var CSSPCBoard []byte

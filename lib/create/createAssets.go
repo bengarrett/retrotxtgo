@@ -16,42 +16,62 @@ import (
 type asset int
 
 const (
-	cssFn asset = iota
+	htmlFn asset = iota
 	fontFn
-	htmlFn
+	cssFn
 	jsFn
 	favFn
+	bbsFn
+	pcbFn
 
 	faviconSrc = "img/retrotxt_16.png"
 )
 
 func (a asset) write() string {
+	// do not change the order of this array,
+	// they must match the Fn asset iota values.
 	return [...]string{
-		"styles.css",
-		"font.css",
+		// core assets
 		"index.html",
+		"font.css",
+		"styles.css",
 		"scripts.js",
-		"favicon.ico"}[a]
+		"favicon.ico",
+		// dynamic assets
+		"text_bbs.css",
+		"text_pcboard.css",
+	}[a]
 }
 
-// saveCSS creates and save the styles CSS file.
-func (args *Args) saveCSS(c chan error) {
-	src, dst := static.Styles, cssFn.write()
-	s, err := args.destination(dst)
+// saveStyles creates and save the styles CSS file.
+func (args *Args) saveStyles(c chan error) {
+	c <- args.saveCSSFile(static.CSSStyles, cssFn)
+}
+
+func (args *Args) saveBBS(c chan error) {
+	c <- args.saveCSSFile(static.CSSBBS, bbsFn)
+}
+
+func (args *Args) savePCBoard(c chan error) {
+	c <- args.saveCSSFile(static.CSSPCBoard, pcbFn)
+}
+
+func (args *Args) saveCSSFile(src []byte, a asset) error {
+	s, err := args.destination(a.write())
 	if err != nil {
-		c <- fmt.Errorf("%w: %s", err, s)
+		return fmt.Errorf("%w: %s", err, s)
 	}
 	if len(src) == 0 {
-		c <- fmt.Errorf("saveCSS, %w", static.ErrNotFound)
+		return fmt.Errorf("%s, %w", a.write(), static.ErrNotFound)
 	}
 	nn, _, err := filesystem.Save(s, src...)
 	if err != nil {
-		c <- err
+		return err
 	}
 	if !args.Test {
 		fmt.Println(bytesStats(s, nn))
 	}
-	c <- nil
+	return nil
 }
 
 // saveFavIcon read and save the favorite icon to a file.

@@ -2,6 +2,7 @@
 package create
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"html/template"
@@ -10,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/bengarrett/retrotxtgo/lib/bbs"
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
@@ -27,6 +29,7 @@ type Args struct {
 		Encoding   encoding.Encoding // Original encoding of the text source
 		HiddenBody string            // Pre-text content override, accessible by a hidden flag
 		Name       string            // Text source, usually a file or pack name
+		BBSType    bbs.BBS           // Optional BBS or ANSI text format
 	}
 	Save struct {
 		AsFiles     bool   // Save assets as files
@@ -125,6 +128,7 @@ type PageData struct {
 	SauceWidth       uint
 	SauceLines       uint
 	CSSEmbed         template.CSS
+	HTMLEmbed        template.HTML
 	ScriptEmbed      template.JS
 }
 
@@ -225,44 +229,48 @@ func (args *Args) saveAssets(b *[]byte) error {
 			logs.FatalMark(args.Save.Destination, logs.ErrFileSaveD, err)
 		}
 	}
-	ch := make(chan error)
+
+	r := bytes.NewReader(*b)
+	args.Source.BBSType = bbs.Find(r)
+
+	ch, cnt := make(chan error), 0
+
 	go args.saveHTML(b, ch)
+
 	if useCSS(args.layout) {
-		go args.saveCSS(ch)
-	} else {
-		go skip(ch)
+		cnt++
+		go args.saveStyles(ch)
+	}
+	if usePCBoard(args.Source.BBSType) {
+		cnt += 2
+		go args.saveBBS(ch)
+		go args.savePCBoard(ch)
 	}
 	if useFontCSS(args.layout) {
+		cnt++
 		go args.saveFont(ch)
-	} else {
-		go skip(ch)
 	}
 	if useJS(args.layout) {
+		cnt++
 		go args.saveJS(ch)
-	} else {
-		go skip(ch)
 	}
 	if useIcon(args.layout) {
+		cnt++
 		go args.saveFavIcon(ch)
-	} else {
+	}
+
+	const optionalCh = 6
+	skips := optionalCh - cnt
+	for i := 0; i < skips; i++ {
 		go skip(ch)
 	}
+	return check(<-ch, <-ch, <-ch, <-ch, <-ch, <-ch, <-ch)
+}
+
+func check(ch ...error) error {
 	var errs error
-	err1, err2, err3, err4, err5 := <-ch, <-ch, <-ch, <-ch, <-ch
-	if err1 != nil {
-		errs = appendErr(errs, err1)
-	}
-	if err2 != nil {
-		errs = appendErr(errs, err2)
-	}
-	if err3 != nil {
-		errs = appendErr(errs, err3)
-	}
-	if err4 != nil {
-		errs = appendErr(errs, err4)
-	}
-	if err5 != nil {
-		errs = appendErr(errs, err5)
+	for _, err := range ch {
+		errs = appendErr(errs, err)
 	}
 	return errs
 }
@@ -307,6 +315,17 @@ func useIcon(l Layout) bool {
 		return false
 	}
 	return false
+}
+
+func usePCBoard(b bbs.BBS) bool {
+	switch b {
+	case bbs.PCBoard:
+		return true
+	case bbs.ANSI, bbs.Celerity, bbs.Renegade, bbs.Telegard, bbs.WWIVHash, bbs.WWIVHeart, bbs.Wildcat:
+		return false
+	default:
+		return false
+	}
 }
 
 func useJS(l Layout) bool {
@@ -374,7 +393,7 @@ func (args *Args) Stdout(b *[]byte) error {
 	if errj := args.printJS(&static.Scripts); errj != nil {
 		return errj
 	}
-	if errc := args.printCSS(&static.Styles); errc != nil {
+	if errc := args.printCSS(&static.CSSStyles); errc != nil {
 		return errc
 	}
 	if errf := args.printFontCSS(f, &font); errf != nil {

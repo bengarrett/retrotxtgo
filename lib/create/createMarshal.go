@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bengarrett/retrotxtgo/lib/bbs"
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/meta"
@@ -43,12 +44,32 @@ func (args *Args) marshal(b *[]byte) (PageData, error) {
 	default:
 		return PageData{}, fmt.Errorf("pagedata %s: %w", args.layout, logs.ErrTmplName)
 	}
-	// convert bytes into utf8
+	bt := args.Source.BBSType
 	r := bytes.Runes(*b)
-	p.PreText = string(r)
-	if p.MetaRetroTxt {
-		lb := filesystem.LineBreaks(true, r...)
-		p.Comment = args.comment(lb, r...)
+	switch {
+	case bt == bbs.ANSI:
+		// temp placeholder
+		p.PreText = string(r)
+		if p.MetaRetroTxt {
+			lb := filesystem.LineBreaks(true, r...)
+			p.Comment = args.comment(lb, r...)
+		}
+	case bt < bbs.ANSI:
+		// convert bytes into utf8
+		p.PreText = string(r)
+		if p.MetaRetroTxt {
+			lb := filesystem.LineBreaks(true, r...)
+			p.Comment = args.comment(lb, r...)
+		}
+	case bt > bbs.ANSI:
+		buf, err := bt.HTML(string(r))
+		if err != nil {
+			return PageData{}, err
+		}
+		if err != nil {
+			return PageData{}, err
+		}
+		p.HTMLEmbed = template.HTML(buf.Bytes())
 	}
 	return p, nil
 }
@@ -68,7 +89,7 @@ func (args *Args) marshalInline(p *PageData) (PageData, error) {
 	m.AddFunc("text/css", css.Minify)
 	m.AddFuncRegexp(regexp.MustCompile("^(application|text)/(x-)?(java|ecma)script$"), js.Minify)
 	// styles
-	s := bytes.TrimSpace(static.Styles)
+	s := bytes.TrimSpace(static.CSSStyles)
 	// font
 	f, err := FontCSS(args.FontFamily.Value, args.Source.Encoding, args.FontEmbed)
 	if err != nil {
