@@ -260,11 +260,11 @@ func Test_parserBars(t *testing.T) {
 	}{
 		{"empty", args{""}, "", false},
 		{"string", args{"hello world"}, "hello world", false},
-		{"prefix", args{"|" + black + white + "Hello world"}, "<i class=\"P0,P7\">Hello world</i>", false},
+		{"prefix", args{"|" + black + white + "Hello world"}, "<i class=\"P0 P7\">Hello world</i>", false},
 		{"multi", args{"|" + black + white + "White |" + red + "Red Background"},
-			"<i class=\"P0,P7\">White </i><i class=\"P20,P7\">Red Background</i>", false},
+			"<i class=\"P0 P7\">White </i><i class=\"P20 P7\">Red Background</i>", false},
 		{"newline", args{"|07White\n|20Red Background"},
-			"<i class=\"P0,P7\">White\n</i><i class=\"P20,P7\">Red Background</i>", false},
+			"<i class=\"P0 P7\">White\n</i><i class=\"P20 P7\">Red Background</i>", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -292,10 +292,10 @@ func Test_parserCelerity(t *testing.T) {
 	}{
 		{"empty", args{}, "", false},
 		{"string", args{"the quick brown fox"}, "the quick brown fox", false},
-		{"prefix", args{"|kHello world"}, "<i class=\"PBk,PFk\">Hello world</i>", false},
-		{"background", args{"|S|bHello world"}, "<i class=\"PBb,PFw\">Hello world</i>", false},
-		{"multi", args{"|S|gHello|Rworld"}, "<i class=\"PBg,PFw\">Hello</i><i class=\"PBR,PFw\">world</i>", false},
-		{"newline", args{"|S|gHello\n|Rworld"}, "<i class=\"PBg,PFw\">Hello\n</i><i class=\"PBR,PFw\">world</i>", false},
+		{"prefix", args{"|kHello world"}, "<i class=\"PBk PFk\">Hello world</i>", false},
+		{"background", args{"|S|bHello world"}, "<i class=\"PBb PFw\">Hello world</i>", false},
+		{"multi", args{"|S|gHello|Rworld"}, "<i class=\"PBg PFw\">Hello</i><i class=\"PBR PFw\">world</i>", false},
+		{"newline", args{"|S|gHello\n|Rworld"}, "<i class=\"PBg PFw\">Hello\n</i><i class=\"PBR PFw\">world</i>", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -360,7 +360,7 @@ func Test_parseTelegard(t *testing.T) {
 	}{
 		{"empty", args{""}, "", false},
 		{"string", args{"hello world"}, "hello world", false},
-		{"prefix", args{"`07Hello world"}, "<i class=\"PB0,PF7\">Hello world</i>", false},
+		{"prefix", args{"`07Hello world"}, "<i class=\"PB0 PF7\">Hello world</i>", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -388,7 +388,7 @@ func Test_parseWHash(t *testing.T) {
 	}{
 		{"empty", args{}, "", false},
 		{"string", args{"hello world"}, "hello world", false},
-		{"prefix", args{"|#7Hello world"}, "<i class=\"P0,P7\">Hello world</i>", false},
+		{"prefix", args{"|#7Hello world"}, "<i class=\"P0 P7\">Hello world</i>", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -416,7 +416,7 @@ func Test_parseWHeart(t *testing.T) {
 	}{
 		{"empty", args{}, "", false},
 		{"string", args{"hello world"}, "hello world", false},
-		{"prefix", args{"\x037Hello world"}, "<i class=\"P0,P7\">Hello world</i>", false},
+		{"prefix", args{"\x037Hello world"}, "<i class=\"P0 P7\">Hello world</i>", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -444,7 +444,7 @@ func Test_parseWildcat(t *testing.T) {
 	}{
 		{"empty", args{}, "", false},
 		{"string", args{"hello world"}, "hello world", false},
-		{"prefix", args{"@0F@Hello world"}, "<i class=\"PB0,PFF\">Hello world</i>", false},
+		{"prefix", args{"@0F@Hello world"}, "<i class=\"PB0 PFF\">Hello world</i>", false},
 	}
 	for _, tt := range tests {
 		got, err := parseWildcat(tt.args.s)
