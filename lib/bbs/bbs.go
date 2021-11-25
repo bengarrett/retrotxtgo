@@ -353,7 +353,7 @@ func validateR(b [2]byte) bool {
 
 // parserBar parses the string for BBS color codes that use vertical bar prefixes to apply a HTML template.
 func parserBar(s string) (*bytes.Buffer, error) {
-	const idiomaticTpl = `<i class="P{{.Background}},P{{.Foreground}}">{{.Content}}</i>`
+	const idiomaticTpl = `<i class="P{{.Background}} P{{.Foreground}}">{{.Content}}</i>`
 	buf := bytes.Buffer{}
 	d := IntData{
 		Foreground: 0,
@@ -403,7 +403,7 @@ func parserBar(s string) (*bytes.Buffer, error) {
 
 // parserCelerity parses the string for the unique Celerity BBS color codes to apply a HTML template.
 func parserCelerity(s string) (*bytes.Buffer, error) {
-	const idiomaticTpl, swap = `<i class="PB{{.Background}},PF{{.Foreground}}">{{.Content}}</i>`, "S"
+	const idiomaticTpl, swap = `<i class="PB{{.Background}} PF{{.Foreground}}">{{.Content}}</i>`, "S"
 	buf, background := bytes.Buffer{}, false
 	d := StrData{
 		Foreground: "w",
@@ -452,7 +452,7 @@ func parserCelerity(s string) (*bytes.Buffer, error) {
 
 // parserPCBoard parses the string for the common PCBoard BBS color codes to apply a HTML template.
 func parserPCBoard(s string) (*bytes.Buffer, error) {
-	const idiomaticTpl = `<i class="PB{{.Background}},PF{{.Foreground}}">{{.Content}}</i>`
+	const idiomaticTpl = `<i class="PB{{.Background}} PF{{.Foreground}}">{{.Content}}</i>`
 	buf := bytes.Buffer{}
 	d, b := StrData{}, PCBoard.Bytes()
 
