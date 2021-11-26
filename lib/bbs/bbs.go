@@ -446,49 +446,62 @@ func barForeground(n int) bool {
 	return true
 }
 
+// SplitCelerity slices s into substrings separated by "|" vertical bar codes.
+// The first byte of each substrings will contain a colour value.
+// An empty slice is returned if there are no valid bar code values exist in s.
+func SplitCelerity(s string) []string {
+	// The format uses the vertical bar "|" followed by a case sensitive single alphabetic character.
+	const sep rune = 65535
+	m := regexp.MustCompile(`\|(k|b|g|c|r|m|y|w|d|B|G|C|R|M|Y|W|S)`)
+	repl := fmt.Sprintf("%s$1", string(sep))
+	res := m.ReplaceAllString(s, repl)
+	if !strings.ContainsRune(res, sep) {
+		return []string{}
+	}
+
+	spl := strings.Split(res, string(sep))
+	clean := []string{}
+	for _, val := range spl {
+		if val != "" {
+			clean = append(clean, val)
+		}
+	}
+	return clean
+}
+
 // parserCelerity parses the string for the unique Celerity BBS color codes
 // to apply a HTML template.
 func parserCelerity(s string) (*bytes.Buffer, error) {
-	const idiomaticTpl, swap = `<i class="PB{{.Background}} PF{{.Foreground}}">{{.Content}}</i>`, "S"
+	const idiomaticTpl, swapCmd = `<i class="PB{{.Background}} PF{{.Foreground}}">{{.Content}}</i>`, "S"
+	tmpl, err := template.New("idomatic").Parse(idiomaticTpl)
+	if err != nil {
+		return nil, err
+	}
+
 	buf, background := bytes.Buffer{}, false
 	d := StrData{
 		Foreground: "w",
 		Background: "k",
 	}
 
-	subs := strings.Split(s, string(verticalBar))
-	if len(subs) <= 1 {
+	bars := SplitCelerity(s)
+	fmt.Println(bars)
+	if len(bars) == 0 {
 		fmt.Fprint(&buf, s)
 		return &buf, nil
 	}
-
-	tmpl, err := template.New("idomatic").Parse(idiomaticTpl)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, sub := range subs {
-		if sub == "" {
-			continue
-		}
-		if sub[0] == lf {
-			continue
-		}
-		if !Celerity.Validate([]byte{sub[0]}) {
-			fmt.Fprint(&buf, string(verticalBar))
-			continue
-		}
-		if sub == swap {
+	for _, color := range bars {
+		if color == swapCmd {
 			background = !background
 			continue
 		}
 		if !background {
-			d.Foreground = string(sub[0])
-		} else {
-			d.Background = string(sub[0])
+			d.Foreground = string(color[0])
 		}
-		d.Content = sub[1:]
-
+		if background {
+			d.Background = string(color[0])
+		}
+		d.Content = color[1:]
 		if err := tmpl.Execute(&buf, d); err != nil {
 			return nil, err
 		}

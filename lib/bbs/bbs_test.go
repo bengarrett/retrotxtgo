@@ -342,9 +342,14 @@ func Test_parserCelerity(t *testing.T) {
 		{"empty", args{}, "", false},
 		{"string", args{"the quick brown fox"}, "the quick brown fox", false},
 		{"prefix", args{"|kHello world"}, "<i class=\"PBk PFk\">Hello world</i>", false},
-		{"background", args{"|S|bHello world"}, "<i class=\"PBb PFw\">Hello world</i>", false},
-		{"multi", args{"|S|gHello|Rworld"}, "<i class=\"PBg PFw\">Hello</i><i class=\"PBR PFw\">world</i>", false},
-		{"newline", args{"|S|gHello\n|Rworld"}, "<i class=\"PBg PFw\">Hello\n</i><i class=\"PBR PFw\">world</i>", false},
+		{"background", args{"|S|bHello world"},
+			"<i class=\"PBb PFw\">Hello world</i>", false},
+		{"multi", args{"|S|gHello|Rworld"},
+			"<i class=\"PBg PFw\">Hello</i><i class=\"PBR PFw\">world</i>", false},
+		{"newline", args{"|S|gHello\n|Rworld"},
+			"<i class=\"PBg PFw\">Hello\n</i><i class=\"PBR PFw\">world</i>", false},
+		{"false positive", args{"| Hello world |"}, "| Hello world |", false},
+		{"double bar", args{"||pipes"}, "||pipes", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
