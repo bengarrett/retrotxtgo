@@ -369,6 +369,9 @@ func validateR(b [2]byte) bool {
 	return true
 }
 
+// SplitBars slices s into substrings separated by "|" vertical bar codes.
+// The first two bytes of each substrings will contain a colour value.
+// An empty slice is returned if there are no valid bar code values exist in s.
 func SplitBars(s string) []string {
 	const sep rune = 65535
 	m := regexp.MustCompile(`\|(0[0-9]|1[1-9]|2[0-3])`)
@@ -397,46 +400,50 @@ func parserBars(s string) (*bytes.Buffer, error) {
 		return nil, err
 	}
 
-	buf := bytes.Buffer{}
-	d := IntData{
-		Foreground: 0,
-		Background: 0,
-	}
-
-	bars := strings.Split(s, string(verticalBar))
-	if len(bars) <= 1 {
+	buf, d := bytes.Buffer{}, IntData{}
+	bars := SplitBars(s)
+	if len(bars) == 0 {
 		fmt.Fprint(&buf, s)
 		return &buf, nil
 	}
 
 	for _, color := range bars {
-		if color == "" {
-			continue
-		}
-		if color[0] == lf {
-			continue
-		}
 		n, err := strconv.Atoi(color[0:2])
 		if err != nil {
 			continue
 		}
-		if !Renegade.Validate([]byte{color[0], color[1]}) {
-			fmt.Fprint(&buf, string(verticalBar))
-			continue
-		}
-
-		if n >= 0 && n <= 15 {
+		if barForeground(n) {
 			d.Foreground = n
-		} else if n >= 16 && n <= 23 {
+		}
+		if barBackground(n) {
 			d.Background = n
 		}
 		d.Content = color[2:]
-
 		if err := tmpl.Execute(&buf, d); err != nil {
 			return nil, err
 		}
 	}
 	return &buf, nil
+}
+
+func barBackground(n int) bool {
+	if n < 16 {
+		return false
+	}
+	if n > 23 {
+		return false
+	}
+	return true
+}
+
+func barForeground(n int) bool {
+	if n < 0 {
+		return false
+	}
+	if n > 15 {
+		return false
+	}
+	return true
 }
 
 // parserCelerity parses the string for the unique Celerity BBS color codes
