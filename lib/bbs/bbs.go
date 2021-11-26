@@ -52,6 +52,7 @@ const (
 	lf            byte = 10
 )
 
+// Valid checks the bbs type is a known BBS.
 func (bbs BBS) Valid() bool {
 	switch bbs {
 	case ANSI, Celerity, PCBoard, Renegade, Telegard, Wildcat, WWIVHash, WWIVHeart:
@@ -136,19 +137,19 @@ func (bbs BBS) HTML(s string) (*bytes.Buffer, error) {
 	case ANSI:
 		return &empty, ErrANSI
 	case Celerity:
-		return parseCelerity(x)
+		return ParseCelerity(x)
 	case PCBoard:
-		return parsePCBoard(x)
+		return ParsePCBoard(x)
 	case Renegade:
 		return parseRenegade(x)
 	case Telegard:
-		return parseTelegard(x)
+		return ParseTelegard(x)
 	case Wildcat:
-		return parseWildcat(x)
+		return ParseWildcat(x)
 	case WWIVHash:
-		return parseWHash(x)
+		return ParseWHash(x)
 	case WWIVHeart:
-		return parseWHeart(x)
+		return ParseWHeart(x)
 	default:
 		return &empty, ErrColorCodes
 	}
@@ -311,64 +312,6 @@ func FindWWIVHeart(b []byte) BBS {
 	return -1
 }
 
-// Validate that the bytes are valid BBS color codes.
-// Only Celerity, PCBoard or Renegade types are checked.
-func (bbs BBS) Validate(b []byte) bool {
-	if b == nil {
-		return false
-	}
-	switch bbs {
-	case Celerity:
-		return validateC(b[0])
-	case PCBoard:
-		return validateP(b[0])
-	case Renegade:
-		const min = 2
-		if len(b) < min {
-			return false
-		}
-		return validateR([2]byte{b[0], b[1]})
-	case ANSI:
-	case Telegard:
-	case Wildcat:
-	case WWIVHash:
-	case WWIVHeart:
-	}
-	return false
-}
-
-func validateC(b byte) bool {
-	return bytes.Contains([]byte(celerityCodes), []byte{b})
-}
-
-func validateP(b byte) bool {
-	if b == byte(' ') {
-		return false
-	}
-	const baseHex, bitSize = 16, 64
-	i, err := strconv.ParseInt(string(b), baseHex, bitSize)
-	if err != nil {
-		return false
-	}
-	if i < 0 || i > 16 {
-		return false
-	}
-	return true
-}
-
-func validateR(b [2]byte) bool {
-	const bgMin, fgMax = 0, 23
-	s := string(b[0]) + string(b[1])
-	i, err := strconv.Atoi(s)
-	if err != nil {
-		return false
-	}
-	if i < bgMin || i > fgMax {
-		return false
-	}
-	return true
-}
-
 // SplitBars slices s into substrings separated by "|" vertical bar codes.
 // The first two bytes of each substrings will contain a colour value.
 // An empty slice is returned if there are no valid bar code values exist in s.
@@ -391,9 +334,9 @@ func SplitBars(s string) []string {
 	return clean
 }
 
-// parserBars parses the string for BBS color codes that use
+// ParserBars parses the string for BBS color codes that use
 // vertical bar prefixes to apply a HTML template.
-func parserBars(s string) (*bytes.Buffer, error) {
+func ParserBars(s string) (*bytes.Buffer, error) {
 	const idiomaticTpl = `<i class="P{{.Background}} P{{.Foreground}}">{{.Content}}</i>`
 	tmpl, err := template.New("idomatic").Parse(idiomaticTpl)
 	if err != nil {
@@ -469,9 +412,9 @@ func SplitCelerity(s string) []string {
 	return clean
 }
 
-// parserCelerity parses the string for the unique Celerity BBS color codes
+// ParserCelerity parses the string for the unique Celerity BBS color codes
 // to apply a HTML template.
-func parserCelerity(s string) (*bytes.Buffer, error) {
+func ParserCelerity(s string) (*bytes.Buffer, error) {
 	const idiomaticTpl, swapCmd = `<i class="PB{{.Background}} PF{{.Foreground}}">{{.Content}}</i>`, "S"
 	tmpl, err := template.New("idomatic").Parse(idiomaticTpl)
 	if err != nil {
@@ -558,50 +501,50 @@ func parserPCBoard(s string) (*bytes.Buffer, error) {
 	return &buf, nil
 }
 
-func parseCelerity(s string) (*bytes.Buffer, error) {
-	return parserCelerity(s)
+func ParseCelerity(s string) (*bytes.Buffer, error) {
+	return ParserCelerity(s)
 }
 
 func parseRenegade(s string) (*bytes.Buffer, error) {
-	return parserBars(s)
+	return ParserBars(s)
 }
 
-func parsePCBoard(s string) (*bytes.Buffer, error) {
+func ParsePCBoard(s string) (*bytes.Buffer, error) {
 	return parserPCBoard(s)
 }
 
-// parseTelegard parses the string for Telegard BBS color codes.
+// ParseTelegard parses the string for Telegard BBS color codes.
 // It swaps the Telegard color codes with PCBoard @X codes and
 // parses those with parserPCBoard.
-func parseTelegard(s string) (*bytes.Buffer, error) {
+func ParseTelegard(s string) (*bytes.Buffer, error) {
 	r := regexp.MustCompile("`([0-9|A-F])([0-9|A-F])")
 	x := r.ReplaceAllString(s, `@X$1$2`)
 	return parserPCBoard(x)
 }
 
-// parseWildcat parses the string for Wildcat! BBS color codes.
+// ParseWildcat parses the string for Wildcat! BBS color codes.
 // It swaps the Wildcat color codes with PCBoard @X codes and
 // parses those with parserPCBoard.
-func parseWildcat(s string) (*bytes.Buffer, error) {
+func ParseWildcat(s string) (*bytes.Buffer, error) {
 	r := regexp.MustCompile(`@([0-9|A-F])([0-9|A-F])@`)
 	x := r.ReplaceAllString(s, `@X$1$2`)
 	return parserPCBoard(x)
 }
 
-// parseWHash parses the string for WWIV hash color codes.
+// ParseWHash parses the string for WWIV hash color codes.
 // It swaps the WWIV color codes with vertical bars and
-// parses those with parserBars.
-func parseWHash(s string) (*bytes.Buffer, error) {
+// parses those with ParserBars.
+func ParseWHash(s string) (*bytes.Buffer, error) {
 	r := regexp.MustCompile(`\|#(\d)`)
 	x := r.ReplaceAllString(s, `|0$1`)
-	return parserBars(x)
+	return ParserBars(x)
 }
 
-// parseWHeart parses the string for WWIV heart color codes.
+// ParseWHeart parses the string for WWIV heart color codes.
 // It swaps the WWIV color codes with vertical bars and
-// parses those with parserBars.
-func parseWHeart(s string) (*bytes.Buffer, error) {
+// parses those with ParserBars.
+func ParseWHeart(s string) (*bytes.Buffer, error) {
 	r := regexp.MustCompile(`\x03(\d)`)
 	x := r.ReplaceAllString(s, `|0$1`)
-	return parserBars(x)
+	return ParserBars(x)
 }
