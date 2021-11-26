@@ -369,39 +369,58 @@ func validateR(b [2]byte) bool {
 	return true
 }
 
+func SplitBars(s string) []string {
+	const sep rune = 65535
+	m := regexp.MustCompile(`\|(0[0-9]|1[1-9]|2[0-3])`)
+	repl := fmt.Sprintf("%s$1", string(sep))
+	res := m.ReplaceAllString(s, repl)
+	if !strings.ContainsRune(res, sep) {
+		return []string{}
+	}
+
+	spl := strings.Split(res, string(sep))
+	clean := []string{}
+	for _, val := range spl {
+		if val != "" {
+			clean = append(clean, val)
+		}
+	}
+	return clean
+}
+
 // parserBars parses the string for BBS color codes that use
 // vertical bar prefixes to apply a HTML template.
 func parserBars(s string) (*bytes.Buffer, error) {
 	const idiomaticTpl = `<i class="P{{.Background}} P{{.Foreground}}">{{.Content}}</i>`
+	tmpl, err := template.New("idomatic").Parse(idiomaticTpl)
+	if err != nil {
+		return nil, err
+	}
+
 	buf := bytes.Buffer{}
 	d := IntData{
 		Foreground: 0,
 		Background: 0,
 	}
 
-	subs := strings.Split(s, string(verticalBar))
-	if len(subs) <= 1 {
+	bars := strings.Split(s, string(verticalBar))
+	if len(bars) <= 1 {
 		fmt.Fprint(&buf, s)
 		return &buf, nil
 	}
 
-	tmpl, err := template.New("idomatic").Parse(idiomaticTpl)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, sub := range subs {
-		if sub == "" {
+	for _, color := range bars {
+		if color == "" {
 			continue
 		}
-		if sub[0] == lf {
+		if color[0] == lf {
 			continue
 		}
-		n, err := strconv.Atoi(sub[0:2])
+		n, err := strconv.Atoi(color[0:2])
 		if err != nil {
 			continue
 		}
-		if !Renegade.Validate([]byte{sub[0], sub[1]}) {
+		if !Renegade.Validate([]byte{color[0], color[1]}) {
 			fmt.Fprint(&buf, string(verticalBar))
 			continue
 		}
@@ -411,7 +430,7 @@ func parserBars(s string) (*bytes.Buffer, error) {
 		} else if n >= 16 && n <= 23 {
 			d.Background = n
 		}
-		d.Content = sub[2:]
+		d.Content = color[2:]
 
 		if err := tmpl.Execute(&buf, d); err != nil {
 			return nil, err
@@ -482,7 +501,15 @@ func SplitPCBoard(s string) []string {
 	if !strings.ContainsRune(res, sep) {
 		return []string{}
 	}
-	return strings.Split(res, string(sep))
+
+	spl := strings.Split(res, string(sep))
+	clean := []string{}
+	for _, val := range spl {
+		if val != "" {
+			clean = append(clean, val)
+		}
+	}
+	return clean
 }
 
 // parserPCBoard parses the string for the common PCBoard BBS color codes
@@ -501,12 +528,6 @@ func parserPCBoard(s string) (*bytes.Buffer, error) {
 		return &buf, nil
 	}
 	for _, color := range xcodes {
-		if color == "" {
-			continue
-		}
-		if color[0] == lf {
-			continue
-		}
 		d.Background = strings.ToUpper(string(color[0]))
 		d.Foreground = strings.ToUpper(string(color[1]))
 		d.Content = color[2:]

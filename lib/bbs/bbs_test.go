@@ -1,6 +1,7 @@
 package bbs
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -25,6 +26,26 @@ func TestBBS_String(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.b.String(); got != tt.want {
 				t.Errorf("BBS.String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestBBS_Name(t *testing.T) {
+	tests := []struct {
+		name string
+		b    BBS
+		want string
+	}{
+		{"too small", -1, ""},
+		{"too big", 111, ""},
+		{"first", Celerity, "Celerity"},
+		{"last", WWIVHeart, "WWIV ♥"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.b.Name(); got != tt.want {
+				t.Errorf("BBS.Name() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -247,6 +268,32 @@ func Test_findWWIVHash(t *testing.T) {
 	}
 }
 
+func Test_SplitBars(t *testing.T) {
+	type args struct {
+		s string
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{"empty", args{""}, 0},
+		{"first", args{"|00"}, 1},
+		{"last", args{"|23"}, 1},
+		{"out of range", args{"|24"}, 0},
+		{"incomplete", args{"|2"}, 0},
+		{"multiples", args{"|01Hello|00 |10world"}, 2},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := len(SplitBars(tt.args.s)); got != tt.want {
+				fmt.Println(SplitBars(tt.args.s))
+				t.Errorf("SplitBars() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func Test_parserBars(t *testing.T) {
 	type args struct {
 		s string
@@ -260,6 +307,8 @@ func Test_parserBars(t *testing.T) {
 	}{
 		{"empty", args{""}, "", false},
 		{"string", args{"hello world"}, "hello world", false},
+		{"false pos", args{"hello|world"}, "hello|world", false},
+		{"false pos double", args{"| hello world |"}, "| hello world |", false},
 		{"prefix", args{"|" + black + white + "Hello world"}, "<i class=\"P0 P7\">Hello world</i>", false},
 		{"multi", args{"|" + black + white + "White |" + red + "Red Background"},
 			"<i class=\"P0 P7\">White </i><i class=\"P20 P7\">Red Background</i>", false},
@@ -306,6 +355,32 @@ func Test_parserCelerity(t *testing.T) {
 			}
 			if got.String() != tt.want {
 				t.Errorf("parserCelerity() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_SplitPCBoard(t *testing.T) {
+	type args struct {
+		s string
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{"empty", args{""}, 0},
+		{"first", args{"@X00"}, 1},
+		{"last", args{"@XFF"}, 1},
+		{"out of range", args{"@XFG"}, 0},
+		{"incomplete", args{"@X0"}, 0},
+		{"multiples", args{"@X01Hello@X00 @X10world"}, 3},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := len(SplitPCBoard(tt.args.s)); got != tt.want {
+				fmt.Println(SplitPCBoard(tt.args.s))
+				t.Errorf("SplitPCBoard() = %v, want %v", got, tt.want)
 			}
 		})
 	}
