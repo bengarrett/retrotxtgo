@@ -13,6 +13,94 @@ const (
 	ansiEsc = "\x1B\x5B"
 )
 
+func ExampleBBS_String() {
+	fmt.Print(bbs.PCBoard)
+	// Output: PCBoard @X
+}
+
+func ExampleBBS_Name() {
+	fmt.Print(bbs.PCBoard.Name())
+	// Output: PCBoard
+}
+
+func ExampleBBS_Bytes() {
+	b := bbs.PCBoard.Bytes()
+	fmt.Printf("%s %v", b, b)
+	// Output: @X [64 88]
+}
+
+func ExampleBBS_HTML() {
+	s := "@X03Hello world"
+	buf, err := bbs.PCBoard.HTML(s)
+	if err != nil {
+		fmt.Print(err)
+	}
+	fmt.Print(buf)
+	// Output: <i class="PB0 PF3">Hello world</i>
+}
+
+func ExampleFind() {
+	r := strings.NewReader("@X03Hello world")
+	f := bbs.Find(r)
+	fmt.Printf("Reader is in a %s BBS format", f.Name())
+	// Output: Reader is in a PCBoard BBS format
+}
+
+func ExampleFindPCBoard() {
+	b := []byte("@X03Hello world")
+	f := bbs.FindPCBoard(b)
+	fmt.Printf("Is PCBoard BBS text: %v", f == bbs.PCBoard)
+	// Output: Is PCBoard BBS text: true
+}
+
+func ExampleSplitBars() {
+	s := "|03Hello |07|19world"
+	fmt.Printf("Color sequences: %d", len(bbs.SplitBars(s)))
+	// Output: Color sequences: 3
+}
+
+func ExampleParseRenegade() {
+	s := "|03Hello |07|19world"
+	buf, err := bbs.ParseRenegade(s)
+	if err != nil {
+		fmt.Print(err)
+	}
+	fmt.Print(buf)
+	// Output: <i class="P0 P3">Hello </i><i class="P0 P7"></i><i class="P19 P7">world</i>
+}
+
+func ExampleSplitCelerity() {
+	s := "|cHello |C|S|wworld"
+	fmt.Printf("Color sequences: %d", len(bbs.SplitCelerity(s)))
+	// Output: Color sequences: 4
+}
+
+func ExampleParseCelerity() {
+	s := "|cHello |C|S|wworld"
+	buf, err := bbs.ParseCelerity(s)
+	if err != nil {
+		fmt.Print(err)
+	}
+	fmt.Print(buf)
+	// Output: <i class="PBk PFc">Hello </i><i class="PBk PFC"></i><i class="PBw PFC">world</i>
+}
+
+func ExampleSplitPCBoard() {
+	s := "@X03Hello world"
+	fmt.Printf("Color sequences: %d", len(bbs.SplitPCBoard(s)))
+	// Output: Color sequences: 1
+}
+
+func ExampleParsePCBoard() {
+	s := "@X03Hello world"
+	buf, err := bbs.ParsePCBoard(s)
+	if err != nil {
+		fmt.Print(err)
+	}
+	fmt.Print(buf)
+	// Output: <i class="PB0 PF3">Hello world</i>
+}
+
 func TestBBS_String(t *testing.T) {
 	tests := []struct {
 		name string
@@ -296,7 +384,7 @@ func Test_SplitBars(t *testing.T) {
 	}
 }
 
-func Test_ParserBars(t *testing.T) {
+func Test_ParseRenegade(t *testing.T) {
 	type args struct {
 		s string
 	}
@@ -319,19 +407,19 @@ func Test_ParserBars(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := bbs.ParserBars(tt.args.s)
+			got, err := bbs.ParseRenegade(tt.args.s)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ParserBars() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ParseRenegade() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got.String() != tt.want {
-				t.Errorf("ParserBars() = %v, want %v", got, tt.want)
+				t.Errorf("ParseRenegade() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_ParserCelerity(t *testing.T) {
+func Test_ParseCelerity(t *testing.T) {
 	type args struct {
 		s string
 	}
@@ -355,13 +443,13 @@ func Test_ParserCelerity(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := bbs.ParserCelerity(tt.args.s)
+			got, err := bbs.ParseCelerity(tt.args.s)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ParserCelerity() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ParseCelerity() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got.String() != tt.want {
-				t.Errorf("ParserCelerity() = %v, want %v", got, tt.want)
+				t.Errorf("ParseCelerity() = %v, want %v", got, tt.want)
 			}
 		})
 	}

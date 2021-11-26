@@ -141,7 +141,7 @@ func (bbs BBS) HTML(s string) (*bytes.Buffer, error) {
 	case PCBoard:
 		return ParsePCBoard(x)
 	case Renegade:
-		return parseRenegade(x)
+		return ParseRenegade(x)
 	case Telegard:
 		return ParseTelegard(x)
 	case Wildcat:
@@ -336,7 +336,7 @@ func SplitBars(s string) []string {
 
 // ParserBars parses the string for BBS color codes that use
 // vertical bar prefixes to apply a HTML template.
-func ParserBars(s string) (*bytes.Buffer, error) {
+func parserBars(s string) (*bytes.Buffer, error) {
 	const idiomaticTpl = `<i class="P{{.Background}} P{{.Foreground}}">{{.Content}}</i>`
 	tmpl, err := template.New("idomatic").Parse(idiomaticTpl)
 	if err != nil {
@@ -414,7 +414,7 @@ func SplitCelerity(s string) []string {
 
 // ParserCelerity parses the string for the unique Celerity BBS color codes
 // to apply a HTML template.
-func ParserCelerity(s string) (*bytes.Buffer, error) {
+func parserCelerity(s string) (*bytes.Buffer, error) {
 	const idiomaticTpl, swapCmd = `<i class="PB{{.Background}} PF{{.Foreground}}">{{.Content}}</i>`, "S"
 	tmpl, err := template.New("idomatic").Parse(idiomaticTpl)
 	if err != nil {
@@ -428,7 +428,6 @@ func ParserCelerity(s string) (*bytes.Buffer, error) {
 	}
 
 	bars := SplitCelerity(s)
-	fmt.Println(bars)
 	if len(bars) == 0 {
 		fmt.Fprint(&buf, s)
 		return &buf, nil
@@ -502,11 +501,11 @@ func parserPCBoard(s string) (*bytes.Buffer, error) {
 }
 
 func ParseCelerity(s string) (*bytes.Buffer, error) {
-	return ParserCelerity(s)
+	return parserCelerity(s)
 }
 
-func parseRenegade(s string) (*bytes.Buffer, error) {
-	return ParserBars(s)
+func ParseRenegade(s string) (*bytes.Buffer, error) {
+	return parserBars(s)
 }
 
 func ParsePCBoard(s string) (*bytes.Buffer, error) {
@@ -537,7 +536,7 @@ func ParseWildcat(s string) (*bytes.Buffer, error) {
 func ParseWHash(s string) (*bytes.Buffer, error) {
 	r := regexp.MustCompile(`\|#(\d)`)
 	x := r.ReplaceAllString(s, `|0$1`)
-	return ParserBars(x)
+	return parserBars(x)
 }
 
 // ParseWHeart parses the string for WWIV heart color codes.
@@ -546,5 +545,5 @@ func ParseWHash(s string) (*bytes.Buffer, error) {
 func ParseWHeart(s string) (*bytes.Buffer, error) {
 	r := regexp.MustCompile(`\x03(\d)`)
 	x := r.ReplaceAllString(s, `|0$1`)
-	return ParserBars(x)
+	return parserBars(x)
 }
