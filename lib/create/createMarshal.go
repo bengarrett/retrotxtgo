@@ -44,6 +44,7 @@ func (args *Args) marshal(b *[]byte) (PageData, error) {
 	default:
 		return PageData{}, fmt.Errorf("pagedata %s: %w", args.layout, logs.ErrTmplName)
 	}
+	var out bytes.Buffer
 	bt := args.Source.BBSType
 	r := bytes.Runes(*b)
 	switch {
@@ -62,14 +63,10 @@ func (args *Args) marshal(b *[]byte) (PageData, error) {
 			p.Comment = args.comment(lb, r...)
 		}
 	case bt > bbs.ANSI:
-		buf, err := bt.HTML(string(r))
-		if err != nil {
+		if err := bt.HTML(&out, []byte(string(r))); err != nil {
 			return PageData{}, err
 		}
-		if err != nil {
-			return PageData{}, err
-		}
-		p.HTMLEmbed = template.HTML(buf.Bytes())
+		p.HTMLEmbed = template.HTML(out.Bytes())
 	}
 	return p, nil
 }

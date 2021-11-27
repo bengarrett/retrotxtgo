@@ -2,6 +2,25 @@
 // https://go.dev/blog/examples
 // https://pkg.go.dev/github.com/fluhus/godoc-tricks#section-documentation
 // http://wiki.synchro.net/custom:colors
+//
+// future funcs
+// BBS.ReplaceAll || BBS.Remove || BBS.Discard
+// Marshal(interface) => []byte
+// Encode(dst, src []byte)
+// EncodeToString(src []byte) string
+//
+// HTMLEscape(dst *bytes.Buffer, src []byte)
+// func main() {
+// var out bytes.Buffer
+// json.HTMLEscape(&out, []byte(`{"Name":"<b>HTML content</b>"}`))
+// out.WriteTo(os.Stdout)
+// }
+// dst.Write() // dst.WriteByte // dst.WriteString()
+//
+// func Valid(data []byte) bool
+// Valid reports whether data is a valid JSON encoding.
+//
+// html.HTML type html.CSS type
 
 // Package bbs is a blah.
 package bbs
@@ -58,7 +77,7 @@ const (
 	celerityCodes = "kbgcrmywdBGCRMYWS"
 )
 
-// Valid checks the bbs type is a known BBS.
+// Valid reports whether the BBS type is valid.
 func (bbs BBS) Valid() bool {
 	switch bbs {
 	case ANSI, Celerity, PCBoard, Renegade, Telegard, Wildcat, WWIVHash, WWIVHeart:
@@ -102,7 +121,7 @@ func (bbs BBS) Name() string {
 	}[bbs]
 }
 
-// Bytes returns the BBS color code toggle sequence as bytes.
+// Bytes returns the BBS color toggle sequence as bytes.
 func (bbs BBS) Bytes() []byte {
 	const (
 		etx               byte = 3  // CP437 ♥
@@ -134,48 +153,48 @@ func (bbs BBS) Bytes() []byte {
 	}
 }
 
-// HTML transforms a string containing BBS color codes into a
-// collection of HTML <i> elements with matching CSS color classes.
-func (bbs BBS) HTML(b []byte) (*bytes.Buffer, error) {
-	empty := bytes.Buffer{}
-	x := trimPrefix(string(b))
+// HTML transforms a byte sequence containing BBS color codes into a
+// collection of HTML <i> elements paired with CSS color classes.
+// The CSS classes can be generated using (BBS) CSS.
+// The generated elements are cross-site scripting safe.
+// HTMLEscape(dst *bytes.Buffer, src []byte)
+func (bbs BBS) HTML(dst *bytes.Buffer, src []byte) error {
+	x := trimPrefix(string(src))
 	switch bbs {
 	case ANSI:
-		return &empty, ErrANSI
+		return ErrANSI
 	case Celerity:
-		return HTMLCelerity(x)
+		return HTMLCelerity(dst, x)
 	case PCBoard:
-		return HTMLPCBoard(x)
+		return HTMLPCBoard(dst, x)
 	case Renegade:
-		return HTMLRenegade(x)
+		return HTMLRenegade(dst, x)
 	case Telegard:
-		return HTMLTelegard(x)
+		return HTMLTelegard(dst, x)
 	case Wildcat:
-		return HTMLWildcat(x)
+		return HTMLWildcat(dst, x)
 	case WWIVHash:
-		return HTMLWHash(x)
+		return HTMLWHash(dst, x)
 	case WWIVHeart:
-		return HTMLWHeart(x)
+		return HTMLWHeart(dst, x)
 	default:
-		return &empty, ErrColorCodes
+		return ErrColorCodes
 	}
 }
 
 // HTML transforms a string containing BBS color codes into a
 // collection of HTML <i> elements with matching CSS color classes.
-func HTML(r io.Reader) (*bytes.Buffer, error) {
-	var (
-		empty bytes.Buffer
-		r1    bytes.Buffer
-	)
-	r2 := io.TeeReader(r, &r1)
+func HTML(dst *bytes.Buffer, src io.Reader) error {
+	var r1 bytes.Buffer
+
+	r2 := io.TeeReader(src, &r1)
 
 	find := Find(r2)
 	b, err := io.ReadAll(&r1)
 	if err != nil {
-		return &empty, err
+		return err
 	}
-	return find.HTML(b)
+	return find.HTML(dst, b)
 }
 
 // trimPrefix removes common PCBoard BBS controls from the string.
@@ -226,6 +245,7 @@ func Find(r io.Reader) BBS {
 	return -1
 }
 
+// Fields splits the string s around each instance of one or more consecutive white space characters, as defined by unicode.IsSpace, returning a slice of substrings of s or an empty slice if s contains only white space.
 func Fields(r io.Reader) ([]string, error) {
 	var r1 bytes.Buffer
 	r2 := io.TeeReader(r, &r1)
@@ -383,18 +403,18 @@ func FieldsBars(s string) []string {
 
 // ParserBars parses the string for BBS color codes that use
 // vertical bar prefixes to apply a HTML template.
-func parserBars(s string) (*bytes.Buffer, error) {
+func parserBars(dst *bytes.Buffer, src string) error {
 	const idiomaticTpl = `<i class="P{{.Background}} P{{.Foreground}}">{{.Content}}</i>`
 	tmpl, err := template.New("idomatic").Parse(idiomaticTpl)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	buf, d := bytes.Buffer{}, colorInt{}
-	bars := FieldsBars(s)
+	d := colorInt{}
+	bars := FieldsBars(src)
 	if len(bars) == 0 {
-		fmt.Fprint(&buf, s)
-		return &buf, nil
+		_, err := dst.WriteString(src)
+		return err
 	}
 
 	for _, color := range bars {
@@ -409,11 +429,11 @@ func parserBars(s string) (*bytes.Buffer, error) {
 			d.Background = n
 		}
 		d.Content = color[2:]
-		if err := tmpl.Execute(&buf, d); err != nil {
-			return nil, err
+		if err := tmpl.Execute(dst, d); err != nil {
+			return err
 		}
 	}
-	return &buf, nil
+	return nil
 }
 
 func barBackground(n int) bool {
@@ -461,23 +481,26 @@ func FieldsCelerity(s string) []string {
 
 // ParserCelerity parses the string for the unique Celerity BBS color codes
 // to apply a HTML template.
-func parserCelerity(s string) (*bytes.Buffer, error) {
+func parserCelerity(dst *bytes.Buffer, src string) error {
 	const idiomaticTpl, swapCmd = `<i class="PB{{.Background}} PF{{.Foreground}}">{{.Content}}</i>`, "S"
 	tmpl, err := template.New("idomatic").Parse(idiomaticTpl)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	buf, background := bytes.Buffer{}, false
+	//buf, background := bytes.Buffer{}, false
+	background := false
 	d := colorStr{
 		Foreground: "w",
 		Background: "k",
 	}
 
-	bars := FieldsCelerity(s)
+	bars := FieldsCelerity(src)
 	if len(bars) == 0 {
-		fmt.Fprint(&buf, s)
-		return &buf, nil
+		_, err := dst.WriteString(src)
+		return err
+		//fmt.Fprint(&buf, s)
+		//return &buf, nil
 	}
 	for _, color := range bars {
 		if color == swapCmd {
@@ -491,11 +514,11 @@ func parserCelerity(s string) (*bytes.Buffer, error) {
 			d.Background = string(color[0])
 		}
 		d.Content = color[1:]
-		if err := tmpl.Execute(&buf, d); err != nil {
-			return nil, err
+		if err := tmpl.Execute(dst, d); err != nil {
+			return err
 		}
 	}
-	return &buf, nil
+	return nil
 }
 
 // FieldsPCBoard slices s into substrings separated by PCBoard @X codes.
@@ -523,76 +546,76 @@ func FieldsPCBoard(s string) []string {
 
 // parserPCBoard parses the string for the common PCBoard BBS color codes
 // to apply a HTML template.
-func parserPCBoard(s string) (*bytes.Buffer, error) {
+func parserPCBoard(dst *bytes.Buffer, src string) error {
 	const idiomaticTpl = `<i class="PB{{.Background}} PF{{.Foreground}}">{{.Content}}</i>`
 	tmpl, err := template.New("idomatic").Parse(idiomaticTpl)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	buf, d := bytes.Buffer{}, colorStr{}
-	xcodes := FieldsPCBoard(s)
+	d := colorStr{}
+	xcodes := FieldsPCBoard(src)
 	if len(xcodes) == 0 {
-		fmt.Fprint(&buf, s)
-		return &buf, nil
+		_, err := dst.WriteString(src)
+		return err
 	}
 	for _, color := range xcodes {
 		d.Background = strings.ToUpper(string(color[0]))
 		d.Foreground = strings.ToUpper(string(color[1]))
 		d.Content = color[2:]
-		if err := tmpl.Execute(&buf, d); err != nil {
-			return nil, err
+		if err := tmpl.Execute(dst, d); err != nil {
+			return err
 		}
 	}
-	return &buf, nil
+	return nil
 }
 
-func HTMLCelerity(s string) (*bytes.Buffer, error) {
-	return parserCelerity(s)
+func HTMLCelerity(dst *bytes.Buffer, src string) error {
+	return parserCelerity(dst, src)
 }
 
-func HTMLRenegade(s string) (*bytes.Buffer, error) {
-	return parserBars(s)
+func HTMLRenegade(dst *bytes.Buffer, src string) error {
+	return parserBars(dst, src)
 }
 
-func HTMLPCBoard(s string) (*bytes.Buffer, error) {
-	return parserPCBoard(s)
+func HTMLPCBoard(dst *bytes.Buffer, src string) error {
+	return parserPCBoard(dst, src)
 }
 
 // HTMLTelegard parses the string for Telegard BBS color codes.
 // It swaps the Telegard color codes with PCBoard @X codes and
 // parses those with parserPCBoard.
-func HTMLTelegard(s string) (*bytes.Buffer, error) {
+func HTMLTelegard(dst *bytes.Buffer, src string) error {
 	r := regexp.MustCompile("`([0-9|A-F])([0-9|A-F])")
-	x := r.ReplaceAllString(s, `@X$1$2`)
-	return parserPCBoard(x)
+	x := r.ReplaceAllString(src, `@X$1$2`)
+	return parserPCBoard(dst, x)
 }
 
 // HTMLWildcat parses the string for Wildcat! BBS color codes.
 // It swaps the Wildcat color codes with PCBoard @X codes and
 // parses those with parserPCBoard.
-func HTMLWildcat(s string) (*bytes.Buffer, error) {
+func HTMLWildcat(dst *bytes.Buffer, src string) error {
 	r := regexp.MustCompile(`@([0-9|A-F])([0-9|A-F])@`)
-	x := r.ReplaceAllString(s, `@X$1$2`)
-	return parserPCBoard(x)
+	x := r.ReplaceAllString(src, `@X$1$2`)
+	return parserPCBoard(dst, x)
 }
 
 // HTMLWHash parses the string for WWIV hash color codes.
 // It swaps the WWIV color codes with vertical bars and
 // parses those with ParserBars.
-func HTMLWHash(s string) (*bytes.Buffer, error) {
+func HTMLWHash(dst *bytes.Buffer, src string) error {
 	r := regexp.MustCompile(`\|#(\d)`)
-	x := r.ReplaceAllString(s, `|0$1`)
-	return parserBars(x)
+	x := r.ReplaceAllString(src, `|0$1`)
+	return parserBars(dst, x)
 }
 
 // HTMLWHeart parses the string for WWIV heart color codes.
 // It swaps the WWIV color codes with vertical bars and
 // parses those with ParserBars.
-func HTMLWHeart(s string) (*bytes.Buffer, error) {
+func HTMLWHeart(dst *bytes.Buffer, src string) error {
 	r := regexp.MustCompile(`\x03(\d)`)
-	x := r.ReplaceAllString(s, `|0$1`)
-	return parserBars(x)
+	x := r.ReplaceAllString(src, `|0$1`)
+	return parserBars(dst, x)
 }
 
 // CSS generates the Cascading Style Sheets classes needed by the BBS HTML.

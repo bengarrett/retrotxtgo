@@ -1,8 +1,8 @@
 package bbs_test
 
 import (
+	"bytes"
 	"fmt"
-	"log"
 	"reflect"
 	"strings"
 	"testing"
@@ -13,123 +13,6 @@ import (
 const (
 	ansiEsc = "\x1B\x5B"
 )
-
-func ExampleBBS_String() {
-	fmt.Print(bbs.PCBoard)
-	// Output: PCBoard @X
-}
-
-func ExampleBBS_Name() {
-	fmt.Print(bbs.PCBoard.Name())
-	// Output: PCBoard
-}
-
-func ExampleBBS_Bytes() {
-	b := bbs.PCBoard.Bytes()
-	fmt.Printf("%s %v", b, b)
-	// Output: @X [64 88]
-}
-
-func ExampleBBS_HTML() {
-	b := []byte("@X03Hello world")
-	buf, err := bbs.PCBoard.HTML(b)
-	if err != nil {
-		fmt.Print(err)
-	}
-	fmt.Print(buf)
-	// Output: <i class="PB0 PF3">Hello world</i>
-}
-
-func ExampleBBS_CSS() {
-	css, err := bbs.PCBoard.CSS()
-	if err != nil {
-		fmt.Print(err)
-	}
-	fmt.Print(css)
-	// Output:
-}
-
-func ExampleHTML() {
-	r := strings.NewReader("@X03Hello world")
-	buf, err := bbs.HTML(r)
-	if err != nil {
-		fmt.Print(err)
-	}
-	fmt.Print(buf)
-	// Output: <i class="PB0 PF3">Hello world</i>
-}
-
-func ExampleFind() {
-	r := strings.NewReader("@X03Hello world")
-	f := bbs.Find(r)
-	fmt.Printf("Reader is in a %s BBS format", f.Name())
-	// Output: Reader is in a PCBoard BBS format
-}
-
-func ExampleFindPCBoard() {
-	b := []byte("@X03Hello world")
-	f := bbs.FindPCBoard(b)
-	fmt.Printf("Is PCBoard BBS text: %v", f == bbs.PCBoard)
-	// Output: Is PCBoard BBS text: true
-}
-
-func ExampleFields() {
-	r := strings.NewReader("@X03Hello world")
-	s, err := bbs.Fields(r)
-	if err != nil {
-		log.Print(err)
-	}
-	fmt.Printf("Color sequences: %d", len(s))
-	// Output: Color sequences: 1
-}
-
-func ExampleFieldsBars() {
-	s := "|03Hello |07|19world"
-	fmt.Printf("Color sequences: %d", len(bbs.FieldsBars(s)))
-	// Output: Color sequences: 3
-}
-
-func ExampleHTMLRenegade() {
-	s := "|03Hello |07|19world"
-	buf, err := bbs.HTMLRenegade(s)
-	if err != nil {
-		fmt.Print(err)
-	}
-	fmt.Print(buf)
-	// Output: <i class="P0 P3">Hello </i><i class="P0 P7"></i><i class="P19 P7">world</i>
-}
-
-func ExampleFieldsCelerity() {
-	s := "|cHello |C|S|wworld"
-	fmt.Printf("Color sequences: %d", len(bbs.FieldsCelerity(s)))
-	// Output: Color sequences: 4
-}
-
-func ExampleHTMLCelerity() {
-	s := "|cHello |C|S|wworld"
-	buf, err := bbs.HTMLCelerity(s)
-	if err != nil {
-		fmt.Print(err)
-	}
-	fmt.Print(buf)
-	// Output: <i class="PBk PFc">Hello </i><i class="PBk PFC"></i><i class="PBw PFC">world</i>
-}
-
-func ExampleFieldsPCBoard() {
-	s := "@X03Hello world"
-	fmt.Printf("Color sequences: %d", len(bbs.FieldsPCBoard(s)))
-	// Output: Color sequences: 1
-}
-
-func ExampleHTMLPCBoard() {
-	s := "@X03Hello world"
-	buf, err := bbs.HTMLPCBoard(s)
-	if err != nil {
-		fmt.Print(err)
-	}
-	fmt.Print(buf)
-	// Output: <i class="PB0 PF3">Hello world</i>
-}
 
 func TestBBS_String(t *testing.T) {
 	tests := []struct {
@@ -223,7 +106,8 @@ func TestBBS_HTML(t *testing.T) {
 			"<i class=\"PBg PFw\">ABC&lt;script&gt;alert(&#39;xss&#39;);&lt;/script&gt;D</i><i class=\"PBR PFw\">EF</i>", false},
 	}
 	for _, tt := range tests {
-		got, err := tt.bbs.HTML([]byte(tt.args.s))
+		got := bytes.Buffer{}
+		err := tt.bbs.HTML(&got, []byte(tt.args.s))
 		if (err != nil) != tt.wantErr {
 			t.Errorf("BBS.HTML() %v error = %v, wantErr %v", tt.name, err, tt.wantErr)
 			return
@@ -437,7 +321,8 @@ func Test_HTMLRenegade(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := bbs.HTMLRenegade(tt.args.s)
+			got := bytes.Buffer{}
+			err := bbs.HTMLRenegade(&got, tt.args.s)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("HTMLRenegade() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -473,7 +358,8 @@ func Test_HTMLCelerity(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := bbs.HTMLCelerity(tt.args.s)
+			got := bytes.Buffer{}
+			err := bbs.HTMLCelerity(&got, tt.args.s)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("HTMLCelerity() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -536,7 +422,8 @@ func Test_HTMLPCBoard(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := bbs.HTMLPCBoard(tt.args.s)
+			got := bytes.Buffer{}
+			err := bbs.HTMLPCBoard(&got, tt.args.s)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("HTMLPCBoard() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -564,7 +451,8 @@ func Test_HTMLTelegard(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := bbs.HTMLTelegard(tt.args.s)
+			got := bytes.Buffer{}
+			err := bbs.HTMLTelegard(&got, tt.args.s)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("HTMLTelegard() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -592,7 +480,8 @@ func Test_HTMLWHash(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := bbs.HTMLWHash(tt.args.s)
+			got := bytes.Buffer{}
+			err := bbs.HTMLWHash(&got, tt.args.s)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("HTMLWHash() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -620,7 +509,8 @@ func Test_HTMLWHeart(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := bbs.HTMLWHeart(tt.args.s)
+			got := bytes.Buffer{}
+			err := bbs.HTMLWHeart(&got, tt.args.s)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("HTMLWHeart() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -647,7 +537,8 @@ func Test_HTMLWildcat(t *testing.T) {
 		{"prefix", args{"@0F@Hello world"}, "<i class=\"PB0 PFF\">Hello world</i>", false},
 	}
 	for _, tt := range tests {
-		got, err := bbs.HTMLWildcat(tt.args.s)
+		got := bytes.Buffer{}
+		err := bbs.HTMLWildcat(&got, tt.args.s)
 		if (err != nil) != tt.wantErr {
 			t.Errorf("HTMLWildcat() error = %v, wantErr %v", err, tt.wantErr)
 			return
