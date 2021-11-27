@@ -157,7 +157,6 @@ func (bbs BBS) Bytes() []byte {
 // collection of HTML <i> elements paired with CSS color classes.
 // The CSS classes can be generated using (BBS) CSS.
 // The generated elements are cross-site scripting safe.
-// HTMLEscape(dst *bytes.Buffer, src []byte)
 func (bbs BBS) HTML(dst *bytes.Buffer, src []byte) error {
 	x := trimPrefix(string(src))
 	switch bbs {
@@ -223,23 +222,23 @@ func Find(r io.Reader) BBS {
 		case bytes.Contains(b, ANSI.Bytes()):
 			return ANSI
 		case bytes.Contains(b, Celerity.Bytes()):
-			if f := FindRenegade(b); f == Renegade {
+			if IsRenegade(b) {
 				return Renegade
 			}
-			if f := FindCelerity(b); f == Celerity {
+			if IsCelerity(b) {
 				return Celerity
 			}
 			return -1
-		case bytes.Contains(b, PCBoard.Bytes()):
-			return FindPCBoard(b)
-		case bytes.Contains(b, Telegard.Bytes()):
-			return FindTelegard(b)
-		case bytes.Contains(b, Wildcat.Bytes()):
-			return FindWildcat(b)
-		case bytes.Contains(b, WWIVHash.Bytes()):
-			return FindWWIVHash(b)
-		case bytes.Contains(b, WWIVHeart.Bytes()):
-			return FindWWIVHeart(b)
+		case IsPCBoard(b):
+			return PCBoard
+		case IsTelegard(b):
+			return Telegard
+		case IsWildcat(b):
+			return Wildcat
+		case IsWHash(b):
+			return WWIVHash
+		case IsWHeart(b):
+			return WWIVHeart
 		}
 	}
 	return -1
@@ -270,23 +269,21 @@ func Fields(r io.Reader) ([]string, error) {
 	return []string{}, nil
 }
 
-// FindCelerity reports if the bytes contains Celerity BBS color codes.
+// IsCelerity reports if the bytes contains Celerity BBS color codes.
 // The format uses the vertical bar "|" followed by a case sensitive single alphabetic character.
-// Returns Celerity when true or -1 if no codes are found.
-func FindCelerity(b []byte) BBS {
+func IsCelerity(b []byte) bool {
 	// celerityCodes contains all the character sequences for Celerity.
 	for _, code := range []byte(celerityCodes) {
 		if bytes.Contains(b, []byte{Celerity.Bytes()[0], code}) {
-			return Celerity
+			return true
 		}
 	}
-	return -1
+	return false
 }
 
-// FindPCBoard reports if the bytes contains PCBoard BBS color codes.
+// IsPCBoard reports if the bytes contains PCBoard BBS color codes.
 // The format uses an "@X" prefix with a background and foreground, 4-bit hexadecimal color value.
-// Returns PCBoard when true or -1 if no codes are found.
-func FindPCBoard(b []byte) BBS {
+func IsPCBoard(b []byte) bool {
 	const first, last = 0, 15
 	const hexxed = "%X%X"
 	for bg := first; bg <= last; bg++ {
@@ -294,89 +291,84 @@ func FindPCBoard(b []byte) BBS {
 			subslice := []byte(fmt.Sprintf(hexxed, bg, fg))
 			subslice = append(PCBoard.Bytes(), subslice...)
 			if bytes.Contains(b, subslice) {
-				return PCBoard
+				return true
 			}
 		}
 	}
-	return -1
+	return false
 }
 
-// FindRenegade reports if the bytes contains Renegade BBS color codes.
+// IsRenegade reports if the bytes contains Renegade BBS color codes.
 // The format uses the vertical bar "|" followed by a padded, numeric value between 0 and 23.
-// Returns Renegade when true or -1 if no codes are found.
-func FindRenegade(b []byte) BBS {
+func IsRenegade(b []byte) bool {
 	const first, last = 0, 23
 	const leadingZero = "%01d"
 	for i := first; i <= last; i++ {
 		subslice := []byte(fmt.Sprintf(leadingZero, i))
 		subslice = append(Renegade.Bytes(), subslice...)
 		if bytes.Contains(b, subslice) {
-			return Renegade
+			return true
 		}
 	}
-	return -1
+	return false
 }
 
-// FindTelegard reports if the bytes contains Telegard BBS color codes.
+// IsTelegard reports if the bytes contains Telegard BBS color codes.
 // The format uses the vertical bar "|" followed by a padded, numeric value between 0 and 23.
-// Returns Telegard when true or -1 if no codes are found.
-func FindTelegard(b []byte) BBS {
+func IsTelegard(b []byte) bool {
 	const first, last = 0, 23
 	const leadingZero = "%01d"
 	for i := first; i <= last; i++ {
 		subslice := []byte(fmt.Sprintf(leadingZero, i))
 		subslice = append(Telegard.Bytes(), subslice...)
 		if bytes.Contains(b, subslice) {
-			return Telegard
+			return true
 		}
 	}
-	return -1
+	return false
 }
 
-// FindWildcat reports if the bytes contains Wildcat! BBS color codes.
+// IsWildcat reports if the bytes contains Wildcat! BBS color codes.
 // The format uses an a background and foreground, 4-bit hexadecimal color value enclosed by two at "@" characters.
-// Returns Wildcat when true or -1 if no codes are found.
-func FindWildcat(b []byte) BBS {
+func IsWildcat(b []byte) bool {
 	const first, last = 0, 15
 	for bg := first; bg <= last; bg++ {
 		for fg := first; fg <= last; fg++ {
 			subslice := []byte(fmt.Sprintf("%s%X%X%s",
 				Wildcat.Bytes(), bg, fg, Wildcat.Bytes()))
 			if bytes.Contains(b, subslice) {
-				return Wildcat
+				return true
 			}
 		}
 	}
-	return -1
+	return false
 }
 
-// FindWWIVHash reports if the bytes contains WWIV BBS hash color codes.
+// IsWHash reports if the bytes contains WWIV BBS hash color codes.
 // The format uses a vertical bar "|" with the hash "#" characters as a prefix with a numeric value between 0 and 9.
-// Returns WWIVHash when true or -1 if no codes are found.
-func FindWWIVHash(b []byte) BBS {
+func IsWHash(b []byte) bool {
 	const first, last = 0, 9
 	for i := first; i <= last; i++ {
 		subslice := append(WWIVHash.Bytes(), []byte(strconv.Itoa(i))...)
 		if bytes.Contains(b, subslice) {
-			return WWIVHash
+			return true
 		}
 	}
-	return -1
+	return false
 }
 
-// FindWWIVHeart reports if the bytes contains WWIV BBS heart color codes.
+// IsWHeart reports if the bytes contains WWIV BBS heart color codes.
 // The format uses the ETX character as a prefix with a numeric value between 0 and 9.
 // The ETX (end-of-text) character in the MS-DOS Code Page 437 is substituted with a heart "♥" character.
-// Returns WWIVHeart when true or -1 if no codes are found.
-func FindWWIVHeart(b []byte) BBS {
+func IsWHeart(b []byte) bool {
 	const first, last = 0, 9
 	for i := first; i <= last; i++ {
 		subslice := append(WWIVHeart.Bytes(), []byte(strconv.Itoa(i))...)
 		if bytes.Contains(b, subslice) {
-			return WWIVHeart
+			return true
 		}
 	}
-	return -1
+	return false
 }
 
 // FieldsBars slices s into substrings separated by "|" vertical bar codes.

@@ -118,26 +118,26 @@ func TestBBS_HTML(t *testing.T) {
 	}
 }
 
-func Test_findCelerity(t *testing.T) {
+func Test_IsCelerity(t *testing.T) {
 	type args struct {
 		b []byte
 	}
 	tests := []struct {
 		name string
 		args args
-		want bbs.BBS
+		want bool
 	}{
-		{"empty", args{[]byte{}}, -1},
-		{"ansi", args{[]byte(ansiEsc + "0;")}, -1},
-		{"false positive z", args{[]byte("Hello |Zworld")}, -1},
-		{"false positive s", args{[]byte("Hello |sworld")}, -1},
-		{"cel B", args{[]byte("Hello |Bworld")}, bbs.Celerity},
-		{"cel W", args{[]byte("Hello world\n|WThis is a newline.")}, bbs.Celerity},
+		{"empty", args{[]byte{}}, false},
+		{"ansi", args{[]byte(ansiEsc + "0;")}, false},
+		{"false positive z", args{[]byte("Hello |Zworld")}, false},
+		{"false positive s", args{[]byte("Hello |sworld")}, false},
+		{"cel B", args{[]byte("Hello |Bworld")}, true},
+		{"cel W", args{[]byte("Hello world\n|WThis is a newline.")}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := bbs.FindCelerity(tt.args.b); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("FindCelerity() = %v, want %v", got, tt.want)
+			if got := bbs.IsCelerity(tt.args.b); got != tt.want {
+				t.Errorf("IsCelerity() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -150,123 +150,123 @@ func Test_findRenegade(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want bbs.BBS
+		want bool
 	}{
-		{"empty", args{nil}, -1},
-		{"celerity", args{[]byte("Hello |Bworld")}, -1},
-		{"first", args{[]byte("|00")}, bbs.Renegade},
-		{"end", args{[]byte("|23")}, bbs.Renegade},
-		{"newline", args{[]byte("Hello world\n|15This is a newline.")}, bbs.Renegade},
+		{"empty", args{nil}, false},
+		{"celerity", args{[]byte("Hello |Bworld")}, false},
+		{"first", args{[]byte("|00")}, true},
+		{"end", args{[]byte("|23")}, true},
+		{"newline", args{[]byte("Hello world\n|15This is a newline.")}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := bbs.FindRenegade(tt.args.b); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("FindRenegade() = %v, want %v", got, tt.want)
+			if got := bbs.IsRenegade(tt.args.b); got != tt.want {
+				t.Errorf("IsRenegade() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_findPCBoard(t *testing.T) {
+func Test_IsPCBoard(t *testing.T) {
 	type args struct {
 		b []byte
 	}
 	tests := []struct {
 		name string
 		args args
-		want bbs.BBS
+		want bool
 	}{
-		{"empty", args{nil}, -1},
-		{"malformed", args{[]byte("@XHello world")}, -1},
-		{"incomplete", args{[]byte("@X0Hello world")}, -1},
-		{"out of range", args{[]byte("@X0GHello world")}, -1},
-		{"first", args{[]byte("@X00Hello world")}, bbs.PCBoard},
-		{"end", args{[]byte("@XFFHello world")}, bbs.PCBoard},
-		{"newline", args{[]byte("Hello world\n@X00This is a newline.")}, bbs.PCBoard},
-		{"false pos", args{[]byte("PCBoard @X code")}, -1},
+		{"empty", args{nil}, false},
+		{"malformed", args{[]byte("@XHello world")}, false},
+		{"incomplete", args{[]byte("@X0Hello world")}, false},
+		{"out of range", args{[]byte("@X0GHello world")}, false},
+		{"first", args{[]byte("@X00Hello world")}, true},
+		{"end", args{[]byte("@XFFHello world")}, true},
+		{"newline", args{[]byte("Hello world\n@X00This is a newline.")}, true},
+		{"false pos", args{[]byte("PCBoard @X code")}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := bbs.FindPCBoard(tt.args.b); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("FindPCBoard() = %v, want %v", got, tt.want)
+			if got := bbs.IsPCBoard(tt.args.b); got != tt.want {
+				t.Errorf("IsPCBoard() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_findWildcat(t *testing.T) {
+func Test_IsWildcat(t *testing.T) {
 	type args struct {
 		b []byte
 	}
 	tests := []struct {
 		name string
 		args args
-		want bbs.BBS
+		want bool
 	}{
-		{"empty", args{nil}, -1},
-		{"malformed", args{[]byte("@Hello world")}, -1},
-		{"incomplete", args{[]byte("@0Hello world")}, -1},
-		{"out of range", args{[]byte("@0@GHello world")}, -1},
-		{"first", args{[]byte("@00@Hello world")}, bbs.Wildcat},
-		{"end", args{[]byte("@FF@Hello world")}, bbs.Wildcat},
-		{"newline", args{[]byte("Hello world\n@00@This is a newline.")}, bbs.Wildcat},
+		{"empty", args{nil}, false},
+		{"malformed", args{[]byte("@Hello world")}, false},
+		{"incomplete", args{[]byte("@0Hello world")}, false},
+		{"out of range", args{[]byte("@0@GHello world")}, false},
+		{"first", args{[]byte("@00@Hello world")}, true},
+		{"end", args{[]byte("@FF@Hello world")}, true},
+		{"newline", args{[]byte("Hello world\n@00@This is a newline.")}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := bbs.FindWildcat(tt.args.b); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("FindWildcat() = %v, want %v", got, tt.want)
+			if got := bbs.IsWildcat(tt.args.b); got != tt.want {
+				t.Errorf("IsWildcat() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_findWWIVHeart(t *testing.T) {
+func Test_IsWHeart(t *testing.T) {
 	type args struct {
 		b []byte
 	}
 	tests := []struct {
 		name string
 		args args
-		want bbs.BBS
+		want bool
 	}{
-		{"empty", args{nil}, -1},
-		{"malformed", args{[]byte("\x03Hello world")}, -1},
-		{"first", args{[]byte("\x030Hello world")}, bbs.WWIVHeart},
-		{"last", args{[]byte("\x039Hello world")}, bbs.WWIVHeart},
-		{"lots of numbers", args{[]byte("\x0398765 Hello world")}, bbs.WWIVHeart},
-		{"newline", args{[]byte("Hello world\n\x031This is a newline.")}, bbs.WWIVHeart},
+		{"empty", args{nil}, false},
+		{"malformed", args{[]byte("\x03Hello world")}, false},
+		{"first", args{[]byte("\x030Hello world")}, true},
+		{"last", args{[]byte("\x039Hello world")}, true},
+		{"lots of numbers", args{[]byte("\x0398765 Hello world")}, true},
+		{"newline", args{[]byte("Hello world\n\x031This is a newline.")}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := bbs.FindWWIVHeart(tt.args.b); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("FindWWIVHeart() = %v, want %v", got, tt.want)
+			if got := bbs.IsWHeart(tt.args.b); got != tt.want {
+				t.Errorf("IsWHeart() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_findWWIVHash(t *testing.T) {
+func Test_IsWHash(t *testing.T) {
 	type args struct {
 		b []byte
 	}
 	tests := []struct {
 		name string
 		args args
-		want bbs.BBS
+		want bool
 	}{
-		{"empty", args{nil}, -1},
-		{"malformed |#", args{[]byte("|#Hello world")}, -1},
-		{"malformed |0", args{[]byte("|0Hello world")}, -1},
-		{"malformed #0", args{[]byte("#0Hello world")}, -1},
-		{"first", args{[]byte("|#0Hello world")}, bbs.WWIVHash},
-		{"last", args{[]byte("|#9Hello world")}, bbs.WWIVHash},
-		{"lots of numbers", args{[]byte("|#98765 Hello world")}, bbs.WWIVHash},
-		{"newline", args{[]byte("Hello world\n|#1This is a newline.")}, bbs.WWIVHash},
+		{"empty", args{nil}, false},
+		{"malformed |#", args{[]byte("|#Hello world")}, false},
+		{"malformed |0", args{[]byte("|0Hello world")}, false},
+		{"malformed #0", args{[]byte("#0Hello world")}, false},
+		{"first", args{[]byte("|#0Hello world")}, true},
+		{"last", args{[]byte("|#9Hello world")}, true},
+		{"lots of numbers", args{[]byte("|#98765 Hello world")}, true},
+		{"newline", args{[]byte("Hello world\n|#1This is a newline.")}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := bbs.FindWWIVHash(tt.args.b); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("FindWWIVHash() = %v, want %v", got, tt.want)
+			if got := bbs.IsWHash(tt.args.b); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("IsWHash() = %v, want %v", got, tt.want)
 			}
 		})
 	}

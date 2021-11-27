@@ -61,10 +61,9 @@ func ExampleFind() {
 	// Output: Reader is in a PCBoard BBS format
 }
 
-func ExampleFindPCBoard() {
+func ExampleIsPCBoard() {
 	b := []byte("@X03Hello world")
-	f := bbs.FindPCBoard(b)
-	fmt.Printf("Is PCBoard BBS text: %v", f == bbs.PCBoard)
+	fmt.Printf("Is PCBoard BBS text: %v", bbs.IsPCBoard(b))
 	// Output: Is PCBoard BBS text: true
 }
 
