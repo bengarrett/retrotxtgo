@@ -1,3 +1,9 @@
+// internal header
+// https://go.dev/blog/examples
+// https://pkg.go.dev/github.com/fluhus/godoc-tricks#section-documentation
+// http://wiki.synchro.net/custom:colors
+
+// Package bbs is a blah.
 package bbs
 
 import (
@@ -31,25 +37,25 @@ const (
 	WWIVHeart            // WWIV BBS ♥ codes.
 )
 
-// IntData template data for integer based color codes.
-type IntData struct {
+// colorInt template data for integer based color codes.
+type colorInt struct {
 	Background int
 	Foreground int
 	Content    string
 }
 
-// StrData template data for string based color codes.
-type StrData struct {
+// colorStr template data for string based color codes.
+type colorStr struct {
 	Background string
 	Foreground string
 	Content    string
 }
 
 const (
-	celerityCodes      = "kbgcrmywdBGCRMYWS"
-	pcbClear           = `@CLS@`
-	verticalBar        = byte('|')
-	lf            byte = 10
+	// ClearCmd is a PCBoard specific control to clear the screen that's occasionally found in ANSI text.
+	ClearCmd = "@CLS@"
+
+	celerityCodes = "kbgcrmywdBGCRMYWS"
 )
 
 // Valid checks the bbs type is a known BBS.
@@ -130,29 +136,46 @@ func (bbs BBS) Bytes() []byte {
 
 // HTML transforms a string containing BBS color codes into a
 // collection of HTML <i> elements with matching CSS color classes.
-func (bbs BBS) HTML(s string) (*bytes.Buffer, error) {
+func (bbs BBS) HTML(b []byte) (*bytes.Buffer, error) {
 	empty := bytes.Buffer{}
-	x := trimPrefix(s)
+	x := trimPrefix(string(b))
 	switch bbs {
 	case ANSI:
 		return &empty, ErrANSI
 	case Celerity:
-		return ParseCelerity(x)
+		return HTMLCelerity(x)
 	case PCBoard:
-		return ParsePCBoard(x)
+		return HTMLPCBoard(x)
 	case Renegade:
-		return ParseRenegade(x)
+		return HTMLRenegade(x)
 	case Telegard:
-		return ParseTelegard(x)
+		return HTMLTelegard(x)
 	case Wildcat:
-		return ParseWildcat(x)
+		return HTMLWildcat(x)
 	case WWIVHash:
-		return ParseWHash(x)
+		return HTMLWHash(x)
 	case WWIVHeart:
-		return ParseWHeart(x)
+		return HTMLWHeart(x)
 	default:
 		return &empty, ErrColorCodes
 	}
+}
+
+// HTML transforms a string containing BBS color codes into a
+// collection of HTML <i> elements with matching CSS color classes.
+func HTML(r io.Reader) (*bytes.Buffer, error) {
+	var (
+		empty bytes.Buffer
+		r1    bytes.Buffer
+	)
+	r2 := io.TeeReader(r, &r1)
+
+	find := Find(r2)
+	b, err := io.ReadAll(&r1)
+	if err != nil {
+		return &empty, err
+	}
+	return find.HTML(b)
 }
 
 // trimPrefix removes common PCBoard BBS controls from the string.
@@ -171,9 +194,9 @@ func Find(r io.Reader) BBS {
 		if ts == nil {
 			continue
 		}
-		const l = len(pcbClear)
+		const l = len(ClearCmd)
 		if len(ts) > l {
-			if bytes.Equal(ts[0:l], []byte(pcbClear)) {
+			if bytes.Equal(ts[0:l], []byte(ClearCmd)) {
 				b = ts[l:]
 			}
 		}
@@ -201,6 +224,30 @@ func Find(r io.Reader) BBS {
 		}
 	}
 	return -1
+}
+
+func Fields(r io.Reader) ([]string, error) {
+	var r1 bytes.Buffer
+	r2 := io.TeeReader(r, &r1)
+	f := Find(r2)
+	if !f.Valid() {
+		return []string{}, nil
+	}
+	b, err := io.ReadAll(&r1)
+	if err != nil {
+		return []string{}, err
+	}
+	switch f {
+	case ANSI:
+		return []string{}, nil
+	case Celerity:
+		return FieldsCelerity(string(b)), nil
+	case PCBoard, Telegard, Wildcat:
+		return FieldsPCBoard(string(b)), nil
+	case Renegade, WWIVHash, WWIVHeart:
+		return FieldsBars(string(b)), nil
+	}
+	return []string{}, nil
 }
 
 // FindCelerity reports if the bytes contains Celerity BBS color codes.
@@ -312,10 +359,10 @@ func FindWWIVHeart(b []byte) BBS {
 	return -1
 }
 
-// SplitBars slices s into substrings separated by "|" vertical bar codes.
+// FieldsBars slices s into substrings separated by "|" vertical bar codes.
 // The first two bytes of each substrings will contain a colour value.
 // An empty slice is returned if there are no valid bar code values exist in s.
-func SplitBars(s string) []string {
+func FieldsBars(s string) []string {
 	const sep rune = 65535
 	m := regexp.MustCompile(`\|(0[0-9]|1[1-9]|2[0-3])`)
 	repl := fmt.Sprintf("%s$1", string(sep))
@@ -343,8 +390,8 @@ func parserBars(s string) (*bytes.Buffer, error) {
 		return nil, err
 	}
 
-	buf, d := bytes.Buffer{}, IntData{}
-	bars := SplitBars(s)
+	buf, d := bytes.Buffer{}, colorInt{}
+	bars := FieldsBars(s)
 	if len(bars) == 0 {
 		fmt.Fprint(&buf, s)
 		return &buf, nil
@@ -389,10 +436,10 @@ func barForeground(n int) bool {
 	return true
 }
 
-// SplitCelerity slices s into substrings separated by "|" vertical bar codes.
+// FieldsCelerity slices s into substrings separated by "|" vertical bar codes.
 // The first byte of each substrings will contain a colour value.
 // An empty slice is returned if there are no valid bar code values exist in s.
-func SplitCelerity(s string) []string {
+func FieldsCelerity(s string) []string {
 	// The format uses the vertical bar "|" followed by a case sensitive single alphabetic character.
 	const sep rune = 65535
 	m := regexp.MustCompile(`\|(k|b|g|c|r|m|y|w|d|B|G|C|R|M|Y|W|S)`)
@@ -422,12 +469,12 @@ func parserCelerity(s string) (*bytes.Buffer, error) {
 	}
 
 	buf, background := bytes.Buffer{}, false
-	d := StrData{
+	d := colorStr{
 		Foreground: "w",
 		Background: "k",
 	}
 
-	bars := SplitCelerity(s)
+	bars := FieldsCelerity(s)
 	if len(bars) == 0 {
 		fmt.Fprint(&buf, s)
 		return &buf, nil
@@ -451,11 +498,11 @@ func parserCelerity(s string) (*bytes.Buffer, error) {
 	return &buf, nil
 }
 
-// SplitPCBoard slices s into substrings separated by PCBoard @X codes.
+// FieldsPCBoard slices s into substrings separated by PCBoard @X codes.
 // The first two bytes of each substrings will contain a background
 // and foreground hex colour value. An empty slice is returned if
 // there are no valid @X code values exist in s.
-func SplitPCBoard(s string) []string {
+func FieldsPCBoard(s string) []string {
 	const sep rune = 65535
 	m := regexp.MustCompile("(?i)@X([0-9A-F][0-9A-F])")
 	repl := fmt.Sprintf("%s$1", string(sep))
@@ -483,8 +530,8 @@ func parserPCBoard(s string) (*bytes.Buffer, error) {
 		return nil, err
 	}
 
-	buf, d := bytes.Buffer{}, StrData{}
-	xcodes := SplitPCBoard(s)
+	buf, d := bytes.Buffer{}, colorStr{}
+	xcodes := FieldsPCBoard(s)
 	if len(xcodes) == 0 {
 		fmt.Fprint(&buf, s)
 		return &buf, nil
@@ -500,50 +547,57 @@ func parserPCBoard(s string) (*bytes.Buffer, error) {
 	return &buf, nil
 }
 
-func ParseCelerity(s string) (*bytes.Buffer, error) {
+func HTMLCelerity(s string) (*bytes.Buffer, error) {
 	return parserCelerity(s)
 }
 
-func ParseRenegade(s string) (*bytes.Buffer, error) {
+func HTMLRenegade(s string) (*bytes.Buffer, error) {
 	return parserBars(s)
 }
 
-func ParsePCBoard(s string) (*bytes.Buffer, error) {
+func HTMLPCBoard(s string) (*bytes.Buffer, error) {
 	return parserPCBoard(s)
 }
 
-// ParseTelegard parses the string for Telegard BBS color codes.
+// HTMLTelegard parses the string for Telegard BBS color codes.
 // It swaps the Telegard color codes with PCBoard @X codes and
 // parses those with parserPCBoard.
-func ParseTelegard(s string) (*bytes.Buffer, error) {
+func HTMLTelegard(s string) (*bytes.Buffer, error) {
 	r := regexp.MustCompile("`([0-9|A-F])([0-9|A-F])")
 	x := r.ReplaceAllString(s, `@X$1$2`)
 	return parserPCBoard(x)
 }
 
-// ParseWildcat parses the string for Wildcat! BBS color codes.
+// HTMLWildcat parses the string for Wildcat! BBS color codes.
 // It swaps the Wildcat color codes with PCBoard @X codes and
 // parses those with parserPCBoard.
-func ParseWildcat(s string) (*bytes.Buffer, error) {
+func HTMLWildcat(s string) (*bytes.Buffer, error) {
 	r := regexp.MustCompile(`@([0-9|A-F])([0-9|A-F])@`)
 	x := r.ReplaceAllString(s, `@X$1$2`)
 	return parserPCBoard(x)
 }
 
-// ParseWHash parses the string for WWIV hash color codes.
+// HTMLWHash parses the string for WWIV hash color codes.
 // It swaps the WWIV color codes with vertical bars and
 // parses those with ParserBars.
-func ParseWHash(s string) (*bytes.Buffer, error) {
+func HTMLWHash(s string) (*bytes.Buffer, error) {
 	r := regexp.MustCompile(`\|#(\d)`)
 	x := r.ReplaceAllString(s, `|0$1`)
 	return parserBars(x)
 }
 
-// ParseWHeart parses the string for WWIV heart color codes.
+// HTMLWHeart parses the string for WWIV heart color codes.
 // It swaps the WWIV color codes with vertical bars and
 // parses those with ParserBars.
-func ParseWHeart(s string) (*bytes.Buffer, error) {
+func HTMLWHeart(s string) (*bytes.Buffer, error) {
 	r := regexp.MustCompile(`\x03(\d)`)
 	x := r.ReplaceAllString(s, `|0$1`)
 	return parserBars(x)
+}
+
+// CSS generates the Cascading Style Sheets classes needed by the BBS HTML.
+// This is currently a non functional			 place-holder.
+func (bbs BBS) CSS() (*bytes.Buffer, error) {
+	buf := bytes.Buffer{}
+	return &buf, nil
 }

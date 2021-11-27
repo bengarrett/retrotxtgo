@@ -2,6 +2,7 @@ package bbs_test
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 	"strings"
 	"testing"
@@ -30,8 +31,27 @@ func ExampleBBS_Bytes() {
 }
 
 func ExampleBBS_HTML() {
-	s := "@X03Hello world"
-	buf, err := bbs.PCBoard.HTML(s)
+	b := []byte("@X03Hello world")
+	buf, err := bbs.PCBoard.HTML(b)
+	if err != nil {
+		fmt.Print(err)
+	}
+	fmt.Print(buf)
+	// Output: <i class="PB0 PF3">Hello world</i>
+}
+
+func ExampleBBS_CSS() {
+	css, err := bbs.PCBoard.CSS()
+	if err != nil {
+		fmt.Print(err)
+	}
+	fmt.Print(css)
+	// Output:
+}
+
+func ExampleHTML() {
+	r := strings.NewReader("@X03Hello world")
+	buf, err := bbs.HTML(r)
 	if err != nil {
 		fmt.Print(err)
 	}
@@ -53,15 +73,25 @@ func ExampleFindPCBoard() {
 	// Output: Is PCBoard BBS text: true
 }
 
-func ExampleSplitBars() {
+func ExampleFields() {
+	r := strings.NewReader("@X03Hello world")
+	s, err := bbs.Fields(r)
+	if err != nil {
+		log.Print(err)
+	}
+	fmt.Printf("Color sequences: %d", len(s))
+	// Output: Color sequences: 1
+}
+
+func ExampleFieldsBars() {
 	s := "|03Hello |07|19world"
-	fmt.Printf("Color sequences: %d", len(bbs.SplitBars(s)))
+	fmt.Printf("Color sequences: %d", len(bbs.FieldsBars(s)))
 	// Output: Color sequences: 3
 }
 
-func ExampleParseRenegade() {
+func ExampleHTMLRenegade() {
 	s := "|03Hello |07|19world"
-	buf, err := bbs.ParseRenegade(s)
+	buf, err := bbs.HTMLRenegade(s)
 	if err != nil {
 		fmt.Print(err)
 	}
@@ -69,15 +99,15 @@ func ExampleParseRenegade() {
 	// Output: <i class="P0 P3">Hello </i><i class="P0 P7"></i><i class="P19 P7">world</i>
 }
 
-func ExampleSplitCelerity() {
+func ExampleFieldsCelerity() {
 	s := "|cHello |C|S|wworld"
-	fmt.Printf("Color sequences: %d", len(bbs.SplitCelerity(s)))
+	fmt.Printf("Color sequences: %d", len(bbs.FieldsCelerity(s)))
 	// Output: Color sequences: 4
 }
 
-func ExampleParseCelerity() {
+func ExampleHTMLCelerity() {
 	s := "|cHello |C|S|wworld"
-	buf, err := bbs.ParseCelerity(s)
+	buf, err := bbs.HTMLCelerity(s)
 	if err != nil {
 		fmt.Print(err)
 	}
@@ -85,15 +115,15 @@ func ExampleParseCelerity() {
 	// Output: <i class="PBk PFc">Hello </i><i class="PBk PFC"></i><i class="PBw PFC">world</i>
 }
 
-func ExampleSplitPCBoard() {
+func ExampleFieldsPCBoard() {
 	s := "@X03Hello world"
-	fmt.Printf("Color sequences: %d", len(bbs.SplitPCBoard(s)))
+	fmt.Printf("Color sequences: %d", len(bbs.FieldsPCBoard(s)))
 	// Output: Color sequences: 1
 }
 
-func ExampleParsePCBoard() {
+func ExampleHTMLPCBoard() {
 	s := "@X03Hello world"
-	buf, err := bbs.ParsePCBoard(s)
+	buf, err := bbs.HTMLPCBoard(s)
 	if err != nil {
 		fmt.Print(err)
 	}
@@ -193,7 +223,7 @@ func TestBBS_HTML(t *testing.T) {
 			"<i class=\"PBg PFw\">ABC&lt;script&gt;alert(&#39;xss&#39;);&lt;/script&gt;D</i><i class=\"PBR PFw\">EF</i>", false},
 	}
 	for _, tt := range tests {
-		got, err := tt.bbs.HTML(tt.args.s)
+		got, err := tt.bbs.HTML([]byte(tt.args.s))
 		if (err != nil) != tt.wantErr {
 			t.Errorf("BBS.HTML() %v error = %v, wantErr %v", tt.name, err, tt.wantErr)
 			return
@@ -358,7 +388,7 @@ func Test_findWWIVHash(t *testing.T) {
 	}
 }
 
-func Test_SplitBars(t *testing.T) {
+func Test_FieldsBars(t *testing.T) {
 	type args struct {
 		s string
 	}
@@ -376,15 +406,15 @@ func Test_SplitBars(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := len(bbs.SplitBars(tt.args.s)); got != tt.want {
-				fmt.Println(bbs.SplitBars(tt.args.s))
-				t.Errorf("SplitBars() = %v, want %v", got, tt.want)
+			if got := len(bbs.FieldsBars(tt.args.s)); got != tt.want {
+				fmt.Println(bbs.FieldsBars(tt.args.s))
+				t.Errorf("FieldsBars() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_ParseRenegade(t *testing.T) {
+func Test_HTMLRenegade(t *testing.T) {
 	type args struct {
 		s string
 	}
@@ -407,19 +437,19 @@ func Test_ParseRenegade(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := bbs.ParseRenegade(tt.args.s)
+			got, err := bbs.HTMLRenegade(tt.args.s)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ParseRenegade() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("HTMLRenegade() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got.String() != tt.want {
-				t.Errorf("ParseRenegade() = %v, want %v", got, tt.want)
+				t.Errorf("HTMLRenegade() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_ParseCelerity(t *testing.T) {
+func Test_HTMLCelerity(t *testing.T) {
 	type args struct {
 		s string
 	}
@@ -443,19 +473,19 @@ func Test_ParseCelerity(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := bbs.ParseCelerity(tt.args.s)
+			got, err := bbs.HTMLCelerity(tt.args.s)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ParseCelerity() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("HTMLCelerity() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got.String() != tt.want {
-				t.Errorf("ParseCelerity() = %v, want %v", got, tt.want)
+				t.Errorf("HTMLCelerity() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_SplitPCBoard(t *testing.T) {
+func Test_FieldsPCBoard(t *testing.T) {
 	type args struct {
 		s string
 	}
@@ -473,15 +503,15 @@ func Test_SplitPCBoard(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := len(bbs.SplitPCBoard(tt.args.s)); got != tt.want {
-				fmt.Println(bbs.SplitPCBoard(tt.args.s))
-				t.Errorf("SplitPCBoard() = %v, want %v", got, tt.want)
+			if got := len(bbs.FieldsPCBoard(tt.args.s)); got != tt.want {
+				fmt.Println(bbs.FieldsPCBoard(tt.args.s))
+				t.Errorf("FieldsPCBoard() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_ParsePCBoard(t *testing.T) {
+func Test_HTMLPCBoard(t *testing.T) {
 	type args struct {
 		s string
 	}
@@ -506,19 +536,19 @@ func Test_ParsePCBoard(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := bbs.ParsePCBoard(tt.args.s)
+			got, err := bbs.HTMLPCBoard(tt.args.s)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ParsePCBoard() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("HTMLPCBoard() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got.String() != tt.want {
-				t.Errorf("ParsePCBoard() = %v, want %v", got, tt.want)
+				t.Errorf("HTMLPCBoard() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_ParseTelegard(t *testing.T) {
+func Test_HTMLTelegard(t *testing.T) {
 	type args struct {
 		s string
 	}
@@ -534,19 +564,19 @@ func Test_ParseTelegard(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := bbs.ParseTelegard(tt.args.s)
+			got, err := bbs.HTMLTelegard(tt.args.s)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ParseTelegard() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("HTMLTelegard() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got.String() != tt.want {
-				t.Errorf("ParseTelegard() = %v, want %v", got, tt.want)
+				t.Errorf("HTMLTelegard() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_ParseWHash(t *testing.T) {
+func Test_HTMLWHash(t *testing.T) {
 	type args struct {
 		s string
 	}
@@ -562,19 +592,19 @@ func Test_ParseWHash(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := bbs.ParseWHash(tt.args.s)
+			got, err := bbs.HTMLWHash(tt.args.s)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ParseWHash() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("HTMLWHash() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got.String() != tt.want {
-				t.Errorf("ParseWHash() = %v, want %v", got, tt.want)
+				t.Errorf("HTMLWHash() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_ParseWHeart(t *testing.T) {
+func Test_HTMLWHeart(t *testing.T) {
 	type args struct {
 		s string
 	}
@@ -590,19 +620,19 @@ func Test_ParseWHeart(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := bbs.ParseWHeart(tt.args.s)
+			got, err := bbs.HTMLWHeart(tt.args.s)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ParseWHeart() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("HTMLWHeart() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got.String() != tt.want {
-				t.Errorf("ParseWHeart() = %v, want %v", got, tt.want)
+				t.Errorf("HTMLWHeart() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_ParseWildcat(t *testing.T) {
+func Test_HTMLWildcat(t *testing.T) {
 	type args struct {
 		s string
 	}
@@ -617,13 +647,13 @@ func Test_ParseWildcat(t *testing.T) {
 		{"prefix", args{"@0F@Hello world"}, "<i class=\"PB0 PFF\">Hello world</i>", false},
 	}
 	for _, tt := range tests {
-		got, err := bbs.ParseWildcat(tt.args.s)
+		got, err := bbs.HTMLWildcat(tt.args.s)
 		if (err != nil) != tt.wantErr {
-			t.Errorf("ParseWildcat() error = %v, wantErr %v", err, tt.wantErr)
+			t.Errorf("HTMLWildcat() error = %v, wantErr %v", err, tt.wantErr)
 			return
 		}
 		if got.String() != tt.want {
-			t.Errorf("ParseWildcat() = %v, want %v", got, tt.want)
+			t.Errorf("HTMLWildcat() = %v, want %v", got, tt.want)
 		}
 	}
 }
