@@ -38,11 +38,12 @@ import (
 )
 
 var (
-	ErrColorCodes = errors.New("no bbs color codes found in string")
-	ErrANSI       = errors.New("ansi escape code found in string")
+	ErrColorCodes = errors.New("no bbs color codes found")
+	ErrANSI       = errors.New("ansi escape code found")
 )
 
 // Bulletin Board System color code format.
+// Other than Find, the ANSI type is not supported by this library.
 type BBS int
 
 const (
@@ -72,7 +73,28 @@ type colorStr struct {
 
 const (
 	// ClearCmd is a PCBoard specific control to clear the screen that's occasionally found in ANSI text.
-	ClearCmd = "@CLS@"
+	ClearCmd string = "@CLS@"
+
+	// CelerityMatch is a regular expression to match Celerity BBS color codes.
+	CelerityMatch string = `\|(k|b|g|c|r|m|y|w|d|B|G|C|R|M|Y|W|S)`
+
+	// PCBoardMatch is a case-insensitive, regular expression to match PCBoard BBS color codes.
+	PCBoardMatch string = "(?i)@X([0-9A-F][0-9A-F])"
+
+	// RenegadeMatch is a regular expression to match Renegade BBS color codes.
+	RenegadeMatch string = `\|(0[0-9]|1[1-9]|2[0-3])`
+
+	// TelegardMatch is a case-insensitive, regular expression to match Telegard BBS color codes.
+	TelegardMatch string = "(?i)`([0-9|A-F])([0-9|A-F])"
+
+	// WildcatMatch is a case-insensitive, regular expression to match Wildcat! BBS color codes.
+	WildcatMatch string = `(?i)@([0-9|A-F])([0-9|A-F])@`
+
+	// WWIVHashMatch is a regular expression to match WWIV BBS # color codes.
+	WWIVHashMatch string = `\|#(\d)`
+
+	// WWIVHeartMatch is a regular expression to match WWIV BBS ♥ color codes.
+	WWIVHeartMatch string = `\x03(\d)`
 
 	celerityCodes = "kbgcrmywdBGCRMYWS"
 )
@@ -80,7 +102,14 @@ const (
 // Valid reports whether the BBS type is valid.
 func (b BBS) Valid() bool {
 	switch b {
-	case ANSI, Celerity, PCBoard, Renegade, Telegard, Wildcat, WWIVHash, WWIVHeart:
+	case ANSI,
+		Celerity,
+		PCBoard,
+		Renegade,
+		Telegard,
+		Wildcat,
+		WWIVHash,
+		WWIVHeart:
 		return true
 	default:
 		return false
@@ -179,6 +208,36 @@ func (b BBS) HTML(dst *bytes.Buffer, src []byte) error {
 	default:
 		return ErrColorCodes
 	}
+}
+
+func (b BBS) Remove(dst *bytes.Buffer, src []byte) error {
+	switch b {
+	case ANSI:
+		return ErrANSI
+	case Celerity:
+		return remove(dst, src, CelerityMatch)
+	case PCBoard:
+		return remove(dst, src, PCBoardMatch)
+	case Renegade:
+		return remove(dst, src, RenegadeMatch)
+	case Telegard:
+		return remove(dst, src, TelegardMatch)
+	case Wildcat:
+		return remove(dst, src, WildcatMatch)
+	case WWIVHash:
+		return remove(dst, src, WWIVHashMatch)
+	case WWIVHeart:
+		return remove(dst, src, WWIVHeartMatch)
+	default:
+		return ErrColorCodes
+	}
+}
+
+func remove(dst *bytes.Buffer, src []byte, expr string) error {
+	m := regexp.MustCompile(expr)
+	res := m.ReplaceAll(src, []byte(""))
+	_, err := dst.Write(res)
+	return err
 }
 
 // HTML transforms a string containing BBS color codes into a
@@ -376,7 +435,7 @@ func IsWHeart(b []byte) bool {
 // An empty slice is returned if there are no valid bar code values exist in s.
 func FieldsBars(s string) []string {
 	const sep rune = 65535
-	m := regexp.MustCompile(`\|(0[0-9]|1[1-9]|2[0-3])`)
+	m := regexp.MustCompile(RenegadeMatch)
 	repl := fmt.Sprintf("%s$1", string(sep))
 	res := m.ReplaceAllString(s, repl)
 	if !strings.ContainsRune(res, sep) {
@@ -454,7 +513,7 @@ func barForeground(n int) bool {
 func FieldsCelerity(s string) []string {
 	// The format uses the vertical bar "|" followed by a case sensitive single alphabetic character.
 	const sep rune = 65535
-	m := regexp.MustCompile(`\|(k|b|g|c|r|m|y|w|d|B|G|C|R|M|Y|W|S)`)
+	m := regexp.MustCompile(CelerityMatch)
 	repl := fmt.Sprintf("%s$1", string(sep))
 	res := m.ReplaceAllString(s, repl)
 	if !strings.ContainsRune(res, sep) {
@@ -491,8 +550,6 @@ func parserCelerity(dst *bytes.Buffer, src string) error {
 	if len(bars) == 0 {
 		_, err := dst.WriteString(src)
 		return err
-		//fmt.Fprint(&buf, s)
-		//return &buf, nil
 	}
 	for _, color := range bars {
 		if color == swapCmd {
@@ -519,7 +576,7 @@ func parserCelerity(dst *bytes.Buffer, src string) error {
 // there are no valid @X code values exist in s.
 func FieldsPCBoard(s string) []string {
 	const sep rune = 65535
-	m := regexp.MustCompile("(?i)@X([0-9A-F][0-9A-F])")
+	m := regexp.MustCompile(PCBoardMatch)
 	repl := fmt.Sprintf("%s$1", string(sep))
 	res := m.ReplaceAllString(s, repl)
 	if !strings.ContainsRune(res, sep) {
@@ -578,7 +635,7 @@ func HTMLPCBoard(dst *bytes.Buffer, src string) error {
 // It swaps the Telegard color codes with PCBoard @X codes and
 // parses those with parserPCBoard.
 func HTMLTelegard(dst *bytes.Buffer, src string) error {
-	r := regexp.MustCompile("`([0-9|A-F])([0-9|A-F])")
+	r := regexp.MustCompile(TelegardMatch)
 	x := r.ReplaceAllString(src, `@X$1$2`)
 	return parserPCBoard(dst, x)
 }
@@ -587,7 +644,7 @@ func HTMLTelegard(dst *bytes.Buffer, src string) error {
 // It swaps the Wildcat color codes with PCBoard @X codes and
 // parses those with parserPCBoard.
 func HTMLWildcat(dst *bytes.Buffer, src string) error {
-	r := regexp.MustCompile(`@([0-9|A-F])([0-9|A-F])@`)
+	r := regexp.MustCompile(WildcatMatch)
 	x := r.ReplaceAllString(src, `@X$1$2`)
 	return parserPCBoard(dst, x)
 }
@@ -596,7 +653,7 @@ func HTMLWildcat(dst *bytes.Buffer, src string) error {
 // It swaps the WWIV color codes with vertical bars and
 // parses those with ParserBars.
 func HTMLWHash(dst *bytes.Buffer, src string) error {
-	r := regexp.MustCompile(`\|#(\d)`)
+	r := regexp.MustCompile(WWIVHashMatch)
 	x := r.ReplaceAllString(src, `|0$1`)
 	return parserBars(dst, x)
 }
@@ -605,7 +662,7 @@ func HTMLWHash(dst *bytes.Buffer, src string) error {
 // It swaps the WWIV color codes with vertical bars and
 // parses those with ParserBars.
 func HTMLWHeart(dst *bytes.Buffer, src string) error {
-	r := regexp.MustCompile(`\x03(\d)`)
+	r := regexp.MustCompile(WWIVHeartMatch)
 	x := r.ReplaceAllString(src, `|0$1`)
 	return parserBars(dst, x)
 }

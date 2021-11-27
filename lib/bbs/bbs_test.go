@@ -548,3 +548,41 @@ func Test_HTMLWildcat(t *testing.T) {
 		}
 	}
 }
+
+func TestBBS_Remove(t *testing.T) {
+	type args struct {
+		src []byte
+	}
+	tests := []struct {
+		name    string
+		b       bbs.BBS
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{"empty", bbs.PCBoard, args{[]byte("")}, "", false},
+		{"invalid", -1, args{[]byte("")}, "", true},
+		{"incorrect", bbs.WWIVHash, args{[]byte("@X07Hello world")}, "@X07Hello world", false},
+		{"ansi", bbs.ANSI, args{[]byte("")}, "", true},
+		{"celerity", bbs.Celerity, args{[]byte("Hello |Bworld")}, "Hello world", false},
+		{"pcboard", bbs.PCBoard, args{[]byte("@X07Hello world")}, "Hello world", false},
+		{"pcboard nl", bbs.PCBoard, args{[]byte("@X07Hello\n@X11world@X01")}, "Hello\nworld", false},
+		{"pcboard false pos", bbs.PCBoard, args{[]byte("@X07PCBoard @X code")}, "PCBoard @X code", false},
+		{"renegade", bbs.Renegade, args{[]byte("Hello |15world")}, "Hello world", false},
+		{"telegard", bbs.Telegard, args{[]byte("`07Hello world")}, "Hello world", false},
+		{"whash", bbs.WWIVHash, args{[]byte("|#7Hello world")}, "Hello world", false},
+		{"wheart", bbs.WWIVHeart, args{[]byte("\x037Hello world")}, "Hello world", false},
+		{"wildcat", bbs.Wildcat, args{[]byte("@0F@Hello world")}, "Hello world", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := bytes.Buffer{}
+			if err := tt.b.Remove(&got, tt.args.src); (err != nil) != tt.wantErr {
+				t.Errorf("BBS.Remove() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if got.String() != tt.want {
+				t.Errorf("BBS.Remove() dst = %q, want %q", got.String(), tt.want)
+			}
+		})
+	}
+}
