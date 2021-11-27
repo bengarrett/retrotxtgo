@@ -78,8 +78,8 @@ const (
 )
 
 // Valid reports whether the BBS type is valid.
-func (bbs BBS) Valid() bool {
-	switch bbs {
+func (b BBS) Valid() bool {
+	switch b {
 	case ANSI, Celerity, PCBoard, Renegade, Telegard, Wildcat, WWIVHash, WWIVHeart:
 		return true
 	default:
@@ -88,8 +88,8 @@ func (bbs BBS) Valid() bool {
 }
 
 // String returns the BBS color format name and toggle sequence.
-func (bbs BBS) String() string {
-	if !bbs.Valid() {
+func (b BBS) String() string {
+	if !b.Valid() {
 		return ""
 	}
 	return [...]string{
@@ -101,12 +101,12 @@ func (bbs BBS) String() string {
 		"Wildcat! @@",
 		"WWIV |#",
 		"WWIV ♥",
-	}[bbs]
+	}[b]
 }
 
 // Name returns the BBS color format name.
-func (bbs BBS) Name() string {
-	if !bbs.Valid() {
+func (b BBS) Name() string {
+	if !b.Valid() {
 		return ""
 	}
 	return [...]string{
@@ -118,11 +118,11 @@ func (bbs BBS) Name() string {
 		"Wildcat!",
 		"WWIV #",
 		"WWIV ♥",
-	}[bbs]
+	}[b]
 }
 
 // Bytes returns the BBS color toggle sequence as bytes.
-func (bbs BBS) Bytes() []byte {
+func (b BBS) Bytes() []byte {
 	const (
 		etx               byte = 3  // CP437 ♥
 		esc               byte = 27 // CP437 ←
@@ -133,7 +133,7 @@ func (bbs BBS) Bytes() []byte {
 		verticalBar            = byte('|')
 		upperX                 = byte('X')
 	)
-	switch bbs {
+	switch b {
 	case ANSI:
 		return []byte{esc, leftSquareBracket}
 	case Celerity, Renegade:
@@ -157,9 +157,9 @@ func (bbs BBS) Bytes() []byte {
 // collection of HTML <i> elements paired with CSS color classes.
 // The CSS classes can be generated using (BBS) CSS.
 // The generated elements are cross-site scripting safe.
-func (bbs BBS) HTML(dst *bytes.Buffer, src []byte) error {
+func (b BBS) HTML(dst *bytes.Buffer, src []byte) error {
 	x := trimPrefix(string(src))
-	switch bbs {
+	switch b {
 	case ANSI:
 		return ErrANSI
 	case Celerity:
@@ -204,8 +204,8 @@ func trimPrefix(s string) string {
 
 // Find the format of any known BBS color code sequence within the reader.
 // If no sequences are found -1 is returned.
-func Find(r io.Reader) BBS {
-	scanner := bufio.NewScanner(r)
+func Find(src io.Reader) BBS {
+	scanner := bufio.NewScanner(src)
 	for scanner.Scan() {
 		b := scanner.Bytes()
 		ts := bytes.TrimSpace(b)
@@ -245,9 +245,9 @@ func Find(r io.Reader) BBS {
 }
 
 // Fields splits the string s around each instance of one or more consecutive white space characters, as defined by unicode.IsSpace, returning a slice of substrings of s or an empty slice if s contains only white space.
-func Fields(r io.Reader) ([]string, error) {
+func Fields(src io.Reader) ([]string, error) {
 	var r1 bytes.Buffer
-	r2 := io.TeeReader(r, &r1)
+	r2 := io.TeeReader(src, &r1)
 	f := Find(r2)
 	if !f.Valid() {
 		return []string{}, nil
@@ -612,7 +612,7 @@ func HTMLWHeart(dst *bytes.Buffer, src string) error {
 
 // CSS generates the Cascading Style Sheets classes needed by the BBS HTML.
 // This is currently a non functional			 place-holder.
-func (bbs BBS) CSS() (*bytes.Buffer, error) {
+func (b BBS) CSS() (*bytes.Buffer, error) {
 	buf := bytes.Buffer{}
 	return &buf, nil
 }
