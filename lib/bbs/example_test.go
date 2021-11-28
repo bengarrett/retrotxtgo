@@ -44,7 +44,7 @@ func Example() {
 
 	// create the HTML equivalent of BBS color codes
 	var buf bytes.Buffer
-	if err := bbs.HTML(&buf, reader); err != nil {
+	if _, err := bbs.HTML(&buf, reader); err != nil {
 		log.Fatal(err)
 	}
 	fmt.Print(buf.String())

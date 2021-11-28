@@ -34,7 +34,7 @@ func ExampleFieldsPCBoard() {
 func ExampleHTML() {
 	var out bytes.Buffer
 	src := strings.NewReader("@X03Hello world")
-	if err := bbs.HTML(&out, src); err != nil {
+	if _, err := bbs.HTML(&out, src); err != nil {
 		fmt.Print(err)
 	}
 	fmt.Print(out.String())

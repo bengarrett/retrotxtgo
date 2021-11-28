@@ -297,21 +297,6 @@ func parserPCBoard(dst *bytes.Buffer, src string) error {
 	return nil
 }
 
-// HTML writes to dst the HTML equivalent of BBS color codes with matching CSS color classes.
-// The first found color code format is used for the remainder of the Reader.
-func HTML(dst *bytes.Buffer, src io.Reader) error {
-	var r1 bytes.Buffer
-
-	r2 := io.TeeReader(src, &r1)
-
-	find := Find(r2)
-	b, err := io.ReadAll(&r1)
-	if err != nil {
-		return err
-	}
-	return find.HTML(dst, b)
-}
-
 // HTMLCelerity writes to dst the HTML equivalent of Celerity BBS color codes with
 // matching CSS color classes.
 func HTMLCelerity(dst *bytes.Buffer, src string) error {
@@ -533,6 +518,21 @@ func Find(src io.Reader) BBS {
 		}
 	}
 	return -1
+}
+
+// HTML writes to dst the HTML equivalent of BBS color codes with matching CSS color classes.
+// The first found color code format is used for the remainder of the Reader.
+func HTML(dst *bytes.Buffer, src io.Reader) (BBS, error) {
+	var r1 bytes.Buffer
+
+	r2 := io.TeeReader(src, &r1)
+
+	find := Find(r2)
+	b, err := io.ReadAll(&r1)
+	if err != nil {
+		return -1, err
+	}
+	return find, find.HTML(dst, b)
 }
 
 // Bytes returns the BBS color toggle sequence as bytes.
