@@ -571,8 +571,7 @@ func (b BBS) Bytes() []byte {
 // The CSS relies on cascading variables.
 // See https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties for details.
 func (b BBS) CSS(dst *bytes.Buffer) error {
-
-	r, err := static.ReadFile("static/text_pcboard.css")
+	r, err := static.ReadFile("static/css/text_pcboard.css")
 	if err != nil {
 		return err
 	}
