@@ -1,0 +1,64 @@
+/* layout.css */
+
+body {
+  background-color: black;
+  display: flex;
+  flex-direction: column;
+  text-shadow: none;
+  /* these will need to be dynamic */
+  color: var(--vgagray);
+}
+
+main {
+  display: inline-block;
+  letter-spacing: 0;
+  min-width: 640px;
+  order: 2;
+}
+
+main b {
+  font-style: normal;
+  font-weight: normal;
+  /* offset-x | offset-y | blur-radius | color */
+  text-shadow: 1px 0 1px currentColor;
+}
+
+main i {
+  font-style: normal;
+  font-weight: normal;
+}
+
+/* retrotxt.css */
+
+.dos-cursor {
+  animation: var(--blink-fast-timer) blink step-end infinite;
+  text-shadow: none;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* text_colors.css */
+
+:root {
+  --amber: rgb(185, 128, 0);
+  --black: rgb(0, 0, 0);
+  --green: rgb(41, 244, 24);
+  --vgagray: rgb(170, 170, 170);
+  --white: rgb(255, 255, 255);
+}
+
+.theme-msdos-fg {
+  color: var(--vgagray);
+}
+
+.theme-msdos-bg {
+  background-color: var(--black);
+}
+
+.theme-msdos-shadowed {
+  text-shadow: 0.063em 0.063em 0 rgba(64, 64, 64, 1);
+}

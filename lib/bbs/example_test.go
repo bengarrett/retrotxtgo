@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/bengarrett/retrotxtgo/lib/bbs"
@@ -133,12 +134,20 @@ func ExampleBBS_Bytes() {
 }
 
 func ExampleBBS_CSS() {
-	css, err := bbs.PCBoard.CSS()
-	if err != nil {
+	var buf bytes.Buffer
+	if err := bbs.PCBoard.CSS(&buf); err != nil {
 		fmt.Print(err)
 	}
-	fmt.Print(css)
-	// Output:
+
+	f, err := os.OpenFile("pcboard.css", os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.Remove(f.Name()) // clean up
+
+	if _, err := buf.WriteTo(f); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func ExampleBBS_HTML() {

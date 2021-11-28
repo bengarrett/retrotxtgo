@@ -31,6 +31,7 @@ package bbs
 import (
 	"bufio"
 	"bytes"
+	"embed"
 	"errors"
 	"fmt"
 	"html/template"
@@ -43,6 +44,9 @@ import (
 var (
 	ErrColorCodes = errors.New("no bbs color codes found")
 	ErrANSI       = errors.New("ansi escape code found")
+
+	//go:embed static/*
+	static embed.FS
 )
 
 // Bulletin Board System color code format.
@@ -563,11 +567,17 @@ func (b BBS) Bytes() []byte {
 	}
 }
 
-// CSS generates the Cascading Style Sheets classes needed by the BBS HTML.
-// This is currently a non functional place-holder.
-func (b BBS) CSS() (*bytes.Buffer, error) {
-	buf := bytes.Buffer{}
-	return &buf, nil
+// CSS writes to dst the Cascading Style Sheets classes needed by the HTML.
+// The CSS relies on cascading variables.
+// See https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties for details.
+func (b BBS) CSS(dst *bytes.Buffer) error {
+
+	r, err := static.ReadFile("static/text_pcboard.css")
+	if err != nil {
+		return err
+	}
+	dst.Write(r)
+	return nil
 }
 
 // HTML writes to dst the HTML equivalent of BBS color codes with matching CSS color classes.
