@@ -18,7 +18,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/bengarrett/retrotxtgo/lib/bbs"
+	"github.com/bengarrett/bbs"
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/humanize"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
