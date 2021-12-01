@@ -28,7 +28,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 
-require github.com/bengarrett/bbs v0.0.0-20211130215024-8dbaca2f6ea1
+require github.com/bengarrett/bbs v0.1.0
 
 require (
 	github.com/dlclark/regexp2 v1.4.0 // indirect
@@ -44,5 +44,5 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778 // indirect
-	gopkg.in/ini.v1 v1.64.0 // indirect
+	gopkg.in/ini.v1 v1.66.0 // indirect
 )
