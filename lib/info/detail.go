@@ -20,10 +20,10 @@ import (
 
 	"github.com/bengarrett/bbs"
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
-	"github.com/bengarrett/retrotxtgo/lib/humanize"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/sauce"
+	"github.com/bengarrett/sauce/humanize"
 	gookit "github.com/gookit/color"
 	"github.com/mozillazg/go-slugify"
 	"github.com/zRedShift/mimemagic"
@@ -377,7 +377,7 @@ func (d *Detail) printMarshalData() (data []struct{ k, v string }) {
 		{k: "size", v: d.Size.Decimal},
 		{k: "lines", v: p.Sprint(d.Lines)},
 		{k: "width", v: p.Sprint(d.Width)},
-		{k: "modified", v: humanize.Datetime(DTFormat, d.Modified.Time.UTC())},
+		{k: "modified", v: humanize.DMY.Format(d.Modified.Time.UTC())},
 		{k: "media mime type", v: d.Mime.Type},
 		{k: "SHA256 checksum", v: d.Sums.SHA256},
 		{k: "CRC64 ECMA", v: d.Sums.CRC64},
@@ -388,7 +388,7 @@ func (d *Detail) printMarshalData() (data []struct{ k, v string }) {
 		{k: "title", v: d.Sauce.Title},
 		{k: "author", v: d.Sauce.Author},
 		{k: "group", v: d.Sauce.Group},
-		{k: "date", v: humanize.Date(DFormat, d.Sauce.Date.Time.UTC())},
+		{k: "date", v: humanize.DMY.Format(d.Modified.Time.UTC())},
 		{k: "original size", v: d.Sauce.FileSize.Decimal},
 		{k: "file type", v: d.Sauce.File.Name},
 		{k: "data type", v: d.Sauce.Data.Name},

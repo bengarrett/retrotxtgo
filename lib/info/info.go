@@ -17,11 +17,6 @@ import (
 )
 
 const (
-	// DTFormat is the date-time format.
-	DTFormat = "DMY24"
-	// DFormat is the date format.
-	DFormat = "DMY"
-
 	octetStream = "application/octet-stream"
 	zipType     = "application/zip"
 )

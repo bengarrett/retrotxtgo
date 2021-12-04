@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
-	"github.com/bengarrett/retrotxtgo/lib/humanize"
 	"github.com/bengarrett/retrotxtgo/static"
+	"github.com/bengarrett/sauce/humanize"
 	"github.com/gookit/color"
 	"golang.org/x/text/language"
 )

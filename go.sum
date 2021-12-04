@@ -55,8 +55,6 @@ github.com/armon/go-radix v0.0.0-20180808171621-7fddfc383310/go.mod h1:ufUuZ+zHj
 github.com/armon/go-radix v1.0.0/go.mod h1:ufUuZ+zHj4x4TnLV4JWEpy2hxWSpsRywHrMgIH9cCH8=
 github.com/bengarrett/bbs v0.1.0 h1:jK7s7UhbjQRPCpbjErWmA60PKq1zXHmOOSYAfzY9VnU=
 github.com/bengarrett/bbs v0.1.0/go.mod h1:Q9Z2NiscHyRX02VvtWDTlwjEgAC3KvxO1wShoGA36Kg=
-github.com/bengarrett/sauce v0.0.0-20211204033011-afc8f048f37c h1:QYMfMTB/tQg0EinMIvGsxYFbn0tkwjjUIWjF0BY4XGs=
-github.com/bengarrett/sauce v0.0.0-20211204033011-afc8f048f37c/go.mod h1:SPT83WS2dwNkBLmZ0Ob8iwenJU9h3QxsbruRJb7vgUk=
 github.com/bengarrett/sauce v1.0.0 h1:Phui7joOFishI7pv9J9tcvmQtYkyXBCRiX2UMxNsjDk=
 github.com/bengarrett/sauce v1.0.0/go.mod h1:SPT83WS2dwNkBLmZ0Ob8iwenJU9h3QxsbruRJb7vgUk=
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
