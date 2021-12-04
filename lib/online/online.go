@@ -4,12 +4,18 @@ package online
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
 
 	"github.com/bengarrett/retrotxtgo/meta"
+)
+
+var (
+	ErrJSON = errors.New("cannot understand the response body as the syntax is not json")
+	ErrMash = errors.New("cannot unmarshal the json response body")
 )
 
 const (
