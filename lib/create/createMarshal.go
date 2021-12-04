@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/bengarrett/bbs"
+	"github.com/bengarrett/retrotxtgo/lib/create/internal/layout"
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/meta"
@@ -29,17 +30,17 @@ func (args *Args) Marshal(b *[]byte) (PageData, error) {
 	p := PageData{}
 	// templates are found in the dir static/html/*.gohtml
 	switch args.Layouts {
-	case Inline:
+	case layout.Inline:
 		var err error
 		p, err = args.marshalInline(&p)
 		if err != nil {
 			return PageData{}, err
 		}
-	case Standard:
+	case layout.Standard:
 		p = args.marshalStandard(&p)
-	case Compact: // disables all meta tags
+	case layout.Compact: // disables all meta tags
 		p = args.marshalCompact(&p)
-	case None:
+	case layout.None:
 		// do nothing
 	default:
 		return PageData{}, fmt.Errorf("pagedata %s: %w", args.Layouts, logs.ErrTmplName)
@@ -234,15 +235,15 @@ func (args *Args) templatePack() error {
 		return fmt.Errorf("template pack %q: %w", args.Layouts, logs.ErrTmplName)
 	}
 	filename := name + ext
-	args.pack = strings.Join([]string{dir, filename}, sep)
+	args.Pack = strings.Join([]string{dir, filename}, sep)
 	return nil
 }
 
 // templateData reads and returns an embedded file.
 func (args *Args) templateData() (*[]byte, error) {
-	b, err := static.Tmpl.ReadFile(args.pack)
+	b, err := static.Tmpl.ReadFile(args.Pack)
 	if err != nil {
-		return nil, fmt.Errorf("template data %s: %w", args.pack, err)
+		return nil, fmt.Errorf("template data %s: %w", args.Pack, err)
 	}
 	return &b, nil
 }

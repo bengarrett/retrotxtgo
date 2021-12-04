@@ -11,17 +11,13 @@ import (
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/lib/create"
+	"github.com/bengarrett/retrotxtgo/lib/create/internal/assets"
+	"github.com/bengarrett/retrotxtgo/lib/create/internal/layout"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/spf13/viper"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 )
-
-// create.Destination
-// create.SaveAssets
-// create.ZipAssets
-// create.SaveHTML
-// create.Asset type
 
 func ExampleColorScheme() {
 	fmt.Print(create.ColorScheme()[0])
@@ -48,7 +44,7 @@ func TestSaveAssets(t *testing.T) {
 		// Initialize
 		a := create.Args{
 			Test:    true,
-			Layouts: create.Compact,
+			Layouts: layout.Compact,
 		}
 		a.Save.Destination = tmpDir
 		// Save files
@@ -80,12 +76,12 @@ func TestZipAssets(t *testing.T) {
 		defer os.RemoveAll(tmpDir)
 		// Initialize
 		a := create.Args{
-			Layouts: create.Standard,
+			Layouts: layout.Standard,
 			Test:    true,
 		}
 		a.Save.Destination = tmpDir
 		// Create a zip file
-		name := filepath.Join(os.TempDir(), create.ZipName)
+		name := filepath.Join(os.TempDir(), layout.ZipName)
 		b := []byte("hello")
 		a.ZipAssets(os.TempDir(), &b)
 		defer os.Remove(name)
@@ -127,7 +123,7 @@ func TestSave(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ch := make(chan error)
-			a := create.Args{Layouts: create.Standard, Test: true}
+			a := create.Args{Layouts: layout.Standard, Test: true}
 			a.Save.OW = true
 			a.Save.Destination = tt.args.name
 			go a.SaveHTML(&tt.args.data, ch)
@@ -149,7 +145,7 @@ func TestSave(t *testing.T) {
 
 func TestArgsStdout(t *testing.T) {
 	var (
-		a  = create.Args{Layouts: create.Standard}
+		a  = create.Args{Layouts: layout.Standard}
 		b  = []byte("")
 		hi = []byte("hello world")
 	)
@@ -182,26 +178,6 @@ func TestKeys(t *testing.T) {
 	}
 }
 
-func TestTemplates(t *testing.T) {
-	tests := []struct {
-		name string
-		key  string
-		want string
-	}{
-		{"empty", "", "unknown"},
-		{"none", "none", "none"},
-		{"standard", "standard", "standard"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l, _ := create.ParseLayout(tt.key)
-			if got := l.Pack(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ParseLayout() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestTemplateSave(t *testing.T) {
 	tmpFile, err := ioutil.TempFile(os.TempDir(), "tmplsave")
 	if err != nil {
@@ -209,7 +185,7 @@ func TestTemplateSave(t *testing.T) {
 	}
 	defer os.Remove(tmpFile.Name())
 	a := create.Args{
-		Layouts: create.Standard,
+		Layouts: layout.Standard,
 		Tmpl:    tmpFile.Name(),
 	}
 	if err = a.TemplateSave(); err != nil {
@@ -220,14 +196,14 @@ func TestTemplateSave(t *testing.T) {
 func TestArgs_Marshal(t *testing.T) {
 	ex := fmt.Sprintf("%s | example", meta.Name)
 	viper.SetDefault("html.title", ex)
-	args := create.Args{Layouts: create.Standard}
+	args := create.Args{Layouts: layout.Standard}
 	w := "hello"
 	d := []byte(w)
 	got, _ := args.Marshal(&d)
 	if got.PreText != w {
 		t.Errorf("Marshal().PreText = %v, want %v", got, w)
 	}
-	args.Layouts = create.Compact
+	args.Layouts = layout.Compact
 	w = ex
 	got, _ = args.Marshal(&d)
 	if got.PageTitle != w {
@@ -238,13 +214,13 @@ func TestArgs_Marshal(t *testing.T) {
 	if got.MetaDesc != w {
 		t.Errorf("Marshal().MetaDesc = %v, want %v", got, w)
 	}
-	args.Layouts = create.Standard
+	args.Layouts = layout.Standard
 	w = ""
 	got, _ = args.Marshal(&d)
 	if got.MetaAuthor != w {
 		t.Errorf("Marshal().MetaAuthor = %v, want %v", got, w)
 	}
-	args.Layouts = create.Inline
+	args.Layouts = layout.Inline
 	w = ""
 	got, _ = args.Marshal(&d)
 	if got.MetaAuthor != w {
@@ -281,7 +257,7 @@ func TestDestination(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotPath, err := create.Destination(tt.args...)
+			gotPath, err := assets.Destination(tt.args...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Destination() error = %v, wantErr %v", err, tt.wantErr)
 				return

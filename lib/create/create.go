@@ -9,9 +9,10 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/bengarrett/bbs"
+	"github.com/bengarrett/retrotxtgo/lib/create/internal/assets"
+	"github.com/bengarrett/retrotxtgo/lib/create/internal/layout"
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
@@ -23,84 +24,7 @@ import (
 	"golang.org/x/text/transform"
 )
 
-// Args holds arguments and options sourced from user flags and the config file.
-type Args struct {
-	Source struct {
-		Encoding   encoding.Encoding // Original encoding of the text source
-		HiddenBody string            // Pre-text content override, accessible by a hidden flag
-		Name       string            // Text source, usually a file or pack name
-		BBSType    bbs.BBS           // Optional BBS or ANSI text format
-	}
-	Save struct {
-		AsFiles     bool   // Save assets as files
-		Cache       bool   // Cache, when false will always unpack a new .gohtml template
-		Compress    bool   // Compress and store all assets into an archive
-		OW          bool   // OW overwrite any existing files when saving
-		Destination string // Destination HTML destination either a directory or file
-	}
-	Title struct {
-		Flag  bool
-		Value string
-	}
-	FontFamily struct {
-		Flag  bool
-		Value string
-	}
-	Metadata  Meta
-	SauceData struct {
-		Use         bool
-		Title       string
-		Author      string
-		Group       string
-		Description string
-		Width       uint
-		Lines       uint
-	}
-	Port      uint   // Port for HTTP server
-	FontEmbed bool   // embed the font as Base64 data
-	Test      bool   // unit test mode
-	Layout    string // Layout of the HTML
-	Syntax    string // Syntax and color theming printing HTML
-	//
-	Layouts Layout // layout flag interpretation
-	Tmpl    string // template filename
-	pack    string // template package name
-}
-
-// Meta data to embed into the HTML.
-type Meta struct {
-	Author struct {
-		Flag  bool
-		Value string
-	}
-	ColorScheme struct {
-		Flag  bool
-		Value string
-	}
-	Description struct {
-		Flag  bool
-		Value string
-	}
-	Keywords struct {
-		Flag  bool
-		Value string
-	}
-	Referrer struct {
-		Flag  bool
-		Value string
-	}
-	Robots struct {
-		Flag  bool
-		Value string
-	}
-	ThemeColor struct {
-		Flag  bool
-		Value string
-	}
-	Generator   bool
-	NoTranslate bool
-	RetroTxt    bool
-}
+type Args assets.Args
 
 // PageData temporarily holds template data used for the HTML layout.
 type PageData struct {
@@ -133,36 +57,6 @@ type PageData struct {
 	ScriptEmbed      template.JS
 }
 
-// Layout are HTML template variations.
-type Layout int
-
-const (
-	// use 0 as an error placeholder.
-	_ Layout = iota
-	// Standard template with external CSS, JS, fonts.
-	Standard
-	// Inline template with CSS and JS embedded.
-	Inline
-	// Compact template with external CSS, JS, fonts and no meta-tags.
-	Compact
-	// None template, just print the generated HTML.
-	None
-)
-
-func (l Layout) String() string {
-	return [...]string{unknown, standard, inline, compact, none}[l]
-}
-
-const (
-	none     = "none"
-	compact  = "compact"
-	inline   = "inline"
-	standard = "standard"
-	unknown  = "unknown"
-
-	ZipName = "retrotxt.zip"
-)
-
 // ColorScheme values for the content attribute of <meta name="color-scheme">.
 func ColorScheme() [3]string {
 	return [...]string{"normal", "dark light", "only light"}
@@ -176,23 +70,22 @@ func Referrer() [8]string {
 
 // Robots values for the content attribute of <meta name="robots">.
 func Robots() [9]string {
-	return [...]string{"index", "noindex", "follow", "nofollow", none, "noarchive", "nosnippet", "noimageindex", "nocache"}
+	return [...]string{"index", "noindex", "follow", "nofollow", "none", "noarchive", "nosnippet", "noimageindex", "nocache"}
 }
 
 // Layouts are the names of the HTML templates.
 func Layouts() []string {
-	return []string{Standard.String(), Inline.String(), Compact.String(), None.String()}
-}
-
-// Pack is the packed name of the HTML template.
-func (l Layout) Pack() string {
-	return [...]string{unknown, standard, standard, standard, none}[l]
+	return []string{
+		layout.Standard.String(),
+		layout.Inline.String(),
+		layout.Compact.String(),
+		layout.None.String()}
 }
 
 // Create handles the target output command arguments.
 func (args *Args) Create(b *[]byte) error {
 	var err error
-	args.Layouts, err = ParseLayout(args.Layout)
+	args.Layouts, err = layout.ParseLayout(args.Layout)
 	if err != nil {
 		return err
 	}
@@ -226,7 +119,7 @@ func (args *Args) SaveAssets(b *[]byte) error {
 	if args.Save.Destination == "" {
 		dir := []string{viper.GetString("save-directory")}
 		var err error
-		if args.Save.Destination, err = Destination(dir...); err != nil {
+		if args.Save.Destination, err = assets.Destination(dir...); err != nil {
 			logs.FatalMark(args.Save.Destination, logs.ErrFileSaveD, err)
 		}
 	}
@@ -238,7 +131,7 @@ func (args *Args) SaveAssets(b *[]byte) error {
 
 	go args.SaveHTML(b, ch)
 
-	if useCSS(args.Layouts) {
+	if layout.UseCSS(args.Layouts) {
 		cnt++
 		go args.saveStyles(ch)
 	}
@@ -247,15 +140,15 @@ func (args *Args) SaveAssets(b *[]byte) error {
 		go args.saveBBS(ch)
 		go args.savePCBoard(ch)
 	}
-	if useFontCSS(args.Layouts) {
+	if layout.UseFontCSS(args.Layouts) {
 		cnt++
 		go args.saveFont(ch)
 	}
-	if useJS(args.Layouts) {
+	if layout.UseJS(args.Layouts) {
 		cnt++
 		go args.saveJS(ch)
 	}
-	if useIcon(args.Layouts) {
+	if layout.UseIcon(args.Layouts) {
 		cnt++
 		go args.saveFavIcon(ch)
 	}
@@ -288,36 +181,6 @@ func appendErr(errs, err error) error {
 	return fmt.Errorf("%s;%w", errs, err)
 }
 
-func useCSS(l Layout) bool {
-	switch l {
-	case Standard, Compact:
-		return true
-	case Inline, None:
-		return false
-	}
-	return false
-}
-
-func useFontCSS(l Layout) bool {
-	switch l {
-	case Standard, Compact:
-		return true
-	case Inline, None:
-		return false
-	}
-	return false
-}
-
-func useIcon(l Layout) bool {
-	switch l {
-	case Standard, Compact:
-		return true
-	case Inline, None:
-		return false
-	}
-	return false
-}
-
 func usePCBoard(b bbs.BBS) bool {
 	switch b {
 	case bbs.PCBoard:
@@ -327,10 +190,6 @@ func usePCBoard(b bbs.BBS) bool {
 	default:
 		return false
 	}
-}
-
-func useJS(l Layout) bool {
-	return false
 }
 
 // zipAssets compresses all assets into a single zip archive.
@@ -357,9 +216,9 @@ func (args *Args) ZipAssets(destDir string, b *[]byte) {
 		fmt.Println(logs.SprintWrap(logs.ErrFileSave, err))
 		return
 	}
-	name := ZipName
+	name := layout.ZipName
 	if destDir != "" {
-		name = filepath.Join(destDir, ZipName)
+		name = filepath.Join(destDir, layout.ZipName)
 	}
 	zip := filesystem.Zip{
 		Name:      name,
@@ -410,14 +269,14 @@ func (args *Args) Stdout(b *[]byte) error {
 
 func colorSyntax(s string) bool {
 	switch s {
-	case "", none:
+	case "", "none":
 		return false
 	}
 	return str.Valid(s)
 }
 
 func (args *Args) printCSS(b *[]byte) error {
-	if !useCSS(args.Layouts) {
+	if !layout.UseCSS(args.Layouts) {
 		return nil
 	}
 	fmt.Printf("\nCSS file: %s\n\n", cssFn.Write())
@@ -432,7 +291,7 @@ func (args *Args) printCSS(b *[]byte) error {
 }
 
 func (args *Args) printFontCSS(name string, b *[]byte) error {
-	if !useFontCSS(args.Layouts) {
+	if !layout.UseFontCSS(args.Layouts) {
 		return nil
 	}
 	fmt.Printf("\nCSS for %s font file: %s\n\n", name, fontFn.Write())
@@ -443,7 +302,7 @@ func (args *Args) printFontCSS(name string, b *[]byte) error {
 }
 
 func (args *Args) printJS(b *[]byte) error {
-	if !useJS(args.Layouts) {
+	if !layout.UseJS(args.Layouts) {
 		return nil
 	}
 	fmt.Printf("\nJS file: %s\n\n", jsFn.Write())
@@ -468,60 +327,6 @@ func Normalize(e encoding.Encoding, r ...rune) []byte {
 		return []byte(s)
 	}
 	return []byte(string(r))
-}
-
-// destination determines if user supplied arguments are a valid file or directory destination.
-func Destination(args ...string) (path string, err error) {
-	if len(args) == 0 {
-		return path, nil
-	}
-	dir := filepath.Clean(strings.Join(args, " "))
-	if len(dir) == 1 {
-		return dirs(dir)
-	}
-	part := strings.Split(dir, string(os.PathSeparator))
-	if len(part) > 1 {
-		part[0], err = dirs(part[0])
-		if err != nil {
-			return path, fmt.Errorf("destination arguments: %w", err)
-		}
-	}
-	return strings.Join(part, string(os.PathSeparator)), nil
-}
-
-// dirs parses and expand special directory characters.
-func dirs(dir string) (path string, err error) {
-	const (
-		homeDir    = "~"
-		currentDir = "."
-	)
-	switch dir {
-	case homeDir:
-		return os.UserHomeDir()
-	case currentDir:
-		return os.Getwd()
-	case string(os.PathSeparator):
-		return filepath.Abs(dir)
-	}
-	if err != nil {
-		return "", fmt.Errorf("parse directory error: %q: %w", dir, err)
-	}
-	return "", nil
-}
-
-// ParseLayout parses possible --layout argument values.
-func ParseLayout(name string) (Layout, error) {
-	switch name {
-	case standard, "s":
-		return Standard, nil
-	case inline, "i":
-		return Inline, nil
-	case compact, "c":
-		return Compact, nil
-	case none, "n":
-		return None, nil
-	}
-	return 0, logs.ErrTmplName
 }
 
 // replaceNELs replace EBCDIC newlines with Unicode linefeeds.

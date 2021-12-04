@@ -145,7 +145,7 @@ func (args *Args) saveFontWoff2(name, packName string) error {
 	}
 	b, err := static.Font.ReadFile(packName)
 	if err != nil {
-		return fmt.Errorf("saveFontWoff2 %q, %w", args.pack, err)
+		return fmt.Errorf("saveFontWoff2 %q, %w", args.Pack, err)
 	}
 	nn, _, err := filesystem.Write(s, b...)
 	if err != nil {

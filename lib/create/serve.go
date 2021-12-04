@@ -15,6 +15,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/bengarrett/retrotxtgo/lib/create/internal/layout"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/prompt"
 	"github.com/bengarrett/retrotxtgo/lib/str"
@@ -65,9 +66,9 @@ func (args *Args) Serve(b *[]byte) error {
 func (args *Args) override() {
 	const embed = false
 	s := []string{}
-	if args.Layouts != Standard {
-		s = append(s, fmt.Sprintf("%s HTML layout", Standard))
-		args.Layouts = Standard
+	if args.Layouts != layout.Standard {
+		s = append(s, fmt.Sprintf("%s HTML layout", layout.Standard))
+		args.Layouts = layout.Standard
 	}
 	if args.FontEmbed {
 		s = append(s, "not embedding the font")
