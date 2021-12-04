@@ -1,8 +1,10 @@
-package logs
+package logs_test
 
 import (
 	"errors"
 	"testing"
+
+	"github.com/bengarrett/retrotxtgo/lib/logs"
 )
 
 var (
@@ -12,7 +14,7 @@ var (
 	ErrBoolType = errors.New("invalid argument test flag strconv.ParseBool")
 )
 
-func Test_execute(t *testing.T) {
+func Test_Execute(t *testing.T) {
 	type args struct {
 		err  error
 		args []string
@@ -31,8 +33,8 @@ func Test_execute(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := execute(tt.args.err, true, tt.args.args...); got != tt.want {
-				t.Errorf("execute() = %v, want %v", got, tt.want)
+			if got := logs.Execute(tt.args.err, true, tt.args.args...); got != tt.want {
+				t.Errorf("Execute() = %v, want %v", got, tt.want)
 			}
 		})
 	}

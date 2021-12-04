@@ -1,4 +1,4 @@
-package info
+package detail
 
 import (
 	"archive/zip"
@@ -27,7 +27,89 @@ import (
 	gookit "github.com/gookit/color"
 	"github.com/mozillazg/go-slugify"
 	"github.com/zRedShift/mimemagic"
+	"golang.org/x/text/language"
 	"golang.org/x/text/message"
+)
+
+// Detail of a file.
+type Detail struct {
+	XMLName    xml.Name     `json:"-" xml:"file"`
+	Name       string       `json:"filename" xml:"name"`
+	Unicode    string       `json:"unicode" xml:"unicode,attr"`
+	LineBreak  LineBreaks   `json:"lineBreak" xml:"line_break"`
+	Count      Stats        `json:"counts" xml:"counts"`
+	Size       Sizes        `json:"size" xml:"size"`
+	Lines      int          `json:"lines" xml:"lines"`
+	Width      int          `json:"width" xml:"width"`
+	Modified   ModDates     `json:"modified" xml:"last_modified"`
+	Sums       Checksums    `json:"checksums" xml:"checksums"`
+	Mime       Content      `json:"mime" xml:"mime"`
+	Slug       string       `json:"slug" xml:"id,attr"`
+	Sauce      sauce.Record `json:"sauce" xml:"sauce"`
+	ZipComment string       `json:"zipComment" xml:"zip_comment"`
+	UTF8       bool
+	//index      int
+	//length     int
+	sauceIndex int
+}
+
+// Checksums and hashes of the file.
+type Checksums struct {
+	CRC32  string `json:"CRC32" xml:"CRC32"`
+	CRC64  string `json:"CRC64" xml:"CRC64"`
+	MD5    string `json:"MD5" xml:"md5"`
+	SHA256 string `json:"SHA256" xml:"sha256"`
+}
+
+// Content metadata from either MIME content type and magic file data.
+type Content struct {
+	Type  string `json:"-" xml:"-"`
+	Media string `json:"media" xml:"media"`
+	Sub   string `json:"subMedia" xml:"sub_media"`
+	Commt string `json:"comment" xml:"comment"`
+}
+
+// LineBreaks for new line toggles.
+type LineBreaks struct {
+	Abbr     string  `json:"string" xml:"string,attr"`
+	Escape   string  `json:"escape" xml:"-"`
+	Decimals [2]rune `json:"decimals" xml:"decimal"`
+}
+
+// ModDates is the file last modified dates in multiple output formats.
+type ModDates struct {
+	Time  time.Time `json:"iso" xml:"date"`
+	Epoch int64     `json:"epoch" xml:"epoch,attr"`
+}
+
+// Sizes of the file in multiples.
+type Sizes struct {
+	Bytes   int64  `json:"bytes" xml:"bytes"`
+	Decimal string `json:"decimal" xml:"decimal,attr"`
+	Binary  string `json:"binary" xml:"binary,attr"`
+}
+
+// Stats are the text file content statistics and counts.
+type Stats struct {
+	Chars    int `json:"characters" xml:"characters"`
+	Controls int `json:"ansiControls" xml:"ansi_controls"`
+	Words    int `json:"words" xml:"words"`
+}
+
+// Format of the text to output.
+type Format uint
+
+const (
+	// ColorText is ANSI colored text.
+	ColorText Format = iota
+	// PlainText is standard text.
+	PlainText
+	// JSON data-interchange format.
+	JSON
+	// JSONMin is JSON data minified.
+	JSONMin
+	// XML markup data.
+	XML
 )
 
 const (
@@ -42,8 +124,18 @@ const (
 	uc8        = "UTF-8"
 )
 
-// ctrls counts the number of ANSI escape controls in the named file.
-func (d *Detail) ctrls(name string) error {
+const (
+	octetStream = "application/octet-stream"
+	zipType     = "application/zip"
+)
+
+// lang returns the English Language tag used for numeric syntax formatting.
+func lang() language.Tag {
+	return language.English
+}
+
+// Ctrls counts the number of ANSI escape controls in the named file.
+func (d *Detail) Ctrls(name string) error {
 	f, err := os.Open(name)
 	if err != nil {
 		return err
@@ -57,8 +149,8 @@ func (d *Detail) ctrls(name string) error {
 	return f.Close()
 }
 
-// lines counts the totals lines in the named file.
-func (d *Detail) lines(name string) error {
+// LineTotals counts the totals lines in the named file.
+func (d *Detail) LineTotals(name string) error {
 	f, err := os.Open(name)
 	if err != nil {
 		return err
@@ -72,8 +164,8 @@ func (d *Detail) lines(name string) error {
 	return f.Close()
 }
 
-// marshal the Detail data to a text format syntax.
-func (d *Detail) marshal(f Format) ([]byte, error) {
+// Marshal the Detail data to a text format syntax.
+func (d *Detail) Marshal(f Format) ([]byte, error) {
 	var err error
 	var b []byte
 	switch f {
@@ -102,8 +194,8 @@ func (d *Detail) marshal(f Format) ([]byte, error) {
 	return b, nil
 }
 
-// mimeUnknown detects non-Standard legacy data.
-func (d *Detail) mimeUnknown() {
+// MimeUnknown detects non-Standard legacy data.
+func (d *Detail) MimeUnknown() {
 	if d.Mime.Commt != "unknown" {
 		return
 	}
@@ -117,15 +209,15 @@ func (d *Detail) mimeUnknown() {
 		return
 	}
 	if d.Mime.Type == octetStream {
-		if !d.utf8 && d.Count.Words > 0 {
+		if !d.UTF8 && d.Count.Words > 0 {
 			d.Mime.Commt = "US-ASCII encoded text document"
 			return
 		}
 	}
 }
 
-// parse the file and the raw data content.
-func (d *Detail) parse(name string, stat os.FileInfo, data ...byte) error {
+// Parse the file and the raw data content.
+func (d *Detail) Parse(name string, stat os.FileInfo, data ...byte) error {
 	const routines = 8
 	var wg sync.WaitGroup
 	wg.Add(routines)
@@ -166,8 +258,8 @@ func (d *Detail) parse(name string, stat os.FileInfo, data ...byte) error {
 	}()
 	go func() {
 		defer wg.Done()
-		d.utf8 = utf8.Valid(data)
-		d.Unicode = unicode(&data, d.utf8)
+		d.UTF8 = utf8.Valid(data)
+		d.Unicode = unicode(&data, d.UTF8)
 	}()
 	wg.Wait()
 	return nil
@@ -185,7 +277,7 @@ func (d *Detail) mime(name string, data ...byte) {
 			d.Mime.Commt += fmt.Sprintf(" with %s BBS color codes", s)
 		}
 	}
-	if d.validText() {
+	if d.ValidText() {
 		var err error
 		if d.Count.Chars, err = filesystem.Runes(bytes.NewBuffer(data)); err != nil {
 			fmt.Printf("mine sniffer failure, %s\n", err)
@@ -303,7 +395,7 @@ func (d *Detail) printMarshal(color bool) []byte {
 
 // marshalDataValid returns true if the key and value data validates.
 func (d *Detail) marshalDataValid(k, v string) bool {
-	if !d.validText() {
+	if !d.ValidText() {
 		switch k {
 		case uc8, "line break", "characters", ans, "words", "lines", "width":
 			return false
@@ -331,8 +423,8 @@ func (d *Detail) marshalDataValid(k, v string) bool {
 	return true
 }
 
-// linebreaks determines the new lines characters found in the rune pair.
-func (d *Detail) linebreaks(r [2]rune) {
+// LineBreaks determines the new lines characters found in the rune pair.
+func (d *Detail) LineBreaks(r [2]rune) {
 	a, e := "", ""
 	switch r {
 	case [2]rune{lf}:
@@ -411,8 +503,8 @@ func (d *Detail) printMarshalData() (data []struct{ k, v string }) {
 	return data
 }
 
-// read and parse the named file and content.
-func (d *Detail) read(name string) error {
+// Read and parse the named file and content.
+func (d *Detail) Read(name string) error {
 	// Get the file details
 	stat, err := os.Stat(name)
 	if err != nil {
@@ -423,11 +515,11 @@ func (d *Detail) read(name string) error {
 	if err != nil {
 		return err
 	}
-	return d.parse(name, stat, data...)
+	return d.Parse(name, stat, data...)
 }
 
-// validText returns true if the MIME content-type value is valid for text files.
-func (d *Detail) validText() bool {
+// ValidText returns true if the MIME content-type value is valid for text files.
+func (d *Detail) ValidText() bool {
 	s := strings.Split(d.Mime.Type, "/")
 	const req = 2
 	if len(s) != req {
@@ -442,8 +534,8 @@ func (d *Detail) validText() bool {
 	return false
 }
 
-// width counts the number of characters used per line in the named file.
-func (d *Detail) width(name string) error {
+// Len counts the number of characters used per line in the named file.
+func (d *Detail) Len(name string) error {
 	f, err := os.Open(name)
 	if err != nil {
 		return err
@@ -459,8 +551,8 @@ func (d *Detail) width(name string) error {
 	return f.Close()
 }
 
-// words counts the number of words used in the named file.
-func (d *Detail) words(name string) error {
+// Words counts the number of words used in the named file.
+func (d *Detail) Words(name string) error {
 	f, err := os.Open(name)
 	if err != nil {
 		return err

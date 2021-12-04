@@ -28,7 +28,7 @@ func FatalSave(err error) {
 		return
 	}
 	// save error to log file
-	if err = save(err, ""); err != nil {
+	if err = SaveErr(err, ""); err != nil {
 		log.Fatalf("%s %s", color.Danger.Sprint("!"), err)
 	}
 	// print error
@@ -47,7 +47,7 @@ func Save(err error) {
 		return
 	}
 	// save error to log file
-	if err = save(err, ""); err != nil {
+	if err = SaveErr(err, ""); err != nil {
 		log.Fatalf("%s %s", color.Danger.Sprint("!"), err)
 	}
 }
@@ -86,7 +86,7 @@ func Name() string {
 
 // Save an error to the log directory.
 // An optional named file is available for unit tests.
-func save(err error, name string) error {
+func SaveErr(err error, name string) error {
 	if err == nil || fmt.Sprintf("%v", err) == "" {
 		return fmt.Errorf("logs save: %w", ErrErrorNil)
 	}

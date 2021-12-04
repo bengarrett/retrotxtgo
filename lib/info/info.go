@@ -3,110 +3,23 @@ package info
 
 import (
 	"bytes"
-	"encoding/xml"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
+	"github.com/bengarrett/retrotxtgo/lib/info/internal/detail"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
-	"github.com/bengarrett/sauce"
 	"github.com/karrick/godirwalk"
 	"golang.org/x/sync/errgroup"
-	"golang.org/x/text/language"
 )
 
-const (
-	octetStream = "application/octet-stream"
-	zipType     = "application/zip"
-)
-
-// Detail of a file.
-type Detail struct {
-	XMLName    xml.Name     `json:"-" xml:"file"`
-	Name       string       `json:"filename" xml:"name"`
-	Unicode    string       `json:"unicode" xml:"unicode,attr"`
-	LineBreak  LineBreaks   `json:"lineBreak" xml:"line_break"`
-	Count      Stats        `json:"counts" xml:"counts"`
-	Size       Sizes        `json:"size" xml:"size"`
-	Lines      int          `json:"lines" xml:"lines"`
-	Width      int          `json:"width" xml:"width"`
-	Modified   ModDates     `json:"modified" xml:"last_modified"`
-	Sums       Checksums    `json:"checksums" xml:"checksums"`
-	Mime       Content      `json:"mime" xml:"mime"`
-	Slug       string       `json:"slug" xml:"id,attr"`
-	Sauce      sauce.Record `json:"sauce" xml:"sauce"`
-	ZipComment string       `json:"zipComment" xml:"zip_comment"`
-	utf8       bool
-	index      int
-	length     int
-	sauceIndex int
-}
-
-// LineBreaks for new line toggles.
-type LineBreaks struct {
-	Abbr     string  `json:"string" xml:"string,attr"`
-	Escape   string  `json:"escape" xml:"-"`
-	Decimals [2]rune `json:"decimals" xml:"decimal"`
-}
-
-// Stats are the text file content statistics and counts.
-type Stats struct {
-	Chars    int `json:"characters" xml:"characters"`
-	Controls int `json:"ansiControls" xml:"ansi_controls"`
-	Words    int `json:"words" xml:"words"`
-}
-
-// ModDates is the file last modified dates in multiple output formats.
-type ModDates struct {
-	Time  time.Time `json:"iso" xml:"date"`
-	Epoch int64     `json:"epoch" xml:"epoch,attr"`
-}
-
-// Checksums and hashes of the file.
-type Checksums struct {
-	CRC32  string `json:"CRC32" xml:"CRC32"`
-	CRC64  string `json:"CRC64" xml:"CRC64"`
-	MD5    string `json:"MD5" xml:"md5"`
-	SHA256 string `json:"SHA256" xml:"sha256"`
-}
-
-// Content metadata from either MIME content type and magic file data.
-type Content struct {
-	Type  string `json:"-" xml:"-"`
-	Media string `json:"media" xml:"media"`
-	Sub   string `json:"subMedia" xml:"sub_media"`
-	Commt string `json:"comment" xml:"comment"`
-}
-
-// Sizes of the file in multiples.
-type Sizes struct {
-	Bytes   int64  `json:"bytes" xml:"bytes"`
-	Decimal string `json:"decimal" xml:"decimal,attr"`
-	Binary  string `json:"binary" xml:"binary,attr"`
-}
+type Detail detail.Detail
 
 // Names index and totals.
 type Names struct {
 	Index  int
 	Length int
 }
-
-// Format of the text to output.
-type Format uint
-
-const (
-	// ColorText is ANSI colored text.
-	ColorText Format = iota
-	// PlainText is standard text.
-	PlainText
-	// JSON data-interchange format.
-	JSON
-	// JSONMin is JSON data minified.
-	JSONMin
-	// XML markup data.
-	XML
-)
 
 // Info parses the named file and prints out its details in a specific syntax.
 func (n Names) Info(name, format string) error {
@@ -153,68 +66,63 @@ func (n Names) Info(name, format string) error {
 	return nil
 }
 
-// lang returns the English Language tag used for numeric syntax formatting.
-func lang() language.Tag {
-	return language.English
-}
-
 // output converts the --format argument value to a format type.
-func output(argument string) (f Format, err error) {
+func output(argument string) (f detail.Format, err error) {
 	switch argument {
 	case "color", "c", "":
-		return ColorText, nil
+		return detail.ColorText, nil
 	case "text", "t":
-		return PlainText, nil
+		return detail.PlainText, nil
 	case "json", "j":
-		return JSON, nil
+		return detail.JSON, nil
 	case "json.min", "jm":
-		return JSONMin, nil
+		return detail.JSONMin, nil
 	case "xml", "x":
-		return XML, nil
+		return detail.XML, nil
 	}
 	return f, logs.ErrFmt
 }
 
 // Marshal the metadata and system details of a named file.
-func Marshal(name string, f Format, i, length int) error {
-	var d Detail
-	if err := d.read(name); err != nil {
+func Marshal(name string, f detail.Format, i, length int) error {
+	var d detail.Detail
+	if err := d.Read(name); err != nil {
 		return err
 	}
-	d.index, d.length = i, length
-	if d.validText() {
+	//d.index, d.length = i, length
+	if d.ValidText() {
 		var err error
 		// get the required linebreaks chars before running the multiple tasks
 		if d.LineBreak.Decimals, err = filesystem.ReadLineBreaks(name); err != nil {
 			return err
 		}
-		d.linebreaks(d.LineBreak.Decimals)
+		d.LineBreaks(d.LineBreak.Decimals)
 		var g errgroup.Group
 		g.Go(func() error {
-			return d.ctrls(name)
+			return d.Ctrls(name)
 		})
 		g.Go(func() error {
-			return d.width(name)
+			return d.Len(name)
 		})
 		g.Go(func() error {
-			return d.lines(name)
+			return d.LineTotals(name)
 		})
 		g.Go(func() error {
-			return d.width(name)
+			return d.Len(name)
 		})
 		g.Go(func() error {
-			return d.words(name)
+			return d.Words(name)
 		})
 		if err := g.Wait(); err != nil {
 			return err
 		}
-		d.mimeUnknown()
+		d.MimeUnknown()
 	}
 	var (
 		m   []byte
 		err error
 	)
-	if m, err = d.marshal(f); err != nil {
+	if m, err = d.Marshal(f); err != nil {
 		return err
 	}
 	printf(f, m...)
@@ -223,16 +131,16 @@ func Marshal(name string, f Format, i, length int) error {
 
 // Stdin parses piped data and prints out the details in a specific syntax.
 func Stdin(format string, b ...byte) error {
-	var d Detail
+	var d detail.Detail
 	f, e := output(format)
 	if e != nil {
 		return e
 	}
-	if err := d.parse("", nil, b...); err != nil {
+	if err := d.Parse("", nil, b...); err != nil {
 		return err
 	}
-	if d.validText() {
-		d.linebreaks(filesystem.LineBreaks(true, []rune(string(b))...))
+	if d.ValidText() {
+		d.LineBreaks(filesystem.LineBreaks(true, []rune(string(b))...))
 		var g errgroup.Group
 		g.Go(func() error {
 			var err error
@@ -274,10 +182,10 @@ func Stdin(format string, b ...byte) error {
 		if err := g.Wait(); err != nil {
 			return err
 		}
-		d.mimeUnknown()
+		d.MimeUnknown()
 	}
 	var m []byte
-	if m, e = d.marshal(f); e != nil {
+	if m, e = d.Marshal(f); e != nil {
 		return e
 	}
 	printf(f, m...)
@@ -285,11 +193,11 @@ func Stdin(format string, b ...byte) error {
 }
 
 // printf prints the bytes as text and appends a newline to JSON and XML text.
-func printf(f Format, b ...byte) {
+func printf(f detail.Format, b ...byte) {
 	switch f {
-	case ColorText, PlainText:
+	case detail.ColorText, detail.PlainText:
 		fmt.Printf("%s", b)
-	case JSON, JSONMin, XML:
+	case detail.JSON, detail.JSONMin, detail.XML:
 		fmt.Printf("%s\n", b)
 	}
 }
