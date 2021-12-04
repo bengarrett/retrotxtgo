@@ -28,7 +28,10 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 
-require github.com/bengarrett/bbs v0.1.0
+require (
+	github.com/bengarrett/bbs v0.1.0
+	github.com/bengarrett/sauce v0.0.0-20211204010258-52e4c93ae217
+)
 
 require (
 	github.com/dlclark/regexp2 v1.4.0 // indirect

@@ -22,8 +22,8 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/humanize"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
-	"github.com/bengarrett/retrotxtgo/lib/sauce"
 	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/bengarrett/sauce"
 	gookit "github.com/gookit/color"
 	"github.com/mozillazg/go-slugify"
 	"github.com/zRedShift/mimemagic"
@@ -131,9 +131,9 @@ func (d *Detail) parse(name string, stat os.FileInfo, data ...byte) error {
 	wg.Add(routines)
 	go func() {
 		defer wg.Done()
-		d.sauceIndex = sauce.Scan(data...)
+		d.sauceIndex = sauce.Index(data)
 		if d.sauceIndex > 0 {
-			d.Sauce = sauce.Parse(data...)
+			d.Sauce = sauce.Decode(data)
 		}
 	}()
 	go func() {

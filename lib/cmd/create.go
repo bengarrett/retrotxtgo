@@ -14,9 +14,9 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/sample"
-	"github.com/bengarrett/retrotxtgo/lib/sauce"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/meta"
+	"github.com/bengarrett/sauce"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -374,15 +374,16 @@ func createHTML(cmd *cobra.Command, flags convert.Flag, src *[]byte) []byte {
 // appendSAUCE parses any embedded SAUCE metadata.
 func appendSAUCE(src *[]byte) {
 	if html.SauceData.Use {
-		if index := sauce.Scan(*src...); index > 0 {
-			s := sauce.Parse(*src...)
-			html.SauceData.Title = s.Title
-			html.SauceData.Author = s.Author
-			html.SauceData.Group = s.Group
-			html.SauceData.Description = s.Desc
-			html.SauceData.Width = uint(s.Info.Info1.Value)
-			html.SauceData.Lines = uint(s.Info.Info2.Value)
+		sr := sauce.Decode(*src)
+		if !sr.Valid() {
+			return
 		}
+		html.SauceData.Title = sr.Title
+		html.SauceData.Author = sr.Author
+		html.SauceData.Group = sr.Group
+		html.SauceData.Description = sr.Desc
+		html.SauceData.Width = uint(sr.Info.Info1.Value)
+		html.SauceData.Lines = uint(sr.Info.Info2.Value)
 	}
 }
 
