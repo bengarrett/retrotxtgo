@@ -28,7 +28,7 @@ func Read(r io.Reader) (input string, err error) {
 
 // ParseYN parses the input to boolean value.
 func ParseYN(input string, yesDefault bool) bool {
-	switch input {
+	switch strings.ToLower(input) {
 	case "":
 		if yesDefault {
 			return true
