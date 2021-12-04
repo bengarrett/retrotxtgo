@@ -52,7 +52,7 @@ func ExampleText() {
 	s := strings.ReplaceAll(string(data), "\t", "")
 	ln := strings.Split(s, "\n")
 	fmt.Println(ln[0])
-	// Output: <file utf8="true" id="info-test-txt">
+	// Output: <file unicode="UTF-8 compatible" id="info-test-txt">
 }
 
 func TestValidText(t *testing.T) {
@@ -195,7 +195,7 @@ func Test_marshal_json(t *testing.T) {
 }
 
 func Test_marshal_text(t *testing.T) {
-	const want = 822
+	const want = 829
 	var d Detail
 	tmp := sampleFile()
 	err := d.read(tmp)
