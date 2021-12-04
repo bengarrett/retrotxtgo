@@ -336,7 +336,7 @@ func Words(r io.Reader) (int, error) {
 			continue
 		}
 		// scan chars within each word
-		if word(t) {
+		if Word(t) {
 			count++
 		}
 	}
@@ -353,10 +353,10 @@ func WordsEBCDIC(r io.Reader) (int, error) {
 	return Words(c)
 }
 
-// IsWord scans the content of a word for characters that are not digits,
+// Word scans the content of a word for characters that are not digits,
 // letters or punctuation and if discovered returns false.
 // If a space or line break is encountered the scan will end.
-func word(s string) bool {
+func Word(s string) bool {
 	if s == "" {
 		return false
 	}

@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/bengarrett/retrotxtgo/lib/filesystem/internal/dirs"
 	"github.com/bengarrett/retrotxtgo/lib/internal/save"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 )
@@ -71,7 +72,7 @@ func DirExpansion(name string) string {
 			p = s
 		}
 		var cont bool
-		if dir, cont = winDir(i, p, runtime.GOOS, dir); cont {
+		if dir, cont = dirs.Windows(i, p, runtime.GOOS, dir); cont {
 			continue
 		}
 		dir = filepath.Join(dir, p)
@@ -80,21 +81,6 @@ func DirExpansion(name string) string {
 		dir = string(os.PathSeparator) + dir
 	}
 	return dir
-}
-
-// winDir appends Windows style syntax to the directory.
-func winDir(i int, p, platform, dir string) (s string, cont bool) {
-	if platform == "windows" {
-		if len(p) == 2 && p[1:] == ":" {
-			dir = strings.ToUpper(p) + "\\"
-			return dir, true
-		}
-		if dir == "" && i > 0 {
-			dir = p + "\\"
-			return dir, true
-		}
-	}
-	return dir, false
 }
 
 // SaveTemp saves bytes to a named temporary file.

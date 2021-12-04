@@ -1,4 +1,4 @@
-package filesystem
+package filesystem_test
 
 import (
 	"fmt"
@@ -9,19 +9,21 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/internal/mock"
+	"github.com/bengarrett/retrotxtgo/lib/internal/tmp"
 )
 
 const windows = "windows"
 
 func ExampleTar() {
-	tmpTar := tempFile("tar_test.tar")
-	tmpFile, err := SaveTemp(tmpTar, []byte("x")...)
+	tmpTar := tmp.File("tar_test.tar")
+	tmpFile, err := filesystem.SaveTemp(tmpTar, []byte("x")...)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer os.Remove(tmpFile)
-	if err = Tar(tmpTar, tmpFile); err != nil {
+	if err = filesystem.Tar(tmpTar, tmpFile); err != nil {
 		log.Print(err)
 		return
 	}
@@ -36,31 +38,31 @@ func ExampleTar() {
 
 func BenchmarkReadLarge(b *testing.B) {
 	large := mock.LargeExample()
-	_, err := Read(large)
+	_, err := filesystem.Read(large)
 	if err != nil {
-		Clean(large)
+		filesystem.Clean(large)
 		log.Fatal(err)
 	}
-	Clean(large)
+	filesystem.Clean(large)
 }
 
 func BenchmarkReadMega(b *testing.B) {
 	mega := mock.MegaExample()
-	_, err := Read(mega)
+	_, err := filesystem.Read(mega)
 	if err != nil {
-		Clean(mega)
+		filesystem.Clean(mega)
 		log.Fatal(err)
 	}
-	Clean(mega)
+	filesystem.Clean(mega)
 }
 
 func ExampleSave() {
-	path, err := SaveTemp("examplesave.txt", []byte("hello world")...)
+	path, err := filesystem.SaveTemp("examplesave.txt", []byte("hello world")...)
 	if err != nil {
-		Clean(path)
+		filesystem.Clean(path)
 		log.Fatal(err)
 	}
-	Clean(path)
+	filesystem.Clean(path)
 	// Output:
 }
 
@@ -85,7 +87,7 @@ func Test_DirExpansion(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
-			if gotDir := DirExpansion(tt.Name); gotDir != tt.WantDir {
+			if gotDir := filesystem.DirExpansion(tt.Name); gotDir != tt.WantDir {
 				t.Errorf("DirExpansion(%v) = %v, want %v", tt.Name, gotDir, tt.WantDir)
 			}
 		})
@@ -111,14 +113,14 @@ func TestRead(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := Read(tt.args.name)
+			_, err := filesystem.Read(tt.args.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Read() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
-	Clean(f)
-	Clean(large)
+	filesystem.Clean(f)
+	filesystem.Clean(large)
 }
 
 func TestReadAllBytes(t *testing.T) {
@@ -147,7 +149,7 @@ func TestReadAllBytes(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotData, err := ReadAllBytes(tt.args.name)
+			gotData, err := filesystem.ReadAllBytes(tt.args.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadAllBytes() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -157,11 +159,11 @@ func TestReadAllBytes(t *testing.T) {
 			}
 		})
 	}
-	Clean(f2)
-	Clean(f3)
-	Clean(f4)
-	Clean(f5)
-	Clean(large)
+	filesystem.Clean(f2)
+	filesystem.Clean(f3)
+	filesystem.Clean(f4)
+	filesystem.Clean(f5)
+	filesystem.Clean(large)
 }
 
 func TestReadChunk(t *testing.T) {
@@ -194,7 +196,7 @@ func TestReadChunk(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotData, err := ReadChunk(tt.args.name, tt.args.size)
+			gotData, err := filesystem.ReadChunk(tt.args.name, tt.args.size)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadChunk() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -207,11 +209,11 @@ func TestReadChunk(t *testing.T) {
 			}
 		})
 	}
-	Clean(f1)
-	Clean(f2)
-	Clean(f3)
-	Clean(f4)
-	Clean(large)
+	filesystem.Clean(f1)
+	filesystem.Clean(f2)
+	filesystem.Clean(f3)
+	filesystem.Clean(f4)
+	filesystem.Clean(large)
 }
 
 func TestReadTail(t *testing.T) {
@@ -241,7 +243,7 @@ func TestReadTail(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotData, err := ReadTail(tt.args.name, tt.args.offset)
+			gotData, err := filesystem.ReadTail(tt.args.name, tt.args.offset)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadTail() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -254,11 +256,11 @@ func TestReadTail(t *testing.T) {
 			}
 		})
 	}
-	Clean(f1)
-	Clean(f2)
-	Clean(f3)
-	Clean(f4)
-	Clean(large)
+	filesystem.Clean(f1)
+	filesystem.Clean(f2)
+	filesystem.Clean(f3)
+	filesystem.Clean(f4)
+	filesystem.Clean(large)
 }
 
 func Test_word(t *testing.T) {
@@ -282,8 +284,8 @@ func Test_word(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := word(tt.s); got != tt.want {
-				t.Errorf("word() = %v, want %v", got, tt.want)
+			if got := filesystem.Word(tt.s); got != tt.want {
+				t.Errorf("Word() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -305,7 +307,7 @@ func TestTouch(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotPath, err := Touch(tt.args.name)
+			gotPath, err := filesystem.Touch(tt.args.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Touch() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -315,34 +317,5 @@ func TestTouch(t *testing.T) {
 			}
 		})
 	}
-	Clean(tmpFile)
-}
-
-func Test_winDir(t *testing.T) {
-	type args struct {
-		i   int
-		p   string
-		os  string
-		dir string
-	}
-	tests := []struct {
-		name     string
-		args     args
-		wantS    string
-		wantCont bool
-	}{
-		{"home", args{1, "", "linux", "/home/retro"}, "/home/retro", false},
-		{"c drive", args{0, "c:", windows, ""}, "C:\\", true},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotS, gotCont := winDir(tt.args.i, tt.args.p, tt.args.os, tt.args.dir)
-			if gotS != tt.wantS {
-				t.Errorf("winDir() gotS = %v, want %v", gotS, tt.wantS)
-			}
-			if gotCont != tt.wantCont {
-				t.Errorf("winDir() gotCont = %v, want %v", gotCont, tt.wantCont)
-			}
-		})
-	}
+	filesystem.Clean(tmpFile)
 }
