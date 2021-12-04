@@ -8,7 +8,11 @@ import (
 	"reflect"
 	"runtime"
 	"testing"
+
+	"github.com/bengarrett/retrotxtgo/lib/internal/mock"
 )
+
+const windows = "windows"
 
 func ExampleTar() {
 	tmpTar := tempFile("tar_test.tar")
@@ -31,7 +35,7 @@ func ExampleTar() {
 }
 
 func BenchmarkReadLarge(b *testing.B) {
-	large := largeExample()
+	large := mock.LargeExample()
 	_, err := Read(large)
 	if err != nil {
 		Clean(large)
@@ -41,7 +45,7 @@ func BenchmarkReadLarge(b *testing.B) {
 }
 
 func BenchmarkReadMega(b *testing.B) {
-	mega := megaExample()
+	mega := mock.MegaExample()
 	_, err := Read(mega)
 	if err != nil {
 		Clean(mega)
@@ -60,25 +64,6 @@ func ExampleSave() {
 	// Output:
 }
 
-func Test_filler(t *testing.T) {
-	tests := []struct {
-		name       string
-		sizeMB     float64
-		wantLength int
-	}{
-		{"0", 0, 0},
-		{"0.1", 0.1, 100000},
-		{"1.5", 1.5, 1500000},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if gotLength, _ := filler(tt.sizeMB); gotLength != tt.wantLength {
-				t.Errorf("filler() = %v, want %v", gotLength, tt.wantLength)
-			}
-		})
-	}
-}
-
 func Test_DirExpansion(t *testing.T) {
 	h, err := os.UserHomeDir()
 	if err != nil {
@@ -92,24 +77,24 @@ func Test_DirExpansion(t *testing.T) {
 	wp := filepath.Dir(w)
 	s := string(os.PathSeparator)
 
-	var tests dirTests
+	var tests mock.DirTests
 	if runtime.GOOS == windows {
-		tests = windowsTests(h, hp, s, w, wp)
+		tests = mock.WindowsTests(h, hp, s, w, wp)
 	} else {
-		tests = nixTests(h, hp, s, w, wp)
+		tests = mock.NixTests(h, hp, s, w, wp)
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if gotDir := DirExpansion(tt.name); gotDir != tt.wantDir {
-				t.Errorf("DirExpansion(%v) = %v, want %v", tt.name, gotDir, tt.wantDir)
+		t.Run(tt.Name, func(t *testing.T) {
+			if gotDir := DirExpansion(tt.Name); gotDir != tt.WantDir {
+				t.Errorf("DirExpansion(%v) = %v, want %v", tt.Name, gotDir, tt.WantDir)
 			}
 		})
 	}
 }
 
 func TestRead(t *testing.T) {
-	f := fileExample("hello", 0)
-	large := largeExample()
+	f := mock.FileExample("hello", 0)
+	large := mock.LargeExample()
 	type args struct {
 		name string
 	}
@@ -137,11 +122,11 @@ func TestRead(t *testing.T) {
 }
 
 func TestReadAllBytes(t *testing.T) {
-	f2 := fileExample(T()["Symbols"], 2)
-	f3 := fileExample(T()["Tabs"], 3)
-	f4 := fileExample(T()["Escapes"], 4)
-	f5 := fileExample(T()["Digits"], 5)
-	large := largeExample()
+	f2 := mock.FileExample(mock.T()["Symbols"], 2)
+	f3 := mock.FileExample(mock.T()["Tabs"], 3)
+	f4 := mock.FileExample(mock.T()["Escapes"], 4)
+	f5 := mock.FileExample(mock.T()["Digits"], 5)
+	large := mock.LargeExample()
 	type args struct {
 		name string
 	}
@@ -154,10 +139,10 @@ func TestReadAllBytes(t *testing.T) {
 		{"empty", args{""}, nil, true},
 		{"invalid", args{"/invalid-file"}, nil, true},
 		{"dir", args{os.TempDir()}, nil, true},
-		{"utf8", args{f2}, []byte(T()["Symbols"]), false},
-		{"tabs", args{f3}, []byte(T()["Tabs"]), false},
-		{"escs", args{f4}, []byte(T()["Escapes"]), false},
-		{"digs", args{f5}, []byte(T()["Digits"]), false},
+		{"utf8", args{f2}, []byte(mock.T()["Symbols"]), false},
+		{"tabs", args{f3}, []byte(mock.T()["Tabs"]), false},
+		{"escs", args{f4}, []byte(mock.T()["Escapes"]), false},
+		{"digs", args{f5}, []byte(mock.T()["Digits"]), false},
 		{"1.5MB", args{large}, nil, false},
 	}
 	for _, tt := range tests {
@@ -180,11 +165,11 @@ func TestReadAllBytes(t *testing.T) {
 }
 
 func TestReadChunk(t *testing.T) {
-	f1 := fileExample(T()["Newline"], 1)
-	f2 := fileExample(T()["Symbols"], 2)
-	f3 := fileExample(T()["Tabs"], 3)
-	f4 := fileExample(T()["Escapes"], 4)
-	large := largeExample()
+	f1 := mock.FileExample(mock.T()["Newline"], 1)
+	f2 := mock.FileExample(mock.T()["Symbols"], 2)
+	f3 := mock.FileExample(mock.T()["Tabs"], 3)
+	f4 := mock.FileExample(mock.T()["Escapes"], 4)
+	large := mock.LargeExample()
 	type args struct {
 		name string
 		size int
@@ -200,7 +185,7 @@ func TestReadChunk(t *testing.T) {
 		{"dir", args{os.TempDir(), 0}, nil, true},
 		{"range 0", args{"", 10}, nil, true},
 		{"range -", args{f2, -20}, []byte{}, false},
-		{"range +", args{f2, 20}, []byte(T()["Symbols"]), false},
+		{"range +", args{f2, 20}, []byte(mock.T()["Symbols"]), false},
 		{"nl", args{f1, 4}, []byte("a\nb\n"), false},
 		{"utf8", args{f2, 4}, []byte("[☠|☮"), false},
 		{"tabs", args{f3, 7}, []byte("☠\tSkull"), false},
@@ -230,11 +215,11 @@ func TestReadChunk(t *testing.T) {
 }
 
 func TestReadTail(t *testing.T) {
-	f1 := fileExample(T()["Newline"], 1)
-	f2 := fileExample(T()["Symbols"], 2)
-	f3 := fileExample(T()["Tabs"], 3)
-	f4 := fileExample(T()["Escapes"], 4)
-	large := largeExample()
+	f1 := mock.FileExample(mock.T()["Newline"], 1)
+	f2 := mock.FileExample(mock.T()["Symbols"], 2)
+	f3 := mock.FileExample(mock.T()["Tabs"], 3)
+	f4 := mock.FileExample(mock.T()["Escapes"], 4)
+	large := mock.LargeExample()
 	type args struct {
 		name   string
 		offset int

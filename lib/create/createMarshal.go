@@ -201,7 +201,7 @@ func (args *Args) newTemplate() (*template.Template, error) {
 		if err != nil {
 			return nil, fmt.Errorf("template data: %w", err)
 		}
-		if _, _, err := filesystem.Save(args.tmpl, *b...); err != nil {
+		if _, _, err := filesystem.Write(args.tmpl, *b...); err != nil {
 			return nil, fmt.Errorf("saving template: %q: %w", args.tmpl, err)
 		}
 	}
@@ -257,7 +257,7 @@ func (args *Args) templateSave() error {
 	if err != nil {
 		return fmt.Errorf("template save data error: %w", err)
 	}
-	if _, _, err := filesystem.Save(args.tmpl, *b...); err != nil {
+	if _, _, err := filesystem.Write(args.tmpl, *b...); err != nil {
 		return fmt.Errorf("template save error: %w", err)
 	}
 	return nil

@@ -64,7 +64,7 @@ func (args *Args) saveCSSFile(src []byte, a asset) error {
 	if len(src) == 0 {
 		return fmt.Errorf("%s, %w", a.write(), static.ErrNotFound)
 	}
-	nn, _, err := filesystem.Save(s, src...)
+	nn, _, err := filesystem.Write(s, src...)
 	if err != nil {
 		return err
 	}
@@ -84,7 +84,7 @@ func (args *Args) saveFavIcon(c chan error) {
 	if err != nil {
 		c <- fmt.Errorf("saveFavIcon, %w", err)
 	}
-	nn, _, err := filesystem.Save(s, b...)
+	nn, _, err := filesystem.Write(s, b...)
 	if err != nil {
 		c <- err
 	}
@@ -127,7 +127,7 @@ func (args *Args) saveFontCSS(name string) error {
 	if err != nil {
 		return err
 	}
-	nn, _, err := filesystem.Save(s, b...)
+	nn, _, err := filesystem.Write(s, b...)
 	if err != nil {
 		return err
 	}
@@ -147,7 +147,7 @@ func (args *Args) saveFontWoff2(name, packName string) error {
 	if err != nil {
 		return fmt.Errorf("saveFontWoff2 %q, %w", args.pack, err)
 	}
-	nn, _, err := filesystem.Save(s, b...)
+	nn, _, err := filesystem.Write(s, b...)
 	if err != nil {
 		return err
 	}
@@ -167,7 +167,7 @@ func (args *Args) saveJS(c chan error) {
 	if len(b) == 0 {
 		c <- fmt.Errorf("saveJS, %w", static.ErrNotFound)
 	}
-	nn, _, err := filesystem.Save(s, b...)
+	nn, _, err := filesystem.Write(s, b...)
 	if err != nil {
 		c <- err
 	}
@@ -259,7 +259,7 @@ func (args *Args) destination(name string) (string, error) {
 	// create an empty zero byte file
 	if os.IsNotExist(err) {
 		empty := []byte{}
-		if _, _, err = filesystem.Save(dst, empty...); err != nil {
+		if _, _, err = filesystem.Write(dst, empty...); err != nil {
 			return "", fmt.Errorf("create %s, %w", dst, err)
 		}
 	}

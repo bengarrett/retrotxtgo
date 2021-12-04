@@ -12,6 +12,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/info/internal/detail"
+	"github.com/bengarrett/retrotxtgo/lib/internal/mock"
 )
 
 func millennia(name string) {
@@ -22,7 +23,7 @@ func millennia(name string) {
 }
 
 func sampleFile() string {
-	b := []byte(filesystem.T()["Tabs"]) // Tabs and Unicode glyphs
+	b := []byte(mock.T()["Tabs"]) // Tabs and Unicode glyphs
 	path, err := filesystem.SaveTemp("info_test.txt", b...)
 	if err != nil {
 		log.Fatal(err)

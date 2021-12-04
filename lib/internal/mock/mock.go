@@ -1,4 +1,4 @@
-package filesystem
+package mock
 
 import (
 	"fmt"
@@ -7,9 +7,10 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
-)
 
-const windows = "windows"
+	"github.com/bengarrett/retrotxtgo/lib/internal/save"
+	"github.com/bengarrett/retrotxtgo/lib/internal/tmp"
+)
 
 // MockInput uses the os pipe to mock the user input.
 // os.Pipe() https://stackoverflow.com/questions/46365221/fill-os-stdin-for-function-that-reads-from-it
@@ -25,7 +26,7 @@ const windows = "windows"
 	}()
 	os.Stdin = r
 */
-func MockInput(input string) (*os.File, error) {
+func Input(input string) (*os.File, error) {
 	s := []byte(input)
 	r, w, err := os.Pipe()
 	if err != nil {
@@ -55,8 +56,8 @@ func T() map[string]string {
 	}
 }
 
-// fileExample saves the string to a numbered text file.
-func fileExample(s string, i int) string {
+// FileExample saves the string to a numbered text file.
+func FileExample(s string, i int) string {
 	name := fmt.Sprintf("rt_fs_save%d.txt", i)
 	path, err := SaveTemp(name, []byte(s)...)
 	if err != nil {
@@ -65,10 +66,10 @@ func fileExample(s string, i int) string {
 	return path
 }
 
-// largeExample generates and saves a 800k file of random us-ascii text.
-func largeExample() string {
+// LargeExample generates and saves a 800k file of random us-ascii text.
+func LargeExample() string {
 	const name, sizeMB = "rs_mega_example_save.txt", 0.8
-	_, s := filler(sizeMB)
+	_, s := Filler(sizeMB)
 	path, err := SaveTemp(name, []byte(s)...)
 	if err != nil {
 		log.Fatal(err)
@@ -76,10 +77,10 @@ func largeExample() string {
 	return path
 }
 
-// megaExample generates and saves a 1.5MB file of random us-ascii text.
-func megaExample() string {
+// MegaExample generates and saves a 1.5MB file of random us-ascii text.
+func MegaExample() string {
 	const name, sizeMB = "rs_giga_mega_save.txt", 1.5
-	_, s := filler(sizeMB)
+	_, s := Filler(sizeMB)
 	path, err := SaveTemp(name, []byte(s)...)
 	if err != nil {
 		log.Fatal(err)
@@ -87,8 +88,8 @@ func megaExample() string {
 	return path
 }
 
-// filler generates random us-ascii text.
-func filler(sizeMB float64) (length int, random string) {
+// Filler generates random us-ascii text.
+func Filler(sizeMB float64) (length int, random string) {
 	if sizeMB <= 0 {
 		return length, random
 	}
@@ -115,14 +116,14 @@ func filler(sizeMB float64) (length int, random string) {
 	return len(s), string(s)
 }
 
-type dirTests []struct {
-	name    string
-	wantDir string
+type DirTests []struct {
+	Name    string
+	WantDir string
 }
 
 // nolint:dupl
-func windowsTests(h, hp, s, w, wp string) dirTests {
-	return dirTests{
+func WindowsTests(h, hp, s, w, wp string) DirTests {
+	return DirTests{
 		{fmt.Sprintf("C:%shome%suser", s, s), fmt.Sprintf("C:%shome%suser", s, s)},
 		{"~", h},
 		{filepath.Join("~", "foo"), filepath.Join(h, "foo")},
@@ -136,8 +137,8 @@ func windowsTests(h, hp, s, w, wp string) dirTests {
 }
 
 // nolint:dupl
-func nixTests(h, hp, s, w, wp string) dirTests {
-	return dirTests{
+func NixTests(h, hp, s, w, wp string) DirTests {
+	return DirTests{
 		{fmt.Sprintf("%shome%suser", s, s), fmt.Sprintf("%shome%suser", s, s)},
 		{"~", h},
 		{filepath.Join("~", "foo"), filepath.Join(h, "foo")},
@@ -148,4 +149,13 @@ func nixTests(h, hp, s, w, wp string) dirTests {
 		{fmt.Sprintf("%sroot%sfoo%s..%sblah", s, s, s, s), fmt.Sprintf("%sroot%sblah", s, s)},
 		{fmt.Sprintf("%sroot%sfoo%s.%sblah", s, s, s, s), fmt.Sprintf("%sroot%sfoo%sblah", s, s, s)},
 	}
+}
+
+// SaveTemp saves bytes to a named temporary file.
+func SaveTemp(name string, b ...byte) (string, error) {
+	_, path, err := save.Save(tmp.File(name), b...)
+	if err != nil {
+		return path, fmt.Errorf("could not save the temporary file: %w", err)
+	}
+	return path, nil
 }

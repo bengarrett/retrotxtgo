@@ -1,20 +1,24 @@
-package filesystem
+package filesystem_test
 
 import (
 	"bytes"
 	"os"
 	"testing"
+
+	"github.com/bengarrett/retrotxtgo/lib/filesystem"
+	"github.com/bengarrett/retrotxtgo/lib/internal/mock"
+	"github.com/bengarrett/retrotxtgo/lib/internal/nl"
 )
 
 func TestReadColumns(t *testing.T) {
-	tmp0 := fileExample("hello world\n", 0)
-	tmp1 := fileExample("hello\x0aworld\x0a", 1)
-	tmp2 := fileExample("hello 😄😄😄\n", 2)
-	tmp3 := fileExample("hello\nworld\n", 3)
-	tmp4 := fileExample("hello\x0d\x0aworld\x0d\x0a", 4)
-	tmp5 := fileExample("", 5)
-	tmp6 := fileExample("\x0d\x0a", 6)
-	tmp7 := fileExample("let's\x0duse\x0dan old-skool\x0d8-bit microcomputer\x0dnewline\x0d", 7)
+	tmp0 := mock.FileExample("hello world\n", 0)
+	tmp1 := mock.FileExample("hello\x0aworld\x0a", 1)
+	tmp2 := mock.FileExample("hello 😄😄😄\n", 2)
+	tmp3 := mock.FileExample("hello\nworld\n", 3)
+	tmp4 := mock.FileExample("hello\x0d\x0aworld\x0d\x0a", 4)
+	tmp5 := mock.FileExample("", 5)
+	tmp6 := mock.FileExample("\x0d\x0a", 6)
+	tmp7 := mock.FileExample("let's\x0duse\x0dan old-skool\x0d8-bit microcomputer\x0dnewline\x0d", 7)
 	tests := []struct {
 		name      string
 		wantCount int
@@ -32,7 +36,7 @@ func TestReadColumns(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotCount, err := ReadColumns(tt.name)
+			gotCount, err := filesystem.ReadColumns(tt.name)
 			os.Remove(tt.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadColumns() error = %v, wantErr %v", err, tt.wantErr)
@@ -46,10 +50,10 @@ func TestReadColumns(t *testing.T) {
 }
 
 func TestReadControls(t *testing.T) {
-	tmp0 := fileExample("\x1B\x5b0mhello world\n", 0)
-	tmp1 := fileExample("\x1B\x5b1mhello world\x1B\x5b0m\n", 1)
-	tmp2 := fileExample("hello \x1B\x5b1m😄😄😄\x1B\x5b0m\n", 2)
-	tmp3 := fileExample("\x1B\x5b0m\x1B\x5b34mH\x1B\x5b1me\x1B\x5b32ml\x1B\x5b0;32ml\x1B\x5b1;36mo\x1B\x5b37m "+
+	tmp0 := mock.FileExample("\x1B\x5b0mhello world\n", 0)
+	tmp1 := mock.FileExample("\x1B\x5b1mhello world\x1B\x5b0m\n", 1)
+	tmp2 := mock.FileExample("hello \x1B\x5b1m😄😄😄\x1B\x5b0m\n", 2)
+	tmp3 := mock.FileExample("\x1B\x5b0m\x1B\x5b34mH\x1B\x5b1me\x1B\x5b32ml\x1B\x5b0;32ml\x1B\x5b1;36mo\x1B\x5b37m "+
 		"w\x1B\x5b0mo\x1B\x5b33mr\x1B\x5b1ml\x1B\x5b35md\x1B\x5b0;35m!\x1B\x5b37m\n", 3)
 	tests := []struct {
 		name      string
@@ -64,7 +68,7 @@ func TestReadControls(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotCount, err := ReadControls(tt.name)
+			gotCount, err := filesystem.ReadControls(tt.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadControls() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -85,7 +89,7 @@ func TestIsPipe(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := IsPipe(); got != tt.want {
+			if got := filesystem.IsPipe(); got != tt.want {
 				t.Errorf("IsPipe() = %v, want %v", got, tt.want)
 			}
 		})
@@ -93,10 +97,10 @@ func TestIsPipe(t *testing.T) {
 }
 
 func TestReadLine(t *testing.T) {
-	tmp0 := fileExample("hello\nworld\n", 0)
+	tmp0 := mock.FileExample("hello\nworld\n", 0)
 	type args struct {
 		name      string
-		linebreak lineBreaks
+		linebreak nl.LineBreaks
 	}
 	tests := []struct {
 		name     string
@@ -104,12 +108,12 @@ func TestReadLine(t *testing.T) {
 		wantText string
 		wantErr  bool
 	}{
-		{"none", args{"", nl}, "", true},
-		{"tmp0", args{tmp0, nl}, "hello\nworld\n", false},
+		{"none", args{"", nl.NL}, "", true},
+		{"tmp0", args{tmp0, nl.NL}, "hello\nworld\n", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotText, err := ReadLine(tt.args.name, tt.args.linebreak)
+			gotText, err := filesystem.ReadLine(tt.args.name, tt.args.linebreak)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadLine() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -122,7 +126,7 @@ func TestReadLine(t *testing.T) {
 }
 
 func TestReadLines(t *testing.T) {
-	tmp0 := fileExample("hello\nworld\n", 0)
+	tmp0 := mock.FileExample("hello\nworld\n", 0)
 	type args struct {
 		name string
 	}
@@ -137,7 +141,7 @@ func TestReadLines(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotCount, err := ReadLines(tt.args.name)
+			gotCount, err := filesystem.ReadLines(tt.args.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadLines() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -150,7 +154,7 @@ func TestReadLines(t *testing.T) {
 }
 
 func TestReadText(t *testing.T) {
-	tmp0 := fileExample("hello\nworld\n", 0)
+	tmp0 := mock.FileExample("hello\nworld\n", 0)
 	type args struct {
 		name string
 	}
@@ -166,7 +170,7 @@ func TestReadText(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotText, err := ReadText(tt.args.name)
+			gotText, err := filesystem.ReadText(tt.args.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadText() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -179,7 +183,7 @@ func TestReadText(t *testing.T) {
 }
 
 func TestReadWords(t *testing.T) {
-	tmp0 := fileExample("hello\nworld,\nmy name is Ben\n", 0)
+	tmp0 := mock.FileExample("hello\nworld,\nmy name is Ben\n", 0)
 	type args struct {
 		name string
 	}
@@ -195,7 +199,7 @@ func TestReadWords(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotCount, err := ReadWords(tt.args.name)
+			gotCount, err := filesystem.ReadWords(tt.args.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadWords() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -224,7 +228,7 @@ func TestReadPipe(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r, err := MockInput(tt.args.input)
+			r, err := mock.Input(tt.args.input)
 			if err != nil {
 				t.Error(err)
 			}
@@ -233,7 +237,7 @@ func TestReadPipe(t *testing.T) {
 				os.Stdin = stdin
 			}()
 			os.Stdin = r
-			gotB, err := ReadPipe()
+			gotB, err := filesystem.ReadPipe()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadPipe() error = %v, wantErr %v", err, tt.wantErr)
 				return

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
+	"github.com/bengarrett/retrotxtgo/lib/internal/mock"
 	"golang.org/x/text/encoding/charmap"
 )
 
@@ -42,10 +43,10 @@ func TestCP437Decode(t *testing.T) {
 	}{
 		{"empty", "", "", false},
 		{"hex", cp437hex, "═╣▓╠═", false},
-		{"nl", filesystem.T()["Newline"], filesystem.T()["Newline"], false},
-		{"utf", filesystem.T()["Symbols"], "[Γÿá|Γÿ«|ΓÖ║]", false},
-		{"escapes", filesystem.T()["Escapes"], "bell:\a,back:\b,tab:\t,form:\f,vertical:\v,quote:\"", false},
-		{"digits", filesystem.T()["Digits"], "░░┼░┼░", false},
+		{"nl", mock.T()["Newline"], mock.T()["Newline"], false},
+		{"utf", mock.T()["Symbols"], "[Γÿá|Γÿ«|ΓÖ║]", false},
+		{"escapes", mock.T()["Escapes"], "bell:\a,back:\b,tab:\t,form:\f,vertical:\v,quote:\"", false},
+		{"digits", mock.T()["Digits"], "░░┼░┼░", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

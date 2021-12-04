@@ -3,7 +3,6 @@ package filesystem
 
 import (
 	"archive/tar"
-	"bufio"
 	"errors"
 	"fmt"
 	"io"
@@ -12,12 +11,8 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/bengarrett/retrotxtgo/lib/internal/save"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
-)
-
-const (
-	fileMode os.FileMode = 0660
-	dirMode  os.FileMode = 0700
 )
 
 // ErrStdErr could not print to stderr.
@@ -102,40 +97,9 @@ func winDir(i int, p, platform, dir string) (s string, cont bool) {
 	return dir, false
 }
 
-// Save bytes to the named file location.
-func Save(name string, b ...byte) (written int, path string, err error) {
-	path, err = dir(name)
-	if err != nil {
-		return 0, path, fmt.Errorf("save could not open directory %q: %w", name, err)
-	}
-	path = name
-	const overwrite = os.O_RDWR | os.O_CREATE | os.O_TRUNC
-	file, err := os.OpenFile(path, overwrite, fileMode)
-	if err != nil {
-		return 0, path, fmt.Errorf("save could not open file %q: %w", path, err)
-	}
-	defer file.Close()
-	// bufio is the most performant
-	writer := bufio.NewWriter(file)
-	for i, c := range b {
-		written = i
-		if err = writer.WriteByte(c); err != nil {
-			return 0, path, fmt.Errorf("save could not write bytes: %w", err)
-		}
-	}
-	if err = writer.Flush(); err != nil {
-		return 0, path, fmt.Errorf("save could not flush the writer: %w", err)
-	}
-	path, err = filepath.Abs(file.Name())
-	if err != nil {
-		return 0, path, fmt.Errorf("save could not find the absolute filename: %w", err)
-	}
-	return written, path, file.Close()
-}
-
 // SaveTemp saves bytes to a named temporary file.
 func SaveTemp(name string, b ...byte) (string, error) {
-	_, path, err := Save(tempFile(name), b...)
+	_, path, err := save.Save(tempFile(name), b...)
 	if err != nil {
 		return path, fmt.Errorf("could not save the temporary file: %w", err)
 	}
@@ -188,37 +152,11 @@ func addTar(name string, w *tar.Writer) error {
 
 // Touch creates an empty file at the named location.
 func Touch(name string) (string, error) {
-	_, path, err := Save(name, nil...)
+	_, path, err := save.Save(name, nil...)
 	if err != nil {
 		return path, fmt.Errorf("could not touch a new file: %w", err)
 	}
 	return path, nil
-}
-
-// dir creates the named path directory if it doesn't exist.
-func dir(name string) (string, error) {
-	path := filepath.Dir(name)
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		if err = os.MkdirAll(path, dirMode); err != nil {
-			return "", fmt.Errorf("dir could not make the directory: %s %s: %w", dirMode, path, err)
-		}
-	}
-	return path, nil
-}
-
-// lineBreak returns line break character for the system platform.
-func lineBreak(platform lineBreaks) string {
-	switch platform {
-	case dos, win:
-		return fmt.Sprintf("%x%x", CarriageReturn, Linefeed)
-	case c64, darwin, mac:
-		return fmt.Sprintf("%x", CarriageReturn)
-	case amiga, linux, unix:
-		return fmt.Sprintf("%x", Linefeed)
-	case nl: // use operating system default
-		return "\n"
-	}
-	return "\n"
 }
 
 // tempFile returns a path to the named file
@@ -229,4 +167,9 @@ func tempFile(name string) string {
 		path = filepath.Join(os.TempDir(), name)
 	}
 	return path
+}
+
+// Write b to the named file.
+func Write(name string, b ...byte) (written int, path string, err error) {
+	return save.Save(name, b...)
 }

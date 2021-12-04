@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/lib/filesystem"
+	"github.com/bengarrett/retrotxtgo/lib/internal/mock"
 	"github.com/bengarrett/retrotxtgo/lib/prompt"
 	"github.com/gookit/color"
 )
@@ -47,7 +47,7 @@ func TestPort(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r, err := filesystem.MockInput(tt.args.input)
+			r, err := mock.Input(tt.args.input)
 			if err != nil {
 				t.Error(err)
 			}
@@ -81,7 +81,7 @@ func TestIndexStrings(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r, err := filesystem.MockInput(tt.args.input)
+			r, err := mock.Input(tt.args.input)
 			if err != nil {
 				t.Error(err)
 			}
@@ -114,7 +114,7 @@ func TestShortStrings(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r, err := filesystem.MockInput(tt.args.input)
+			r, err := mock.Input(tt.args.input)
 			if err != nil {
 				t.Error(err)
 			}
@@ -142,7 +142,7 @@ func TestString(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r, err := filesystem.MockInput(tt.input)
+			r, err := mock.Input(tt.input)
 			if err != nil {
 				t.Error(err)
 			}
@@ -175,7 +175,7 @@ func TestStrings(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r, err := filesystem.MockInput(tt.args.input)
+			r, err := mock.Input(tt.args.input)
 			if err != nil {
 				t.Error(err)
 			}

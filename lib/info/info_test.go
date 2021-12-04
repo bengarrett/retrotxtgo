@@ -8,6 +8,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/info"
 	"github.com/bengarrett/retrotxtgo/lib/info/internal/detail"
+	"github.com/bengarrett/retrotxtgo/lib/internal/mock"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/static"
 )
@@ -21,7 +22,7 @@ func rawData() []byte {
 }
 
 func sampleFile() string {
-	b := []byte(filesystem.T()["Tabs"]) // Tabs and Unicode glyphs
+	b := []byte(mock.T()["Tabs"]) // Tabs and Unicode glyphs
 	path, err := filesystem.SaveTemp("info_test.txt", b...)
 	if err != nil {
 		log.Fatal(err)

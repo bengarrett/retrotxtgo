@@ -98,7 +98,7 @@ func cacheSet(etag, ver string) error {
 	if err != nil {
 		return fmt.Errorf("%q: %w", cacheFile, ErrCacheData)
 	}
-	if _, _, err := filesystem.Save(f, out...); err != nil {
+	if _, _, err := filesystem.Write(f, out...); err != nil {
 		return fmt.Errorf("%s: %w", err, ErrCacheSave)
 	}
 	return nil

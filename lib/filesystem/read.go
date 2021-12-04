@@ -8,22 +8,11 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/bengarrett/retrotxtgo/lib/internal/nl"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 )
 
-type lineBreaks int
-
-const (
-	nl lineBreaks = iota
-	dos
-	win
-	c64
-	darwin
-	mac
-	amiga
-	linux
-	unix
-)
+const fileMode os.FileMode = 0600
 
 // IsPipe determines if Stdin (standard input) is piped from another command.
 func IsPipe() bool {
@@ -146,8 +135,8 @@ func ReadControls(name string) (int, error) {
 }
 
 // ReadLine reads a named file location or a named temporary file and returns its content.
-func ReadLine(name string, lb lineBreaks) (string, error) {
-	var path, n = tempFile(name), lineBreak(lb)
+func ReadLine(name string, lb nl.LineBreaks) (string, error) {
+	var path, n = tempFile(name), nl.LineBreak(lb)
 	file, err := os.OpenFile(path, os.O_RDONLY, fileMode)
 	if errors.Is(err, os.ErrNotExist) {
 		return "", fmt.Errorf("%w: %s", ErrNotFound, name)
@@ -259,7 +248,7 @@ func ReadTail(name string, offset int) ([]byte, error) {
 
 // ReadText reads a named file location or a named temporary file and returns its content.
 func ReadText(name string) (string, error) {
-	return ReadLine(name, nl)
+	return ReadLine(name, nl.NL)
 }
 
 // ReadWords counts the number of spaced words in the named file.
