@@ -18,8 +18,8 @@ import (
 )
 
 const (
-	PortMin uint = port.PortMin
-	PortMax uint = port.PortMax
+	PortMin uint = port.Min
+	PortMax uint = port.Max
 )
 
 // CtrlC intercepts any Ctrl-C keyboard input and exits to the shell.
@@ -52,12 +52,12 @@ func SkipSet(setup bool) string {
 
 // Port asks for and returns a HTTP port value.
 func Port(validate, setup bool) uint {
-	return port.PPort(os.Stdin, validate, setup)
+	return port.Port(os.Stdin, validate, setup)
 }
 
 // PortValid checks if the network port is within range to serve HTTP.
 func PortValid(p uint) bool {
-	return port.PortValid(p)
+	return port.Valid(p)
 }
 
 // ShortStrings asks for and returns a single choice from a string of keys.

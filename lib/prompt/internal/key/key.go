@@ -18,7 +18,7 @@ const NoChange = "no changes applied"
 type Keys []string
 
 // Numeric checks input string for a valid int value and returns a matching slice.
-func (k Keys) numeric(input string) string {
+func (k Keys) Numeric(input string) string {
 	if input == "" {
 		return ""
 	}
@@ -46,7 +46,7 @@ func (k Keys) Prompt(r io.Reader, setup bool) string {
 		if setup && key == "" {
 			return ""
 		}
-		if n := k.numeric(key); n != "" {
+		if n := k.Numeric(key); n != "" {
 			return n
 		}
 		if !k.Validate(key) {

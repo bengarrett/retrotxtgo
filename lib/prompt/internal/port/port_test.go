@@ -9,7 +9,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/meta"
 )
 
-func TestPortValid(t *testing.T) {
+func TestValid(t *testing.T) {
 	p := strconv.Itoa(int(meta.WebPort))
 	tests := []struct {
 		name   string
@@ -24,14 +24,14 @@ func TestPortValid(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotOk := port.PortValid(tt.p); gotOk != tt.wantOk {
-				t.Errorf("PortValid() = %v, want %v", gotOk, tt.wantOk)
+			if gotOk := port.Valid(tt.p); gotOk != tt.wantOk {
+				t.Errorf("Valid() = %v, want %v", gotOk, tt.wantOk)
 			}
 		})
 	}
 }
 
-func Test_PPort(t *testing.T) {
+func Test_Port(t *testing.T) {
 	var stdin bytes.Buffer
 	tests := []struct {
 		name     string
@@ -50,8 +50,8 @@ func Test_PPort(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			stdin.Write([]byte(tt.input + "\n")) // \n is a requirement
-			if gotPort := port.PPort(&stdin, tt.validate, false); gotPort != tt.wantPort {
-				t.Errorf("PPort() = %v, want %v", gotPort, tt.wantPort)
+			if gotPort := port.Port(&stdin, tt.validate, false); gotPort != tt.wantPort {
+				t.Errorf("Port() = %v, want %v", gotPort, tt.wantPort)
 			}
 		})
 	}

@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	PortMin  uint = 1 // port 0 is not valid as viper treats it as a null value
-	PortMax  uint = 65535
+	Min      uint = 1 // Min 0 is not valid as Viper treats it as a null value
+	Max      uint = 65535
 	NoChange      = "no changes applied"
 )
 
@@ -31,8 +31,8 @@ func Check(prompts int) {
 	}
 }
 
-// PPort asks for and validates HTTP ports.
-func PPort(r io.Reader, validate, setup bool) uint {
+// Port asks for and validates HTTP ports.
+func Port(r io.Reader, validate, setup bool) uint {
 	const reset uint = 0
 	const baseTen = 10
 	input, prompts := "", 0
@@ -55,7 +55,7 @@ func PPort(r io.Reader, validate, setup bool) uint {
 		}
 		p := uint(value)
 		if validate {
-			if v := PortValid(p); !v {
+			if v := Valid(p); !v {
 				fmt.Printf("%s %v, is out of range\n", str.Bool(false), input)
 				Check(prompts)
 				continue
@@ -66,9 +66,9 @@ func PPort(r io.Reader, validate, setup bool) uint {
 	return reset
 }
 
-// PortValid checks if the network port is within range to serve HTTP.
-func PortValid(p uint) bool {
-	if p < PortMin || p > PortMax {
+// Valid checks if the network port is within range to serve HTTP.
+func Valid(p uint) bool {
+	if p < Min || p > Max {
 		return false
 	}
 	return true
