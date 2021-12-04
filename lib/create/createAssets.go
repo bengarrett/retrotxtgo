@@ -13,10 +13,10 @@ import (
 	"golang.org/x/text/language"
 )
 
-type asset int
+type Asset int
 
 const (
-	htmlFn asset = iota
+	HtmlFn Asset = iota
 	fontFn
 	cssFn
 	jsFn
@@ -27,9 +27,9 @@ const (
 	faviconSrc = "img/retrotxt_16.png"
 )
 
-func (a asset) write() string {
+func (a Asset) Write() string {
 	// do not change the order of this array,
-	// they must match the Fn asset iota values.
+	// they must match the Fn Asset iota values.
 	return [...]string{
 		// core assets
 		"index.html",
@@ -56,27 +56,27 @@ func (args *Args) savePCBoard(c chan error) {
 	c <- args.saveCSSFile(static.CSSPCBoard, pcbFn)
 }
 
-func (args *Args) saveCSSFile(src []byte, a asset) error {
-	s, err := args.destination(a.write())
+func (args *Args) saveCSSFile(src []byte, a Asset) error {
+	s, err := args.destination(a.Write())
 	if err != nil {
 		return fmt.Errorf("%w: %s", err, s)
 	}
 	if len(src) == 0 {
-		return fmt.Errorf("%s, %w", a.write(), static.ErrNotFound)
+		return fmt.Errorf("%s, %w", a.Write(), static.ErrNotFound)
 	}
 	nn, _, err := filesystem.Write(s, src...)
 	if err != nil {
 		return err
 	}
 	if !args.Test {
-		fmt.Println(bytesStats(s, nn))
+		fmt.Println(Stats(s, nn))
 	}
 	return nil
 }
 
 // saveFavIcon read and save the favorite icon to a file.
 func (args *Args) saveFavIcon(c chan error) {
-	s, err := args.destination(favFn.write())
+	s, err := args.destination(favFn.Write())
 	if err != nil {
 		c <- fmt.Errorf("%w: %s", err, s)
 	}
@@ -89,7 +89,7 @@ func (args *Args) saveFavIcon(c chan error) {
 		c <- err
 	}
 	if !args.Test {
-		fmt.Println(bytesStats(s, nn))
+		fmt.Println(Stats(s, nn))
 	}
 	c <- nil
 }
@@ -107,7 +107,7 @@ func (args *Args) saveFont(c chan error) {
 			c <- err
 		}
 	}
-	if err := args.saveFontCSS(fontFn.write()); err != nil {
+	if err := args.saveFontCSS(fontFn.Write()); err != nil {
 		c <- err
 	}
 	c <- nil
@@ -132,7 +132,7 @@ func (args *Args) saveFontCSS(name string) error {
 		return err
 	}
 	if !args.Test {
-		fmt.Println(bytesStats(s, nn))
+		fmt.Println(Stats(s, nn))
 	}
 	return nil
 }
@@ -152,14 +152,14 @@ func (args *Args) saveFontWoff2(name, packName string) error {
 		return err
 	}
 	if !args.Test {
-		fmt.Println(bytesStats(s, nn))
+		fmt.Println(Stats(s, nn))
 	}
 	return nil
 }
 
 // saveJS creates and save the JS file.
 func (args *Args) saveJS(c chan error) {
-	s, err := args.destination(jsFn.write())
+	s, err := args.destination(jsFn.Write())
 	if err != nil {
 		c <- fmt.Errorf("%w: %s", err, s)
 	}
@@ -172,14 +172,14 @@ func (args *Args) saveJS(c chan error) {
 		c <- err
 	}
 	if !args.Test {
-		fmt.Println(bytesStats(s, nn))
+		fmt.Println(Stats(s, nn))
 	}
 	c <- nil
 }
 
-// saveHTML creates and save the HTML file.
-func (args *Args) saveHTML(b *[]byte, c chan error) {
-	s, err := args.destination(htmlFn.write())
+// SaveHTML creates and save the HTML file.
+func (args *Args) SaveHTML(b *[]byte, c chan error) {
+	s, err := args.destination(HtmlFn.Write())
 	if err != nil {
 		c <- fmt.Errorf("%w: %s", err, s)
 	}
@@ -205,7 +205,7 @@ func (args *Args) saveHTML(b *[]byte, c chan error) {
 		c <- err
 	}
 	if !args.Test {
-		fmt.Println(bytesStats(s, nn))
+		fmt.Println(Stats(s, nn))
 	}
 	if err := w.Flush(); err != nil {
 		c <- err
@@ -213,8 +213,8 @@ func (args *Args) saveHTML(b *[]byte, c chan error) {
 	c <- nil
 }
 
-// bytesStats humanizes, colorizes and prints the filename and size.
-func bytesStats(name string, nn int) string {
+// Stats humanizes, colorizes and prints the filename and size.
+func Stats(name string, nn int) string {
 	const kB = 1000
 	if nn == 0 {
 		return color.OpFuzzy.Sprintf("saved to %s (zero-byte file)", name)
@@ -250,7 +250,7 @@ func (args *Args) destination(name string) (string, error) {
 	} else if fs.Size() > 0 && !args.Save.OW {
 		// unexpected, dst does exist
 		switch name {
-		case favFn.write(), jsFn.write(), "vga.woff2", "mona.woff2":
+		case favFn.Write(), jsFn.Write(), "vga.woff2", "mona.woff2":
 			// existing static files can be ignored
 			return dst, nil
 		}

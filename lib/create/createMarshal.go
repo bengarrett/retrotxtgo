@@ -21,14 +21,14 @@ import (
 	"github.com/tdewolff/minify/js"
 )
 
-// marshal transforms bytes into UTF-8, creates the page meta and template data.
-func (args *Args) marshal(b *[]byte) (PageData, error) {
+// Marshal transforms bytes into UTF-8, creates the page meta and template data.
+func (args *Args) Marshal(b *[]byte) (PageData, error) {
 	if b == nil {
 		return PageData{}, fmt.Errorf("pagedata: %w", ErrNilByte)
 	}
 	p := PageData{}
 	// templates are found in the dir static/html/*.gohtml
-	switch args.layout {
+	switch args.Layouts {
 	case Inline:
 		var err error
 		p, err = args.marshalInline(&p)
@@ -42,7 +42,7 @@ func (args *Args) marshal(b *[]byte) (PageData, error) {
 	case None:
 		// do nothing
 	default:
-		return PageData{}, fmt.Errorf("pagedata %s: %w", args.layout, logs.ErrTmplName)
+		return PageData{}, fmt.Errorf("pagedata %s: %w", args.Layouts, logs.ErrTmplName)
 	}
 	var out bytes.Buffer
 	bt := args.Source.BBSType
@@ -53,14 +53,14 @@ func (args *Args) marshal(b *[]byte) (PageData, error) {
 		p.PreText = string(r)
 		if p.MetaRetroTxt {
 			lb := filesystem.LineBreaks(true, r...)
-			p.Comment = args.comment(lb, r...)
+			p.Comment = args.Comment(lb, r...)
 		}
 	case bt < bbs.ANSI:
 		// convert bytes into utf8
 		p.PreText = string(r)
 		if p.MetaRetroTxt {
 			lb := filesystem.LineBreaks(true, r...)
-			p.Comment = args.comment(lb, r...)
+			p.Comment = args.Comment(lb, r...)
 		}
 	case bt > bbs.ANSI:
 		if err := bt.HTML(&out, []byte(string(r))); err != nil {
@@ -152,15 +152,15 @@ func metaAppVersion() string {
 // marshalTextTransform marshals the bytes data with the HTML template.
 func (args *Args) marshalTextTransform(b *[]byte) (bytes.Buffer, error) {
 	buf := bytes.Buffer{}
-	tmpl, err := args.newTemplate()
+	Tmpl, err := args.newTemplate()
 	if err != nil {
 		return buf, fmt.Errorf("stdout new template failure: %w", err)
 	}
-	d, err := args.marshal(b)
+	d, err := args.Marshal(b)
 	if err != nil {
 		return buf, fmt.Errorf("stdout meta and pagedata failure: %w", err)
 	}
-	if err = tmpl.Execute(&buf, d); err != nil {
+	if err = Tmpl.Execute(&buf, d); err != nil {
 		return buf, fmt.Errorf("stdout template execute failure: %w", err)
 	}
 	return buf, nil
@@ -172,26 +172,26 @@ func (args *Args) newTemplate() (*template.Template, error) {
 		return nil, fmt.Errorf("using existing template cache: %w", err)
 	}
 	if !args.Save.Cache {
-		if err := args.templateSave(); err != nil {
+		if err := args.TemplateSave(); err != nil {
 			return nil, fmt.Errorf("creating a new template: %w", err)
 		}
 	} else {
-		s, err := os.Stat(args.tmpl)
+		s, err := os.Stat(args.Tmpl)
 		switch {
 		case os.IsNotExist(err):
-			if err2 := args.templateSave(); err2 != nil {
+			if err2 := args.TemplateSave(); err2 != nil {
 				return nil, fmt.Errorf("saving to the template: %w", err2)
 			}
 		case err != nil:
 			return nil, err
 		case s.IsDir():
-			return nil, fmt.Errorf("new template %q: %w", args.tmpl, logs.ErrTmplIsDir)
+			return nil, fmt.Errorf("new template %q: %w", args.Tmpl, logs.ErrTmplIsDir)
 		}
 	}
 	// to avoid a potential panic, Stat again in case os.IsNotExist() is true
-	s, err := os.Stat(args.tmpl)
+	s, err := os.Stat(args.Tmpl)
 	if err != nil {
-		return nil, fmt.Errorf("could not access file: %q: %w", args.tmpl, err)
+		return nil, fmt.Errorf("could not access file: %q: %w", args.Tmpl, err)
 	}
 	if err = args.templatePack(); err != nil {
 		return nil, fmt.Errorf("template pack: %w", err)
@@ -201,26 +201,26 @@ func (args *Args) newTemplate() (*template.Template, error) {
 		if err != nil {
 			return nil, fmt.Errorf("template data: %w", err)
 		}
-		if _, _, err := filesystem.Write(args.tmpl, *b...); err != nil {
-			return nil, fmt.Errorf("saving template: %q: %w", args.tmpl, err)
+		if _, _, err := filesystem.Write(args.Tmpl, *b...); err != nil {
+			return nil, fmt.Errorf("saving template: %q: %w", args.Tmpl, err)
 		}
 	}
-	t := template.Must(template.ParseFiles(args.tmpl))
+	t := template.Must(template.ParseFiles(args.Tmpl))
 	return t, nil
 }
 
 // templateCache creates a filepath for the cache templates.
 func (args *Args) templateCache() error {
 	const ext = ".gohtml"
-	name := args.layout.Pack()
+	name := args.Layouts.Pack()
 	if name == "" {
-		return fmt.Errorf("template cache %q: %w", args.layout, logs.ErrTmplName)
+		return fmt.Errorf("template cache %q: %w", args.Layouts, logs.ErrTmplName)
 	}
 	var err error
 	filename := name + ext
-	args.tmpl, err = gap.NewScope(gap.User, meta.Dir).DataPath(filename)
+	args.Tmpl, err = gap.NewScope(gap.User, meta.Dir).DataPath(filename)
 	if err != nil {
-		return fmt.Errorf("template cache path: %q: %w", args.tmpl, err)
+		return fmt.Errorf("template cache path: %q: %w", args.Tmpl, err)
 	}
 	return nil
 }
@@ -229,9 +229,9 @@ func (args *Args) templateCache() error {
 func (args *Args) templatePack() error {
 	// sep should be kept as-is, regardless of platform
 	const dir, ext, sep = "html", ".gohtml", "/"
-	name := args.layout.Pack()
+	name := args.Layouts.Pack()
 	if name == "" {
-		return fmt.Errorf("template pack %q: %w", args.layout, logs.ErrTmplName)
+		return fmt.Errorf("template pack %q: %w", args.Layouts, logs.ErrTmplName)
 	}
 	filename := name + ext
 	args.pack = strings.Join([]string{dir, filename}, sep)
@@ -247,8 +247,8 @@ func (args *Args) templateData() (*[]byte, error) {
 	return &b, nil
 }
 
-// templateSave saves an embedded template.
-func (args *Args) templateSave() error {
+// TemplateSave saves an embedded template.
+func (args *Args) TemplateSave() error {
 	err := args.templatePack()
 	if err != nil {
 		return fmt.Errorf("template save pack error: %w", err)
@@ -257,14 +257,14 @@ func (args *Args) templateSave() error {
 	if err != nil {
 		return fmt.Errorf("template save data error: %w", err)
 	}
-	if _, _, err := filesystem.Write(args.tmpl, *b...); err != nil {
+	if _, _, err := filesystem.Write(args.Tmpl, *b...); err != nil {
 		return fmt.Errorf("template save error: %w", err)
 	}
 	return nil
 }
 
-// comment content for the meta retrotxt attribute.
-func (args *Args) comment(lb filesystem.LB, r ...rune) string {
+// Comment content for the meta retrotxt attribute.
+func (args *Args) Comment(lb filesystem.LB, r ...rune) string {
 	const na = "n/a"
 	l, w, name, b := 0, 0, na, []byte(string(r))
 

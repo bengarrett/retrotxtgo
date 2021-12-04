@@ -1,4 +1,4 @@
-package create
+package create_test
 
 import (
 	"fmt"
@@ -10,27 +10,34 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/bengarrett/retrotxtgo/lib/create"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/spf13/viper"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 )
 
+// create.Destination
+// create.SaveAssets
+// create.ZipAssets
+// create.SaveHTML
+// create.Asset type
+
 func ExampleColorScheme() {
-	fmt.Print(ColorScheme()[0])
+	fmt.Print(create.ColorScheme()[0])
 	// Output: normal
 }
 func ExampleReferrer() {
-	fmt.Print(Referrer()[1])
+	fmt.Print(create.Referrer()[1])
 	// Output: origin
 }
 
 func ExampleRobots() {
-	fmt.Print(Robots()[2])
+	fmt.Print(create.Robots()[2])
 	// Output: follow
 }
 
-func Test_saveAssets(t *testing.T) {
+func TestSaveAssets(t *testing.T) {
 	t.Run("comment", func(t *testing.T) {
 		// Create a temporary directory
 		tmpDir := filepath.Join(os.TempDir(), "retrotxt_example_save_assets")
@@ -39,14 +46,14 @@ func Test_saveAssets(t *testing.T) {
 		}
 		defer os.RemoveAll(tmpDir)
 		// Initialize
-		a := Args{
-			Test:   true,
-			layout: Compact,
+		a := create.Args{
+			Test:    true,
+			Layouts: create.Compact,
 		}
 		a.Save.Destination = tmpDir
 		// Save files
 		b := []byte("hello")
-		if err := a.saveAssets(&b); err != nil {
+		if err := a.SaveAssets(&b); err != nil {
 			t.Errorf("saveAssets: %w", err)
 		}
 		// Count the saved files in the temporary directory
@@ -57,12 +64,12 @@ func Test_saveAssets(t *testing.T) {
 		const zero = 0
 
 		if got := len(files); got == zero {
-			t.Errorf("saveAssets() file count = %v", got)
+			t.Errorf("SaveAssets() file count = %v", got)
 		}
 	})
 }
 
-func Test_zipAssets(t *testing.T) {
+func TestZipAssets(t *testing.T) {
 	t.Run("comment", func(t *testing.T) {
 		// Create a temporary directory
 		tmpDir := filepath.Join(os.TempDir(), "retrotxt_example_save_assets")
@@ -72,15 +79,15 @@ func Test_zipAssets(t *testing.T) {
 		}
 		defer os.RemoveAll(tmpDir)
 		// Initialize
-		a := Args{
-			layout: Standard,
-			Test:   true,
+		a := create.Args{
+			Layouts: create.Standard,
+			Test:    true,
 		}
 		a.Save.Destination = tmpDir
 		// Create a zip file
-		name := filepath.Join(os.TempDir(), zipName)
+		name := filepath.Join(os.TempDir(), create.ZipName)
 		b := []byte("hello")
-		a.zipAssets(os.TempDir(), &b)
+		a.ZipAssets(os.TempDir(), &b)
 		defer os.Remove(name)
 		// Print the filename of the new zip file
 		file, err := os.Stat(name)
@@ -89,7 +96,7 @@ func Test_zipAssets(t *testing.T) {
 		}
 		const want = "retrotxt.zip"
 		if got := file.Name(); got != want {
-			t.Errorf("zipAssets() filename = %v, want %v", got, want)
+			t.Errorf("ZipAssets() filename = %v, want %v", got, want)
 		}
 	})
 }
@@ -120,10 +127,10 @@ func TestSave(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ch := make(chan error)
-			a := Args{layout: Standard, Test: true}
+			a := create.Args{Layouts: create.Standard, Test: true}
 			a.Save.OW = true
 			a.Save.Destination = tt.args.name
-			go a.saveHTML(&tt.args.data, ch)
+			go a.SaveHTML(&tt.args.data, ch)
 			err := <-ch
 			if (err != nil) != tt.wantErr {
 				fmt.Println("TestSave dir:", tmpDir)
@@ -133,7 +140,7 @@ func TestSave(t *testing.T) {
 	}
 	// clean-up
 	if wd, err := os.Getwd(); err == nil {
-		p := filepath.Join(wd, htmlFn.write())
+		p := filepath.Join(wd, create.HtmlFn.Write())
 		if err := os.Remove(p); err != nil && !os.IsNotExist(err) {
 			t.Error(err)
 		}
@@ -142,13 +149,13 @@ func TestSave(t *testing.T) {
 
 func TestArgsStdout(t *testing.T) {
 	var (
-		a  = Args{layout: Standard}
+		a  = create.Args{Layouts: create.Standard}
 		b  = []byte("")
 		hi = []byte("hello world")
 	)
 	tests := []struct {
 		name    string
-		args    Args
+		args    create.Args
 		b       *[]byte
 		wantErr bool
 	}{
@@ -166,11 +173,11 @@ func TestArgsStdout(t *testing.T) {
 }
 
 func TestKeys(t *testing.T) {
-	l := Layouts()
+	l := create.Layouts()
 	if got := len(l); got != 4 {
 		t.Errorf("Templates().Keys() = %v, want %v", got, 4)
 	}
-	if got := Layouts()[3]; got != "none" {
+	if got := create.Layouts()[3]; got != "none" {
 		t.Errorf("Templates().Keys() = %v, want %v", got, "none")
 	}
 }
@@ -187,65 +194,65 @@ func TestTemplates(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			l, _ := layout(tt.key)
+			l, _ := create.ParseLayout(tt.key)
 			if got := l.Pack(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("layout() = %v, want %v", got, tt.want)
+				t.Errorf("ParseLayout() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_templateSave(t *testing.T) {
+func TestTemplateSave(t *testing.T) {
 	tmpFile, err := ioutil.TempFile(os.TempDir(), "tmplsave")
 	if err != nil {
 		t.Error(err)
 	}
 	defer os.Remove(tmpFile.Name())
-	a := Args{
-		layout: Standard,
-		tmpl:   tmpFile.Name(),
+	a := create.Args{
+		Layouts: create.Standard,
+		Tmpl:    tmpFile.Name(),
 	}
-	if err = a.templateSave(); err != nil {
-		t.Errorf("templateSave() created an error: %w", err)
+	if err = a.TemplateSave(); err != nil {
+		t.Errorf("TemplateSave() created an error: %w", err)
 	}
 }
 
-func Test_marshal(t *testing.T) {
+func TestArgs_Marshal(t *testing.T) {
 	ex := fmt.Sprintf("%s | example", meta.Name)
 	viper.SetDefault("html.title", ex)
-	args := Args{layout: Standard}
+	args := create.Args{Layouts: create.Standard}
 	w := "hello"
 	d := []byte(w)
-	got, _ := args.marshal(&d)
+	got, _ := args.Marshal(&d)
 	if got.PreText != w {
-		t.Errorf("marshal().PreText = %v, want %v", got, w)
+		t.Errorf("Marshal().PreText = %v, want %v", got, w)
 	}
-	args.layout = Compact
+	args.Layouts = create.Compact
 	w = ex
-	got, _ = args.marshal(&d)
+	got, _ = args.Marshal(&d)
 	if got.PageTitle != w {
-		t.Errorf("marshal().PageTitle = %v, want %v", got, w)
+		t.Errorf("Marshal().PageTitle = %v, want %v", got, w)
 	}
 	w = ""
-	got, _ = args.marshal(&d)
+	got, _ = args.Marshal(&d)
 	if got.MetaDesc != w {
-		t.Errorf("marshal().MetaDesc = %v, want %v", got, w)
+		t.Errorf("Marshal().MetaDesc = %v, want %v", got, w)
 	}
-	args.layout = Standard
+	args.Layouts = create.Standard
 	w = ""
-	got, _ = args.marshal(&d)
+	got, _ = args.Marshal(&d)
 	if got.MetaAuthor != w {
-		t.Errorf("marshal().MetaAuthor = %v, want %v", got, w)
+		t.Errorf("Marshal().MetaAuthor = %v, want %v", got, w)
 	}
-	args.layout = Inline
+	args.Layouts = create.Inline
 	w = ""
-	got, _ = args.marshal(&d)
+	got, _ = args.Marshal(&d)
 	if got.MetaAuthor != w {
-		t.Errorf("marshal().MetaAuthor = %v, want %v", got, w)
+		t.Errorf("Marshal().MetaAuthor = %v, want %v", got, w)
 	}
 }
 
-func Test_destination(t *testing.T) {
+func TestDestination(t *testing.T) {
 	saved := viper.GetString("save-directory")
 	wd, _ := os.Getwd()
 	home, _ := os.UserHomeDir()
@@ -274,13 +281,13 @@ func Test_destination(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotPath, err := destination(tt.args...)
+			gotPath, err := create.Destination(tt.args...)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("destination() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Destination() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if gotPath != tt.wantPath {
-				t.Errorf("destination() = %v, want %v", gotPath, tt.wantPath)
+				t.Errorf("Destination() = %v, want %v", gotPath, tt.wantPath)
 			}
 		})
 	}
@@ -305,7 +312,7 @@ func TestNormalize(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotB := Normalize(tt.args.e, tt.args.r...); !reflect.DeepEqual(gotB, tt.wantB) {
+			if gotB := create.Normalize(tt.args.e, tt.args.r...); !reflect.DeepEqual(gotB, tt.wantB) {
 				t.Errorf("Normalize() = %v, want %v", gotB, tt.wantB)
 			}
 		})

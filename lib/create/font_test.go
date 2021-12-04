@@ -1,16 +1,17 @@
-package create
+package create_test
 
 import (
 	"fmt"
 	"reflect"
 	"testing"
 
+	"github.com/bengarrett/retrotxtgo/lib/create"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/japanese"
 )
 
 func ExampleFonts() {
-	fmt.Print(Fonts()[2])
+	fmt.Print(create.Fonts()[2])
 	// Output: vga
 }
 
@@ -18,14 +19,14 @@ func TestAutoFont(t *testing.T) {
 	tests := []struct {
 		name string
 		e    encoding.Encoding
-		want Font
+		want create.Font
 	}{
-		{"empty", nil, VGA},
-		{"jp", japanese.ShiftJIS, Mona},
+		{"empty", nil, create.VGA},
+		{"jp", japanese.ShiftJIS, create.Mona},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := AutoFont(tt.e); !reflect.DeepEqual(got, tt.want) {
+			if got := create.AutoFont(tt.e); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("AutoFont() = %v, want %v", got, tt.want)
 			}
 		})
@@ -35,10 +36,10 @@ func TestAutoFont(t *testing.T) {
 func TestFont_File(t *testing.T) {
 	tests := []struct {
 		name string
-		f    Font
+		f    create.Font
 		want string
 	}{
-		{"vga", VGA, "ibm-vga8.woff2"},
+		{"vga", create.VGA, "ibm-vga8.woff2"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -52,15 +53,15 @@ func TestFont_File(t *testing.T) {
 func TestFamily(t *testing.T) {
 	tests := []struct {
 		name string
-		want Font
+		want create.Font
 	}{
-		{"v", VGA},
-		{"mona", Mona},
-		{"a", Automatic},
+		{"v", create.VGA},
+		{"mona", create.Mona},
+		{"a", create.Automatic},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Family(tt.name); !reflect.DeepEqual(got, tt.want) {
+			if got := create.Family(tt.name); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Family() = %v, want %v", got, tt.want)
 			}
 		})
@@ -85,7 +86,7 @@ func TestFontCSS(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotB, err := FontCSS(tt.args.name, nil, tt.args.embed)
+			gotB, err := create.FontCSS(tt.args.name, nil, tt.args.embed)
 			gotSize := len(gotB)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("FontCSS() error = %v, wantErr %v", err, tt.wantErr)

@@ -56,14 +56,15 @@ type Args struct {
 		Width       uint
 		Lines       uint
 	}
-	layout    Layout // layout flag interpretation
 	Port      uint   // Port for HTTP server
 	FontEmbed bool   // embed the font as Base64 data
 	Test      bool   // unit test mode
 	Layout    string // Layout of the HTML
 	Syntax    string // Syntax and color theming printing HTML
-	tmpl      string // template filename
-	pack      string // template package name
+	//
+	Layouts Layout // layout flag interpretation
+	Tmpl    string // template filename
+	pack    string // template package name
 }
 
 // Meta data to embed into the HTML.
@@ -159,7 +160,7 @@ const (
 	standard = "standard"
 	unknown  = "unknown"
 
-	zipName = "retrotxt.zip"
+	ZipName = "retrotxt.zip"
 )
 
 // ColorScheme values for the content attribute of <meta name="color-scheme">.
@@ -191,13 +192,13 @@ func (l Layout) Pack() string {
 // Create handles the target output command arguments.
 func (args *Args) Create(b *[]byte) error {
 	var err error
-	args.layout, err = layout(args.Layout)
+	args.Layouts, err = ParseLayout(args.Layout)
 	if err != nil {
 		return err
 	}
 	switch {
 	case args.Save.AsFiles:
-		if err := args.saveAssets(b); err != nil {
+		if err := args.SaveAssets(b); err != nil {
 			// --overwrite hint
 			if errors.As(err, &ErrFileExist) {
 				fmt.Println(logs.Hint("create [filenames] --overwrite", ErrFileExist))
@@ -208,7 +209,7 @@ func (args *Args) Create(b *[]byte) error {
 		}
 	case args.Save.Compress:
 		const noDestination = ""
-		args.zipAssets(noDestination, b)
+		args.ZipAssets(noDestination, b)
 	default:
 		// print to terminal
 		if err := args.Stdout(b); err != nil {
@@ -218,14 +219,14 @@ func (args *Args) Create(b *[]byte) error {
 	return nil
 }
 
-func (args *Args) saveAssets(b *[]byte) error {
+func (args *Args) SaveAssets(b *[]byte) error {
 	skip := func(c chan error) {
 		c <- nil
 	}
 	if args.Save.Destination == "" {
 		dir := []string{viper.GetString("save-directory")}
 		var err error
-		if args.Save.Destination, err = destination(dir...); err != nil {
+		if args.Save.Destination, err = Destination(dir...); err != nil {
 			logs.FatalMark(args.Save.Destination, logs.ErrFileSaveD, err)
 		}
 	}
@@ -235,9 +236,9 @@ func (args *Args) saveAssets(b *[]byte) error {
 
 	ch, cnt := make(chan error), 0
 
-	go args.saveHTML(b, ch)
+	go args.SaveHTML(b, ch)
 
-	if useCSS(args.layout) {
+	if useCSS(args.Layouts) {
 		cnt++
 		go args.saveStyles(ch)
 	}
@@ -246,15 +247,15 @@ func (args *Args) saveAssets(b *[]byte) error {
 		go args.saveBBS(ch)
 		go args.savePCBoard(ch)
 	}
-	if useFontCSS(args.layout) {
+	if useFontCSS(args.Layouts) {
 		cnt++
 		go args.saveFont(ch)
 	}
-	if useJS(args.layout) {
+	if useJS(args.Layouts) {
 		cnt++
 		go args.saveJS(ch)
 	}
-	if useIcon(args.layout) {
+	if useIcon(args.Layouts) {
 		cnt++
 		go args.saveFavIcon(ch)
 	}
@@ -334,7 +335,7 @@ func useJS(l Layout) bool {
 
 // zipAssets compresses all assets into a single zip archive.
 // An empty destination directory argument will save the zip file to the user working directory.
-func (args *Args) zipAssets(destDir string, b *[]byte) {
+func (args *Args) ZipAssets(destDir string, b *[]byte) {
 	defer func() {
 		dir := args.Save.Destination
 		m, err := filepath.Match(filepath.Join(os.TempDir(), "*"), dir)
@@ -352,13 +353,13 @@ func (args *Args) zipAssets(destDir string, b *[]byte) {
 	if err != nil {
 		logs.FatalMark("temporary", logs.ErrFileSaveD, err)
 	}
-	if err = args.saveAssets(b); err != nil {
+	if err = args.SaveAssets(b); err != nil {
 		fmt.Println(logs.SprintWrap(logs.ErrFileSave, err))
 		return
 	}
-	name := zipName
+	name := ZipName
 	if destDir != "" {
-		name = filepath.Join(destDir, zipName)
+		name = filepath.Join(destDir, ZipName)
 	}
 	zip := filesystem.Zip{
 		Name:      name,
@@ -400,7 +401,7 @@ func (args *Args) Stdout(b *[]byte) error {
 		return errf
 	}
 	// always print the HTML
-	fmt.Printf("\nHTML file: %s\n\n", htmlFn.write())
+	fmt.Printf("\nHTML file: %s\n\n", HtmlFn.Write())
 	if err = str.Highlight(html.String(), "html", args.Syntax, true); err != nil {
 		return fmt.Errorf("stdout html highlight: %w", err)
 	}
@@ -416,10 +417,10 @@ func colorSyntax(s string) bool {
 }
 
 func (args *Args) printCSS(b *[]byte) error {
-	if !useCSS(args.layout) {
+	if !useCSS(args.Layouts) {
 		return nil
 	}
-	fmt.Printf("\nCSS file: %s\n\n", cssFn.write())
+	fmt.Printf("\nCSS file: %s\n\n", cssFn.Write())
 	if !colorSyntax(args.Syntax) {
 		fmt.Println(string(*b))
 		return nil
@@ -431,10 +432,10 @@ func (args *Args) printCSS(b *[]byte) error {
 }
 
 func (args *Args) printFontCSS(name string, b *[]byte) error {
-	if !useFontCSS(args.layout) {
+	if !useFontCSS(args.Layouts) {
 		return nil
 	}
-	fmt.Printf("\nCSS for %s font file: %s\n\n", name, fontFn.write())
+	fmt.Printf("\nCSS for %s font file: %s\n\n", name, fontFn.Write())
 	if err := str.Highlight(string(*b), "css", args.Syntax, true); err != nil {
 		return fmt.Errorf("stdout font css highlight: %w", err)
 	}
@@ -442,10 +443,10 @@ func (args *Args) printFontCSS(name string, b *[]byte) error {
 }
 
 func (args *Args) printJS(b *[]byte) error {
-	if !useJS(args.layout) {
+	if !useJS(args.Layouts) {
 		return nil
 	}
-	fmt.Printf("\nJS file: %s\n\n", jsFn.write())
+	fmt.Printf("\nJS file: %s\n\n", jsFn.Write())
 	if !colorSyntax(args.Syntax) {
 		fmt.Println(string(*b))
 		return nil
@@ -470,7 +471,7 @@ func Normalize(e encoding.Encoding, r ...rune) []byte {
 }
 
 // destination determines if user supplied arguments are a valid file or directory destination.
-func destination(args ...string) (path string, err error) {
+func Destination(args ...string) (path string, err error) {
 	if len(args) == 0 {
 		return path, nil
 	}
@@ -508,8 +509,8 @@ func dirs(dir string) (path string, err error) {
 	return "", nil
 }
 
-// layout parses possible --layout argument values.
-func layout(name string) (Layout, error) {
+// ParseLayout parses possible --layout argument values.
+func ParseLayout(name string) (Layout, error) {
 	switch name {
 	case standard, "s":
 		return Standard, nil

@@ -1,16 +1,17 @@
-package create
+package create_test
 
 import (
 	"log"
 	"testing"
 
+	"github.com/bengarrett/retrotxtgo/lib/create"
 	"github.com/bengarrett/retrotxtgo/meta"
 )
 
-func ExampleServe() {
+func ExampleArgs_Serve() {
 	// Initialize the bare minimum configuration.
 	b := []byte("hello world")
-	args := Args{
+	args := create.Args{
 		Layout: "standard",
 		Port:   meta.WebPort,
 	}
@@ -35,7 +36,7 @@ func TestPort(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Port(tt.port); got != tt.want {
+			if got := create.Port(tt.port); got != tt.want {
 				t.Errorf("Port() = %v, want %v", got, tt.want)
 			}
 		})

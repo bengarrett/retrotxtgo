@@ -65,9 +65,9 @@ func (args *Args) Serve(b *[]byte) error {
 func (args *Args) override() {
 	const embed = false
 	s := []string{}
-	if args.layout != Standard {
+	if args.Layouts != Standard {
 		s = append(s, fmt.Sprintf("%s HTML layout", Standard))
-		args.layout = Standard
+		args.Layouts = Standard
 	}
 	if args.FontEmbed {
 		s = append(s, "not embedding the font")
