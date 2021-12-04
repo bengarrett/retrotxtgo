@@ -2,6 +2,7 @@
 package sample
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -16,6 +17,12 @@ import (
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/encoding/unicode/utf32"
+)
+
+var (
+	ErrEncode  = errors.New("no encoding provided")
+	ErrConvert = errors.New("unknown convert method")
+	ErrConvNil = errors.New("conv argument cannot be empty")
 )
 
 // Flags and configuration values by the user.
@@ -124,6 +131,21 @@ func Open(name string) ([]byte, error) {
 	return b, nil
 }
 
+// Encode b to the encoding.
+func Encode(e encoding.Encoding, b ...byte) ([]byte, error) {
+	if e == nil {
+		return nil, ErrEncode
+	}
+	nb, err := e.NewEncoder().Bytes(b)
+	if err != nil {
+		if len(nb) == 0 {
+			return b, fmt.Errorf("encoder could not convert bytes to %s: %w", e, err)
+		}
+		return nb, nil
+	}
+	return nb, nil
+}
+
 // Open and convert a sample textfile.
 func (flag Flags) Open(name string, conv *convert.Convert) (File, error) {
 	var f File
@@ -195,18 +217,4 @@ func Valid(name string) bool {
 		return false
 	}
 	return true
-}
-
-func encode(e encoding.Encoding, b ...byte) ([]byte, error) {
-	if e == nil {
-		return nil, ErrEncode
-	}
-	nb, err := e.NewEncoder().Bytes(b)
-	if err != nil {
-		if len(nb) == 0 {
-			return b, fmt.Errorf("encoder could not convert bytes to %s: %w", e, err)
-		}
-		return nb, nil
-	}
-	return nb, nil
 }

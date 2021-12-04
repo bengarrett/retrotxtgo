@@ -1,5 +1,5 @@
 // Package sample opens and encodes the example textfiles embedded into the program.
-package sample
+package sample_test
 
 import (
 	"fmt"
@@ -9,12 +9,13 @@ import (
 	"unicode/utf8"
 
 	"github.com/bengarrett/retrotxtgo/lib/convert"
+	"github.com/bengarrett/retrotxtgo/lib/sample"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 )
 
 func ExampleOpen() {
-	b, err := Open("037")
+	b, err := sample.Open("037")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -52,7 +53,7 @@ func TestFlags_Open(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f := Flags{
+			f := sample.Flags{
 				From: tt.fields.From,
 				To:   tt.fields.To,
 			}
@@ -84,7 +85,7 @@ func TestValid(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Valid(tt.args.name); got != tt.want {
+			if got := sample.Valid(tt.args.name); got != tt.want {
 				t.Errorf("Valid() = %v, want %v", got, tt.want)
 			}
 		})
@@ -112,7 +113,7 @@ func Test_encode(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := encode(tt.args.e, tt.args.b...)
+			got, err := sample.Encode(tt.args.e, tt.args.b...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("encode() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -141,7 +142,7 @@ func TestOpen(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Open(tt.args.name)
+			got, err := sample.Open(tt.args.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Open() error = %v, wantErr %v", err, tt.wantErr)
 				return
