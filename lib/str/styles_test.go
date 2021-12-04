@@ -1,12 +1,14 @@
-package str
+package str_test
 
 import (
 	"fmt"
 	"testing"
+
+	"github.com/bengarrett/retrotxtgo/lib/str"
 )
 
 func ExampleBorder() {
-	fmt.Printf("%s", Border("hi"))
+	fmt.Printf("%s", str.Border("hi"))
 	// Output: ┌────┐
 	// │ hi │
 	// └────┘
@@ -24,7 +26,7 @@ func TestTerm(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotTerm := Term("", tt.name); gotTerm != tt.wantTerm {
+			if gotTerm := str.Term("", tt.name); gotTerm != tt.wantTerm {
 				t.Errorf("Term() = %v, want %v", gotTerm, tt.wantTerm)
 			}
 		})
@@ -41,7 +43,7 @@ func TestTerm16M(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotTerm := Term(tt.name, ""); gotTerm != tt.wantTerm {
+			if gotTerm := str.Term(tt.name, ""); gotTerm != tt.wantTerm {
 				t.Errorf("Term() = %v, want %v", gotTerm, tt.wantTerm)
 			}
 		})
@@ -68,7 +70,7 @@ func TestUnderlineChar(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotS, err := UnderlineChar(tt.c)
+			gotS, err := str.UnderlineChar(tt.c)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("underlineChar() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -99,7 +101,7 @@ func TestUnderlineKeys(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := UnderlineKeys(tt.keys...); got != tt.want {
+			if got := str.UnderlineKeys(tt.keys...); got != tt.want {
 				t.Errorf("UnderlineKeys() = %v, want %v", got, tt.want)
 			}
 		})
@@ -122,7 +124,7 @@ func TestCenter(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Center(tt.args.width, tt.args.text); got != tt.want {
+			if got := str.Center(tt.args.width, tt.args.text); got != tt.want {
 				t.Errorf("Center() = %q, want %q", got, tt.want)
 			}
 		})
@@ -140,7 +142,7 @@ func TestNumberizeKeys(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NumberizeKeys(tt.keys...); bool(len(got) > 16) != tt.want {
+			if got := str.NumberizeKeys(tt.keys...); bool(len(got) > 16) != tt.want {
 				t.Errorf("NumberizeKeys() = %v, want %v", got, tt.want)
 			}
 		})
@@ -165,7 +167,7 @@ func TestHighlight(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := Highlight(tt.args.source, tt.args.lexer, tt.args.style, tt.args.ansi); (err != nil) != tt.wantErr {
+			if err := str.Highlight(tt.args.source, tt.args.lexer, tt.args.style, tt.args.ansi); (err != nil) != tt.wantErr {
 				t.Errorf("Highlight() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -184,7 +186,7 @@ func TestValid(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Valid(tt.style); got != tt.want {
+			if got := str.Valid(tt.style); got != tt.want {
 				t.Errorf("Valid() = %v, want %v", got, tt.want)
 			}
 		})
