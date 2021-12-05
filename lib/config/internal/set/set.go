@@ -21,7 +21,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-var ErrSaveType = errors.New("save value type is unsupported")
+var (
+	ErrSaveType = errors.New("save value type is unsupported")
+)
 
 // Write the value of the named setting to the configuration file.
 func Write(name string, setup bool, value interface{}) {
@@ -31,7 +33,9 @@ func Write(name string, setup bool, value interface{}) {
 	if !Validate(name) {
 		logs.FatalSave(fmt.Errorf("save %q: %w", name, logs.ErrConfigName))
 	}
-	if skipSave(name, value) {
+	if b, err := SkipWrite(name, value); err != nil {
+		logs.FatalSave(err)
+	} else if b {
 		fmt.Print(skipSet(setup))
 		return
 	}
@@ -65,31 +69,32 @@ func Write(name string, setup bool, value interface{}) {
 	}
 }
 
-// skipSave returns true if the named value doesn't need updating.
-func skipSave(name string, value interface{}) bool {
+// SkipWrite returns true if the named value doesn't need updating.
+func SkipWrite(name string, value interface{}) (bool, error) {
+	if viper.Get(name) == nil {
+		return false, fmt.Errorf("name: %s, type: %T, %w", name, nil, logs.ErrConfigName)
+	}
 	switch v := value.(type) {
 	case bool:
 		if viper.Get(name).(bool) == v {
-			return true
+			return true, nil
 		}
 	case string:
 		if viper.Get(name).(string) == v {
-			return true
+			return true, nil
 		}
 		if value.(string) == "" {
-			return true
+			return true, nil
 		}
 	case uint:
 		if viper.Get(name).(int) == int(v) {
-			return true
+			return true, nil
 		}
 		if name == get.Serve && v == 0 {
-			return true
+			return true, nil
 		}
-	default:
-		logs.FatalSave(fmt.Errorf("name: %s, type: %T, %w", name, value, ErrSaveType))
 	}
-	return false
+	return false, fmt.Errorf("name: %s, type: %T, %w", name, value, ErrSaveType)
 }
 
 func skipSet(setup bool) string {
@@ -97,57 +102,6 @@ func skipSet(setup bool) string {
 		return ""
 	}
 	return str.ColSuc("\r  skipped setting")
-}
-
-// Recommend uses the s value as a user input suggestion.
-func Recommend(s string) string {
-	if s == "" {
-		return fmt.Sprintf(" (suggestion: %s)", str.Example("do not use"))
-	}
-	return fmt.Sprintf(" (suggestion: %s)", str.Example(s))
-}
-
-// Validate the existence of the key in a list of settings.
-func Validate(key string) (ok bool) {
-	keys := Keys()
-	// var i must be sorted in ascending order.
-	if i := sort.SearchStrings(keys, key); i == len(keys) || keys[i] != key {
-		return false
-	}
-	return true
-}
-
-// Keys list all the available configuration setting names sorted alphabetically.
-func Keys() []string {
-	keys := make([]string, len(get.Reset()))
-	i := 0
-	for key := range get.Reset() {
-		keys[i] = key
-		i++
-	}
-	sort.Strings(keys)
-	return keys
-}
-
-// Font previews and saves the embedded Base64 font setting.
-func FontEmbed(value, setup bool) {
-	const name = get.FontEmbed
-	elm := fmt.Sprintf("  %s\n  %s\n  %s\n",
-		"@font-face{",
-		"  font-family: vga8;",
-		"  src: url(data:font/woff2;base64,[a large font binary will be embedded here]...) format('woff2');",
-	)
-	fmt.Print(color.CSS(elm))
-	q := fmt.Sprintf("%s\n%s\n%s",
-		"  The use of this setting not recommended,",
-		"  unless you always want large, self-contained HTML files for distribution.",
-		"  Embed the font as Base64 text within the HTML")
-	if value {
-		q = "  Keep the embedded font option?"
-	}
-	q += Recommend("no")
-	b := prompt.YesNo(q, viper.GetBool(name))
-	Write(name, setup, b)
 }
 
 // Directory prompts for, checks and saves the directory path.
@@ -181,13 +135,13 @@ func Directory(name string, setup bool) (ok bool) {
 
 // DirExpansion traverses the named directory to apply shell-like expansions.
 // It supports limited Bash tilde, shell dot and double dot syntax.
-func DirExpansion(name string) (dir string) {
+func DirExpansion(name string) string {
 	const sep, homeDir, currentDir, parentDir = string(os.PathSeparator), "~", ".", ".."
 	if name == "" || name == sep {
 		return name
 	}
 	// Bash tilde expension http://www.gnu.org/software/bash/manual/html_node/Tilde-Expansion.html
-	r, paths := bool(name[0:1] == sep), strings.Split(name, sep)
+	dir, r, paths := "", bool(name[0:1] == sep), strings.Split(name, sep)
 	var err error
 	for i, s := range paths {
 		p := ""
@@ -268,6 +222,27 @@ func Font(value string, setup bool) {
 	ShortStrings(get.FontFamily, setup, create.Fonts()...)
 }
 
+// Font previews and saves the embedded Base64 font setting.
+func FontEmbed(value, setup bool) {
+	const name = get.FontEmbed
+	elm := fmt.Sprintf("  %s\n  %s\n  %s\n",
+		"@font-face{",
+		"  font-family: vga8;",
+		"  src: url(data:font/woff2;base64,[a large font binary will be embedded here]...) format('woff2');",
+	)
+	fmt.Print(color.CSS(elm))
+	q := fmt.Sprintf("%s\n%s\n%s",
+		"  The use of this setting not recommended,",
+		"  unless you always want large, self-contained HTML files for distribution.",
+		"  Embed the font as Base64 text within the HTML")
+	if value {
+		q = "  Keep the embedded font option?"
+	}
+	q += Recommend("no")
+	b := prompt.YesNo(q, viper.GetBool(name))
+	Write(name, setup, b)
+}
+
 // Generator prompts for and previews the custom program generator meta tag.
 func Generator(value bool) {
 	const name = get.Genr
@@ -302,6 +277,18 @@ func Index(name string, setup bool, data ...string) {
 	Write(name, setup, s)
 }
 
+// Keys list all the available configuration setting names sorted alphabetically.
+func Keys() []string {
+	keys := make([]string, len(get.Reset()))
+	i := 0
+	for key := range get.Reset() {
+		keys[i] = key
+		i++
+	}
+	sort.Strings(keys)
+	return keys
+}
+
 // NoTranslate previews and prompts for the notranslate HTML attribute
 // and Google meta elemenet.
 func NoTranslate(value, setup bool) {
@@ -328,6 +315,14 @@ func Port(name string, setup bool) {
 	}
 	u := prompt.Port(true, setup)
 	Write(name, setup, u)
+}
+
+// Recommend uses the s value as a user input suggestion.
+func Recommend(s string) string {
+	if s == "" {
+		return fmt.Sprintf(" (suggestion: %s)", str.Example("do not use"))
+	}
+	return fmt.Sprintf(" (suggestion: %s)", str.Example(s))
 }
 
 // RetroTxt previews and prompts the custom retrotxt meta tag.
@@ -385,4 +380,14 @@ func Title(name, value string, setup bool) {
 		str.ColFuz("  About this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title"),
 		fmt.Sprintf("  Choose a new %s:", get.Tip()[name]))
 	String(name, setup)
+}
+
+// Validate the existence of the key in a list of settings.
+func Validate(key string) (ok bool) {
+	keys := Keys()
+	// var i must be sorted in ascending order.
+	if i := sort.SearchStrings(keys, key); i == len(keys) || keys[i] != key {
+		return false
+	}
+	return true
 }
