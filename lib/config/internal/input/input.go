@@ -74,7 +74,7 @@ func PrintMeta(name, value string) {
 			fmt.Sprintf("    <meta name=\"%s\" value=\"%s\">", s[2], v),
 			"  </head>")
 	}
-	fmt.Print(color.ColorHTML(element()))
+	fmt.Print(color.HTML(element()))
 	h := strings.Split(get.Tip()[name], " ")
 	fmt.Printf("%s\n  %s %s.",
 		str.ColFuz("  About this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name"),

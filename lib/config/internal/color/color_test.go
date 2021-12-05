@@ -6,7 +6,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/color"
 )
 
-func TestColorCSS(t *testing.T) {
+func TestCSS(t *testing.T) {
 	tests := []struct {
 		name string
 		elm  string
@@ -16,34 +16,14 @@ func TestColorCSS(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := color.ColorCSS(tt.elm); got != tt.want {
-				t.Errorf("ColorCSS() = %v, want %v", got, tt.want)
+			if got := color.CSS(tt.elm); got != tt.want {
+				t.Errorf("CSS() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_names_string(t *testing.T) {
-	tests := []struct {
-		name  string
-		n     color.Names
-		theme bool
-		want  string
-	}{
-		{"nil", nil, false, ""},
-		{"empty", color.Names{""}, false, ""},
-		{"ok", color.Names{"okay"}, false, "okay"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.n.String(tt.theme, ""); got != tt.want {
-				t.Errorf("Names.string() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_colorElm(t *testing.T) {
+func TestElm(t *testing.T) {
 	// set test mode for str.HighlightWriter()
 	tests := []struct {
 		name string
@@ -56,8 +36,28 @@ func Test_colorElm(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := color.ColorElm(tt.elm, "html", "bw", false); got != tt.want {
-				t.Errorf("ColorElm() = %v, want %v", got, tt.want)
+			if got := color.Elm(tt.elm, "html", "bw", false); got != tt.want {
+				t.Errorf("Elm() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+func TestNames_string(t *testing.T) {
+	tests := []struct {
+		name  string
+		n     color.Names
+		theme bool
+		want  string
+	}{
+		{"nil", nil, false, ""},
+		{"empty", color.Names{""}, false, ""},
+		{"one", color.Names{"okay"}, false, " 0 <okay=\"okay\">  \n"},
+		{"two", color.Names{"hello", "world"}, false, " 0 <hello=\"hello\">  \n 1 <world=\"world\">\n\n"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.n.String(tt.theme, ""); got != tt.want {
+				t.Errorf("Names.string() = %q, want %q", got, tt.want)
 			}
 		})
 	}

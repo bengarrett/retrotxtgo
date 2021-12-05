@@ -1,4 +1,3 @@
-// nolint:goconst
 package config
 
 import (
@@ -106,7 +105,10 @@ func Update(name string, setup bool) {
 	if s, ok := value.(string); ok {
 		upd.String(s, name, value.(string))
 	}
-	updatePrompt(input.Update{name, setup, value})
+	updatePrompt(input.Update{
+		Name:  name,
+		Setup: setup,
+		Value: value})
 }
 
 // updatePrompt prompts the user for input to a config file setting.

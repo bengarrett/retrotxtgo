@@ -137,7 +137,7 @@ func FontEmbed(value, setup bool) {
 		"  font-family: vga8;",
 		"  src: url(data:font/woff2;base64,[a large font binary will be embedded here]...) format('woff2');",
 	)
-	fmt.Print(color.ColorCSS(elm))
+	fmt.Print(color.CSS(elm))
 	q := fmt.Sprintf("%s\n%s\n%s",
 		"  The use of this setting not recommended,",
 		"  unless you always want large, self-contained HTML files for distribution.",
@@ -259,7 +259,7 @@ func Font(value string, setup bool) {
 		fmt.Sprintf("    font-family: \"%s\";", f),
 		fmt.Sprintf("    src: url(\"%s.woff2\") format(\"woff2\");", f),
 		"  }")
-	fmt.Print(color.ColorCSS(b.String()))
+	fmt.Print(color.CSS(b.String()))
 	fmt.Printf("%s\n%s%s %s: ",
 		str.ColFuz("  About font families: https://developer.mozilla.org/en-US/docs/Web/CSS/font-family"),
 		"  Choose a font, ",
@@ -283,7 +283,7 @@ func Generator(value bool) {
 				meta.Name, meta.Print(), meta.App.Date),
 			"</head>")
 	}
-	fmt.Print(color.ColorHTML(elm))
+	fmt.Print(color.HTML(elm))
 	p := "Enable the generator element?"
 	if value {
 		p = "Keep the generator element?"
@@ -311,7 +311,7 @@ func NoTranslate(value, setup bool) {
 		"<meta name=\"google\" content=\"notranslate\">",
 		"</head>",
 		"<body class=\"notranslate\">")
-	fmt.Print(color.ColorHTML(elm))
+	fmt.Print(color.HTML(elm))
 	q := "Enable the no translate option?"
 	if value {
 		q = "Keep the translate option?"
@@ -337,7 +337,7 @@ func RetroTxt(value bool) {
 		"  <head>",
 		"    <meta name=\"retrotxt\" content=\"encoding: IBM437; linebreak: CRLF; length: 50; width: 80; name: file.txt\">",
 		"  </head>")
-	fmt.Print(color.ColorHTML(elm))
+	fmt.Print(color.HTML(elm))
 	p := "Enable the retrotxt element?"
 	if value {
 		p = "Keep the retrotxt element?"
@@ -380,7 +380,7 @@ func Title(name, value string, setup bool) {
 		"  <head>",
 		fmt.Sprintf("    <title>%s</title>", value),
 		"  </head>")
-	fmt.Print(color.ColorHTML(elm))
+	fmt.Print(color.HTML(elm))
 	fmt.Printf("%s\n%s\n  ",
 		str.ColFuz("  About this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title"),
 		fmt.Sprintf("  Choose a new %s:", get.Tip()[name]))
