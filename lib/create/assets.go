@@ -13,23 +13,21 @@ import (
 	"golang.org/x/text/language"
 )
 
+// Asset filenames.
 type Asset int
 
 const (
-	HtmlFn Asset = iota
-	fontFn
-	cssFn
-	jsFn
-	favFn
-	bbsFn
-	pcbFn
-
-	faviconSrc = "img/retrotxt_16.png"
+	HTML     Asset = iota // Index html.
+	FontCss               // CSS containing fonts.
+	StyleCss              // CSS containing styles and colors.
+	Scripts               // JS scripts.
+	FavIco                // Favorite icon.
+	BbsCss                // Other BBS CSS.
+	PcbCss                // PCBoard BBS CSS.
 )
 
 func (a Asset) Write() string {
-	// do not change the order of this array,
-	// they must match the Fn Asset iota values.
+	// do not change the order of this array, they must match the Asset iota values.
 	return [...]string{
 		// core assets
 		"index.html",
@@ -45,15 +43,15 @@ func (a Asset) Write() string {
 
 // saveStyles creates and save the styles CSS file.
 func (args *Args) saveStyles(c chan error) {
-	c <- args.saveCSSFile(static.CSSStyles, cssFn)
+	c <- args.saveCSSFile(static.CSSStyles, StyleCss)
 }
 
 func (args *Args) saveBBS(c chan error) {
-	c <- args.saveCSSFile(static.CSSBBS, bbsFn)
+	c <- args.saveCSSFile(static.CSSBBS, BbsCss)
 }
 
 func (args *Args) savePCBoard(c chan error) {
-	c <- args.saveCSSFile(static.CSSPCBoard, pcbFn)
+	c <- args.saveCSSFile(static.CSSPCBoard, PcbCss)
 }
 
 func (args *Args) saveCSSFile(src []byte, a Asset) error {
@@ -76,7 +74,8 @@ func (args *Args) saveCSSFile(src []byte, a Asset) error {
 
 // saveFavIcon read and save the favorite icon to a file.
 func (args *Args) saveFavIcon(c chan error) {
-	s, err := args.destination(favFn.Write())
+	const faviconSrc = "img/retrotxt_16.png"
+	s, err := args.destination(FavIco.Write())
 	if err != nil {
 		c <- fmt.Errorf("%w: %s", err, s)
 	}
@@ -107,7 +106,7 @@ func (args *Args) saveFont(c chan error) {
 			c <- err
 		}
 	}
-	if err := args.saveFontCSS(fontFn.Write()); err != nil {
+	if err := args.saveFontCSS(FontCss.Write()); err != nil {
 		c <- err
 	}
 	c <- nil
@@ -159,7 +158,7 @@ func (args *Args) saveFontWoff2(name, packName string) error {
 
 // saveJS creates and save the JS file.
 func (args *Args) saveJS(c chan error) {
-	s, err := args.destination(jsFn.Write())
+	s, err := args.destination(Scripts.Write())
 	if err != nil {
 		c <- fmt.Errorf("%w: %s", err, s)
 	}
@@ -179,7 +178,7 @@ func (args *Args) saveJS(c chan error) {
 
 // SaveHTML creates and save the HTML file.
 func (args *Args) SaveHTML(b *[]byte, c chan error) {
-	s, err := args.destination(HtmlFn.Write())
+	s, err := args.destination(HTML.Write())
 	if err != nil {
 		c <- fmt.Errorf("%w: %s", err, s)
 	}
@@ -250,7 +249,7 @@ func (args *Args) destination(name string) (string, error) {
 	} else if fs.Size() > 0 && !args.Save.OW {
 		// unexpected, dst does exist
 		switch name {
-		case favFn.Write(), jsFn.Write(), "vga.woff2", "mona.woff2":
+		case FavIco.Write(), Scripts.Write(), "vga.woff2", "mona.woff2":
 			// existing static files can be ignored
 			return dst, nil
 		}

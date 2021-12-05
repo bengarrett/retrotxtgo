@@ -1,4 +1,4 @@
-package config
+package config_test
 
 import (
 	"fmt"
@@ -6,27 +6,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/bengarrett/retrotxtgo/lib/config"
+	"github.com/bengarrett/retrotxtgo/lib/config/internal/get"
 	"github.com/gookit/color"
 )
 
-func Example_updateBool() {
-	color.Enable = false
-	updateBool(false, "example")
-	// Output: The example is not in use.
-}
-
-func Example_updateString() {
-	color.Enable = false
-	updateString("", "example", "")
-	updateString("x", saveDir, "")
-	// Output: The empty example setting is not in use.
-	//
-	//   The save-directory is set to "". ✗
-}
-
 func Example_recommend() {
 	color.Enable = false
-	fmt.Print(recommend(""))
+	fmt.Print(config.Recommend(""))
 	// Output: (suggestion: do not use)
 }
 
@@ -39,7 +26,7 @@ func TestList(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := List(); (err != nil) != tt.wantErr {
+			if err := config.List(); (err != nil) != tt.wantErr {
 				t.Errorf("List() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -57,7 +44,7 @@ func TestSet(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			Set(tt.name)
+			config.Set(tt.name)
 		})
 	}
 }
@@ -65,18 +52,18 @@ func TestSet(t *testing.T) {
 func Test_names_string(t *testing.T) {
 	tests := []struct {
 		name  string
-		n     names
+		n     config.Names
 		theme bool
 		want  string
 	}{
 		{"nil", nil, false, ""},
-		{"empty", names{""}, false, ""},
-		{"ok", names{"okay"}, false, "okay"},
+		{"empty", config.Names{""}, false, ""},
+		{"ok", config.Names{"okay"}, false, "okay"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.n.string(tt.theme, ""); got != tt.want {
-				t.Errorf("names.string() = %v, want %v", got, tt.want)
+			if got := tt.n.String(tt.theme, ""); got != tt.want {
+				t.Errorf("Names.string() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -101,8 +88,8 @@ func Test_dirExpansion(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotDir := dirExpansion(tt.name); gotDir != tt.wantDir {
-				t.Errorf("dirExpansion() = %v, want %v", gotDir, tt.wantDir)
+			if gotDir := config.DirExpansion(tt.name); gotDir != tt.wantDir {
+				t.Errorf("DirExpansion() = %v, want %v", gotDir, tt.wantDir)
 			}
 		})
 	}
@@ -121,8 +108,8 @@ func Test_colorElm(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := colorElm(tt.elm, "html", "bw", false); got != tt.want {
-				t.Errorf("colorhtml() = %v, want %v", got, tt.want)
+			if got := config.ColorElm(tt.elm, "html", "bw", false); got != tt.want {
+				t.Errorf("ColorElm() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -138,7 +125,7 @@ func TestColorCSS(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ColorCSS(tt.elm); got != tt.want {
+			if got := config.ColorCSS(tt.elm); got != tt.want {
 				t.Errorf("ColorCSS() = %v, want %v", got, tt.want)
 			}
 		})
@@ -156,14 +143,14 @@ func Test_previewPrompt(t *testing.T) {
 		wantP string
 	}{
 		{"empty", args{}, "Set"},
-		{"key", args{keywords, "ooooh"}, "Replace"},
+		{"key", args{get.Keywords, "ooooh"}, "Replace"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotP := previewPrompt(tt.args.name, tt.args.value)
+			gotP := config.PreviewPrompt(tt.args.name, tt.args.value)
 			firstWord := strings.Split(strings.TrimSpace(gotP), " ")[0]
 			if firstWord != tt.wantP {
-				t.Errorf("previewPrompt() = %v, want %v", firstWord, tt.wantP)
+				t.Errorf("PreviewPrompt() = %v, want %v", firstWord, tt.wantP)
 			}
 		})
 	}

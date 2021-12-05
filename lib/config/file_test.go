@@ -1,4 +1,4 @@
-package config
+package config_test
 
 import (
 	"io/ioutil"
@@ -6,6 +6,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/gookit/color"
 )
 
@@ -18,7 +19,7 @@ func TestPath(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotDir := Path(); gotDir == tt.wantDir {
+			if gotDir := config.Path(); gotDir == tt.wantDir {
 				t.Errorf("Path() = \"\"")
 			}
 		})
@@ -42,7 +43,7 @@ func TestSetConfig(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := SetConfig(tt.flag); (err != nil) != tt.wantErr {
+			if err := config.SetConfig(tt.flag); (err != nil) != tt.wantErr {
 				t.Errorf("SetConfig() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

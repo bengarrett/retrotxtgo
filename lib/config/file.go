@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/bengarrett/retrotxtgo/lib/config/internal/get"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/meta"
@@ -19,7 +20,7 @@ import (
 
 // InitDefaults initializes flag and configuration defaults.
 func InitDefaults() {
-	for key, val := range Reset() {
+	for key, val := range get.Reset() {
 		viper.SetDefault(key, val)
 		viper.Set(key, val)
 	}

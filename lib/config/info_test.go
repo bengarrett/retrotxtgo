@@ -1,8 +1,10 @@
-package config
+package config_test
 
 import (
 	"errors"
 	"testing"
+
+	"github.com/bengarrett/retrotxtgo/lib/config"
 )
 
 func TestInfo(t *testing.T) {
@@ -15,7 +17,7 @@ func TestInfo(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotErr := Info(tt.style); !errors.Is(gotErr, tt.wantErr) {
+			if gotErr := config.Info(tt.style); !errors.Is(gotErr, tt.wantErr) {
 				t.Errorf("Info() = %v, want %v", gotErr, tt.wantErr)
 			}
 		})

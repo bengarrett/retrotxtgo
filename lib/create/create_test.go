@@ -19,20 +19,6 @@ import (
 	"golang.org/x/text/encoding/charmap"
 )
 
-func ExampleColorScheme() {
-	fmt.Print(create.ColorScheme()[0])
-	// Output: normal
-}
-func ExampleReferrer() {
-	fmt.Print(create.Referrer()[1])
-	// Output: origin
-}
-
-func ExampleRobots() {
-	fmt.Print(create.Robots()[2])
-	// Output: follow
-}
-
 func TestSaveAssets(t *testing.T) {
 	t.Run("comment", func(t *testing.T) {
 		// Create a temporary directory
@@ -136,7 +122,7 @@ func TestSave(t *testing.T) {
 	}
 	// clean-up
 	if wd, err := os.Getwd(); err == nil {
-		p := filepath.Join(wd, create.HtmlFn.Write())
+		p := filepath.Join(wd, create.HTML.Write())
 		if err := os.Remove(p); err != nil && !os.IsNotExist(err) {
 			t.Error(err)
 		}

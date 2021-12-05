@@ -16,6 +16,8 @@ import (
 	"text/tabwriter"
 
 	"github.com/alecthomas/chroma/styles"
+	"github.com/bengarrett/retrotxtgo/lib/config/internal/get"
+	"github.com/bengarrett/retrotxtgo/lib/config/internal/upd"
 	"github.com/bengarrett/retrotxtgo/lib/create"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/prompt"
@@ -33,14 +35,14 @@ type update struct {
 
 // ColorCSS returns the element colored using CSS syntax highlights.
 func ColorCSS(elm string) string {
-	style := viper.GetString(styleh)
-	return colorElm(elm, "css", style, true)
+	style := viper.GetString(get.Styleh)
+	return ColorElm(elm, "css", style, true)
 }
 
 // ColorHTML returns the element colored using HTML syntax highlights.
 func ColorHTML(elm string) string {
-	style := viper.GetString(styleh)
-	return colorElm(elm, "html", style, true)
+	style := viper.GetString(get.Styleh)
+	return ColorElm(elm, "html", style, true)
 }
 
 // List and print all the available configurations.
@@ -68,10 +70,10 @@ func List() error {
 		fmt.Fprintln(w, tabs)
 		fmt.Fprintf(w, " %d\t\t%s\t\t%s", i, key, suffix(capitalize(tip)))
 		switch key {
-		case layoutTmpl:
+		case get.LayoutTmpl:
 			fmt.Fprintf(w, "\n%schoices: %s (suggestion: %s)",
 				tabs, str.ColPri(strings.Join(create.Layouts(), ", ")), str.Example("standard"))
-		case serve:
+		case get.Serve:
 			fmt.Fprintf(w, "\n%schoices: %s",
 				tabs, portInfo())
 		}
@@ -81,17 +83,17 @@ func List() error {
 	fmt.Fprintln(w, str.HR(len(title)))
 	fmt.Fprintln(w, "\nEither the setting Name or the Alias can be used.")
 	fmt.Fprintf(w, "\n%s # To change the meta description setting\n",
-		str.Example(cmds+desc))
+		str.Example(cmds+get.Desc))
 	fmt.Fprintf(w, "%s # Will also change the meta description setting\n", str.Example(cmds+"6"))
 	fmt.Fprintln(w, "\nMultiple settings are supported.")
 	fmt.Fprintf(w, "\n%s\n", str.Example(cmds+"style.html style.info"))
 	return w.Flush()
 }
 
-// Names returns the chroma style names.
-func Names(lexer string) string {
-	var s names = styles.Names()
-	return s.string(true, lexer)
+// ChromaNames returns the chroma style names.
+func ChromaNames(lexer string) string {
+	var s Names = styles.Names()
+	return s.String(true, lexer)
 }
 
 // Set edits and saves a named setting within a configuration file.
@@ -101,7 +103,7 @@ func Set(name string) {
 	switch {
 	case err != nil:
 		Update(name, false)
-	case i >= 0 && i <= (len(Reset())-1):
+	case i >= 0 && i <= (len(get.Reset())-1):
 		k := Keys()
 		Update(k[i], false)
 	default:
@@ -123,16 +125,16 @@ func Update(name string, setup bool) {
 	switch value.(type) {
 	case nil:
 		// avoid potential panics from missing settings by implementing the default value
-		viper.Set(name, Reset()[name])
+		viper.Set(name, get.Reset()[name])
 		value = viper.Get(name)
 	default:
 		// everything ok
 	}
 	if b, ok := value.(bool); ok {
-		updateBool(b, name)
+		upd.Bool(b, name)
 	}
 	if s, ok := value.(string); ok {
-		updateString(s, name, value.(string))
+		upd.String(s, name, value.(string))
 	}
 	updatePrompt(update{name, setup, value})
 }
@@ -147,49 +149,8 @@ func Validate(key string) (ok bool) {
 	return true
 }
 
-// updateBool the boolean value of the named setting.
-func updateBool(b bool, name string) {
-	switch b {
-	case true:
-		fmt.Printf("\n  The %s is enabled.\n", str.ColFuz(name))
-	default:
-		fmt.Printf("\n  The %s is not in use.\n", str.ColFuz(name))
-	}
-}
-
-// updateString the string value of the named setting.
-func updateString(s, name, value string) {
-	const sd = saveDir
-	switch s {
-	case "":
-		fmt.Printf("\n  The empty %s setting is not in use.\n",
-			str.ColFuz(name))
-		if name == sd {
-			fmt.Printf("  Files created by %s will always be saved to the active directory.\n",
-				meta.Name)
-		}
-	default:
-		fmt.Printf("\n  The %s is set to %q.", str.ColFuz(name), value)
-		// print the operating system's ability to use the existing set values
-		// does the 'editor' exist in the env path, does the save-directory exist?
-		switch name {
-		case "editor":
-			_, err := exec.LookPath(value)
-			fmt.Print(" ", str.Bool(err == nil))
-		case sd:
-			f := false
-			if _, err := os.Stat(value); !os.IsNotExist(err) {
-				f = true
-			}
-			fmt.Print(" ", str.Bool(f))
-		default:
-		}
-		fmt.Println()
-	}
-}
-
-// recommend uses the s value as a user input suggestion.
-func recommend(s string) string {
+// Recommend uses the s value as a user input suggestion.
+func Recommend(s string) string {
 	if s == "" {
 		return fmt.Sprintf(" (suggestion: %s)", str.Example("do not use"))
 	}
@@ -201,13 +162,13 @@ func updatePrompt(u update) {
 	switch u.name {
 	case "editor":
 		promptEditor(u)
-	case saveDir:
+	case get.SaveDir:
 		promptSaveDir(u)
-	case serve:
+	case get.Serve:
 		promptServe(u)
-	case styleh:
+	case get.Styleh:
 		promptStyleHTML(u)
-	case stylei:
+	case get.Stylei:
 		promptStyleInfo(u)
 	default:
 		metaPrompts(u)
@@ -217,39 +178,39 @@ func updatePrompt(u update) {
 // metaPrompts prompts the user for a meta setting.
 func metaPrompts(u update) {
 	switch u.name {
-	case fontEmbed:
+	case get.FontEmbed:
 		setFontEmbed(u.value.(bool), u.setup)
-	case fontFamily:
+	case get.FontFamily:
 		setFont(u.value.(string), u.setup)
-	case layoutTmpl:
+	case get.LayoutTmpl:
 		promptLayout(u)
-	case author,
-		desc,
-		keywords:
+	case get.Author,
+		get.Desc,
+		get.Keywords:
 		previewMeta(u.name, u.value.(string))
 		setString(u.name, u.setup)
-	case theme:
+	case get.Theme:
 		recommendMeta(u.name, u.value.(string), "")
 		setString(u.name, u.setup)
-	case scheme:
+	case get.Scheme:
 		promptColorScheme(u)
-	case genr:
+	case get.Genr:
 		setGenerator(u.value.(bool))
-	case notlate:
+	case get.Notlate:
 		setNoTranslate(u.value.(bool), u.setup)
-	case referr:
+	case get.Referr:
 		recommendMeta(u.name, u.value.(string), "")
 		cr := create.Referrer()
 		fmt.Printf("%s\n  ", str.NumberizeKeys(cr[:]...))
 		setIndex(u.name, u.setup, cr[:]...)
-	case bot:
+	case get.Bot:
 		recommendMeta(u.name, u.value.(string), "")
 		cr := create.Robots()
 		fmt.Printf("%s\n  ", str.NumberizeKeys(cr[:]...))
 		setIndex(u.name, u.setup, cr[:]...)
-	case rtx:
+	case get.Rtx:
 		setRetroTxt(u.value.(bool))
-	case title:
+	case get.Title:
 		setTitle(u.name, u.value.(string), u.setup)
 	default:
 		log.Fatalln("config is not configured:", u.name)
@@ -263,7 +224,7 @@ func promptColorScheme(u update) {
 	prints := make([]string, len(c[:]))
 	copy(prints, c[:])
 	fmt.Printf("%s%s: ",
-		str.UnderlineKeys(prints...), recommend(""))
+		str.UnderlineKeys(prints...), Recommend(""))
 	setShortStrings(u.name, u.setup, c[:]...)
 }
 
@@ -317,7 +278,7 @@ func promptSaveDir(u update) {
 func promptServe(u update) {
 	reset := func() {
 		var p uint
-		if u, ok := Reset()[serve].(uint); ok {
+		if u, ok := get.Reset()[get.Serve].(uint); ok {
 			p = u
 		}
 		save(u.name, false, p)
@@ -348,27 +309,27 @@ func promptServe(u update) {
 // promptStyleHTML prompts the user for the a HTML and CSS style setting.
 func promptStyleHTML(u update) {
 	d := ""
-	if s, ok := Reset()[u.name].(string); ok {
+	if s, ok := get.Reset()[u.name].(string); ok {
 		d = s
 	}
 	fmt.Printf("\n%s\n\n  Choose the number to set a new HTML syntax style%s: ",
-		str.Italic(Names("css")), recommend(d))
+		str.Italic(ChromaNames("css")), Recommend(d))
 	setStrings(u.name, u.setup, styles.Names()...)
 }
 
 // promptStyleInfo prompts the user for the a JS style setting.
 func promptStyleInfo(u update) {
 	d := ""
-	if s, ok := Reset()[u.name].(string); ok {
+	if s, ok := get.Reset()[u.name].(string); ok {
 		d = s
 	}
 	fmt.Printf("\n%s\n\n  Choose the number to set a new %s syntax style%s: ",
-		str.Italic(Names("json")), str.Example("config info"), recommend(d))
+		str.Italic(ChromaNames("json")), str.Example("config info"), Recommend(d))
 	setStrings(u.name, u.setup, styles.Names()...)
 }
 
-// colorElm applies color syntax to an element.
-func colorElm(elm, lexer, style string, color bool) string {
+// ColorElm applies color syntax to an element.
+func ColorElm(elm, lexer, style string, color bool) string {
 	if elm == "" {
 		return ""
 	}
@@ -380,10 +341,10 @@ func colorElm(elm, lexer, style string, color bool) string {
 	return fmt.Sprintf("\n%s\n", b.String())
 }
 
-type names []string
+type Names []string
 
-// string lists and applies the named themes for the HighlightWriter.
-func (n names) string(theme bool, lexer string) string {
+// String lists and applies the named themes for the HighlightWriter.
+func (n Names) String(theme bool, lexer string) string {
 	maxWidth := 0
 	for _, s := range n {
 		if l := len(fmt.Sprintf("%s=%q", s, s)); l > maxWidth {
@@ -437,9 +398,9 @@ func (n names) string(theme bool, lexer string) string {
 	return strings.Join(s, "")
 }
 
-// dirExpansion traverses the named directory to apply shell-like expansions.
+// DirExpansion traverses the named directory to apply shell-like expansions.
 // It supports limited Bash tilde, shell dot and double dot syntax.
-func dirExpansion(name string) (dir string) {
+func DirExpansion(name string) (dir string) {
 	const sep, homeDir, currentDir, parentDir = string(os.PathSeparator), "~", ".", ".."
 	if name == "" || name == sep {
 		return name
@@ -507,7 +468,7 @@ func portInfo() string {
 // previewMeta previews and prompts for a meta element content value.
 func previewMeta(name, value string) {
 	previewMetaPrint(name, value)
-	fmt.Printf("\n%s \n  ", previewPrompt(name, value))
+	fmt.Printf("\n%s \n  ", PreviewPrompt(name, value))
 }
 
 func previewMetaPrint(name, value string) {
@@ -542,21 +503,21 @@ func previewMetaPrint(name, value string) {
 
 func metaDefaults(name string) string {
 	switch name {
-	case author:
+	case get.Author:
 		return "Your name goes here"
-	case scheme:
+	case get.Scheme:
 		return "normal"
-	case desc:
+	case get.Desc:
 		return "A brief description of the page could go here."
-	case keywords:
+	case get.Keywords:
 		return "some, keywords, go here"
-	case referr:
+	case get.Referr:
 		return "same-origin"
-	case bot:
+	case get.Bot:
 		return "noindex"
-	case theme:
+	case get.Theme:
 		return "ghostwhite"
-	case title:
+	case get.Title:
 		return "A page title foes here."
 	}
 	return ""
@@ -575,14 +536,14 @@ func setTitle(name, value string, setup bool) {
 	setString(name, setup)
 }
 
-// previewPrompt returns the available options for the named setting.
-func previewPrompt(name, value string) string {
+// PreviewPrompt returns the available options for the named setting.
+func PreviewPrompt(name, value string) string {
 	return fmt.Sprintf("%s:", previewPromptPrint(name, value))
 }
 
 func previewPromptPrint(name, value string) string {
 	p := "Set a new value"
-	if name == keywords {
+	if name == get.Keywords {
 		p = "Set some comma-separated keywords"
 		if value != "" {
 			p = "Replace the current keywords"
@@ -601,7 +562,7 @@ func recommendMeta(name, value, suggest string) {
 
 func recommendPrompt(name, value, suggest string) string {
 	p := previewPromptPrint(name, value)
-	return fmt.Sprintf("%s%s:", p, recommend(suggest))
+	return fmt.Sprintf("%s%s:", p, Recommend(suggest))
 }
 
 // save the value of the named setting to the configuration file.
@@ -664,7 +625,7 @@ func skipSave(name string, value interface{}) bool {
 		if viper.Get(name).(int) == int(v) {
 			return true
 		}
-		if name == serve && v == 0 {
+		if name == get.Serve && v == 0 {
 			return true
 		}
 	default:
@@ -685,7 +646,7 @@ func setDirectory(name string, setup bool) (ok bool) {
 	if name == "" {
 		logs.FatalSave(fmt.Errorf("set directory: %w", logs.ErrNameNil))
 	}
-	s := dirExpansion(prompt.String())
+	s := DirExpansion(prompt.String())
 	if s == "" {
 		fmt.Print(skipSet(true))
 		if setup {
@@ -748,12 +709,12 @@ func setFont(value string, setup bool) {
 		"  Choose a font, ",
 		str.UnderlineKeys(create.Fonts()...),
 		fmt.Sprintf("(suggestion: %s)", str.Example("automatic")))
-	setShortStrings(fontFamily, setup, create.Fonts()...)
+	setShortStrings(get.FontFamily, setup, create.Fonts()...)
 }
 
 // setFont previews and saves the embedded Base64 font setting.
 func setFontEmbed(value, setup bool) {
-	const name = fontEmbed
+	const name = get.FontEmbed
 	elm := fmt.Sprintf("  %s\n  %s\n  %s\n",
 		"@font-face{",
 		"  font-family: vga8;",
@@ -767,14 +728,14 @@ func setFontEmbed(value, setup bool) {
 	if value {
 		q = "  Keep the embedded font option?"
 	}
-	q += recommend("no")
+	q += Recommend("no")
 	b := prompt.YesNo(q, viper.GetBool(name))
 	save(name, setup, b)
 }
 
 // SetGenerator prompts for and previews the custom program generator meta tag.
 func setGenerator(value bool) {
-	const name = genr
+	const name = get.Genr
 	elm := fmt.Sprintf("  %s\n    %s\n  %s\n",
 		"<head>",
 		fmt.Sprintf("<meta name=\"generator\" content=\"%s, %s\">",
@@ -792,7 +753,7 @@ func setGenerator(value bool) {
 	if value {
 		p = "Keep the generator element?"
 	}
-	p = fmt.Sprintf("  %s%s", p, recommend("yes"))
+	p = fmt.Sprintf("  %s%s", p, Recommend("yes"))
 	b := prompt.YesNo(p, viper.GetBool(name))
 	save(name, true, b)
 }
@@ -809,7 +770,7 @@ func setIndex(name string, setup bool, data ...string) {
 // setNoTranslate previews and prompts for the notranslate HTML attribute
 // and Google meta elemenet.
 func setNoTranslate(value, setup bool) {
-	const name = notlate
+	const name = get.Notlate
 	elm := fmt.Sprintf("  %s\n    %s\n  %s\n  %s\n",
 		"<head>",
 		"<meta name=\"google\" content=\"notranslate\">",
@@ -820,7 +781,7 @@ func setNoTranslate(value, setup bool) {
 	if value {
 		q = "Keep the translate option?"
 	}
-	q = fmt.Sprintf("  %s%s", q, recommend("no"))
+	q = fmt.Sprintf("  %s%s", q, Recommend("no"))
 	b := prompt.YesNo(q, viper.GetBool(name))
 	save(name, setup, b)
 }
@@ -836,7 +797,7 @@ func setPort(name string, setup bool) {
 
 // setRetroTxt previews and prompts the custom retrotxt meta tag.
 func setRetroTxt(value bool) {
-	const name = rtx
+	const name = get.Rtx
 	elm := fmt.Sprintf("%s\n%s\n%s\n",
 		"  <head>",
 		"    <meta name=\"retrotxt\" content=\"encoding: IBM437; linebreak: CRLF; length: 50; width: 80; name: file.txt\">",
@@ -846,7 +807,7 @@ func setRetroTxt(value bool) {
 	if value {
 		p = "Keep the retrotxt element?"
 	}
-	p = fmt.Sprintf("  %s%s", p, recommend("yes"))
+	p = fmt.Sprintf("  %s%s", p, Recommend("yes"))
 	b := prompt.YesNo(p, viper.GetBool(name))
 	save(name, true, b)
 }

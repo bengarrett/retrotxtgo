@@ -1,4 +1,4 @@
-package config
+package config_test
 
 import (
 	"errors"
@@ -7,6 +7,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/spf13/viper"
 )
 
@@ -27,7 +28,7 @@ func TestDelete(t *testing.T) {
 			if tt.name == "ok" {
 				viper.SetConfigFile(tmpFile.Name())
 			}
-			if gotErr := Delete(); !errors.Is(gotErr, tt.wantErr) {
+			if gotErr := config.Delete(); !errors.Is(gotErr, tt.wantErr) {
 				t.Errorf("Delete() = %v, want %v", gotErr, tt.wantErr)
 			}
 		})

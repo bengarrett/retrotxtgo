@@ -22,6 +22,62 @@ import (
 	"github.com/tdewolff/minify/js"
 )
 
+// PageData temporarily holds template data used for the HTML layout.
+type PageData struct {
+	ExternalEmbed    bool
+	FontEmbed        bool
+	MetaGenerator    bool
+	MetaNoTranslate  bool
+	MetaRetroTxt     bool
+	BuildVersion     string
+	CacheRefresh     string
+	Comment          string
+	FontFamily       string
+	MetaAuthor       string
+	MetaColorScheme  string
+	MetaDesc         string
+	MetaKeywords     string
+	MetaReferrer     string
+	MetaRobots       string
+	MetaThemeColor   string
+	PageTitle        string
+	PreText          string
+	SauceTitle       string
+	SauceAuthor      string
+	SauceGroup       string
+	SauceDescription string
+	SauceWidth       uint
+	SauceLines       uint
+	CSSEmbed         template.CSS
+	HTMLEmbed        template.HTML
+	ScriptEmbed      template.JS
+}
+
+// Comment content for the meta retrotxt attribute.
+func (args *Args) Comment(lb filesystem.LB, r ...rune) string {
+	const na = "n/a"
+	l, w, name, b := 0, 0, na, []byte(string(r))
+
+	e := na
+	if args.Source.Encoding != nil {
+		e = fmt.Sprint(args.Source.Encoding)
+	}
+	lbs := filesystem.LineBreak(lb, false)
+	l, err := filesystem.Lines(bytes.NewReader(b), lb)
+	if err != nil {
+		l = -1
+	}
+	w, err = filesystem.Columns(bytes.NewReader(b), lb)
+	if err != nil {
+		w = -1
+	}
+	if args.Source.Name != "" {
+		name = args.Source.Name
+	}
+	return fmt.Sprintf("encoding: %s; line break: %s; length: %d; width: %d; name: %s",
+		e, lbs, l, w, name)
+}
+
 // Marshal transforms bytes into UTF-8, creates the page meta and template data.
 func (args *Args) Marshal(b *[]byte) (PageData, error) {
 	if b == nil {
@@ -70,6 +126,22 @@ func (args *Args) Marshal(b *[]byte) (PageData, error) {
 		p.HTMLEmbed = template.HTML(out.Bytes())
 	}
 	return p, nil
+}
+
+// TemplateSave saves an embedded template.
+func (args *Args) TemplateSave() error {
+	err := args.templatePack()
+	if err != nil {
+		return fmt.Errorf("template save pack error: %w", err)
+	}
+	b, err := args.templateData()
+	if err != nil {
+		return fmt.Errorf("template save data error: %w", err)
+	}
+	if _, _, err := filesystem.Write(args.Tmpl, *b...); err != nil {
+		return fmt.Errorf("template save error: %w", err)
+	}
+	return nil
 }
 
 // marshalCompact is used by the compact layout argument.
@@ -246,47 +318,6 @@ func (args *Args) templateData() (*[]byte, error) {
 		return nil, fmt.Errorf("template data %s: %w", args.Pack, err)
 	}
 	return &b, nil
-}
-
-// TemplateSave saves an embedded template.
-func (args *Args) TemplateSave() error {
-	err := args.templatePack()
-	if err != nil {
-		return fmt.Errorf("template save pack error: %w", err)
-	}
-	b, err := args.templateData()
-	if err != nil {
-		return fmt.Errorf("template save data error: %w", err)
-	}
-	if _, _, err := filesystem.Write(args.Tmpl, *b...); err != nil {
-		return fmt.Errorf("template save error: %w", err)
-	}
-	return nil
-}
-
-// Comment content for the meta retrotxt attribute.
-func (args *Args) Comment(lb filesystem.LB, r ...rune) string {
-	const na = "n/a"
-	l, w, name, b := 0, 0, na, []byte(string(r))
-
-	e := na
-	if args.Source.Encoding != nil {
-		e = fmt.Sprint(args.Source.Encoding)
-	}
-	lbs := filesystem.LineBreak(lb, false)
-	l, err := filesystem.Lines(bytes.NewReader(b), lb)
-	if err != nil {
-		l = -1
-	}
-	w, err = filesystem.Columns(bytes.NewReader(b), lb)
-	if err != nil {
-		w = -1
-	}
-	if args.Source.Name != "" {
-		name = args.Source.Name
-	}
-	return fmt.Sprintf("encoding: %s; line break: %s; length: %d; width: %d; name: %s",
-		e, lbs, l, w, name)
 }
 
 // fontFamily value for the CSS font face.
