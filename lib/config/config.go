@@ -3,7 +3,6 @@ package config
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/get"
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/set"
@@ -11,10 +10,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const (
-	filemode  os.FileMode = 0660
-	namedFile             = "config.yaml"
-)
+const namedFile = "config.yaml"
 
 func cmdPath() string {
 	return fmt.Sprintf("%s config", meta.Bin)
