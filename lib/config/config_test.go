@@ -1,35 +1,19 @@
 package config_test
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/get"
+	"github.com/bengarrett/retrotxtgo/lib/config/internal/set"
 )
-
-func TestKeys(t *testing.T) {
-	tests := []struct {
-		name string
-		want string
-	}{
-		{"0 index", "editor"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := config.Keys()[0]; !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Keys() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
 
 func TestMissing(t *testing.T) {
 	tests := []struct {
 		name      string
 		wantCount int
 	}{
-		{"want no values", len(config.Keys())},
+		{"want no values", len(set.Keys())},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -41,7 +25,7 @@ func TestMissing(t *testing.T) {
 }
 
 func TestKeySort(t *testing.T) {
-	got, keys := config.KeySort(), config.Keys()
+	got, keys := config.KeySort(), set.Keys()
 	lenG, lenK := len(got), len(keys)
 	if lenG == 0 {
 		t.Errorf("KeySort() is empty")

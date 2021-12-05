@@ -17,6 +17,7 @@ import (
 
 	"github.com/alecthomas/chroma/styles"
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/get"
+	"github.com/bengarrett/retrotxtgo/lib/config/internal/set"
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/upd"
 	"github.com/bengarrett/retrotxtgo/lib/create"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
@@ -56,7 +57,7 @@ func List() error {
 		}
 		return fmt.Sprintf("%s.", s)
 	}
-	keys := Keys()
+	keys := set.Keys()
 	const minWidth, tabWidth, tabs = 2, 2, "\t\t\t\t"
 	w := tabwriter.NewWriter(os.Stdout, minWidth, tabWidth, 0, ' ', 0)
 	cmds := fmt.Sprintf(" %s config set ", meta.Bin)
@@ -104,7 +105,7 @@ func Set(name string) {
 	case err != nil:
 		Update(name, false)
 	case i >= 0 && i <= (len(get.Reset())-1):
-		k := Keys()
+		k := set.Keys()
 		Update(k[i], false)
 	default:
 		Update(name, false)
@@ -141,7 +142,7 @@ func Update(name string, setup bool) {
 
 // Validate the existence of the key in a list of settings.
 func Validate(key string) (ok bool) {
-	keys := Keys()
+	keys := set.Keys()
 	// var i must be sorted in ascending order.
 	if i := sort.SearchStrings(keys, key); i == len(keys) || keys[i] != key {
 		return false

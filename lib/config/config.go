@@ -4,9 +4,9 @@ package config
 import (
 	"fmt"
 	"os"
-	"sort"
 
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/get"
+	"github.com/bengarrett/retrotxtgo/lib/config/internal/set"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/spf13/viper"
@@ -74,20 +74,20 @@ func Enabled() map[string]interface{} {
 }
 
 // Keys list all the available configuration setting names sorted alphabetically.
-func Keys() []string {
-	keys := make([]string, len(get.Reset()))
-	i := 0
-	for key := range get.Reset() {
-		keys[i] = key
-		i++
-	}
-	sort.Strings(keys)
-	return keys
-}
+// func Keys() []string {
+// 	keys := make([]string, len(get.Reset()))
+// 	i := 0
+// 	for key := range get.Reset() {
+// 		keys[i] = key
+// 		i++
+// 	}
+// 	sort.Strings(keys)
+// 	return keys
+// }
 
 // KeySort list all the available configuration setting names sorted by hand.
 func KeySort() []string {
-	all := Keys()
+	all := set.Keys()
 	keys := []string{get.FontFamily, get.Title, get.LayoutTmpl, get.FontEmbed,
 		get.SaveDir, get.Serve, get.Editor, get.Styleh, get.Stylei}
 	for _, key := range all {
