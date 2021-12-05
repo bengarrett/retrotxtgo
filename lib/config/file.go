@@ -101,31 +101,6 @@ func SetConfig(flag string) error {
 	return nil
 }
 
-// // UpdateConfig saves all viper settings to the named file.
-// func UpdateConfig(name string, stdout bool) error {
-// 	if name == "" {
-// 		name = viper.ConfigFileUsed()
-// 	}
-// 	data, err := Marshal()
-// 	if err != nil {
-// 		return fmt.Errorf("config update marshal failed: %w", err)
-// 	}
-// 	out, err := yaml.Marshal(&data)
-// 	if err != nil {
-// 		return fmt.Errorf("config update marshal data failed: %w", err)
-// 	}
-// 	// prepend comments
-// 	cmt := []byte(fmt.Sprintf("# %s configuration file", meta.Name))
-// 	out = bytes.Join([][]byte{cmt, out}, []byte("\n"))
-// 	if err = ioutil.WriteFile(name, out, filemode); err != nil {
-// 		return fmt.Errorf("config update saving data to the file failed: %q: %w", name, err)
-// 	}
-// 	if stdout {
-// 		fmt.Println("The change is saved")
-// 	}
-// 	return nil
-// }
-
 // configMissing prints an config file error notice and exits.
 func configMissing(name, suffix string) {
 	cmd := strings.TrimSuffix(name, suffix) + " create"

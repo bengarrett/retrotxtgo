@@ -49,18 +49,6 @@ func Enabled() map[string]interface{} {
 	return sets
 }
 
-// Keys list all the available configuration setting names sorted alphabetically.
-// func Keys() []string {
-// 	keys := make([]string, len(get.Reset()))
-// 	i := 0
-// 	for key := range get.Reset() {
-// 		keys[i] = key
-// 		i++
-// 	}
-// 	sort.Strings(keys)
-// 	return keys
-// }
-
 // KeySort list all the available configuration setting names sorted by hand.
 func KeySort() []string {
 	all := set.Keys()

@@ -1,6 +1,7 @@
 package input
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -17,10 +18,23 @@ import (
 	"github.com/bengarrett/retrotxtgo/meta"
 )
 
+var ErrMeta = errors.New("cannot use name as a meta element")
+
 type Update struct {
 	Name  string
 	Setup bool
 	Value interface{}
+}
+
+// ColorScheme prompts the user for the color scheme setting.
+func ColorScheme(u Update) {
+	PreviewMeta(u.Name, u.Value.(string))
+	c := create.ColorScheme()
+	prints := make([]string, len(c[:]))
+	copy(prints, c[:])
+	fmt.Printf("%s%s: ",
+		str.UnderlineKeys(prints...), set.Recommend(""))
+	set.ShortStrings(u.Name, u.Setup, c[:]...)
 }
 
 func Defaults(name string) string {
@@ -45,51 +59,60 @@ func Defaults(name string) string {
 	return ""
 }
 
+// Editor prompts the user for the editor setting.
+func Editor(u Update) {
+	s := fmt.Sprint("  Set a " + get.Tip()[u.Name])
+	if u.Value.(string) != "" {
+		s = fmt.Sprint(s, " or use a dash [-] to remove")
+	} else if ed := get.TextEditor(); ed != "" {
+		s = fmt.Sprintf("  Instead %s found %s and will use this editor.\n\n%s",
+			meta.Name, str.ColPri(ed), s)
+	}
+	fmt.Printf("%s:\n  ", s)
+	set.Editor(u.Name, u.Setup)
+}
+
+// Layout prompts the user for the layout setting.
+func Layout(u Update) {
+	fmt.Printf("\n%s\n%s\n%s\n%s\n",
+		"  Standard: Recommended, uses external CSS, JS and woff2 fonts and is the recommended layout for online hosting.",
+		"  Inline:   Not recommended as it includes both the CSS and JS as inline elements that cannot be cached.",
+		"  Compact:  The same as the standard layout but without any <meta> tags.",
+		"  None:     No template is used and instead only the generated markup is returned.")
+	fmt.Printf("\n%s%s%s ",
+		"  Choose a ", str.Options(get.Tip()[u.Name], true, false, create.Layouts()...),
+		fmt.Sprintf(" (suggestion: %s):", str.Example("standard")))
+	set.ShortStrings(u.Name, u.Setup, create.Layouts()...)
+}
+
+// PortInfo returns recommended and valid HTTP port values.
+func PortInfo() string {
+	type ports struct {
+		max uint
+		min uint
+		rec uint
+	}
+	port := ports{
+		max: prompt.PortMax,
+		min: prompt.PortMin,
+		rec: meta.WebPort,
+	}
+	pm, px, pr :=
+		strconv.Itoa(int(port.min)),
+		strconv.Itoa(int(port.max)),
+		strconv.Itoa(int(port.rec))
+	return fmt.Sprintf("%s-%s (suggestion: %s)",
+		str.Example(pm), str.Example(px), str.Example(pr))
+}
+
 // PreviewMeta previews and prompts for a meta element content value.
 func PreviewMeta(name, value string) {
-	PrintMeta(name, value)
+	s, err := PrintMeta(name, value)
+	if err != nil {
+		logs.FatalSave(err)
+	}
+	fmt.Print(s)
 	fmt.Printf("\n%s \n  ", PreviewPrompt(name, value))
-}
-
-func PrintMeta(name, value string) {
-	if name == "" {
-		logs.FatalSave(fmt.Errorf("preview meta: %w", logs.ErrNameNil))
-	}
-	if !set.Validate(name) {
-		logs.FatalSave(fmt.Errorf("preview meta %q: %w", name, logs.ErrConfigName))
-	}
-	s := strings.Split(name, ".")
-	const splits = 3
-	switch {
-	case len(s) != splits, s[0] != "html", s[1] != "meta":
-		return
-	}
-	element := func() string {
-		v := value
-		if v == "" {
-			v = Defaults(name)
-		}
-		return fmt.Sprintf("%s\n%s\n%s\n",
-			"  <head>",
-			fmt.Sprintf("    <meta name=\"%s\" value=\"%s\">", s[2], v),
-			"  </head>")
-	}
-	fmt.Print(color.HTML(element()))
-	h := strings.Split(get.Tip()[name], " ")
-	fmt.Printf("%s\n  %s %s.",
-		str.ColFuz("  About this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name"),
-		strings.Title(h[0]), strings.Join(h[1:], " "))
-}
-
-// ColorScheme prompts the user for the color scheme setting.
-func ColorScheme(u Update) {
-	PreviewMeta(u.Name, u.Value.(string))
-	c := create.ColorScheme()
-	prints := make([]string, len(c[:]))
-	copy(prints, c[:])
-	fmt.Printf("%s%s: ",
-		str.UnderlineKeys(prints...), set.Recommend(""))
-	set.ShortStrings(u.Name, u.Setup, c[:]...)
 }
 
 // PreviewPrompt returns the available options for the named setting.
@@ -111,30 +134,37 @@ func PreviewPromptS(name, value string) string {
 	return fmt.Sprintf("  %s or leave blank to keep it unused", p)
 }
 
-// Layout prompts the user for the layout setting.
-func Layout(u Update) {
-	fmt.Printf("\n%s\n%s\n%s\n%s\n",
-		"  Standard: Recommended, uses external CSS, JS and woff2 fonts and is the recommended layout for online hosting.",
-		"  Inline:   Not recommended as it includes both the CSS and JS as inline elements that cannot be cached.",
-		"  Compact:  The same as the standard layout but without any <meta> tags.",
-		"  None:     No template is used and instead only the generated markup is returned.")
-	fmt.Printf("\n%s%s%s ",
-		"  Choose a ", str.Options(get.Tip()[u.Name], true, false, create.Layouts()...),
-		fmt.Sprintf(" (suggestion: %s):", str.Example("standard")))
-	set.ShortStrings(u.Name, u.Setup, create.Layouts()...)
-}
-
-// Editor prompts the user for the editor setting.
-func Editor(u Update) {
-	s := fmt.Sprint("  Set a " + get.Tip()[u.Name])
-	if u.Value.(string) != "" {
-		s = fmt.Sprint(s, " or use a dash [-] to remove")
-	} else if ed := get.TextEditor(); ed != "" {
-		s = fmt.Sprintf("  Instead %s found %s and will use this editor.\n\n%s",
-			meta.Name, str.ColPri(ed), s)
+func PrintMeta(name, value string) (string, error) {
+	if name == "" {
+		return "", fmt.Errorf("preview meta: %w", logs.ErrNameNil)
 	}
-	fmt.Printf("%s:\n  ", s)
-	set.Editor(u.Name, u.Setup)
+	if !set.Validate(name) {
+		return "", fmt.Errorf("preview meta %q: %w", name, logs.ErrConfigName)
+	}
+	s := strings.Split(name, ".")
+	const splits = 3
+	switch {
+	case len(s) != splits, s[0] != "html", s[1] != "meta":
+		return "", fmt.Errorf("preview meta %q: %w", name, ErrMeta)
+	}
+	element := func() string {
+		v := value
+		if v == "" {
+			v = Defaults(name)
+		}
+		return fmt.Sprintf("%s\n%s\n%s\n",
+			"  <head>",
+			fmt.Sprintf("    <meta name=\"%s\" value=\"%s\">", s[2], v),
+			"  </head>")
+	}
+	var b strings.Builder
+	b.WriteString(color.HTML(element()))
+	h := strings.Split(get.Tip()[name], " ")
+	a := fmt.Sprintf("%s\n  %s %s.",
+		str.ColFuz("  About this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name"),
+		strings.Title(h[0]), strings.Join(h[1:], " "))
+	b.WriteString(a)
+	return b.String(), nil
 }
 
 // Serve prompts the user for a HTTP server port setting.
@@ -167,26 +197,6 @@ func Serve(u Update) {
 		str.Example("0"), str.Example("1024"))
 	fmt.Printf("  Set a HTTP port number, choices %s: ", PortInfo())
 	set.Port(u.Name, u.Setup)
-}
-
-// PortInfo returns recommended and valid HTTP port values.
-func PortInfo() string {
-	type ports struct {
-		max uint
-		min uint
-		rec uint
-	}
-	port := ports{
-		max: prompt.PortMax,
-		min: prompt.PortMin,
-		rec: meta.WebPort,
-	}
-	pm, px, pr :=
-		strconv.Itoa(int(port.min)),
-		strconv.Itoa(int(port.max)),
-		strconv.Itoa(int(port.rec))
-	return fmt.Sprintf("%s-%s (suggestion: %s)",
-		str.Example(pm), str.Example(px), str.Example(pr))
 }
 
 // SaveDir prompts the user for the a save destination directory setting.

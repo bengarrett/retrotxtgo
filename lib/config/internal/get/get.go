@@ -112,20 +112,6 @@ func Bool(key string) bool {
 	return false
 }
 
-// UInt returns the default integer value for the key.
-func UInt(key string) uint {
-	if v := viper.GetUint(key); v != 0 {
-		return v
-	}
-	switch Reset()[key].(type) {
-	case uint:
-		return Reset()[key].(uint)
-	default:
-		logs.FatalMark(key, ErrUint, logs.ErrConfigName)
-	}
-	return 0
-}
-
 // String returns the default string value for the key.
 func String(key string) string {
 	if v := viper.GetString(key); v != "" {
@@ -138,6 +124,20 @@ func String(key string) string {
 		logs.FatalMark(key, ErrString, logs.ErrConfigName)
 	}
 	return ""
+}
+
+// UInt returns the default integer value for the key.
+func UInt(key string) uint {
+	if v := viper.GetUint(key); v != 0 {
+		return v
+	}
+	switch Reset()[key].(type) {
+	case uint:
+		return Reset()[key].(uint)
+	default:
+		logs.FatalMark(key, ErrUint, logs.ErrConfigName)
+	}
+	return 0
 }
 
 // Marshal default values for use in a YAML configuration file.
@@ -239,18 +239,18 @@ func TextEditor() string {
 			fmt.Printf("%s\nwill attempt to use the $EDITOR environment variable\n", err)
 		}
 		if err := viper.BindEnv("editor", "EDITOR"); err != nil {
-			return lookEdit()
+			return DiscEditor()
 		}
 		edit = viper.GetString("editor")
 		if _, err := exec.LookPath(edit); err != nil {
-			return lookEdit()
+			return DiscEditor()
 		}
 	}
 	return edit
 }
 
-// lookEdit attempts to find any known text editors on the host system.
-func lookEdit() string {
+// DiscEditor attempts to discover any known text editors on the host system.
+func DiscEditor() string {
 	editors := [5]string{"nano", "vim", "emacs"}
 	if runtime.GOOS == "windows" {
 		editors[3] = "notepad++.exe"
