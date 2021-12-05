@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"sort"
 	"strconv"
 	"strings"
 	"text/tabwriter"
@@ -24,18 +23,6 @@ import (
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/spf13/viper"
 )
-
-// ColorCSS returns the element colored using CSS syntax highlights.
-func ColorCSS(elm string) string {
-	style := viper.GetString(get.Styleh)
-	return ColorElm(elm, "css", style, true)
-}
-
-// ColorHTML returns the element colored using HTML syntax highlights.
-func ColorHTML(elm string) string {
-	style := viper.GetString(get.Styleh)
-	return ColorElm(elm, "html", style, true)
-}
 
 // List and print all the available configurations.
 func List() error {
@@ -105,7 +92,7 @@ func Set(name string) {
 
 // Update edits and saves a named setting within a configuration file.
 func Update(name string, setup bool) {
-	if !Validate(name) {
+	if !set.Validate(name) {
 		fmt.Println(logs.Hint("config set --list", logs.ErrConfigName))
 		return
 	}
@@ -129,24 +116,6 @@ func Update(name string, setup bool) {
 		upd.String(s, name, value.(string))
 	}
 	updatePrompt(input.Update{name, setup, value})
-}
-
-// Validate the existence of the key in a list of settings.
-func Validate(key string) (ok bool) {
-	keys := set.Keys()
-	// var i must be sorted in ascending order.
-	if i := sort.SearchStrings(keys, key); i == len(keys) || keys[i] != key {
-		return false
-	}
-	return true
-}
-
-// Recommend uses the s value as a user input suggestion.
-func Recommend(s string) string {
-	if s == "" {
-		return fmt.Sprintf(" (suggestion: %s)", str.Example("do not use"))
-	}
-	return fmt.Sprintf(" (suggestion: %s)", str.Example(s))
 }
 
 // updatePrompt prompts the user for input to a config file setting.
@@ -216,7 +185,7 @@ func promptStyleHTML(u input.Update) {
 		d = s
 	}
 	fmt.Printf("\n%s\n\n  Choose the number to set a new HTML syntax style%s: ",
-		str.Italic(ChromaNames("css")), Recommend(d))
+		str.Italic(ChromaNames("css")), set.Recommend(d))
 	set.Strings(u.Name, u.Setup, styles.Names()...)
 }
 
@@ -227,7 +196,7 @@ func promptStyleInfo(u input.Update) {
 		d = s
 	}
 	fmt.Printf("\n%s\n\n  Choose the number to set a new %s syntax style%s: ",
-		str.Italic(ChromaNames("json")), str.Example("config info"), Recommend(d))
+		str.Italic(ChromaNames("json")), str.Example("config info"), set.Recommend(d))
 	set.Strings(u.Name, u.Setup, styles.Names()...)
 }
 
@@ -301,26 +270,12 @@ func (n Names) String(theme bool, lexer string) string {
 	return strings.Join(s, "")
 }
 
-func previewPromptPrint(name, value string) string {
-	p := "Set a new value"
-	if name == get.Keywords {
-		p = "Set some comma-separated keywords"
-		if value != "" {
-			p = "Replace the current keywords"
-		}
-	}
-	if value != "" {
-		return fmt.Sprintf("  %s, leave blank to keep as-is or use a dash [-] to remove", p)
-	}
-	return fmt.Sprintf("  %s or leave blank to keep it unused", p)
-}
-
 func recommendMeta(name, value, suggest string) {
 	input.PrintMeta(name, value)
 	fmt.Printf("\n%s\n  ", recommendPrompt(name, value, suggest))
 }
 
 func recommendPrompt(name, value, suggest string) string {
-	p := previewPromptPrint(name, value)
-	return fmt.Sprintf("%s%s:", p, Recommend(suggest))
+	p := input.PreviewPromptS(name, value)
+	return fmt.Sprintf("%s%s:", p, set.Recommend(suggest))
 }

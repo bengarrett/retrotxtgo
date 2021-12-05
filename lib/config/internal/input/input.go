@@ -93,10 +93,10 @@ func ColorScheme(u Update) {
 
 // PreviewPrompt returns the available options for the named setting.
 func PreviewPrompt(name, value string) string {
-	return fmt.Sprintf("%s:", previewPromptPrint(name, value))
+	return fmt.Sprintf("%s:", PreviewPromptS(name, value))
 }
 
-func previewPromptPrint(name, value string) string {
+func PreviewPromptS(name, value string) string {
 	p := "Set a new value"
 	if name == get.Keywords {
 		p = "Set some comma-separated keywords"
