@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/set"
+	"github.com/gookit/color"
 	"github.com/spf13/viper"
 )
 
@@ -89,6 +90,7 @@ func TestSkipWrite(t *testing.T) {
 }
 
 func TestRecommend(t *testing.T) {
+	color.Enable = false
 	value, want := "some command", " (suggestion: some command)"
 	if got := set.Recommend(value); got != want {
 		t.Errorf("Recommand() = %q, want %q", got, want)
