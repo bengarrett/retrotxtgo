@@ -585,7 +585,7 @@ func save(name string, setup bool, value interface{}) {
 	default:
 	}
 	viper.Set(name, value)
-	if err := UpdateConfig("", false); err != nil {
+	if err := upd.UpdateConfig("", false); err != nil {
 		logs.FatalSave(err)
 	}
 	switch v := value.(type) {

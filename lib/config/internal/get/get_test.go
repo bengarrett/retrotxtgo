@@ -57,3 +57,21 @@ func TestUInt(t *testing.T) {
 		})
 	}
 }
+
+func TestMarshal(t *testing.T) {
+	tests := []struct {
+		name    string
+		wantErr bool
+	}{
+		{"marshal", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := get.Marshal()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Marshal() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+		})
+	}
+}

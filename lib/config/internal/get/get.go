@@ -2,6 +2,7 @@ package get
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/meta"
@@ -106,4 +107,94 @@ func String(key string) string {
 		logs.FatalMark(key, ErrString, logs.ErrConfigName)
 	}
 	return ""
+}
+
+// Marshal default values for use in a YAML configuration file.
+func Marshal() (interface{}, error) {
+	sc := Settings{}
+	for key := range Reset() {
+		if err := sc.marshals(key); err != nil {
+			return sc, err
+		}
+	}
+	return sc, nil
+}
+
+// Settings types and names to be saved as YAML.
+type Settings struct {
+	Editor string
+	HTML   struct {
+		Font struct {
+			Embed  bool   `yaml:"embed"`
+			Family string `yaml:"family"`
+			Size   string `yaml:"size"`
+		}
+		Layout string `yaml:"layout"`
+		Meta   struct {
+			Author      string `yaml:"author"`
+			ColorScheme string `yaml:"color-scheme"`
+			Description string `yaml:"description"`
+			Keywords    string `yaml:"keywords"`
+			Referrer    string `yaml:"referrer"`
+			Robots      string `yaml:"robots"`
+			ThemeColor  string `yaml:"theme-color"`
+			Generator   bool   `yaml:"generator"`
+			Notranslate bool   `yaml:"notranslate"`
+			RetroTxt    bool   `yaml:"retrotxt"`
+		}
+		Title string `yaml:"title"`
+	}
+	SaveDirectory string `yaml:"save-directory"`
+	ServerPort    uint   `yaml:"serve"`
+	Style         struct {
+		Info string `yaml:"info"`
+		HTML string `yaml:"html"`
+	}
+}
+
+// marshals sets the default value for the key.
+func (sc *Settings) marshals(key string) error { // nolint:gocyclo
+	switch key {
+	case Editor:
+		sc.Editor = String(key)
+	case FontEmbed:
+		sc.HTML.Font.Embed = Bool(key)
+	case FontFamily:
+		sc.HTML.Font.Family = String(key)
+	case LayoutTmpl:
+		sc.HTML.Layout = String(key)
+	case Author:
+		sc.HTML.Meta.Author = String(key)
+	case Scheme:
+		sc.HTML.Meta.ColorScheme = String(key)
+	case Desc:
+		sc.HTML.Meta.Description = String(key)
+	case Genr:
+		sc.HTML.Meta.Generator = Bool(key)
+	case Keywords:
+		sc.HTML.Meta.Keywords = String(key)
+	case Notlate:
+		sc.HTML.Meta.Notranslate = Bool(key)
+	case Referr:
+		sc.HTML.Meta.Referrer = String(key)
+	case Rtx:
+		sc.HTML.Meta.RetroTxt = Bool(key)
+	case Bot:
+		sc.HTML.Meta.Robots = String(key)
+	case Theme:
+		sc.HTML.Meta.ThemeColor = String(key)
+	case Title:
+		sc.HTML.Title = String(key)
+	case SaveDir:
+		sc.SaveDirectory = String(key)
+	case Serve:
+		sc.ServerPort = UInt(key)
+	case Stylei:
+		sc.Style.Info = String(key)
+	case Styleh:
+		sc.Style.HTML = String(key)
+	default:
+		return fmt.Errorf("marshals %q: %w", key, logs.ErrConfigName)
+	}
+	return nil
 }

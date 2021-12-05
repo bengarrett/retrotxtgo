@@ -7,7 +7,6 @@ import (
 	"sort"
 
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/get"
-	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/spf13/viper"
@@ -43,38 +42,6 @@ func Tip() Hints {
 		get.Serve:      "serve files using an internal web server with this port",
 		get.Stylei:     "syntax highlighter for the config info output",
 		get.Styleh:     "syntax highlighter for html previews",
-	}
-}
-
-// Settings types and names to be saved as YAML.
-type Settings struct {
-	Editor string
-	HTML   struct {
-		Font struct {
-			Embed  bool   `yaml:"embed"`
-			Family string `yaml:"family"`
-			Size   string `yaml:"size"`
-		}
-		Layout string `yaml:"layout"`
-		Meta   struct {
-			Author      string `yaml:"author"`
-			ColorScheme string `yaml:"color-scheme"`
-			Description string `yaml:"description"`
-			Keywords    string `yaml:"keywords"`
-			Referrer    string `yaml:"referrer"`
-			Robots      string `yaml:"robots"`
-			ThemeColor  string `yaml:"theme-color"`
-			Generator   bool   `yaml:"generator"`
-			Notranslate bool   `yaml:"notranslate"`
-			RetroTxt    bool   `yaml:"retrotxt"`
-		}
-		Title string `yaml:"title"`
-	}
-	SaveDirectory string `yaml:"save-directory"`
-	ServerPort    uint   `yaml:"serve"`
-	Style         struct {
-		Info string `yaml:"info"`
-		HTML string `yaml:"html"`
 	}
 }
 
@@ -136,64 +103,6 @@ func KeySort() []string {
 		}
 	}
 	return keys
-}
-
-// Marshal default values for use in a YAML configuration file.
-func Marshal() (interface{}, error) {
-	sc := Settings{}
-	for key := range get.Reset() {
-		if err := sc.marshals(key); err != nil {
-			return sc, err
-		}
-	}
-	return sc, nil
-}
-
-// marshals sets the default value for the key.
-func (sc *Settings) marshals(key string) error { // nolint:gocyclo
-	switch key {
-	case get.Editor:
-		sc.Editor = get.String(key)
-	case get.FontEmbed:
-		sc.HTML.Font.Embed = get.Bool(key)
-	case get.FontFamily:
-		sc.HTML.Font.Family = get.String(key)
-	case get.LayoutTmpl:
-		sc.HTML.Layout = get.String(key)
-	case get.Author:
-		sc.HTML.Meta.Author = get.String(key)
-	case get.Scheme:
-		sc.HTML.Meta.ColorScheme = get.String(key)
-	case get.Desc:
-		sc.HTML.Meta.Description = get.String(key)
-	case get.Genr:
-		sc.HTML.Meta.Generator = get.Bool(key)
-	case get.Keywords:
-		sc.HTML.Meta.Keywords = get.String(key)
-	case get.Notlate:
-		sc.HTML.Meta.Notranslate = get.Bool(key)
-	case get.Referr:
-		sc.HTML.Meta.Referrer = get.String(key)
-	case get.Rtx:
-		sc.HTML.Meta.RetroTxt = get.Bool(key)
-	case get.Bot:
-		sc.HTML.Meta.Robots = get.String(key)
-	case get.Theme:
-		sc.HTML.Meta.ThemeColor = get.String(key)
-	case get.Title:
-		sc.HTML.Title = get.String(key)
-	case get.SaveDir:
-		sc.SaveDirectory = get.String(key)
-	case get.Serve:
-		sc.ServerPort = get.UInt(key)
-	case get.Stylei:
-		sc.Style.Info = get.String(key)
-	case get.Styleh:
-		sc.Style.HTML = get.String(key)
-	default:
-		return fmt.Errorf("marshals %q: %w", key, logs.ErrConfigName)
-	}
-	return nil
 }
 
 // Missing returns the settings that are not found in the configuration file.
