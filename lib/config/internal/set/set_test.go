@@ -1,12 +1,20 @@
 package set_test
 
 import (
+	"fmt"
 	"os"
 	"reflect"
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/set"
+	"github.com/gookit/color"
 )
+
+func Example_recommend() {
+	color.Enable = false
+	fmt.Print(set.Recommend(""))
+	// Output: (suggestion: do not use)
+}
 
 func TestKeys(t *testing.T) {
 	tests := []struct {

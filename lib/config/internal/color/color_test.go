@@ -22,3 +22,43 @@ func TestColorCSS(t *testing.T) {
 		})
 	}
 }
+
+func Test_names_string(t *testing.T) {
+	tests := []struct {
+		name  string
+		n     color.Names
+		theme bool
+		want  string
+	}{
+		{"nil", nil, false, ""},
+		{"empty", color.Names{""}, false, ""},
+		{"ok", color.Names{"okay"}, false, "okay"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.n.String(tt.theme, ""); got != tt.want {
+				t.Errorf("Names.string() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_colorElm(t *testing.T) {
+	// set test mode for str.HighlightWriter()
+	tests := []struct {
+		name string
+		elm  string
+		want string
+	}{
+		{"empty", "", ""},
+		{"str", "hello", "\nhello\n\n"},
+		{"basic", "<h1>hello</h1>", "\n<h1>hello</h1>\n\n"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := color.ColorElm(tt.elm, "html", "bw", false); got != tt.want {
+				t.Errorf("ColorElm() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

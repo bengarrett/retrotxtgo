@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/alecthomas/chroma/styles"
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/color"
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/get"
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/set"
@@ -206,4 +207,26 @@ func SaveDir(u Update) {
 			break
 		}
 	}
+}
+
+// StyleHTML prompts the user for the a HTML and CSS style setting.
+func StyleHTML(u Update) {
+	d := ""
+	if s, ok := get.Reset()[u.Name].(string); ok {
+		d = s
+	}
+	fmt.Printf("\n%s\n\n  Choose the number to set a new HTML syntax style%s: ",
+		str.Italic(color.ChromaNames("css")), set.Recommend(d))
+	set.Strings(u.Name, u.Setup, styles.Names()...)
+}
+
+// StyleInfo prompts the user for the a JS style setting.
+func StyleInfo(u Update) {
+	d := ""
+	if s, ok := get.Reset()[u.Name].(string); ok {
+		d = s
+	}
+	fmt.Printf("\n%s\n\n  Choose the number to set a new %s syntax style%s: ",
+		str.Italic(color.ChromaNames("json")), str.Example("config info"), set.Recommend(d))
+	set.Strings(u.Name, u.Setup, styles.Names()...)
 }
