@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"runtime"
 
+	"github.com/bengarrett/retrotxtgo/lib/config/internal/get"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/spf13/viper"
 )
@@ -19,7 +19,7 @@ func Edit() error {
 		configMissing(cmdPath(), "edit")
 		os.Exit(1)
 	}
-	edit := Editor()
+	edit := get.TextEditor()
 	if edit == "" {
 		return fmt.Errorf("create an $EDITOR environment variable in your shell configuration: %w", ErrEditorNil)
 	}
@@ -32,43 +32,4 @@ func Edit() error {
 		return fmt.Errorf("%s: %w", e, err)
 	}
 	return nil
-}
-
-// Editor returns the path of a configured or discovered text editor.
-func Editor() string {
-	edit := viper.GetString("editor")
-	_, err := exec.LookPath(edit)
-	if err != nil {
-		if edit != "" {
-			fmt.Printf("%s\nwill attempt to use the $EDITOR environment variable\n", err)
-		}
-		if err := viper.BindEnv("editor", "EDITOR"); err != nil {
-			return lookEdit()
-		}
-		edit = viper.GetString("editor")
-		if _, err := exec.LookPath(edit); err != nil {
-			return lookEdit()
-		}
-	}
-	return edit
-}
-
-// lookEdit attempts to find any known text editors on the host system.
-func lookEdit() string {
-	editors := [5]string{"nano", "vim", "emacs"}
-	if runtime.GOOS == "windows" {
-		editors[3] = "notepad++.exe"
-		editors[4] = "notepad.exe"
-	}
-	edit := ""
-	for _, editor := range editors {
-		if editor == "" {
-			continue
-		}
-		if _, err := exec.LookPath(editor); err == nil {
-			edit = editor
-			break
-		}
-	}
-	return edit
 }

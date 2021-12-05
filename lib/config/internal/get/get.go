@@ -3,6 +3,8 @@ package get
 import (
 	"errors"
 	"fmt"
+	"os/exec"
+	"runtime"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
@@ -226,4 +228,43 @@ func (sc *Settings) marshals(key string) error { // nolint:gocyclo
 		return fmt.Errorf("marshals %q: %w", key, logs.ErrConfigName)
 	}
 	return nil
+}
+
+// TextEditor returns the path of a configured or discovered text editor.
+func TextEditor() string {
+	edit := viper.GetString("editor")
+	_, err := exec.LookPath(edit)
+	if err != nil {
+		if edit != "" {
+			fmt.Printf("%s\nwill attempt to use the $EDITOR environment variable\n", err)
+		}
+		if err := viper.BindEnv("editor", "EDITOR"); err != nil {
+			return lookEdit()
+		}
+		edit = viper.GetString("editor")
+		if _, err := exec.LookPath(edit); err != nil {
+			return lookEdit()
+		}
+	}
+	return edit
+}
+
+// lookEdit attempts to find any known text editors on the host system.
+func lookEdit() string {
+	editors := [5]string{"nano", "vim", "emacs"}
+	if runtime.GOOS == "windows" {
+		editors[3] = "notepad++.exe"
+		editors[4] = "notepad.exe"
+	}
+	edit := ""
+	for _, editor := range editors {
+		if editor == "" {
+			continue
+		}
+		if _, err := exec.LookPath(editor); err == nil {
+			edit = editor
+			break
+		}
+	}
+	return edit
 }
