@@ -7,7 +7,6 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/get"
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/set"
-	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/spf13/viper"
 )
@@ -17,36 +16,13 @@ const (
 	namedFile             = "config.yaml"
 )
 
-// Hints for configuration values.
-type Hints map[string]string
-
-// Tip provides a brief help on the config file configurations.
-func Tip() Hints {
-	return Hints{
-		get.Editor:     "text editor to launch when using " + str.Example("config edit"),
-		get.FontEmbed:  "encode and embed the font as Base64 binary-to-text within the CSS",
-		get.FontFamily: "specifies the font to use with the HTML",
-		get.LayoutTmpl: "HTML template for the layout of CSS, JS and fonts",
-		get.Author:     "defines the name of the page authors",
-		get.Scheme:     "specifies one or more color schemes with which the page is compatible",
-		get.Desc:       "a short and accurate summary of the content of the page",
-		get.Genr:       fmt.Sprintf("include the %s version and page generation date?", meta.Name),
-		get.Keywords:   "words relevant to the page content",
-		get.Notlate:    "used to declare that the page should not be translated by Google Translate",
-		get.Referr:     "controls the Referer HTTP header attached to requests sent from the page",
-		get.Rtx:        "include a custom tag containing the meta information of the source textfile",
-		get.Bot:        "behavor that crawlers from Google, Bing and other engines should use with the page",
-		get.Theme:      "indicates a suggested color that user agents should use to customize the display of the page",
-		get.Title:      "page title that is shown in the browser tab",
-		get.SaveDir:    fmt.Sprintf("directory to store HTML assets created by %s", meta.Name),
-		get.Serve:      "serve files using an internal web server with this port",
-		get.Stylei:     "syntax highlighter for the config info output",
-		get.Styleh:     "syntax highlighter for html previews",
-	}
-}
-
 func cmdPath() string {
 	return fmt.Sprintf("%s config", meta.Bin)
+}
+
+// Tip provides a brief help on the config file configurations.
+func Tip() get.Hints {
+	return get.Tip()
 }
 
 // Formats choices for flags.

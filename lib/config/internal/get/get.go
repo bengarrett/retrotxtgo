@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/spf13/viper"
 )
@@ -39,6 +40,34 @@ const (
 
 // Defaults for setting keys.
 type Defaults map[string]interface{}
+
+// Hints for configuration values.
+type Hints map[string]string
+
+// Tip provides a brief help on the config file configurations.
+func Tip() Hints {
+	return Hints{
+		Editor:     "text editor to launch when using " + str.Example("config edit"),
+		FontEmbed:  "encode and embed the font as Base64 binary-to-text within the CSS",
+		FontFamily: "specifies the font to use with the HTML",
+		LayoutTmpl: "HTML template for the layout of CSS, JS and fonts",
+		Author:     "defines the name of the page authors",
+		Scheme:     "specifies one or more color schemes with which the page is compatible",
+		Desc:       "a short and accurate summary of the content of the page",
+		Genr:       fmt.Sprintf("include the %s version and page generation date?", meta.Name),
+		Keywords:   "words relevant to the page content",
+		Notlate:    "used to declare that the page should not be translated by Google Translate",
+		Referr:     "controls the Referer HTTP header attached to requests sent from the page",
+		Rtx:        "include a custom tag containing the meta information of the source textfile",
+		Bot:        "behavor that crawlers from Google, Bing and other engines should use with the page",
+		Theme:      "indicates a suggested color that user agents should use to customize the display of the page",
+		Title:      "page title that is shown in the browser tab",
+		SaveDir:    fmt.Sprintf("directory to store HTML assets created by %s", meta.Name),
+		Serve:      "serve files using an internal web server with this port",
+		Stylei:     "syntax highlighter for the config info output",
+		Styleh:     "syntax highlighter for html previews",
+	}
+}
 
 // Reset configuration values.
 // These are the default values whenever a setting is deleted,

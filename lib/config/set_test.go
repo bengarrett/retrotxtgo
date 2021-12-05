@@ -2,7 +2,6 @@ package config_test
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 
@@ -64,32 +63,6 @@ func Test_names_string(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.n.String(tt.theme, ""); got != tt.want {
 				t.Errorf("Names.string() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_dirExpansion(t *testing.T) {
-	u, err := os.UserHomeDir()
-	if err != nil {
-		t.Error(err)
-	}
-	w, err := os.Getwd()
-	if err != nil {
-		t.Error(err)
-	}
-	tests := []struct {
-		name    string
-		wantDir string
-	}{
-		{"", ""},
-		{"~", u},
-		{".", w},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if gotDir := config.DirExpansion(tt.name); gotDir != tt.wantDir {
-				t.Errorf("DirExpansion() = %v, want %v", gotDir, tt.wantDir)
 			}
 		})
 	}
