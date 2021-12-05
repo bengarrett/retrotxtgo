@@ -9,15 +9,14 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/bengarrett/retrotxtgo/lib/internal/save"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/gookit/color"
 	gap "github.com/muesli/go-app-paths"
 )
 
 const (
-	filename             = "errors.log"
-	fileMode os.FileMode = 0600
-	dirMode  os.FileMode = 0700
+	filename = "errors.log"
 
 	Panic = false
 )
@@ -97,12 +96,12 @@ func SaveErr(err error, name string) error {
 	}
 	p := filepath.Dir(name)
 	if _, e := os.Stat(p); os.IsNotExist(e) {
-		if e := os.MkdirAll(p, dirMode); e != nil {
+		if e := os.MkdirAll(p, save.DirMode); e != nil {
 			return e
 		}
 	}
 	const appendFile = os.O_APPEND | os.O_CREATE | os.O_WRONLY
-	file, e := os.OpenFile(name, appendFile, fileMode)
+	file, e := os.OpenFile(name, appendFile, save.LogFileMode)
 	if e != nil {
 		return e
 	}

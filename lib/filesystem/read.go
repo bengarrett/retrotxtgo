@@ -8,11 +8,11 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/bengarrett/retrotxtgo/lib/filesystem/internal/util"
 	"github.com/bengarrett/retrotxtgo/lib/internal/nl"
+	"github.com/bengarrett/retrotxtgo/lib/internal/save"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 )
-
-const fileMode os.FileMode = 0600
 
 // IsPipe determines if Stdin (standard input) is piped from another command.
 func IsPipe() bool {
@@ -136,8 +136,8 @@ func ReadControls(name string) (int, error) {
 
 // ReadLine reads a named file location or a named temporary file and returns its content.
 func ReadLine(name string, lb nl.LineBreaks) (string, error) {
-	var path, n = tempFile(name), nl.LineBreak(lb)
-	file, err := os.OpenFile(path, os.O_RDONLY, fileMode)
+	var path, n = util.Temp(name), nl.LineBreak(lb)
+	file, err := os.OpenFile(path, os.O_RDONLY, save.LogFileMode)
 	if errors.Is(err, os.ErrNotExist) {
 		return "", fmt.Errorf("%w: %s", ErrNotFound, name)
 	}

@@ -5,13 +5,12 @@ import (
 	"archive/tar"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 
-	"github.com/bengarrett/retrotxtgo/lib/filesystem/internal/dirs"
+	"github.com/bengarrett/retrotxtgo/lib/filesystem/internal/util"
 	"github.com/bengarrett/retrotxtgo/lib/internal/save"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 )
@@ -72,7 +71,7 @@ func DirExpansion(name string) string {
 			p = s
 		}
 		var cont bool
-		if dir, cont = dirs.Windows(i, p, runtime.GOOS, dir); cont {
+		if dir, cont = util.Windows(i, p, runtime.GOOS, dir); cont {
 			continue
 		}
 		dir = filepath.Join(dir, p)
@@ -85,7 +84,7 @@ func DirExpansion(name string) string {
 
 // SaveTemp saves bytes to a named temporary file.
 func SaveTemp(name string, b ...byte) (string, error) {
-	_, path, err := save.Save(tempFile(name), b...)
+	_, path, err := save.Save(util.Temp(name), b...)
 	if err != nil {
 		return path, fmt.Errorf("could not save the temporary file: %w", err)
 	}
@@ -102,38 +101,11 @@ func Tar(name string, files ...string) error {
 	w := tar.NewWriter(f)
 	defer w.Close()
 	for _, file := range files {
-		if err := addTar(file, w); err != nil {
+		if err := util.AddTar(file, w); err != nil {
 			return err
 		}
 	}
 	return nil
-}
-
-// AddTar inserts the named file to the TAR writer.
-func addTar(name string, w *tar.Writer) error {
-	f, err := os.Open(name)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	s, err := f.Stat()
-	if err != nil {
-		return err
-	}
-	h := &tar.Header{
-		Name:    f.Name(),
-		Size:    s.Size(),
-		Mode:    int64(s.Mode()),
-		ModTime: s.ModTime(),
-	}
-	if err1 := w.WriteHeader(h); err1 != nil {
-		return err1
-	}
-	_, err = io.Copy(w, f)
-	if err != nil {
-		return nil
-	}
-	return f.Close()
 }
 
 // Touch creates an empty file at the named location.
@@ -143,16 +115,6 @@ func Touch(name string) (string, error) {
 		return path, fmt.Errorf("could not touch a new file: %w", err)
 	}
 	return path, nil
-}
-
-// tempFile returns a path to the named file
-// if it was stored in the system's temporary directory.
-func tempFile(name string) string {
-	path := name
-	if filepath.Base(name) == name {
-		path = filepath.Join(os.TempDir(), name)
-	}
-	return path
 }
 
 // Write b to the named file.

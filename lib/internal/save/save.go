@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	DirMode  os.FileMode = 0700
-	FileMode os.FileMode = 0660
+	DirMode     os.FileMode = 0700
+	FileMode    os.FileMode = 0660
+	LogFileMode os.FileMode = 0600
 )
 
 // Save bytes to the named file location.
