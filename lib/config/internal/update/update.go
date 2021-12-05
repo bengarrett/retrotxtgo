@@ -8,6 +8,7 @@ import (
 	"os/exec"
 
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/get"
+	"github.com/bengarrett/retrotxtgo/lib/internal/save"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/spf13/viper"
@@ -55,8 +56,6 @@ func String(s, name, value string) {
 	}
 }
 
-const filemode os.FileMode = 0660
-
 // Config saves all viper settings to the named file.
 func Config(name string, stdout bool) error {
 	if name == "" {
@@ -73,7 +72,7 @@ func Config(name string, stdout bool) error {
 	// prepend comments
 	cmt := []byte(fmt.Sprintf("# %s configuration file", meta.Name))
 	out = bytes.Join([][]byte{cmt, out}, []byte("\n"))
-	if err = ioutil.WriteFile(name, out, filemode); err != nil {
+	if err = ioutil.WriteFile(name, out, save.FileMode); err != nil {
 		return fmt.Errorf("config update saving data to the file failed: %q: %w", name, err)
 	}
 	if stdout {
