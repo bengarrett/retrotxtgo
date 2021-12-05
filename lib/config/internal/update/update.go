@@ -1,4 +1,4 @@
-package upd
+package update
 
 import (
 	"bytes"
@@ -57,8 +57,8 @@ func String(s, name, value string) {
 
 const filemode os.FileMode = 0660
 
-// UpdateConfig saves all viper settings to the named file.
-func UpdateConfig(name string, stdout bool) error {
+// Config saves all viper settings to the named file.
+func Config(name string, stdout bool) error {
 	if name == "" {
 		name = viper.ConfigFileUsed()
 	}

@@ -11,7 +11,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/get"
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/input"
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/set"
-	"github.com/bengarrett/retrotxtgo/lib/config/internal/upd"
+	"github.com/bengarrett/retrotxtgo/lib/config/internal/update"
 	"github.com/bengarrett/retrotxtgo/lib/create"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
@@ -100,10 +100,10 @@ func Update(name string, setup bool) {
 		// everything ok
 	}
 	if b, ok := value.(bool); ok {
-		upd.Bool(b, name)
+		update.Bool(b, name)
 	}
 	if s, ok := value.(string); ok {
-		upd.String(s, name, value.(string))
+		update.String(s, name, value.(string))
 	}
 	updatePrompt(input.Update{
 		Name:  name,

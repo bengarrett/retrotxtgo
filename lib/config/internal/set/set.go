@@ -12,7 +12,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/color"
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/get"
-	"github.com/bengarrett/retrotxtgo/lib/config/internal/upd"
+	"github.com/bengarrett/retrotxtgo/lib/config/internal/update"
 	"github.com/bengarrett/retrotxtgo/lib/create"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/prompt"
@@ -47,7 +47,7 @@ func Write(name string, setup bool, value interface{}) {
 	default:
 	}
 	viper.Set(name, value)
-	if err := upd.UpdateConfig("", false); err != nil {
+	if err := update.Config("", false); err != nil {
 		logs.FatalSave(err)
 	}
 	switch v := value.(type) {

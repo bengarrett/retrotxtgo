@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/bengarrett/retrotxtgo/lib/config/internal/upd"
+	"github.com/bengarrett/retrotxtgo/lib/config/internal/update"
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
@@ -48,7 +48,7 @@ func createNew(name string) error {
 		return fmt.Errorf("%s: %q: %w", errMsg("create"), name, err)
 	}
 	InitDefaults()
-	err = upd.UpdateConfig(path, false)
+	err = update.Config(path, false)
 	if err != nil {
 		return fmt.Errorf("%s: %q: %w", errMsg("update"), name, err)
 	}
