@@ -56,7 +56,7 @@ func BenchmarkReadMega(b *testing.B) {
 	filesystem.Clean(mega)
 }
 
-func ExampleSave() {
+func ExampleClean() {
 	path, err := filesystem.SaveTemp("examplesave.txt", []byte("hello world")...)
 	if err != nil {
 		filesystem.Clean(path)

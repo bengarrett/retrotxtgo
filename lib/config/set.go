@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -18,6 +19,10 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/spf13/viper"
+)
+
+var (
+	ErrNotCfged = errors.New("config is not configured")
 )
 
 // List and print all the available configurations.
@@ -105,14 +110,16 @@ func Update(name string, setup bool) {
 	if s, ok := value.(string); ok {
 		update.String(s, name, value.(string))
 	}
-	updatePrompt(input.Update{
+	if err := updatePrompt(input.Update{
 		Name:  name,
 		Setup: setup,
-		Value: value})
+		Value: value}); err != nil {
+		log.Fatalln(err)
+	}
 }
 
 // updatePrompt prompts the user for input to a config file setting.
-func updatePrompt(u input.Update) {
+func updatePrompt(u input.Update) error {
 	switch u.Name {
 	case "editor":
 		input.Editor(u)
@@ -124,13 +131,12 @@ func updatePrompt(u input.Update) {
 		input.StyleHTML(u)
 	case get.Stylei:
 		input.StyleInfo(u)
-	default:
-		metaPrompts(u)
 	}
+	return metaPrompts(u)
 }
 
 // metaPrompts prompts the user for a meta setting.
-func metaPrompts(u input.Update) {
+func metaPrompts(u input.Update) error {
 	switch u.Name {
 	case get.FontEmbed:
 		set.FontEmbed(u.Value.(bool), u.Setup)
@@ -144,7 +150,9 @@ func metaPrompts(u input.Update) {
 		input.PreviewMeta(u.Name, u.Value.(string))
 		set.String(u.Name, u.Setup)
 	case get.Theme:
-		recommendMeta(u.Name, u.Value.(string), "")
+		if err := recommendMeta(u.Name, u.Value.(string), ""); err != nil {
+			return err
+		}
 		set.String(u.Name, u.Setup)
 	case get.Scheme:
 		input.ColorScheme(u)
@@ -153,12 +161,16 @@ func metaPrompts(u input.Update) {
 	case get.Notlate:
 		set.NoTranslate(u.Value.(bool), u.Setup)
 	case get.Referr:
-		recommendMeta(u.Name, u.Value.(string), "")
+		if err := recommendMeta(u.Name, u.Value.(string), ""); err != nil {
+			return err
+		}
 		cr := create.Referrer()
 		fmt.Printf("%s\n  ", str.NumberizeKeys(cr[:]...))
 		set.Index(u.Name, u.Setup, cr[:]...)
 	case get.Bot:
-		recommendMeta(u.Name, u.Value.(string), "")
+		if err := recommendMeta(u.Name, u.Value.(string), ""); err != nil {
+			return err
+		}
 		cr := create.Robots()
 		fmt.Printf("%s\n  ", str.NumberizeKeys(cr[:]...))
 		set.Index(u.Name, u.Setup, cr[:]...)
@@ -166,17 +178,20 @@ func metaPrompts(u input.Update) {
 		set.RetroTxt(u.Value.(bool))
 	case get.Title:
 		set.Title(u.Name, u.Value.(string), u.Setup)
-	default:
-		log.Fatalln("config is not configured:", u.Name)
 	}
+	return fmt.Errorf("%w: %s", ErrNotCfged, u.Name)
 }
 
-func recommendMeta(name, value, suggest string) {
-	input.PrintMeta(name, value)
-	fmt.Printf("\n%s\n  ", recommendPrompt(name, value, suggest))
+func recommendMeta(name, value, suggest string) error {
+	s, err := input.PrintMeta(name, value)
+	if err != nil {
+		return fmt.Errorf("recommanded meta: %w", err)
+	}
+	fmt.Printf("%s\n%s\n  ", s, recommendPrompt(name, value, suggest))
+	return err
 }
 
 func recommendPrompt(name, value, suggest string) string {
-	p := input.PreviewPromptS(name, value)
-	return fmt.Sprintf("%s%s:", p, set.Recommend(suggest))
+	s := input.PreviewPromptS(name, value)
+	return fmt.Sprintf("%s%s:", s, set.Recommend(suggest))
 }

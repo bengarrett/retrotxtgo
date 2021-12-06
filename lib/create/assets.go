@@ -16,6 +16,7 @@ import (
 // Asset filenames.
 type Asset int
 
+//nolint:stylecheck,revive
 const (
 	HTML     Asset = iota // Index html.
 	FontCss               // CSS containing fonts.

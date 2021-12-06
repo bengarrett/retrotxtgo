@@ -21,8 +21,8 @@ var (
 
 func Run(cmd *cobra.Command, args []string) error {
 	f := convert.Flag{
-		Controls:  flag.CreateDefaults.Controls,
-		SwapChars: flag.CreateDefaults.Swap,
+		Controls:  flag.CreateDefaults().Controls,
+		SwapChars: flag.CreateDefaults().Swap,
 	}
 	// handle defaults, use these control codes
 	if c := cmd.Flags().Lookup("controls"); !c.Changed {

@@ -25,7 +25,7 @@ var (
 var rootCmd = &cobra.Command{
 	Use:     meta.Bin,
 	Short:   fmt.Sprintf("%s is the tool that turns ANSI, ASCII, NFO text into browser ready HTML", meta.Name),
-	Long:    long.Root,
+	Long:    long.Root.String(),
 	Example: example.Root.Print(),
 	Run: func(cmd *cobra.Command, args []string) {
 		// Do nothing other than print the help.

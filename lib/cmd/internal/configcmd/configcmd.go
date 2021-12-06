@@ -29,7 +29,7 @@ func (c Configs) Command() *cobra.Command {
 	case Create:
 		return create()
 	case Delete:
-		return delete()
+		return del()
 	case Edit:
 		return edit()
 	case Info:
@@ -56,7 +56,7 @@ func create() *cobra.Command {
 	}
 }
 
-func delete() *cobra.Command {
+func del() *cobra.Command {
 	return &cobra.Command{
 		Use:     "delete",
 		Aliases: []string{"d", "del", "rm"},
@@ -79,7 +79,7 @@ func edit() *cobra.Command {
 		Use:     "edit",
 		Aliases: []string{"e"},
 		Short:   "Edit the config file\n",
-		Long:    long.ConfigEdit,
+		Long:    long.ConfigEdit.String(),
 		Run: func(cmd *cobra.Command, args []string) {
 			if err := config.Edit(); err != nil {
 				logs.Fatal(err)

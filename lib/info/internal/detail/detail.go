@@ -48,8 +48,6 @@ type Detail struct {
 	Sauce      sauce.Record `json:"sauce" xml:"sauce"`
 	ZipComment string       `json:"zipComment" xml:"zip_comment"`
 	UTF8       bool
-	//index      int
-	//length     int
 	sauceIndex int
 }
 

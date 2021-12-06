@@ -12,21 +12,22 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//nolint:gochecknoglobals
-var infoCmd = &cobra.Command{
-	Use:     fmt.Sprintf("info %s", example.Filenames),
-	Aliases: []string{"i"},
-	Short:   "Information on a text file",
-	Long:    "Discover details and information about any text or text art file.",
-	Example: example.Info.Print(),
-	Run: func(cmd *cobra.Command, args []string) {
-		if err := infocmd.Run(cmd, args); err != nil {
-			logs.Fatal(err)
-		}
-	},
+func infoCommand() *cobra.Command {
+	return &cobra.Command{
+		Use:     fmt.Sprintf("info %s", example.Filenames),
+		Aliases: []string{"i"},
+		Short:   "Information on a text file",
+		Long:    "Discover details and information about any text or text art file.",
+		Example: example.Info.Print(),
+		Run: func(cmd *cobra.Command, args []string) {
+			if err := infocmd.Run(cmd, args); err != nil {
+				logs.Fatal(err)
+			}
+		}}
 }
 
 func init() {
+	infoCmd := infoCommand()
 	rootCmd.AddCommand(infoCmd)
 	infos := config.Format().Info
 	infoCmd.Flags().StringVarP(&flag.InfoFlag.Format, "format", "f", "color",

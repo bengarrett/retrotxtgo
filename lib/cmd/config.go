@@ -13,19 +13,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//nolint:gochecknoglobals
-var configCmd = &cobra.Command{
-	Use:     "config",
-	Aliases: []string{"cfg"},
-	Short:   fmt.Sprintf("%s configuration and defaults", meta.Name),
-	Long:    fmt.Sprintf("%s settings, setup and default configurations.", meta.Name),
-	Example: example.Config.Print(),
-	Run: func(cmd *cobra.Command, args []string) {
-		if err := flag.PrintUsage(cmd, args...); err != nil {
-			logs.Fatal(err)
-		}
-		logs.FatalCmd("config", args...)
-	},
+func configCommand() *cobra.Command {
+	return &cobra.Command{
+		Use:     "config",
+		Aliases: []string{"cfg"},
+		Short:   fmt.Sprintf("%s configuration and defaults", meta.Name),
+		Long:    fmt.Sprintf("%s settings, setup and default configurations.", meta.Name),
+		Example: example.Config.Print(),
+		Run: func(cmd *cobra.Command, args []string) {
+			if err := flag.PrintUsage(cmd, args...); err != nil {
+				logs.Fatal(err)
+			}
+			logs.FatalCmd("config", args...)
+		}}
 }
 
 // init is always called by the Cobra library to be used for global flags and commands.
@@ -35,6 +35,7 @@ func init() {
 		// disable all color output
 		color.Enable = false
 	}
+	configCmd := configCommand()
 	rootCmd.AddCommand(configCmd)
 	configCmd.AddCommand(configcmd.Create.Command())
 	configCmd.AddCommand(configcmd.Delete.Command())

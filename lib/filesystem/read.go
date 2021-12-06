@@ -101,15 +101,15 @@ func readLineBreaks(name string, cols bool) (int, error) {
 		return -1, err
 	}
 	defer file.Close()
-	nl, err := ReadLineBreaks(name)
+	lb, err := ReadLineBreaks(name)
 	if err != nil {
 		return -1, fmt.Errorf("could not find the line break method: %w", err)
 	}
 	var count int
 	if !cols {
-		count, err = Lines(file, nl)
+		count, err = Lines(file, lb)
 	} else {
-		count, err = Columns(file, nl)
+		count, err = Columns(file, lb)
 	}
 	if err != nil {
 		return -1, fmt.Errorf("read columns count the file: %q: %w", name, err)

@@ -89,7 +89,6 @@ func Marshal(name string, f detail.Format, i, length int) error {
 	if err := d.Read(name); err != nil {
 		return err
 	}
-	//d.index, d.length = i, length
 	if d.ValidText() {
 		var err error
 		// get the required linebreaks chars before running the multiple tasks

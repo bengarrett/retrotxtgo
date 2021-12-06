@@ -12,28 +12,31 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//nolint:gochecknoglobals
-var createCmd = &cobra.Command{
-	Use:     fmt.Sprintf("create %s", example.Filenames),
-	Aliases: []string{"c", "html"},
-	Short:   "Create a HTML document from text files",
-	Long:    "Create a HTML document from text documents and text art files.",
-	Example: example.Create.Print(),
-	Run: func(cmd *cobra.Command, args []string) {
-		if err := createcmd.Run(cmd, args); err != nil {
-			logs.Fatal(err)
-		}
-	},
+func createCommand() *cobra.Command {
+	return &cobra.Command{
+		Use:     fmt.Sprintf("create %s", example.Filenames),
+		Aliases: []string{"c", "html"},
+		Short:   "Create a HTML document from text files",
+		Long:    "Create a HTML document from text documents and text art files.",
+		Example: example.Create.Print(),
+		Run: func(cmd *cobra.Command, args []string) {
+			if err := createcmd.Run(cmd, args); err != nil {
+				logs.Fatal(err)
+			}
+		},
+	}
 }
 
 func init() {
+	createCmd := createCommand()
 	rootCmd.AddCommand(createCmd)
 	// root config must be initialized before getting saved default values
 	rootcmd.Init()
 	// output flags
-	flag.Encode(&flag.CreateDefaults.Encode, createCmd)
-	flag.Controls(&flag.CreateDefaults.Controls, createCmd)
-	flag.Runes(&flag.CreateDefaults.Swap, createCmd)
+	deflts := flag.CreateDefaults()
+	flag.Encode(&deflts.Encode, createCmd)
+	flag.Controls(&deflts.Controls, createCmd)
+	flag.Runes(&deflts.Swap, createCmd)
 	dir := createcmd.SaveDir()
 	createCmd.Flags().BoolVarP(&flag.HTML.Save.AsFiles, "save", "s", false,
 		"save HTML and static files to a the save directory\nor ignore to print (save directory: "+dir+")")

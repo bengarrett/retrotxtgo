@@ -60,7 +60,7 @@ var InfoFlag struct {
 	Format string
 }
 
-// flags container.
+// HTML flags container.
 var HTML create.Args
 
 func ConfigInfo() (exit bool) {
@@ -94,12 +94,12 @@ type Create struct {
 
 const EncodingDefault = "CP437"
 
-// createFlag
-// CreateDefaults contain default values.
-var CreateDefaults = Create{
-	Controls: []string{"eof", "tab"},
-	Encode:   EncodingDefault,
-	Swap:     []string{"null", "bar"},
+func CreateDefaults() Create {
+	return Create{
+		Controls: []string{"eof", "tab"},
+		Encode:   EncodingDefault,
+		Swap:     []string{"null", "bar"},
+	}
 }
 
 type Meta struct {

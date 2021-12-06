@@ -3,6 +3,7 @@ package ver
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"os"
 	"runtime"
 	"strings"
@@ -69,7 +70,7 @@ func terminal() string {
 	if err != nil {
 		return unknown()
 	}
-	defer term.Restore(int(os.Stdin.Fd()), oldState)
+	defer restoreTerm(oldState)
 	w, h, err := term.GetSize(int(os.Stdin.Fd()))
 	// code source: https://gist.github.com/mattn/00cf5b7e38f4cceaf7077f527479870c
 	if os.Getenv("WT_SESSION") != "" {
@@ -107,4 +108,10 @@ func terminal() string {
 		return fmt.Sprintf("%s (%dx%d)", s, w, h)
 	}
 	return unknown()
+}
+
+func restoreTerm(oldState *term.State) {
+	if err := term.Restore(int(os.Stdin.Fd()), oldState); err != nil {
+		log.Fatal(err)
+	}
 }
