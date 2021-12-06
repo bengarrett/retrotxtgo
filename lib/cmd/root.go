@@ -22,6 +22,7 @@ var (
 )
 
 // rootCmd represents the base command when called without any subcommands.
+//nolint:gochecknoglobals
 var rootCmd = &cobra.Command{
 	Use:     meta.Bin,
 	Short:   fmt.Sprintf("%s is the tool that turns ANSI, ASCII, NFO text into browser ready HTML", meta.Name),

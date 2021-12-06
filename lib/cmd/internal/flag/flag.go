@@ -44,24 +44,24 @@ type ViewFlags struct {
 	Width    int
 }
 
-var RootFlag RootFlags
+// nolint:gochecknoglobals
+var (
+	Config   Configs
+	HTML     create.Args
+	InfoFlag struct{ Format string }
+	RootFlag RootFlags
+	ViewFlag = vfDefaults()
+)
 
-var ViewFlag = ViewFlags{
-	Controls: []string{"eof", "tab"},
-	Encode:   "CP437",
-	Swap:     []string{"null", "bar"},
-	To:       "",
-	Width:    0,
+func vfDefaults() ViewFlags {
+	return ViewFlags{
+		Controls: []string{"eof", "tab"},
+		Encode:   "CP437",
+		Swap:     []string{"null", "bar"},
+		To:       "",
+		Width:    0,
+	}
 }
-
-var Config Configs
-
-var InfoFlag struct {
-	Format string
-}
-
-// HTML flags container.
-var HTML create.Args
 
 func ConfigInfo() (exit bool) {
 	if Config.Configs {

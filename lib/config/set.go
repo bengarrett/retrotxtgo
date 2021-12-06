@@ -150,10 +150,7 @@ func metaPrompts(u input.Update) error {
 		input.PreviewMeta(u.Name, u.Value.(string))
 		set.String(u.Name, u.Setup)
 	case get.Theme:
-		if err := recommendMeta(u.Name, u.Value.(string), ""); err != nil {
-			return err
-		}
-		set.String(u.Name, u.Setup)
+		return theme(u)
 	case get.Scheme:
 		input.ColorScheme(u)
 	case get.Genr:
@@ -161,25 +158,43 @@ func metaPrompts(u input.Update) error {
 	case get.Notlate:
 		set.NoTranslate(u.Value.(bool), u.Setup)
 	case get.Referr:
-		if err := recommendMeta(u.Name, u.Value.(string), ""); err != nil {
-			return err
-		}
-		cr := create.Referrer()
-		fmt.Printf("%s\n  ", str.NumberizeKeys(cr[:]...))
-		set.Index(u.Name, u.Setup, cr[:]...)
+		return referr(u)
 	case get.Bot:
-		if err := recommendMeta(u.Name, u.Value.(string), ""); err != nil {
-			return err
-		}
-		cr := create.Robots()
-		fmt.Printf("%s\n  ", str.NumberizeKeys(cr[:]...))
-		set.Index(u.Name, u.Setup, cr[:]...)
+		return bot(u)
 	case get.Rtx:
 		set.RetroTxt(u.Value.(bool))
 	case get.Title:
 		set.Title(u.Name, u.Value.(string), u.Setup)
 	}
 	return fmt.Errorf("%w: %s", ErrNotCfged, u.Name)
+}
+
+func theme(u input.Update) error {
+	if err := recommendMeta(u.Name, u.Value.(string), ""); err != nil {
+		return err
+	}
+	set.String(u.Name, u.Setup)
+	return nil
+}
+
+func bot(u input.Update) error {
+	if err := recommendMeta(u.Name, u.Value.(string), ""); err != nil {
+		return err
+	}
+	cr := create.Robots()
+	fmt.Printf("%s\n  ", str.NumberizeKeys(cr[:]...))
+	set.Index(u.Name, u.Setup, cr[:]...)
+	return nil
+}
+
+func referr(u input.Update) error {
+	if err := recommendMeta(u.Name, u.Value.(string), ""); err != nil {
+		return err
+	}
+	cr := create.Referrer()
+	fmt.Printf("%s\n  ", str.NumberizeKeys(cr[:]...))
+	set.Index(u.Name, u.Setup, cr[:]...)
+	return nil
 }
 
 func recommendMeta(name, value, suggest string) error {

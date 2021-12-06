@@ -64,6 +64,7 @@ func TestPort(t *testing.T) {
 	}
 }
 
+//nolint:dupl
 func TestIndexStrings(t *testing.T) {
 	options := []string{"number1", "number2", "number3"}
 	type args struct {
