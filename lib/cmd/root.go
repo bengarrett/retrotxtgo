@@ -26,7 +26,7 @@ var rootCmd = &cobra.Command{
 	Use:     meta.Bin,
 	Short:   fmt.Sprintf("%s is the tool that turns ANSI, ASCII, NFO text into browser ready HTML", meta.Name),
 	Long:    long.Root,
-	Example: example.Print(example.Root),
+	Example: example.Root.Print(),
 	Run: func(cmd *cobra.Command, args []string) {
 		// Do nothing other than print the help.
 		// This func must remain otherwise root command flags are ignored by Cobra.

@@ -8,12 +8,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+//nolint:gochecknoglobals
 var listCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"l"},
 	Short:   "Available inbuilt examples, codepages and tabled datasets",
 	Long:    "List the available inbuilt text art and text documents, codepages and their tabled values.",
-	Example: example.Print(example.List),
+	Example: example.List.Print(),
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := flag.PrintUsage(cmd, args...); err != nil {
 			logs.Fatal(err)
@@ -24,8 +25,8 @@ var listCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(listCmd)
-	listCmd.AddCommand(listcmd.Codepages)
-	listCmd.AddCommand(listcmd.Examples)
-	listCmd.AddCommand(listcmd.Table)
-	listCmd.AddCommand(listcmd.Tables)
+	listCmd.AddCommand(listcmd.Codepages.Command())
+	listCmd.AddCommand(listcmd.Examples.Command())
+	listCmd.AddCommand(listcmd.Table.Command())
+	listCmd.AddCommand(listcmd.Tables.Command())
 }

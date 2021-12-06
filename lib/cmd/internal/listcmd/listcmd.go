@@ -25,29 +25,27 @@ var (
 	ErrIANA  = errors.New("could not work out the IANA index or MIME type")
 )
 
-var Codepages = &cobra.Command{
-	Use:     "codepages",
-	Aliases: []string{"c", "cp"},
-	Short: fmt.Sprintf("List the legacy codepages that %s can convert to UTF-8",
-		meta.Name),
-	Long: fmt.Sprintf("List the available legacy codepages that %s can convert to UTF-8.",
-		meta.Name),
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Print(convert.List())
-	},
-}
+type Lists int
 
-var Examples = &cobra.Command{
-	Use:     "examples",
-	Aliases: []string{"e"},
-	Short: fmt.Sprintf("List builtin text files available for use with the %s, %s, %s and %s commands",
-		str.Example("create"), str.Example("save"), str.Example("info"), str.Example("view")),
-	Long: fmt.Sprintf("List builtin text art and documents available for use with the %s, %s, %s and %s commands.",
-		str.Example("create"), str.Example("save"), str.Example("info"), str.Example("view")),
-	Example: example.Print(example.ListExamples),
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Print(PrintExamples())
-	},
+const (
+	Codepages Lists = iota
+	Examples
+	Table
+	Tables
+)
+
+func (l Lists) Command() *cobra.Command {
+	switch l {
+	case Codepages:
+		return codepages()
+	case Examples:
+		return examples()
+	case Table:
+		return table()
+	case Tables:
+		return tables()
+	}
+	return nil
 }
 
 func PrintExamples() *bytes.Buffer {
@@ -94,20 +92,6 @@ func PrintExamples() *bytes.Buffer {
 	return &buf
 }
 
-var Table = &cobra.Command{
-	Use:     "table [codepage names or aliases]",
-	Aliases: []string{"t"},
-	Short:   "Display one or more codepage tables showing all the characters in use",
-	Long:    "Display one or more codepage tables showing all the characters in use.",
-	Example: example.Print(example.ListTable),
-	Run: func(cmd *cobra.Command, args []string) {
-		if err := flag.PrintUsage(cmd, args...); err != nil {
-			logs.Fatal(err)
-		}
-		fmt.Print(PrintTable(args...))
-	},
-}
-
 // listTable returns one or more named encodings in a tabled format.
 func PrintTable(names ...string) (s string) {
 	for _, name := range names {
@@ -119,15 +103,6 @@ func PrintTable(names ...string) (s string) {
 		s = fmt.Sprintf("%s%s", s, table.String())
 	}
 	return s
-}
-
-var Tables = &cobra.Command{
-	Use:   "tables",
-	Short: "Display the characters of every codepage table inuse",
-	Long:  "Display the characters of every codepage table inuse.",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Print(PrintTables())
-	},
 }
 
 // listTbls returns all the supported encodings in a tabled format.
@@ -167,4 +142,60 @@ func Printable(name string) bool {
 		return false
 	}
 	return true
+}
+
+func codepages() *cobra.Command {
+	return &cobra.Command{
+		Use:     "codepages",
+		Aliases: []string{"c", "cp"},
+		Short: fmt.Sprintf("List the legacy codepages that %s can convert to UTF-8",
+			meta.Name),
+		Long: fmt.Sprintf("List the available legacy codepages that %s can convert to UTF-8.",
+			meta.Name),
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Print(convert.List())
+		},
+	}
+}
+
+func examples() *cobra.Command {
+	return &cobra.Command{
+		Use:     "examples",
+		Aliases: []string{"e"},
+		Short: fmt.Sprintf("List builtin text files available for use with the %s, %s, %s and %s commands",
+			str.Example("create"), str.Example("save"), str.Example("info"), str.Example("view")),
+		Long: fmt.Sprintf("List builtin text art and documents available for use with the %s, %s, %s and %s commands.",
+			str.Example("create"), str.Example("save"), str.Example("info"), str.Example("view")),
+		Example: example.ListExamples.Print(),
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Print(PrintExamples())
+		},
+	}
+}
+
+func table() *cobra.Command {
+	return &cobra.Command{
+		Use:     "table [codepage names or aliases]",
+		Aliases: []string{"t"},
+		Short:   "Display one or more codepage tables showing all the characters in use",
+		Long:    "Display one or more codepage tables showing all the characters in use.",
+		Example: example.ListTable.Print(),
+		Run: func(cmd *cobra.Command, args []string) {
+			if err := flag.PrintUsage(cmd, args...); err != nil {
+				logs.Fatal(err)
+			}
+			fmt.Print(PrintTable(args...))
+		},
+	}
+}
+
+func tables() *cobra.Command {
+	return &cobra.Command{
+		Use:   "tables",
+		Short: "Display the characters of every codepage table inuse",
+		Long:  "Display the characters of every codepage table inuse.",
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Print(PrintTables())
+		},
+	}
 }

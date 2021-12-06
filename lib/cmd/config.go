@@ -13,12 +13,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+//nolint:gochecknoglobals
 var configCmd = &cobra.Command{
 	Use:     "config",
 	Aliases: []string{"cfg"},
 	Short:   fmt.Sprintf("%s configuration and defaults", meta.Name),
 	Long:    fmt.Sprintf("%s settings, setup and default configurations.", meta.Name),
-	Example: example.Print(example.Config),
+	Example: example.Config.Print(),
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := flag.PrintUsage(cmd, args...); err != nil {
 			logs.Fatal(err)
@@ -35,23 +36,23 @@ func init() {
 		color.Enable = false
 	}
 	rootCmd.AddCommand(configCmd)
-	configCmd.AddCommand(configcmd.Create)
-	configCmd.AddCommand(configcmd.Delete)
-	configCmd.AddCommand(configcmd.Edit)
-	configCmd.AddCommand(configcmd.Info)
-	configCmd.AddCommand(configcmd.Set)
-	configCmd.AddCommand(configcmd.Setup)
+	configCmd.AddCommand(configcmd.Create.Command())
+	configCmd.AddCommand(configcmd.Delete.Command())
+	configCmd.AddCommand(configcmd.Edit.Command())
+	configCmd.AddCommand(configcmd.Info.Command())
+	configCmd.AddCommand(configcmd.Set.Command())
+	configCmd.AddCommand(configcmd.Setup.Command())
 	// create
-	configcmd.Create.Flags().BoolVarP(&flag.Config.Ow, "overwrite", "y", false,
+	configcmd.Create.Command().Flags().BoolVarP(&flag.Config.Ow, "overwrite", "y", false,
 		"overwrite and reset the existing config file")
 	// info
-	configcmd.Info.Flags().BoolVarP(&flag.Config.Configs, "configs", "c", false,
+	configcmd.Info.Command().Flags().BoolVarP(&flag.Config.Configs, "configs", "c", false,
 		"list all the available configuration setting names")
-	configcmd.Info.Flags().StringVarP(&flag.Config.Style, "style", "s", "",
+	configcmd.Info.Command().Flags().StringVarP(&flag.Config.Style, "style", "s", "",
 		"choose a syntax highligher")
-	configcmd.Info.Flags().BoolVar(&flag.Config.Styles, "styles", false,
+	configcmd.Info.Command().Flags().BoolVar(&flag.Config.Styles, "styles", false,
 		"list and preview the available syntax highlighers")
 	// set
-	configcmd.Set.Flags().BoolVarP(&flag.Config.Configs, "list", "l", false,
+	configcmd.Set.Command().Flags().BoolVarP(&flag.Config.Configs, "list", "l", false,
 		"list all the available setting names")
 }

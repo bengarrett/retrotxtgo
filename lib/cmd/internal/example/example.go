@@ -17,84 +17,52 @@ import (
 
 const Filenames = "[filenames]"
 
-var Config = fmt.Sprintf("  %s %s %s\n%s %s %s",
-	meta.Bin, "config setup", "# Walk through all the settings",
-	meta.Bin, "config set --list", "# List all the settings in use")
+type Examples int
 
-var Create = fmt.Sprintf("  %s%s\n%s%s\n%s%s\n%s%s\n%s%s",
-	"# print a HTML file created from file.txt\n",
-	fmt.Sprintf("%s create file.txt --title \"A text file\" --description \"Some text goes here\"", meta.Bin),
-	"# save HTML files created from file1.txt and file2.asc\n",
-	fmt.Sprintf("%s create file1.txt file2.asc --save", meta.Bin),
-	"# save and compress a HTML file created from file.txt in Downloads.\n",
-	fmt.Sprintf("%s create ~{{.}}Downloads{{.}}file.txt --compress", meta.Bin),
-	"# host the HTML file created from file.txt\n",
-	fmt.Sprintf("%s create file.txt --serve=%d", meta.Bin, meta.WebPort),
-	"# pipe a HTML file created from file.txt\n",
-	fmt.Sprintf("%s create file.txt | %s", meta.Bin, catCmd()))
+const (
+	Config Examples = iota
+	Create
+	CfgInfo
+	List
+	ListExamples
+	ListTable
+	Info
+	Root
+	Set
+	View
+)
 
-// catCmd returns the os command name to concatenate a file to standard output.
-func catCmd() string {
-	s := "cat"
-	if runtime.GOOS == "windows" {
-		s = "type"
+func (e Examples) String() string {
+	switch e {
+	case Config:
+		return config()
+	case Create:
+		return create()
+	case CfgInfo:
+		return cfgInfo()
+	case List:
+		return list()
+	case ListExamples:
+		return listExamples()
+	case ListTable:
+		return listTable()
+	case Info:
+		return info()
+	case Root:
+		return root()
+	case Set:
+		return set()
+	case View:
+		return view()
 	}
-	return s
+	return ""
 }
 
-var CfgInfo = fmt.Sprintf("  %s\n%s",
-	fmt.Sprintf("%s config info   # List the default setting values", meta.Bin),
-	fmt.Sprintf("%s config set -c # List the settings and help hints", meta.Bin))
-
-var List = fmt.Sprintf("  %s\n%s\n%s\n%s",
-	fmt.Sprintf("%s list codepages", meta.Bin),
-	fmt.Sprintf("%s list examples", meta.Bin),
-	fmt.Sprintf("%s list table cp437 cp1252", meta.Bin),
-	fmt.Sprintf("%s list tables", meta.Bin))
-
-var ListExamples = fmt.Sprintf("  %s\n%s\n%s\n%s\n%s",
-	fmt.Sprintf("%s list examples # list the builtin examples", meta.Bin),
-	fmt.Sprintf("%s info ascii    # information on the buildin ascii example", meta.Bin),
-	fmt.Sprintf("%s view ascii    # view the ascii example", meta.Bin),
-	fmt.Sprintf("%s create ascii  # create the ascii example", meta.Bin),
-	fmt.Sprintf("%s save ascii    # save the ascii example", meta.Bin))
-
-var ListTable = fmt.Sprintf("  %s\n%s\n%s",
-	fmt.Sprintf("%s table cp437", meta.Bin),
-	fmt.Sprintf("%s table cp437 latin1 windows-1252", meta.Bin),
-	fmt.Sprintf("%s table iso-8859-15", meta.Bin))
-
-var Info = fmt.Sprintf("  %s %s\n%s %s",
-	meta.Bin, "info text.asc logo.jpg # print the information of multiple files",
-	meta.Bin, "info file.txt --format=json # print the information using a structured syntax")
-
-var Root = fmt.Sprintf("  %s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s",
-	"# save the text files as webpages",
-	fmt.Sprintf("%s create %s", meta.Bin, Filenames),
-	"# save the text files as webpages stored in a zip file",
-	fmt.Sprintf("%s create %s --compress", meta.Bin, Filenames),
-	"# print detailed information about the text files",
-	fmt.Sprintf("%s info   %s", meta.Bin, Filenames),
-	"# print the text files as Unicode text",
-	fmt.Sprintf("%s view   %s", meta.Bin, Filenames),
-	fmt.Sprintf("# configure the %s flags and settings", meta.Name),
-	fmt.Sprintf("%s config setup", meta.Bin),
-)
-
-var Set = fmt.Sprintf("  %s %s %s\n%s %s %s\n%s %s %s",
-	meta.Bin, "config set --list", "# List the available settings",
-	meta.Bin, "config set html.meta.description", "# Edit the meta description setting",
-	meta.Bin, "config set style.info style.html", fmt.Sprintf("# Edit both the %s color styles", meta.Name),
-)
-
 // Print returns help usage examples.
-func Print(tmpl string) string {
-	if tmpl == "" {
-		return ""
-	}
+func (e Examples) Print() string {
 	var b bytes.Buffer
 	// change example operating system path separator
-	t := template.Must(template.New("example").Parse(tmpl))
+	t := template.Must(template.New("example").Parse(e.String()))
 	err := t.Execute(&b, string(os.PathSeparator))
 	if err != nil {
 		log.Fatal(err)
@@ -118,7 +86,90 @@ func Print(tmpl string) string {
 	return strings.TrimSpace(s)
 }
 
-var View = fmt.Sprintf("  %s\n%s\n%s",
-	fmt.Sprintf("%s view file.txt -e latin1", meta.Bin),
-	fmt.Sprintf("%s view file1.txt file2.txt --encode=\"iso-8859-1\"", meta.Bin),
-	fmt.Sprintf("cat file.txt | %s view", meta.Bin))
+func config() string {
+	return fmt.Sprintf("  %s %s %s\n%s %s %s",
+		meta.Bin, "config setup", "# Walk through all the settings",
+		meta.Bin, "config set --list", "# List all the settings in use")
+}
+
+func create() string {
+	return fmt.Sprintf("  %s%s\n%s%s\n%s%s\n%s%s\n%s%s",
+		"# print a HTML file created from file.txt\n",
+		fmt.Sprintf("%s create file.txt --title \"A text file\" --description \"Some text goes here\"", meta.Bin),
+		"# save HTML files created from file1.txt and file2.asc\n",
+		fmt.Sprintf("%s create file1.txt file2.asc --save", meta.Bin),
+		"# save and compress a HTML file created from file.txt in Downloads.\n",
+		fmt.Sprintf("%s create ~{{.}}Downloads{{.}}file.txt --compress", meta.Bin),
+		"# host the HTML file created from file.txt\n",
+		fmt.Sprintf("%s create file.txt --serve=%d", meta.Bin, meta.WebPort),
+		"# pipe a HTML file created from file.txt\n",
+		fmt.Sprintf("%s create file.txt | %s", meta.Bin, catCmd()))
+}
+
+// catCmd returns the os command name to concatenate a file to standard output.
+func catCmd() string {
+	s := "cat"
+	if runtime.GOOS == "windows" {
+		s = "type"
+	}
+	return s
+}
+
+func cfgInfo() string {
+	return fmt.Sprintf("  %s\n%s",
+		fmt.Sprintf("%s config info   # List the default setting values", meta.Bin),
+		fmt.Sprintf("%s config set -c # List the settings and help hints", meta.Bin))
+}
+func list() string {
+	return fmt.Sprintf("  %s\n%s\n%s\n%s",
+		fmt.Sprintf("%s list codepages", meta.Bin),
+		fmt.Sprintf("%s list examples", meta.Bin),
+		fmt.Sprintf("%s list table cp437 cp1252", meta.Bin),
+		fmt.Sprintf("%s list tables", meta.Bin))
+}
+func listExamples() string {
+	return fmt.Sprintf("  %s\n%s\n%s\n%s\n%s",
+		fmt.Sprintf("%s list examples # list the builtin examples", meta.Bin),
+		fmt.Sprintf("%s info ascii    # information on the buildin ascii example", meta.Bin),
+		fmt.Sprintf("%s view ascii    # view the ascii example", meta.Bin),
+		fmt.Sprintf("%s create ascii  # create the ascii example", meta.Bin),
+		fmt.Sprintf("%s save ascii    # save the ascii example", meta.Bin))
+}
+func listTable() string {
+	return fmt.Sprintf("  %s\n%s\n%s",
+		fmt.Sprintf("%s table cp437", meta.Bin),
+		fmt.Sprintf("%s table cp437 latin1 windows-1252", meta.Bin),
+		fmt.Sprintf("%s table iso-8859-15", meta.Bin))
+}
+func info() string {
+	return fmt.Sprintf("  %s %s\n%s %s",
+		meta.Bin, "info text.asc logo.jpg # print the information of multiple files",
+		meta.Bin, "info file.txt --format=json # print the information using a structured syntax")
+}
+func root() string {
+	return fmt.Sprintf("  %s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s",
+		"# save the text files as webpages",
+		fmt.Sprintf("%s create %s", meta.Bin, Filenames),
+		"# save the text files as webpages stored in a zip file",
+		fmt.Sprintf("%s create %s --compress", meta.Bin, Filenames),
+		"# print detailed information about the text files",
+		fmt.Sprintf("%s info   %s", meta.Bin, Filenames),
+		"# print the text files as Unicode text",
+		fmt.Sprintf("%s view   %s", meta.Bin, Filenames),
+		fmt.Sprintf("# configure the %s flags and settings", meta.Name),
+		fmt.Sprintf("%s config setup", meta.Bin),
+	)
+}
+func set() string {
+	return fmt.Sprintf("  %s %s %s\n%s %s %s\n%s %s %s",
+		meta.Bin, "config set --list", "# List the available settings",
+		meta.Bin, "config set html.meta.description", "# Edit the meta description setting",
+		meta.Bin, "config set style.info style.html", fmt.Sprintf("# Edit both the %s color styles", meta.Name),
+	)
+}
+func view() string {
+	return fmt.Sprintf("  %s\n%s\n%s",
+		fmt.Sprintf("%s view file.txt -e latin1", meta.Bin),
+		fmt.Sprintf("%s view file1.txt file2.txt --encode=\"iso-8859-1\"", meta.Bin),
+		fmt.Sprintf("cat file.txt | %s view", meta.Bin))
+}

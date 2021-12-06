@@ -10,12 +10,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+//nolint:gochecknoglobals
 var viewCmd = &cobra.Command{
 	Use:     fmt.Sprintf("view %s", example.Filenames),
 	Aliases: []string{"v"},
 	Short:   "Print a text file to the terminal using standard output",
 	Long:    "Print a text file to the terminal using standard output.",
-	Example: example.Print(example.View),
+	Example: example.View.Print(),
 	Run: func(cmd *cobra.Command, args []string) {
 		b, err := viewcmd.Run(cmd, args...)
 		if err != nil {

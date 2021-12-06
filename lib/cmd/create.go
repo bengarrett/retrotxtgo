@@ -12,12 +12,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+//nolint:gochecknoglobals
 var createCmd = &cobra.Command{
 	Use:     fmt.Sprintf("create %s", example.Filenames),
 	Aliases: []string{"c", "html"},
 	Short:   "Create a HTML document from text files",
 	Long:    "Create a HTML document from text documents and text art files.",
-	Example: example.Print(example.Create),
+	Example: example.Create.Print(),
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := createcmd.Run(cmd, args); err != nil {
 			logs.Fatal(err)

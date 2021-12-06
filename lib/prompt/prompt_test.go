@@ -30,6 +30,7 @@ func TestSkipSet(t *testing.T) {
 	}
 }
 
+//nolint:dupl
 func TestPort(t *testing.T) {
 	type args struct {
 		validate bool
