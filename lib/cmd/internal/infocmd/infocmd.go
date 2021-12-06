@@ -21,13 +21,13 @@ var (
 	ErrUsage = errors.New("command usage could not display")
 )
 
-func Run(cmd *cobra.Command, args []string) {
+func Run(cmd *cobra.Command, args []string) error {
 	// piped input from other programs
 	if filesystem.IsPipe() {
 		Pipe()
 	}
 	if err := flag.PrintUsage(cmd, args...); err != nil {
-		logs.Fatal(err)
+		return err
 	}
 	var n info.Names
 	n.Length = len(args)
@@ -46,7 +46,7 @@ func Run(cmd *cobra.Command, args []string) {
 		if err := n.Info(arg, flag.InfoFlag.Format); err != nil {
 			if errors.As(logs.ErrFileName, &err) {
 				if n.Length <= 1 {
-					logs.Fatal(err)
+					return err
 				}
 				fmt.Println(logs.SprintMark(arg, logs.ErrFileName, err))
 				continue
@@ -54,9 +54,10 @@ func Run(cmd *cobra.Command, args []string) {
 			if err = cmd.Usage(); err != nil {
 				fmt.Println(logs.SprintWrap(ErrUsage, err))
 			}
-			logs.Fatal(err)
+			return err
 		}
 	}
+	return nil
 }
 
 // infoSample extracts and saves an embed sample file then returns its location.

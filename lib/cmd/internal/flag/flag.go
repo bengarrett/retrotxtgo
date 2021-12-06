@@ -32,6 +32,10 @@ type Configs struct {
 	Style   string
 }
 
+type RootFlags struct {
+	Config string
+}
+
 type ViewFlags struct {
 	Controls []string
 	Encode   string
@@ -39,6 +43,8 @@ type ViewFlags struct {
 	To       string
 	Width    int
 }
+
+var RootFlag RootFlags
 
 var ViewFlag = ViewFlags{
 	Controls: []string{"eof", "tab"},

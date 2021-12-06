@@ -13,7 +13,7 @@ import (
 
 // viewCmd represents the view command.
 var viewCmd = &cobra.Command{
-	Use:     fmt.Sprintf("view %s", filenames),
+	Use:     fmt.Sprintf("view %s", example.Filenames),
 	Aliases: []string{"v"},
 	Short:   "Print a text file to the terminal using standard output",
 	Long:    "Print a text file to the terminal using standard output.",
@@ -29,10 +29,10 @@ var viewCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(viewCmd)
-	flagEncode(&flag.ViewFlag.Encode, viewCmd)
-	flagControls(&flag.ViewFlag.Controls, viewCmd)
-	flagRunes(&flag.ViewFlag.Swap, viewCmd)
-	flagTo(&flag.ViewFlag.To, viewCmd)
-	flagWidth(&flag.ViewFlag.Width, viewCmd)
+	flag.Encode(&flag.ViewFlag.Encode, viewCmd)
+	flag.Controls(&flag.ViewFlag.Controls, viewCmd)
+	flag.Runes(&flag.ViewFlag.Swap, viewCmd)
+	flag.To(&flag.ViewFlag.To, viewCmd)
+	flag.Width(&flag.ViewFlag.Width, viewCmd)
 	viewCmd.Flags().SortFlags = false
 }

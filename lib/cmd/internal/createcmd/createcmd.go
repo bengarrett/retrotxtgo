@@ -19,8 +19,39 @@ var (
 	ErrBody   = errors.New("could not parse the body flag")
 )
 
+func Run(cmd *cobra.Command, args []string) error {
+	f := convert.Flag{
+		Controls:  flag.CreateDefaults.Controls,
+		SwapChars: flag.CreateDefaults.Swap,
+	}
+	// handle defaults, use these control codes
+	if c := cmd.Flags().Lookup("controls"); !c.Changed {
+		f.Controls = []string{"eof", "tab"}
+	}
+	// handle defaults, swap out these characters with UTF-8 alternatives
+	if s := cmd.Flags().Lookup("swap-chars"); !s.Changed {
+		f.SwapChars = []string{"null", "bar"}
+	}
+	// handle the defaults for most other flags
+	Strings(cmd)
+	// handle standard input (stdio)
+	if filesystem.IsPipe() {
+		return ParsePipe(cmd, f)
+	}
+	// handle the hidden --body flag value,
+	// used for debugging, it ignores most other flags and
+	// overrides the <pre></pre> content before exiting
+	if body := cmd.Flags().Lookup("body"); body.Changed {
+		return ParseBody(cmd)
+	}
+	if err := flag.PrintUsage(cmd, args...); err != nil {
+		return err
+	}
+	return ParseFiles(cmd, f, args...)
+}
+
 // createHTML applies a HTML template to src text.
-func CreateHTML(cmd *cobra.Command, flags convert.Flag, src *[]byte) []byte {
+func HTML(cmd *cobra.Command, flags convert.Flag, src *[]byte) ([]byte, error) {
 	var err error
 	conv := convert.Convert{
 		Flags: flags,
@@ -33,7 +64,7 @@ func CreateHTML(cmd *cobra.Command, flags convert.Flag, src *[]byte) []byte {
 			name = cp.Value.String()
 		}
 		if f.From, err = convert.Encoder(name); err != nil {
-			logs.FatalWrap(logs.ErrEncode, err)
+			return nil, fmt.Errorf("%s: %w", logs.ErrEncode, err)
 		}
 		conv.Input.Encoding = f.From
 	}
@@ -47,51 +78,61 @@ func CreateHTML(cmd *cobra.Command, flags convert.Flag, src *[]byte) []byte {
 		r, err = conv.Dump(*src...)
 	}
 	if err != nil {
-		fmt.Println(logs.SprintWrap(ErrCreate, err))
-		return nil
+		return nil, fmt.Errorf("%s: %w", ErrCreate, err)
 	}
-	return []byte(string(r))
+	return []byte(string(r)), nil
 }
 
 // parsePipe creates HTML content using the standard input (stdio) of the operating system.
-func ParsePipe(cmd *cobra.Command, flags convert.Flag) {
+func ParsePipe(cmd *cobra.Command, flags convert.Flag) error {
 	src, err := filesystem.ReadPipe()
 	if err != nil {
-		logs.FatalWrap(logs.ErrPipeRead, err)
+		return fmt.Errorf("%s: %w", logs.ErrPipeRead, err)
 	}
-	b := CreateHTML(cmd, flags, &src)
+	b, err := HTML(cmd, flags, &src)
+	if err != nil {
+		return err
+	}
 	serve := cmd.Flags().Lookup("serve").Changed
-	h := ServeBytes(0, serve, &b)
+	h, err := ServeBytes(0, serve, &b)
+	if err != nil {
+		return err
+	}
 	if !h {
 		if err := flag.HTML.Create(&b); err != nil {
-			logs.Fatal(err)
+			return err
 		}
 	}
+	return nil
 }
 
 // parseBody is a hidden debugging feature.
 // It takes the supplied text and uses for the HTML <pre></pre> elements text content.
-func ParseBody(cmd *cobra.Command) {
+func ParseBody(cmd *cobra.Command) error {
 	// hidden --body flag ignores most other args
 	if body := cmd.Flags().Lookup("body"); body.Changed {
 		b := []byte(body.Value.String())
 		serve := cmd.Flags().Lookup("serve").Changed
-		h := ServeBytes(0, serve, &b)
+		h, err := ServeBytes(0, serve, &b)
+		if err != nil {
+			return err
+		}
 		if !h {
 			err := flag.HTML.Create(&b)
 			if err != nil {
-				logs.FatalWrap(ErrBody, err)
+				return fmt.Errorf("%s: %w", ErrBody, err)
 			}
 		}
 	}
+	return nil
 }
 
 // parseFiles parses the flags to create the HTML document or website.
 // The generated HTML and associated files will either be served, saved or printed.
-func ParseFiles(cmd *cobra.Command, flags convert.Flag, args ...string) {
+func ParseFiles(cmd *cobra.Command, flags convert.Flag, args ...string) error {
 	args, conv, samp, err := flag.InitArgs(cmd, args...)
 	if err != nil {
-		logs.Fatal(err)
+		return err
 	}
 	for i, arg := range args {
 		b, err := flag.ReadArg(arg, cmd, conv, samp)
@@ -99,17 +140,25 @@ func ParseFiles(cmd *cobra.Command, flags convert.Flag, args ...string) {
 			fmt.Fprintln(os.Stderr, logs.Sprint(err))
 			continue
 		}
-		b = CreateHTML(cmd, flags, &b)
+		b, err = HTML(cmd, flags, &b)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, logs.Sprint(err))
+			continue
+		}
 		if b == nil {
 			continue
 		}
-		h := ServeBytes(i, cmd.Flags().Lookup("serve").Changed, &b)
+		h, err := ServeBytes(i, cmd.Flags().Lookup("serve").Changed, &b)
+		if err != nil {
+			return err
+		}
 		if !h {
 			if err := flag.HTML.Create(&b); err != nil {
-				logs.Fatal(err)
+				return err
 			}
 		}
 	}
+	return nil
 }
 
 // SaveDir returns the directory the created HTML and other files will be saved to.
@@ -126,20 +175,20 @@ func SaveDir() string {
 }
 
 // serveBytes hosts the HTML using an internal HTTP server.
-func ServeBytes(i int, changed bool, b *[]byte) bool {
+func ServeBytes(i int, changed bool, b *[]byte) (bool, error) {
 	if i != 0 {
-		return false
+		return false, nil
 		// only ever serve the first file given to the args.
 		// in the future, when handling multiple files a dynamic
 		// index.html could be generated with links to each of the htmls.
 	}
 	if changed {
 		if err := flag.HTML.Serve(b); err != nil {
-			logs.Fatal(err)
+			return false, err
 		}
-		return true
+		return true, nil
 	}
-	return false
+	return false, nil
 }
 
 // stringFlags handles the defaults for flags that accept strings.

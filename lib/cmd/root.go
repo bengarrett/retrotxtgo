@@ -3,65 +3,32 @@
 package cmd
 
 import (
-	"bufio"
-	"bytes"
 	"fmt"
-	"log"
 	"os"
-	"runtime"
-	"strings"
-	"text/tabwriter"
-	"text/template"
-	"time"
 
+	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/example"
 	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/flag"
-	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/release"
-	"github.com/bengarrett/retrotxtgo/lib/config"
+	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/long"
+	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/rootcmd"
+	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/ver"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
-	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/meta"
-	"github.com/gookit/color"
-	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"golang.org/x/term"
 )
 
-type rootFlags struct {
-	config string
-}
-
-const (
-	eof         = "eof"
-	tab         = "tab"
-	null        = "null" // 0
-	verticalBar = "bar"  // 124
-	filenames   = "[filenames]"
-)
-
-var rootFlag = rootFlags{}
-
-var rootCmdExample = fmt.Sprintf("  %s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s",
-	"# save the text files as webpages",
-	fmt.Sprintf("%s create %s", meta.Bin, filenames),
-	"# save the text files as webpages stored in a zip file",
-	fmt.Sprintf("%s create %s --compress", meta.Bin, filenames),
-	"# print detailed information about the text files",
-	fmt.Sprintf("%s info   %s", meta.Bin, filenames),
-	"# print the text files as Unicode text",
-	fmt.Sprintf("%s view   %s", meta.Bin, filenames),
-	fmt.Sprintf("# configure the %s flags and settings", meta.Name),
-	fmt.Sprintf("%s config setup", meta.Bin),
-)
+// const (
+// 	eof         = "eof"
+// 	tab         = "tab"
+// 	null        = "null" // 0
+// 	verticalBar = "bar"  // 124
+// )
 
 // rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
-	Use:   meta.Bin,
-	Short: fmt.Sprintf("%s is the tool that turns ANSI, ASCII, NFO text into browser ready HTML", meta.Name),
-	Long: fmt.Sprintf(`Turn many pieces of ANSI art, ASCII and NFO texts into HTML5 using %s.
-It is the platform agnostic tool that takes nostalgic text files and stylises
-them into a more modern, useful format to view or copy in a web browser.`, meta.Name),
-	Example: exampleCmd(rootCmdExample),
+	Use:     meta.Bin,
+	Short:   fmt.Sprintf("%s is the tool that turns ANSI, ASCII, NFO text into browser ready HTML", meta.Name),
+	Long:    long.Root,
+	Example: example.Print(example.Root),
 	Run: func(cmd *cobra.Command, args []string) {
 		// Do nothing other than print the help.
 		// This func must remain otherwise root command flags are ignored by Cobra.
@@ -77,7 +44,7 @@ func Execute() {
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 	rootCmd.SilenceErrors = true // set to false to debug errors
 	rootCmd.Version = meta.Print()
-	rootCmd.SetVersionTemplate(printVer())
+	rootCmd.SetVersionTemplate(ver.Print())
 	if err := rootCmd.Execute(); err != nil {
 		const minArgs = 2
 		if len(os.Args) < minArgs {
@@ -89,101 +56,10 @@ func Execute() {
 	}
 }
 
-func printVer() string {
-	const tabWidth, copyright, years = 8, "\u00A9", "2020-21"
-	exe, err := self()
-	if err != nil {
-		exe = err.Error()
-	}
-	newVer, v := release.Check()
-	appDate := ""
-	if meta.App.Date != meta.Placeholder {
-		appDate = fmt.Sprintf(" (%s)", meta.App.Date)
-	}
-	var b bytes.Buffer
-	w := new(tabwriter.Writer)
-	w.Init(&b, 0, tabWidth, 0, '\t', 0)
-	fmt.Fprintf(w, "%s %s\n", meta.Name, meta.Print())
-	fmt.Fprintf(w, "%s %s Ben Garrett\n", copyright, years)
-	fmt.Fprintln(w, color.Primary.Sprint(meta.URL))
-	fmt.Fprintf(w, "\n%s\t%s %s%s\n", color.Secondary.Sprint("build:"), runtime.Compiler, meta.App.BuiltBy, appDate)
-	fmt.Fprintf(w, "%s\t%s/%s\n", color.Secondary.Sprint("platform:"), runtime.GOOS, runtime.GOARCH)
-	fmt.Fprintf(w, "%s\t%s\n", color.Secondary.Sprint("terminal:"), terminal())
-	fmt.Fprintf(w, "%s\t%s\n", color.Secondary.Sprint("go:"), strings.Replace(runtime.Version(), "go", "v", 1))
-	fmt.Fprintf(w, "%s\t%s\n", color.Secondary.Sprint("path:"), exe)
-	if newVer {
-		fmt.Fprintf(w, "\n%s\n", release.Print(meta.App.Version, v))
-	}
-	w.Flush()
-	return b.String()
-}
-
-func terminal() string {
-	const win = "windows"
-	unknown := func() string {
-		if runtime.GOOS == win {
-			return "PowerShell"
-		}
-		return "unknown"
-	}
-
-	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
-	if err != nil {
-		return unknown()
-	}
-	defer term.Restore(int(os.Stdin.Fd()), oldState)
-	w, h, err := term.GetSize(int(os.Stdin.Fd()))
-	// code source: https://gist.github.com/mattn/00cf5b7e38f4cceaf7077f527479870c
-	if os.Getenv("WT_SESSION") != "" {
-		const s = "Windows Terminal"
-		if err != nil {
-			return s
-		}
-		return fmt.Sprintf("%s (%dx%d)", s, w, h)
-	}
-	if isatty.IsCygwinTerminal(os.Stdout.Fd()) {
-		const s = "Cygwin"
-		if err != nil {
-			return s
-		}
-		return fmt.Sprintf("%s (%dx%d)", s, w, h)
-	}
-	_, err = os.Stdout.Write([]byte("\x1b[c"))
-	if err != nil {
-		return unknown()
-	}
-	defer os.Stdout.SetReadDeadline(time.Time{})
-	const timeout = 10 * time.Millisecond
-	time.Sleep(timeout)
-
-	var b [100]byte
-	n, err := os.Stdout.Read(b[:])
-	if err != nil {
-		return unknown()
-	}
-	if n > 0 {
-		s := "VT100 compatible"
-		if err != nil {
-			return s
-		}
-		return fmt.Sprintf("%s (%dx%d)", s, w, h)
-	}
-	return unknown()
-}
-
-// Self returns the path to this dupers executable file.
-func self() (string, error) {
-	exe, err := os.Executable()
-	if err != nil {
-		return "", fmt.Errorf("self error: %w", err)
-	}
-	return exe, nil
-}
-
 func init() {
-	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(rootcmd.Init)
 	// create and hide custom configuration file location flag.
-	rootCmd.PersistentFlags().StringVar(&rootFlag.config, "config", "",
+	rootCmd.PersistentFlags().StringVar(&flag.RootFlag.Config, "config", "",
 		"optional config file location")
 	if err := rootCmd.PersistentFlags().MarkHidden("config"); err != nil {
 		logs.FatalMark("config", ErrHide, err)
@@ -193,101 +69,4 @@ func init() {
 	// hide the cobra introduced help command.
 	// https://github.com/spf13/cobra/issues/587#issuecomment-810159087
 	rootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
-}
-
-// initConfig reads in the config file and ENV variables if set.
-// This init might be run twice due to the Cobra initializer registers.
-func initConfig() {
-	// read in environment variables
-	viper.SetEnvPrefix("env")
-	viper.AutomaticEnv()
-	// configuration file
-	if err := config.SetConfig(rootFlag.config); err != nil {
-		logs.FatalMark(viper.ConfigFileUsed(), logs.ErrConfigOpen, err)
-	}
-}
-
-// exampleCmd returns help usage examples.
-func exampleCmd(tmpl string) string {
-	if tmpl == "" {
-		return ""
-	}
-	var b bytes.Buffer
-	// change example operating system path separator
-	t := template.Must(template.New("example").Parse(tmpl))
-	err := t.Execute(&b, string(os.PathSeparator))
-	if err != nil {
-		log.Fatal(err)
-	}
-	// color the example text except text following
-	// the last hash #, which is treated as a comment
-	const cmmt, sentence = "#", 2
-	scanner, s := bufio.NewScanner(&b), ""
-	for scanner.Scan() {
-		ss := strings.Split(scanner.Text(), cmmt)
-		l := len(ss)
-		if l < sentence {
-			s += str.ColInf(scanner.Text()) + "\n  "
-			continue
-		}
-		// do not the last hash as a comment
-		ex := strings.Join(ss[:l-1], cmmt)
-		s += str.ColInf(ex)
-		s += fmt.Sprintf("%s%s\n  ", color.Secondary.Sprint(cmmt), ss[l-1])
-	}
-	return strings.TrimSpace(s)
-}
-
-// flagControls handles the --controls flag.
-func flagControls(p *[]string, cc *cobra.Command) {
-	cc.Flags().StringSliceVarP(p, "controls", "c", []string{},
-		`implement these control codes (default "eof,tab")
-separate multiple controls with commas
-  eof    end of file mark
-  tab    horizontal tab
-  bell   bell or terminal alert
-  cr     carriage return
-  lf     line feed
-  bs backspace, del delete character, esc escape character
-  ff formfeed, vt vertical tab
-`)
-}
-
-// flagEncode handles the --encode flag.
-func flagEncode(p *string, cc *cobra.Command) {
-	cc.Flags().StringVarP(p, "encode", "e", "",
-		fmt.Sprintf("character encoding used by the filename(s) (default \"CP437\")\n%s\n%s%s\n",
-			color.Info.Sprint("this flag has no effect for Unicode and EBCDIC samples"),
-			"see the list of encode values ",
-			str.Example(meta.Bin+" list codepages")))
-}
-
-// flagRunes handles the --swap-chars flag.
-func flagRunes(p *[]string, cc *cobra.Command) {
-	cc.Flags().StringSliceVarP(p, "swap-chars", "x", []string{},
-		`swap out these characters with UTF8 alternatives (default "null,bar")
-separate multiple values with commas
-  null	C null for a space
-  bar	Unicode vertical bar | for the IBM broken pipe ¦
-  house	IBM house ⌂ for the Greek capital delta Δ
-  pipe	Box pipe │ for the Unicode integral extension ⎮
-  root	Square root √ for the Unicode check mark ✓
-  space	Space for the Unicode open box ␣
-  `)
-}
-
-// flagTo handles the hidden --to flag.
-func flagTo(p *string, cc *cobra.Command) {
-	const name = "to"
-	cc.Flags().StringVar(p, name, "",
-		"alternative character encoding to print to stdout\nthis flag is unreliable and not recommended")
-	if err := cc.Flags().MarkHidden(name); err != nil {
-		logs.FatalMark(name, ErrHide, err)
-	}
-}
-
-// flagWidth handles the --width flag.
-func flagWidth(p *int, cc *cobra.Command) {
-	cc.Flags().IntVarP(p, "width", "w", flag.ViewFlag.Width,
-		"maximum document character/column width")
 }

@@ -15,6 +15,8 @@ import (
 	"github.com/gookit/color"
 )
 
+const Filenames = "[filenames]"
+
 var Config = fmt.Sprintf("  %s %s %s\n%s %s %s",
 	meta.Bin, "config setup", "# Walk through all the settings",
 	meta.Bin, "config set --list", "# List all the settings in use")
@@ -65,6 +67,19 @@ var ListTable = fmt.Sprintf("  %s\n%s\n%s",
 var Info = fmt.Sprintf("  %s %s\n%s %s",
 	meta.Bin, "info text.asc logo.jpg # print the information of multiple files",
 	meta.Bin, "info file.txt --format=json # print the information using a structured syntax")
+
+var Root = fmt.Sprintf("  %s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s",
+	"# save the text files as webpages",
+	fmt.Sprintf("%s create %s", meta.Bin, Filenames),
+	"# save the text files as webpages stored in a zip file",
+	fmt.Sprintf("%s create %s --compress", meta.Bin, Filenames),
+	"# print detailed information about the text files",
+	fmt.Sprintf("%s info   %s", meta.Bin, Filenames),
+	"# print the text files as Unicode text",
+	fmt.Sprintf("%s view   %s", meta.Bin, Filenames),
+	fmt.Sprintf("# configure the %s flags and settings", meta.Name),
+	fmt.Sprintf("%s config setup", meta.Bin),
+)
 
 var Set = fmt.Sprintf("  %s %s %s\n%s %s %s\n%s %s %s",
 	meta.Bin, "config set --list", "# List the available settings",
