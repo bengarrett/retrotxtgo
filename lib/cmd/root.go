@@ -1,8 +1,8 @@
 // Package cmd handles the terminal interface, user flags and arguments.
-// nolint: gochecknoglobals,gochecknoinits
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -16,12 +16,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// const (
-// 	eof         = "eof"
-// 	tab         = "tab"
-// 	null        = "null" // 0
-// 	verticalBar = "bar"  // 124
-// )
+var (
+	ErrHide  = errors.New("could not hide the flag")
+	ErrUsage = errors.New("command usage could not display")
+)
 
 // rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{

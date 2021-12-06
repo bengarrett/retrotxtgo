@@ -1,4 +1,3 @@
-// nolint: gochecknoglobals,gochecknoinits
 package cmd
 
 import (
@@ -13,7 +12,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// infoCmd represents the info command.
 var infoCmd = &cobra.Command{
 	Use:     fmt.Sprintf("info %s", example.Filenames),
 	Aliases: []string{"i"},

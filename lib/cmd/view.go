@@ -1,4 +1,3 @@
-// nolint: gochecknoglobals,gochecknoinits
 package cmd
 
 import (
@@ -11,7 +10,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// viewCmd represents the view command.
 var viewCmd = &cobra.Command{
 	Use:     fmt.Sprintf("view %s", example.Filenames),
 	Aliases: []string{"v"},

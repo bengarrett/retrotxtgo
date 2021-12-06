@@ -1,4 +1,4 @@
-package cmd
+package rootcmd_test
 
 import (
 	"testing"

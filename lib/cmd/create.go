@@ -1,4 +1,3 @@
-// nolint: gochecknoglobals,gochecknoinits
 package cmd
 
 import (
@@ -13,7 +12,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// createCmd represents the create command.
 var createCmd = &cobra.Command{
 	Use:     fmt.Sprintf("create %s", example.Filenames),
 	Aliases: []string{"c", "html"},
