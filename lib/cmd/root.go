@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/flag"
+	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/release"
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
@@ -76,7 +77,7 @@ func Execute() {
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 	rootCmd.SilenceErrors = true // set to false to debug errors
 	rootCmd.Version = meta.Print()
-	rootCmd.SetVersionTemplate(version())
+	rootCmd.SetVersionTemplate(printVer())
 	if err := rootCmd.Execute(); err != nil {
 		const minArgs = 2
 		if len(os.Args) < minArgs {
@@ -88,13 +89,13 @@ func Execute() {
 	}
 }
 
-func version() string {
+func printVer() string {
 	const tabWidth, copyright, years = 8, "\u00A9", "2020-21"
 	exe, err := self()
 	if err != nil {
 		exe = err.Error()
 	}
-	newVer, v := chkRelease()
+	newVer, v := release.Check()
 	appDate := ""
 	if meta.App.Date != meta.Placeholder {
 		appDate = fmt.Sprintf(" (%s)", meta.App.Date)
@@ -111,7 +112,7 @@ func version() string {
 	fmt.Fprintf(w, "%s\t%s\n", color.Secondary.Sprint("go:"), strings.Replace(runtime.Version(), "go", "v", 1))
 	fmt.Fprintf(w, "%s\t%s\n", color.Secondary.Sprint("path:"), exe)
 	if newVer {
-		fmt.Fprintf(w, "\n%s\n", newRelease(meta.App.Version, v))
+		fmt.Fprintf(w, "\n%s\n", release.Print(meta.App.Version, v))
 	}
 	w.Flush()
 	return b.String()

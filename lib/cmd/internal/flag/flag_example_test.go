@@ -1,4 +1,4 @@
-package cmd
+package flag_test
 
 import (
 	"fmt"
@@ -7,9 +7,9 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/convert"
 )
 
-func Example_endOfFile() {
+func ExampleEndOfFile() {
 	var f convert.Flag
-	f.Controls = []string{eof}
+	f.Controls = []string{"eof"}
 	fmt.Print(flag.EndOfFile(f))
 	// Output: true
 }

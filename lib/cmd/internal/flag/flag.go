@@ -50,6 +50,10 @@ var ViewFlag = ViewFlags{
 
 var Config Configs
 
+var InfoFlag struct {
+	Format string
+}
+
 // flags container.
 var HTML create.Args
 

@@ -40,9 +40,31 @@ func catCmd() string {
 	return s
 }
 
-var Info = fmt.Sprintf("  %s\n%s",
+var CfgInfo = fmt.Sprintf("  %s\n%s",
 	fmt.Sprintf("%s config info   # List the default setting values", meta.Bin),
 	fmt.Sprintf("%s config set -c # List the settings and help hints", meta.Bin))
+
+var List = fmt.Sprintf("  %s\n%s\n%s\n%s",
+	fmt.Sprintf("%s list codepages", meta.Bin),
+	fmt.Sprintf("%s list examples", meta.Bin),
+	fmt.Sprintf("%s list table cp437 cp1252", meta.Bin),
+	fmt.Sprintf("%s list tables", meta.Bin))
+
+var ListExamples = fmt.Sprintf("  %s\n%s\n%s\n%s\n%s",
+	fmt.Sprintf("%s list examples # list the builtin examples", meta.Bin),
+	fmt.Sprintf("%s info ascii    # information on the buildin ascii example", meta.Bin),
+	fmt.Sprintf("%s view ascii    # view the ascii example", meta.Bin),
+	fmt.Sprintf("%s create ascii  # create the ascii example", meta.Bin),
+	fmt.Sprintf("%s save ascii    # save the ascii example", meta.Bin))
+
+var ListTable = fmt.Sprintf("  %s\n%s\n%s",
+	fmt.Sprintf("%s table cp437", meta.Bin),
+	fmt.Sprintf("%s table cp437 latin1 windows-1252", meta.Bin),
+	fmt.Sprintf("%s table iso-8859-15", meta.Bin))
+
+var Info = fmt.Sprintf("  %s %s\n%s %s",
+	meta.Bin, "info text.asc logo.jpg # print the information of multiple files",
+	meta.Bin, "info file.txt --format=json # print the information using a structured syntax")
 
 var Set = fmt.Sprintf("  %s %s %s\n%s %s %s\n%s %s %s",
 	meta.Bin, "config set --list", "# List the available settings",
@@ -80,3 +102,8 @@ func Print(tmpl string) string {
 	}
 	return strings.TrimSpace(s)
 }
+
+var View = fmt.Sprintf("  %s\n%s\n%s",
+	fmt.Sprintf("%s view file.txt -e latin1", meta.Bin),
+	fmt.Sprintf("%s view file1.txt file2.txt --encode=\"iso-8859-1\"", meta.Bin),
+	fmt.Sprintf("cat file.txt | %s view", meta.Bin))

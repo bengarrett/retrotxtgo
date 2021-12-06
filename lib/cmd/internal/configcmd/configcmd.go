@@ -56,7 +56,7 @@ var Edit = &cobra.Command{
 var Info = &cobra.Command{
 	Use:     "info",
 	Aliases: []string{"i"},
-	Example: example.Print(example.Info),
+	Example: example.Print(example.CfgInfo),
 	Short:   "List all the settings in use",
 	Long:    fmt.Sprintf("List all the %s settings in use.", meta.Name),
 	Run: func(cmd *cobra.Command, args []string) {
