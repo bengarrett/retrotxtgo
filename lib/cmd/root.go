@@ -14,8 +14,8 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/lib/config"
-	"github.com/bengarrett/retrotxtgo/lib/convert"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/meta"
@@ -64,7 +64,7 @@ them into a more modern, useful format to view or copy in a web browser.`, meta.
 	Run: func(cmd *cobra.Command, args []string) {
 		// Do nothing other than print the help.
 		// This func must remain otherwise root command flags are ignored by Cobra.
-		if err := printUsage(cmd); err != nil {
+		if err := flag.PrintUsage(cmd); err != nil {
 			logs.Fatal(err)
 		}
 	},
@@ -206,27 +206,6 @@ func initConfig() {
 	}
 }
 
-// printUsage will print the help and exit when no arguments are supplied.
-func printUsage(cmd *cobra.Command, args ...string) error {
-	if len(args) == 0 {
-		if err := cmd.Help(); err != nil {
-			return err
-		}
-		os.Exit(0)
-	}
-	return nil
-}
-
-// endOfFile determines if the end-of-file control flag was requested.
-func endOfFile(flags convert.Flag) bool {
-	for _, c := range flags.Controls {
-		if c == eof {
-			return true
-		}
-	}
-	return false
-}
-
 // exampleCmd returns help usage examples.
 func exampleCmd(tmpl string) string {
 	if tmpl == "" {
@@ -308,6 +287,6 @@ func flagTo(p *string, cc *cobra.Command) {
 
 // flagWidth handles the --width flag.
 func flagWidth(p *int, cc *cobra.Command) {
-	cc.Flags().IntVarP(p, "width", "w", viewFlag.width,
+	cc.Flags().IntVarP(p, "width", "w", flag.ViewFlag.Width,
 		"maximum document character/column width")
 }

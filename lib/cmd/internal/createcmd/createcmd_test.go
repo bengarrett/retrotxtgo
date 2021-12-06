@@ -1,14 +1,16 @@
-package cmd
+package createcmd_test
 
 import (
 	"testing"
 
+	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/createcmd"
+	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/flag"
 	"github.com/gookit/color"
 )
 
-func Test_serveBytes(t *testing.T) {
+func TestServeBytes(t *testing.T) {
 	color.Enable = false
-	html.Test = true
+	flag.HTML.Test = true
 	b := []byte("hello world")
 	type args struct {
 		i       int
@@ -25,7 +27,7 @@ func Test_serveBytes(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := serveBytes(tt.args.i, tt.args.changed, tt.args.b); got != tt.want {
+			if got := createcmd.ServeBytes(tt.args.i, tt.args.changed, tt.args.b); got != tt.want {
 				t.Errorf("serveBytes() = %v, want %v", got, tt.want)
 			}
 		})

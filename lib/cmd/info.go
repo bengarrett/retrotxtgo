@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/info"
@@ -39,7 +40,7 @@ var infoCmd = &cobra.Command{
 		if filesystem.IsPipe() {
 			infoPipe()
 		}
-		if err := printUsage(cmd, args...); err != nil {
+		if err := flag.PrintUsage(cmd, args...); err != nil {
 			logs.Fatal(err)
 		}
 		var n info.Names

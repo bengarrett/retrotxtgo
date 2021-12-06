@@ -17,6 +17,8 @@ import (
 	"golang.org/x/text/transform"
 )
 
+var ErrLB = errors.New("linebreak runes cannot be empty")
+
 // LB is the text line break control represented as 2 runes.
 type LB [2]rune
 
@@ -61,8 +63,6 @@ func NL() LB {
 func NEL() LB {
 	return LB{NextLine}
 }
-
-var ErrLB = errors.New("linebreak runes cannot be empty")
 
 // Columns counts the number of characters used per line in the reader interface.
 func Columns(r io.Reader, lb LB) (int, error) {

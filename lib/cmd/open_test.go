@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/lib/sample"
 	"github.com/spf13/cobra"
 	"golang.org/x/text/encoding"
@@ -19,7 +20,7 @@ func Test_dfaultInput(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := dfaultInput(); !reflect.DeepEqual(got, tt.want) {
+			if got := flag.DfaultInput(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("dfaultInput() = %v, want %v", got, tt.want)
 			}
 		})
@@ -42,7 +43,7 @@ func Test_initEncodings(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := initEncodings(tt.args.cmd, tt.args.dfault)
+			got, err := flag.InitEncodings(tt.args.cmd, tt.args.dfault)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("initEncodings() error = %v, wantErr %v", err, tt.wantErr)
 				return

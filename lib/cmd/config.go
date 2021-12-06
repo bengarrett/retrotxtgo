@@ -4,27 +4,14 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/bengarrett/retrotxtgo/lib/config"
+	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/configcmd"
+	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/example"
+	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/gookit/color"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-)
-
-type configFlags struct {
-	configs bool
-	ow      bool
-	styles  bool
-	style   string
-}
-
-var (
-	configFlag    configFlags
-	configExample = fmt.Sprintf("  %s %s %s\n%s %s %s",
-		meta.Bin, "config setup", "# Walk through all the settings",
-		meta.Bin, "config set --list", "# List all the settings in use")
 )
 
 var configCmd = &cobra.Command{
@@ -32,148 +19,12 @@ var configCmd = &cobra.Command{
 	Aliases: []string{"cfg"},
 	Short:   fmt.Sprintf("%s configuration and defaults", meta.Name),
 	Long:    fmt.Sprintf("%s settings, setup and default configurations.", meta.Name),
-	Example: exampleCmd(configExample),
+	Example: exampleCmd(example.Config),
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := printUsage(cmd, args...); err != nil {
+		if err := flag.PrintUsage(cmd, args...); err != nil {
 			logs.Fatal(err)
 		}
 		logs.FatalCmd("config", args...)
-	},
-}
-
-var configCreateCmd = &cobra.Command{
-	Use:     "create",
-	Aliases: []string{"c"},
-	Short:   "Create or reset the config file",
-	Long:    fmt.Sprintf("Create or reset the %s configuration file.", meta.Name),
-	Run: func(cmd *cobra.Command, args []string) {
-		if err := config.New(configFlag.ow); err != nil {
-			logs.FatalWrap(logs.ErrConfigNew, err)
-		}
-	},
-}
-
-var configDeleteCmd = &cobra.Command{
-	Use:     "delete",
-	Aliases: []string{"d", "del", "rm"},
-	Short:   "Remove the config file",
-	Long:    fmt.Sprintf("Remove the %s configuration file.", meta.Name),
-	Run: func(cmd *cobra.Command, args []string) {
-		if err := config.Delete(); err != nil {
-			logs.Fatal(err)
-		}
-	},
-}
-
-var configEditLong = fmt.Sprintf("%s\n\n%s\n%s\n%s\n%s\n",
-	fmt.Sprintf("Edit the %s configuration file.", meta.Name),
-	"To change the editor program, either:",
-	fmt.Sprintf("  1. Configure one by creating a %s shell environment variable.",
-		str.Example("$EDITOR")),
-	"  2. Set an editor in the configuration file:",
-	str.Example(fmt.Sprintf("     %s config set --name=editor", meta.Bin)),
-)
-
-// Note: Previously I inserted the results of config.Editor() into
-// the Short and Long fields. This will cause a logic error because
-// viper.GetString("editor") is not yet set and the EDITOR env value
-// will instead always be used.
-var configEditCmd = &cobra.Command{
-	Use:     "edit",
-	Aliases: []string{"e"},
-	Short:   "Edit the config file\n",
-	Long:    configEditLong,
-	Run: func(cmd *cobra.Command, args []string) {
-		if err := config.Edit(); err != nil {
-			logs.Fatal(err)
-		}
-	},
-}
-
-var configInfoExample = fmt.Sprintf("  %s\n%s",
-	fmt.Sprintf("%s config info   # List the default setting values", meta.Bin),
-	fmt.Sprintf("%s config set -c # List the settings and help hints", meta.Bin))
-
-var configInfoCmd = &cobra.Command{
-	Use:     "info",
-	Aliases: []string{"i"},
-	Example: exampleCmd(configInfoExample),
-	Short:   "List all the settings in use",
-	Long:    fmt.Sprintf("List all the %s settings in use.", meta.Name),
-	Run: func(cmd *cobra.Command, args []string) {
-		if configInfo() {
-			return
-		}
-	},
-}
-
-// configInfo is the "config info" run command.
-func configInfo() (quit bool) {
-	if configFlag.configs {
-		if err := config.List(); err != nil {
-			logs.FatalFlag("config info", "list", err)
-		}
-	}
-	if configFlag.styles {
-		fmt.Print(str.JSONStyles(fmt.Sprintf("%s info --style", meta.Bin)))
-		return true
-	}
-	style := viper.GetString("style.info")
-	if configFlag.style != "" {
-		style = configFlag.style
-	}
-	if style == "" {
-		style = "dracula"
-	}
-	if err := config.Info(style); err != nil {
-		logs.Fatal(err)
-	}
-	return false
-}
-
-var configSetExample = fmt.Sprintf("  %s %s %s\n%s %s %s\n%s %s %s",
-	meta.Bin, "config set --list", "# List the available settings",
-	meta.Bin, "config set html.meta.description", "# Edit the meta description setting",
-	meta.Bin, "config set style.info style.html", fmt.Sprintf("# Edit both the %s color styles", meta.Name),
-)
-
-var configSetCmd = &cobra.Command{
-	Use:     "set [setting names]",
-	Aliases: []string{"s"},
-	Short:   "Edit a setting",
-	Long:    fmt.Sprintf("Edit a %s setting.", meta.Name),
-	Example: exampleCmd(configSetExample),
-	Run: func(cmd *cobra.Command, args []string) {
-		if configListAll() {
-			return
-		}
-		if err := printUsage(cmd, args...); err != nil {
-			logs.Fatal(err)
-		}
-		for _, arg := range args {
-			config.Set(arg)
-		}
-	},
-}
-
-// configListAll is the "config set --list" command run.
-func configListAll() (ok bool) {
-	if configFlag.configs {
-		if err := config.List(); err != nil {
-			logs.FatalFlag("config", "list", err)
-		}
-		return true
-	}
-	return false
-}
-
-var configSetupCmd = &cobra.Command{
-	Use:   "setup",
-	Short: "Walk through all the settings",
-	Long:  fmt.Sprintf("Walk through all of the %s settings.", meta.Name),
-	Run: func(cmd *cobra.Command, args []string) {
-		const startAt = 0
-		config.Setup(startAt)
 	},
 }
 
@@ -185,23 +36,23 @@ func init() {
 		color.Enable = false
 	}
 	rootCmd.AddCommand(configCmd)
-	configCmd.AddCommand(configCreateCmd)
-	configCmd.AddCommand(configDeleteCmd)
-	configCmd.AddCommand(configEditCmd)
-	configCmd.AddCommand(configInfoCmd)
-	configCmd.AddCommand(configSetCmd)
-	configCmd.AddCommand(configSetupCmd)
+	configCmd.AddCommand(configcmd.Create)
+	configCmd.AddCommand(configcmd.Delete)
+	configCmd.AddCommand(configcmd.Edit)
+	configCmd.AddCommand(configcmd.Info)
+	configCmd.AddCommand(configcmd.Set)
+	configCmd.AddCommand(configcmd.Setup)
 	// create
-	configCreateCmd.Flags().BoolVarP(&configFlag.ow, "overwrite", "y", false,
+	configcmd.Create.Flags().BoolVarP(&flag.Config.Ow, "overwrite", "y", false,
 		"overwrite and reset the existing config file")
 	// info
-	configInfoCmd.Flags().BoolVarP(&configFlag.configs, "configs", "c", false,
+	configcmd.Info.Flags().BoolVarP(&flag.Config.Configs, "configs", "c", false,
 		"list all the available configuration setting names")
-	configInfoCmd.Flags().StringVarP(&configFlag.style, "style", "s", "",
+	configcmd.Info.Flags().StringVarP(&flag.Config.Style, "style", "s", "",
 		"choose a syntax highligher")
-	configInfoCmd.Flags().BoolVar(&configFlag.styles, "styles", false,
+	configcmd.Info.Flags().BoolVar(&flag.Config.Styles, "styles", false,
 		"list and preview the available syntax highlighers")
 	// set
-	configSetCmd.Flags().BoolVarP(&configFlag.configs, "list", "l", false,
+	configcmd.Set.Flags().BoolVarP(&flag.Config.Configs, "list", "l", false,
 		"list all the available setting names")
 }

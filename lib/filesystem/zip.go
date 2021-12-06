@@ -106,9 +106,9 @@ func (files *Files) Zip(name, comment string, ow, quiet bool) error {
 		}
 	}
 	for _, f := range *files {
-		err = zipper(f, z)
+		err = AddZip(f, z)
 		if err != nil {
-			return fmt.Errorf("zipper %q: %w", f, err)
+			return fmt.Errorf("add zip %q: %w", f, err)
 		}
 	}
 	err = z.Close()
@@ -129,7 +129,7 @@ func (files *Files) Zip(name, comment string, ow, quiet bool) error {
 	return nil
 }
 
-func zipper(name string, z *zip.Writer) error {
+func AddZip(name string, z *zip.Writer) error {
 	s, err := os.Stat(name)
 	if err != nil {
 		fmt.Println("skipping file, could not stat", name)
