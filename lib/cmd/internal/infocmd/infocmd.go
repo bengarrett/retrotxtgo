@@ -60,10 +60,10 @@ func Run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// infoSample extracts and saves an embed sample file then returns its location.
-func Sample(name string) (filename string, err error) {
+// Sample extracts and saves an embed sample file then returns its location.
+func Sample(name string) (string, error) {
 	s := strings.ToLower(name)
-	if _, err = os.Stat(s); !os.IsNotExist(err) {
+	if _, err := os.Stat(s); !os.IsNotExist(err) {
 		return "", nil
 	}
 	samp, exist := sample.Map()[s]
@@ -87,7 +87,7 @@ func Sample(name string) (filename string, err error) {
 	return file.Name(), nil
 }
 
-// infoPipe parses a standard input (stdin) stream of data.
+// Pipe parses a standard input (stdin) stream of data.
 func Pipe() {
 	b, err := filesystem.ReadPipe()
 	if err != nil {

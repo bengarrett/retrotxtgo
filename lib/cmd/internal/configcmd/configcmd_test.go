@@ -5,9 +5,11 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/configcmd"
 	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/flag"
+	"github.com/bengarrett/retrotxtgo/lib/config"
+	"github.com/spf13/viper"
 )
 
-func Test_configListAll(t *testing.T) {
+func TestListAll(t *testing.T) {
 	tests := []struct {
 		name string
 		flag bool
@@ -20,7 +22,28 @@ func Test_configListAll(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			flag.Config.Configs = tt.flag
 			if got := configcmd.ListAll(); got != tt.want {
-				t.Errorf("configListAll() = %v, want %v", got, tt.want)
+				t.Errorf("ListAll() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestInitDefaults(t *testing.T) {
+	tests := []struct {
+		name string
+		key  string
+		want string
+	}{
+		{"empty", "", ""},
+		{"layout", "html.layout", "standard"},
+		{"save dir", "save-directory", ""},
+		{"style", "style.html", "lovelace"},
+	}
+	config.InitDefaults()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := viper.GetString(tt.key); got != tt.want {
+				t.Errorf("config.InitDefaults() %v = %v, want %v", tt.key, got, tt.want)
 			}
 		})
 	}

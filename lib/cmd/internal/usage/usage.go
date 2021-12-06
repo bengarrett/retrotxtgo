@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// printUsage will print the help and exit when no arguments are supplied.
+// Print the usage help and exit; but only when no arguments are given.
 func Print(cmd *cobra.Command, args ...string) error {
 	if len(args) == 0 {
 		if err := cmd.Help(); err != nil {

@@ -16,7 +16,7 @@ import (
 	"golang.org/x/term"
 )
 
-// printVer
+// Print the application version, copyright and build variables.
 func Print() string {
 	const tabWidth, copyright, years = 8, "\u00A9", "2020-21"
 	exe, err := self()
@@ -46,7 +46,7 @@ func Print() string {
 	return b.String()
 }
 
-// Self returns the path to this dupers executable file.
+// Self returns the path to this executable file.
 func self() (string, error) {
 	exe, err := os.Executable()
 	if err != nil {
@@ -55,6 +55,7 @@ func self() (string, error) {
 	return exe, nil
 }
 
+// Terminal attempts to determine the host shell environment.
 func terminal() string {
 	const win = "windows"
 	unknown := func() string {

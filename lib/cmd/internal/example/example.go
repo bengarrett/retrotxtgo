@@ -87,7 +87,7 @@ var Set = fmt.Sprintf("  %s %s %s\n%s %s %s\n%s %s %s",
 	meta.Bin, "config set style.info style.html", fmt.Sprintf("# Edit both the %s color styles", meta.Name),
 )
 
-// exampleCmd returns help usage examples.
+// Print returns help usage examples.
 func Print(tmpl string) string {
 	if tmpl == "" {
 		return ""

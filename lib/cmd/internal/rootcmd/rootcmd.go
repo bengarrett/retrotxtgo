@@ -7,8 +7,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-// initConfig reads in the config file and ENV variables if set.
-// This init might be run twice due to the Cobra initializer registers.
+// Init reads in the config file and ENV variables if set.
+// This might be triggered twice due to the Cobra initializer registers.
 func Init() {
 	// read in environment variables
 	viper.SetEnvPrefix("env")

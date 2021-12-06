@@ -6,7 +6,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/infocmd"
 )
 
-func Test_infoSample(t *testing.T) {
+func TestSample(t *testing.T) {
 	tests := []struct {
 		m            string
 		name         string
@@ -21,11 +21,11 @@ func Test_infoSample(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			gotFilename, err := infocmd.Sample(tt.name)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("infoSample() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Sample() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if bool(len(gotFilename) > 0) != tt.wantFilename {
-				t.Errorf("infoSample() = %v, want %v", gotFilename, tt.wantFilename)
+				t.Errorf("Sample() = %v, want %v", gotFilename, tt.wantFilename)
 			}
 		})
 	}

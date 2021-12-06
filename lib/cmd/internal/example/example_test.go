@@ -8,7 +8,7 @@ import (
 	"github.com/gookit/color"
 )
 
-func Test_exampleCmd(t *testing.T) {
+func TestPrint(t *testing.T) {
 	color.Enable = false
 	tests := []struct {
 		name string
@@ -24,7 +24,7 @@ func Test_exampleCmd(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := example.Print(tt.tmpl); strings.TrimSpace(got) != tt.want {
-				t.Errorf("exampleCmd() = %v, want %v", got, tt.want)
+				t.Errorf("Print() = %v, want %v", got, tt.want)
 			}
 		})
 	}

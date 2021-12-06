@@ -22,7 +22,7 @@ var (
 	ErrCacheSave = errors.New("set cache cannot save data")
 )
 
-// Cache the version data.
+// Cache the release data.
 type Cache struct {
 	Etag string `yaml:"etag"`
 	Ver  string `yaml:"version"`
@@ -30,7 +30,7 @@ type Cache struct {
 
 const cacheFile = "api.github.cache"
 
-// newRelease notification box and text.
+// Print the new release notification box and text.
 func Print(old, newest string) *bytes.Buffer {
 	s := fmt.Sprintf("%s%s%s\n%s%s\n%s → %s",
 		"A newer edition of ", meta.Name, " is available!",
@@ -38,38 +38,38 @@ func Print(old, newest string) *bytes.Buffer {
 	return str.Border(s)
 }
 
-// chkRelease returns true if the latest GitHub repo tag is newer than the program version.
-// The returned v string is the latest GitHub repo tag.
-func Check() (newRel bool, v string) {
+// Check if the latest GitHub repo tag is newer than the program version.
+// The tag value is the latest GitHub repo tag.
+func Check() (newer bool, tag string) {
 	if meta.App.Version == meta.GoBuild {
 		return false, ""
 	}
-	etag, v := CacheGet()
+	etag, tag := CacheGet()
 	cache, data, err := online.Endpoint(online.ReleaseAPI, etag)
 	if err != nil {
 		logs.Save(err)
-		return false, v
+		return false, tag
 	}
 	if !cache {
-		v = fmt.Sprint(data["tag_name"])
-		if v == "" {
-			return false, v
+		tag = fmt.Sprint(data["tag_name"])
+		if tag == "" {
+			return false, ""
 		}
 		if fmt.Sprintf("%T", data["etag"]) == "string" {
 			if data["etag"].(string) != "" {
-				if err = CacheSet(data["etag"].(string), v); err != nil {
+				if err = CacheSet(data["etag"].(string), tag); err != nil {
 					logs.Save(err)
 				}
 			}
 		}
 	}
-	if comp := Compare(meta.App.Version, v); comp {
-		return true, v
+	if comp := Compare(meta.App.Version, tag); comp {
+		return true, tag
 	}
-	return false, v
+	return false, ""
 }
 
-// cacheGet reads the stored GitHub API, HTTP ETag header and release version.
+// CacheGet reads the stored GitHub API, HTTP ETag header and release version.
 func CacheGet() (etag, ver string) {
 	cf, err := home().DataPath(cacheFile)
 	if err != nil {
@@ -96,7 +96,7 @@ func CacheGet() (etag, ver string) {
 	return cache.Etag, cache.Ver
 }
 
-// cacheSet saves the Github API, ETag HTTP header and release version.
+// CacheSet saves the Github API, ETag HTTP header and release version.
 func CacheSet(etag, ver string) error {
 	if etag == "" || ver == "" {
 		return nil
@@ -119,7 +119,7 @@ func CacheSet(etag, ver string) error {
 	return nil
 }
 
-// compare the version value of this executable program against the latest version hosted on GitHub.
+// Compare the release version of this program against the latest version hosted on GitHub.
 func Compare(current, fetched string) bool {
 	cur := meta.Semantic(current)
 	if !cur.Valid() {
@@ -141,7 +141,7 @@ func Compare(current, fetched string) bool {
 	return false
 }
 
-// home returns the user home directory.
+// home is the user's home directory.
 func home() *gap.Scope {
 	return gap.NewScope(gap.User, meta.Dir)
 }

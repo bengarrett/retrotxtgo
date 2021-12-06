@@ -50,7 +50,7 @@ func Run(cmd *cobra.Command, args []string) error {
 	return ParseFiles(cmd, f, args...)
 }
 
-// createHTML applies a HTML template to src text.
+// HTML applies a HTML template to the src text.
 func HTML(cmd *cobra.Command, flags convert.Flag, src *[]byte) ([]byte, error) {
 	var err error
 	conv := convert.Convert{
@@ -83,7 +83,7 @@ func HTML(cmd *cobra.Command, flags convert.Flag, src *[]byte) ([]byte, error) {
 	return []byte(string(r)), nil
 }
 
-// parsePipe creates HTML content using the standard input (stdio) of the operating system.
+// ParsePipe creates HTML content using the standard input (stdin) of the operating system.
 func ParsePipe(cmd *cobra.Command, flags convert.Flag) error {
 	src, err := filesystem.ReadPipe()
 	if err != nil {
@@ -106,7 +106,7 @@ func ParsePipe(cmd *cobra.Command, flags convert.Flag) error {
 	return nil
 }
 
-// parseBody is a hidden debugging feature.
+// hidden is a hidden debugging feature.
 // It takes the supplied text and uses for the HTML <pre></pre> elements text content.
 func ParseBody(cmd *cobra.Command) error {
 	// hidden --body flag ignores most other args
@@ -127,7 +127,7 @@ func ParseBody(cmd *cobra.Command) error {
 	return nil
 }
 
-// parseFiles parses the flags to create the HTML document or website.
+// ParseFiles parses the flags to create the HTML document or website.
 // The generated HTML and associated files will either be served, saved or printed.
 func ParseFiles(cmd *cobra.Command, flags convert.Flag, args ...string) error {
 	args, conv, samp, err := flag.InitArgs(cmd, args...)
@@ -174,7 +174,7 @@ func SaveDir() string {
 	return s
 }
 
-// serveBytes hosts the HTML using an internal HTTP server.
+// ServeBytes hosts the HTML using an internal HTTP server.
 func ServeBytes(i int, changed bool, b *[]byte) (bool, error) {
 	if i != 0 {
 		return false, nil
@@ -191,7 +191,7 @@ func ServeBytes(i int, changed bool, b *[]byte) (bool, error) {
 	return false, nil
 }
 
-// stringFlags handles the defaults for flags that accept strings.
+// Strings handles the defaults for flags that accept strings.
 // These flags are parse to three different states.
 // 1) the flag is unchanged, so use the configured viper default.
 // 2) the flag has a new value to overwrite viper default.
