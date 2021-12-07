@@ -29,7 +29,7 @@ func FatalExecute(err error, args ...string) {
 }
 
 // Execute is the error handler for command flags and arguments.
-func Execute(err error, test bool, args ...string) string { //nolint:gocyclo,funlen
+func Execute(err error, test bool, args ...string) string { //nolint:funlen
 	if err == nil {
 		return ""
 	}

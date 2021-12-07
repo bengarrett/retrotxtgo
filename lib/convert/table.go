@@ -25,7 +25,7 @@ const (
 )
 
 // Table prints out all the characters in the named 8-bit character set.
-func Table(name string) (*bytes.Buffer, error) {
+func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 	cp, err := codepager(name)
 	if err != nil {
 		return nil, err
@@ -35,8 +35,7 @@ func Table(name string) (*bytes.Buffer, error) {
 		h = "ISO 8859-11"
 		cp = charmap.XUserDefined
 	}
-	h += charmapAlias(cp)
-	h += charmapStandard(cp)
+	h += charmapAlias(cp) + charmapStandard(cp)
 	var buf bytes.Buffer
 	const tabWidth = 8
 	w := new(tabwriter.Writer).Init(&buf, 0, tabWidth, 0, '\t', 0)

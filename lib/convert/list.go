@@ -48,7 +48,7 @@ func Encodings() []encoding.Encoding {
 }
 
 // List returns a tabled list of supported IANA character set encodings.
-func List() *bytes.Buffer {
+func List() *bytes.Buffer { //nolint:funlen
 	const header, title = " Formal name\t Named value\t Numeric value\t Alias value\t",
 		" Supported legacy code pages and character encodings "
 	var buf bytes.Buffer

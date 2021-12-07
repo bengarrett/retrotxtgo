@@ -9,6 +9,7 @@ linters:
     - golint            # Deprecated
     - maligned          # Deprecated
 
+    - cyclop            # duplicates gocyclo
     - exhaustivestruct  # 'It is not recommended to use it for all files in a project'
     - forbidigo         # forbids the use for fmt.Print(f|ln)
     - nlreturn          # opinionated

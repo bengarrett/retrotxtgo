@@ -125,7 +125,7 @@ func (args *Args) Marshal(b *[]byte) (PageData, error) {
 		if err := bt.HTML(&out, []byte(string(r))); err != nil {
 			return PageData{}, err
 		}
-		p.HTMLEmbed = template.HTML(out.Bytes())
+		p.HTMLEmbed = template.HTML(out.Bytes()) //nolint:gosec
 	}
 	return p, nil
 }

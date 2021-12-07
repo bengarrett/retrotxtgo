@@ -184,7 +184,7 @@ type Settings struct {
 }
 
 // marshals sets the default value for the key.
-func (sc *Settings) marshals(key string) error { // nolint:gocyclo
+func (sc *Settings) marshals(key string) error { // nolint:funlen
 	switch key {
 	case Editor:
 		sc.Editor = String(key)
