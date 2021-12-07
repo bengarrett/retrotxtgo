@@ -48,8 +48,10 @@ func Enabled() map[string]interface{} {
 // KeySort list all the available configuration setting names sorted by hand.
 func KeySort() []string {
 	all := set.Keys()
-	keys := []string{get.FontFamily, get.Title, get.LayoutTmpl, get.FontEmbed,
-		get.SaveDir, get.Serve, get.Editor, get.Styleh, get.Stylei}
+	keys := []string{
+		get.FontFamily, get.Title, get.LayoutTmpl, get.FontEmbed,
+		get.SaveDir, get.Serve, get.Editor, get.Styleh, get.Stylei,
+	}
 	for _, key := range all {
 		found := false
 		for _, used := range keys {

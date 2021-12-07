@@ -30,7 +30,7 @@ func AddTar(name string, w *tar.Writer) error {
 	}
 	_, err = io.Copy(w, f)
 	if err != nil {
-		return nil
+		return nil //nolint:nilerr
 	}
 	return f.Close()
 }

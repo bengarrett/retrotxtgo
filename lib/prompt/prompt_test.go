@@ -10,11 +10,8 @@ import (
 	"github.com/gookit/color"
 )
 
-func init() {
-	color.Enable = false
-}
-
 func ExampleYesNo() {
+	color.Enable = false
 	yn := prompt.YesNo("Say hello", true)
 	fmt.Print(yn)
 	// Output:Say hello? [Yes/no] true

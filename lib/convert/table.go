@@ -282,7 +282,7 @@ func character(pos int, r rune, cp encoding.Encoding) string {
 }
 
 // charmapAlias humanizes encodings.
-func charmapAlias(cp encoding.Encoding) string { // nolint:gocyclo
+func charmapAlias(cp encoding.Encoding) string { //nolint:cyclop
 	if c := charmapDOS(cp); c != "" {
 		return c
 	}

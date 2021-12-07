@@ -32,15 +32,19 @@ func ColorScheme() [3]string {
 
 // Referrer values for the content attribute of <meta name="referrer">.
 func Referrer() [8]string {
-	return [...]string{"no-referrer", "origin", "no-referrer-when-downgrade",
+	return [...]string{
+		"no-referrer", "origin", "no-referrer-when-downgrade",
 		"origin-when-cross-origin", "same-origin", "strict-origin",
-		"strict-origin-when-cross-origin", "unsafe-URL"}
+		"strict-origin-when-cross-origin", "unsafe-URL",
+	}
 }
 
 // Robots values for the content attribute of <meta name="robots">.
 func Robots() [9]string {
-	return [...]string{"index", "noindex", "follow", "nofollow", "none",
-		"noarchive", "nosnippet", "noimageindex", "nocache"}
+	return [...]string{
+		"index", "noindex", "follow", "nofollow", "none",
+		"noarchive", "nosnippet", "noimageindex", "nocache",
+	}
 }
 
 // Layouts are the names of the HTML templates.
@@ -49,7 +53,8 @@ func Layouts() []string {
 		layout.Standard.String(),
 		layout.Inline.String(),
 		layout.Compact.String(),
-		layout.None.String()}
+		layout.None.String(),
+	}
 }
 
 // Create handles the target output command arguments.

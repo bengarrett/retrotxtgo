@@ -50,7 +50,7 @@ func Check() (newer bool, tag string) {
 		logs.Save(err)
 		return false, tag
 	}
-	if !cache {
+	if !cache { //nolint:nestif
 		tag = fmt.Sprint(data["tag_name"])
 		if tag == "" {
 			return false, ""

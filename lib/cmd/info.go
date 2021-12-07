@@ -23,7 +23,8 @@ func infoCommand() *cobra.Command {
 			if err := infocmd.Run(cmd, args); err != nil {
 				logs.Fatal(err)
 			}
-		}}
+		},
+	}
 }
 
 //nolint:gochecknoinits

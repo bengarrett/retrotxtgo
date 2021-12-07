@@ -20,7 +20,7 @@ func Read(r io.Reader) (input string, err error) {
 	reader := bufio.NewReader(r)
 	input, err = reader.ReadString('\n')
 	input = strings.TrimSpace(input)
-	if err != nil && err != io.EOF {
+	if err != nil && !errors.Is(err, io.EOF) {
 		return input, fmt.Errorf("prompt string reader error: %w", err)
 	}
 	return input, nil

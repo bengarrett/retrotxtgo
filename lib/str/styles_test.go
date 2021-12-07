@@ -13,6 +13,7 @@ func ExampleBorder() {
 	// │ hi │
 	// └────┘
 }
+
 func TestTerm(t *testing.T) {
 	tests := []struct {
 		name     string

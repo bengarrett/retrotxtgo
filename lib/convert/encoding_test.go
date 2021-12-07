@@ -121,7 +121,7 @@ func TestANSI(t *testing.T) {
 	}
 }
 
-func TestEncoder(t *testing.T) {
+func TestEncoder(t *testing.T) { //nolint:funlen
 	tests := []struct {
 		name    string
 		want    encoding.Encoding
@@ -417,7 +417,7 @@ func TestRunesEBCDIC(t *testing.T) {
 }
 
 func Test_equalLB(t *testing.T) {
-	var o, n, lf, win = [2]rune{0, 0}, [2]rune{-1, -1}, [2]rune{10, 0}, [2]rune{13, 0}
+	o, n, lf, win := [2]rune{0, 0}, [2]rune{-1, -1}, [2]rune{10, 0}, [2]rune{13, 0}
 	type args struct {
 		r  [2]rune
 		nl [2]rune

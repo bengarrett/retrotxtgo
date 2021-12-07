@@ -21,9 +21,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var (
-	ErrSaveType = errors.New("save value type is unsupported")
-)
+var ErrSaveType = errors.New("save value type is unsupported")
 
 // Write the value of the named setting to the configuration file.
 func Write(name string, setup bool, value interface{}) {

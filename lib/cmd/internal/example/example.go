@@ -120,6 +120,7 @@ func cfgInfo() string {
 		fmt.Sprintf("%s config info   # List the default setting values", meta.Bin),
 		fmt.Sprintf("%s config set -c # List the settings and help hints", meta.Bin))
 }
+
 func list() string {
 	return fmt.Sprintf("  %s\n%s\n%s\n%s",
 		fmt.Sprintf("%s list codepages", meta.Bin),
@@ -127,6 +128,7 @@ func list() string {
 		fmt.Sprintf("%s list table cp437 cp1252", meta.Bin),
 		fmt.Sprintf("%s list tables", meta.Bin))
 }
+
 func listExamples() string {
 	return fmt.Sprintf("  %s\n%s\n%s\n%s\n%s",
 		fmt.Sprintf("%s list examples # list the builtin examples", meta.Bin),
@@ -135,17 +137,20 @@ func listExamples() string {
 		fmt.Sprintf("%s create ascii  # create the ascii example", meta.Bin),
 		fmt.Sprintf("%s save ascii    # save the ascii example", meta.Bin))
 }
+
 func listTable() string {
 	return fmt.Sprintf("  %s\n%s\n%s",
 		fmt.Sprintf("%s table cp437", meta.Bin),
 		fmt.Sprintf("%s table cp437 latin1 windows-1252", meta.Bin),
 		fmt.Sprintf("%s table iso-8859-15", meta.Bin))
 }
+
 func info() string {
 	return fmt.Sprintf("  %s %s\n%s %s",
 		meta.Bin, "info text.asc logo.jpg # print the information of multiple files",
 		meta.Bin, "info file.txt --format=json # print the information using a structured syntax")
 }
+
 func root() string {
 	return fmt.Sprintf("  %s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s",
 		"# save the text files as webpages",
@@ -160,6 +165,7 @@ func root() string {
 		fmt.Sprintf("%s config setup", meta.Bin),
 	)
 }
+
 func set() string {
 	return fmt.Sprintf("  %s %s %s\n%s %s %s\n%s %s %s",
 		meta.Bin, "config set --list", "# List the available settings",
@@ -167,6 +173,7 @@ func set() string {
 		meta.Bin, "config set style.info style.html", fmt.Sprintf("# Edit both the %s color styles", meta.Name),
 	)
 }
+
 func view() string {
 	return fmt.Sprintf("  %s\n%s\n%s",
 		fmt.Sprintf("%s view file.txt -e latin1", meta.Bin),

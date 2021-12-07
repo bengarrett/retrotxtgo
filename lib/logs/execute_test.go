@@ -25,14 +25,26 @@ func Test_Execute(t *testing.T) {
 		want string
 	}{
 		{"empty", args{}, ""},
-		{"no strings", args{ErrTest, []string{}},
-			"cmd error args: word count is too short, less than 3"},
-		{"default", args{ErrLongMsg, []string{""}},
-			"Problem:\nthis error message has at least three words.\n run retrotxt  --help"},
-		{"strings", args{ErrBF, []string{"some", "command"}},
-			"Problem:\n with the some --test flag, bad flag test"},
-		{"type", args{ErrBoolType, []string{"some", "command"}},
-			"Problem:\n with the some --strconv.ParseBool flag, the value must be either true or false"},
+		{
+			"no strings",
+			args{ErrTest, []string{}},
+			"cmd error args: word count is too short, less than 3",
+		},
+		{
+			"default",
+			args{ErrLongMsg, []string{""}},
+			"Problem:\nthis error message has at least three words.\n run retrotxt  --help",
+		},
+		{
+			"strings",
+			args{ErrBF, []string{"some", "command"}},
+			"Problem:\n with the some --test flag, bad flag test",
+		},
+		{
+			"type",
+			args{ErrBoolType, []string{"some", "command"}},
+			"Problem:\n with the some --strconv.ParseBool flag, the value must be either true or false",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

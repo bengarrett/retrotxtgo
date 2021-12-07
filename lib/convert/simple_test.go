@@ -34,6 +34,7 @@ func ExampleD437() {
 	fmt.Print(t)
 	// Output: ═╣▓╠═
 }
+
 func TestCP437Decode(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -94,8 +95,10 @@ func TestDString(t *testing.T) {
 	}{
 		{"empty", args{}, []byte{}, false},
 		{"hello", args{"hello world", *charmap.CodePage437}, []byte("hello world"), false},
-		{"mainframe", args{string([]byte{136, 133, 147, 147, 150, 64, 166, 150, 153, 147, 132}),
-			*charmap.CodePage037}, []byte("hello world"), false},
+		{"mainframe", args{
+			string([]byte{136, 133, 147, 147, 150, 64, 166, 150, 153, 147, 132}),
+			*charmap.CodePage037,
+		}, []byte("hello world"), false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -123,8 +126,17 @@ func TestEString(t *testing.T) {
 		wantErr    bool
 	}{
 		{"empty", args{}, []byte{}, false},
-		{"hello", args{"hello world", *charmap.CodePage437}, []byte("hello world"), false},
-		{"mainframe", args{"hello world", *charmap.CodePage037}, []byte{136, 133, 147, 147, 150, 64, 166, 150, 153, 147, 132}, false},
+		{
+			"hello",
+			args{"hello world", *charmap.CodePage437},
+			[]byte("hello world"), false,
+		},
+		{
+			"mainframe",
+			args{"hello world", *charmap.CodePage037},
+			[]byte{136, 133, 147, 147, 150, 64, 166, 150, 153, 147, 132},
+			false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

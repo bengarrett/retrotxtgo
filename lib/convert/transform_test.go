@@ -32,7 +32,7 @@ func Test_skipCtrlCodes(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var c = Convert{}
+			c := Convert{}
 			c.lineBreaks = true
 			c.Flags.Controls = tt.ctrl
 			c.skipCtrlCodes()

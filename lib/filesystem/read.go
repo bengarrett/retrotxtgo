@@ -136,7 +136,7 @@ func ReadControls(name string) (int, error) {
 
 // ReadLine reads a named file location or a named temporary file and returns its content.
 func ReadLine(name string, lb nl.LineBreaks) (string, error) {
-	var path, n = util.Temp(name), nl.LineBreak(lb)
+	path, n := util.Temp(name), nl.LineBreak(lb)
 	file, err := os.OpenFile(path, os.O_RDONLY, save.LogFileMode)
 	if errors.Is(err, os.ErrNotExist) {
 		return "", fmt.Errorf("%w: %s", ErrNotFound, name)

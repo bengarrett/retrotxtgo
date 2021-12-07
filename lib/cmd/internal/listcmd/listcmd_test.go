@@ -15,6 +15,7 @@ func ExamplePrintTable() {
 	fmt.Printf("%d characters in the table", len(t))
 	// Output: 1689 characters in the table
 }
+
 func ExamplePrintTables() {
 	color.Enable = false
 	t := listcmd.PrintTables()

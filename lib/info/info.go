@@ -138,7 +138,7 @@ func Stdin(format string, b ...byte) error {
 	if err := d.Parse("", nil, b...); err != nil {
 		return err
 	}
-	if d.ValidText() {
+	if d.ValidText() { //nolint:nestif
 		d.LineBreaks(filesystem.LineBreaks(true, []rune(string(b))...))
 		var g errgroup.Group
 		g.Go(func() error {

@@ -79,8 +79,10 @@ func List() *bytes.Buffer {
 		// do not use ANSI colors in cells as it will break the table layout
 		fmt.Fprintf(w, " %s\t %s\t %s\t %s\t\n", c.name, c.value, c.numeric, c.alias)
 	}
-	fmt.Fprintln(w, "\n "+str.ColInf("*")+" EBCDIC encoding, is in use on IBM mainframes and not ASCII compatible.")
-	fmt.Fprintln(w, str.ColInf("**")+" ANSI X3.2 encodings are only usable with the "+str.Example("list table")+" command.")
+	fmt.Fprintln(w, "\n "+str.ColInf("*")+
+		" EBCDIC encoding, is in use on IBM mainframes and not ASCII compatible.")
+	fmt.Fprintln(w, str.ColInf("**")+
+		" ANSI X3.2 encodings are only usable with the "+str.Example("list table")+" command.")
 	fmt.Fprintln(w, "\nEither named, numeric or alias values are valid codepage arguments.")
 	fmt.Fprintln(w, "  These values all match ISO 8859-1.")
 	cmds := fmt.Sprintf("%s list table ", meta.Bin)
@@ -148,35 +150,36 @@ func alias(s, val string, e encoding.Encoding) string {
 	if a == val {
 		a = ""
 	}
-	if a == "" {
-		switch val {
-		case "cp437":
-			return "msdos"
-		case "cp850":
-			return "latinI"
-		case "cp852":
-			return "latinII"
-		case "macintosh":
-			return "mac"
-		}
-		var err error
-		a, err = ianaindex.MIB.Name(e)
-		if err != nil {
-			return ""
-		}
-		a = strings.ToLower(a)
-		if a == val {
-			return ""
-		}
-		if len(a) > 2 && a[:2] == "pc" {
-			return ""
-		}
-		if len(a) == 9 && a[:8] == latin {
-			return "latin" + a[8:]
-		}
-		if len(a) > 9 && a[:8] == latin {
-			return a[8:]
-		}
+	if a != "" {
+		return a
+	}
+	switch val {
+	case "cp437":
+		return "msdos"
+	case "cp850":
+		return "latinI"
+	case "cp852":
+		return "latinII"
+	case "macintosh":
+		return "mac"
+	}
+	var err error
+	a, err = ianaindex.MIB.Name(e)
+	if err != nil {
+		return ""
+	}
+	a = strings.ToLower(a)
+	if a == val {
+		return ""
+	}
+	if len(a) > 2 && a[:2] == "pc" {
+		return ""
+	}
+	if len(a) == 9 && a[:8] == latin {
+		return "latin" + a[8:]
+	}
+	if len(a) > 9 && a[:8] == latin {
+		return a[8:]
 	}
 	return a
 }

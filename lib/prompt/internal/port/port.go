@@ -35,7 +35,10 @@ func Check(prompts int) {
 func Port(r io.Reader, validate, setup bool) uint {
 	const reset uint = 0
 	const baseTen = 10
-	input, prompts := "", 0
+	var (
+		input   string
+		prompts int
+	)
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		prompts++

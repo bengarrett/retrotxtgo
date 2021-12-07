@@ -23,7 +23,7 @@ linters-settings:
     max-complexity: 15
 
 # Fixes
-# gofumpt -l -w <file>
+# gofumpt -l -w <file> || <dir>/*
 # gci -w <file>
 
 # linters-settings:

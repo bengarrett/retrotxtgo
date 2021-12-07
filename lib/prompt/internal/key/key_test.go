@@ -83,7 +83,7 @@ func Test_keys_shortValidate(t *testing.T) {
 }
 
 func Test_keys_shortPrompt(t *testing.T) {
-	var fruits = key.Keys{"apple", "orange", "grape"}
+	fruits := key.Keys{"apple", "orange", "grape"}
 	tests := []struct {
 		name    string
 		k       key.Keys

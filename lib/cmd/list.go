@@ -20,7 +20,8 @@ func listCommand() *cobra.Command {
 				logs.Fatal(err)
 			}
 			logs.FatalCmd("list", args...)
-		}}
+		},
+	}
 }
 
 //nolint:gochecknoinits

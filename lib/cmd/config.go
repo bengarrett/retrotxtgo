@@ -25,7 +25,8 @@ func configCommand() *cobra.Command {
 				logs.Fatal(err)
 			}
 			logs.FatalCmd("config", args...)
-		}}
+		},
+	}
 }
 
 // init is always called by the Cobra library to be used for global flags and commands.

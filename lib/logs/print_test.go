@@ -7,21 +7,16 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/meta"
-	"github.com/gookit/color"
 )
 
 const status = "exit status 1"
 
 var ErrTest = errors.New("error")
 
-func init() {
-	color.Enable = false
-}
-
 func ExampleSprint() {
 	fmt.Println(logs.Sprint(ErrTest))
 	fmt.Println(status)
-	//Output: Problem:
+	// Output: Problem:
 	// error.
 	// exit status 1
 }

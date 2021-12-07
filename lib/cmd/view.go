@@ -23,10 +23,11 @@ func viewCommand() *cobra.Command {
 				logs.Fatal(err)
 			}
 			fmt.Print(b)
-		}}
+		},
+	}
 }
 
-func init() {
+func init() { //nolint:gochecknoinits
 	viewCmd := viewCommand()
 	rootCmd.AddCommand(viewCmd)
 	flag.Encode(&flag.ViewFlag.Encode, viewCmd)

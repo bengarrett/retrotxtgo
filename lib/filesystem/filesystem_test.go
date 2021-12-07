@@ -38,8 +38,7 @@ func ExampleTar() {
 
 func BenchmarkReadLarge(b *testing.B) {
 	large := mock.LargeExample()
-	_, err := filesystem.Read(large)
-	if err != nil {
+	if _, err := filesystem.Read(large); err != nil {
 		filesystem.Clean(large)
 		log.Fatal(err)
 	}
@@ -48,8 +47,7 @@ func BenchmarkReadLarge(b *testing.B) {
 
 func BenchmarkReadMega(b *testing.B) {
 	mega := mock.MegaExample()
-	_, err := filesystem.Read(mega)
-	if err != nil {
+	if _, err := filesystem.Read(mega); err != nil {
 		filesystem.Clean(mega)
 		log.Fatal(err)
 	}

@@ -163,19 +163,19 @@ type Settings struct {
 		Layout string `yaml:"layout"`
 		Meta   struct {
 			Author      string `yaml:"author"`
-			ColorScheme string `yaml:"color-scheme"`
+			ColorScheme string `yaml:"colorScheme"`
 			Description string `yaml:"description"`
 			Keywords    string `yaml:"keywords"`
 			Referrer    string `yaml:"referrer"`
 			Robots      string `yaml:"robots"`
-			ThemeColor  string `yaml:"theme-color"`
+			ThemeColor  string `yaml:"themeColor"`
 			Generator   bool   `yaml:"generator"`
 			Notranslate bool   `yaml:"notranslate"`
 			RetroTxt    bool   `yaml:"retrotxt"`
 		}
 		Title string `yaml:"title"`
 	}
-	SaveDirectory string `yaml:"save-directory"`
+	SaveDirectory string `yaml:"saveDirectory"`
 	ServerPort    uint   `yaml:"serve"`
 	Style         struct {
 		Info string `yaml:"info"`

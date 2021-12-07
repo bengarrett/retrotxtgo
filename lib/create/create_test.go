@@ -23,7 +23,7 @@ func TestSaveAssets(t *testing.T) {
 	t.Run("comment", func(t *testing.T) {
 		// Create a temporary directory
 		tmpDir := filepath.Join(os.TempDir(), "retrotxt_example_save_assets")
-		if err := os.MkdirAll(tmpDir, 0755); err != nil {
+		if err := os.MkdirAll(tmpDir, 0o755); err != nil {
 			t.Errorf("saveAssets make temp dir: %q: %w", tmpDir, err)
 		}
 		defer os.RemoveAll(tmpDir)
@@ -56,7 +56,7 @@ func TestZipAssets(t *testing.T) {
 		// Create a temporary directory
 		tmpDir := filepath.Join(os.TempDir(), "retrotxt_example_save_assets")
 		os.RemoveAll(tmpDir)
-		if err := os.MkdirAll(tmpDir, 0755); err != nil {
+		if err := os.MkdirAll(tmpDir, 0o755); err != nil {
 			t.Errorf("saveAssets make temp dir: %w", err)
 		}
 		defer os.RemoveAll(tmpDir)

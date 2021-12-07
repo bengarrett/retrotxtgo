@@ -94,7 +94,7 @@ func (n Names) lexorOthers(theme bool, lexer string) string {
 		if err := str.HighlightWriter(&b, t, lexer, name, theme); err != nil {
 			logs.FatalMark(name, logs.ErrHighlight, err)
 		}
-		s = append(s, fmt.Sprintf("%2d %s", i, b.String()))
+		s[i] = fmt.Sprintf("%2d %s", i, b.String())
 		if len(n) == 1 {
 			break
 		}
@@ -106,7 +106,7 @@ func (n Names) lexorOthers(theme bool, lexer string) string {
 		if err := str.HighlightWriter(&b, t, lexer, name, theme); err != nil {
 			logs.FatalMark(name, logs.ErrHighlight, err)
 		}
-		s = append(s, fmt.Sprintf("%2d %s", split+i, b.String()))
+		s[i] = fmt.Sprintf("%s%2d %s", s[i], split+i, b.String())
 	}
 	return strings.Join(s, "")
 }
@@ -131,7 +131,7 @@ func (n Names) lexerJSON(theme bool) string {
 		if err := str.HighlightWriter(&b, t, "json", name, theme); err != nil {
 			logs.FatalMark(name, logs.ErrHighlight, err)
 		}
-		s = append(s, fmt.Sprintf("%2d %s", i, b.String()))
+		s[i] = fmt.Sprintf("%2d %s", i, b.String())
 		if split+i >= len(n) {
 			break
 		}
@@ -140,7 +140,7 @@ func (n Names) lexerJSON(theme bool) string {
 		if err := str.HighlightWriter(&b, t, "json", name, theme); err != nil {
 			logs.FatalMark(name, logs.ErrHighlight, err)
 		}
-		s = append(s, fmt.Sprintf("%2d %s", split+i, b.String()))
+		s[i] = fmt.Sprintf("%s%2d %s", s[i], split+i, b.String())
 		continue
 	}
 	return strings.Join(s, "")

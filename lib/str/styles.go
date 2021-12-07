@@ -106,8 +106,7 @@ func Border(s string) *bytes.Buffer {
 // Center align text to a the width of an area.
 func Center(width int, s string) string {
 	const split, space = 2, "\u0020"
-	w := (width - len(s)) / split
-	if w > 0 {
+	if w := (width - len(s)) / split; w > 0 {
 		return strings.Repeat(space, w) + s
 	}
 	return s
@@ -152,7 +151,11 @@ func HighlightWriter(w io.Writer, source, lexer, style string, ansi bool) error 
 // Provide a fixed width value for the underline border or set to zero.
 func Head(width int, s string) string {
 	const div, padding = 2, 4
-	h, r, p := ColPri(s), "", ""
+	var (
+		h string
+		p string
+		r string
+	)
 	if width == 0 {
 		r = strings.Repeat(HBar, len(s)+padding)
 		p = strings.Repeat(" ", padding/div)

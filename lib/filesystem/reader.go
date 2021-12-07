@@ -69,7 +69,7 @@ func Columns(r io.Reader, lb LB) (int, error) {
 	if reflect.DeepEqual(lb, LB{}) {
 		return 0, ErrLB
 	}
-	var lineBreak = []byte{byte(lb[0]), byte(lb[1])}
+	lineBreak := []byte{byte(lb[0]), byte(lb[1])}
 	if lb[1] == 0 {
 		lineBreak = []byte{byte(lb[0])}
 	}
@@ -322,7 +322,7 @@ func Words(r io.Reader) (int, error) {
 	scanner := bufio.NewScanner(r)
 	scanner.Split(bufio.ScanWords)
 	for scanner.Scan() {
-		var t = scanner.Text()
+		t := scanner.Text()
 		r, _ := utf8.DecodeRuneInString(t)
 		const max = 65533
 		if r >= max {

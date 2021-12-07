@@ -72,7 +72,7 @@ func (files *Files) Zip(name, comment string, ow, quiet bool) error {
 	const (
 		overwrite    = os.O_RDWR | os.O_CREATE
 		mustNotExist = os.O_RDWR | os.O_CREATE | os.O_EXCL
-		readWriteAll = 0666
+		readWriteAll = 0o666
 	)
 	var (
 		err error
