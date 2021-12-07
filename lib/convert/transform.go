@@ -97,8 +97,7 @@ func (c *Convert) Transform() error {
 	c.fixJISTable()
 	b := bytes.Buffer{}
 	t := transform.NewWriter(&b, c.Input.Encoding.NewDecoder())
-	_, err := t.Write(c.Input.Bytes)
-	if err != nil {
+	if _, err := t.Write(c.Input.Bytes); err != nil {
 		return err
 	}
 	defer t.Close()

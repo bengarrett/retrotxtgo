@@ -56,9 +56,11 @@ type PageData struct {
 // Comment content for the meta retrotxt attribute.
 func (args *Args) Comment(lb filesystem.LB, r ...rune) string {
 	const na = "n/a"
-	l, w, name, b := 0, 0, na, []byte(string(r))
-
-	e := na
+	var (
+		l int
+		w int
+	)
+	name, e, b := na, na, []byte(string(r))
 	if args.Source.Encoding != nil {
 		e = fmt.Sprint(args.Source.Encoding)
 	}

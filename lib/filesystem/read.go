@@ -224,7 +224,10 @@ func ReadTail(name string, offset int) ([]byte, error) {
 		return nil, err
 	}
 	defer file.Close()
-	count, total := 0, 0
+	var (
+		count int
+		total int
+	)
 	total, err = ReadRunes(name)
 	if err != nil {
 		return nil, fmt.Errorf("read tail could not read runes: %q: %w", name, err)

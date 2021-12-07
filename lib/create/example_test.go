@@ -11,6 +11,7 @@ func ExampleColorScheme() {
 	fmt.Print(create.ColorScheme()[0])
 	// Output: normal
 }
+
 func ExampleReferrer() {
 	fmt.Print(create.Referrer()[1])
 	// Output: origin

@@ -675,7 +675,7 @@ func (c *Convert) RunesEBCDIC() {
 }
 
 // control switches out an EBCDIC IBM mainframe control with Unicode picture representation.
-func (c *Convert) control(i int, r rune) (skip bool) { // nolint:gocyclo
+func (c *Convert) control(i int, r rune) (skip bool) {
 	if i > len(c.Output) {
 		return false
 	}
@@ -700,39 +700,53 @@ func (c *Convert) control(i int, r rune) (skip bool) { // nolint:gocyclo
 	switch r {
 	case HT:
 		c.Output[i] = picture(ht)
+		return false
 	case DEL:
 		c.Output[i] = picture(del)
+		return false
 	case nel:
 		if c.lineBreaks {
-			// Go will automatically convert this to CRLF on Windows
-			c.Output[i] = LF
+			c.Output[i] = LF // Go will automatically convert this to CRLF on Windows
 			return true
 		}
 		c.Output[i] = picture(nl)
+		return false
 	case BS:
 		c.Output[i] = picture(bs)
+		return false
 	case LF:
 		c.Output[i] = picture(lf)
+		return false
 	case ETB:
 		c.Output[i] = picture(etb)
+		return false
 	case ESC:
 		c.Output[i] = picture(esc)
+		return false
 	case ENQ:
 		c.Output[i] = picture(enq)
+		return false
 	case ACK:
 		c.Output[i] = picture(ack)
+		return false
 	case BEL:
 		c.Output[i] = picture(bel)
+		return false
 	case SYN:
 		c.Output[i] = picture(syn)
+		return false
 	case Dash:
 		c.Output[i] = picture(eot)
+		return false
 	case DC4:
 		c.Output[i] = picture(dc4)
+		return false
 	case NAK:
 		c.Output[i] = picture(nak)
+		return false
 	case SUB:
 		c.Output[i] = picture(sub)
+		return false
 	default:
 		c.miscCtrls(i, r)
 	}

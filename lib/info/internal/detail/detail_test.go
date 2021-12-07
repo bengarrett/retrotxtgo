@@ -73,8 +73,7 @@ func TestRead(t *testing.T) {
 	tmp := sampleFile()
 	fmt.Println("path:", tmp)
 	var got detail.Detail
-	err := got.Read(tmp)
-	if err != nil {
+	if err := got.Read(tmp); err != nil {
 		t.Errorf("Read() = %v, want %v", err, nil)
 	}
 	if got.Size.Bytes != 57 {
@@ -160,8 +159,7 @@ func TestMarshal_text(t *testing.T) {
 	const want = 829
 	var d detail.Detail
 	tmp := sampleFile()
-	err := d.Read(tmp)
-	if err != nil {
+	if err := d.Read(tmp); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}

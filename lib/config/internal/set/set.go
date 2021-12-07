@@ -144,7 +144,7 @@ func DirExpansion(name string) string {
 	dir, r, paths := "", bool(name[0:1] == sep), strings.Split(name, sep)
 	var err error
 	for i, s := range paths {
-		p := ""
+		var p string
 		switch s {
 		case homeDir:
 			p, err = os.UserHomeDir()

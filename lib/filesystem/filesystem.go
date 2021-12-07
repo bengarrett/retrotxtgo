@@ -44,7 +44,7 @@ func DirExpansion(name string) string {
 	// Bash tilde expension http://www.gnu.org/software/bash/manual/html_node/Tilde-Expansion.html
 	dir, paths := "", strings.Split(name, string(os.PathSeparator))
 	for i, s := range paths {
-		p := ""
+		var p string
 		switch s {
 		case homeDir:
 			if p, err = os.UserHomeDir(); err != nil {

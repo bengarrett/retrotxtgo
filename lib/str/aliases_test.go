@@ -1,5 +1,4 @@
 // Package str for strings and styles.
-// nolint:gocritic,gochecknoinits
 package str_test
 
 import (
@@ -9,44 +8,56 @@ import (
 	"github.com/gookit/color"
 )
 
-func init() {
-	color.Enable = false
-}
-
 func ExampleAlert() {
+	color.Enable = false
 	fmt.Print(str.Alert())
 	// Output:Problem:
 }
+
 func ExampleInfo() {
+	color.Enable = false
 	fmt.Print(str.Info())
 	// Output:Information:
 }
 
 func ExampleColSec() {
+	color.Enable = false
 	fmt.Print(str.ColSec("Hi"))
 	// Output:Hi
 }
+
 func ExampleColCmt() {
+	color.Enable = false
 	fmt.Print(str.ColCmt("Hi"))
 	// Output:Hi
 }
+
 func ExampleColFuz() {
+	color.Enable = false
 	fmt.Print(str.ColFuz("Hi"))
 	// Output:Hi
 }
+
 func ExampleItalic() {
+	color.Enable = false
 	fmt.Print(str.Italic("Hi"))
 	// Output:Hi
 }
+
 func ExampleColInf() {
+	color.Enable = false
 	fmt.Print(str.ColInf("Hi"))
 	// Output:Hi
 }
+
 func ExampleColPri() {
+	color.Enable = false
 	fmt.Print(str.ColPri("Hi"))
 	// Output:Hi
 }
+
 func ExampleColSuc() {
+	color.Enable = false
 	fmt.Print(str.ColSuc("Hi"))
 	// Output:Hi
 }

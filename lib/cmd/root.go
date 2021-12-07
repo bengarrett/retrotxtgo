@@ -55,6 +55,7 @@ func Execute() {
 	}
 }
 
+//nolint:gochecknoinits
 func init() {
 	cobra.OnInitialize(rootcmd.Init)
 	// create and hide custom configuration file location flag.

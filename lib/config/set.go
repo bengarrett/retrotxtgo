@@ -16,14 +16,11 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/create"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
-
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/spf13/viper"
 )
 
-var (
-	ErrNotCfged = errors.New("config is not configured")
-)
+var ErrNotCfged = errors.New("config is not configured")
 
 // List and print all the available configurations.
 func List() error {
@@ -113,7 +110,8 @@ func Update(name string, setup bool) {
 	if err := updatePrompt(input.Update{
 		Name:  name,
 		Setup: setup,
-		Value: value}); err != nil {
+		Value: value,
+	}); err != nil {
 		log.Fatalln(err)
 	}
 }

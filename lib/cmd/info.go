@@ -26,6 +26,7 @@ func infoCommand() *cobra.Command {
 		}}
 }
 
+//nolint:gochecknoinits
 func init() {
 	infoCmd := infoCommand()
 	rootCmd.AddCommand(infoCmd)

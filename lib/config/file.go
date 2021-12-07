@@ -27,7 +27,7 @@ func InitDefaults() {
 func Path() string {
 	dir, err := gap.NewScope(gap.User, meta.Dir).ConfigPath(namedFile)
 	if err != nil {
-		h := ""
+		var h string
 		if h, err = os.UserHomeDir(); err != nil {
 			return ""
 		}
@@ -59,32 +59,7 @@ func SetConfig(flag string) error {
 	}
 	viper.SetConfigFile(path)
 	if err := viper.ReadInConfig(); err != nil {
-		if flag == "" {
-			if errors.Is(err, os.ErrNotExist) {
-				// auto-generate new config except when the --config flag is used
-				return Create(viper.ConfigFileUsed(), false)
-			}
-			// internal config fail
-			return err
-		}
-		if errors.Is(err, os.ErrNotExist) {
-			// initialize a new, default config file if conditions are met
-			const min = 2
-			if len(os.Args) > min {
-				switch strings.Join(os.Args[1:3], ".") {
-				case "config.create", "config.delete":
-					// never auto-generate a config when these arguments are given
-					return nil
-				}
-			}
-			fmt.Println(logs.Hint(fmt.Sprintf("config create --config=%s", flag), err))
-			return err
-		}
-		// user given config file fail
-		if strings.Contains(err.Error(), "found character that cannot start any token") {
-			return logs.ErrConfigRead
-		}
-		return err
+		return readInCfgErr(flag, err)
 	}
 	if flag != "" {
 		if len(viper.AllKeys()) == 0 {
@@ -101,11 +76,39 @@ func SetConfig(flag string) error {
 	return nil
 }
 
+func readInCfgErr(flag string, err error) error {
+	if flag == "" {
+		if errors.Is(err, os.ErrNotExist) {
+			// auto-generate new config except when the --config flag is used
+			return Create(viper.ConfigFileUsed(), false)
+		}
+		// internal config fail
+		return err
+	}
+	if errors.Is(err, os.ErrNotExist) {
+		// initialize a new, default config file if conditions are met
+		const min = 2
+		if len(os.Args) > min {
+			switch strings.Join(os.Args[1:3], ".") {
+			case "config.create", "config.delete":
+				// never auto-generate a config when these arguments are given
+				return nil
+			}
+		}
+		fmt.Println(logs.Hint(fmt.Sprintf("config create --config=%s", flag), err))
+		return err
+	}
+	// user given config file fail
+	if strings.Contains(err.Error(), "found character that cannot start any token") {
+		return logs.ErrConfigRead
+	}
+	return err
+}
+
 // configMissing prints an config file error notice and exits.
 func configMissing(name, suffix string) {
 	cmd := strings.TrimSuffix(name, suffix) + " create"
-	used := viper.ConfigFileUsed()
-	if used != "" {
+	if used := viper.ConfigFileUsed(); used != "" {
 		fmt.Printf("%s %q config file is missing\ncreate it: %s\n",
 			str.Info(), used, str.ColPri(cmd+" --config="+used))
 		return

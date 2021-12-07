@@ -90,18 +90,18 @@ func (k Keys) ShortValidate(key string) string {
 	}
 	l, x := len(k), strings.ToLower(key)
 	sort.Strings(k)
-	var a, b = make([]string, l), make([]string, l)
+	a, b := make([]string, l), make([]string, l)
 	for i, l := range k {
 		a[i] = strings.ToLower(string(l[0]))
 		b[i] = strings.ToLower(l)
 	}
 	// match the first letter
 	sort.Strings(a)
-	var i = sort.SearchStrings(a, x)
+	i := sort.SearchStrings(a, x)
 	if i >= len(a) || a[i] != x {
 		// match the whole word
 		sort.Strings(b)
-		var j = sort.SearchStrings(b, x)
+		j := sort.SearchStrings(b, x)
 		if j >= len(b) || b[j] != x {
 			return ""
 		}
@@ -116,7 +116,7 @@ func (k Keys) Validate(key string) (ok bool) {
 		return false
 	}
 	sort.Strings(k)
-	var i = sort.SearchStrings(k, key)
+	i := sort.SearchStrings(k, key)
 	if i >= len(k) || k[i] != key {
 		fmt.Printf("%s %v\n", str.Bool(false), key)
 		return false

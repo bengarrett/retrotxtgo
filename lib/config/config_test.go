@@ -34,7 +34,7 @@ func TestKeySort(t *testing.T) {
 	if lenG != lenK {
 		t.Errorf("KeySort() length = %d, want %d", lenG, lenK)
 	}
-	want := get.FontFamily
+	const want = get.FontFamily
 	if s := got[0]; s != want {
 		t.Errorf("KeySort()[0] = %s, want %s", s, want)
 	}

@@ -3,7 +3,9 @@ package detail
 import (
 	"archive/zip"
 	"bytes"
-	"crypto/md5" // nolint:gosec
+
+	// nolint:gosec
+	"crypto/md5"
 	"crypto/sha256"
 	"encoding/json"
 	"encoding/xml"
@@ -53,10 +55,10 @@ type Detail struct {
 
 // Checksums and hashes of the file.
 type Checksums struct {
-	CRC32  string `json:"CRC32" xml:"CRC32"`
-	CRC64  string `json:"CRC64" xml:"CRC64"`
-	MD5    string `json:"MD5" xml:"md5"`
-	SHA256 string `json:"SHA256" xml:"sha256"`
+	CRC32  string `json:"crc32" xml:"crc32"`
+	CRC64  string `json:"crc64" xml:"crc64"`
+	MD5    string `json:"md5" xml:"md5"`
+	SHA256 string `json:"sha256" xml:"sha256"`
 }
 
 // Content metadata from either MIME content type and magic file data.

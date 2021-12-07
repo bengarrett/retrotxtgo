@@ -91,7 +91,7 @@ func Border(s string) *bytes.Buffer {
 	fmt.Fprintln(&b, ("┌" + strings.Repeat("─", maxLen) + "┐"))
 	for scanner.Scan() {
 		l := utf8.RuneCountInString(scanner.Text())
-		lp := ((maxLen - l) / 2)
+		lp := ((maxLen - l) / split)
 		rp := lp
 		// if lp/rp are X.5 decimal values, add 1 right padd to account for the uneven split
 		if float32((maxLen-l)/split) != float32(maxLen-l)/split {
@@ -184,7 +184,7 @@ func NumberizeKeys(keys ...string) string {
 		return ""
 	}
 	const nbsp = "\u00A0"
-	var s = make([]string, len(keys))
+	s := make([]string, len(keys))
 	sort.Strings(keys)
 	for i, key := range keys {
 		if i == 0 {

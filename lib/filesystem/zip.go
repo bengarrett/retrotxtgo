@@ -133,7 +133,7 @@ func AddZip(name string, z *zip.Writer) error {
 	s, err := os.Stat(name)
 	if err != nil {
 		fmt.Println("skipping file, could not stat", name)
-		return nil
+		return nil //nolint:nilerr
 	}
 	fh, err := zip.FileInfoHeader(s)
 	if err != nil {
@@ -146,7 +146,7 @@ func AddZip(name string, z *zip.Writer) error {
 	b, err := Read(name)
 	if err != nil {
 		fmt.Println("skipping file, could not read", name)
-		return nil
+		return nil //nolint:nilerr
 	}
 	_, err = f.Write(b)
 	if err != nil {
@@ -178,7 +178,7 @@ func UniqueName(name string) (string, error) {
 		dir, file := path.Split(name)
 		e := path.Ext(file)
 		b := strings.TrimSuffix(file, e)
-		n := ""
+		var n string
 		switch runtime.GOOS {
 		case macOS:
 			n = fmt.Sprintf("%s %d%s", b, i, e)

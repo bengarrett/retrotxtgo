@@ -68,7 +68,7 @@ func TestConvert_ANSI(t *testing.T) {
 		{"eof", args{be}, bytes.Runes([]byte(wantEOF1)), false},
 		{"ansi", args{hi}, bytes.Runes([]byte(wantHi)), false},
 	}
-	for _, tt := range tests { //nolint: dupl
+	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := Convert{}
 			c.Input.Encoding = charmap.CodePage437
@@ -101,7 +101,7 @@ func TestConvert_Chars(t *testing.T) {
 		{"eof", args{[]byte(eof)}, bytes.Runes([]byte(wantEOF0)), false},
 		{"ansi", args{[]byte(abc)}, bytes.Runes([]byte(wantAbc)), false},
 	}
-	for _, tt := range tests { //nolint: dupl
+	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := Convert{}
 			c.Input.Encoding = charmap.CodePage437
@@ -136,7 +136,7 @@ func TestConvert_Dump(t *testing.T) {
 		{"eof", args{[]byte(eof)}, bytes.Runes([]byte(wantEOF0)), false},
 		{"abc", args{[]byte(abc)}, []rune("␀ ☺ ☻\r\n\x1b[0mA B C"), false},
 	}
-	for _, tt := range tests { //nolint: dupl
+	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := Convert{}
 			c.Input.Encoding = charmap.CodePage437
@@ -210,8 +210,7 @@ func TestConvert_fixJISTable(t *testing.T) {
 	c.Input.Encoding = japanese.ShiftJIS
 	c.Input.Bytes = fix
 	c.fixJISTable()
-	want := []byte("\u007f   ")
-	if !reflect.DeepEqual(c.Input.Bytes, want) {
+	if want := []byte("\u007f   "); !reflect.DeepEqual(c.Input.Bytes, want) {
 		t.Errorf("Convert.fixJISTable() = %q, want %q", c.Input.Bytes, want)
 	}
 }

@@ -55,40 +55,37 @@ type Names []string
 
 // String lists and applies the named themes for the HighlightWriter.
 func (n Names) String(theme bool, lexer string) string {
+	if lexer == "json" {
+		return n.lexerJSON(theme)
+	}
+	return n.lexorOthers(theme, lexer)
+}
+
+func (n Names) maximunWidth() int {
 	maxWidth := 0
-	for _, s := range n {
-		if l := len(fmt.Sprintf("%s=%q", s, s)); l > maxWidth {
+	for _, ns := range n {
+		if l := len(fmt.Sprintf("%s=%q", ns, ns)); l > maxWidth {
 			maxWidth = l
 		}
 	}
-	s := make([]string, len(n))
-	split := (len(n) / 2)
+	return maxWidth
+}
+
+func (n Names) lexorOthers(theme bool, lexer string) string {
 	const space = 2
+	maxWidth := n.maximunWidth()
+	s := make([]string, len(n))
+	split := (len(n) / space)
 	for i, name := range n {
 		if name == "" {
 			continue
 		}
-		b, t := bytes.Buffer{}, ""
+		var (
+			b bytes.Buffer
+			t string
+		)
 		pad := maxWidth - len(fmt.Sprintf("%s=%q", name, name))
 		// prints a sequential list of styles
-		if lexer == "json" {
-			b = bytes.Buffer{}
-			t = fmt.Sprintf("{ %q:%q }%s", name, name, strings.Repeat(" ", pad+space))
-			if err := str.HighlightWriter(&b, t, lexer, name, theme); err != nil {
-				logs.FatalMark(name, logs.ErrHighlight, err)
-			}
-			s = append(s, fmt.Sprintf("%2d %s", i, b.String()))
-			if split+i >= len(n) {
-				break
-			}
-			b = bytes.Buffer{}
-			t = fmt.Sprintf("{ %q:%q }\n", n[split+i], n[split+i])
-			if err := str.HighlightWriter(&b, t, lexer, name, theme); err != nil {
-				logs.FatalMark(name, logs.ErrHighlight, err)
-			}
-			s = append(s, fmt.Sprintf("%2d %s", split+i, b.String()))
-			continue
-		}
 		if split+i >= len(n) {
 			break
 		}
@@ -110,6 +107,41 @@ func (n Names) String(theme bool, lexer string) string {
 			logs.FatalMark(name, logs.ErrHighlight, err)
 		}
 		s = append(s, fmt.Sprintf("%2d %s", split+i, b.String()))
+	}
+	return strings.Join(s, "")
+}
+
+func (n Names) lexerJSON(theme bool) string {
+	const space = 2
+	maxWidth := n.maximunWidth()
+	s := make([]string, len(n))
+	split := (len(n) / space)
+	for i, name := range n {
+		if name == "" {
+			continue
+		}
+		var (
+			b bytes.Buffer
+			t string
+		)
+		pad := maxWidth - len(fmt.Sprintf("%s=%q", name, name))
+		// prints a sequential list of styles
+		b = bytes.Buffer{}
+		t = fmt.Sprintf("{ %q:%q }%s", name, name, strings.Repeat(" ", pad+space))
+		if err := str.HighlightWriter(&b, t, "json", name, theme); err != nil {
+			logs.FatalMark(name, logs.ErrHighlight, err)
+		}
+		s = append(s, fmt.Sprintf("%2d %s", i, b.String()))
+		if split+i >= len(n) {
+			break
+		}
+		b = bytes.Buffer{}
+		t = fmt.Sprintf("{ %q:%q }\n", n[split+i], n[split+i])
+		if err := str.HighlightWriter(&b, t, "json", name, theme); err != nil {
+			logs.FatalMark(name, logs.ErrHighlight, err)
+		}
+		s = append(s, fmt.Sprintf("%2d %s", split+i, b.String()))
+		continue
 	}
 	return strings.Join(s, "")
 }

@@ -51,7 +51,7 @@ func missing(list ...string) string {
 	if l == 1 {
 		t = "This setting is missing and should be configured"
 	}
-	s := ""
+	var s string
 	if l < tries {
 		s = str.Example(fmt.Sprintf("%s config set %s\n",
 			meta.Bin, strings.Join(list, " ")))

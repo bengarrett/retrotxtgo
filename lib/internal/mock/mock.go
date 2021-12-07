@@ -121,7 +121,6 @@ type DirTests []struct {
 	WantDir string
 }
 
-// nolint:dupl
 func WindowsTests(h, hp, s, w, wp string) DirTests {
 	return DirTests{
 		{fmt.Sprintf("C:%shome%suser", s, s), fmt.Sprintf("C:%shome%suser", s, s)},
@@ -136,7 +135,6 @@ func WindowsTests(h, hp, s, w, wp string) DirTests {
 	}
 }
 
-// nolint:dupl
 func NixTests(h, hp, s, w, wp string) DirTests {
 	return DirTests{
 		{fmt.Sprintf("%shome%suser", s, s), fmt.Sprintf("%shome%suser", s, s)},

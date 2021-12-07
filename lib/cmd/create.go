@@ -27,6 +27,7 @@ func createCommand() *cobra.Command {
 	}
 }
 
+//nolint:gochecknoinits
 func init() {
 	createCmd := createCommand()
 	rootCmd.AddCommand(createCmd)
