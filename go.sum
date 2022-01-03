@@ -255,8 +255,8 @@ github.com/mozillazg/go-slugify v0.2.0 h1:SIhqDlnJWZH8OdiTmQgeXR28AOnypmAXPeOTcG
 github.com/mozillazg/go-slugify v0.2.0/go.mod h1:z7dPH74PZf2ZPFkyxx+zjPD8CNzRJNa1CGacv0gg8Ns=
 github.com/mozillazg/go-unidecode v0.1.1 h1:uiRy1s4TUqLbcROUrnCN/V85Jlli2AmDF6EeAXOeMHE=
 github.com/mozillazg/go-unidecode v0.1.1/go.mod h1:fYMdhyjni9ZeEmS6OE/GJHDLsF8TQvIVDwYR/drR26Q=
-github.com/muesli/go-app-paths v0.2.1 h1:Qi+2igkDX2aPqyRddp7P0sMQIBwBqhkfQfNcjdGjL6Y=
-github.com/muesli/go-app-paths v0.2.1/go.mod h1:SxS3Umca63pcFcLtbjVb+J0oD7cl4ixQWoBKhGEtEho=
+github.com/muesli/go-app-paths v0.2.2 h1:NqG4EEZwNIhBq/pREgfBmgDmt3h1Smr1MjZiXbpZUnI=
+github.com/muesli/go-app-paths v0.2.2/go.mod h1:SxS3Umca63pcFcLtbjVb+J0oD7cl4ixQWoBKhGEtEho=
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
 github.com/pelletier/go-toml v1.9.3/go.mod h1:u1nR/EPcESfeI/szUZKdtJ0xRNbUoANCkoOuaOx1Y+c=
 github.com/pelletier/go-toml v1.9.4 h1:tjENF6MfZAg8e4ZmZTeWaWiT2vXtsoO6+iuOjFhECwM=

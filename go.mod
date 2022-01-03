@@ -10,7 +10,7 @@ require (
 	github.com/mattn/go-isatty v0.0.14
 	github.com/mozillazg/go-slugify v0.2.0
 	github.com/mozillazg/go-unidecode v0.1.1 // indirect
-	github.com/muesli/go-app-paths v0.2.1
+	github.com/muesli/go-app-paths v0.2.2
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.9.0
