@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/listcmd"
+	"github.com/bengarrett/retrotxtgo/cmd/internal/listcmd"
 	"github.com/gookit/color"
 )
 

@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/flag"
+	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/lib/sample"
 	"github.com/spf13/cobra"
 	"golang.org/x/text/encoding"

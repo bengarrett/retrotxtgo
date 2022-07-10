@@ -3,7 +3,7 @@ package infocmd_test
 import (
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/infocmd"
+	"github.com/bengarrett/retrotxtgo/cmd/internal/infocmd"
 )
 
 func TestSample(t *testing.T) {

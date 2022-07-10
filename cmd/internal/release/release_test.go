@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/release"
+	"github.com/bengarrett/retrotxtgo/cmd/internal/release"
 )
 
 const etag = `W/"3715383704fac6f3568e9039b347937a`

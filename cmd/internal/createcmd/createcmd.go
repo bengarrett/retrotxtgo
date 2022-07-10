@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/flag"
+	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/lib/convert"
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/logs"

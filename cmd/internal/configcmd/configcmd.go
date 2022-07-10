@@ -3,10 +3,10 @@ package configcmd
 import (
 	"fmt"
 
-	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/example"
-	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/flag"
-	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/long"
-	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/usage"
+	"github.com/bengarrett/retrotxtgo/cmd/internal/example"
+	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
+	"github.com/bengarrett/retrotxtgo/cmd/internal/long"
+	"github.com/bengarrett/retrotxtgo/cmd/internal/usage"
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/meta"

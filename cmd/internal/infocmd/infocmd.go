@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/flag"
+	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/info"
 	"github.com/bengarrett/retrotxtgo/lib/logs"

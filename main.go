@@ -16,7 +16,7 @@
 package main
 
 import (
-	"github.com/bengarrett/retrotxtgo/lib/cmd"
+	"github.com/bengarrett/retrotxtgo/cmd"
 	"github.com/bengarrett/retrotxtgo/meta"
 )
 

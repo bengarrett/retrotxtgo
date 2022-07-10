@@ -10,7 +10,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/release"
+	"github.com/bengarrett/retrotxtgo/cmd/internal/release"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/gookit/color"
 	"github.com/mattn/go-isatty"

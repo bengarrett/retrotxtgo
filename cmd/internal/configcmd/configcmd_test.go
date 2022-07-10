@@ -3,8 +3,8 @@ package configcmd_test
 import (
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/configcmd"
-	"github.com/bengarrett/retrotxtgo/lib/cmd/internal/flag"
+	"github.com/bengarrett/retrotxtgo/cmd/internal/configcmd"
+	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/spf13/viper"
 )
