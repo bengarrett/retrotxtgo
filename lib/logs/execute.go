@@ -111,7 +111,7 @@ func Execute(err error, test bool, args ...string) string { //nolint:funlen
 	case flagChoice:
 		c = "flagChoice placeholder"
 	default:
-		if errors.As(err, &ErrCmd) {
+		if errors.Is(err, ErrCmd) {
 			mark = strings.Join(args[1:], " ")
 			c = Hint(fmt.Sprintf("%s --help", mark), ErrCmd)
 			break

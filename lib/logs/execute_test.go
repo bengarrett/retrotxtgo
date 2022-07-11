@@ -35,7 +35,7 @@ func Test_Execute(t *testing.T) {
 		{
 			"default",
 			args{ErrLongMsg, []string{""}},
-			"Problem:\nthis error message has at least three words.\n run retrotxt  --help",
+			"Problem:\nthis error message has at least three words.",
 		},
 		{
 			"strings",
