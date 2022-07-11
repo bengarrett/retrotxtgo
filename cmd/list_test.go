@@ -93,8 +93,8 @@ func Test_ListTables(t *testing.T) {
 		{"iso889512", "", []rune{}},
 		{"iso889513", "8859-13 (Baltic Rim", []rune{'Ø', 'ų'}},                  // TODO: iso889513, iso-8895-13 fails; 13 "ISO 8859-13" works
 		{"iso889514", "8859-14 (Celtic", []rune{'Ŵ', 'ẅ'}},                      // TODO: same as iso 13
-		{"iso889515", "8859-15 (Western Eruopean, 1999", []rune{'€', 'Š', 'œ'}}, // TODO: same as iso 13
-		{"iso889516", "8859-16 (Soouth-Eastern Eruopean", []rune{'đ', 'Œ'}},     // TODO: same as iso 13
+		{"iso889515", "8859-15 (Western European, 1999", []rune{'€', 'Š', 'œ'}}, // TODO: same as iso 13
+		{"iso889516", "8859-16 (South-Eastern European", []rune{'đ', 'Œ'}},      // TODO: same as iso 13
 		{"koi8r", "KOI8-R (Russian)", []rune{'Ю', '╬'}},
 		{"koi8u", "KOI8-U (Ukrainian)", []rune{'є', 'Ґ', '█'}},
 		{"mac", "Macintosh (Mac OS Roman", []rune{'∞', '‰', '◊'}},
@@ -108,7 +108,6 @@ func Test_ListTables(t *testing.T) {
 		{"windows-1256", "Windows 1256 (Arabic", []rune{'“', '”', 'گ'}},
 		{"windows-1257", "Windows 1257 (Baltic Rim", []rune{'“', '”', '€'}},
 		{"windows-1258", "Windows 1258 (Vietnamese", []rune{'“', '”', '†'}},
-		// TODO: list tables, thai windows 874 is relisted again??
 		{"shift_jis", "Shift JIS (Japanese", []rune{'ﾗ', 'ｼ', 'ﾎ'}},
 		{"utf-8", "UTF-8 - Unicode", []rune{'␀', '␟', '␗'}},
 		// UTF16 & UTF32 tables are not supported; TODO: add *** notice on list codepages command
