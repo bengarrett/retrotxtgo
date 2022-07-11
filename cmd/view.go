@@ -6,34 +6,38 @@ import (
 	"github.com/bengarrett/retrotxtgo/cmd/internal/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/view"
-	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/spf13/cobra"
 )
 
-func viewCommand() *cobra.Command {
+func ViewCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:     fmt.Sprintf("view %s", example.Filenames),
 		Aliases: []string{"v"},
 		Short:   "Print a text file to the terminal using standard output",
 		Long:    "Print a text file to the terminal using standard output.",
 		Example: example.View.Print(),
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			b, err := view.Run(cmd, args...)
 			if err != nil {
-				logs.Fatal(err)
+				return err
 			}
-			fmt.Print(b)
+			fmt.Fprint(cmd.OutOrStdout(), b)
+			return nil
 		},
 	}
 }
 
+func ViewInit() *cobra.Command {
+	vc := ViewCommand()
+	flag.Encode(&flag.ViewFlag.Encode, vc)
+	flag.Controls(&flag.ViewFlag.Controls, vc)
+	flag.Runes(&flag.ViewFlag.Swap, vc)
+	flag.To(&flag.ViewFlag.To, vc)
+	flag.Width(&flag.ViewFlag.Width, vc)
+	vc.Flags().SortFlags = false
+	return vc
+}
+
 func init() { //nolint:gochecknoinits
-	viewCmd := viewCommand()
-	rootCmd.AddCommand(viewCmd)
-	flag.Encode(&flag.ViewFlag.Encode, viewCmd)
-	flag.Controls(&flag.ViewFlag.Controls, viewCmd)
-	flag.Runes(&flag.ViewFlag.Swap, viewCmd)
-	flag.To(&flag.ViewFlag.To, viewCmd)
-	flag.Width(&flag.ViewFlag.Width, viewCmd)
-	viewCmd.Flags().SortFlags = false
+	rootCmd.AddCommand(ViewInit())
 }
