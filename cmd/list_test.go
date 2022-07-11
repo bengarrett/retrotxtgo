@@ -80,42 +80,44 @@ func Test_ListTable(t *testing.T) {
 		{"latin3", "8859-3 (South European", []rune{'Ħ', 'ĝ'}},
 		{"latin4", "8859-4 (North European", []rune{'ĸ', 'Æ'}},
 		{"cyrillic", "8859-5 (Cyrillic", []rune{'Ђ', 'й'}},
-		{"arabic", "", []rune{'ي', 'ص'}},
-		{"iso88596e", "", []rune{'ي', 'ص'}},
-		{"iso88596i", "", []rune{'ي', 'ص'}},
-		{"greek", "", []rune{'₯', 'Ξ'}},
-		{"hebrew", "", []rune{'א', 'ת'}},
-		{"iso88598e", "", []rune{'א', 'ת'}},
-		{"iso88598i", "", []rune{'א', 'ת'}},
-		{"latin5", "", []rune{'ğ', 'Ğ'}},
-		{"latin6", "", []rune{'ą', 'ß'}},
-		{"iso889511", "", []rune{'ข', '๛', '฿'}},
+		{"arabic", "8859-6 (Arabic", []rune{'ي', 'ص'}},
+		{"iso88596e", "8859-6E", []rune{'ي', 'ص'}},
+		{"iso88596i", "8859-6I", []rune{'ي', 'ص'}},
+		{"greek", "8859-7 (Greek", []rune{'₯', 'Ξ'}},
+		{"hebrew", "8859-8 (Hebrew", []rune{'א', 'ת'}},
+		{"iso88598e", "8859-8E", []rune{'א', 'ת'}},
+		{"iso88598i", "8859-8I", []rune{'א', 'ת'}},
+		{"latin5", "8859-9 (Turkish", []rune{'ğ', 'Ğ'}},
+		{"latin6", "8859-10 (Nordic", []rune{'ą', 'ß'}},
+		{"iso889511", "", []rune{'ข', '๛', '฿'}}, // TODO: missing in tables
 		{"iso889512", "", []rune{}},
-		{"iso889513", "", []rune{'š', '¾'}},
-		{"iso889514", "", []rune{'Ŵ', 'ẅ'}},
-		{"iso889515", "", []rune{'€', 'Š', 'œ'}},
-		{"iso889516", "", []rune{'đ', 'Œ'}},
-		{"koi8r", "", []rune{'Ю', '╬'}},
-		{"koi8u", "", []rune{'є', 'Ґ', '█'}},
-		{"mac", "", []rune{'∞', '‰', '◊'}},
-		{"windows-874", "", []rune{'€', '“', '”'}},
-		{"windows-1250", "", []rune{'‡', '“', '”'}},
-		{"windows-1251", "", []rune{'“', '”', 'Љ'}},
-		{"windows-1252", "", []rune{'“', '”', 'ƒ'}},
-		{"windows-1253", "", []rune{'“', '”', '…'}},
-		{"windows-1254", "", []rune{'“', '”', 'Ğ'}},
-		{"windows-1255", "", []rune{'“', '”', '₪'}},
-		{"windows-1256", "", []rune{'“', '”', 'گ'}},
-		{"windows-1257", "", []rune{'“', '”', '€'}},
-		{"windows-1258", "", []rune{'“', '”', '†'}},
-		{"shift_jis", "", []rune{'ﾗ', 'ｼ', 'ﾎ'}},
-		{"utf-8", "", []rune{'␀', '␟', '␗'}},
-		{"utf-16", "", []rune{}},
-		{"utf-16be", "", []rune{}},
-		{"utf-16le", "", []rune{}},
-		{"utf-32", "", []rune{}},
-		{"utf-32be", "", []rune{}},
-		{"utf-32le", "", []rune{}},
+		{"iso889513", "8859-13 (Baltic Rim", []rune{'Ø', 'ų'}},                  // TODO: iso889513, iso-8895-13 fails; 13 "ISO 8859-13" works
+		{"iso889514", "8859-14 (Celtic", []rune{'Ŵ', 'ẅ'}},                      // TODO: same as iso 13
+		{"iso889515", "8859-15 (Western Eruopean, 1999", []rune{'€', 'Š', 'œ'}}, // TODO: same as iso 13
+		{"iso889516", "8859-16 (Soouth-Eastern Eruopean", []rune{'đ', 'Œ'}},     // TODO: same as iso 13
+		{"koi8r", "KOI8-R (Russian)", []rune{'Ю', '╬'}},
+		{"koi8u", "KOI8-U (Ukrainian)", []rune{'є', 'Ґ', '█'}},
+		{"mac", "Macintosh (Mac OS Roman", []rune{'∞', '‰', '◊'}},
+		{"windows-874", "Windows 874 (Thai", []rune{'€', '“', '”'}},
+		{"windows-1250", "Windows 1250 (Central European", []rune{'‡', '“', '”'}},
+		{"windows-1251", "Windows 1251 (Cyrillic", []rune{'“', '”', 'Љ'}},
+		{"windows-1252", "Windows 1252 (Western European", []rune{'“', '”', 'ƒ'}},
+		{"windows-1253", "Windows 1253 (Greek", []rune{'“', '”', '…'}},
+		{"windows-1254", "Windows 1254 (Turkish", []rune{'“', '”', 'Ğ'}},
+		{"windows-1255", "Windows 1255 (Hebrew", []rune{'“', '”', '₪'}},
+		{"windows-1256", "Windows 1256 (Arabic", []rune{'“', '”', 'گ'}},
+		{"windows-1257", "Windows 1257 (Baltic Rim", []rune{'“', '”', '€'}},
+		{"windows-1258", "Windows 1258 (Vietnamese", []rune{'“', '”', '†'}},
+		// TODO: list tables, thai windows 874 is relisted again??
+		{"shift_jis", "Shift JIS (Japanese", []rune{'ﾗ', 'ｼ', 'ﾎ'}},
+		{"utf-8", "UTF-8 - Unicode", []rune{'␀', '␟', '␗'}},
+		// UTF16 & UTF32 tables are not supported; TODO: add *** notice on list codepages command
+		// {"utf-16", "", []rune{}},
+		// {"utf-16be", "", []rune{}},
+		// {"utf-16le", "", []rune{}},
+		// {"utf-32", "", []rune{}},
+		// {"utf-32be", "", []rune{}},
+		// {"utf-32le", "", []rune{}},
 		{"ascii-63", "", []rune{'␉', '0', 'A'}},
 		{"ascii-65", "", []rune{'␉', '0', 'A', 'a', '{'}},
 		{"ascii-67", "", []rune{'␉', '0', 'A', 'a', '~'}},
@@ -126,6 +128,10 @@ func Test_ListTable(t *testing.T) {
 			gotB, err := listT.tester(args)
 			if err != nil {
 				t.Error(err)
+				return
+			}
+			if len(gotB) == 0 {
+				t.Errorf("the requested table %q is empty, or 0 bytes", tt.table)
 				return
 			}
 			if !bytes.Contains(gotB, []byte(tt.wantHeader)) {
