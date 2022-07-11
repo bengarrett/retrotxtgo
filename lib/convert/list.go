@@ -74,18 +74,29 @@ func List() *bytes.Buffer { //nolint:funlen
 			fmt.Fprintf(w, " %s\t %s\t %s\t %s\t\n", "ISO 8895-11", "iso-8895-11", "11", "iso889511")
 			continue
 		case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
-			fmt.Fprintf(w, " *%s\t %s\t %s\t %s\t\n", c.name, c.value, c.numeric, c.alias)
+			fmt.Fprintf(w, " * %s\t %s\t %s\t %s\t\n", c.name, c.value, c.numeric, c.alias)
+			continue
+		case
+			unicode.UTF16(unicode.BigEndian, unicode.UseBOM),
+			unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM),
+			unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM),
+			utf32.UTF32(utf32.BigEndian, utf32.UseBOM),
+			utf32.UTF32(utf32.BigEndian, utf32.IgnoreBOM),
+			utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM):
+			fmt.Fprintf(w, " † %s\t %s\t %s\t %s\t\n", c.name, c.value, c.numeric, c.alias)
 			continue
 		case AsaX34_1963, AsaX34_1965, AnsiX34_1967:
-			fmt.Fprintf(w, " **%s\t %s\t %s\t %s\t\n", c.name, c.value, c.numeric, c.alias)
+			fmt.Fprintf(w, " ⁑ %s\t %s\t %s\t %s\t\n", c.name, c.value, c.numeric, c.alias)
 			continue
 		}
 		// do not use ANSI colors in cells as it will break the table layout
 		fmt.Fprintf(w, " %s\t %s\t %s\t %s\t\n", c.name, c.value, c.numeric, c.alias)
 	}
 	fmt.Fprintln(w, "\n "+str.ColInf("*")+
-		" EBCDIC encoding, is in use on IBM mainframes and not ASCII compatible.")
-	fmt.Fprintln(w, str.ColInf("**")+
+		" A EBCDIC encoding in use on IBM mainframes but is not ASCII compatible.")
+	fmt.Fprintln(w, " "+str.ColInf("†")+
+		" UTF-16/32 encodings are NOT usable with the "+str.Example("list table")+" command.")
+	fmt.Fprintln(w, " "+str.ColInf("⁑")+
 		" ANSI X3.2 encodings are only usable with the "+str.Example("list table")+" command.")
 	fmt.Fprintln(w, "\nEither named, numeric or alias values are valid codepage arguments.")
 	fmt.Fprintln(w, "  These values all match ISO 8859-1.")
