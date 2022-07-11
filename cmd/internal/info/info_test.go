@@ -1,9 +1,9 @@
-package infocmd_test
+package info_test
 
 import (
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/cmd/internal/infocmd"
+	"github.com/bengarrett/retrotxtgo/cmd/internal/info"
 )
 
 func TestSample(t *testing.T) {
@@ -19,7 +19,7 @@ func TestSample(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotFilename, err := infocmd.Sample(tt.name)
+			gotFilename, err := info.Sample(tt.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Sample() error = %v, wantErr %v", err, tt.wantErr)
 				return

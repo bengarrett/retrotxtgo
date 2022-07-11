@@ -1,4 +1,4 @@
-package listcmd
+package list
 
 import (
 	"bytes"

@@ -9,7 +9,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/cmd/internal/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/long"
-	"github.com/bengarrett/retrotxtgo/cmd/internal/rootcmd"
+	"github.com/bengarrett/retrotxtgo/cmd/internal/root"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/ver"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/meta"
@@ -57,7 +57,7 @@ func Execute() {
 
 //nolint:gochecknoinits
 func init() {
-	cobra.OnInitialize(rootcmd.Init)
+	cobra.OnInitialize(root.Init)
 	// create and hide custom configuration file location flag.
 	rootCmd.PersistentFlags().StringVar(&flag.RootFlag.Config, "config", "",
 		"optional config file location")

@@ -1,4 +1,4 @@
-package createcmd
+package create
 
 import (
 	"errors"

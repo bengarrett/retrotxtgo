@@ -1,4 +1,4 @@
-package infocmd
+package info
 
 import (
 	"errors"
@@ -44,7 +44,7 @@ func Run(cmd *cobra.Command, args []string) error {
 			arg = filename
 		}
 		if err := n.Info(arg, flag.InfoFlag.Format); err != nil {
-			if errors.As(logs.ErrFileName, &err) {
+			if errors.Is(logs.ErrFileName, err) {
 				if n.Length <= 1 {
 					return err
 				}

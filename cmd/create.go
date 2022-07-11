@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/bengarrett/retrotxtgo/cmd/internal/createcmd"
+	"github.com/bengarrett/retrotxtgo/cmd/internal/create"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
-	"github.com/bengarrett/retrotxtgo/cmd/internal/rootcmd"
+	"github.com/bengarrett/retrotxtgo/cmd/internal/root"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/spf13/cobra"
 )
@@ -20,7 +20,7 @@ func createCommand() *cobra.Command {
 		Long:    "Create a HTML document from text documents and text art files.",
 		Example: example.Create.Print(),
 		Run: func(cmd *cobra.Command, args []string) {
-			if err := createcmd.Run(cmd, args); err != nil {
+			if err := create.Run(cmd, args); err != nil {
 				logs.Fatal(err)
 			}
 		},
@@ -29,21 +29,21 @@ func createCommand() *cobra.Command {
 
 //nolint:gochecknoinits
 func init() {
-	createCmd := createCommand()
-	rootCmd.AddCommand(createCmd)
+	cc := createCommand()
+	rootCmd.AddCommand(cc)
 	// root config must be initialized before getting saved default values
-	rootcmd.Init()
+	root.Init()
 	// output flags
 	deflts := flag.CreateDefaults()
-	flag.Encode(&deflts.Encode, createCmd)
-	flag.Controls(&deflts.Controls, createCmd)
-	flag.Runes(&deflts.Swap, createCmd)
-	dir := createcmd.SaveDir()
-	createCmd.Flags().BoolVarP(&flag.HTML.Save.AsFiles, "save", "s", false,
+	flag.Encode(&deflts.Encode, cc)
+	flag.Controls(&deflts.Controls, cc)
+	flag.Runes(&deflts.Swap, cc)
+	dir := create.SaveDir()
+	cc.Flags().BoolVarP(&flag.HTML.Save.AsFiles, "save", "s", false,
 		"save HTML and static files to a the save directory\nor ignore to print (save directory: "+dir+")")
-	createCmd.Flags().BoolVarP(&flag.HTML.Save.Compress, "compress", "z", false,
+	cc.Flags().BoolVarP(&flag.HTML.Save.Compress, "compress", "z", false,
 		"store and compress all files into an archive when saving")
-	createCmd.Flags().BoolVarP(&flag.HTML.Save.OW, "overwrite", "o", false,
+	cc.Flags().BoolVarP(&flag.HTML.Save.OW, "overwrite", "o", false,
 		"overwrite any existing files when saving")
 	// meta and html related flags.
 	flags := flag.Init()
@@ -52,15 +52,15 @@ func init() {
 		c := flags[i]
 		var buf bytes.Buffer
 		buf = c.Body(buf)
-		buf = c.Init(createCmd, buf)
+		c.Init(cc, buf)
 	}
-	createCmd.Flags().BoolVarP(&flag.HTML.SauceData.Use, "sauce", "", true,
+	cc.Flags().BoolVarP(&flag.HTML.SauceData.Use, "sauce", "", true,
 		"use any found SAUCE metadata as HTML meta tags")
-	if err := createCmd.Flags().MarkHidden("body"); err != nil {
+	if err := cc.Flags().MarkHidden("body"); err != nil {
 		logs.FatalMark("body", ErrHide, err)
 	}
-	if err := createCmd.Flags().MarkHidden("cache"); err != nil {
+	if err := cc.Flags().MarkHidden("cache"); err != nil {
 		logs.FatalMark("cache", ErrHide, err)
 	}
-	createCmd.Flags().SortFlags = false
+	cc.Flags().SortFlags = false
 }

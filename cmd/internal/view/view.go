@@ -1,4 +1,4 @@
-package viewcmd
+package view
 
 import (
 	"bytes"

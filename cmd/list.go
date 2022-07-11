@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/bengarrett/retrotxtgo/cmd/internal/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
-	"github.com/bengarrett/retrotxtgo/cmd/internal/listcmd"
+	"github.com/bengarrett/retrotxtgo/cmd/internal/list"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/spf13/cobra"
 )
@@ -26,10 +26,10 @@ func listCommand() *cobra.Command {
 
 //nolint:gochecknoinits
 func init() {
-	listCmd := listCommand()
-	rootCmd.AddCommand(listCmd)
-	listCmd.AddCommand(listcmd.Codepages.Command())
-	listCmd.AddCommand(listcmd.Examples.Command())
-	listCmd.AddCommand(listcmd.Table.Command())
-	listCmd.AddCommand(listcmd.Tables.Command())
+	lc := listCommand()
+	rootCmd.AddCommand(lc)
+	lc.AddCommand(list.Codepages.Command())
+	lc.AddCommand(list.Examples.Command())
+	lc.AddCommand(list.Table.Command())
+	lc.AddCommand(list.Tables.Command())
 }

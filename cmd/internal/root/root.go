@@ -1,4 +1,4 @@
-package rootcmd
+package root
 
 import (
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"

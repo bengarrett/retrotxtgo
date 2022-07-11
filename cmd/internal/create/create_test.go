@@ -1,4 +1,4 @@
-package createcmd_test
+package create_test
 
 // func TestServeBytes(t *testing.T) {
 // 	color.Enable = false

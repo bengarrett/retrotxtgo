@@ -5,7 +5,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
-	"github.com/bengarrett/retrotxtgo/cmd/internal/viewcmd"
+	"github.com/bengarrett/retrotxtgo/cmd/internal/view"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/spf13/cobra"
 )
@@ -18,7 +18,7 @@ func viewCommand() *cobra.Command {
 		Long:    "Print a text file to the terminal using standard output.",
 		Example: example.View.Print(),
 		Run: func(cmd *cobra.Command, args []string) {
-			b, err := viewcmd.Run(cmd, args...)
+			b, err := view.Run(cmd, args...)
 			if err != nil {
 				logs.Fatal(err)
 			}
