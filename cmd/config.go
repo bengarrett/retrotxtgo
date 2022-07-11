@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/bengarrett/retrotxtgo/cmd/internal/configcmd"
+	cfg "github.com/bengarrett/retrotxtgo/cmd/internal/config"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
@@ -37,25 +37,25 @@ func init() {
 		// disable all color output
 		color.Enable = false
 	}
-	configCmd := configCommand()
-	rootCmd.AddCommand(configCmd)
-	configCmd.AddCommand(configcmd.Create.Command())
-	configCmd.AddCommand(configcmd.Delete.Command())
-	configCmd.AddCommand(configcmd.Edit.Command())
-	configCmd.AddCommand(configcmd.Info.Command())
-	configCmd.AddCommand(configcmd.Set.Command())
-	configCmd.AddCommand(configcmd.Setup.Command())
+	cc := configCommand()
+	rootCmd.AddCommand(cc)
+	cc.AddCommand(cfg.Create.Command())
+	cc.AddCommand(cfg.Delete.Command())
+	cc.AddCommand(cfg.Edit.Command())
+	cc.AddCommand(cfg.Info.Command())
+	cc.AddCommand(cfg.Set.Command())
+	cc.AddCommand(cfg.Setup.Command())
 	// create
-	configcmd.Create.Command().Flags().BoolVarP(&flag.Config.Ow, "overwrite", "y", false,
+	cfg.Create.Command().Flags().BoolVarP(&flag.Config.Ow, "overwrite", "y", false,
 		"overwrite and reset the existing config file")
 	// info
-	configcmd.Info.Command().Flags().BoolVarP(&flag.Config.Configs, "configs", "c", false,
+	cfg.Info.Command().Flags().BoolVarP(&flag.Config.Configs, "configs", "c", false,
 		"list all the available configuration setting names")
-	configcmd.Info.Command().Flags().StringVarP(&flag.Config.Style, "style", "s", "",
+	cfg.Info.Command().Flags().StringVarP(&flag.Config.Style, "style", "s", "",
 		"choose a syntax highligher")
-	configcmd.Info.Command().Flags().BoolVar(&flag.Config.Styles, "styles", false,
+	cfg.Info.Command().Flags().BoolVar(&flag.Config.Styles, "styles", false,
 		"list and preview the available syntax highlighers")
 	// set
-	configcmd.Set.Command().Flags().BoolVarP(&flag.Config.Configs, "list", "l", false,
+	cfg.Set.Command().Flags().BoolVarP(&flag.Config.Configs, "list", "l", false,
 		"list all the available setting names")
 }
