@@ -4,7 +4,6 @@ import (
 	"github.com/bengarrett/retrotxtgo/cmd/internal/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/list"
-	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/spf13/cobra"
 )
 
@@ -15,11 +14,12 @@ func listCommand() *cobra.Command {
 		Short:   "Available inbuilt examples, codepages and tabled datasets",
 		Long:    "List the available inbuilt text art and text documents, codepages and their tabled values.",
 		Example: example.List.Print(),
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := flag.PrintUsage(cmd, args...); err != nil {
-				logs.Fatal(err)
+				return err
 			}
-			logs.FatalCmd("list", args...)
+			//logs.FatalCmd("list", args...)
+			return nil
 		},
 	}
 }
