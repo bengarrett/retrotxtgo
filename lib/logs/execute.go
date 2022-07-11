@@ -12,8 +12,11 @@ import (
 
 // FatalCmd prints a problem highlighting the unsupported command.
 func FatalCmd(usage string, args ...string) {
-	err := fmt.Errorf("%w: %s", ErrCmd, args[0])
 	args = append(args, usage)
+	var err error
+	if len(args) > 0 {
+		err = fmt.Errorf("%w: %s", ErrCmd, args[0])
+	}
 	if s := Execute(err, false, args...); s != "" {
 		fmt.Fprintln(os.Stderr, s)
 		os.Exit(OSErrCode)

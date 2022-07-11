@@ -4,10 +4,11 @@ import (
 	"github.com/bengarrett/retrotxtgo/cmd/internal/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/list"
+	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/spf13/cobra"
 )
 
-func listCommand() *cobra.Command {
+func ListCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:     "list",
 		Aliases: []string{"l"},
@@ -18,18 +19,24 @@ func listCommand() *cobra.Command {
 			if err := flag.PrintUsage(cmd, args...); err != nil {
 				return err
 			}
-			//logs.FatalCmd("list", args...)
+			if len(args) > 0 {
+				logs.FatalCmd("list", args...) // TODO replace with a print and error return
+			}
 			return nil
 		},
 	}
 }
 
-//nolint:gochecknoinits
-func init() {
-	lc := listCommand()
-	rootCmd.AddCommand(lc)
+func ListInit() *cobra.Command {
+	lc := ListCommand()
 	lc.AddCommand(list.Codepages.Command())
 	lc.AddCommand(list.Examples.Command())
 	lc.AddCommand(list.Table.Command())
 	lc.AddCommand(list.Tables.Command())
+	return lc
+}
+
+//nolint:gochecknoinits
+func init() {
+	rootCmd.AddCommand(ListInit())
 }

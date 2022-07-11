@@ -2,13 +2,9 @@ package cmd_test
 
 import (
 	"bytes"
-	"io/ioutil"
 	"strconv"
 	"testing"
 	"unicode/utf8"
-
-	"github.com/bengarrett/retrotxtgo/cmd"
-	"github.com/gookit/color"
 )
 
 //  Formal name             | Named value   | Numeric value  | Alias value   |
@@ -69,22 +65,6 @@ import (
 //  **ASA X3.4 1965         | ascii-65      |                |               |
 //  **ANSI X3.4 1967/77/86  | ascii-67      |                |               |
 
-// tester initialises, runs and returns the results of the view command.
-// args are the command line arguments to test with the command.
-func tester(args []string) ([]byte, error) {
-	color.Enable = false
-	b := bytes.NewBufferString("")
-	cmd := cmd.ViewInit()
-	cmd.SetOut(b)
-	cmd.SetArgs(args)
-	cmd.Execute()
-	out, err := ioutil.ReadAll(b)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 var (
 	// arguments to test the --encoding flag
 	cp037    = []string{"--encode", "cp037", "../static/text/cp037.txt"}
@@ -117,9 +97,7 @@ var (
 	space    = []string{"-c", "", "-x", "space", "../static/text/cp437-crlf.txt"}
 )
 
-// todo, test for BOM with utf-8-bom.txt
-
-func Test_ExecuteCommand(t *testing.T) {
+func Test_ViewCommand(t *testing.T) {
 	utfResults := []rune{'☠', '☮', '♺'}
 	tests := []struct {
 		name       string
@@ -189,7 +167,7 @@ func Test_ExecuteCommand(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			for i, runes := range tt.checkRunes {
-				gotB, err := tester(tt.args)
+				gotB, err := viewT.tester(tt.args)
 				if err != nil {
 					t.Error(err)
 					return
@@ -226,7 +204,7 @@ func Test_ExecuteCommand_width(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := strconv.Itoa(tt.width)
-			gotB, err := tester([]string{"--width", w, "../static/text/cp437-crlf.txt"})
+			gotB, err := viewT.tester([]string{"--width", w, "../static/text/cp437-crlf.txt"})
 			if err != nil {
 				t.Error(err)
 				return

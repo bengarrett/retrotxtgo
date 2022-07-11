@@ -152,8 +152,10 @@ func codepages() *cobra.Command {
 			meta.Name),
 		Long: fmt.Sprintf("List the available legacy codepages that %s can convert to UTF-8.",
 			meta.Name),
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Print(convert.List())
+		RunE: func(cmd *cobra.Command, args []string) error {
+			b := convert.List()
+			fmt.Fprint(cmd.OutOrStdout(), b)
+			return nil
 		},
 	}
 }
@@ -167,8 +169,10 @@ func examples() *cobra.Command {
 		Long: fmt.Sprintf("List builtin text art and documents available for use with the %s, %s, %s and %s commands.",
 			str.Example("create"), str.Example("save"), str.Example("info"), str.Example("view")),
 		Example: example.ListExamples.Print(),
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Print(PrintExamples())
+		RunE: func(cmd *cobra.Command, args []string) error {
+			b := PrintExamples()
+			fmt.Fprint(cmd.OutOrStdout(), b)
+			return nil
 		},
 	}
 }
@@ -180,11 +184,13 @@ func table() *cobra.Command {
 		Short:   "Display one or more codepage tables showing all the characters in use",
 		Long:    "Display one or more codepage tables showing all the characters in use.",
 		Example: example.ListTable.Print(),
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := flag.PrintUsage(cmd, args...); err != nil {
-				logs.Fatal(err)
+				return err
 			}
-			fmt.Print(PrintTable(args...))
+			b := PrintTable(args...)
+			fmt.Fprint(cmd.OutOrStdout(), b)
+			return nil
 		},
 	}
 }
