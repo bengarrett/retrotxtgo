@@ -31,15 +31,19 @@ const latin = "isolatin"
 
 // Encodings returns all the supported legacy text encodings.
 func Encodings() []encoding.Encoding {
-	a, e := charmap.All, []encoding.Encoding{}
+	e := []encoding.Encoding{}
+	// create a collection of all the encodings
+	a := charmap.All
 	a = append(a, japanese.All...)
 	a = append(a, unicode.All...)
 	a = append(a, utf32.All...)
+	// iterate the collection and skip the unwanted and duplicate encodings
 	for _, m := range a {
 		switch m {
 		case japanese.EUCJP,
 			japanese.ISO2022JP,
-			charmap.MacintoshCyrillic:
+			charmap.MacintoshCyrillic,
+			charmap.XUserDefined: // XUserDefined creates a duplicate of Windows 874.
 			continue
 		}
 		e = append(e, m)
