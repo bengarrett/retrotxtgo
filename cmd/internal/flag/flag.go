@@ -236,10 +236,10 @@ func InitArgs(cmd *cobra.Command, args ...string) ([]string, *convert.Convert, s
 	}
 	l := len(args)
 
-	if c := cmd.Flags().Lookup("controls"); !c.Changed {
+	if c := cmd.Flags().Lookup("controls"); c != nil && !c.Changed {
 		conv.Flags.Controls = []string{"eof", "tab"}
 	}
-	if s := cmd.Flags().Lookup("swap-chars"); !s.Changed {
+	if s := cmd.Flags().Lookup("swap-chars"); s != nil && !s.Changed {
 		conv.Flags.SwapChars = []string{"null", "bar"}
 	}
 	if filesystem.IsPipe() {
@@ -336,7 +336,7 @@ func PrintUsage(cmd *cobra.Command, args ...string) error {
 		if err := cmd.Help(); err != nil {
 			return err
 		}
-		os.Exit(0)
+		//os.Exit(0)
 	}
 	return nil
 }
