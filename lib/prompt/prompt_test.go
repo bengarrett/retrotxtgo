@@ -18,6 +18,7 @@ func ExampleYesNo() {
 }
 
 func TestSkipSet(t *testing.T) {
+	color.Enable = false
 	if ss := prompt.SkipSet(false); ss != "" {
 		t.Errorf("SkipSet(true) = %s, want empty", ss)
 	}

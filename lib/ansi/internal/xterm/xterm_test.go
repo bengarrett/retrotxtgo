@@ -13,8 +13,8 @@ func TestForeground(t *testing.T) {
 		c    fg.Colors
 		want Color
 	}{
-		{"black", fg.Black, 0},
-		{"white", fg.White, 7},
+		{"black", fg.Black, 30},
+		{"white", fg.White, 37},
 		{"bcyan", fg.BrightCyan, 13},
 		{"bwhite", fg.BrightWhite, 14},
 	}
@@ -33,8 +33,8 @@ func TestBackground(t *testing.T) {
 		c    bg.Colors
 		want Color
 	}{
-		{"black", bg.Black, 0},
-		{"white", bg.White, 7},
+		{"black", bg.Black, 40},
+		{"white", bg.White, 47},
 		{"bcyan", bg.BrightCyan, 13},
 		{"bwhite", bg.BrightWhite, 14},
 	}

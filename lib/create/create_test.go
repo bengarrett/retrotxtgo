@@ -24,7 +24,7 @@ func TestSaveAssets(t *testing.T) {
 		// Create a temporary directory
 		tmpDir := filepath.Join(os.TempDir(), "retrotxt_example_save_assets")
 		if err := os.MkdirAll(tmpDir, 0o755); err != nil {
-			t.Errorf("saveAssets make temp dir: %q: %w", tmpDir, err)
+			t.Errorf("saveAssets make temp dir: %q: %v", tmpDir, err)
 		}
 		defer os.RemoveAll(tmpDir)
 		// Initialize
@@ -36,12 +36,12 @@ func TestSaveAssets(t *testing.T) {
 		// Save files
 		b := []byte("hello")
 		if err := a.SaveAssets(&b); err != nil {
-			t.Errorf("saveAssets: %w", err)
+			t.Errorf("saveAssets: %s", err)
 		}
 		// Count the saved files in the temporary directory
 		files, err := ioutil.ReadDir(tmpDir)
 		if err != nil {
-			t.Errorf("saveAssets read dir: %q: %w", tmpDir, err)
+			t.Errorf("saveAssets read dir: %q: %s", tmpDir, err)
 		}
 		const zero = 0
 
@@ -57,7 +57,7 @@ func TestZipAssets(t *testing.T) {
 		tmpDir := filepath.Join(os.TempDir(), "retrotxt_example_save_assets")
 		os.RemoveAll(tmpDir)
 		if err := os.MkdirAll(tmpDir, 0o755); err != nil {
-			t.Errorf("saveAssets make temp dir: %w", err)
+			t.Errorf("saveAssets make temp dir: %s", err)
 		}
 		defer os.RemoveAll(tmpDir)
 		// Initialize
@@ -74,7 +74,7 @@ func TestZipAssets(t *testing.T) {
 		// Print the filename of the new zip file
 		file, err := os.Stat(name)
 		if err != nil {
-			t.Errorf("stat file: %w", err)
+			t.Errorf("stat file: %s", err)
 		}
 		const want = "retrotxt.zip"
 		if got := file.Name(); got != want {
@@ -90,7 +90,7 @@ func TestSave(t *testing.T) {
 	}
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		t.Errorf("Save() user home error: %w", err)
+		t.Errorf("Save() user home error: %s", err)
 	}
 	tmpDir := os.TempDir()
 	tmpFile := path.Join(tmpDir, "retrotxt_create_test.txt")
@@ -175,7 +175,7 @@ func TestTemplateSave(t *testing.T) {
 		Tmpl:    tmpFile.Name(),
 	}
 	if err = a.TemplateSave(); err != nil {
-		t.Errorf("TemplateSave() created an error: %w", err)
+		t.Errorf("TemplateSave() created an error: %s", err)
 	}
 }
 

@@ -7,7 +7,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/ansi"
 )
 
-func ExampleHTMLReader() {
+func ExampleHTMLReader_aix() {
 	file, err := os.Open("../../static/ansi/ansi-aixterm.ans")
 	if err != nil {
 		log.Fatal(err)
@@ -17,10 +17,9 @@ func ExampleHTMLReader() {
 	if err := ansi.HTMLReader(os.Stdout, file); err != nil {
 		log.Fatal(err)
 	}
-	// Output:
 }
 
-func ExampleHTMLReader_() {
+func ExampleHTMLReader_ansi() {
 	file, err := os.Open("../../static/ansi/preview_01.ans")
 	if err != nil {
 		log.Fatal(err)
@@ -30,5 +29,4 @@ func ExampleHTMLReader_() {
 	if err := ansi.HTMLReader(os.Stdout, file); err != nil {
 		log.Fatal(err)
 	}
-	// Output:
 }

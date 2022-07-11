@@ -3,7 +3,6 @@ package config
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -69,24 +68,25 @@ func List() error {
 
 // Set edits and saves a named setting within a configuration file.
 // It also accepts numeric index values printed by List().
-func Set(name string) {
+func Set(name string) error {
 	i, err := strconv.Atoi(name)
+	namedSetting := err != nil
 	switch {
-	case err != nil:
-		Update(name, false)
+	case namedSetting:
+		return Update(name, false)
 	case i >= 0 && i <= (len(get.Reset())-1):
 		k := set.Keys()
-		Update(k[i], false)
+		return Update(k[i], false)
 	default:
-		Update(name, false)
+		return Update(name, false)
 	}
 }
 
 // Update edits and saves a named setting within a configuration file.
-func Update(name string, setup bool) {
+func Update(name string, setup bool) error {
 	if !set.Validate(name) {
 		fmt.Println(logs.Hint("config set --list", logs.ErrConfigName))
-		return
+		return nil
 	}
 	if !setup {
 		fmt.Print(Location())
@@ -112,8 +112,9 @@ func Update(name string, setup bool) {
 		Setup: setup,
 		Value: value,
 	}); err != nil {
-		log.Fatalln(err)
+		return err
 	}
+	return nil
 }
 
 // updatePrompt prompts the user for input to a config file setting.

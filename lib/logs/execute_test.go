@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/gookit/color"
 )
 
 var (
@@ -15,6 +16,7 @@ var (
 )
 
 func Test_Execute(t *testing.T) {
+	color.Enable = false
 	type args struct {
 		err  error
 		args []string

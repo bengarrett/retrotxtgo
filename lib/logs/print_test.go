@@ -7,6 +7,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/meta"
+	"github.com/gookit/color"
 )
 
 const status = "exit status 1"
@@ -14,6 +15,7 @@ const status = "exit status 1"
 var ErrTest = errors.New("error")
 
 func ExampleSprint() {
+	color.Enable = false
 	fmt.Println(logs.Sprint(ErrTest))
 	fmt.Println(status)
 	// Output: Problem:
@@ -22,6 +24,7 @@ func ExampleSprint() {
 }
 
 func TestHint_String(t *testing.T) {
+	color.Enable = false
 	type fields struct {
 		Error error
 		Hint  string
@@ -45,6 +48,7 @@ func TestHint_String(t *testing.T) {
 }
 
 func TestSprint(t *testing.T) {
+	color.Enable = false
 	tests := []struct {
 		name string
 		err  error
@@ -63,6 +67,7 @@ func TestSprint(t *testing.T) {
 }
 
 func TestSprintCmd(t *testing.T) {
+	color.Enable = false
 	type args struct {
 		name string
 		err  error
@@ -86,6 +91,7 @@ func TestSprintCmd(t *testing.T) {
 }
 
 func TestSprintFlag(t *testing.T) {
+	color.Enable = false
 	type args struct {
 		name string
 		flag string
@@ -110,6 +116,7 @@ func TestSprintFlag(t *testing.T) {
 }
 
 func TestSprintMark(t *testing.T) {
+	color.Enable = false
 	type args struct {
 		value string
 		err   error
@@ -134,6 +141,7 @@ func TestSprintMark(t *testing.T) {
 }
 
 func TestSprintWrap(t *testing.T) {
+	color.Enable = false
 	type args struct {
 		err  error
 		errs error

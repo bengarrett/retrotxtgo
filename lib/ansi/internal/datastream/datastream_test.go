@@ -1,10 +1,7 @@
 package datastream
 
 import (
-	"reflect"
 	"testing"
-
-	"github.com/bengarrett/retrotxtgo/lib/ansi/internal/sgr"
 )
 
 func TestNumber(t *testing.T) {
@@ -124,22 +121,22 @@ func TestED(t *testing.T) {
 	}
 }
 
-func TestSGR(t *testing.T) {
-	tests := []struct {
-		name string
-		b    []byte
-		want []sgr.Ps
-	}{
-		{"empty", nil, nil},
-		{"reset", []byte("0m"), []sgr.Ps{0}},
-		{"invalid", []byte("1234m"), nil},
-		{"bold bg/fg", []byte("37;40;1"), nil},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := SGR(tt.b); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SGR() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
+// func TestSGR(t *testing.T) {
+// 	tests := []struct {
+// 		name string
+// 		b    []byte
+// 		want []sgr.Ps
+// 	}{
+// 		{"empty", nil, nil},
+// 		{"reset", []byte("0m"), []sgr.Ps{0}},
+// 		{"invalid", []byte("1234m"), nil},
+// 		{"bold bg/fg", []byte("37;40;1"), nil},
+// 	}
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			if got := SGR(tt.b); !reflect.DeepEqual(got, tt.want) {
+// 				t.Errorf("SGR() = %v, want %v", got, tt.want)
+// 			}
+// 		})
+// 	}
+// }

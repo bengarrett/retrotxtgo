@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/lib/config"
+	"github.com/gookit/color"
 )
 
 func TestList(t *testing.T) {
@@ -23,17 +24,20 @@ func TestList(t *testing.T) {
 }
 
 func TestSet(t *testing.T) {
+	color.Enable = false
 	tests := []struct {
-		name string
-		args string
+		name    string
+		wantErr bool
 	}{
-		{"empty", ""},
-		{"0", "0"},
-		{"valid", "editor"},
+		{"empty", false},
+		{"0", true},
+		{"valid", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			config.Set(tt.name)
+			if err := config.Set(tt.name); (err != nil) != tt.wantErr {
+				t.Errorf("Set() error = %v, wantErr %v", err, tt.wantErr)
+			}
 		})
 	}
 }

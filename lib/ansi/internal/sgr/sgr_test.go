@@ -128,39 +128,39 @@ func TestXterm(t *testing.T) {
 	}
 }
 
-func TestDataStream(t *testing.T) {
-	tests := []struct {
-		name string
-		s    string
-		want Attributes
-	}{
-		// {"empty", "", Toggle{}},
-		// {"reset", "0m", Toggle{Foreground: fg.White, Background: bg.Black, Font: Primary}},
-		// {"invalid", "1234m",
-		// 	Toggle{PrintChars: []byte("1234m")}},
-		// {"normal bold", "0;1mHi",
-		// 	Toggle{Bold: true, Foreground: fg.White, Background: bg.Black, Font: Primary,
-		// 		PrintChars: []byte("Hi")}},
-		// {"bold then reset", "1;0mHi",
-		// 	Toggle{Bold: false, Foreground: fg.White, Background: bg.Black, Font: Primary,
-		// 		PrintChars: []byte("Hi")}},
-		// {"bold bg/fg", "37;40;1mABC",
-		// 	Toggle{Bold: true, Foreground: fg.White, Background: bg.Black,
-		// 		PrintChars: []byte("ABC")}},
-		// {"ega 8px", "37;40;15mEGA",
-		// 	Toggle{Font: IbmEGA8, Foreground: fg.White, Background: bg.Black,
-		// 		PrintChars: []byte("EGA")}},
-		{"xterm", "48;5;233;38;5;243mXterm colors!",
-			Attributes{}},
-		// 		// {"reset and style", "0;42;31;3m", []Ps{0, 42, 31, 3}},
-		// 		//{"xterm fg", "38;5;0m", []Ps{}},
+// func TestDataStream(t *testing.T) {
+// 	tests := []struct {
+// 		name string
+// 		s    string
+// 		want Attributes
+// 	}{
+// 		// {"empty", "", Toggle{}},
+// 		// {"reset", "0m", Toggle{Foreground: fg.White, Background: bg.Black, Font: Primary}},
+// 		// {"invalid", "1234m",
+// 		// 	Toggle{PrintChars: []byte("1234m")}},
+// 		// {"normal bold", "0;1mHi",
+// 		// 	Toggle{Bold: true, Foreground: fg.White, Background: bg.Black, Font: Primary,
+// 		// 		PrintChars: []byte("Hi")}},
+// 		// {"bold then reset", "1;0mHi",
+// 		// 	Toggle{Bold: false, Foreground: fg.White, Background: bg.Black, Font: Primary,
+// 		// 		PrintChars: []byte("Hi")}},
+// 		// {"bold bg/fg", "37;40;1mABC",
+// 		// 	Toggle{Bold: true, Foreground: fg.White, Background: bg.Black,
+// 		// 		PrintChars: []byte("ABC")}},
+// 		// {"ega 8px", "37;40;15mEGA",
+// 		// 	Toggle{Font: IbmEGA8, Foreground: fg.White, Background: bg.Black,
+// 		// 		PrintChars: []byte("EGA")}},
+// 		{"xterm", "48;5;233;38;5;243mXterm colors!",
+// 			Attributes{}},
+// 		// 		// {"reset and style", "0;42;31;3m", []Ps{0, 42, 31, 3}},
+// 		// 		//{"xterm fg", "38;5;0m", []Ps{}},
 
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := DataStream([]byte(tt.s)); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("DataStream() = \n%v, want \n%v", got, tt.want)
-			}
-		})
-	}
-}
+// 	}
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			if got := DataStream([]byte(tt.s)); !reflect.DeepEqual(got, tt.want) {
+// 				t.Errorf("DataStream() = \n%v, want \n%v", got, tt.want)
+// 			}
+// 		})
+// 	}
+// }
