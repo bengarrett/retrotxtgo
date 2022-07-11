@@ -56,7 +56,7 @@ func Test_ListExamples(t *testing.T) {
 	}
 }
 
-func Test_ListTable(t *testing.T) {
+func Test_ListTables(t *testing.T) {
 	tests := []struct {
 		table      string
 		wantHeader string
@@ -122,6 +122,35 @@ func Test_ListTable(t *testing.T) {
 		{"ascii-65", "", []rune{'␉', '0', 'A', 'a', '{'}},
 		{"ascii-67", "", []rune{'␉', '0', 'A', 'a', '~'}},
 	}
+	// test the list tables command
+	args := []string{"tables"}
+	gotB, err := listT.tester(args)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if len(gotB) == 0 {
+		t.Errorf("TABLES, the result of the llist tables command is empty, or 0 bytes")
+	}
+	for _, tt := range tests {
+		t.Run(tt.table, func(t *testing.T) {
+			if !bytes.Contains(gotB, []byte(tt.wantHeader)) {
+				t.Errorf("TABLES, could not find %q header in the tables output", tt.wantHeader)
+				return
+			}
+			// find duplicate tables
+			if len(tt.wantHeader) == 0 {
+				return
+			}
+			const expected = 1
+			if finds := bytes.Count(gotB, []byte(tt.wantHeader)); finds > expected {
+				t.Errorf("TABLES, %d instances of the %q table were displayed in the tables output", finds, tt.wantHeader)
+			}
+			// don't check for individual runes,
+			// as all the tables are dumped together, there are too many duplicates
+		})
+	}
+	// test the list table command
 	for _, tt := range tests {
 		t.Run(tt.table, func(t *testing.T) {
 			args := []string{"table", tt.table}
@@ -130,13 +159,16 @@ func Test_ListTable(t *testing.T) {
 				t.Error(err)
 				return
 			}
+			// find empty results
 			if len(gotB) == 0 {
-				t.Errorf("the requested table %q is empty, or 0 bytes", tt.table)
+				t.Errorf("TABLE %q, the returned table is empty, or 0 bytes", tt.table)
 				return
 			}
+			// find invalid or unexpected results
 			if !bytes.Contains(gotB, []byte(tt.wantHeader)) {
-				t.Errorf("could not find %q header in the table", tt.wantHeader)
+				t.Errorf("TABLE, could not find %q header in the table", tt.wantHeader)
 			}
+			// confirm a couple of unique runes displayed in the table
 			for i, runes := range tt.wantRunes {
 				if !bytes.ContainsRune(gotB, runes) {
 					t.Errorf("%d. result doesn't include the expected rune, %q got:\n%s", i, runes, gotB)

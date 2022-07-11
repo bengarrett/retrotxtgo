@@ -200,8 +200,10 @@ func tables() *cobra.Command {
 		Use:   "tables",
 		Short: "Display the characters of every codepage table inuse",
 		Long:  "Display the characters of every codepage table inuse.",
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Print(PrintTables())
+		RunE: func(cmd *cobra.Command, args []string) error {
+			b := PrintTables()
+			fmt.Fprint(cmd.OutOrStdout(), b)
+			return nil
 		},
 	}
 }
