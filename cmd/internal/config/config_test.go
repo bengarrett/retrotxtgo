@@ -9,6 +9,28 @@ import (
 	"github.com/spf13/viper"
 )
 
+func TestConfigs_Command(t *testing.T) {
+	tests := []struct {
+		name string
+		c    config.Configs
+		want string
+	}{
+		{"create", config.Create, "create"},
+		{"del", config.Delete, "delete"},
+		{"edit", config.Edit, "edit"},
+		{"info", config.Info, "info"},
+		{"set", config.Set, "set [setting names]"},
+		{"setup", config.Setup, "setup"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.c.Command().Use; got != tt.want {
+				t.Errorf("Configs.Command() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestListAll(t *testing.T) {
 	tests := []struct {
 		name string
