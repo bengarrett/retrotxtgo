@@ -6,11 +6,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/bengarrett/retrotxtgo/cmd/internal/config"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
-	"github.com/bengarrett/retrotxtgo/cmd/internal/long"
-	"github.com/bengarrett/retrotxtgo/cmd/internal/root"
-	"github.com/bengarrett/retrotxtgo/cmd/internal/ver"
+	"github.com/bengarrett/retrotxtgo/cmd/internal/version"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/spf13/cobra"
@@ -21,12 +20,19 @@ var (
 	ErrUsage = errors.New("command usage could not display")
 )
 
+var cmdShort = fmt.Sprintf("%s is the tool that turns ANSI, ASCII, NFO text into browser ready HTML",
+	meta.Name)
+
+var cmdLong = fmt.Sprintf(`Turn many pieces of ANSI art, ASCII and NFO texts into HTML5 using %s.
+It is the platform agnostic tool that takes nostalgic text files and stylises
+them into a more modern, useful format to view or copy in a web browser.`, meta.Name)
+
 // Cmd represents the base command when called without any subcommands.
 //nolint:gochecknoglobals
 var Cmd = &cobra.Command{
 	Use:     meta.Bin,
-	Short:   fmt.Sprintf("%s is the tool that turns ANSI, ASCII, NFO text into browser ready HTML", meta.Name),
-	Long:    long.Root.String(),
+	Short:   cmdShort,
+	Long:    cmdLong,
 	Example: example.Root.Print(),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Do nothing other than print the help.
@@ -40,11 +46,12 @@ var Cmd = &cobra.Command{
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
+// TODO: MAKE EXECUTE return an error.
 func Execute() {
 	Cmd.CompletionOptions.DisableDefaultCmd = true
 	Cmd.SilenceErrors = true // set to false to debug errors
 	Cmd.Version = meta.Print()
-	Cmd.SetVersionTemplate(ver.Print())
+	Cmd.SetVersionTemplate(version.Print())
 	if err := Cmd.Execute(); err != nil {
 		const minArgs = 2
 		if len(os.Args) < minArgs {
@@ -57,7 +64,7 @@ func Execute() {
 }
 
 func CmdInit() {
-	cobra.OnInitialize(root.Init)
+	cobra.OnInitialize(config.Load)
 	// create and hide custom configuration file location flag.
 	Cmd.PersistentFlags().StringVar(&flag.RootFlag.Config, "config", "",
 		"optional config file location")

@@ -1,4 +1,4 @@
-package ver
+package version
 
 import (
 	"bytes"
@@ -10,7 +10,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/bengarrett/retrotxtgo/cmd/internal/release"
+	"github.com/bengarrett/retrotxtgo/cmd/internal/update"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/gookit/color"
 	"github.com/mattn/go-isatty"
@@ -24,7 +24,7 @@ func Print() string {
 	if err != nil {
 		exe = err.Error()
 	}
-	newVer, v := release.Check()
+	newVer, v := update.Check()
 	appDate := ""
 	if meta.App.Date != meta.Placeholder {
 		appDate = fmt.Sprintf(" (%s)", meta.App.Date)
@@ -41,7 +41,7 @@ func Print() string {
 	fmt.Fprintf(w, "%s\t%s\n", color.Secondary.Sprint("go:"), strings.Replace(runtime.Version(), "go", "v", 1))
 	fmt.Fprintf(w, "%s\t%s\n", color.Secondary.Sprint("path:"), exe)
 	if newVer {
-		fmt.Fprintf(w, "\n%s\n", release.Print(meta.App.Version, v))
+		fmt.Fprintf(w, "\n%s\n", update.Print(meta.App.Version, v))
 	}
 	w.Flush()
 	return b.String()

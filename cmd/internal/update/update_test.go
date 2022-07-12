@@ -1,19 +1,19 @@
-package release_test
+package update_test
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/cmd/internal/release"
+	"github.com/bengarrett/retrotxtgo/cmd/internal/update"
 )
 
 const etag = `W/"3715383704fac6f3568e9039b347937a`
 
 func Example_cacheSet() {
-	if err := release.CacheSet(etag, "0.0.1"); err != nil {
+	if err := update.CacheSet(etag, "0.0.1"); err != nil {
 		fmt.Println(err)
 	}
-	e, v := release.CacheGet()
+	e, v := update.CacheGet()
 	fmt.Println("Etag", e)
 	fmt.Println("Version", v)
 	// Output: Etag W/"3715383704fac6f3568e9039b347937a
@@ -43,7 +43,7 @@ func Test_compare(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := release.Compare(tt.args.current, tt.args.fetched); got != tt.want {
+			if got := update.Compare(tt.args.current, tt.args.fetched); got != tt.want {
 				t.Errorf("compare() = %v, want %v", got, tt.want)
 			}
 		})

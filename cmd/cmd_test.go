@@ -16,7 +16,7 @@ const (
 	viewT
 )
 
-// tester initialises, runs and returns the results of the a cmd command.
+// tester initialises, runs and returns the results of the a Cmd package command.
 // args are the command line arguments to test with the command.
 func (t cmdT) tester(args []string) ([]byte, error) {
 	color.Enable = false

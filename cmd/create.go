@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"fmt"
 
+	"github.com/bengarrett/retrotxtgo/cmd/internal/config"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/create"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
-	"github.com/bengarrett/retrotxtgo/cmd/internal/root"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/spf13/cobra"
 )
@@ -31,7 +31,7 @@ func CreateCommand() *cobra.Command {
 func CreateInit() *cobra.Command {
 	cc := CreateCommand()
 	// root config must be initialized before getting saved default values
-	root.Init()
+	config.Load()
 	// output flags
 	deflts := flag.CreateDefaults()
 	flag.Encode(&deflts.Encode, cc)

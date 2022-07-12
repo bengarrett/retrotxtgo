@@ -2,15 +2,16 @@ package config
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
-	"github.com/bengarrett/retrotxtgo/cmd/internal/long"
-	"github.com/bengarrett/retrotxtgo/cmd/internal/usage"
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 type Configs int
@@ -75,11 +76,19 @@ func del() *cobra.Command {
 // viper.GetString("editor") is not yet set and the EDITOR env value
 // will instead always be used.
 func edit() *cobra.Command {
+	long := fmt.Sprintf("%s\n\n%s\n%s\n%s\n%s\n",
+		fmt.Sprintf("Edit the %s configuration file.", meta.Name),
+		"To change the editor program, either:",
+		fmt.Sprintf("  1. Configure one by creating a %s shell environment variable.",
+			str.Example("$EDITOR")),
+		"  2. Set an editor in the configuration file:",
+		str.Example(fmt.Sprintf("     %s config set --name=editor", meta.Bin)),
+	)
 	return &cobra.Command{
 		Use:     "edit",
 		Aliases: []string{"e"},
 		Short:   "Edit the config file\n",
-		Long:    long.ConfigEdit.String(),
+		Long:    long,
 		Run: func(cmd *cobra.Command, args []string) {
 			if err := config.Edit(); err != nil {
 				logs.Fatal(err)
@@ -114,7 +123,7 @@ func set() *cobra.Command {
 			if ListAll() {
 				return
 			}
-			if err := usage.Print(cmd, args...); err != nil {
+			if err := Usage(cmd, args...); err != nil {
 				logs.Fatal(err)
 			}
 			for _, arg := range args {
@@ -145,4 +154,29 @@ func ListAll() (exit bool) {
 		return true
 	}
 	return false
+}
+
+///=======================
+
+// Print the usage help and exit; but only when no arguments are given.
+func Usage(cmd *cobra.Command, args ...string) error {
+	if len(args) == 0 {
+		if err := cmd.Help(); err != nil {
+			return err
+		}
+		os.Exit(0)
+	}
+	return nil
+}
+
+// Init reads in the config file and ENV variables if set.
+// This might be triggered twice due to the Cobra initializer registers.
+func Load() {
+	// read in environment variables
+	viper.SetEnvPrefix("env")
+	viper.AutomaticEnv()
+	// configuration file
+	if err := config.SetConfig(flag.RootFlag.Config); err != nil {
+		logs.FatalMark(viper.ConfigFileUsed(), logs.ErrConfigOpen, err)
+	}
 }
