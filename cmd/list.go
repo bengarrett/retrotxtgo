@@ -38,5 +38,5 @@ func ListInit() *cobra.Command {
 
 //nolint:gochecknoinits
 func init() {
-	rootCmd.AddCommand(ListInit())
+	Cmd.AddCommand(ListInit())
 }

@@ -12,25 +12,24 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func createCommand() *cobra.Command {
+func CreateCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:     fmt.Sprintf("create %s", example.Filenames),
 		Aliases: []string{"c", "html"},
 		Short:   "Create a HTML document from text files",
 		Long:    "Create a HTML document from text documents and text art files.",
 		Example: example.Create.Print(),
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := create.Run(cmd, args); err != nil {
-				logs.Fatal(err)
+				return err
 			}
+			return nil
 		},
 	}
 }
 
-//nolint:gochecknoinits
-func init() {
-	cc := createCommand()
-	rootCmd.AddCommand(cc)
+func CreateInit() *cobra.Command {
+	cc := CreateCommand()
 	// root config must be initialized before getting saved default values
 	root.Init()
 	// output flags
@@ -63,4 +62,10 @@ func init() {
 		logs.FatalMark("cache", ErrHide, err)
 	}
 	cc.Flags().SortFlags = false
+	return cc
+}
+
+//nolint:gochecknoinits
+func init() {
+	Cmd.AddCommand(CreateCommand())
 }

@@ -13,32 +13,25 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func configCommand() *cobra.Command {
+func ConfigCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:     "config",
 		Aliases: []string{"cfg"},
 		Short:   fmt.Sprintf("%s configuration and defaults", meta.Name),
 		Long:    fmt.Sprintf("%s settings, setup and default configurations.", meta.Name),
 		Example: example.Config.Print(),
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := flag.PrintUsage(cmd, args...); err != nil {
-				logs.Fatal(err)
+				return err
 			}
-			logs.FatalCmd("config", args...)
+			logs.FatalCmd("config", args...) // TODO: move funcs into \cmd
+			return nil
 		},
 	}
 }
 
-// init is always called by the Cobra library to be used for global flags and commands.
-//nolint:gochecknoinits
-func init() {
-	const highColor, basicColor = "COLORTERM", "TERM"
-	if str.Term(str.GetEnv(highColor), str.GetEnv(basicColor)) == "none" {
-		// disable all color output
-		color.Enable = false
-	}
-	cc := configCommand()
-	rootCmd.AddCommand(cc)
+func ConfigInit() *cobra.Command {
+	cc := ConfigCommand()
 	cc.AddCommand(cfg.Create.Command())
 	cc.AddCommand(cfg.Delete.Command())
 	cc.AddCommand(cfg.Edit.Command())
@@ -58,4 +51,16 @@ func init() {
 	// set
 	cfg.Set.Command().Flags().BoolVarP(&flag.Config.Configs, "list", "l", false,
 		"list all the available setting names")
+	return cc
+}
+
+// init is always called by the Cobra library to be used for global flags and commands.
+//nolint:gochecknoinits
+func init() {
+	const highColor, basicColor = "COLORTERM", "TERM"
+	if str.Term(str.GetEnv(highColor), str.GetEnv(basicColor)) == "none" {
+		// disable all color output
+		color.Enable = false
+	}
+	Cmd.AddCommand(ConfigInit())
 }

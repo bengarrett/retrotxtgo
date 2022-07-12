@@ -39,5 +39,5 @@ func ViewInit() *cobra.Command {
 }
 
 func init() { //nolint:gochecknoinits
-	rootCmd.AddCommand(ViewInit())
+	Cmd.AddCommand(ViewInit())
 }

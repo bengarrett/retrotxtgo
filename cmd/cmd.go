@@ -21,33 +21,34 @@ var (
 	ErrUsage = errors.New("command usage could not display")
 )
 
-// rootCmd represents the base command when called without any subcommands.
+// Cmd represents the base command when called without any subcommands.
 //nolint:gochecknoglobals
-var rootCmd = &cobra.Command{
+var Cmd = &cobra.Command{
 	Use:     meta.Bin,
 	Short:   fmt.Sprintf("%s is the tool that turns ANSI, ASCII, NFO text into browser ready HTML", meta.Name),
 	Long:    long.Root.String(),
 	Example: example.Root.Print(),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		// Do nothing other than print the help.
 		// This func must remain otherwise root command flags are ignored by Cobra.
 		if err := flag.PrintUsage(cmd); err != nil {
-			logs.Fatal(err)
+			return err
 		}
+		return nil
 	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	rootCmd.CompletionOptions.DisableDefaultCmd = true
-	rootCmd.SilenceErrors = true // set to false to debug errors
-	rootCmd.Version = meta.Print()
-	rootCmd.SetVersionTemplate(ver.Print())
-	if err := rootCmd.Execute(); err != nil {
+	Cmd.CompletionOptions.DisableDefaultCmd = true
+	Cmd.SilenceErrors = true // set to false to debug errors
+	Cmd.Version = meta.Print()
+	Cmd.SetVersionTemplate(ver.Print())
+	if err := Cmd.Execute(); err != nil {
 		const minArgs = 2
 		if len(os.Args) < minArgs {
-			if err1 := rootCmd.Usage(); err1 != nil {
+			if err1 := Cmd.Usage(); err1 != nil {
 				logs.FatalMark("rootCmd", ErrUsage, err1)
 			}
 		}
@@ -55,18 +56,22 @@ func Execute() {
 	}
 }
 
-//nolint:gochecknoinits
-func init() {
+func CmdInit() {
 	cobra.OnInitialize(root.Init)
 	// create and hide custom configuration file location flag.
-	rootCmd.PersistentFlags().StringVar(&flag.RootFlag.Config, "config", "",
+	Cmd.PersistentFlags().StringVar(&flag.RootFlag.Config, "config", "",
 		"optional config file location")
-	if err := rootCmd.PersistentFlags().MarkHidden("config"); err != nil {
+	if err := Cmd.PersistentFlags().MarkHidden("config"); err != nil {
 		logs.FatalMark("config", ErrHide, err)
 	}
 	// create a version flag that only works on root.
-	rootCmd.LocalNonPersistentFlags().BoolP("version", "v", false, "")
+	Cmd.LocalNonPersistentFlags().BoolP("version", "v", false, "")
 	// hide the cobra introduced help command.
 	// https://github.com/spf13/cobra/issues/587#issuecomment-810159087
-	rootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
+	Cmd.SetHelpCommand(&cobra.Command{Hidden: true})
+}
+
+//nolint:gochecknoinits
+func init() {
+	CmdInit()
 }
