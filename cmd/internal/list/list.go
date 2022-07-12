@@ -94,6 +94,19 @@ func PrintExamples() *bytes.Buffer {
 
 // listTable returns one or more named encodings in a tabled format.
 func PrintTable(names ...string) (s string) {
+	// custom ascii shortcut
+	ns := names
+	for i, name := range ns {
+		if name != "ascii" {
+			continue
+		}
+		names[i] = "ascii-67"
+		names = append(names[:i+1], names[i:]...)
+		names[i] = "ascii-65"
+		names = append(names[:i+1], names[i:]...)
+		names[i] = "ascii-63"
+	}
+	// iterate through the tables
 	for _, name := range names {
 		table, err := convert.Table(name)
 		if err != nil {
