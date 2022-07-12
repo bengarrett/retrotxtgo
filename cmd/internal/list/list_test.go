@@ -2,6 +2,7 @@ package list_test
 
 import (
 	"fmt"
+	"log"
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/list"
@@ -11,7 +12,10 @@ import (
 func ExamplePrintTable() {
 	color.Enable = false
 	names := []string{"cp437"}
-	t := list.PrintTable(names...)
+	t, err := list.PrintTable(names...)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Printf("%d characters in the table", len(t))
 	// Output: 1689 characters in the table
 }

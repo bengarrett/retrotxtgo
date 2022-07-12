@@ -16,6 +16,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/spf13/cobra"
+	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/ianaindex"
 )
@@ -93,7 +94,7 @@ func PrintExamples() *bytes.Buffer {
 }
 
 // listTable returns one or more named encodings in a tabled format.
-func PrintTable(names ...string) (s string) {
+func PrintTable(names ...string) (string, error) {
 	// custom ascii shortcut
 	ns := names
 	for i, name := range ns {
@@ -106,32 +107,47 @@ func PrintTable(names ...string) (s string) {
 		names = append(names[:i+1], names[i:]...)
 		names[i] = "ascii-63"
 	}
+	s := ""
 	// iterate through the tables
 	for _, name := range names {
 		table, err := convert.Table(name)
 		if err != nil {
-			fmt.Println(logs.SprintMark(name, ErrTable, err))
-			continue
+			return "", err
 		}
 		s = fmt.Sprintf("%s%s", s, table.String())
 	}
-	return s
+	return s, nil
 }
 
 // listTbls returns all the supported encodings in a tabled format.
 func PrintTables() (s string) {
-	for _, e := range convert.Encodings() {
+	enc := convert.Encodings()
+	var tables []encoding.Encoding
+	// reorder tables to position X-User-Defined after ISO-8859-10
+	for _, tbl := range enc {
+		switch tbl {
+		case charmap.ISO8859_10:
+			tables = append(tables, charmap.ISO8859_10)
+			tables = append(tables, charmap.XUserDefined)
+			continue
+		case charmap.XUserDefined:
+			continue
+		}
+		tables = append(tables, tbl)
+	}
+	// print tables
+	for _, tbl := range tables {
 		var (
 			err  error
 			name string
 		)
-		if e == charmap.XUserDefined {
+		if tbl == charmap.XUserDefined {
 			name = "iso-8859-11"
 		}
 		if name == "" {
-			name, err = ianaindex.MIME.Name(e)
+			name, err = ianaindex.MIME.Name(tbl)
 			if err != nil {
-				fmt.Println(logs.SprintMark(fmt.Sprint(e), ErrIANA, err))
+				fmt.Println(logs.SprintMark(fmt.Sprint(tbl), ErrIANA, err))
 				continue
 			}
 		}
@@ -201,7 +217,10 @@ func table() *cobra.Command {
 			if err := flag.PrintUsage(cmd, args...); err != nil {
 				return err
 			}
-			b := PrintTable(args...)
+			b, err := PrintTable(args...)
+			if err != nil {
+				return err
+			}
 			fmt.Fprint(cmd.OutOrStdout(), b)
 			return nil
 		},

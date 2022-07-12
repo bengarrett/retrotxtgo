@@ -47,8 +47,8 @@ func Encodings() []encoding.Encoding {
 		switch m {
 		case japanese.EUCJP,
 			japanese.ISO2022JP,
-			charmap.MacintoshCyrillic,
-			charmap.XUserDefined: // XUserDefined creates a duplicate of Windows 874.
+			charmap.MacintoshCyrillic:
+			//charmap.XUserDefined: // XUserDefined creates a duplicate of Windows 874.
 			continue
 		}
 		e = append(e, m)
@@ -80,6 +80,7 @@ func List() *bytes.Buffer { //nolint:funlen
 		case charmap.ISO8859_10:
 			fmt.Fprintf(w, " %s\t %s\t %s\t %s\t\n",
 				c.Name, c.Value, c.Numeric, c.Alias)
+			// intentionally insert ISO-8895-11 after 10.
 			fmt.Fprintf(w, " %s\t %s\t %s\t %s\t\n",
 				"ISO 8895-11", "iso-8895-11", "11", "iso889511")
 			continue

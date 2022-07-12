@@ -185,7 +185,7 @@ func Encoder(name string) (encoding.Encoding, error) {
 		// ISO-8859-11 uses the same characters as Windows 847
 		// except for 9 characters in rows 8 and 9.
 		// https://en.wikipedia.org/wiki/ISO/IEC_8859-11#Code_page_874_(IBM)_/_9066
-		return charmap.Windows874, nil
+		return charmap.XUserDefined, nil
 	}
 	if e := encodeUTF32(a); e != nil {
 		return e, nil

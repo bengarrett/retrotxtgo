@@ -31,7 +31,9 @@ func (t cmdT) tester(args []string) ([]byte, error) {
 	}
 	c.SetOut(b)
 	c.SetArgs(args)
-	c.Execute()
+	if err := c.Execute(); err != nil {
+		return nil, err
+	}
 	out, err := ioutil.ReadAll(b)
 	if err != nil {
 		return nil, err

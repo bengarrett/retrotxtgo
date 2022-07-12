@@ -588,3 +588,24 @@ func TestConvert_skipIgnores(t *testing.T) {
 		})
 	}
 }
+
+func Test_encodeAlias(t *testing.T) {
+	tests := []struct {
+		name string
+		want string
+	}{
+		{"", ""},
+		{"37", "IBM037"},
+		{"10000", "Macintosh"},
+		{"win", "Windows-1252"},
+		{"8", "ISO-8859-8"},
+		{"11", "ISO-8859-11"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := encodeAlias(tt.name); got != tt.want {
+				t.Errorf("encodeAlias() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
