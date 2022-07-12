@@ -40,7 +40,8 @@ func (e Encoding) String() string {
 	return e.Name
 }
 
-func x34(e encoding.Encoding) string {
+// AsaX34 returns a named value for the legacy ASA ASCII character encodings.
+func AsaX34(e encoding.Encoding) string {
 	switch e {
 	case AsaX34_1963:
 		return ascii63
