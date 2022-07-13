@@ -30,7 +30,7 @@ func Test_InfoErrDir(t *testing.T) {
 
 func Test_InfoFiles(t *testing.T) {
 	t.Run("info multiple files", func(t *testing.T) {
-		gotB, err := infoT.tester([]string{"--format", "text", file1, file2, file3})
+		gotB, err := infoT.tester([]string{"--format", "color", file1, file2, file3})
 		if err != nil {
 			t.Errorf("info arguments threw an unexpected error: %s", err)
 		}
