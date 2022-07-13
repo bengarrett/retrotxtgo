@@ -49,10 +49,12 @@ func ConfigCreate() *cobra.Command {
 		Aliases: []string{"c"},
 		Short:   "Create or reset the config file",
 		Long:    fmt.Sprintf("Create or reset the %s configuration file.", meta.Name),
-		Run: func(cmd *cobra.Command, args []string) {
-			if err := config.New(flag.Config.Ow); err != nil {
-				logs.FatalWrap(logs.ErrConfigNew, err)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			overwrite := flag.Config.Ow
+			if err := config.New(overwrite); err != nil {
+				return fmt.Errorf("%w: %s", logs.ErrConfigNew, err)
 			}
+			return nil
 		},
 	}
 }
@@ -63,10 +65,11 @@ func ConfigDel() *cobra.Command {
 		Aliases: []string{"d", "del", "rm"},
 		Short:   "Remove the config file",
 		Long:    fmt.Sprintf("Remove the %s configuration file.", meta.Name),
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := config.Delete(); err != nil {
-				logs.Fatal(err)
+				return err
 			}
+			return nil
 		},
 	}
 }
@@ -89,10 +92,11 @@ func ConfigEdit() *cobra.Command {
 		Aliases: []string{"e"},
 		Short:   "Edit the config file\n",
 		Long:    long,
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := config.Edit(); err != nil {
-				logs.Fatal(err)
+				return err
 			}
+			return nil
 		},
 	}
 }
@@ -104,10 +108,11 @@ func ConfigInfo() *cobra.Command {
 		Example: example.CfgInfo.Print(),
 		Short:   "List all the settings in use",
 		Long:    fmt.Sprintf("List all the %s settings in use.", meta.Name),
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			if flag.ConfigInfo() {
-				return
+				return nil
 			}
+			return nil
 		},
 	}
 }
@@ -119,16 +124,19 @@ func ConfigSet() *cobra.Command {
 		Short:   "Edit a setting",
 		Long:    fmt.Sprintf("Edit a %s setting.", meta.Name),
 		Example: example.Set.Print(),
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			if ListAll() {
-				return
+				return nil
 			}
 			if err := Usage(cmd, args...); err != nil {
-				logs.Fatal(err)
+				return err
 			}
 			for _, arg := range args {
-				config.Set(arg)
+				if err := config.Set(arg); err != nil {
+					return err
+				}
 			}
+			return nil
 		},
 	}
 }
@@ -138,9 +146,10 @@ func ConfigSetup() *cobra.Command {
 		Use:   "setup",
 		Short: "Walk through all the settings",
 		Long:  fmt.Sprintf("Walk through all of the %s settings.", meta.Name),
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			const startAt = 0
 			config.Setup(startAt)
+			return nil
 		},
 	}
 }
