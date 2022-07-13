@@ -12,7 +12,8 @@ import (
 type cmdT int
 
 const (
-	listT cmdT = iota
+	infoT cmdT = iota
+	listT
 	viewT
 )
 
@@ -23,6 +24,8 @@ func (t cmdT) tester(args []string) ([]byte, error) {
 	var c *cobra.Command
 	b := bytes.NewBufferString("")
 	switch t {
+	case infoT:
+		c = cmd.InfoInit()
 	case listT:
 		c = cmd.ListInit()
 	case viewT:

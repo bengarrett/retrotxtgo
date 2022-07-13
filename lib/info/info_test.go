@@ -51,7 +51,7 @@ func TestMarshal(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := info.Marshal(tt.args.filename, tt.args.format, 0, 0); (err != nil) != tt.wantErr {
+			if _, err := info.Marshal(tt.args.filename, tt.args.format, 0, 0); (err != nil) != tt.wantErr {
 				t.Errorf("Marshal() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -79,7 +79,8 @@ func TestStdin(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := info.Stdin(tt.args.format, tt.args.b...); (err != nil) != tt.wantErr {
+			_, err := info.Stdin(tt.args.format, tt.args.b...)
+			if (err != nil) != tt.wantErr {
 				t.Errorf("Stdin() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -113,7 +114,7 @@ func TestNames_Info(t *testing.T) {
 				Index:  tt.fields.Index,
 				Length: tt.fields.Length,
 			}
-			if got := n.Info(tt.args.name, tt.args.format); !errors.Is(got, tt.wantErr) {
+			if _, got := n.Info(tt.args.name, tt.args.format); !errors.Is(got, tt.wantErr) {
 				t.Errorf("Names.Info() = %v, want %v", got, tt.wantErr)
 			}
 		})

@@ -22,21 +22,21 @@ type Names struct {
 }
 
 // Info parses the named file and prints out its details in a specific syntax.
-func (n Names) Info(name, format string) error {
+func (n Names) Info(name, format string) (string, error) {
 	err1 := fmt.Sprintf("info on %s failed", name)
 	if name == "" {
-		return fmt.Errorf("%s: %w", err1, logs.ErrNameNil)
+		return "", fmt.Errorf("%s: %w", err1, logs.ErrNameNil)
 	}
 	f, err := output(format)
 	if err != nil {
-		return fmt.Errorf("%s: %w", err1, logs.ErrFmt)
+		return "", fmt.Errorf("%s: %w", err1, logs.ErrFmt)
 	}
 	s, err := os.Stat(name)
 	if os.IsNotExist(err) {
-		return fmt.Errorf("%s: %w", err1, logs.ErrFileName)
+		return "", fmt.Errorf("%s: %w", err1, logs.ErrFileName)
 	}
 	if err != nil {
-		return fmt.Errorf("%s: %w", err1, err)
+		return "", fmt.Errorf("%s: %w", err1, err)
 	}
 	if s.IsDir() {
 		const walkMode = -1
@@ -48,7 +48,8 @@ func (n Names) Info(name, format string) error {
 				} else if skip {
 					return nil
 				}
-				return Marshal(osPathname, f, walkMode, walkMode)
+				_, err := Marshal(osPathname, f, walkMode, walkMode)
+				return err
 			},
 			ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {
 				return godirwalk.SkipNode
@@ -56,14 +57,15 @@ func (n Names) Info(name, format string) error {
 			Unsorted: true, // set true for faster yet non-deterministic enumeration
 		})
 		if err != nil {
-			return fmt.Errorf("info could not walk directory: %w", err)
+			return "", fmt.Errorf("info could not walk directory: %w", err)
 		}
-		return nil
+		return "", nil
 	}
-	if err := Marshal(name, f, n.Index, n.Length); err != nil {
-		return fmt.Errorf("info on %s could not marshal: %w", name, err)
+	res, err := Marshal(name, f, n.Index, n.Length)
+	if err != nil {
+		return "", fmt.Errorf("info on %s could not marshal: %w", name, err)
 	}
-	return nil
+	return res, nil
 }
 
 // output converts the --format argument value to a format type.
@@ -84,16 +86,16 @@ func output(argument string) (f detail.Format, err error) {
 }
 
 // Marshal the metadata and system details of a named file.
-func Marshal(name string, f detail.Format, i, length int) error {
+func Marshal(name string, f detail.Format, i, length int) (string, error) {
 	var d detail.Detail
 	if err := d.Read(name); err != nil {
-		return err
+		return "", err
 	}
 	if d.ValidText() {
 		var err error
 		// get the required linebreaks chars before running the multiple tasks
 		if d.LineBreak.Decimals, err = filesystem.ReadLineBreaks(name); err != nil {
-			return err
+			return "", err
 		}
 		d.LineBreaks(d.LineBreak.Decimals)
 		var g errgroup.Group
@@ -113,7 +115,7 @@ func Marshal(name string, f detail.Format, i, length int) error {
 			return d.Words(name)
 		})
 		if err := g.Wait(); err != nil {
-			return err
+			return "", err
 		}
 		d.MimeUnknown()
 	}
@@ -122,21 +124,20 @@ func Marshal(name string, f detail.Format, i, length int) error {
 		err error
 	)
 	if m, err = d.Marshal(f); err != nil {
-		return err
+		return "", err
 	}
-	printf(f, m...)
-	return nil
+	return printf(f, m...), nil
 }
 
 // Stdin parses piped data and prints out the details in a specific syntax.
-func Stdin(format string, b ...byte) error {
+func Stdin(format string, b ...byte) (string, error) {
 	var d detail.Detail
 	f, e := output(format)
 	if e != nil {
-		return e
+		return "", e
 	}
 	if err := d.Parse("", nil, b...); err != nil {
-		return err
+		return "", err
 	}
 	if d.ValidText() { //nolint:nestif
 		d.LineBreaks(filesystem.LineBreaks(true, []rune(string(b))...))
@@ -179,24 +180,24 @@ func Stdin(format string, b ...byte) error {
 			return nil
 		})
 		if err := g.Wait(); err != nil {
-			return err
+			return "", err
 		}
 		d.MimeUnknown()
 	}
 	var m []byte
 	if m, e = d.Marshal(f); e != nil {
-		return e
+		return "", e
 	}
-	printf(f, m...)
-	return nil
+	return printf(f, m...), nil
 }
 
 // printf prints the bytes as text and appends a newline to JSON and XML text.
-func printf(f detail.Format, b ...byte) {
+func printf(f detail.Format, b ...byte) string {
 	switch f {
 	case detail.ColorText, detail.PlainText:
-		fmt.Printf("%s", b)
+		return string(b)
 	case detail.JSON, detail.JSONMin, detail.XML:
-		fmt.Printf("%s\n", b)
+		return string(b) + "\n"
 	}
+	return ""
 }

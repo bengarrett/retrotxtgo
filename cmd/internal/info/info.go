@@ -17,14 +17,15 @@ import (
 )
 
 var (
-	ErrInfo  = errors.New("could not any obtain information")
-	ErrUsage = errors.New("command usage could not display")
+	ErrNotExist = errors.New("no such file or directory")
+	ErrInfo     = errors.New("could not any obtain information")
+	ErrUsage    = errors.New("command usage could not display")
 )
 
 func Run(cmd *cobra.Command, args []string) error {
 	// piped input from other programs
 	if filesystem.IsPipe() {
-		Pipe()
+		Pipe(cmd)
 	}
 	if err := flag.PrintUsage(cmd, args...); err != nil {
 		return err
@@ -32,30 +33,37 @@ func Run(cmd *cobra.Command, args []string) error {
 	var n info.Names
 	n.Length = len(args)
 	for i, arg := range args {
+		if _, err := os.Stat(arg); os.IsNotExist(err) {
+			return fmt.Errorf("%w: %s", ErrNotExist, arg)
+		} else if err != nil {
+			return err
+		}
 		n.Index = i + 1
 		// embed sample filename
 		filename, err := Sample(arg)
 		if err != nil {
-			fmt.Println(logs.SprintMark(arg, ErrInfo, err))
+			fmt.Fprintln(cmd.OutOrStdout(), logs.SprintMark(arg, ErrInfo, err))
 			continue
 		}
 		if filename != "" {
 			defer os.Remove(filename)
 			arg = filename
 		}
-		if err := n.Info(arg, flag.InfoFlag.Format); err != nil {
+		s, err := n.Info(arg, flag.InfoFlag.Format)
+		if err != nil {
 			if errors.Is(logs.ErrFileName, err) {
 				if n.Length <= 1 {
 					return err
 				}
-				fmt.Println(logs.SprintMark(arg, logs.ErrFileName, err))
+				fmt.Fprintln(cmd.OutOrStdout(), logs.SprintMark(arg, logs.ErrFileName, err))
 				continue
 			}
 			if err = cmd.Usage(); err != nil {
-				fmt.Println(logs.SprintWrap(ErrUsage, err))
+				fmt.Fprintln(cmd.OutOrStdout(), logs.SprintWrap(ErrUsage, err))
 			}
 			return err
 		}
+		fmt.Fprintln(cmd.OutOrStdout(), s)
 	}
 	return nil
 }
@@ -88,13 +96,15 @@ func Sample(name string) (string, error) {
 }
 
 // Pipe parses a standard input (stdin) stream of data.
-func Pipe() {
+func Pipe(cmd *cobra.Command) {
 	b, err := filesystem.ReadPipe()
 	if err != nil {
 		logs.FatalMark("info", logs.ErrPipeRead, err)
 	}
-	if err = info.Stdin(flag.InfoFlag.Format, b...); err != nil {
+	s, err := info.Stdin(flag.InfoFlag.Format, b...)
+	if err != nil {
 		logs.FatalMark("info", logs.ErrPipeParse, err)
 	}
+	fmt.Fprint(cmd.OutOrStdout(), s)
 	os.Exit(0)
 }
