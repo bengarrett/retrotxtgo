@@ -29,6 +29,7 @@ type Configs struct {
 	Configs bool
 	Ow      bool
 	Styles  bool
+	Test    bool
 	Style   string
 }
 

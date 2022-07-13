@@ -1,4 +1,4 @@
-package config
+package cmd
 
 import (
 	"fmt"
@@ -28,22 +28,22 @@ const (
 func (c Configs) Command() *cobra.Command {
 	switch c {
 	case Create:
-		return create()
+		return ConfigCreate()
 	case Delete:
-		return del()
+		return ConfigDel()
 	case Edit:
-		return edit()
+		return ConfigEdit()
 	case Info:
-		return info()
+		return ConfigInfo()
 	case Set:
-		return set()
+		return ConfigSet()
 	case Setup:
-		return setup()
+		return ConfigSetup()
 	}
 	return nil
 }
 
-func create() *cobra.Command {
+func ConfigCreate() *cobra.Command {
 	return &cobra.Command{
 		Use:     "create",
 		Aliases: []string{"c"},
@@ -57,7 +57,7 @@ func create() *cobra.Command {
 	}
 }
 
-func del() *cobra.Command {
+func ConfigDel() *cobra.Command {
 	return &cobra.Command{
 		Use:     "delete",
 		Aliases: []string{"d", "del", "rm"},
@@ -75,7 +75,7 @@ func del() *cobra.Command {
 // the Short and Long fields. This will cause a logic error because
 // viper.GetString("editor") is not yet set and the EDITOR env value
 // will instead always be used.
-func edit() *cobra.Command {
+func ConfigEdit() *cobra.Command {
 	long := fmt.Sprintf("%s\n\n%s\n%s\n%s\n%s\n",
 		fmt.Sprintf("Edit the %s configuration file.", meta.Name),
 		"To change the editor program, either:",
@@ -97,7 +97,7 @@ func edit() *cobra.Command {
 	}
 }
 
-func info() *cobra.Command {
+func ConfigInfo() *cobra.Command {
 	return &cobra.Command{
 		Use:     "info",
 		Aliases: []string{"i"},
@@ -112,7 +112,7 @@ func info() *cobra.Command {
 	}
 }
 
-func set() *cobra.Command {
+func ConfigSet() *cobra.Command {
 	return &cobra.Command{
 		Use:     "set [setting names]",
 		Aliases: []string{"s"},
@@ -133,7 +133,7 @@ func set() *cobra.Command {
 	}
 }
 
-func setup() *cobra.Command {
+func ConfigSetup() *cobra.Command {
 	return &cobra.Command{
 		Use:   "setup",
 		Short: "Walk through all the settings",

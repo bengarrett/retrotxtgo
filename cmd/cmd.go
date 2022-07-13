@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bengarrett/retrotxtgo/cmd/internal/config"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/version"
@@ -64,7 +63,7 @@ func Execute() {
 }
 
 func CmdInit() {
-	cobra.OnInitialize(config.Load)
+	cobra.OnInitialize(Load)
 	// create and hide custom configuration file location flag.
 	Cmd.PersistentFlags().StringVar(&flag.RootFlag.Config, "config", "",
 		"optional config file location")
