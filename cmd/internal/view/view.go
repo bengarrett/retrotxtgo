@@ -2,14 +2,18 @@ package view
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/lib/convert"
-	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/spf13/cobra"
 	"golang.org/x/text/encoding"
+)
+
+var (
+	ErrConv = errors.New("convert cannot be nil")
 )
 
 // Run parses the arguments supplied with the view command.
@@ -26,13 +30,11 @@ func Run(cmd *cobra.Command, args ...string) (*bytes.Buffer, error) {
 		}
 		b, err := flag.ReadArg(arg, cmd, conv, samp)
 		if err != nil {
-			fmt.Fprintln(w, logs.Sprint(err))
-			continue
+			return nil, err
 		}
 		r, err := Transform(samp.From, samp.To, conv, b...)
 		if err != nil {
-			fmt.Fprintln(w, logs.Sprint(err))
-			continue
+			return nil, err
 		}
 		fmt.Fprint(w, string(r))
 	}
@@ -48,29 +50,29 @@ func Transform(
 	out encoding.Encoding,
 	conv *convert.Convert,
 	b ...byte) ([]rune, error) {
+	if conv == nil {
+		return nil, ErrConv
+	}
+	var err error
+	if b == nil {
+		return nil, nil
+	}
 	// handle input source encoding
 	if in != nil {
 		conv.Input.Encoding = in
 	}
-	var (
-		r   []rune
-		err error
-	)
-	// handle any output encoding BEFORE converting to Unicode
+	b2 := b
+	// handle any output re-encoding BEFORE converting to Unicode
 	if out != nil {
-		b, err = out.NewDecoder().Bytes(b)
+		b2, err = out.NewDecoder().Bytes(b)
 		if err != nil {
 			return nil, err
 		}
+		fmt.Printf("%s\n", b2)
 	}
-	// convert text to runes
+	// convert the bytes into runes
 	if flag.EndOfFile(conv.Flags) {
-		r, err = conv.Text(b...)
-	} else {
-		r, err = conv.Dump(b...)
+		return conv.Text(b2...)
 	}
-	if err != nil {
-		return nil, err
-	}
-	return r, nil
+	return conv.Dump(b2...)
 }
