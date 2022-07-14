@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
@@ -29,11 +30,13 @@ func ViewCommand() *cobra.Command {
 
 func ViewInit() *cobra.Command {
 	vc := ViewCommand()
-	flag.Encode(&flag.ViewFlag.Encode, vc)
-	flag.Controls(&flag.ViewFlag.Controls, vc)
-	flag.Runes(&flag.ViewFlag.Swap, vc)
-	flag.To(&flag.ViewFlag.To, vc)
-	flag.Width(&flag.ViewFlag.Width, vc)
+	flag.Encode(&flag.View.Encode, vc)
+	flag.Controls(&flag.View.Controls, vc)
+	flag.SwapChars(&flag.View.Swap, vc)
+	if err := flag.HiddenTo(&flag.View.To, vc); err != nil {
+		log.Fatal(err)
+	}
+	flag.Width(&flag.View.Width, vc)
 	vc.Flags().SortFlags = false
 	return vc
 }

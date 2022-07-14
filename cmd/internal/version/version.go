@@ -11,44 +11,53 @@ import (
 	"time"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/update"
+	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/gookit/color"
 	"github.com/mattn/go-isatty"
 	"golang.org/x/term"
 )
 
-// Print the application version, copyright and build variables.
-func Print() string {
-	const tabWidth, copyright, years = 8, "\u00A9", "2020-21"
-	exe, err := self()
+const (
+	Copyright = "2020-22" // Copyright © years.
+	TabWidth  = 8         // Width of tab characters.
+)
+
+// Template returns the application version, copyright and build variables.
+func Template() string {
+	const c = "\u00A9"
+	exe, err := Self()
 	if err != nil {
 		exe = err.Error()
 	}
-	newVer, v := update.Check()
+	tag, err := update.Check()
+	if err != nil {
+		logs.Save(err)
+	}
 	appDate := ""
 	if meta.App.Date != meta.Placeholder {
 		appDate = fmt.Sprintf(" (%s)", meta.App.Date)
 	}
 	var b bytes.Buffer
 	w := new(tabwriter.Writer)
-	w.Init(&b, 0, tabWidth, 0, '\t', 0)
+	w.Init(&b, 0, TabWidth, 0, '\t', 0)
 	fmt.Fprintf(w, "%s %s\n", meta.Name, meta.Print())
-	fmt.Fprintf(w, "%s %s Ben Garrett\n", copyright, years)
+	fmt.Fprintf(w, "%s %s Ben Garrett\n", Copyright, c)
 	fmt.Fprintln(w, color.Primary.Sprint(meta.URL))
 	fmt.Fprintf(w, "\n%s\t%s %s%s\n", color.Secondary.Sprint("build:"), runtime.Compiler, meta.App.BuiltBy, appDate)
 	fmt.Fprintf(w, "%s\t%s/%s\n", color.Secondary.Sprint("platform:"), runtime.GOOS, runtime.GOARCH)
-	fmt.Fprintf(w, "%s\t%s\n", color.Secondary.Sprint("terminal:"), terminal())
+	fmt.Fprintf(w, "%s\t%s\n", color.Secondary.Sprint("terminal:"), Terminal())
 	fmt.Fprintf(w, "%s\t%s\n", color.Secondary.Sprint("go:"), strings.Replace(runtime.Version(), "go", "v", 1))
 	fmt.Fprintf(w, "%s\t%s\n", color.Secondary.Sprint("path:"), exe)
-	if newVer {
-		fmt.Fprintf(w, "\n%s\n", update.Print(meta.App.Version, v))
+	if tag != "" {
+		fmt.Fprintf(w, "\n%s\n", update.String(meta.App.Version, tag))
 	}
 	w.Flush()
 	return b.String()
 }
 
 // Self returns the path to this executable file.
-func self() (string, error) {
+func Self() (string, error) {
 	exe, err := os.Executable()
 	if err != nil {
 		return "", fmt.Errorf("self error: %w", err)
@@ -57,7 +66,7 @@ func self() (string, error) {
 }
 
 // Terminal attempts to determine the host shell environment.
-func terminal() string {
+func Terminal() string {
 	const win = "windows"
 	unknown := func() string {
 		if runtime.GOOS == win {

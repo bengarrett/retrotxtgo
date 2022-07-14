@@ -29,6 +29,7 @@ require (
 require (
 	github.com/bengarrett/bbs v0.1.0
 	github.com/bengarrett/sauce v1.1.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -47,5 +48,4 @@ require (
 	github.com/subosito/gotenv v1.4.0 // indirect
 	github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778 // indirect
 	gopkg.in/ini.v1 v1.66.6 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

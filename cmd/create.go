@@ -32,16 +32,19 @@ func CreateInit() *cobra.Command {
 	// root config must be initialized before getting saved default values
 	Load()
 	// output flags
-	deflts := flag.CreateDefaults()
+	deflts := flag.Create()
 	flag.Encode(&deflts.Encode, cc)
 	flag.Controls(&deflts.Controls, cc)
-	flag.Runes(&deflts.Swap, cc)
-	dest := create.SaveDest()
-	cc.Flags().BoolVarP(&flag.HTML.Save.AsFiles, "save", "s", false,
-		"save HTML and static files to a the save directory\nor ignore to print (save directory: "+dest+")")
-	cc.Flags().BoolVarP(&flag.HTML.Save.Compress, "compress", "z", false,
+	flag.SwapChars(&deflts.Swap, cc)
+	dst, err := create.SaveDst()
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
+	cc.Flags().BoolVarP(&flag.Build.Save.AsFiles, "save", "s", false,
+		"save HTML and static files to a the save directory\nor ignore to print (save directory: "+dst+")")
+	cc.Flags().BoolVarP(&flag.Build.Save.Compress, "compress", "z", false,
 		"store and compress all files into an archive when saving")
-	cc.Flags().BoolVarP(&flag.HTML.Save.OW, "overwrite", "o", false,
+	cc.Flags().BoolVarP(&flag.Build.Save.OW, "overwrite", "o", false,
 		"overwrite any existing files when saving")
 	// meta and html related flags.
 	flags := flag.Init()
@@ -52,7 +55,7 @@ func CreateInit() *cobra.Command {
 		buf = c.Body(buf)
 		c.Init(cc, buf)
 	}
-	cc.Flags().BoolVarP(&flag.HTML.SauceData.Use, "sauce", "", true,
+	cc.Flags().BoolVarP(&flag.Build.SauceData.Use, "sauce", "", true,
 		"use any found SAUCE metadata as HTML meta tags")
 	if err := cc.Flags().MarkHidden("body"); err != nil {
 		logs.FatalMark("body", ErrHide, err)

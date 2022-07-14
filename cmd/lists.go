@@ -61,7 +61,10 @@ func ListExamples() *cobra.Command {
 			str.Example("create"), str.Example("save"), str.Example("info"), str.Example("view")),
 		Example: fmt.Sprint(example.ListExamples),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			b := list.Examples()
+			b, err := list.Examples()
+			if err != nil {
+				return err
+			}
 			fmt.Fprint(cmd.OutOrStdout(), b)
 			return nil
 		},
@@ -76,14 +79,14 @@ func ListTable() *cobra.Command {
 		Long:    "Display one or more codepage tables showing all the characters in use.",
 		Example: fmt.Sprint(example.ListTable),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := flag.PrintUsage(cmd, args...); err != nil {
+			if err := flag.Help(cmd, args...); err != nil {
 				return err
 			}
-			b, err := list.Table(args...)
+			s, err := list.Table(args...)
 			if err != nil {
 				return err
 			}
-			fmt.Fprint(cmd.OutOrStdout(), b)
+			fmt.Fprint(cmd.OutOrStdout(), fmt.Sprintln(s))
 			return nil
 		},
 	}
@@ -92,11 +95,14 @@ func ListTable() *cobra.Command {
 func ListTables() *cobra.Command {
 	return &cobra.Command{
 		Use:   "tables",
-		Short: "Display the characters of every codepage table inuse",
-		Long:  "Display the characters of every codepage table inuse.",
+		Short: "Display the characters of every codepage table in use",
+		Long:  "Display the characters of every codepage table in use.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			b := list.Tables()
-			fmt.Fprint(cmd.OutOrStdout(), b)
+			s, err := list.Tables()
+			if err != nil {
+				return err
+			}
+			fmt.Fprint(cmd.OutOrStdout(), fmt.Sprintln(s))
 			return nil
 		},
 	}

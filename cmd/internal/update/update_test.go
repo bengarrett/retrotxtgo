@@ -5,12 +5,26 @@ import (
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/update"
+	"github.com/bengarrett/retrotxtgo/meta"
 )
 
-const etag = `W/"3715383704fac6f3568e9039b347937a`
+const (
+	etag  = `W/"3715383704fac6f3568e9039b347937a`
+	alpha = `0.0.1`
+)
 
-func Example_cacheSet() {
-	if err := update.CacheSet(etag, "0.0.1"); err != nil {
+func ExampleString() {
+	s := update.String(alpha, "1.0.0")
+	fmt.Println(s)
+	// Output:┌─────────────────────────────────────────────┐
+	// │ A newer edition of RetroTxtGo is available! │
+	// │    Learn more at https://retrotxt.com/go    │
+	// │               α0.0.1 → 1.0.0                │
+	// └─────────────────────────────────────────────┘
+}
+
+func ExampleCacheSet() {
+	if err := update.CacheSet(etag, alpha); err != nil {
 		fmt.Println(err)
 	}
 	e, v := update.CacheGet()
@@ -20,7 +34,20 @@ func Example_cacheSet() {
 	// Version 0.0.1
 }
 
-func Test_compare(t *testing.T) {
+func TestCheck(t *testing.T) {
+	t.Run("check as sourcecode", func(t *testing.T) {
+		meta.App.Version = alpha
+		s, err := update.Check()
+		if err != nil {
+			t.Error(err)
+		}
+		if s == "" {
+			t.Error("expected a tag from github")
+		}
+	})
+}
+
+func TestCompare(t *testing.T) {
 	type args struct {
 		current string
 		fetched string

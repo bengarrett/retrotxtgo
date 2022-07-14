@@ -13,7 +13,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/meta"
 	gap "github.com/muesli/go-app-paths"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -24,53 +24,53 @@ var (
 
 // Cache the release data.
 type Cache struct {
-	Etag string `yaml:"etag"`
-	Ver  string `yaml:"version"`
+	Etag    string `yaml:"etag"`
+	Version string `yaml:"version"`
 }
 
 const cacheFile = "api.github.cache"
 
-// Print the new release notification box and text.
-func Print(old, newest string) *bytes.Buffer {
+// String the new release notification box and text.
+func String(old, current string) *bytes.Buffer {
 	s := fmt.Sprintf("%s%s%s\n%s%s\n%s → %s",
 		"A newer edition of ", meta.Name, " is available!",
-		"Learn more at ", meta.URL, meta.Semantic(old), newest)
+		"Learn more at ", meta.URL, meta.Semantic(old), current)
 	return str.Border(s)
 }
 
-// Check if the latest GitHub repo tag is newer than the program version.
-// The tag value is the latest GitHub repo tag.
-func Check() (newer bool, tag string) {
+// Check the GitHub for the newest release tag.
+// The returned string will only contain the newest available release tag
+// if the local program version is out of date.
+func Check() (string, error) {
 	if meta.App.Version == meta.GoBuild {
-		return false, ""
+		return "", nil
 	}
 	etag, tag := CacheGet()
 	cache, data, err := online.Endpoint(online.ReleaseAPI, etag)
 	if err != nil {
-		logs.Save(err)
-		return false, tag
+		return "", err
 	}
 	if !cache { //nolint:nestif
 		tag = fmt.Sprint(data["tag_name"])
 		if tag == "" {
-			return false, ""
+			return "", nil
 		}
 		if fmt.Sprintf("%T", data["etag"]) == "string" {
 			if data["etag"].(string) != "" {
 				if err = CacheSet(data["etag"].(string), tag); err != nil {
-					logs.Save(err)
+					return "", err
 				}
 			}
 		}
 	}
 	if comp := Compare(meta.App.Version, tag); comp {
-		return true, tag
+		return tag, nil
 	}
-	return false, ""
+	return "", nil
 }
 
 // CacheGet reads the stored GitHub API, HTTP ETag header and release version.
-func CacheGet() (etag, ver string) {
+func CacheGet() (etag, version string) {
 	cf, err := home().DataPath(cacheFile)
 	if err != nil {
 		logs.Save(err)
@@ -88,22 +88,22 @@ func CacheGet() (etag, ver string) {
 		logs.Save(err)
 	}
 	// if either value is missing, delete the broken cache
-	if cache.Etag == "" || cache.Ver == "" {
+	if cache.Etag == "" || cache.Version == "" {
 		err = os.Remove(cf)
 		logs.Save(err)
 		return "", ""
 	}
-	return cache.Etag, cache.Ver
+	return cache.Etag, cache.Version
 }
 
 // CacheSet saves the Github API, ETag HTTP header and release version.
-func CacheSet(etag, ver string) error {
-	if etag == "" || ver == "" {
+func CacheSet(etag, version string) error {
+	if etag == "" || version == "" {
 		return nil
 	}
 	cache := Cache{
-		Etag: etag,
-		Ver:  ver,
+		Etag:    etag,
+		Version: version,
 	}
 	out, err := yaml.Marshal(&cache)
 	if err != nil {

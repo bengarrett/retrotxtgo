@@ -18,16 +18,20 @@ import (
 
 var (
 	ErrNotExist = errors.New("no such file or directory")
+	ErrNotSamp  = errors.New("no such example or sample file")
 	ErrInfo     = errors.New("could not any obtain information")
 	ErrUsage    = errors.New("command usage could not display")
 )
 
 func Run(cmd *cobra.Command, args []string) error {
-	// piped input from other programs
+	// piped input from other programs and then exit
 	if filesystem.IsPipe() {
-		Pipe(cmd)
+		if err := Pipe(cmd); err != nil {
+			return err
+		}
+		return nil
 	}
-	if err := flag.PrintUsage(cmd, args...); err != nil {
+	if err := flag.Help(cmd, args...); err != nil {
 		return err
 	}
 	var n info.Names
@@ -42,24 +46,22 @@ func Run(cmd *cobra.Command, args []string) error {
 		// embed sample filename
 		filename, err := Sample(arg)
 		if err != nil {
-			fmt.Fprintln(cmd.OutOrStdout(), logs.SprintMark(arg, ErrInfo, err))
-			continue
+			return fmt.Errorf("%w, %s: %s", ErrInfo, err, arg)
 		}
 		if filename != "" {
 			defer os.Remove(filename)
 			arg = filename
 		}
-		s, err := n.Info(arg, flag.InfoFlag.Format)
+		s, err := n.Info(arg, flag.Info.Format)
 		if err != nil {
 			if errors.Is(logs.ErrFileName, err) {
 				if n.Length <= 1 {
 					return err
 				}
-				fmt.Fprintln(cmd.OutOrStdout(), logs.SprintMark(arg, logs.ErrFileName, err))
-				continue
+				return fmt.Errorf("%w, %s: %s", logs.ErrFileName, err, arg)
 			}
 			if err = cmd.Usage(); err != nil {
-				fmt.Fprintln(cmd.OutOrStdout(), logs.SprintWrap(ErrUsage, err))
+				return fmt.Errorf("%w: %s", ErrUsage, err)
 			}
 			return err
 		}
@@ -72,39 +74,39 @@ func Run(cmd *cobra.Command, args []string) error {
 func Sample(name string) (string, error) {
 	s := strings.ToLower(name)
 	if _, err := os.Stat(s); !os.IsNotExist(err) {
-		return "", nil
+		return "", ErrNotSamp
 	}
 	samp, exist := sample.Map()[s]
 	if !exist {
-		return "", nil
+		return "", ErrNotSamp
 	}
 	b, err := static.File.ReadFile(samp.Name)
 	if err != nil {
-		return "", fmt.Errorf("view package %q: %w", samp.Name, err)
+		return "", fmt.Errorf(" sample file %q: %w", samp.Name, err)
 	}
 	file, err := ioutil.TempFile("", fmt.Sprintf("retrotxt_%s.*.txt", s))
 	if err != nil {
-		return "", fmt.Errorf("view package %q: %w", samp.Name, logs.ErrTmpOpen)
+		return "", fmt.Errorf(" sample file %q: %w", samp.Name, logs.ErrTmpOpen)
 	}
 	if _, err = file.Write(b); err != nil {
-		return "", fmt.Errorf("view package %q: %w", samp.Name, logs.ErrTmpSave)
+		return "", fmt.Errorf(" sample file %q: %w", samp.Name, logs.ErrTmpSave)
 	}
 	if err := file.Close(); err != nil {
-		return "", fmt.Errorf("view package %q: %w", samp.Name, logs.ErrTmpClose)
+		return "", fmt.Errorf(" sample file %q: %w", samp.Name, logs.ErrTmpClose)
 	}
 	return file.Name(), nil
 }
 
 // Pipe parses a standard input (stdin) stream of data.
-func Pipe(cmd *cobra.Command) {
+func Pipe(cmd *cobra.Command) error {
 	b, err := filesystem.ReadPipe()
 	if err != nil {
-		logs.FatalMark("info", logs.ErrPipeRead, err)
+		return fmt.Errorf("%w, %s", logs.ErrPipeRead, err)
 	}
-	s, err := info.Stdin(flag.InfoFlag.Format, b...)
+	s, err := info.Stdin(flag.Info.Format, b...)
 	if err != nil {
-		logs.FatalMark("info", logs.ErrPipeParse, err)
+		return fmt.Errorf("%w, %s", logs.ErrPipeParse, err)
 	}
 	fmt.Fprint(cmd.OutOrStdout(), s)
-	os.Exit(0)
+	return nil
 }

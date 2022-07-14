@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/cmd"
-	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/spf13/viper"
 )
@@ -42,7 +41,7 @@ func TestListAll(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			flag.Config.Configs = tt.flag
+			cmd.Config.Configs = tt.flag
 			if got := cmd.ListAll(); got != tt.want {
 				t.Errorf("ListAll() = %v, want %v", got, tt.want)
 			}
@@ -66,6 +65,22 @@ func TestInitDefaults(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := viper.GetString(tt.key); got != tt.want {
 				t.Errorf("config.InitDefaults() %v = %v, want %v", tt.key, got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_configInfo(t *testing.T) {
+	tests := []struct {
+		name     string
+		wantExit bool
+	}{
+		{"output", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotExit := cmd.ConfigInfoer(); gotExit != tt.wantExit {
+				t.Errorf("ConfigInfo() = %v, want %v", gotExit, tt.wantExit)
 			}
 		})
 	}

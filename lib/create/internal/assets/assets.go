@@ -5,55 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/bengarrett/bbs"
-	"github.com/bengarrett/retrotxtgo/lib/create/internal/layout"
-	"golang.org/x/text/encoding"
 )
-
-// Args holds arguments and options sourced from user flags and the config file.
-type Args struct {
-	Source struct {
-		Encoding   encoding.Encoding // Original encoding of the text source
-		HiddenBody string            // Pre-text content override, accessible by a hidden flag
-		Name       string            // Text source, usually a file or pack name
-		BBSType    bbs.BBS           // Optional BBS or ANSI text format
-	}
-	Save struct {
-		AsFiles     bool   // Save assets as files
-		Cache       bool   // Cache, when false will always unpack a new .gohtml template
-		Compress    bool   // Compress and store all assets into an archive
-		OW          bool   // OW overwrite any existing files when saving
-		Destination string // Destination HTML destination either a directory or file
-	}
-	Title struct {
-		Flag  bool
-		Value string
-	}
-	FontFamily struct {
-		Flag  bool
-		Value string
-	}
-	Metadata  Meta
-	SauceData struct {
-		Use         bool
-		Title       string
-		Author      string
-		Group       string
-		Description string
-		Width       uint
-		Lines       uint
-	}
-	Port      uint   // Port for HTTP server
-	FontEmbed bool   // embed the font as Base64 data
-	Test      bool   // unit test mode
-	Layout    string // Layout of the HTML
-	Syntax    string // Syntax and color theming printing HTML
-	// internals
-	Layouts layout.Layout // layout flag interpretation
-	Tmpl    string        // template filename
-	Pack    string        // template package name
-}
 
 // Meta data to embed into the HTML.
 type Meta struct {

@@ -23,7 +23,7 @@ var (
 	ErrIANA  = errors.New("could not work out the IANA index or MIME type")
 )
 
-func Examples() *bytes.Buffer {
+func Examples() (*bytes.Buffer, error) {
 	m := sample.Map()
 	keys := make([]string, 0, len(m))
 	for k := range m {
@@ -62,16 +62,16 @@ func Examples() *bytes.Buffer {
 	fmt.Fprintf(w, "\nMultiple examples used together are supported.\n%s\n",
 		str.Example(bin+"view ansi ascii ansi.rgb"))
 	if err := w.Flush(); err != nil {
-		logs.FatalWrap(logs.ErrTabFlush, err)
+		return nil, fmt.Errorf("%w, %s", logs.ErrTabFlush, err)
 	}
-	return &buf
+	return &buf, nil
 }
 
 // listTable returns one or more named encodings in a tabled format.
 func Table(names ...string) (string, error) {
 	// custom ascii shortcut
-	ns := names
-	for i, name := range ns {
+	tables := names
+	for i, name := range tables {
 		if name != "ascii" {
 			continue
 		}
@@ -81,25 +81,30 @@ func Table(names ...string) (string, error) {
 		names = append(names[:i+1], names[i:]...)
 		names[i] = "ascii-63"
 	}
-	s := ""
+	var b = strings.Builder{}
 	// iterate through the tables
 	for _, name := range names {
 		table, err := convert.Table(name)
 		if err != nil {
 			return "", err
 		}
-		s = fmt.Sprintf("%s%s", s, table.String())
+		l := len(table.Bytes())
+		b.Grow(l)
+		fmt.Fprintf(&b, "%s ", table)
 	}
-	return s, nil
+	return b.String(), nil
 }
 
-// listTbls returns all the supported encodings in a tabled format.
-func Tables() (s string) {
-	enc := convert.Encodings()
+// Tables returns all the supported encodings in a tabled format.
+func Tables() (string, error) {
+	// use strings builder to reduce memory usage
+	// https://yourbasic.org/golang/build-append-concatenate-strings-efficiently/
+	var b = strings.Builder{}
 	var tables []encoding.Encoding
+	encodings := convert.Encodings()
 	// reorder tables to position X-User-Defined after ISO-8859-10
-	for _, tbl := range enc {
-		switch tbl {
+	for _, e := range encodings {
+		switch e {
 		case charmap.ISO8859_10:
 			tables = append(tables, charmap.ISO8859_10)
 			tables = append(tables, charmap.XUserDefined)
@@ -107,22 +112,21 @@ func Tables() (s string) {
 		case charmap.XUserDefined:
 			continue
 		}
-		tables = append(tables, tbl)
+		tables = append(tables, e)
 	}
 	// print tables
-	for _, tbl := range tables {
+	for _, e := range tables {
 		var (
 			err  error
 			name string
 		)
-		if tbl == charmap.XUserDefined {
+		if e == charmap.XUserDefined {
 			name = "iso-8859-11"
 		}
 		if name == "" {
-			name, err = ianaindex.MIME.Name(tbl)
+			name, err = ianaindex.MIME.Name(e)
 			if err != nil {
-				fmt.Println(logs.SprintMark(fmt.Sprint(tbl), ErrIANA, err))
-				continue
+				return "", fmt.Errorf("table %s, %s, %w", e, ErrIANA, err)
 			}
 		}
 		if !Printable(name) {
@@ -130,18 +134,32 @@ func Tables() (s string) {
 		}
 		table, err := convert.Table(name)
 		if err != nil {
-			fmt.Println(logs.SprintMark(name, ErrTable, err))
-			continue
+			return "", fmt.Errorf("table %s, %s, %w", e, ErrTable, err)
 		}
-		s = fmt.Sprintf("%s%s", s, table.String())
+		l := len(table.Bytes())
+		b.Grow(l)
+		fmt.Fprintf(&b, "%s ", table)
 	}
-	return s
+	return b.String(), nil
 }
 
-// Printable returns true if the named encoding be shown in an 8-bit table.
+// Printable returns true if the named encoding can be shown in an 8-bit table.
 func Printable(name string) bool {
-	switch strings.ToLower(name) {
-	case "", "utf-16", "utf-16be", "utf-16le", "utf-32", "utf-32be", "utf-32le":
+	const (
+		utf16 = "utf-16"
+		l     = len(utf16)
+	)
+	s := strings.ToLower(name)
+	if s == "" {
+		return false
+	}
+	if len(s) < l {
+		return true
+	}
+	if s[:l] == utf16 {
+		return false
+	}
+	if s[:l] == "utf-32" {
 		return false
 	}
 	return true

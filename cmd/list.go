@@ -17,7 +17,7 @@ func ListCommand() *cobra.Command {
 		Long:    "List the available inbuilt text art and text documents, codepages and their tabled values.",
 		Example: fmt.Sprint(example.List),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := flag.PrintUsage(cmd, args...); err != nil {
+			if err := flag.Help(cmd, args...); err != nil {
 				return err
 			}
 			if len(args) > 0 {

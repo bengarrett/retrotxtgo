@@ -36,7 +36,7 @@ var Cmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Do nothing other than print the help.
 		// This func must remain otherwise root command flags are ignored by Cobra.
-		if err := flag.PrintUsage(cmd); err != nil {
+		if err := flag.Help(cmd); err != nil {
 			return err
 		}
 		return nil
@@ -50,7 +50,7 @@ func Execute() {
 	Cmd.CompletionOptions.DisableDefaultCmd = true
 	Cmd.SilenceErrors = true // set to false to debug errors
 	Cmd.Version = meta.Print()
-	Cmd.SetVersionTemplate(version.Print())
+	Cmd.SetVersionTemplate(version.Template())
 	if err := Cmd.Execute(); err != nil {
 		const minArgs = 2
 		if len(os.Args) < minArgs {
@@ -65,7 +65,7 @@ func Execute() {
 func CmdInit() {
 	cobra.OnInitialize(Load)
 	// create and hide custom configuration file location flag.
-	Cmd.PersistentFlags().StringVar(&flag.RootFlag.Config, "config", "",
+	Cmd.PersistentFlags().StringVar(&flag.Command.Config, "config", "",
 		"optional config file location")
 	if err := Cmd.PersistentFlags().MarkHidden("config"); err != nil {
 		logs.FatalMark("config", ErrHide, err)

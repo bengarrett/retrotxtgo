@@ -20,7 +20,7 @@ func ConfigCommand() *cobra.Command {
 		Long:    fmt.Sprintf("%s settings, setup and default configurations.", meta.Name),
 		Example: fmt.Sprint(example.Config),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := flag.PrintUsage(cmd, args...); err != nil {
+			if err := flag.Help(cmd, args...); err != nil {
 				return err
 			}
 			if len(args) > 0 {
@@ -40,20 +40,20 @@ func ConfigInit() *cobra.Command {
 	cc.AddCommand(Set.Command())
 	cc.AddCommand(Setup.Command())
 	// create
-	Create.Command().Flags().BoolVarP(&flag.Config.Ow, "overwrite", "y", false,
+	Create.Command().Flags().BoolVarP(&Config.OW, "overwrite", "y", false,
 		"overwrite and reset the existing config file")
 	// info
-	Info.Command().Flags().BoolVarP(&flag.Config.Configs, "configs", "c", false,
+	Info.Command().Flags().BoolVarP(&Config.Configs, "configs", "c", false,
 		"list all the available configuration setting names")
-	Info.Command().Flags().StringVarP(&flag.Config.Style, "style", "s", "",
+	Info.Command().Flags().StringVarP(&Config.Style, "style", "s", "",
 		"choose a syntax highligher")
-	Info.Command().Flags().BoolVar(&flag.Config.Styles, "styles", false,
+	Info.Command().Flags().BoolVar(&Config.Styles, "styles", false,
 		"list and preview the available syntax highlighers")
 	// set
-	Set.Command().Flags().BoolVarP(&flag.Config.Configs, "list", "l", false,
+	Set.Command().Flags().BoolVarP(&Config.Configs, "list", "l", false,
 		"list all the available setting names")
 	// hidden test flag
-	cc.PersistentFlags().BoolVar(&flag.Config.Test, "test", false,
+	cc.PersistentFlags().BoolVar(&Config.Test, "test", false,
 		"hidden flag to use an alternative config for config testing")
 	if err := cc.PersistentFlags().MarkHidden("test"); err != nil {
 		logs.FatalMark("test", ErrHide, err)

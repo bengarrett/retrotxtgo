@@ -13,9 +13,11 @@ func TestSample(t *testing.T) {
 		wantFilename bool
 		wantErr      bool
 	}{
-		{"empty", "", false, false},
-		{"invalid", "text/retrotxt.asc", false, false},
-		{"empty", "ascii", true, false},
+		{"empty", "", false, true},
+		{"invalid", "text/retrotxt.asc", false, true},
+		{"logos", "ascii", true, false},
+		{"ansi", "ansi", true, false},
+		{"utf8", "utf8", true, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

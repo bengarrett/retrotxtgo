@@ -23,7 +23,51 @@ import (
 	"golang.org/x/text/transform"
 )
 
-type Args assets.Args
+// Args holds arguments and options sourced from user flags and the config file.
+type Args struct {
+	Source struct {
+		Encoding   encoding.Encoding // Original encoding of the text source
+		HiddenBody string            // Pre-text content override, accessible by a hidden flag
+		Name       string            // Text source, usually a file or pack name
+		BBSType    bbs.BBS           // Optional BBS or ANSI text format
+	}
+	Save struct {
+		AsFiles     bool   // Save assets as files
+		Cache       bool   // Cache, when false will always unpack a new .gohtml template
+		Compress    bool   // Compress and store all assets into an archive
+		OW          bool   // OW overwrite any existing files when saving
+		Destination string // Destination HTML destination either a directory or file
+	}
+	Title struct {
+		Flag  bool
+		Value string
+	}
+	FontFamily struct {
+		Flag  bool
+		Value string
+	}
+	Metadata  assets.Meta
+	SauceData SAUCE
+	Port      uint   // Port for HTTP server
+	FontEmbed bool   // embed the font as Base64 data
+	Test      bool   // unit test mode
+	Layout    string // Layout of the HTML
+	Syntax    string // Syntax and color theming printing HTML
+	// internals
+	Layouts layout.Layout // layout flag interpretation
+	Tmpl    string        // template filename
+	Pack    string        // template package name
+}
+
+type SAUCE struct {
+	Use         bool
+	Title       string
+	Author      string
+	Group       string
+	Description string
+	Width       uint
+	Lines       uint
+}
 
 // ColorScheme values for the content attribute of <meta name="color-scheme">.
 func ColorScheme() [3]string {
@@ -68,7 +112,7 @@ func (args *Args) Create(b *[]byte) error {
 	case args.Save.AsFiles:
 		if err := args.SaveAssets(b); err != nil {
 			// --overwrite hint
-			if errors.As(err, &ErrFileExist) {
+			if errors.Is(err, ErrFileExist) {
 				fmt.Println(logs.Hint("create [filenames] --overwrite", ErrFileExist))
 				fmt.Println(str.Info() + "Use the overwrite flag to replace any existing files.")
 				os.Exit(logs.OSErrCode)
@@ -150,7 +194,7 @@ func appendErr(errs, err error) error {
 		return err
 	}
 	// skip duplicate errors
-	if !errors.Is(err, ErrFileExist) && errors.As(errs, &err) {
+	if !errors.Is(err, ErrFileExist) && errors.Is(errs, err) {
 		return errs
 	}
 	return fmt.Errorf("%s;%w", errs, err)

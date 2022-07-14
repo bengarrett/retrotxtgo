@@ -43,6 +43,16 @@ func (c Configs) Command() *cobra.Command {
 	return nil
 }
 
+type Configer struct {
+	Configs bool
+	OW      bool
+	Styles  bool
+	Test    bool
+	Style   string
+}
+
+var Config Configer
+
 func ConfigCreate() *cobra.Command {
 	return &cobra.Command{
 		Use:     "create",
@@ -50,7 +60,7 @@ func ConfigCreate() *cobra.Command {
 		Short:   "Create or reset the config file",
 		Long:    fmt.Sprintf("Create or reset the %s configuration file.", meta.Name),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			overwrite := flag.Config.Ow
+			overwrite := Config.OW
 			if err := config.New(overwrite); err != nil {
 				return fmt.Errorf("%w: %s", logs.ErrConfigNew, err)
 			}
@@ -109,7 +119,7 @@ func ConfigInfo() *cobra.Command {
 		Short:   "List all the settings in use",
 		Long:    fmt.Sprintf("List all the %s settings in use.", meta.Name),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if flag.ConfigInfo() {
+			if ConfigInfoer() {
 				return nil
 			}
 			return nil
@@ -156,7 +166,7 @@ func ConfigSetup() *cobra.Command {
 
 // ListAll is the "config set --list" command run.
 func ListAll() (exit bool) {
-	if flag.Config.Configs {
+	if Config.Configs {
 		if err := config.List(); err != nil {
 			logs.FatalFlag("config", "list", err)
 		}
@@ -185,7 +195,30 @@ func Load() {
 	viper.SetEnvPrefix("env")
 	viper.AutomaticEnv()
 	// configuration file
-	if err := config.SetConfig(flag.RootFlag.Config); err != nil {
+	if err := config.SetConfig(flag.Command.Config); err != nil {
 		logs.FatalMark(viper.ConfigFileUsed(), logs.ErrConfigOpen, err)
 	}
+}
+
+func ConfigInfoer() (exit bool) {
+	if Config.Configs {
+		if err := config.List(); err != nil {
+			logs.FatalFlag("config info", "list", err)
+		}
+	}
+	if Config.Styles {
+		fmt.Print(str.JSONStyles(fmt.Sprintf("%s info --style", meta.Bin)))
+		return true
+	}
+	style := viper.GetString("style.info")
+	if Config.Style != "" {
+		style = Config.Style
+	}
+	if style == "" {
+		style = "dracula"
+	}
+	if err := config.Info(style); err != nil {
+		logs.Fatal(err)
+	}
+	return false
 }

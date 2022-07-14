@@ -18,7 +18,7 @@ var (
 
 // Run parses the arguments supplied with the view command.
 func Run(cmd *cobra.Command, args ...string) (*bytes.Buffer, error) {
-	args, conv, samp, err := flag.InitArgs(cmd, args...)
+	args, conv, samp, err := flag.Args(cmd, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +28,7 @@ func Run(cmd *cobra.Command, args ...string) (*bytes.Buffer, error) {
 			const halfPage = 40
 			fmt.Fprintln(w, str.HRPad(halfPage))
 		}
-		b, err := flag.ReadArg(arg, cmd, conv, samp)
+		b, err := flag.ReadArgument(arg, cmd, conv, samp)
 		if err != nil {
 			return nil, err
 		}

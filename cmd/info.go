@@ -30,7 +30,7 @@ func InfoCommand() *cobra.Command {
 func InfoInit() *cobra.Command {
 	ic := InfoCommand()
 	infos := config.Format().Info
-	ic.Flags().StringVarP(&flag.InfoFlag.Format, "format", "f", "color",
+	ic.Flags().StringVarP(&flag.Info.Format, "format", "f", "color",
 		str.Options("print format or syntax", true, true, infos[:]...))
 	return ic
 }
