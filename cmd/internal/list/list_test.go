@@ -9,10 +9,10 @@ import (
 	"github.com/gookit/color"
 )
 
-func ExamplePrintTable() {
+func ExampleTable() {
 	color.Enable = false
 	names := []string{"cp437"}
-	t, err := list.PrintTable(names...)
+	t, err := list.Table(names...)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -20,16 +20,16 @@ func ExamplePrintTable() {
 	// Output: 1689 characters in the table
 }
 
-func ExamplePrintTables() {
+func ExampleTables() {
 	color.Enable = false
-	t := list.PrintTables()
+	t := list.Tables()
 	fmt.Printf("%d characters in the table", len(t))
 	// Output: 75070 characters in the table
 }
 
-func TestPrintExamples(t *testing.T) {
+func TestExamples(t *testing.T) {
 	t.Run("example", func(t *testing.T) {
-		if got := list.PrintExamples(); got == nil {
+		if got := list.Examples(); got == nil {
 			t.Errorf("examples() failed to return anything")
 		}
 	})

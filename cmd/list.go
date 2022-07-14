@@ -5,7 +5,6 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
-	"github.com/bengarrett/retrotxtgo/cmd/internal/list"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/spf13/cobra"
 )
@@ -31,10 +30,10 @@ func ListCommand() *cobra.Command {
 
 func ListInit() *cobra.Command {
 	lc := ListCommand()
-	lc.AddCommand(list.Codepages.Command())
-	lc.AddCommand(list.Examples.Command())
-	lc.AddCommand(list.Table.Command())
-	lc.AddCommand(list.Tables.Command())
+	lc.AddCommand(ListCodepages())
+	lc.AddCommand(ListExamples())
+	lc.AddCommand(ListTable())
+	lc.AddCommand(ListTables())
 	return lc
 }
 

@@ -8,14 +8,11 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/bengarrett/retrotxtgo/cmd/internal/example"
-	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/lib/convert"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/sample"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/meta"
-	"github.com/spf13/cobra"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/ianaindex"
@@ -26,30 +23,7 @@ var (
 	ErrIANA  = errors.New("could not work out the IANA index or MIME type")
 )
 
-type Lists int
-
-const (
-	Codepages Lists = iota
-	Examples
-	Table
-	Tables
-)
-
-func (l Lists) Command() *cobra.Command {
-	switch l {
-	case Codepages:
-		return codepages()
-	case Examples:
-		return examples()
-	case Table:
-		return table()
-	case Tables:
-		return tables()
-	}
-	return nil
-}
-
-func PrintExamples() *bytes.Buffer {
+func Examples() *bytes.Buffer {
 	m := sample.Map()
 	keys := make([]string, 0, len(m))
 	for k := range m {
@@ -94,7 +68,7 @@ func PrintExamples() *bytes.Buffer {
 }
 
 // listTable returns one or more named encodings in a tabled format.
-func PrintTable(names ...string) (string, error) {
+func Table(names ...string) (string, error) {
 	// custom ascii shortcut
 	ns := names
 	for i, name := range ns {
@@ -120,7 +94,7 @@ func PrintTable(names ...string) (string, error) {
 }
 
 // listTbls returns all the supported encodings in a tabled format.
-func PrintTables() (s string) {
+func Tables() (s string) {
 	enc := convert.Encodings()
 	var tables []encoding.Encoding
 	// reorder tables to position X-User-Defined after ISO-8859-10
@@ -171,71 +145,4 @@ func Printable(name string) bool {
 		return false
 	}
 	return true
-}
-
-func codepages() *cobra.Command {
-	return &cobra.Command{
-		Use:     "codepages",
-		Aliases: []string{"c", "cp"},
-		Short: fmt.Sprintf("List the legacy codepages that %s can convert to UTF-8",
-			meta.Name),
-		Long: fmt.Sprintf("List the available legacy codepages that %s can convert to UTF-8.",
-			meta.Name),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			b := convert.List()
-			fmt.Fprint(cmd.OutOrStdout(), b)
-			return nil
-		},
-	}
-}
-
-func examples() *cobra.Command {
-	return &cobra.Command{
-		Use:     "examples",
-		Aliases: []string{"e"},
-		Short: fmt.Sprintf("List builtin text files available for use with the %s, %s, %s and %s commands",
-			str.Example("create"), str.Example("save"), str.Example("info"), str.Example("view")),
-		Long: fmt.Sprintf("List builtin text art and documents available for use with the %s, %s, %s and %s commands.",
-			str.Example("create"), str.Example("save"), str.Example("info"), str.Example("view")),
-		Example: fmt.Sprint(example.ListExamples),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			b := PrintExamples()
-			fmt.Fprint(cmd.OutOrStdout(), b)
-			return nil
-		},
-	}
-}
-
-func table() *cobra.Command {
-	return &cobra.Command{
-		Use:     "table [codepage names or aliases]",
-		Aliases: []string{"t"},
-		Short:   "Display one or more codepage tables showing all the characters in use",
-		Long:    "Display one or more codepage tables showing all the characters in use.",
-		Example: fmt.Sprint(example.ListTable),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := flag.PrintUsage(cmd, args...); err != nil {
-				return err
-			}
-			b, err := PrintTable(args...)
-			if err != nil {
-				return err
-			}
-			fmt.Fprint(cmd.OutOrStdout(), b)
-			return nil
-		},
-	}
-}
-
-func tables() *cobra.Command {
-	return &cobra.Command{
-		Use:   "tables",
-		Short: "Display the characters of every codepage table inuse",
-		Long:  "Display the characters of every codepage table inuse.",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			b := PrintTables()
-			fmt.Fprint(cmd.OutOrStdout(), b)
-			return nil
-		},
-	}
 }
