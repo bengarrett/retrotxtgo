@@ -7,9 +7,9 @@ import (
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/lib/convert"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
-	"github.com/bengarrett/retrotxtgo/lib/sample"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/spf13/cobra"
+	"golang.org/x/text/encoding"
 )
 
 // Run parses the arguments supplied with the view command.
@@ -29,7 +29,7 @@ func Run(cmd *cobra.Command, args ...string) (*bytes.Buffer, error) {
 			fmt.Fprintln(w, logs.Sprint(err))
 			continue
 		}
-		r, err := transform(conv, samp, b...)
+		r, err := Transform(samp.From, samp.To, conv, b...)
 		if err != nil {
 			fmt.Fprintln(w, logs.Sprint(err))
 			continue
@@ -39,19 +39,26 @@ func Run(cmd *cobra.Command, args ...string) (*bytes.Buffer, error) {
 	return w, nil
 }
 
-// transform the bytes into Unicode runes.
-func transform(conv *convert.Convert, f sample.Flags, b ...byte) ([]rune, error) {
+// Transform bytes into Unicode runes.
+// The optional in encoding argument is the bytes original character encoding.
+// The optional out encoding argument is the encoding to replicate.
+// When no encoding arguments are provided, UTF-8 unicode encoding is used.
+func Transform(
+	in encoding.Encoding,
+	out encoding.Encoding,
+	conv *convert.Convert,
+	b ...byte) ([]rune, error) {
 	// handle input source encoding
-	if f.From != nil {
-		conv.Input.Encoding = f.From
+	if in != nil {
+		conv.Input.Encoding = in
 	}
 	var (
 		r   []rune
 		err error
 	)
 	// handle any output encoding BEFORE converting to Unicode
-	if f.To != nil {
-		b, err = f.To.NewDecoder().Bytes(b)
+	if out != nil {
+		b, err = out.NewDecoder().Bytes(b)
 		if err != nil {
 			return nil, err
 		}
