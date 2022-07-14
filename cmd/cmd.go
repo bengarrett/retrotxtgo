@@ -32,7 +32,7 @@ var Cmd = &cobra.Command{
 	Use:     meta.Bin,
 	Short:   cmdShort,
 	Long:    cmdLong,
-	Example: example.Root.Print(),
+	Example: fmt.Sprint(example.Cmd),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Do nothing other than print the help.
 		// This func must remain otherwise root command flags are ignored by Cobra.

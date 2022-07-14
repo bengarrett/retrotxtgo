@@ -15,7 +15,7 @@ func ViewCommand() *cobra.Command {
 		Aliases: []string{"v"},
 		Short:   "Print a text file to the terminal using standard output",
 		Long:    "Print a text file to the terminal using standard output.",
-		Example: example.View.Print(),
+		Example: fmt.Sprint(example.View),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			b, err := view.Run(cmd, args...)
 			if err != nil {

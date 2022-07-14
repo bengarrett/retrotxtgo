@@ -17,52 +17,26 @@ import (
 
 const Filenames = "[filenames]"
 
-type Examples int
+type Example int
 
 const (
-	Config Examples = iota
+	Cmd Example = iota
+	Config
+	ConfigInfo
 	Create
-	CfgInfo
 	List
 	ListExamples
 	ListTable
 	Info
-	Root
 	Set
 	View
 )
 
-func (e Examples) String() string {
-	switch e {
-	case Config:
-		return config()
-	case Create:
-		return create()
-	case CfgInfo:
-		return cfgInfo()
-	case List:
-		return list()
-	case ListExamples:
-		return listExamples()
-	case ListTable:
-		return listTable()
-	case Info:
-		return info()
-	case Root:
-		return root()
-	case Set:
-		return set()
-	case View:
-		return view()
-	}
-	return ""
-}
-
 // Print returns help usage examples.
-func (e Examples) Print() string {
+func (e Example) String() string {
 	var b bytes.Buffer
 	// change example operating system path separator
-	t := template.Must(template.New("example").Parse(e.String()))
+	t := template.Must(template.New("example").Parse(e.result()))
 	err := t.Execute(&b, string(os.PathSeparator))
 	if err != nil {
 		log.Fatal(err)
@@ -86,10 +60,57 @@ func (e Examples) Print() string {
 	return strings.TrimSpace(s)
 }
 
+func (e Example) result() string {
+	switch e {
+	case Cmd:
+		return cmd()
+	case Config:
+		return config()
+	case ConfigInfo:
+		return configInfo()
+	case Create:
+		return create()
+	case List:
+		return list()
+	case ListExamples:
+		return listExamples()
+	case ListTable:
+		return listTable()
+	case Info:
+		return info()
+	case Set:
+		return set()
+	case View:
+		return view()
+	}
+	return ""
+}
+
+func cmd() string {
+	return fmt.Sprintf("  %s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s",
+		"# save the text files as webpages",
+		fmt.Sprintf("%s create %s", meta.Bin, Filenames),
+		"# save the text files as webpages stored in a zip file",
+		fmt.Sprintf("%s create %s --compress", meta.Bin, Filenames),
+		"# print detailed information about the text files",
+		fmt.Sprintf("%s info   %s", meta.Bin, Filenames),
+		"# print the text files as Unicode text",
+		fmt.Sprintf("%s view   %s", meta.Bin, Filenames),
+		fmt.Sprintf("# configure the %s flags and settings", meta.Name),
+		fmt.Sprintf("%s config setup", meta.Bin),
+	)
+}
+
 func config() string {
 	return fmt.Sprintf("  %s %s %s\n%s %s %s",
 		meta.Bin, "config setup", "# Walk through all the settings",
 		meta.Bin, "config set --list", "# List all the settings in use")
+}
+
+func configInfo() string {
+	return fmt.Sprintf("  %s\n%s",
+		fmt.Sprintf("%s config info   # List the default setting values", meta.Bin),
+		fmt.Sprintf("%s config set -c # List the settings and help hints", meta.Bin))
 }
 
 func create() string {
@@ -103,22 +124,15 @@ func create() string {
 		"# host the HTML file created from file.txt\n",
 		fmt.Sprintf("%s create file.txt --serve=%d", meta.Bin, meta.WebPort),
 		"# pipe a HTML file created from file.txt\n",
-		fmt.Sprintf("%s create file.txt | %s", meta.Bin, catCmd()))
+		fmt.Sprintf("%s create file.txt | %s", meta.Bin, cat()))
 }
 
-// catCmd returns the os command name to concatenate a file to standard output.
-func catCmd() string {
-	s := "cat"
+// cat returns the os command name to concatenate a file to standard output.
+func cat() string {
 	if runtime.GOOS == "windows" {
-		s = "type"
+		return "type"
 	}
-	return s
-}
-
-func cfgInfo() string {
-	return fmt.Sprintf("  %s\n%s",
-		fmt.Sprintf("%s config info   # List the default setting values", meta.Bin),
-		fmt.Sprintf("%s config set -c # List the settings and help hints", meta.Bin))
+	return "cat"
 }
 
 func list() string {
@@ -149,21 +163,6 @@ func info() string {
 	return fmt.Sprintf("  %s %s\n%s %s",
 		meta.Bin, "info text.asc logo.jpg # print the information of multiple files",
 		meta.Bin, "info file.txt --format=json # print the information using a structured syntax")
-}
-
-func root() string {
-	return fmt.Sprintf("  %s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s",
-		"# save the text files as webpages",
-		fmt.Sprintf("%s create %s", meta.Bin, Filenames),
-		"# save the text files as webpages stored in a zip file",
-		fmt.Sprintf("%s create %s --compress", meta.Bin, Filenames),
-		"# print detailed information about the text files",
-		fmt.Sprintf("%s info   %s", meta.Bin, Filenames),
-		"# print the text files as Unicode text",
-		fmt.Sprintf("%s view   %s", meta.Bin, Filenames),
-		fmt.Sprintf("# configure the %s flags and settings", meta.Name),
-		fmt.Sprintf("%s config setup", meta.Bin),
-	)
 }
 
 func set() string {

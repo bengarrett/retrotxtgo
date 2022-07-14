@@ -197,7 +197,7 @@ func examples() *cobra.Command {
 			str.Example("create"), str.Example("save"), str.Example("info"), str.Example("view")),
 		Long: fmt.Sprintf("List builtin text art and documents available for use with the %s, %s, %s and %s commands.",
 			str.Example("create"), str.Example("save"), str.Example("info"), str.Example("view")),
-		Example: example.ListExamples.Print(),
+		Example: fmt.Sprint(example.ListExamples),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			b := PrintExamples()
 			fmt.Fprint(cmd.OutOrStdout(), b)
@@ -212,7 +212,7 @@ func table() *cobra.Command {
 		Aliases: []string{"t"},
 		Short:   "Display one or more codepage tables showing all the characters in use",
 		Long:    "Display one or more codepage tables showing all the characters in use.",
-		Example: example.ListTable.Print(),
+		Example: fmt.Sprint(example.ListTable),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := flag.PrintUsage(cmd, args...); err != nil {
 				return err

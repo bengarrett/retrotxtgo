@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/bengarrett/retrotxtgo/cmd/internal/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/list"
@@ -14,7 +16,7 @@ func ListCommand() *cobra.Command {
 		Aliases: []string{"l"},
 		Short:   "Available inbuilt examples, codepages and tabled datasets",
 		Long:    "List the available inbuilt text art and text documents, codepages and their tabled values.",
-		Example: example.List.Print(),
+		Example: fmt.Sprint(example.List),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := flag.PrintUsage(cmd, args...); err != nil {
 				return err

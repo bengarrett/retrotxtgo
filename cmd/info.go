@@ -17,7 +17,7 @@ func InfoCommand() *cobra.Command {
 		Aliases: []string{"i"},
 		Short:   "Information on a text file",
 		Long:    "Discover details and information about any text or text art file.",
-		Example: example.Info.Print(),
+		Example: fmt.Sprint(example.Info),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := info.Run(cmd, args); err != nil {
 				return err

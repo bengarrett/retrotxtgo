@@ -17,7 +17,7 @@ func CreateCommand() *cobra.Command {
 		Aliases: []string{"c", "html"},
 		Short:   "Create a HTML document from text files",
 		Long:    "Create a HTML document from text documents and text art files.",
-		Example: example.Create.Print(),
+		Example: fmt.Sprint(example.Create),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := create.Run(cmd, args); err != nil {
 				return err
@@ -36,9 +36,9 @@ func CreateInit() *cobra.Command {
 	flag.Encode(&deflts.Encode, cc)
 	flag.Controls(&deflts.Controls, cc)
 	flag.Runes(&deflts.Swap, cc)
-	dir := create.SaveDir()
+	dest := create.SaveDest()
 	cc.Flags().BoolVarP(&flag.HTML.Save.AsFiles, "save", "s", false,
-		"save HTML and static files to a the save directory\nor ignore to print (save directory: "+dir+")")
+		"save HTML and static files to a the save directory\nor ignore to print (save directory: "+dest+")")
 	cc.Flags().BoolVarP(&flag.HTML.Save.Compress, "compress", "z", false,
 		"store and compress all files into an archive when saving")
 	cc.Flags().BoolVarP(&flag.HTML.Save.OW, "overwrite", "o", false,

@@ -105,7 +105,7 @@ func ConfigInfo() *cobra.Command {
 	return &cobra.Command{
 		Use:     "info",
 		Aliases: []string{"i"},
-		Example: example.CfgInfo.Print(),
+		Example: fmt.Sprint(example.ConfigInfo),
 		Short:   "List all the settings in use",
 		Long:    fmt.Sprintf("List all the %s settings in use.", meta.Name),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -123,7 +123,7 @@ func ConfigSet() *cobra.Command {
 		Aliases: []string{"s"},
 		Short:   "Edit a setting",
 		Long:    fmt.Sprintf("Edit a %s setting.", meta.Name),
-		Example: example.Set.Print(),
+		Example: fmt.Sprint(example.Set),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if ListAll() {
 				return nil

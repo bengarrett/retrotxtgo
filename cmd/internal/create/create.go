@@ -161,8 +161,8 @@ func ParseFiles(cmd *cobra.Command, flags convert.Flag, args ...string) error {
 	return nil
 }
 
-// SaveDir returns the directory the created HTML and other files will be saved to.
-func SaveDir() string {
+// SaveDest returns the directory the created HTML and other files will be saved to.
+func SaveDest() string {
 	var err error
 	s := viper.GetString("save-directory")
 	if s == "" {

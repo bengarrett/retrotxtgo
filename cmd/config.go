@@ -18,7 +18,7 @@ func ConfigCommand() *cobra.Command {
 		Aliases: []string{"cfg"},
 		Short:   fmt.Sprintf("%s configuration and defaults", meta.Name),
 		Long:    fmt.Sprintf("%s settings, setup and default configurations.", meta.Name),
-		Example: example.Config.Print(),
+		Example: fmt.Sprint(example.Config),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := flag.PrintUsage(cmd, args...); err != nil {
 				return err
