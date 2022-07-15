@@ -23,15 +23,12 @@ func ExampleString() {
 	// └─────────────────────────────────────────────┘
 }
 
-func ExampleCacheSet() {
-	if err := update.CacheSet(etag, alpha); err != nil {
-		fmt.Println(err)
-	}
-	e, v := update.CacheGet()
-	fmt.Println("Etag", e)
-	fmt.Println("Version", v)
-	// Output: Etag W/"3715383704fac6f3568e9039b347937a
-	// Version 0.0.1
+func TestCacheSet(t *testing.T) {
+	t.Run("cache set", func(t *testing.T) {
+		if err := update.CacheSet(etag, alpha); err != nil {
+			t.Error(err)
+		}
+	})
 }
 
 func TestCheck(t *testing.T) {

@@ -43,6 +43,27 @@ func Test_InfoFiles(t *testing.T) {
 	})
 }
 
+func Test_InfoSamples(t *testing.T) {
+	samplers := []string{"037", "ansi.aix", "shiftjis", "utf8"}
+	wants := []string{"EBCDIC encoded text document",
+		"Text document with ANSI controls",
+		"plain text document",
+		"UTF-8 compatible"}
+	t.Run("info multiple samples", func(t *testing.T) {
+		for i, sample := range samplers {
+			fmt.Println(i, sample)
+			gotB, err := infoT.tester([]string{"--format", "text", sample})
+			if err != nil {
+				t.Error(err)
+			}
+			if !bytes.Contains(gotB, []byte(wants[i])) {
+				t.Errorf("sample %s result does not contain: %s", sample, wants[i])
+				fmt.Printf("%s", gotB)
+			}
+		}
+	})
+}
+
 func Test_InfoText(t *testing.T) {
 	t.Run("info format text", func(t *testing.T) {
 		err := filepath.Walk(static,

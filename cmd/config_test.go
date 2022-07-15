@@ -36,7 +36,6 @@ func Test_createConfig(t *testing.T) {
 				t.Error(err)
 			}
 		}()
-		t.Error(tmp)
 	})
 }
 

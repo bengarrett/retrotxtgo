@@ -37,20 +37,23 @@ func Run(cmd *cobra.Command, args []string) error {
 	var n info.Names
 	n.Length = len(args)
 	for i, arg := range args {
-		if _, err := os.Stat(arg); os.IsNotExist(err) {
-			return fmt.Errorf("%w: %s", ErrNotExist, arg)
-		} else if err != nil {
-			return err
-		}
 		n.Index = i + 1
-		// embed sample filename
-		filename, err := Sample(arg)
-		if err != nil {
-			return fmt.Errorf("%w, %s: %s", ErrInfo, err, arg)
-		}
-		if filename != "" {
+		_, err := os.Stat(arg)
+		if os.IsNotExist(err) {
+			// embed sample filename
+			filename, err := Sample(arg)
+			//fmt.Println("->", filename)
+			if errors.Is(err, ErrNotSamp) {
+				return fmt.Errorf("%w, %s: %s", ErrInfo, err, arg)
+			}
+			//fmt.Println("-->", filename)
+			if filename == "" {
+				return ErrNotExist
+			}
 			defer os.Remove(filename)
 			arg = filename
+			// fmt.Println("->", filename)
+			// os.Exit(1)
 		}
 		s, err := n.Info(arg, flag.Info.Format)
 		if err != nil {
@@ -73,9 +76,6 @@ func Run(cmd *cobra.Command, args []string) error {
 // Sample extracts and saves an embed sample file then returns its location.
 func Sample(name string) (string, error) {
 	s := strings.ToLower(name)
-	if _, err := os.Stat(s); !os.IsNotExist(err) {
-		return "", ErrNotSamp
-	}
 	samp, exist := sample.Map()[s]
 	if !exist {
 		return "", ErrNotSamp
