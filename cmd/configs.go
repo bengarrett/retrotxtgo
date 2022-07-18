@@ -131,11 +131,11 @@ func ConfigInfo() *cobra.Command {
 		Short:   "List all the settings in use",
 		Long:    fmt.Sprintf("List all the %s settings in use.", meta.Name),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			b, err := ConfigInfoer()
+			b, err := ConfigInfos()
 			if err != nil {
 				return err
 			}
-			fmt.Fprint(cmd.OutOrStdout(), b)
+			fmt.Fprintln(cmd.OutOrStdout(), b)
 			return nil
 		},
 	}
@@ -153,7 +153,7 @@ func ConfigSet() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Fprint(cmd.OutOrStdout(), b)
+			fmt.Fprintln(cmd.OutOrStdout(), b)
 			if err := Usage(cmd, args...); err != nil {
 				return err
 			}
@@ -181,19 +181,15 @@ func ConfigSetup() *cobra.Command {
 }
 
 // ListAll is the "config set --list" command run.
-func ListAll() (*[]byte, error) {
+func ListAll() (*bytes.Buffer, error) {
 	if !Config.Configs {
 		return nil, nil
 	}
-	var b []byte
-	t, err := config.List()
+	b, err := config.List()
 	if err != nil {
 		return nil, err
 	}
-	if _, err := t.Write(b); err != nil {
-		return nil, err
-	}
-	return &b, nil
+	return b, nil
 }
 
 ///=======================
@@ -217,18 +213,8 @@ func Load() {
 	viper.AutomaticEnv()
 	// tester configuration file
 	if flag.Command.Tester {
-		fmt.Println("The single use, in-memory tester file is in use.")
-		fs := afero.NewMemMapFs()
-		afs := &afero.Afero{Fs: fs}
-		f, err := afs.TempFile("", "ioutil-test")
-		if err != nil {
+		if err := LoadTester(); err != nil {
 			logs.Fatal(err)
-		}
-		if err := config.Create(f.Name(), true); err != nil {
-			logs.Fatal(err)
-		}
-		if err := config.SetConfig(f.Name()); err != nil {
-			logs.FatalMark(viper.ConfigFileUsed(), logs.ErrConfigOpen, err)
 		}
 		return
 	}
@@ -238,28 +224,52 @@ func Load() {
 	}
 }
 
-func ConfigInfoer() (*bytes.Buffer, error) {
+// LoadTester loads an in-memory default configuration file for test purposes.
+func LoadTester() error {
+	fmt.Println("The single use, in-memory tester file is in use.")
+	fs := afero.NewMemMapFs()
+	afs := &afero.Afero{Fs: fs}
+	f, err := afs.TempFile("", "ioutil-test")
+	if err != nil {
+		return err
+	}
+	if err := config.Create(f.Name(), true); err != nil {
+		return err
+	}
+	if err := config.SetConfig(f.Name()); err != nil {
+		return fmt.Errorf("%w, %s: %s", logs.ErrConfigOpen, err, viper.ConfigFileUsed())
+	}
+	return nil
+}
+
+func ConfigInfos() (*bytes.Buffer, error) {
 	w := new(bytes.Buffer)
 	if err := config.SetConfig(flag.Command.Config); err != nil {
 		return nil, fmt.Errorf("%w: %s", logs.ErrConfigOpen, err)
 	}
+	// info --configs flag
 	if Config.Configs {
 		b, err := config.List()
 		if err != nil {
 			return nil, err
 		}
 		fmt.Fprint(w, b)
+		return w, nil
 	}
+	// info --styles flag
 	if Config.Styles {
 		fmt.Fprint(w, str.JSONStyles(fmt.Sprintf("%s info --style", meta.Bin)))
+		return w, nil
 	}
+	// info --style flag
 	style := viper.GetString("style.info")
-	if Config.Style != "" {
-		style = Config.Style
-	}
 	if style == "" {
 		style = "dracula"
 	}
+	if Config.Style != "" {
+		style = Config.Style
+	}
+	// info command
 	b, err := config.Info(style)
 	if err != nil {
 		return nil, err

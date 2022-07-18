@@ -46,7 +46,7 @@ func TestListAll(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
-			if len(string(*got)) > 0 != tt.want {
+			if len(got.String()) > 0 != tt.want {
 				t.Errorf("ListAll() = %v, want %v", got, tt.want)
 			}
 		})

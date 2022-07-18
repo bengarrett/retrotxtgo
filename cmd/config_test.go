@@ -103,6 +103,11 @@ func Test_ConfigCommand(t *testing.T) {
 		{"info", inf, "\"serve\": 8086,"},
 		{"info", inf, "\"style.html\": \"lovelace\","},
 		{"info", inf, "\"style.info\": \"dracula\""},
+		// info styles
+		{"info", []string{"info", "--configs"},
+			"Syntax highlighter for the config info output."},
+		{"info", []string{"info", "--styles"}, "retrotxt info --style=\"xcode-dark\""},
+
 		// {"set", []string{"set"}, "hello"},
 		// {"set -c", []string{"set", "-c"}, "hello"},
 		// {"setup", []string{"setup"}, "hello"},
@@ -120,7 +125,8 @@ func Test_ConfigCommand(t *testing.T) {
 				return
 			}
 			if !bytes.Contains(gotB, []byte(tt.wantFormal)) {
-				fmt.Println(string(gotB))
+				fmt.Println("<<", string(gotB), ">>")
+				fmt.Println("------------/\\", tt.wantFormal)
 				t.Errorf("could not find %q text in config usage", tt.wantFormal)
 			}
 			if bytes.Contains(gotB, []byte(missing)) {

@@ -31,7 +31,7 @@ func Info(style string) (*bytes.Buffer, error) {
 			fmt.Fprintln(w, string(out))
 			break
 		}
-		err = str.Highlight(string(out), "json", style, true)
+		err = str.HighlightWriter(w, string(out), "json", style, true)
 		if err != nil {
 			return nil, fmt.Errorf("failed to run highlighter: %w", err)
 		}

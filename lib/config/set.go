@@ -1,9 +1,9 @@
 package config
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"text/tabwriter"
@@ -22,7 +22,7 @@ import (
 var ErrNotCfged = errors.New("config is not configured")
 
 // List and print all the available configurations.
-func List() (*tabwriter.Writer, error) {
+func List() (*bytes.Buffer, error) {
 	capitalize := func(s string) string {
 		return strings.Title(s[:1]) + s[1:]
 	}
@@ -34,7 +34,8 @@ func List() (*tabwriter.Writer, error) {
 	}
 	keys := set.Keys()
 	const minWidth, tabWidth, tabs = 2, 2, "\t\t\t\t"
-	w := tabwriter.NewWriter(os.Stdout, minWidth, tabWidth, 0, ' ', 0)
+	b := new(bytes.Buffer)
+	w := tabwriter.NewWriter(b, minWidth, tabWidth, 0, ' ', 0)
 	cmds := fmt.Sprintf(" %s config set ", meta.Bin)
 	title := fmt.Sprintf("  Available %s configurations and settings", meta.Name)
 	fmt.Fprintln(w, "\n"+str.ColPri(title))
@@ -63,7 +64,7 @@ func List() (*tabwriter.Writer, error) {
 	fmt.Fprintf(w, "%s # Will also change the meta description setting\n", str.Example(cmds+"6"))
 	fmt.Fprintln(w, "\nMultiple settings are supported.")
 	fmt.Fprintf(w, "\n%s\n", str.Example(cmds+"style.html style.info"))
-	return w, nil
+	return b, nil
 }
 
 // Set edits and saves a named setting within a configuration file.
