@@ -31,6 +31,7 @@ func Create() Creates {
 
 type Commands struct {
 	Config string
+	Tester bool
 }
 
 var Command Commands

@@ -12,7 +12,7 @@ import (
 
 const namedFile = "config.yaml"
 
-func cmdPath() string {
+func CmdPath() string {
 	return fmt.Sprintf("%s config", meta.Bin)
 }
 

@@ -32,25 +32,28 @@ func ConfigCommand() *cobra.Command {
 }
 
 func ConfigInit() *cobra.Command {
+	create := Create.Command()
+	info := Info.Command()
+	sets := Set.Command()
 	cc := ConfigCommand()
-	cc.AddCommand(Create.Command())
+	cc.AddCommand(create)
 	cc.AddCommand(Delete.Command())
 	cc.AddCommand(Edit.Command())
-	cc.AddCommand(Info.Command())
-	cc.AddCommand(Set.Command())
+	cc.AddCommand(info)
+	cc.AddCommand(sets)
 	cc.AddCommand(Setup.Command())
 	// create
-	Create.Command().Flags().BoolVarP(&Config.OW, "overwrite", "y", false,
+	create.Flags().BoolVarP(&Config.OW, "overwrite", "y", false,
 		"overwrite and reset the existing config file")
 	// info
-	Info.Command().Flags().BoolVarP(&Config.Configs, "configs", "c", false,
+	info.Flags().BoolVarP(&Config.Configs, "configs", "c", false,
 		"list all the available configuration setting names")
-	Info.Command().Flags().StringVarP(&Config.Style, "style", "s", "",
+	info.Flags().StringVarP(&Config.Style, "style", "s", "",
 		"choose a syntax highligher")
-	Info.Command().Flags().BoolVar(&Config.Styles, "styles", false,
+	info.Flags().BoolVar(&Config.Styles, "styles", false,
 		"list and preview the available syntax highlighers")
 	// set
-	Set.Command().Flags().BoolVarP(&Config.Configs, "list", "l", false,
+	sets.Flags().BoolVarP(&Config.Configs, "list", "l", false,
 		"list all the available setting names")
 	// hidden test flag
 	cc.PersistentFlags().BoolVar(&Config.Test, "test", false,

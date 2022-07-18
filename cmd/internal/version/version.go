@@ -18,6 +18,8 @@ import (
 	"golang.org/x/term"
 )
 
+// TODO: CPU ID? https://github.com/klauspost/cpuid
+
 const (
 	Copyright = "2020-22" // Copyright © years.
 	TabWidth  = 8         // Width of tab characters.

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/meta"
+	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -61,9 +63,16 @@ func ConfigCreate() *cobra.Command {
 		Long:    fmt.Sprintf("Create or reset the %s configuration file.", meta.Name),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			overwrite := Config.OW
-			if err := config.New(overwrite); err != nil {
+			b, err := config.New(overwrite)
+			if errors.Is(err, config.ErrExist) {
+				b = config.DoesExist(config.CmdPath(), "create")
+				fmt.Fprint(cmd.OutOrStdout(), b)
+				return nil
+			}
+			if err != nil {
 				return fmt.Errorf("%w: %s", logs.ErrConfigNew, err)
 			}
+			fmt.Fprint(cmd.OutOrStdout(), b)
 			return nil
 		},
 	}
@@ -194,6 +203,23 @@ func Load() {
 	// read in environment variables
 	viper.SetEnvPrefix("env")
 	viper.AutomaticEnv()
+	// tester configuration file
+	if flag.Command.Tester {
+		fmt.Println("The single use, in-memory tester file is in use.")
+		fs := afero.NewMemMapFs()
+		afs := &afero.Afero{Fs: fs}
+		f, err := afs.TempFile("", "ioutil-test")
+		if err != nil {
+			logs.Fatal(err)
+		}
+		if err := config.Create(f.Name(), true); err != nil {
+			logs.Fatal(err)
+		}
+		if err := config.SetConfig(f.Name()); err != nil {
+			logs.FatalMark(viper.ConfigFileUsed(), logs.ErrConfigOpen, err)
+		}
+		return
+	}
 	// configuration file
 	if err := config.SetConfig(flag.Command.Config); err != nil {
 		logs.FatalMark(viper.ConfigFileUsed(), logs.ErrConfigOpen, err)
@@ -201,6 +227,9 @@ func Load() {
 }
 
 func ConfigInfoer() (exit bool) {
+	if err := config.SetConfig(flag.Command.Config); err != nil {
+		logs.FatalMark(viper.ConfigFileUsed(), logs.ErrConfigOpen, err)
+	}
 	if Config.Configs {
 		if err := config.List(); err != nil {
 			logs.FatalFlag("config info", "list", err)

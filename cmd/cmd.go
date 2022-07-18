@@ -70,11 +70,23 @@ func CmdInit() {
 	if err := Cmd.PersistentFlags().MarkHidden("config"); err != nil {
 		logs.FatalMark("config", ErrHide, err)
 	}
+	Cmd = Tester(Cmd)
 	// create a version flag that only works on root.
 	Cmd.LocalNonPersistentFlags().BoolP("version", "v", false, "")
 	// hide the cobra introduced help command.
 	// https://github.com/spf13/cobra/issues/587#issuecomment-810159087
 	Cmd.SetHelpCommand(&cobra.Command{Hidden: true})
+}
+
+// Tester creates and hides a custom tester flag.
+// It is its own function so it can also be applied to unit tests as well as init.
+func Tester(c *cobra.Command) *cobra.Command {
+	c.PersistentFlags().BoolVar(&flag.Command.Tester, "tester", false,
+		"optional in-memory, tester config file")
+	if err := c.PersistentFlags().MarkHidden("tester"); err != nil {
+		logs.FatalMark("tester", ErrHide, err)
+	}
+	return c
 }
 
 //nolint:gochecknoinits

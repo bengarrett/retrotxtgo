@@ -16,7 +16,7 @@ func Edit() error {
 		str.Info(), Location())
 	file := viper.ConfigFileUsed()
 	if file == "" {
-		configMissing(cmdPath(), "edit")
+		configMissing(CmdPath(), "edit")
 		os.Exit(1)
 	}
 	edit := get.TextEditor()

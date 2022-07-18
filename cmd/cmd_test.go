@@ -12,7 +12,9 @@ import (
 type cmdT int
 
 const (
-	infoT cmdT = iota
+	confT cmdT = iota
+	creaT
+	infoT
 	listT
 	viewT
 )
@@ -24,6 +26,10 @@ func (t cmdT) tester(args []string) ([]byte, error) {
 	var c *cobra.Command
 	b := bytes.NewBufferString("")
 	switch t {
+	case confT:
+		c = cmd.ConfigInit()
+	case creaT:
+		c = cmd.CreateInit()
 	case infoT:
 		c = cmd.InfoInit()
 	case listT:
@@ -32,8 +38,11 @@ func (t cmdT) tester(args []string) ([]byte, error) {
 		c = cmd.ViewInit()
 	default:
 	}
+	c = cmd.Tester(c)
 	c.SetOut(b)
-	c.SetArgs(args)
+	if len(args) > 0 {
+		c.SetArgs(args)
+	}
 	if err := c.Execute(); err != nil {
 		return nil, err
 	}

@@ -1,6 +1,8 @@
 package config
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -12,15 +14,18 @@ import (
 	"github.com/spf13/viper"
 )
 
+var ErrExist = errors.New("a config file already exists")
+
 // New creates a new configuration file and prints the results.
-func New(overwrite bool) error {
+func New(overwrite bool) (*bytes.Buffer, error) {
 	if err := Create(viper.ConfigFileUsed(), overwrite); err != nil {
-		return err
+		return nil, err
 	}
-	fmt.Printf("%s%s\n%s%s\n",
+	w := new(bytes.Buffer)
+	fmt.Fprintf(w, "%s%s\n%s%s\n",
 		str.Info(), "A new file was created.",
 		"Config file: ", str.Path(viper.ConfigFileUsed()))
-	return nil
+	return w, nil
 }
 
 // Create a named configuration file with the option to overwrite any existing files.
@@ -31,8 +36,7 @@ func Create(name string, ow bool) error {
 	_, err := os.Stat(name)
 	switch {
 	case !ow && !os.IsNotExist(err):
-		configDoesExist(cmdPath(), "create")
-		os.Exit(1)
+		return ErrExist
 	case os.IsNotExist(err):
 		return createNew(name)
 	case err != nil:
@@ -55,18 +59,20 @@ func createNew(name string) error {
 	return nil
 }
 
-// configDoesExist prints a how-to message when a config file already exists.
-func configDoesExist(name, suffix string) {
+// DoesExist prints a how-to message when a config file already exists.
+func DoesExist(name, suffix string) *bytes.Buffer {
 	example := func(s string) string {
 		x := fmt.Sprintf("%s %s", strings.TrimSuffix(name, suffix), s)
 		return str.Example(x)
 	}
-	fmt.Printf("%sA config file already exists: %s\n%s\n",
+	w := new(bytes.Buffer)
+	fmt.Fprintf(w, "%sA config file already exists: %s\n%s\n",
 		str.Info(), str.ColFuz(viper.ConfigFileUsed()),
 		"Use the following commands to modify it.")
-	fmt.Printf("Edit:\t%s\n", example("edit"))
-	fmt.Printf("Delete:\t%s\n", example("delete"))
-	fmt.Printf("Reset:\t%s\n", example("create --overwrite"))
+	fmt.Fprintf(w, "Edit:\t%s\n", example("edit"))
+	fmt.Fprintf(w, "Delete:\t%s\n", example("delete"))
+	fmt.Fprintf(w, "Reset:\t%s\n", example("create --overwrite"))
+	return w
 }
 
 func errMsg(verb string) string {
