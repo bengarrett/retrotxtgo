@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
@@ -106,13 +107,14 @@ func readInCfgErr(flag string, err error) error {
 }
 
 // configMissing prints an config file error notice and exits.
-func configMissing(name, suffix string) {
+func configMissing(b *bytes.Buffer, name, suffix string) *bytes.Buffer {
 	cmd := strings.TrimSuffix(name, suffix) + " create"
 	if used := viper.ConfigFileUsed(); used != "" {
-		fmt.Printf("%s %q config file is missing\ncreate it: %s\n",
+		fmt.Fprintf(b, "%s %q config file is missing\ncreate it: %s\n",
 			str.Info(), used, str.ColPri(cmd+" --config="+used))
-		return
+		return b
 	}
-	fmt.Printf("%s no config file is in use\ncreate it: %s\n",
+	fmt.Fprintf(b, "%s no config file is in use\ncreate it: %s\n",
 		str.Info(), str.ColPri(cmd))
+	return b
 }

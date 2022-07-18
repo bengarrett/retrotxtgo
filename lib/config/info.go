@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -11,33 +12,34 @@ import (
 )
 
 // Info prints the content of a configuration file.
-func Info(style string) error {
-	fmt.Printf("%s%s\n%s%s\n\n", str.Info(),
+func Info(style string) (*bytes.Buffer, error) {
+	w := new(bytes.Buffer)
+	fmt.Fprintf(w, "%s%s\n%s%s\n\n", str.Info(),
 		Location(),
 		meta.Name, " default settings in use.",
 	)
 	out, err := json.MarshalIndent(Enabled(), "", " ")
 	if err != nil {
-		return fmt.Errorf("failed to read configuration in yaml syntax: %w", err)
+		return nil, fmt.Errorf("failed to read configuration in yaml syntax: %w", err)
 	}
 	switch style {
 	case "none", "":
-		fmt.Println(string(out))
+		fmt.Fprintln(w, string(out))
 	default:
 		if !str.Valid(style) {
-			fmt.Printf("unknown style %q, so using none\n", style)
-			fmt.Println(string(out))
+			fmt.Fprintf(w, "unknown style %q, so using none\n", style)
+			fmt.Fprintln(w, string(out))
 			break
 		}
 		err = str.Highlight(string(out), "json", style, true)
 		if err != nil {
-			return fmt.Errorf("failed to run highlighter: %w", err)
+			return nil, fmt.Errorf("failed to run highlighter: %w", err)
 		}
 	}
 	if s := missing(Missing()...); s != "" {
-		fmt.Print(s)
+		fmt.Fprint(w, s)
 	}
-	return nil
+	return w, nil
 }
 
 // missing returns a printed list of missing settings in the config file.

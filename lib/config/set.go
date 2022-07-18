@@ -22,7 +22,7 @@ import (
 var ErrNotCfged = errors.New("config is not configured")
 
 // List and print all the available configurations.
-func List() error {
+func List() (*tabwriter.Writer, error) {
 	capitalize := func(s string) string {
 		return strings.Title(s[:1]) + s[1:]
 	}
@@ -63,7 +63,7 @@ func List() error {
 	fmt.Fprintf(w, "%s # Will also change the meta description setting\n", str.Example(cmds+"6"))
 	fmt.Fprintln(w, "\nMultiple settings are supported.")
 	fmt.Fprintf(w, "\n%s\n", str.Example(cmds+"style.html style.info"))
-	return w.Flush()
+	return w, nil
 }
 
 // Set edits and saves a named setting within a configuration file.

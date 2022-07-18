@@ -42,18 +42,15 @@ func Run(cmd *cobra.Command, args []string) error {
 		if os.IsNotExist(err) {
 			// embed sample filename
 			filename, err := Sample(arg)
-			//fmt.Println("->", filename)
 			if errors.Is(err, ErrNotSamp) {
 				return fmt.Errorf("%w, %s: %s", ErrInfo, err, arg)
 			}
-			//fmt.Println("-->", filename)
 			if filename == "" {
 				return ErrNotExist
 			}
 			defer os.Remove(filename)
 			arg = filename
-			// fmt.Println("->", filename)
-			// os.Exit(1)
+			return nil
 		}
 		s, err := n.Info(arg, flag.Info.Format)
 		if err != nil {
@@ -68,6 +65,7 @@ func Run(cmd *cobra.Command, args []string) error {
 			}
 			return err
 		}
+		s += "honk"
 		fmt.Fprintln(cmd.OutOrStdout(), s)
 	}
 	return nil

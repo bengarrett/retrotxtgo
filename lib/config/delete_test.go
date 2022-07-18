@@ -28,7 +28,7 @@ func TestDelete(t *testing.T) {
 			if tt.name == "ok" {
 				viper.SetConfigFile(tmpFile.Name())
 			}
-			if gotErr := config.Delete(); !errors.Is(gotErr, tt.wantErr) {
+			if _, gotErr := config.Delete(true); !errors.Is(gotErr, tt.wantErr) {
 				t.Errorf("Delete() = %v, want %v", gotErr, tt.wantErr)
 			}
 		})

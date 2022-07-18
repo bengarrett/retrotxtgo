@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
@@ -85,9 +86,11 @@ func ConfigDel() *cobra.Command {
 		Short:   "Remove the config file",
 		Long:    fmt.Sprintf("Remove the %s configuration file.", meta.Name),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := config.Delete(); err != nil {
+			b, err := config.Delete(!flag.Command.Tester)
+			if err != nil {
 				return err
 			}
+			fmt.Fprint(cmd.OutOrStdout(), b)
 			return nil
 		},
 	}
@@ -128,9 +131,11 @@ func ConfigInfo() *cobra.Command {
 		Short:   "List all the settings in use",
 		Long:    fmt.Sprintf("List all the %s settings in use.", meta.Name),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if ConfigInfoer() {
-				return nil
+			b, err := ConfigInfoer()
+			if err != nil {
+				return err
 			}
+			fmt.Fprint(cmd.OutOrStdout(), b)
 			return nil
 		},
 	}
@@ -144,9 +149,11 @@ func ConfigSet() *cobra.Command {
 		Long:    fmt.Sprintf("Edit a %s setting.", meta.Name),
 		Example: fmt.Sprint(example.Set),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if ListAll() {
-				return nil
+			b, err := ListAll()
+			if err != nil {
+				return err
 			}
+			fmt.Fprint(cmd.OutOrStdout(), b)
 			if err := Usage(cmd, args...); err != nil {
 				return err
 			}
@@ -174,14 +181,19 @@ func ConfigSetup() *cobra.Command {
 }
 
 // ListAll is the "config set --list" command run.
-func ListAll() (exit bool) {
-	if Config.Configs {
-		if err := config.List(); err != nil {
-			logs.FatalFlag("config", "list", err)
-		}
-		return true
+func ListAll() (*[]byte, error) {
+	if !Config.Configs {
+		return nil, nil
 	}
-	return false
+	var b []byte
+	t, err := config.List()
+	if err != nil {
+		return nil, err
+	}
+	if _, err := t.Write(b); err != nil {
+		return nil, err
+	}
+	return &b, nil
 }
 
 ///=======================
@@ -226,18 +238,20 @@ func Load() {
 	}
 }
 
-func ConfigInfoer() (exit bool) {
+func ConfigInfoer() (*bytes.Buffer, error) {
+	w := new(bytes.Buffer)
 	if err := config.SetConfig(flag.Command.Config); err != nil {
-		logs.FatalMark(viper.ConfigFileUsed(), logs.ErrConfigOpen, err)
+		return nil, fmt.Errorf("%w: %s", logs.ErrConfigOpen, err)
 	}
 	if Config.Configs {
-		if err := config.List(); err != nil {
-			logs.FatalFlag("config info", "list", err)
+		b, err := config.List()
+		if err != nil {
+			return nil, err
 		}
+		fmt.Fprint(w, b)
 	}
 	if Config.Styles {
-		fmt.Print(str.JSONStyles(fmt.Sprintf("%s info --style", meta.Bin)))
-		return true
+		fmt.Fprint(w, str.JSONStyles(fmt.Sprintf("%s info --style", meta.Bin)))
 	}
 	style := viper.GetString("style.info")
 	if Config.Style != "" {
@@ -246,8 +260,10 @@ func ConfigInfoer() (exit bool) {
 	if style == "" {
 		style = "dracula"
 	}
-	if err := config.Info(style); err != nil {
-		logs.Fatal(err)
+	b, err := config.Info(style)
+	if err != nil {
+		return nil, err
 	}
-	return false
+	fmt.Fprint(w, b)
+	return w, nil
 }
