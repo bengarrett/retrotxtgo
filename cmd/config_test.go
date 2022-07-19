@@ -62,6 +62,11 @@ func Test_ConfigErr(t *testing.T) {
 }
 
 func Test_ConfigCommand(t *testing.T) {
+	const (
+		setEdit = "Set a text editor to launch when using config edit:"
+		hFE     = "Embed the font as Base64 text within the HTML"
+		hFF     = "Choose a font, automatic, mona, vga"
+	)
 	inf := []string{"info", "--style", "none"}
 	tests := []struct {
 		name       string
@@ -80,7 +85,7 @@ func Test_ConfigCommand(t *testing.T) {
 		{"create ow", []string{"create", "--overwrite"}, "A new file was created"},
 		// delete
 		{"delete", []string{"delete"}, "File is deleted"},
-		{"delete", []string{"rm"}, "File is deleted"},
+		{"delete rm", []string{"rm"}, "File is deleted"},
 		// edit
 		// {"edit", []string{"edit"}, "hello"},
 		// info
@@ -104,13 +109,38 @@ func Test_ConfigCommand(t *testing.T) {
 		{"info", inf, "\"style.html\": \"lovelace\","},
 		{"info", inf, "\"style.info\": \"dracula\""},
 		// info styles
-		{"info", []string{"info", "--configs"},
+		{"info configs", []string{"info", "--configs"},
 			"Syntax highlighter for the config info output."},
-		{"info", []string{"info", "--styles"}, "retrotxt info --style=\"xcode-dark\""},
-
-		// {"set", []string{"set"}, "hello"},
-		// {"set -c", []string{"set", "-c"}, "hello"},
-		// {"setup", []string{"setup"}, "hello"},
+		{"info styles", []string{"info", "--styles"},
+			"retrotxt info --style=\"xcode-dark\""},
+		// set styles
+		{"set --list", []string{"set", "--list"},
+			"Available RetroTxtGo configurations and settings"},
+		{"set --list", []string{"set", "--list"},
+			"-l, --list   list all the available setting names"},
+		{"set help", []string{"set"}, "Edit a RetroTxtGo setting."},
+		// set config items
+		//{"set", []string{"set", "editor"}, setEdit},
+		{"set", []string{"set", "html.font.embed"}, hFE},
+		// {"set", []string{"set", "html.font.family"}, hFF},
+		// {"set", []string{"set", "html.layout"}, hFF},
+		// {"set", []string{"set", "html.meta.author"}, hFF},
+		// {"set", []string{"set", "html.meta.color-scheme"}, hFF},
+		// {"set", []string{"set", "html.meta.description"}, hFF},
+		// {"set", []string{"set", "html.meta.generator"}, hFF},
+		// {"set", []string{"set", "html.meta.keywords"}, hFF},
+		// {"set", []string{"set", "html.meta.notranslate"}, hFF},
+		// {"set", []string{"set", "html.meta.referrer"}, hFF},
+		// {"set", []string{"set", "html.meta.retrotxt"}, hFF},
+		// {"set", []string{"set", "html.meta.robots"}, hFF},
+		// {"set", []string{"set", "html.meta.theme-color"}, hFF},
+		// {"set", []string{"set", "html.title"}, hFF},
+		// {"set", []string{"set", "save-directory"}, hFF},
+		// {"set", []string{"set", "serve"}, hFF},
+		// {"set", []string{"set", "style.html"}, hFF},
+		// {"set", []string{"set", "style.info"}, hFF},
+		// setup items
+		// when --tester is enabled, setup skips all prompts and enters defaults
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -125,9 +155,8 @@ func Test_ConfigCommand(t *testing.T) {
 				return
 			}
 			if !bytes.Contains(gotB, []byte(tt.wantFormal)) {
-				fmt.Println("<<", string(gotB), ">>")
-				fmt.Println("------------/\\", tt.wantFormal)
 				t.Errorf("could not find %q text in config usage", tt.wantFormal)
+				fmt.Println("<<", string(gotB), ">>")
 			}
 			if bytes.Contains(gotB, []byte(missing)) {
 				t.Error("config file is missing some expected settings!")

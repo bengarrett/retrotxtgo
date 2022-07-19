@@ -62,14 +62,13 @@ func TestSkipWrite(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    bool
 		wantErr bool
 	}{
-		{"nil", args{}, false, true},
-		{"title err type", args{name: "html.title", value: 0}, false, true},
-		{"title err", args{name: "title", value: "0"}, false, true},
-		{"serve int", args{"serve", uint(8080)}, false, true},
-		{"serve int skip", args{"serve", uint(skipValue)}, true, false},
+		{"nil", args{}, true},
+		{"title err type", args{name: "html.title", value: 0}, true},
+		{"title err", args{name: "title", value: "0"}, true},
+		{"serve int", args{"serve", uint(8080)}, true},
+		{"serve int skip", args{"serve", uint(skipValue)}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -77,13 +76,10 @@ func TestSkipWrite(t *testing.T) {
 				fmt.Println("init serve example.")
 				viper.Set("serve", skipValue)
 			}
-			got, err := set.SkipWrite(tt.args.name, tt.args.value)
+			err := set.SkipWrite(tt.args.name, tt.args.value)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("SkipWrite() error = %v, wantErr %v", err, tt.wantErr)
 				return
-			}
-			if got != tt.want {
-				t.Errorf("SkipWrite() = %v, want %v", got, tt.want)
 			}
 		})
 	}

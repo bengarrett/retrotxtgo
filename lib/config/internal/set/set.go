@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -21,22 +22,26 @@ import (
 	"github.com/spf13/viper"
 )
 
-var ErrSaveType = errors.New("save value type is unsupported")
+var (
+	ErrBreak    = errors.New("break of loop")
+	ErrSaveType = errors.New("save value type is unsupported")
+)
 
 // Write the value of the named setting to the configuration file.
-func Write(name string, setup bool, value interface{}) {
+func Write(name string, setup bool, value interface{}) error {
 	if name == "" {
-		logs.FatalSave(fmt.Errorf("save: %w", logs.ErrNameNil))
+		return fmt.Errorf("save: %w", logs.ErrNameNil)
 	}
 	if !Validate(name) {
-		logs.FatalSave(fmt.Errorf("save %q: %w", name, logs.ErrConfigName))
+		return fmt.Errorf("save %q: %w", name, logs.ErrConfigName)
 	}
-	if b, err := SkipWrite(name, value); err != nil {
-		logs.FatalSave(err)
-	} else if b {
-		fmt.Print(skipSet(setup))
-		return
+
+	// TODO: test this logic
+	if err := SkipWrite(name, value); err != nil {
+		return err
 	}
+	fmt.Print(skipSet(setup))
+
 	switch v := value.(type) {
 	case string:
 		if v == "-" {
@@ -53,46 +58,47 @@ func Write(name string, setup bool, value interface{}) {
 		if v == "" {
 			fmt.Printf("  %s is now unused\n",
 				str.ColSuc(name))
-			if !setup {
-				os.Exit(0)
-			}
-			return
+			// if !setup {
+			// 	os.Exit(0)
+			// }
+			return nil
 		}
 	default:
 	}
 	fmt.Printf("  %s is set to \"%v\"\n",
 		str.ColSuc(name), value)
-	if !setup {
-		os.Exit(0)
-	}
+	// if !setup {
+	// 	os.Exit(0)
+	// }
+	return nil
 }
 
-// SkipWrite returns true if the named value doesn't need updating.
-func SkipWrite(name string, value interface{}) (bool, error) {
+// SkipWrite returns an error if the named value doesn't need updating.
+func SkipWrite(name string, value interface{}) error {
 	if viper.Get(name) == nil {
-		return false, fmt.Errorf("name: %s, type: %T, %w", name, nil, logs.ErrConfigName)
+		return fmt.Errorf("name: %s, type: %T, %w", name, nil, logs.ErrConfigName)
 	}
 	switch v := value.(type) {
 	case bool:
 		if viper.Get(name).(bool) == v {
-			return true, nil
+			return nil
 		}
 	case string:
 		if viper.Get(name).(string) == v {
-			return true, nil
+			return nil
 		}
 		if value.(string) == "" {
-			return true, nil
+			return nil
 		}
-	case uint:
+	case int:
 		if viper.Get(name).(int) == int(v) {
-			return true, nil
+			return nil
 		}
 		if name == get.Serve && v == 0 {
-			return true, nil
+			return nil
 		}
 	}
-	return false, fmt.Errorf("name: %s, type: %T, %w", name, value, ErrSaveType)
+	return fmt.Errorf("name: %s, type: %T, %w", name, value, ErrSaveType)
 }
 
 func skipSet(setup bool) string {
@@ -103,7 +109,7 @@ func skipSet(setup bool) string {
 }
 
 // Directory prompts for, checks and saves the directory path.
-func Directory(name string, setup bool) (ok bool) {
+func Directory(name string, setup bool) error {
 	if name == "" {
 		logs.FatalSave(fmt.Errorf("set directory: %w", logs.ErrNameNil))
 	}
@@ -111,24 +117,28 @@ func Directory(name string, setup bool) (ok bool) {
 	if s == "" {
 		fmt.Print(skipSet(true))
 		if setup {
-			return true
+			return ErrBreak
 		}
-		os.Exit(0)
+		return ErrBreak
 	}
 	if s == "-" {
-		Write(name, setup, "-")
-		return true
+		if err := Write(name, setup, "-"); err != nil {
+			return err
+		}
+		return ErrBreak
 	}
 	if _, err := os.Stat(s); err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			fmt.Printf("%s The directory does not exist: %s\n", str.Alert(), s)
-			return false
+			return nil
 		}
 		fmt.Printf("%s the directory is invalid: %s\n", str.Alert(), errors.Unwrap(err))
-		return false
+		return nil
 	}
-	Write(name, setup, s)
-	return true
+	if err := Write(name, setup, s); err != nil {
+		return err
+	}
+	return ErrBreak
 }
 
 // DirExpansion traverses the named directory to apply shell-like expansions.
@@ -187,7 +197,9 @@ func Editor(name string, setup bool) {
 	s := prompt.String()
 	switch s {
 	case "-":
-		Write(name, setup, "-")
+		if err := Write(name, setup, "-"); err != nil {
+			log.Fatal(err)
+		}
 		return
 	case "":
 		fmt.Print(skipSet(setup))
@@ -197,38 +209,45 @@ func Editor(name string, setup bool) {
 		fmt.Printf("%s%s\nThe %s editor is not usable by %s.\n",
 			str.Alert(), errors.Unwrap(err), s, meta.Name)
 	}
-	Write(name, setup, s)
+	if err := Write(name, setup, s); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // Font previews and saves a default font setting.
-func Font(value string, setup bool) {
-	b, f := bytes.Buffer{}, create.Family(value)
+func Font(value string, setup bool) (*bytes.Buffer, error) {
+	w := new(bytes.Buffer)
+	f := create.Family(value)
 	if f == create.Automatic {
 		f = create.VGA
 	}
-	fmt.Fprintf(&b, "%s\n%s\n%s\n%s\n",
+	s := fmt.Sprintf("%s\n%s\n%s\n%s\n",
 		"  @font-face {",
 		fmt.Sprintf("    font-family: \"%s\";", f),
 		fmt.Sprintf("    src: url(\"%s.woff2\") format(\"woff2\");", f),
 		"  }")
-	fmt.Print(color.CSS(b.String()))
-	fmt.Printf("%s\n%s%s %s: ",
+	fmt.Fprint(w, color.CSS(s))
+	fmt.Fprintf(w, "%s\n%s%s %s: ",
 		str.ColFuz("  About font families: https://developer.mozilla.org/en-US/docs/Web/CSS/font-family"),
 		"  Choose a font, ",
 		str.UnderlineKeys(create.Fonts()...),
 		fmt.Sprintf("(suggestion: %s)", str.Example("automatic")))
-	ShortStrings(get.FontFamily, setup, create.Fonts()...)
+	if err := ShortStrings(get.FontFamily, setup, create.Fonts()...); err != nil {
+		return w, err
+	}
+	return w, nil
 }
 
 // Font previews and saves the embedded Base64 font setting.
-func FontEmbed(value, setup bool) {
+func FontEmbed(value, setup bool) error {
+	w := new(bytes.Buffer)
 	const name = get.FontEmbed
 	elm := fmt.Sprintf("  %s\n  %s\n  %s\n",
 		"@font-face{",
 		"  font-family: vga8;",
 		"  src: url(data:font/woff2;base64,[a large font binary will be embedded here]...) format('woff2');",
 	)
-	fmt.Print(color.CSS(elm))
+	fmt.Fprint(w, color.CSS(elm))
 	q := fmt.Sprintf("%s\n%s\n%s",
 		"  The use of this setting not recommended,",
 		"  unless you always want large, self-contained HTML files for distribution.",
@@ -237,8 +256,12 @@ func FontEmbed(value, setup bool) {
 		q = "  Keep the embedded font option?"
 	}
 	q += Recommend("no")
-	b := prompt.YesNo(q, viper.GetBool(name))
-	Write(name, setup, b)
+	fmt.Fprint(w, q)
+	b := prompt.FYesNo(w, viper.GetBool(name))
+	if err := Write(name, setup, b); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Generator prompts for and previews the custom program generator meta tag.
@@ -263,7 +286,9 @@ func Generator(value bool) {
 	}
 	p = fmt.Sprintf("  %s%s", p, Recommend("yes"))
 	b := prompt.YesNo(p, viper.GetBool(name))
-	Write(name, true, b)
+	if err := Write(name, true, b); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // Index prompts for a value from a list of valid choices and saves the result.
@@ -272,7 +297,9 @@ func Index(name string, setup bool, data ...string) {
 		logs.FatalSave(fmt.Errorf("set index: %w", logs.ErrNameNil))
 	}
 	s := prompt.IndexStrings(&data, setup)
-	Write(name, setup, s)
+	if err := Write(name, setup, s); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // Keys list all the available configuration setting names sorted alphabetically.
@@ -303,7 +330,9 @@ func NoTranslate(value, setup bool) {
 	}
 	q = fmt.Sprintf("  %s%s", q, Recommend("no"))
 	b := prompt.YesNo(q, viper.GetBool(name))
-	Write(name, setup, b)
+	if err := Write(name, setup, b); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // Port prompts for and saves HTTP port.
@@ -312,7 +341,9 @@ func Port(name string, setup bool) {
 		logs.FatalSave(fmt.Errorf("set port: %w", logs.ErrNameNil))
 	}
 	u := prompt.Port(true, setup)
-	Write(name, setup, u)
+	if err := Write(name, setup, u); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // Recommend uses the s value as a user input suggestion.
@@ -337,34 +368,45 @@ func RetroTxt(value bool) {
 	}
 	p = fmt.Sprintf("  %s%s", p, Recommend("yes"))
 	b := prompt.YesNo(p, viper.GetBool(name))
-	Write(name, true, b)
+	if err := Write(name, true, b); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // ShortStrings prompts and saves setting values that support 1 character aliases.
-func ShortStrings(name string, setup bool, data ...string) {
+func ShortStrings(name string, setup bool, data ...string) error {
 	if name == "" {
-		logs.FatalSave(fmt.Errorf("set short string: %w", logs.ErrNameNil))
+		return fmt.Errorf("set short string: %w", logs.ErrNameNil)
 	}
 	s := prompt.ShortStrings(&data)
-	Write(name, setup, s)
+	if err := Write(name, setup, s); err != nil {
+		return err
+	}
+	return nil
 }
 
 // String prompts and saves a single word setting value.
-func String(name string, setup bool) {
+func String(name string, setup bool) error {
 	if name == "" {
-		logs.FatalSave(fmt.Errorf("set string: %w", logs.ErrNameNil))
+		return fmt.Errorf("set string: %w", logs.ErrNameNil)
 	}
 	s := prompt.String()
-	Write(name, setup, s)
+	if err := Write(name, setup, s); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Strings prompts and saves a string of text setting value.
-func Strings(name string, setup bool, data ...string) {
+func Strings(name string, setup bool, data ...string) error {
 	if name == "" {
-		logs.FatalSave(fmt.Errorf("set strings: %w", logs.ErrNameNil))
+		return fmt.Errorf("set strings: %w", logs.ErrNameNil)
 	}
 	s := prompt.Strings(&data, setup)
-	Write(name, setup, s)
+	if err := Write(name, setup, s); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Title prompts for and previews a HTML title element value.
@@ -381,7 +423,7 @@ func Title(name, value string, setup bool) {
 }
 
 // Validate the existence of the key in a list of settings.
-func Validate(key string) (ok bool) {
+func Validate(key string) bool {
 	keys := Keys()
 	// var i must be sorted in ascending order.
 	if i := sort.SearchStrings(keys, key); i == len(keys) || keys[i] != key {

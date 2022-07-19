@@ -3,6 +3,7 @@ package input
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -174,7 +175,9 @@ func Serve(u Update) {
 		if u, ok := get.Reset()[get.Serve].(uint); ok {
 			p = u
 		}
-		set.Write(u.Name, false, p)
+		if err := set.Write(u.Name, false, p); err != nil {
+			log.Fatal(err)
+		}
 	}
 	var p uint
 	switch v := u.Value.(type) {
@@ -213,7 +216,7 @@ func SaveDir(u Update) {
 	fmt.Printf("\n   %s (hyphen-minus) to disable the setting and always use the active directory.\n  ",
 		str.Example("-"))
 	for {
-		if set.Directory(u.Name, u.Setup) {
+		if err := set.Directory(u.Name, u.Setup); err != nil {
 			break
 		}
 	}

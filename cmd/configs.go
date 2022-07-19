@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
@@ -16,6 +15,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
+
+var ErrNoArgs = errors.New("no arguments supplied")
 
 type Configs int
 
@@ -153,14 +154,20 @@ func ConfigSet() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Fprintln(cmd.OutOrStdout(), b)
-			if err := Usage(cmd, args...); err != nil {
+			if b != nil {
+				fmt.Fprintln(cmd.OutOrStdout(), b)
+			}
+			if err := Usage(cmd, args...); errors.Is(err, ErrNoArgs) {
+				return nil
+			} else if err != nil {
 				return err
 			}
 			for _, arg := range args {
-				if err := config.Set(arg); err != nil {
+				b, err := config.Set(arg)
+				if err != nil {
 					return err
 				}
+				fmt.Fprintln(cmd.OutOrStdout(), b)
 			}
 			return nil
 		},
@@ -200,7 +207,7 @@ func Usage(cmd *cobra.Command, args ...string) error {
 		if err := cmd.Help(); err != nil {
 			return err
 		}
-		os.Exit(0)
+		return ErrNoArgs
 	}
 	return nil
 }

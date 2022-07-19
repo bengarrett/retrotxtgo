@@ -69,7 +69,7 @@ func List() (*bytes.Buffer, error) {
 
 // Set edits and saves a named setting within a configuration file.
 // It also accepts numeric index values printed by List().
-func Set(name string) error {
+func Set(name string) (*bytes.Buffer, error) {
 	i, err := strconv.Atoi(name)
 	namedSetting := err != nil
 	switch {
@@ -84,13 +84,14 @@ func Set(name string) error {
 }
 
 // Update edits and saves a named setting within a configuration file.
-func Update(name string, setup bool) error {
+func Update(name string, setup bool) (*bytes.Buffer, error) {
+	w := new(bytes.Buffer)
 	if !set.Validate(name) {
-		fmt.Println(logs.Hint("config set --list", logs.ErrConfigName))
-		return nil
+		fmt.Fprintln(w, logs.Hint("config set --list", logs.ErrConfigName))
+		return w, nil
 	}
 	if !setup {
-		fmt.Print(Location())
+		fmt.Fprint(w, Location())
 	}
 	// print the current status of the named setting
 	value := viper.Get(name)
@@ -103,23 +104,22 @@ func Update(name string, setup bool) error {
 		// everything ok
 	}
 	if b, ok := value.(bool); ok {
-		update.Bool(b, name)
+		fmt.Fprint(w, update.Bool(b, name))
 	}
 	if s, ok := value.(string); ok {
-		update.String(s, name, value.(string))
+		fmt.Fprint(w, update.String(s, name, value.(string)))
 	}
-	if err := updatePrompt(input.Update{
-		Name:  name,
-		Setup: setup,
-		Value: value,
-	}); err != nil {
-		return err
+	u := input.Update{Name: name, Setup: setup, Value: value}
+	b, err := updatePrompt(u)
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	fmt.Fprint(w, b)
+	return w, nil
 }
 
 // updatePrompt prompts the user for input to a config file setting.
-func updatePrompt(u input.Update) error {
+func updatePrompt(u input.Update) (*bytes.Buffer, error) {
 	switch u.Name {
 	case "editor":
 		input.Editor(u)
@@ -136,12 +136,12 @@ func updatePrompt(u input.Update) error {
 }
 
 // metaPrompts prompts the user for a meta setting.
-func metaPrompts(u input.Update) error {
+func metaPrompts(u input.Update) (*bytes.Buffer, error) {
 	switch u.Name {
 	case get.FontEmbed:
-		set.FontEmbed(u.Value.(bool), u.Setup)
+		return nil, set.FontEmbed(u.Value.(bool), u.Setup)
 	case get.FontFamily:
-		set.Font(u.Value.(string), u.Setup)
+		return set.Font(u.Value.(string), u.Setup)
 	case get.LayoutTmpl:
 		input.Layout(u)
 	case get.Author,
@@ -150,7 +150,7 @@ func metaPrompts(u input.Update) error {
 		input.PreviewMeta(u.Name, u.Value.(string))
 		set.String(u.Name, u.Setup)
 	case get.Theme:
-		return theme(u)
+		return nil, theme(u)
 	case get.Scheme:
 		input.ColorScheme(u)
 	case get.Genr:
@@ -158,9 +158,9 @@ func metaPrompts(u input.Update) error {
 	case get.Notlate:
 		set.NoTranslate(u.Value.(bool), u.Setup)
 	case get.Referr:
-		return referr(u)
+		return nil, referr(u)
 	case get.Bot:
-		return bot(u)
+		return nil, bot(u)
 	case get.Rtx:
 		set.RetroTxt(u.Value.(bool))
 	case get.Title:
@@ -170,7 +170,8 @@ func metaPrompts(u input.Update) error {
 }
 
 func theme(u input.Update) error {
-	if err := recommendMeta(u.Name, u.Value.(string), ""); err != nil {
+	s, err := recommendMeta(u.Name, u.Value.(string), "")
+	if err != nil {
 		return err
 	}
 	set.String(u.Name, u.Setup)
@@ -178,7 +179,8 @@ func theme(u input.Update) error {
 }
 
 func bot(u input.Update) error {
-	if err := recommendMeta(u.Name, u.Value.(string), ""); err != nil {
+	s, err := recommendMeta(u.Name, u.Value.(string), "")
+	if err != nil {
 		return err
 	}
 	cr := create.Robots()
@@ -188,7 +190,8 @@ func bot(u input.Update) error {
 }
 
 func referr(u input.Update) error {
-	if err := recommendMeta(u.Name, u.Value.(string), ""); err != nil {
+	s, err := recommendMeta(u.Name, u.Value.(string), "")
+	if err != nil {
 		return err
 	}
 	cr := create.Referrer()
@@ -197,13 +200,12 @@ func referr(u input.Update) error {
 	return nil
 }
 
-func recommendMeta(name, value, suggest string) error {
+func recommendMeta(name, value, suggest string) (string, error) {
 	s, err := input.PrintMeta(name, value)
 	if err != nil {
-		return fmt.Errorf("recommanded meta: %w", err)
+		return "", fmt.Errorf("recommanded meta: %w", err)
 	}
-	fmt.Printf("%s\n%s\n  ", s, recommendPrompt(name, value, suggest))
-	return err
+	return fmt.Sprintf("%s\n%s\n  ", s, recommendPrompt(name, value, suggest)), nil
 }
 
 func recommendPrompt(name, value, suggest string) string {
