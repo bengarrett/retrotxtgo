@@ -43,7 +43,7 @@ func TestSetConfig(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := config.SetConfig(tt.flag); (err != nil) != tt.wantErr {
+			if err := config.SetConfig(os.Stdout, tt.flag); (err != nil) != tt.wantErr {
 				t.Errorf("SetConfig() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

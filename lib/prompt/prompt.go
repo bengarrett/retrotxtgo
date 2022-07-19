@@ -3,6 +3,7 @@ package prompt
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"os/signal"
 	"strings"
@@ -23,23 +24,23 @@ const (
 )
 
 // CtrlC intercepts any Ctrl-C keyboard input and exits to the shell.
-func CtrlC() {
+func CtrlC(w io.Writer) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		fmt.Fprintf(os.Stdout, "%s has quit.", meta.Name)
+		fmt.Fprintf(w, "%s has quit.", meta.Name)
 		os.Exit(0)
 	}()
 }
 
 // IndexStrings asks for a numeric index position and returns a single choice from a string of keys.
-func IndexStrings(options *[]string, setup bool) string {
+func IndexStrings(w io.Writer, options *[]string, setup bool) string {
 	if options == nil {
 		return ""
 	}
 	var k key.Keys = *options
-	return k.Prompt(os.Stdin, setup)
+	return k.Prompt(w, os.Stdin, setup)
 }
 
 // SkipSet returns a skipped setting string for the setup walk through.
@@ -62,12 +63,12 @@ func PortValid(p uint) bool {
 
 // ShortStrings asks for and returns a single choice from a string of keys.
 // Either the first letter or the full name of the key are accepted.
-func ShortStrings(options *[]string) string {
+func ShortStrings(w io.Writer, options *[]string) string {
 	if options == nil {
 		return ""
 	}
 	var k key.Keys = *options
-	return k.ShortPrompt(os.Stdin)
+	return k.ShortPrompt(w, os.Stdin)
 }
 
 // String asks for and returns a multi-word string.
@@ -78,16 +79,16 @@ func String() (words string) {
 }
 
 // Strings asks for and returns a single choice from a string of keys.
-func Strings(options *[]string, setup bool) string {
+func Strings(w io.Writer, options *[]string, setup bool) string {
 	if options == nil {
 		return ""
 	}
 	var k key.Keys = *options
-	return k.Prompt(os.Stdin, setup)
+	return k.Prompt(w, os.Stdin, setup)
 }
 
 // YesNo asks for a yes or no input.
-func YesNo(ask string, yesDefault bool) bool {
+func YesNo(w io.Writer, ask string, yesDefault bool) bool {
 	y, n := "Y", "n"
 	if !yesDefault {
 		y, n = "y", "N"
@@ -100,7 +101,7 @@ func YesNo(ask string, yesDefault bool) bool {
 		yes, _ = str.UnderlineChar(y)
 		no, _ = str.UnderlineChar(n)
 	}
-	fmt.Printf("%s [%ses/%so] ", ask, yes, no)
+	fmt.Fprintf(w, "%s [%ses/%so] ", ask, yes, no)
 	input, err := read.Read(os.Stdin)
 	if err != nil {
 		logs.FatalSave(err)

@@ -120,8 +120,9 @@ func Test_ConfigCommand(t *testing.T) {
 			"-l, --list   list all the available setting names"},
 		{"set help", []string{"set"}, "Edit a RetroTxtGo setting."},
 		// set config items
+		{"set", []string{"set", "xxx"}, "??"},
 		//{"set", []string{"set", "editor"}, setEdit},
-		{"set", []string{"set", "html.font.embed"}, hFE},
+		//{"set", []string{"set", "html.font.embed"}, hFE},
 		// {"set", []string{"set", "html.font.family"}, hFF},
 		// {"set", []string{"set", "html.layout"}, hFF},
 		// {"set", []string{"set", "html.meta.author"}, hFF},

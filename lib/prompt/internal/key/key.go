@@ -34,7 +34,7 @@ func (k Keys) Numeric(input string) string {
 }
 
 // Prompt parses the reader input for a valid key.
-func (k Keys) Prompt(r io.Reader, setup bool) string {
+func (k Keys) Prompt(w io.Writer, r io.Reader, setup bool) string {
 	prompts := 0
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
@@ -50,7 +50,7 @@ func (k Keys) Prompt(r io.Reader, setup bool) string {
 			return n
 		}
 		if !k.Validate(key) {
-			check(prompts)
+			check(w, prompts)
 			continue
 		}
 		return key
@@ -59,7 +59,7 @@ func (k Keys) Prompt(r io.Reader, setup bool) string {
 }
 
 // ShortPrompt parses the reader input for a valid key or alias of the key.
-func (k Keys) ShortPrompt(r io.Reader) string {
+func (k Keys) ShortPrompt(w io.Writer, r io.Reader) string {
 	prompts, scanner := 0, bufio.NewScanner(r)
 	for scanner.Scan() {
 		prompts++
@@ -72,7 +72,7 @@ func (k Keys) ShortPrompt(r io.Reader) string {
 			return long
 		}
 		if !k.Validate(key) {
-			check(prompts)
+			check(w, prompts)
 			continue
 		}
 		return key
@@ -125,15 +125,15 @@ func (k Keys) Validate(key string) (ok bool) {
 }
 
 // Check used in scanner Scans to prompt a user for a valid text input.
-func check(prompts int) {
+func check(w io.Writer, prompts int) {
 	const info, max = 2, 4
 	switch {
 	case prompts == info:
-		if i, err := fmt.Print("\r  Ctrl+C to keep the existing value\n"); err != nil {
+		if i, err := fmt.Fprint(w, "\r  Ctrl+C to keep the existing value\n"); err != nil {
 			log.Fatalf("prompt check println at %dB: %s", i, err)
 		}
 	case prompts >= max:
-		fmt.Printf("\r  %s", NoChange)
-		os.Exit(0)
+		fmt.Fprintf(w, "\r  %s", NoChange)
+		os.Exit(0) // TODO: return error
 	}
 }

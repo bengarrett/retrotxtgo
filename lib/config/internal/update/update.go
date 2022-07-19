@@ -3,6 +3,7 @@ package update
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -26,9 +27,8 @@ func Bool(b bool, name string) string {
 }
 
 // String the string value of the named setting.
-func String(s, name, value string) *bytes.Buffer {
+func String(w io.Writer, s, name, value string) {
 	const sd = get.SaveDir
-	w := new(bytes.Buffer)
 	switch s {
 	case "":
 		fmt.Fprintf(w, "\n  The empty %s setting is not in use.\n",
@@ -55,11 +55,10 @@ func String(s, name, value string) *bytes.Buffer {
 		}
 		fmt.Fprintln(w)
 	}
-	return w
 }
 
 // Config saves all viper settings to the named file.
-func Config(name string, stdout bool) error {
+func Config(w io.Writer, name string, stdout bool) error {
 	if name == "" {
 		name = viper.ConfigFileUsed()
 	}
@@ -78,7 +77,7 @@ func Config(name string, stdout bool) error {
 		return fmt.Errorf("config update saving data to the file failed: %q: %w", name, err)
 	}
 	if stdout {
-		fmt.Println("The change is saved")
+		fmt.Fprintln(w, "The change is saved")
 	}
 	return nil
 }

@@ -3,6 +3,7 @@ package key_test
 import (
 	"bytes"
 	"io"
+	"os"
 	"strings"
 	"testing"
 
@@ -51,7 +52,7 @@ func Test_keys_prompt(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			stdin.Write([]byte(tt.input + "\n")) // \n is a requirement
-			if gotKey := tt.k.Prompt(&stdin, false); gotKey != tt.wantKey {
+			if gotKey := tt.k.Prompt(os.Stdout, &stdin, false); gotKey != tt.wantKey {
 				t.Errorf("Keys.prompt() = %v, want %v", gotKey, tt.wantKey)
 			}
 		})
@@ -97,7 +98,7 @@ func Test_keys_shortPrompt(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotKey := tt.k.ShortPrompt(tt.r); gotKey != tt.wantKey {
+			if gotKey := tt.k.ShortPrompt(os.Stdout, tt.r); gotKey != tt.wantKey {
 				t.Errorf("key.shortPrompt() = %v, want %v", gotKey, tt.wantKey)
 			}
 		})

@@ -1,9 +1,9 @@
 package config
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/bengarrett/retrotxtgo/lib/str"
@@ -12,15 +12,14 @@ import (
 )
 
 // Info prints the content of a configuration file.
-func Info(style string) (*bytes.Buffer, error) {
-	w := new(bytes.Buffer)
+func Info(w io.Writer, style string) error {
 	fmt.Fprintf(w, "%s%s\n%s%s\n\n", str.Info(),
 		Location(),
 		meta.Name, " default settings in use.",
 	)
 	out, err := json.MarshalIndent(Enabled(), "", " ")
 	if err != nil {
-		return nil, fmt.Errorf("failed to read configuration in yaml syntax: %w", err)
+		return fmt.Errorf("failed to read configuration in yaml syntax: %w", err)
 	}
 	switch style {
 	case "none", "":
@@ -33,13 +32,13 @@ func Info(style string) (*bytes.Buffer, error) {
 		}
 		err = str.HighlightWriter(w, string(out), "json", style, true)
 		if err != nil {
-			return nil, fmt.Errorf("failed to run highlighter: %w", err)
+			return fmt.Errorf("failed to run highlighter: %w", err)
 		}
 	}
 	if s := missing(Missing()...); s != "" {
 		fmt.Fprint(w, s)
 	}
-	return w, nil
+	return nil
 }
 
 // missing returns a printed list of missing settings in the config file.

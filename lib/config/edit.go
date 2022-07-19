@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 
@@ -11,9 +12,8 @@ import (
 )
 
 // Edit a configuration file.
-func Edit() error {
-	fmt.Printf("%s%s",
-		str.Info(), Location())
+func Edit(w io.Writer) error {
+	fmt.Fprintf(w, "%s%s", str.Info(), Location())
 	file := viper.ConfigFileUsed()
 	if file == "" {
 		//TODO configMissing(CmdPath(), "edit")
@@ -26,7 +26,7 @@ func Edit() error {
 	// credit: https://stackoverflow.com/questions/21513321/how-to-start-vim-from-go
 	exe := exec.Command(edit, file)
 	exe.Stdin = os.Stdin
-	exe.Stdout = os.Stdout
+	exe.Stdout = w
 	if err := exe.Run(); err != nil {
 		e := fmt.Errorf("%s: %w", edit, ErrEditorRun)
 		return fmt.Errorf("%s: %w", e, err)

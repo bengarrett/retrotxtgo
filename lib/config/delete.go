@@ -1,8 +1,8 @@
 package config
 
 import (
-	"bytes"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/bengarrett/retrotxtgo/lib/prompt"
@@ -11,35 +11,33 @@ import (
 )
 
 // Delete a configuration file.
-func Delete(ask bool) (*bytes.Buffer, error) {
-	w := new(bytes.Buffer)
+func Delete(w io.Writer, ask bool) error {
 	name := viper.ConfigFileUsed()
 	if name == "" {
-		w = configMissing(w, CmdPath(), "delete")
-		return w, nil
+		configMissing(w, CmdPath(), "delete")
+		return nil
 	}
 	f, err := os.Stat(name)
 	if os.IsNotExist(err) {
-		w = configMissing(w, CmdPath(), "delete")
-		return w, nil
+		configMissing(w, CmdPath(), "delete")
+		return nil
 	}
 	if err != nil {
-		return nil, fmt.Errorf("failed to access the config file: %w", err)
+		return fmt.Errorf("failed to access the config file: %w", err)
 	}
 	if !ask {
 		fmt.Fprint(w, Location())
 		fmt.Fprintf(w, "%d bytes\n", f.Size())
 	} else {
 		fmt.Fprintf(w, "%s%s", str.Confirm(), Location())
-		w.WriteTo(os.Stdout)
-		if !prompt.YesNo("Delete this file", false) {
+		if !prompt.YesNo(w, "Delete this file", false) {
 			fmt.Fprintln(w, "Deletion cancelled")
-			return w, nil
+			return nil
 		}
 	}
 	if err := os.Remove(name); err != nil {
-		return nil, fmt.Errorf("failed to remove config file: %w", err)
+		return fmt.Errorf("failed to remove config file: %w", err)
 	}
 	fmt.Fprintln(w, "File is deleted")
-	return w, nil
+	return nil
 }

@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+	"io"
+	"log"
 	"os"
 	"os/signal"
 	"runtime"
@@ -14,39 +16,40 @@ import (
 )
 
 // CtrlC intercepts Ctrl-C key combinations to exit out of the Setup.
-func CtrlC() {
+func CtrlC(w io.Writer) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		fmt.Printf("  exited from the %s setup", meta.Name)
+		fmt.Fprintf(w, "  exited from the %s setup", meta.Name)
 		os.Exit(0)
 	}()
 }
 
 // Setup walks through all the settings and saves them to the configuration file.
 // Start the walk through at the provided question number or leave it at 0.
-func Setup(start int) {
+func Setup(w io.Writer, start int) {
 	const width = 80
 	keys := KeySort()
-	fmt.Printf("%s\n%s\n%s\n%s\n\n",
-		logo(),
-		fmt.Sprintf("Walk through all of the %s settings.", meta.Name),
-		Location(),
-		enterKey())
-	fmt.Println(str.HRPad(width))
-	CtrlC()
+	fmt.Fprintln(w, logo())
+	fmt.Fprintf(w, "Walk through all of the %s settings.\n", meta.Name)
+	fmt.Fprintln(w, Location())
+	fmt.Fprintln(w, enterKey())
+	fmt.Fprintln(w, "\n"+str.HRPad(width))
+	CtrlC(w)
 	for i, key := range keys {
 		if start > i+1 {
 			continue
 		}
 		h := fmt.Sprintf("  %d/%d. %s Setup - %s",
 			i+1, len(keys), meta.Name, key)
-		fmt.Println(h)
-		Update(key, true)
-		fmt.Println(str.HRPad(width))
+		fmt.Fprintln(w, h)
+		if err := Update(w, key, true); err != nil {
+			log.Print(err)
+		}
+		fmt.Fprintln(w, str.HRPad(width))
 	}
-	fmt.Printf("The %s setup and configuration is complete.\n", meta.Name)
+	fmt.Fprintf(w, "The %s setup and configuration is complete.\n", meta.Name)
 }
 
 // enterKey returns the appropriate Setup instructions based on the user's platform.

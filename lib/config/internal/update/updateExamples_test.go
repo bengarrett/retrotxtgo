@@ -2,6 +2,7 @@ package update_test
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/get"
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/update"
@@ -16,8 +17,8 @@ func Example_updateBool() {
 
 func Example_updateString() {
 	color.Enable = false
-	fmt.Print(update.String("", "example", ""))
-	fmt.Print(update.String("x", get.SaveDir, ""))
+	update.String(os.Stdout, "", "example", "")
+	update.String(os.Stdout, "x", get.SaveDir, "")
 	// Output: The empty example setting is not in use.
 	//
 	//   The save-directory is set to "". ✗

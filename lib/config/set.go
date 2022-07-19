@@ -1,9 +1,9 @@
 package config
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"strconv"
 	"strings"
 	"text/tabwriter"
@@ -22,7 +22,7 @@ import (
 var ErrNotCfged = errors.New("config is not configured")
 
 // List and print all the available configurations.
-func List() (*bytes.Buffer, error) {
+func List(w io.Writer) error {
 	capitalize := func(s string) string {
 		return strings.Title(s[:1]) + s[1:]
 	}
@@ -34,61 +34,63 @@ func List() (*bytes.Buffer, error) {
 	}
 	keys := set.Keys()
 	const minWidth, tabWidth, tabs = 2, 2, "\t\t\t\t"
-	b := new(bytes.Buffer)
-	w := tabwriter.NewWriter(b, minWidth, tabWidth, 0, ' ', 0)
+	tw := tabwriter.NewWriter(w, minWidth, tabWidth, 0, ' ', 0)
 	cmds := fmt.Sprintf(" %s config set ", meta.Bin)
 	title := fmt.Sprintf("  Available %s configurations and settings", meta.Name)
-	fmt.Fprintln(w, "\n"+str.ColPri(title))
-	fmt.Fprintln(w, str.HR(len(title)))
-	fmt.Fprintln(w, tabs)
-	fmt.Fprintf(w, "Alias\t\tName\t\tHint\n")
+	fmt.Fprintln(tw, "\n"+str.ColPri(title))
+	fmt.Fprintln(tw, str.HR(len(title)))
+	fmt.Fprintln(tw, tabs)
+	fmt.Fprintf(tw, "Alias\t\tName\t\tHint\n")
 	for i, key := range keys {
 		tip := get.Tip()[key]
-		fmt.Fprintln(w, tabs)
-		fmt.Fprintf(w, " %d\t\t%s\t\t%s", i, key, suffix(capitalize(tip)))
+		fmt.Fprintln(tw, tabs)
+		fmt.Fprintf(tw, " %d\t\t%s\t\t%s", i, key, suffix(capitalize(tip)))
 		switch key {
 		case get.LayoutTmpl:
-			fmt.Fprintf(w, "\n%schoices: %s (suggestion: %s)",
+			fmt.Fprintf(tw, "\n%schoices: %s (suggestion: %s)",
 				tabs, str.ColPri(strings.Join(create.Layouts(), ", ")), str.Example("standard"))
 		case get.Serve:
-			fmt.Fprintf(w, "\n%schoices: %s",
+			fmt.Fprintf(tw, "\n%schoices: %s",
 				tabs, input.PortInfo())
 		}
-		fmt.Fprint(w, "\n")
+		fmt.Fprint(tw, "\n")
 	}
-	fmt.Fprintln(w, tabs)
-	fmt.Fprintln(w, str.HR(len(title)))
-	fmt.Fprintln(w, "\nEither the setting Name or the Alias can be used.")
-	fmt.Fprintf(w, "\n%s # To change the meta description setting\n",
+	fmt.Fprintln(tw, tabs)
+	fmt.Fprintln(tw, str.HR(len(title)))
+	fmt.Fprintln(tw, "\nEither the setting Name or the Alias can be used.")
+	fmt.Fprintf(tw, "\n%s # To change the meta description setting\n",
 		str.Example(cmds+get.Desc))
-	fmt.Fprintf(w, "%s # Will also change the meta description setting\n", str.Example(cmds+"6"))
-	fmt.Fprintln(w, "\nMultiple settings are supported.")
-	fmt.Fprintf(w, "\n%s\n", str.Example(cmds+"style.html style.info"))
-	return b, nil
+	fmt.Fprintf(tw, "%s # Will also change the meta description setting\n", str.Example(cmds+"6"))
+	fmt.Fprintln(tw, "\nMultiple settings are supported.")
+	fmt.Fprintf(tw, "\n%s\n", str.Example(cmds+"style.html style.info"))
+	if _, err := fmt.Print(w, tw); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Set edits and saves a named setting within a configuration file.
 // It also accepts numeric index values printed by List().
-func Set(name string) (*bytes.Buffer, error) {
+func Set(w io.Writer, name string) error {
 	i, err := strconv.Atoi(name)
 	namedSetting := err != nil
 	switch {
 	case namedSetting:
-		return Update(name, false)
+		return Update(w, name, false)
 	case i >= 0 && i <= (len(get.Reset())-1):
 		k := set.Keys()
-		return Update(k[i], false)
+		return Update(w, k[i], false)
 	default:
-		return Update(name, false)
+		return Update(w, name, false)
 	}
 }
 
 // Update edits and saves a named setting within a configuration file.
-func Update(name string, setup bool) (*bytes.Buffer, error) {
-	w := new(bytes.Buffer)
+func Update(w io.Writer, name string, setup bool) error {
+	//w := new(bytes.Buffer)
 	if !set.Validate(name) {
-		fmt.Fprintln(w, logs.Hint("config set --list", logs.ErrConfigName))
-		return w, nil
+		fmt.Fprintln(w, logs.Hint("config set --list??", logs.ErrConfigName))
+		return nil
 	}
 	if !setup {
 		fmt.Fprint(w, Location())
@@ -107,105 +109,101 @@ func Update(name string, setup bool) (*bytes.Buffer, error) {
 		fmt.Fprint(w, update.Bool(b, name))
 	}
 	if s, ok := value.(string); ok {
-		fmt.Fprint(w, update.String(s, name, value.(string)))
+		update.String(w, s, name, value.(string))
 	}
 	u := input.Update{Name: name, Setup: setup, Value: value}
-	b, err := updatePrompt(u)
-	if err != nil {
-		return nil, err
+	if err := updatePrompt(w, u); err != nil {
+		return err
 	}
-	fmt.Fprint(w, b)
-	return w, nil
+	return nil
 }
 
 // updatePrompt prompts the user for input to a config file setting.
-func updatePrompt(u input.Update) (*bytes.Buffer, error) {
+func updatePrompt(w io.Writer, u input.Update) error {
 	switch u.Name {
 	case "editor":
-		input.Editor(u)
+		input.Editor(w, u)
 	case get.SaveDir:
-		input.SaveDir(u)
+		input.SaveDir(w, u)
 	case get.Serve:
-		input.Serve(u)
+		input.Serve(w, u)
 	case get.Styleh:
-		input.StyleHTML(u)
+		input.StyleHTML(w, u)
 	case get.Stylei:
-		input.StyleInfo(u)
+		input.StyleInfo(w, u)
 	}
-	return metaPrompts(u)
+	return metaPrompts(w, u)
 }
 
 // metaPrompts prompts the user for a meta setting.
-func metaPrompts(u input.Update) (*bytes.Buffer, error) {
+func metaPrompts(w io.Writer, u input.Update) error {
 	switch u.Name {
 	case get.FontEmbed:
-		return nil, set.FontEmbed(u.Value.(bool), u.Setup)
+		return set.FontEmbed(w, u.Value.(bool), u.Setup)
 	case get.FontFamily:
-		return set.Font(u.Value.(string), u.Setup)
+		return set.Font(w, u.Value.(string), u.Setup)
 	case get.LayoutTmpl:
-		input.Layout(u)
+		input.Layout(w, u)
 	case get.Author,
 		get.Desc,
 		get.Keywords:
-		input.PreviewMeta(u.Name, u.Value.(string))
-		set.String(u.Name, u.Setup)
+		input.PreviewMeta(w, u.Name, u.Value.(string))
+		return set.String(w, u.Name, u.Setup)
 	case get.Theme:
-		return nil, theme(u)
+		return theme(w, u)
 	case get.Scheme:
-		input.ColorScheme(u)
+		input.ColorScheme(w, u)
 	case get.Genr:
-		set.Generator(u.Value.(bool))
+		set.Generator(w, u.Value.(bool))
 	case get.Notlate:
-		set.NoTranslate(u.Value.(bool), u.Setup)
+		set.NoTranslate(w, u.Value.(bool), u.Setup)
 	case get.Referr:
-		return nil, referr(u)
+		return referr(w, u)
 	case get.Bot:
-		return nil, bot(u)
+		return bot(w, u)
 	case get.Rtx:
-		set.RetroTxt(u.Value.(bool))
+		set.RetroTxt(w, u.Value.(bool))
 	case get.Title:
-		set.Title(u.Name, u.Value.(string), u.Setup)
+		set.Title(w, u.Name, u.Value.(string), u.Setup)
 	}
 	return fmt.Errorf("%w: %s", ErrNotCfged, u.Name)
 }
 
-func theme(u input.Update) error {
-	s, err := recommendMeta(u.Name, u.Value.(string), "")
-	if err != nil {
+func theme(w io.Writer, u input.Update) error {
+	if err := recommendMeta(w, u.Name, u.Value.(string), ""); err != nil {
 		return err
 	}
-	set.String(u.Name, u.Setup)
+	set.String(w, u.Name, u.Setup)
 	return nil
 }
 
-func bot(u input.Update) error {
-	s, err := recommendMeta(u.Name, u.Value.(string), "")
-	if err != nil {
+func bot(w io.Writer, u input.Update) error {
+	if err := recommendMeta(w, u.Name, u.Value.(string), ""); err != nil {
 		return err
 	}
 	cr := create.Robots()
-	fmt.Printf("%s\n  ", str.NumberizeKeys(cr[:]...))
-	set.Index(u.Name, u.Setup, cr[:]...)
+	fmt.Fprintf(w, "%s\n  ", str.NumberizeKeys(cr[:]...))
+	set.Index(w, u.Name, u.Setup, cr[:]...)
 	return nil
 }
 
-func referr(u input.Update) error {
-	s, err := recommendMeta(u.Name, u.Value.(string), "")
-	if err != nil {
+func referr(w io.Writer, u input.Update) error {
+	if err := recommendMeta(w, u.Name, u.Value.(string), ""); err != nil {
 		return err
 	}
 	cr := create.Referrer()
-	fmt.Printf("%s\n  ", str.NumberizeKeys(cr[:]...))
-	set.Index(u.Name, u.Setup, cr[:]...)
+	fmt.Fprintf(w, "%s\n  ", str.NumberizeKeys(cr[:]...))
+	set.Index(w, u.Name, u.Setup, cr[:]...)
 	return nil
 }
 
-func recommendMeta(name, value, suggest string) (string, error) {
-	s, err := input.PrintMeta(name, value)
-	if err != nil {
-		return "", fmt.Errorf("recommanded meta: %w", err)
+func recommendMeta(w io.Writer, name, value, suggest string) error {
+	if err := input.PrintMeta(w, name, value); err != nil {
+		return fmt.Errorf("recommanded meta: %w", err)
 	}
-	return fmt.Sprintf("%s\n%s\n  ", s, recommendPrompt(name, value, suggest)), nil
+	fmt.Fprintln(w)
+	fmt.Fprintf(w, "%s\n  ", recommendPrompt(name, value, suggest))
+	return nil
 }
 
 func recommendPrompt(name, value, suggest string) string {

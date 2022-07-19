@@ -14,51 +14,52 @@ import (
 )
 
 // ChromaNames returns the chroma style names in color.
-func ChromaNames(lexer string) string {
+func ChromaNames(w io.Writer, lexer string) {
 	var s Names = styles.Names()
-	return s.String(true, lexer)
+	s.String(w, true, lexer)
 }
 
 // ChromaNamesMono returns the chroma style names.
-func ChromaNamesMono(lexer string) string {
+func ChromaNamesMono(w io.Writer, lexer string) {
 	var s Names = styles.Names()
-	return s.String(false, lexer)
+	s.String(w, false, lexer)
 }
 
 // CSS returns the element colored using CSS syntax highlights.
-func CSS(elm string) string {
+func CSS(w io.Writer, elm string) error {
 	style := viper.GetString(get.Styleh)
-	return Elm(elm, "css", style, true)
+	return Elm(w, elm, "css", style, true)
 }
 
 // Elm applies color syntax to an element.
-func Elm(elm, lexer, style string, color bool) string {
+func Elm(w io.Writer, elm, lexer, style string, color bool) error {
 	if elm == "" {
-		return ""
+		return nil
 	}
-	var b bytes.Buffer
-	_ = io.Writer(&b)
-	if err := str.HighlightWriter(&b, elm, lexer, style, color); err != nil {
-		logs.FatalMark(fmt.Sprint("html ", lexer), logs.ErrHighlight, err)
+	fmt.Fprintln(w)
+	if err := str.HighlightWriter(w, elm, lexer, style, color); err != nil {
+		return fmt.Errorf("%w, html %s, %s", logs.ErrHighlight, lexer, err)
 	}
-	return fmt.Sprintf("\n%s\n", b.String())
+	fmt.Fprintln(w)
+	return nil
 }
 
 // HTML returns the element colored using HTML syntax highlights.
-func HTML(elm string) string {
+func HTML(w io.Writer, elm string) error {
 	style := viper.GetString(get.Styleh)
-	return Elm(elm, "html", style, true)
+	return Elm(w, elm, "html", style, true)
 }
 
 // Names of the themes for the HighlightWriter.
 type Names []string
 
 // String lists and applies the named themes for the HighlightWriter.
-func (n Names) String(theme bool, lexer string) string {
+func (n Names) String(w io.Writer, theme bool, lexer string) {
 	if lexer == "json" {
-		return n.lexerJSON(theme)
+		n.lexerJSON(w, theme)
+		return
 	}
-	return n.lexorOthers(theme, lexer)
+	n.lexorOthers(w, theme, lexer)
 }
 
 func (n Names) maximunWidth() int {
@@ -71,7 +72,7 @@ func (n Names) maximunWidth() int {
 	return maxWidth
 }
 
-func (n Names) lexorOthers(theme bool, lexer string) string {
+func (n Names) lexorOthers(w io.Writer, theme bool, lexer string) {
 	const space = 2
 	maxWidth := n.maximunWidth()
 	s := make([]string, len(n))
@@ -108,10 +109,10 @@ func (n Names) lexorOthers(theme bool, lexer string) string {
 		}
 		s[i] = fmt.Sprintf("%s%2d %s", s[i], split+i, b.String())
 	}
-	return strings.Join(s, "")
+	fmt.Fprint(w, strings.Join(s, ""))
 }
 
-func (n Names) lexerJSON(theme bool) string {
+func (n Names) lexerJSON(w io.Writer, theme bool) {
 	const space = 2
 	maxWidth := n.maximunWidth()
 	s := make([]string, len(n))
@@ -143,5 +144,5 @@ func (n Names) lexerJSON(theme bool) string {
 		s[i] = fmt.Sprintf("%s%2d %s", s[i], split+i, b.String())
 		continue
 	}
-	return strings.Join(s, "")
+	fmt.Fprint(w, strings.Join(s, ""))
 }

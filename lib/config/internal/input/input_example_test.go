@@ -1,6 +1,7 @@
 package input_test
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"strings"
@@ -21,12 +22,12 @@ func ExampleDefaults() {
 
 func ExamplePrintMeta() {
 	color.Enable = false
-	s, err := input.PrintMeta("html.meta.author", "value")
-	if err != nil {
+	b := new(bytes.Buffer)
+	if err := input.PrintMeta(b, "html.meta.author", "value"); err != nil {
 		log.Print(err)
 		return
 	}
-	spl := strings.Split(s, "\n")
+	spl := strings.Split(b.String(), "\n")
 	fmt.Print(strings.Join(spl[5:], "\n"))
 	// Output:
 	//   About this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name

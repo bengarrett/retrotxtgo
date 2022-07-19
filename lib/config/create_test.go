@@ -29,7 +29,7 @@ func TestCreate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := config.Create(tt.args.name, tt.args.ow); (err != nil) != tt.wantErr {
+			if err := config.Create(os.Stdout, tt.args.name, tt.args.ow); (err != nil) != tt.wantErr {
 				t.Errorf("Create() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

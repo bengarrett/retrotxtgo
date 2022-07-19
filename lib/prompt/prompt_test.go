@@ -12,7 +12,7 @@ import (
 
 func ExampleYesNo() {
 	color.Enable = false
-	yn := prompt.YesNo("Say hello", true)
+	yn := prompt.YesNo(os.Stdout, "Say hello", true)
 	fmt.Print(yn)
 	// Output:Say hello? [Yes/no] true
 }
@@ -88,7 +88,7 @@ func TestIndexStrings(t *testing.T) {
 				os.Stdin = stdin
 			}()
 			os.Stdin = r
-			if gotKey := prompt.IndexStrings(tt.args.options, tt.args.setup); gotKey != tt.wantKey {
+			if gotKey := prompt.IndexStrings(os.Stdout, tt.args.options, tt.args.setup); gotKey != tt.wantKey {
 				t.Errorf("IndexStrings() = %v, want %v", gotKey, tt.wantKey)
 			}
 		})
@@ -121,7 +121,7 @@ func TestShortStrings(t *testing.T) {
 				os.Stdin = stdin
 			}()
 			os.Stdin = r
-			if gotKey := prompt.ShortStrings(tt.args.options); gotKey != tt.wantKey {
+			if gotKey := prompt.ShortStrings(os.Stdout, tt.args.options); gotKey != tt.wantKey {
 				t.Errorf("ShortStrings() = %v, want %v", gotKey, tt.wantKey)
 			}
 		})
@@ -182,7 +182,7 @@ func TestStrings(t *testing.T) {
 				os.Stdin = stdin
 			}()
 			os.Stdin = r
-			if gotKey := prompt.Strings(tt.args.options, false); gotKey != tt.wantKey {
+			if gotKey := prompt.Strings(os.Stdout, tt.args.options, false); gotKey != tt.wantKey {
 				t.Errorf("Strings() = %v, want %v", gotKey, tt.wantKey)
 			}
 		})

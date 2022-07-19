@@ -1,6 +1,7 @@
 package color_test
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 
@@ -8,15 +9,17 @@ import (
 )
 
 func ExampleChromaNamesMono_css() {
-	c := color.ChromaNamesMono("css")
-	s := strings.Split(c, "\n")
+	w := new(bytes.Buffer)
+	color.ChromaNamesMono(w, "css")
+	s := strings.Split(w.String(), "\n")
 	fmt.Print(s[0])
 	// Output:0 <abap="abap">
 }
 
 func ExampleChromaNamesMono_json() {
-	c := color.ChromaNamesMono("json")
-	s := strings.Split(c, "\n")
+	w := new(bytes.Buffer)
+	color.ChromaNamesMono(w, "json")
+	s := strings.Split(w.String(), "\n")
 	fmt.Print(s[0])
 	// Output:0 { "abap":"abap" }
 }

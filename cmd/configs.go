@@ -1,9 +1,10 @@
 package cmd
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
+	"io"
+	"os"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
@@ -65,16 +66,15 @@ func ConfigCreate() *cobra.Command {
 		Long:    fmt.Sprintf("Create or reset the %s configuration file.", meta.Name),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			overwrite := Config.OW
-			b, err := config.New(overwrite)
+			w := cmd.OutOrStdout()
+			err := config.New(w, overwrite)
 			if errors.Is(err, config.ErrExist) {
-				b = config.DoesExist(config.CmdPath(), "create")
-				fmt.Fprint(cmd.OutOrStdout(), b)
+				config.DoesExist(w, config.CmdPath(), "create")
 				return nil
 			}
 			if err != nil {
 				return fmt.Errorf("%w: %s", logs.ErrConfigNew, err)
 			}
-			fmt.Fprint(cmd.OutOrStdout(), b)
 			return nil
 		},
 	}
@@ -87,11 +87,9 @@ func ConfigDel() *cobra.Command {
 		Short:   "Remove the config file",
 		Long:    fmt.Sprintf("Remove the %s configuration file.", meta.Name),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			b, err := config.Delete(!flag.Command.Tester)
-			if err != nil {
+			if err := config.Delete(cmd.OutOrStdout(), !flag.Command.Tester); err != nil {
 				return err
 			}
-			fmt.Fprint(cmd.OutOrStdout(), b)
 			return nil
 		},
 	}
@@ -116,7 +114,7 @@ func ConfigEdit() *cobra.Command {
 		Short:   "Edit the config file\n",
 		Long:    long,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := config.Edit(); err != nil {
+			if err := config.Edit(cmd.OutOrStdout()); err != nil {
 				return err
 			}
 			return nil
@@ -132,11 +130,9 @@ func ConfigInfo() *cobra.Command {
 		Short:   "List all the settings in use",
 		Long:    fmt.Sprintf("List all the %s settings in use.", meta.Name),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			b, err := ConfigInfos()
-			if err != nil {
+			if err := ConfigInfos(cmd.OutOrStdout()); err != nil {
 				return err
 			}
-			fmt.Fprintln(cmd.OutOrStdout(), b)
 			return nil
 		},
 	}
@@ -150,12 +146,8 @@ func ConfigSet() *cobra.Command {
 		Long:    fmt.Sprintf("Edit a %s setting.", meta.Name),
 		Example: fmt.Sprint(example.Set),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			b, err := ListAll()
-			if err != nil {
+			if err := ListAll(cmd.OutOrStdout()); err != nil {
 				return err
-			}
-			if b != nil {
-				fmt.Fprintln(cmd.OutOrStdout(), b)
 			}
 			if err := Usage(cmd, args...); errors.Is(err, ErrNoArgs) {
 				return nil
@@ -163,11 +155,10 @@ func ConfigSet() *cobra.Command {
 				return err
 			}
 			for _, arg := range args {
-				b, err := config.Set(arg)
+				err := config.Set(cmd.OutOrStdout(), arg)
 				if err != nil {
 					return err
 				}
-				fmt.Fprintln(cmd.OutOrStdout(), b)
 			}
 			return nil
 		},
@@ -181,22 +172,21 @@ func ConfigSetup() *cobra.Command {
 		Long:  fmt.Sprintf("Walk through all of the %s settings.", meta.Name),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			const startAt = 0
-			config.Setup(startAt)
+			config.Setup(cmd.OutOrStdout(), startAt)
 			return nil
 		},
 	}
 }
 
 // ListAll is the "config set --list" command run.
-func ListAll() (*bytes.Buffer, error) {
+func ListAll(w io.Writer) error {
 	if !Config.Configs {
-		return nil, nil
+		return nil
 	}
-	b, err := config.List()
-	if err != nil {
-		return nil, err
+	if err := config.List(w); err != nil {
+		return err
 	}
-	return b, nil
+	return nil
 }
 
 ///=======================
@@ -215,24 +205,25 @@ func Usage(cmd *cobra.Command, args ...string) error {
 // Init reads in the config file and ENV variables if set.
 // This might be triggered twice due to the Cobra initializer registers.
 func Load() {
+	w := os.Stdout
 	// read in environment variables
 	viper.SetEnvPrefix("env")
 	viper.AutomaticEnv()
 	// tester configuration file
 	if flag.Command.Tester {
-		if err := LoadTester(); err != nil {
+		if err := LoadTester(w); err != nil {
 			logs.Fatal(err)
 		}
 		return
 	}
 	// configuration file
-	if err := config.SetConfig(flag.Command.Config); err != nil {
+	if err := config.SetConfig(w, flag.Command.Config); err != nil {
 		logs.FatalMark(viper.ConfigFileUsed(), logs.ErrConfigOpen, err)
 	}
 }
 
 // LoadTester loads an in-memory default configuration file for test purposes.
-func LoadTester() error {
+func LoadTester(w io.Writer) error {
 	fmt.Println("The single use, in-memory tester file is in use.")
 	fs := afero.NewMemMapFs()
 	afs := &afero.Afero{Fs: fs}
@@ -240,33 +231,30 @@ func LoadTester() error {
 	if err != nil {
 		return err
 	}
-	if err := config.Create(f.Name(), true); err != nil {
+	if err := config.Create(w, f.Name(), true); err != nil {
 		return err
 	}
-	if err := config.SetConfig(f.Name()); err != nil {
+	if err := config.SetConfig(w, f.Name()); err != nil {
 		return fmt.Errorf("%w, %s: %s", logs.ErrConfigOpen, err, viper.ConfigFileUsed())
 	}
 	return nil
 }
 
-func ConfigInfos() (*bytes.Buffer, error) {
-	w := new(bytes.Buffer)
-	if err := config.SetConfig(flag.Command.Config); err != nil {
-		return nil, fmt.Errorf("%w: %s", logs.ErrConfigOpen, err)
+func ConfigInfos(w io.Writer) error {
+	if err := config.SetConfig(w, flag.Command.Config); err != nil {
+		return fmt.Errorf("%w: %s", logs.ErrConfigOpen, err)
 	}
 	// info --configs flag
 	if Config.Configs {
-		b, err := config.List()
-		if err != nil {
-			return nil, err
+		if err := config.List(w); err != nil {
+			return err
 		}
-		fmt.Fprint(w, b)
-		return w, nil
+		return nil
 	}
 	// info --styles flag
 	if Config.Styles {
 		fmt.Fprint(w, str.JSONStyles(fmt.Sprintf("%s info --style", meta.Bin)))
-		return w, nil
+		return nil
 	}
 	// info --style flag
 	style := viper.GetString("style.info")
@@ -277,10 +265,8 @@ func ConfigInfos() (*bytes.Buffer, error) {
 		style = Config.Style
 	}
 	// info command
-	b, err := config.Info(style)
-	if err != nil {
-		return nil, err
+	if err := config.Info(w, style); err != nil {
+		return err
 	}
-	fmt.Fprint(w, b)
-	return w, nil
+	return nil
 }

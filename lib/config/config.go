@@ -2,12 +2,20 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/get"
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/set"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/spf13/viper"
+)
+
+var (
+	ErrEditorNil = errors.New("no suitable text editor can be found")
+	ErrEditorRun = errors.New("editor cannot be run")
+	ErrLogo      = errors.New("program logo is missing")
+	ErrSaveType  = errors.New("save value type is unsupported")
 )
 
 const namedFile = "config.yaml"
@@ -70,7 +78,8 @@ func KeySort() []string {
 // Missing returns the settings that are not found in the configuration file.
 // This could be due to new features being added after the file was generated
 // or because of manual file edits.
-func Missing() (list []string) {
+func Missing() []string {
+	list := []string{}
 	if len(get.Reset()) == len(viper.AllSettings()) {
 		return list
 	}

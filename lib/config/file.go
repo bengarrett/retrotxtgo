@@ -1,9 +1,9 @@
 package config
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -52,7 +52,7 @@ func Location() string {
 }
 
 // SetConfig reads and loads a configuration file.
-func SetConfig(flag string) error {
+func SetConfig(w io.Writer, flag string) error {
 	viper.SetConfigType("yaml")
 	path := flag
 	if flag == "" {
@@ -60,7 +60,7 @@ func SetConfig(flag string) error {
 	}
 	viper.SetConfigFile(path)
 	if err := viper.ReadInConfig(); err != nil {
-		return readInCfgErr(flag, err)
+		return readInCfgErr(w, flag, err)
 	}
 	if flag != "" {
 		if len(viper.AllKeys()) == 0 {
@@ -71,17 +71,17 @@ func SetConfig(flag string) error {
 			// except when the config command is in use
 			return nil
 		}
-		fmt.Print(Location())
+		fmt.Fprint(w, Location())
 	}
 	// otherwise settings are loaded from default config
 	return nil
 }
 
-func readInCfgErr(flag string, err error) error {
+func readInCfgErr(w io.Writer, flag string, err error) error {
 	if flag == "" {
 		if errors.Is(err, os.ErrNotExist) {
 			// auto-generate new config except when the --config flag is used
-			return Create(viper.ConfigFileUsed(), false)
+			return Create(w, viper.ConfigFileUsed(), false)
 		}
 		// internal config fail
 		return err
@@ -96,7 +96,7 @@ func readInCfgErr(flag string, err error) error {
 				return nil
 			}
 		}
-		fmt.Println(logs.Hint(fmt.Sprintf("config create --config=%s", flag), err))
+		fmt.Fprintln(w, logs.Hint(fmt.Sprintf("config create --config=%s", flag), err))
 		return err
 	}
 	// user given config file fail
@@ -107,14 +107,13 @@ func readInCfgErr(flag string, err error) error {
 }
 
 // configMissing prints an config file error notice and exits.
-func configMissing(b *bytes.Buffer, name, suffix string) *bytes.Buffer {
+func configMissing(w io.Writer, name, suffix string) {
 	cmd := strings.TrimSuffix(name, suffix) + " create"
 	if used := viper.ConfigFileUsed(); used != "" {
-		fmt.Fprintf(b, "%s %q config file is missing\ncreate it: %s\n",
+		fmt.Fprintf(w, "%s %q config file is missing\ncreate it: %s\n",
 			str.Info(), used, str.ColPri(cmd+" --config="+used))
-		return b
+		return
 	}
-	fmt.Fprintf(b, "%s no config file is in use\ncreate it: %s\n",
+	fmt.Fprintf(w, "%s no config file is in use\ncreate it: %s\n",
 		str.Info(), str.ColPri(cmd))
-	return b
 }
