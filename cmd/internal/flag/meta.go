@@ -57,12 +57,12 @@ func Init() map[int]Meta {
 		retro:  {"html.meta.retrotxt", nil, &Build.Metadata.RetroTxt, nil, "meta-retrotxt", "r", nil},
 		// minor tag flags
 		gen:     {"html.meta.generator", nil, &Build.Metadata.Generator, nil, "meta-generator", "g", nil},
-		cscheme: {"html.meta.color-scheme", &Build.Metadata.ColorScheme.Value, nil, nil, "meta-color-scheme", "", nil},
+		cscheme: {"html.meta.color_scheme", &Build.Metadata.ColorScheme.Value, nil, nil, "meta-color-scheme", "", nil},
 		kwords:  {"html.meta.keywords", &Build.Metadata.Keywords.Value, nil, nil, "meta-keywords", "", nil},
 		nolang:  {"html.meta.notranslate", nil, &Build.Metadata.NoTranslate, nil, "meta-notranslate", "", nil},
 		refer:   {"html.meta.referrer", &Build.Metadata.Referrer.Value, nil, nil, "meta-referrer", "", nil},
 		bots:    {"html.meta.robots", &Build.Metadata.Robots.Value, nil, nil, "meta-robots", "", nil},
-		themec:  {"html.meta.theme-color", &Build.Metadata.ThemeColor.Value, nil, nil, "meta-theme-color", "", nil},
+		themec:  {"html.meta.theme_color", &Build.Metadata.ThemeColor.Value, nil, nil, "meta-theme-color", "", nil},
 		fontf:   {"html.font.family", &Build.FontFamily.Value, nil, nil, "font-family", "f", nil},
 		fonte:   {"html.font.embed", nil, &Build.FontEmbed, nil, "font-embed", "", nil},
 		// hidden flags

@@ -16,6 +16,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+const namedFile = "config.yaml"
+
 // InitDefaults initializes flag and configuration defaults.
 func InitDefaults() {
 	for key, val := range get.Reset() {
@@ -116,4 +118,25 @@ func configMissing(w io.Writer, name, suffix string) {
 	}
 	fmt.Fprintf(w, "%s no config file is in use\ncreate it: %s\n",
 		str.Info(), str.ColPri(cmd))
+}
+
+// Save all viper settings to the named file.
+func Save(w io.Writer, name string) error {
+	fmt.Println("honky honk!")
+	if name != "" {
+		viper.SetConfigName(name)
+	}
+	if viper.ConfigFileUsed() == "" {
+		viper.SetConfigFile(Path())
+	}
+	for key := range get.Reset() {
+		fmt.Println(key, viper.IsSet(key), viper.GetString(key))
+	}
+	if err := viper.WriteConfig(); err != nil {
+		return err
+	}
+	if w != nil {
+		fmt.Fprintln(w, "The change is saved")
+	}
+	return nil
 }

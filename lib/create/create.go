@@ -136,7 +136,7 @@ func (args *Args) SaveAssets(b *[]byte) error {
 		c <- nil
 	}
 	if args.Save.Destination == "" {
-		dir := []string{viper.GetString("save-directory")}
+		dir := []string{viper.GetString("save_directory")}
 		var err error
 		if args.Save.Destination, err = assets.Destination(dir...); err != nil {
 			logs.FatalMark(args.Save.Destination, logs.ErrFileSaveD, err)

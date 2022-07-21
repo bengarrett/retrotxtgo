@@ -1,20 +1,17 @@
 package update
 
 import (
-	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/get"
-	"github.com/bengarrett/retrotxtgo/lib/internal/save"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/meta"
-	"github.com/spf13/viper"
-	"gopkg.in/yaml.v2"
 )
+
+const namedFile = "config.yaml"
 
 // Bool the boolean value of the named setting.
 func Bool(b bool, name string) string {
@@ -40,7 +37,7 @@ func String(w io.Writer, s, name, value string) {
 	default:
 		fmt.Fprintf(w, "\n  The %s is set to %q.", str.ColFuz(name), value)
 		// print the operating system's ability to use the existing set values
-		// does the 'editor' exist in the env path, does the save-directory exist?
+		// does the 'editor' exist in the env path, does the save_directory exist?
 		switch name {
 		case "editor":
 			_, err := exec.LookPath(value)
@@ -55,29 +52,4 @@ func String(w io.Writer, s, name, value string) {
 		}
 		fmt.Fprintln(w)
 	}
-}
-
-// Config saves all viper settings to the named file.
-func Config(w io.Writer, name string, stdout bool) error {
-	if name == "" {
-		name = viper.ConfigFileUsed()
-	}
-	data, err := get.Marshal()
-	if err != nil {
-		return fmt.Errorf("config update marshal failed: %w", err)
-	}
-	out, err := yaml.Marshal(&data)
-	if err != nil {
-		return fmt.Errorf("config update marshal data failed: %w", err)
-	}
-	// prepend comments
-	cmt := []byte(fmt.Sprintf("# %s configuration file", meta.Name))
-	out = bytes.Join([][]byte{cmt, out}, []byte("\n"))
-	if err = ioutil.WriteFile(name, out, save.FileMode); err != nil {
-		return fmt.Errorf("config update saving data to the file failed: %q: %w", name, err)
-	}
-	if stdout {
-		fmt.Fprintln(w, "The change is saved")
-	}
-	return nil
 }

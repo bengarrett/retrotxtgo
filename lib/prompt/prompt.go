@@ -21,8 +21,9 @@ import (
 var ErrSkip = errors.New("skipped, no change")
 
 const (
-	PortMin uint = port.Min
-	PortMax uint = port.Max
+	PortMin   uint = port.Min
+	PortMax   uint = port.Max
+	PortReset uint = port.Reset
 )
 
 // CtrlC intercepts any Ctrl-C keyboard input and exits to the shell.

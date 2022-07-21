@@ -21,5 +21,5 @@ func Example_updateString() {
 	update.String(os.Stdout, "x", get.SaveDir, "")
 	// Output: The empty example setting is not in use.
 	//
-	//   The save-directory is set to "". ✗
+	//   The save_directory is set to "". ✗
 }

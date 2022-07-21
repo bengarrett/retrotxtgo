@@ -343,7 +343,7 @@ func (args *Args) metaColorScheme() string {
 	if args.Metadata.ColorScheme.Flag {
 		return args.Metadata.ColorScheme.Value
 	}
-	return viper.GetString("html.meta.color-scheme")
+	return viper.GetString("html.meta.color_scheme")
 }
 
 // metaAuthor content for the meta sauce-description attribute.
@@ -383,7 +383,7 @@ func (args *Args) metaThemeColor() string {
 	if args.Metadata.ThemeColor.Flag {
 		return args.Metadata.ThemeColor.Value
 	}
-	return viper.GetString("html.meta.theme-color")
+	return viper.GetString("html.meta.theme_color")
 }
 
 // pageTitle value for the title element.

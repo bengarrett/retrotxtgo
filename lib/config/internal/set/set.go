@@ -12,7 +12,6 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/color"
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/get"
-	"github.com/bengarrett/retrotxtgo/lib/config/internal/update"
 	"github.com/bengarrett/retrotxtgo/lib/create"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/prompt"
@@ -21,12 +20,29 @@ import (
 	"github.com/spf13/viper"
 )
 
+const RemoveChr = "-"
+
 var (
-	ErrBreak    = errors.New("break of loop")
-	ErrSaveType = errors.New("save value type is unsupported")
-	ErrSkip     = errors.New("skipped, no change")
-	ErrUnused   = errors.New("is left unused")
+	ErrBreak     = errors.New("break of loop")
+	ErrDataEmpty = errors.New("data argument cannot be empty")
+	ErrSaveType  = errors.New("save value type is unsupported")
+	ErrSkip      = errors.New("skipped, no change")
+	ErrUnused    = errors.New("is unused")
+	ErrVal       = errors.New("value is unsupported")
 )
+
+func skip(w io.Writer, name string, setup bool, value interface{}) error {
+	err := SkipWrite(name, value)
+	switch {
+	case errors.Is(err, ErrSkip):
+	case errors.Is(err, ErrUnused):
+		fmt.Fprint(w, skipSet(setup))
+		return nil
+	case err != nil:
+		return err
+	}
+	return nil
+}
 
 // Write the value of the named setting to the configuration file.
 func Write(w io.Writer, name string, setup bool, value interface{}) error {
@@ -36,23 +52,32 @@ func Write(w io.Writer, name string, setup bool, value interface{}) error {
 	if !Validate(name) {
 		return fmt.Errorf("save %q: %w", name, logs.ErrConfigName)
 	}
-	// TODO: test this logic
-	if err := SkipWrite(name, value); err != nil {
-		return err
-	}
-	//	fmt.Fprint(w, "-", skipSet(setup))
-
 	switch v := value.(type) {
 	case string:
-		if v == "-" {
+		if v == RemoveChr {
 			value = ""
+			break
 		}
-	default:
+		if err := skip(w, name, setup, value); err != nil {
+			return err
+		}
+		if value == "" {
+			return nil
+		}
+	case any:
+		if err := skip(w, name, setup, value); err != nil {
+			return err
+		}
 	}
+	fmt.Printf("VIPER SET %q %q\n", name, value)
 	viper.Set(name, value)
-	if err := update.Config(w, "", false); err != nil {
+	fmt.Printf("VIPER GET %q", viper.GetString(name))
+	if err := viper.WriteConfig(); err != nil {
 		return err
 	}
+	// if err := Save(w, ""); err != nil {
+	// 	return err
+	// }
 	switch v := value.(type) {
 	case string:
 		if v == "" {
@@ -68,29 +93,40 @@ func Write(w io.Writer, name string, setup bool, value interface{}) error {
 // SkipWrite returns an error if the named value doesn't need updating.
 func SkipWrite(name string, value interface{}) error {
 	if viper.Get(name) == nil {
-		return fmt.Errorf("name: %s, type: %T, %w", name, nil, logs.ErrConfigName)
+		return fmt.Errorf("setting name: %s, type: %T, %w", name, nil, logs.ErrConfigName)
 	}
 	switch v := value.(type) {
 	case bool:
 		if viper.Get(name).(bool) == v {
-			return nil
+			return ErrSkip
 		}
+		return nil
 	case string:
 		if viper.Get(name).(string) == v {
-			return nil
+			return ErrSkip
 		}
 		if value.(string) == "" {
-			return nil
+			return ErrUnused
 		}
+		return nil
 	case int:
 		if viper.Get(name).(int) == int(v) {
-			return nil
+			return ErrSkip
 		}
 		if name == get.Serve && v == 0 {
-			return nil
+			return ErrUnused
 		}
+		return nil
+	case uint:
+		if viper.Get(name).(int) == int(v) {
+			return ErrSkip
+		}
+		if name == get.Serve && v == 0 {
+			return ErrUnused
+		}
+		return nil
 	}
-	return fmt.Errorf("name: %s, type: %T, %w", name, value, ErrSaveType)
+	return fmt.Errorf("setting: %s, type: %T, %w", name, value, ErrSaveType)
 }
 
 func skipSet(setup bool) string {
@@ -113,8 +149,8 @@ func Directory(w io.Writer, name string, setup bool) error {
 		}
 		return ErrBreak
 	}
-	if s == "-" {
-		if err := Write(w, name, setup, "-"); err != nil {
+	if s == RemoveChr {
+		if err := Write(w, name, setup, RemoveChr); err != nil {
 			return err
 		}
 		return ErrBreak
@@ -188,8 +224,8 @@ func Editor(w io.Writer, name string, setup bool) error {
 	}
 	s := prompt.String(w)
 	switch s {
-	case "-":
-		if err := Write(w, name, setup, "-"); err != nil {
+	case RemoveChr:
+		if err := Write(w, name, setup, RemoveChr); err != nil {
 			return err
 		}
 		return nil
@@ -281,8 +317,19 @@ func Index(w io.Writer, name string, setup bool, data ...string) error {
 	if name == "" {
 		return logs.ErrNameNil
 	}
+	if len(data) == 0 {
+		return ErrDataEmpty
+	}
 	s := prompt.IndexStrings(w, &data, setup)
-	return Write(w, name, setup, s)
+	data = append(data, RemoveChr)
+	data = append(data, "")
+	sort.Strings(data)
+	// validate s against data
+	i := sort.Search(len(data), func(i int) bool { return data[i] >= s })
+	if i < len(data) && data[i] == s {
+		return Write(w, name, setup, s)
+	}
+	return fmt.Errorf("config set %s %w: %q", name, ErrVal, s)
 }
 
 // Keys list all the available configuration setting names sorted alphabetically.
@@ -324,6 +371,10 @@ func Port(w io.Writer, name string, setup bool) error {
 		return logs.ErrNameNil
 	}
 	u := prompt.Port(w, true, setup)
+	if u == prompt.PortReset {
+		fmt.Fprint(w, skipSet(setup))
+		return nil
+	}
 	return Write(w, name, setup, u)
 }
 

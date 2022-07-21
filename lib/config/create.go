@@ -7,7 +7,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/bengarrett/retrotxtgo/lib/config/internal/update"
 	"github.com/bengarrett/retrotxtgo/lib/filesystem"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
@@ -51,7 +50,7 @@ func createNew(w io.Writer, name string) error {
 		return fmt.Errorf("%s: %q: %w", errMsg("create"), name, err)
 	}
 	InitDefaults()
-	err = update.Config(w, path, false)
+	err = Save(nil, path)
 	if err != nil {
 		return fmt.Errorf("%s: %q: %w", errMsg("update"), name, err)
 	}

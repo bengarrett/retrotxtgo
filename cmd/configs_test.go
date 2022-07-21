@@ -58,7 +58,7 @@ func TestInitDefaults(t *testing.T) {
 	}{
 		{"empty", "", ""},
 		{"layout", "html.layout", "standard"},
-		{"save dir", "save-directory", ""},
+		{"save dir", "save_directory", ""},
 		{"style", "style.html", "lovelace"},
 	}
 	config.InitDefaults()

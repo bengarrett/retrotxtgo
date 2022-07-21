@@ -179,7 +179,7 @@ func Runes(encode string, flags convert.Flag, src *[]byte) ([]rune, error) {
 // SaveDst returns the directory the created HTML and other files will be saved to.
 func SaveDst() (string, error) {
 	var err error
-	s := viper.GetString("save-directory")
+	s := viper.GetString("save_directory")
 	if s == "" {
 		s, err = os.Getwd()
 		if err != nil {

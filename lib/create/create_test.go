@@ -215,7 +215,7 @@ func TestArgs_Marshal(t *testing.T) {
 }
 
 func TestDestination(t *testing.T) {
-	saved := viper.GetString("save-directory")
+	saved := viper.GetString("save_directory")
 	wd, _ := os.Getwd()
 	home, _ := os.UserHomeDir()
 	spaces := filepath.Join(home, "some directory", "some file.html")

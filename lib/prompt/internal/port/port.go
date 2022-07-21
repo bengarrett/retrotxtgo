@@ -14,13 +14,13 @@ import (
 var ErrNoChange = errors.New("no changes applied")
 
 const (
-	Min uint = 1 // Min 0 is not valid as Viper treats it as a null value
-	Max uint = 65535
+	Min   uint = 1 // Min 0 is not valid as Viper treats it as a null value
+	Max   uint = 65535
+	Reset uint = 0
 )
 
 // Port asks for and validates HTTP ports.
 func Port(w io.Writer, r io.Reader, validate, setup bool) uint {
-	const reset uint = 0
 	const baseTen = 10
 	var (
 		input   string
@@ -35,7 +35,7 @@ func Port(w io.Writer, r io.Reader, validate, setup bool) uint {
 		}
 		if input == "" {
 			if err := chk.Check(w, prompts); err != nil {
-				return reset
+				return Reset
 			}
 			continue
 		}
@@ -43,7 +43,7 @@ func Port(w io.Writer, r io.Reader, validate, setup bool) uint {
 		if err != nil {
 			fmt.Printf("%s %v\n", str.Bool(false), input)
 			if err := chk.Check(w, prompts); err != nil {
-				return reset
+				return Reset
 			}
 			continue
 		}
@@ -52,14 +52,14 @@ func Port(w io.Writer, r io.Reader, validate, setup bool) uint {
 			if v := Valid(p); !v {
 				fmt.Printf("%s %v, is out of range\n", str.Bool(false), input)
 				if err := chk.Check(w, prompts); err != nil {
-					return reset
+					return Reset
 				}
 				continue
 			}
 		}
 		return p
 	}
-	return reset
+	return Reset
 }
 
 // Valid checks if the network port is within range to serve HTTP.

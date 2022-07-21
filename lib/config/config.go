@@ -18,8 +18,6 @@ var (
 	ErrSaveType  = errors.New("save value type is unsupported")
 )
 
-const namedFile = "config.yaml"
-
 func CmdPath() string {
 	return fmt.Sprintf("%s config", meta.Bin)
 }

@@ -13,7 +13,10 @@ import (
 	"github.com/gookit/color"
 )
 
-const CursorPreviousLine = "\033[F"
+const (
+	CursorPreviousLine = "\033[F"
+	RemoveChr          = "-"
+)
 
 type Keys []string
 
@@ -48,8 +51,8 @@ func (k Keys) Prompt(w io.Writer, r io.Reader, setup bool) string {
 	for scanner.Scan() {
 		prompts++
 		key := scanner.Text()
-		if key == "-" {
-			return ""
+		if key == RemoveChr {
+			return RemoveChr
 		}
 		if setup && key == "" {
 			return ""
@@ -59,7 +62,7 @@ func (k Keys) Prompt(w io.Writer, r io.Reader, setup bool) string {
 		}
 		if !k.Validate(key) {
 			if err := chk.Check(w, prompts); err != nil {
-				return ""
+				return key
 			}
 			continue
 		}
@@ -75,7 +78,7 @@ func (k Keys) ShortPrompt(w io.Writer, r io.Reader) string {
 		prompts++
 		key := scanner.Text()
 		switch key {
-		case "", "-":
+		case "", RemoveChr:
 			return key
 		}
 		if long := k.ShortValidate(key); long != "" {
