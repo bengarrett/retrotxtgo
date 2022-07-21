@@ -69,15 +69,10 @@ func Write(w io.Writer, name string, setup bool, value interface{}) error {
 			return err
 		}
 	}
-	fmt.Printf("VIPER SET %q %q\n", name, value)
 	viper.Set(name, value)
-	fmt.Printf("VIPER GET %q", viper.GetString(name))
 	if err := viper.WriteConfig(); err != nil {
 		return err
 	}
-	// if err := Save(w, ""); err != nil {
-	// 	return err
-	// }
 	switch v := value.(type) {
 	case string:
 		if v == "" {

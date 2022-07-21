@@ -3,6 +3,7 @@ package get
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os/exec"
 	"runtime"
 
@@ -231,12 +232,12 @@ func (sc *Settings) marshals(key string) error { // nolint:funlen
 }
 
 // TextEditor returns the path of a configured or discovered text editor.
-func TextEditor() string {
+func TextEditor(w io.Writer) string {
 	edit := viper.GetString("editor")
 	_, err := exec.LookPath(edit)
 	if err != nil {
 		if edit != "" {
-			fmt.Printf("%s\nwill attempt to use the $EDITOR environment variable\n", err)
+			fmt.Fprintf(w, "%s\nwill attempt to use the $EDITOR environment variable\n", err)
 		}
 		if err := viper.BindEnv("editor", "EDITOR"); err != nil {
 			return DiscEditor()

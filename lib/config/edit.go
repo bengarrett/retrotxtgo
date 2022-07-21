@@ -19,7 +19,7 @@ func Edit(w io.Writer) error {
 		//TODO configMissing(CmdPath(), "edit")
 		os.Exit(1)
 	}
-	edit := get.TextEditor()
+	edit := get.TextEditor(w)
 	if edit == "" {
 		return fmt.Errorf("create an $EDITOR environment variable in your shell configuration: %w", ErrEditorNil)
 	}

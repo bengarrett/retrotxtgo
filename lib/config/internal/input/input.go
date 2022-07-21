@@ -67,7 +67,7 @@ func Editor(w io.Writer, u Update) error {
 	s := fmt.Sprint("  Set a " + get.Tip()[u.Name])
 	if u.Value.(string) != "" {
 		s = fmt.Sprint(s, " or use a dash [-] to remove")
-	} else if ed := get.TextEditor(); ed != "" {
+	} else if ed := get.TextEditor(w); ed != "" {
 		s = fmt.Sprintf("  Instead %s found %s and will use this editor.\n\n%s",
 			meta.Name, str.ColPri(ed), s)
 	}
@@ -77,7 +77,7 @@ func Editor(w io.Writer, u Update) error {
 
 // Layout prompts the user for the layout setting.
 func Layout(w io.Writer, u Update) error {
-	fmt.Printf("\n%s\n%s\n%s\n%s\n",
+	fmt.Fprintf(w, "\n%s\n%s\n%s\n%s\n",
 		"  Standard: Recommended, uses external CSS, JS and woff2 fonts and is the recommended layout for online hosting.",
 		"  Inline:   Not recommended as it includes both the CSS and JS as inline elements that cannot be cached.",
 		"  Compact:  The same as the standard layout but without any <meta> tags.",
