@@ -50,7 +50,6 @@ func Run(cmd *cobra.Command, args []string) error {
 			}
 			defer os.Remove(filename)
 			arg = filename
-			return nil
 		}
 		s, err := n.Info(arg, flag.Info.Format)
 		if err != nil {
@@ -65,7 +64,6 @@ func Run(cmd *cobra.Command, args []string) error {
 			}
 			return err
 		}
-		s += "honk"
 		fmt.Fprintln(cmd.OutOrStdout(), s)
 	}
 	return nil

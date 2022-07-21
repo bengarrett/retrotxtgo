@@ -17,7 +17,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-var ErrNoArgs = errors.New("no arguments supplied")
+var (
+	ErrNoArgs = errors.New("no arguments supplied")
+	ErrWriter = errors.New("writer argument cannot be nil")
+)
 
 type Configs int
 
@@ -180,6 +183,9 @@ func ConfigSetup() *cobra.Command {
 
 // ListAll is the "config set --list" command run.
 func ListAll(w io.Writer) error {
+	if w == nil {
+		return ErrWriter
+	}
 	if !Config.Configs {
 		return nil
 	}

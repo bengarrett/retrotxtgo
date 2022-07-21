@@ -1,6 +1,7 @@
 package cmd_test
 
 import (
+	"os"
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/cmd"
@@ -32,18 +33,17 @@ func TestConfigs_Command(t *testing.T) {
 
 func TestListAll(t *testing.T) {
 	tests := []struct {
-		name string
-		flag bool
-		want bool
+		name    string
+		flag    bool
+		wantErr bool
 	}{
 		{"dont list", false, false},
-		{"list all", true, true},
+		{"list all", true, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cmd.Config.Configs = tt.flag
-			err := cmd.ListAll(nil)
-			if err != nil {
+			if err := cmd.ListAll(os.Stdout); (err != nil) != tt.wantErr {
 				t.Error(err)
 			}
 		})

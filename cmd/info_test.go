@@ -58,7 +58,7 @@ func Test_InfoSamples(t *testing.T) {
 			}
 			if !bytes.Contains(gotB, []byte(wants[i])) {
 				t.Errorf("sample %s result does not contain: %s", sample, wants[i])
-				fmt.Printf("%s", gotB)
+				fmt.Printf("%q\n", gotB)
 			}
 		}
 	})
