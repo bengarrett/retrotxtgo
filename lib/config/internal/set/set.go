@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -25,6 +24,8 @@ import (
 var (
 	ErrBreak    = errors.New("break of loop")
 	ErrSaveType = errors.New("save value type is unsupported")
+	ErrSkip     = errors.New("skipped, no change")
+	ErrUnused   = errors.New("is left unused")
 )
 
 // Write the value of the named setting to the configuration file.
@@ -35,12 +36,11 @@ func Write(w io.Writer, name string, setup bool, value interface{}) error {
 	if !Validate(name) {
 		return fmt.Errorf("save %q: %w", name, logs.ErrConfigName)
 	}
-
 	// TODO: test this logic
 	if err := SkipWrite(name, value); err != nil {
 		return err
 	}
-	fmt.Fprint(w, skipSet(setup))
+	//	fmt.Fprint(w, "-", skipSet(setup))
 
 	switch v := value.(type) {
 	case string:
@@ -56,18 +56,12 @@ func Write(w io.Writer, name string, setup bool, value interface{}) error {
 	switch v := value.(type) {
 	case string:
 		if v == "" {
-			fmt.Fprintf(w, "  %s is now unused\n", str.ColSuc(name))
-			// if !setup {
-			// 	os.Exit(0)
-			// }
+			fmt.Fprintf(w, "  %s %s\n", str.ColSuc(name), ErrUnused)
 			return nil
 		}
 	default:
 	}
 	fmt.Fprintf(w, "  %s is set to \"%v\"\n", str.ColSuc(name), value)
-	// if !setup {
-	// 	os.Exit(0)
-	// }
 	return nil
 }
 
@@ -101,9 +95,9 @@ func SkipWrite(name string, value interface{}) error {
 
 func skipSet(setup bool) string {
 	if !setup {
-		return ""
+		return fmt.Sprintf("  %s\n", ErrSkip.Error())
 	}
-	return str.ColSuc("\r  skipped setting")
+	return str.ColSuc("\r  " + ErrSkip.Error())
 }
 
 // Directory prompts for, checks and saves the directory path.
@@ -111,7 +105,7 @@ func Directory(w io.Writer, name string, setup bool) error {
 	if name == "" {
 		logs.FatalSave(fmt.Errorf("set directory: %w", logs.ErrNameNil))
 	}
-	s := DirExpansion(prompt.String())
+	s := DirExpansion(prompt.String(w))
 	if s == "" {
 		fmt.Fprint(w, skipSet(true))
 		if setup {
@@ -188,28 +182,26 @@ func DirExpansion(name string) string {
 
 // Editor checks the existence of given text editor location
 // and saves it as a configuration regardless of the result.
-func Editor(w io.Writer, name string, setup bool) {
+func Editor(w io.Writer, name string, setup bool) error {
 	if name == "" {
 		logs.FatalSave(fmt.Errorf("set editor: %w", logs.ErrNameNil))
 	}
-	s := prompt.String()
+	s := prompt.String(w)
 	switch s {
 	case "-":
 		if err := Write(w, name, setup, "-"); err != nil {
-			log.Fatal(err)
+			return err
 		}
-		return
+		return nil
 	case "":
 		fmt.Fprint(w, skipSet(setup))
-		return
+		return nil
 	}
 	if _, err := exec.LookPath(s); err != nil {
 		fmt.Fprintf(w, "%s%s\nThe %s editor is not usable by %s.\n",
 			str.Alert(), errors.Unwrap(err), s, meta.Name)
 	}
-	if err := Write(w, name, setup, s); err != nil {
-		log.Fatal(err)
-	}
+	return Write(w, name, setup, s)
 }
 
 // Font previews and saves a default font setting.
@@ -231,10 +223,7 @@ func Font(w io.Writer, value string, setup bool) error {
 		"  Choose a font, ",
 		str.UnderlineKeys(create.Fonts()...),
 		fmt.Sprintf("(suggestion: %s)", str.Example("automatic")))
-	if err := ShortStrings(w, get.FontFamily, setup, create.Fonts()...); err != nil {
-		return err
-	}
-	return nil
+	return ShortStrings(w, get.FontFamily, setup, create.Fonts()...)
 }
 
 // Font previews and saves the embedded Base64 font setting.
@@ -257,14 +246,11 @@ func FontEmbed(w io.Writer, value, setup bool) error {
 	}
 	q += Recommend("no")
 	b := prompt.YesNo(w, q, viper.GetBool(name))
-	if err := Write(w, name, setup, b); err != nil {
-		return err
-	}
-	return nil
+	return Write(w, name, setup, b)
 }
 
 // Generator prompts for and previews the custom program generator meta tag.
-func Generator(w io.Writer, value bool) {
+func Generator(w io.Writer, value bool) error {
 	const name = get.Genr
 	elm := fmt.Sprintf("  %s\n    %s\n  %s\n",
 		"<head>",
@@ -279,7 +265,7 @@ func Generator(w io.Writer, value bool) {
 			"</head>")
 	}
 	if err := color.HTML(w, elm); err != nil {
-		log.Fatal(err)
+		return err
 	}
 	p := "Enable the generator element?"
 	if value {
@@ -287,20 +273,16 @@ func Generator(w io.Writer, value bool) {
 	}
 	p = fmt.Sprintf("  %s%s", p, Recommend("yes"))
 	b := prompt.YesNo(w, p, viper.GetBool(name))
-	if err := Write(w, name, true, b); err != nil {
-		log.Fatal(err)
-	}
+	return Write(w, name, true, b)
 }
 
 // Index prompts for a value from a list of valid choices and saves the result.
-func Index(w io.Writer, name string, setup bool, data ...string) {
+func Index(w io.Writer, name string, setup bool, data ...string) error {
 	if name == "" {
-		logs.FatalSave(fmt.Errorf("set index: %w", logs.ErrNameNil))
+		return logs.ErrNameNil
 	}
 	s := prompt.IndexStrings(w, &data, setup)
-	if err := Write(w, name, setup, s); err != nil {
-		log.Fatal(err)
-	}
+	return Write(w, name, setup, s)
 }
 
 // Keys list all the available configuration setting names sorted alphabetically.
@@ -317,7 +299,7 @@ func Keys() []string {
 
 // NoTranslate previews and prompts for the notranslate HTML attribute
 // and Google meta elemenet.
-func NoTranslate(w io.Writer, value, setup bool) {
+func NoTranslate(w io.Writer, value, setup bool) error {
 	const name = get.Notlate
 	elm := fmt.Sprintf("  %s\n    %s\n  %s\n  %s\n",
 		"<head>",
@@ -325,7 +307,7 @@ func NoTranslate(w io.Writer, value, setup bool) {
 		"</head>",
 		"<body class=\"notranslate\">")
 	if err := color.HTML(w, elm); err != nil {
-		log.Fatal(err)
+		return err
 	}
 	q := "Enable the no translate option?"
 	if value {
@@ -333,20 +315,16 @@ func NoTranslate(w io.Writer, value, setup bool) {
 	}
 	q = fmt.Sprintf("  %s%s", q, Recommend("no"))
 	b := prompt.YesNo(w, q, viper.GetBool(name))
-	if err := Write(w, name, setup, b); err != nil {
-		log.Fatal(err)
-	}
+	return Write(w, name, setup, b)
 }
 
 // Port prompts for and saves HTTP port.
-func Port(w io.Writer, name string, setup bool) {
+func Port(w io.Writer, name string, setup bool) error {
 	if name == "" {
-		logs.FatalSave(fmt.Errorf("set port: %w", logs.ErrNameNil))
+		return logs.ErrNameNil
 	}
-	u := prompt.Port(true, setup)
-	if err := Write(w, name, setup, u); err != nil {
-		log.Fatal(err)
-	}
+	u := prompt.Port(w, true, setup)
+	return Write(w, name, setup, u)
 }
 
 // Recommend uses the s value as a user input suggestion.
@@ -358,14 +336,14 @@ func Recommend(s string) string {
 }
 
 // RetroTxt previews and prompts the custom retrotxt meta tag.
-func RetroTxt(w io.Writer, value bool) {
+func RetroTxt(w io.Writer, value bool) error {
 	const name = get.Rtx
 	elm := fmt.Sprintf("%s\n%s\n%s\n",
 		"  <head>",
 		"    <meta name=\"retrotxt\" content=\"encoding: IBM437; linebreak: CRLF; length: 50; width: 80; name: file.txt\">",
 		"  </head>")
 	if err := color.HTML(w, elm); err != nil {
-		log.Fatal(err)
+		return err
 	}
 	p := "Enable the retrotxt element?"
 	if value {
@@ -373,9 +351,7 @@ func RetroTxt(w io.Writer, value bool) {
 	}
 	p = fmt.Sprintf("  %s%s", p, Recommend("yes"))
 	b := prompt.YesNo(w, p, viper.GetBool(name))
-	if err := Write(w, name, true, b); err != nil {
-		log.Fatal(err)
-	}
+	return Write(w, name, true, b)
 }
 
 // ShortStrings prompts and saves setting values that support 1 character aliases.
@@ -384,10 +360,7 @@ func ShortStrings(w io.Writer, name string, setup bool, data ...string) error {
 		return fmt.Errorf("set short string: %w", logs.ErrNameNil)
 	}
 	s := prompt.ShortStrings(w, &data)
-	if err := Write(w, name, setup, s); err != nil {
-		return err
-	}
-	return nil
+	return Write(w, name, setup, s)
 }
 
 // String prompts and saves a single word setting value.
@@ -395,11 +368,8 @@ func String(w io.Writer, name string, setup bool) error {
 	if name == "" {
 		return fmt.Errorf("set string: %w", logs.ErrNameNil)
 	}
-	s := prompt.String()
-	if err := Write(w, name, setup, s); err != nil {
-		return err
-	}
-	return nil
+	s := prompt.String(w)
+	return Write(w, name, setup, s)
 }
 
 // Strings prompts and saves a string of text setting value.
@@ -408,25 +378,22 @@ func Strings(w io.Writer, name string, setup bool, data ...string) error {
 		return fmt.Errorf("set strings: %w", logs.ErrNameNil)
 	}
 	s := prompt.Strings(w, &data, setup)
-	if err := Write(w, name, setup, s); err != nil {
-		return err
-	}
-	return nil
+	return Write(w, name, setup, s)
 }
 
 // Title prompts for and previews a HTML title element value.
-func Title(w io.Writer, name, value string, setup bool) {
+func Title(w io.Writer, name, value string, setup bool) error {
 	elm := fmt.Sprintf("%s\n%s\n%s\n",
 		"  <head>",
 		fmt.Sprintf("    <title>%s</title>", value),
 		"  </head>")
 	if err := color.HTML(w, elm); err != nil {
-		log.Fatal(err)
+		return err
 	}
 	fmt.Fprintf(w, "%s\n%s\n  ",
 		str.ColFuz("  About this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title"),
 		fmt.Sprintf("  Choose a new %s:", get.Tip()[name]))
-	String(w, name, setup)
+	return String(w, name, setup)
 }
 
 // Validate the existence of the key in a list of settings.

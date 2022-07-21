@@ -4,18 +4,26 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"log"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
 
+	"github.com/bengarrett/retrotxtgo/lib/prompt/internal/chk"
 	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/gookit/color"
 )
 
-const NoChange = "no changes applied"
+const CursorPreviousLine = "\033[F"
 
 type Keys []string
+
+// gotoInput returns the ANSI cursor previous line control.
+func gotoInput() string {
+	if color.Enable {
+		return CursorPreviousLine
+	}
+	return ""
+}
 
 // Numeric checks input string for a valid int value and returns a matching slice.
 func (k Keys) Numeric(input string) string {
@@ -50,7 +58,9 @@ func (k Keys) Prompt(w io.Writer, r io.Reader, setup bool) string {
 			return n
 		}
 		if !k.Validate(key) {
-			check(w, prompts)
+			if err := chk.Check(w, prompts); err != nil {
+				return ""
+			}
 			continue
 		}
 		return key
@@ -72,7 +82,9 @@ func (k Keys) ShortPrompt(w io.Writer, r io.Reader) string {
 			return long
 		}
 		if !k.Validate(key) {
-			check(w, prompts)
+			if err := chk.Check(w, prompts); err != nil {
+				return ""
+			}
 			continue
 		}
 		return key
@@ -118,22 +130,8 @@ func (k Keys) Validate(key string) (ok bool) {
 	sort.Strings(k)
 	i := sort.SearchStrings(k, key)
 	if i >= len(k) || k[i] != key {
-		fmt.Printf("%s %v\n", str.Bool(false), key)
+		fmt.Printf("%s%s %v\n", gotoInput(), str.Bool(false), key)
 		return false
 	}
 	return true
-}
-
-// Check used in scanner Scans to prompt a user for a valid text input.
-func check(w io.Writer, prompts int) {
-	const info, max = 2, 4
-	switch {
-	case prompts == info:
-		if i, err := fmt.Fprint(w, "\r  Ctrl+C to keep the existing value\n"); err != nil {
-			log.Fatalf("prompt check println at %dB: %s", i, err)
-		}
-	case prompts >= max:
-		fmt.Fprintf(w, "\r  %s", NoChange)
-		os.Exit(0) // TODO: return error
-	}
 }

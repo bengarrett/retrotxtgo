@@ -14,12 +14,11 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/update"
 	"github.com/bengarrett/retrotxtgo/lib/create"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/lib/prompt"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/spf13/viper"
 )
-
-var ErrNotCfged = errors.New("config is not configured")
 
 // List and print all the available configurations.
 func List(w io.Writer) error {
@@ -63,10 +62,7 @@ func List(w io.Writer) error {
 	fmt.Fprintf(tw, "%s # Will also change the meta description setting\n", str.Example(cmds+"6"))
 	fmt.Fprintln(tw, "\nMultiple settings are supported.")
 	fmt.Fprintf(tw, "\n%s\n", str.Example(cmds+"style.html style.info"))
-	if _, err := fmt.Print(w, tw); err != nil {
-		return err
-	}
-	return nil
+	return tw.Flush()
 }
 
 // Set edits and saves a named setting within a configuration file.
@@ -87,9 +83,8 @@ func Set(w io.Writer, name string) error {
 
 // Update edits and saves a named setting within a configuration file.
 func Update(w io.Writer, name string, setup bool) error {
-	//w := new(bytes.Buffer)
 	if !set.Validate(name) {
-		fmt.Fprintln(w, logs.Hint("config set --list??", logs.ErrConfigName))
+		fmt.Fprintln(w, logs.Hint("config set --list", logs.ErrConfigName))
 		return nil
 	}
 	if !setup {
@@ -112,7 +107,11 @@ func Update(w io.Writer, name string, setup bool) error {
 		update.String(w, s, name, value.(string))
 	}
 	u := input.Update{Name: name, Setup: setup, Value: value}
-	if err := updatePrompt(w, u); err != nil {
+	err := updatePrompt(w, u)
+	switch {
+	case errors.Is(err, prompt.ErrSkip):
+		fmt.Fprintln(w, prompt.ErrSkip)
+	case err != nil:
 		return err
 	}
 	return nil
@@ -122,15 +121,15 @@ func Update(w io.Writer, name string, setup bool) error {
 func updatePrompt(w io.Writer, u input.Update) error {
 	switch u.Name {
 	case "editor":
-		input.Editor(w, u)
+		return input.Editor(w, u)
 	case get.SaveDir:
-		input.SaveDir(w, u)
+		return input.SaveDir(w, u)
 	case get.Serve:
-		input.Serve(w, u)
+		return input.Serve(w, u)
 	case get.Styleh:
-		input.StyleHTML(w, u)
+		return input.StyleHTML(w, u)
 	case get.Stylei:
-		input.StyleInfo(w, u)
+		return input.StyleInfo(w, u)
 	}
 	return metaPrompts(w, u)
 }
@@ -143,30 +142,32 @@ func metaPrompts(w io.Writer, u input.Update) error {
 	case get.FontFamily:
 		return set.Font(w, u.Value.(string), u.Setup)
 	case get.LayoutTmpl:
-		input.Layout(w, u)
+		return input.Layout(w, u)
 	case get.Author,
 		get.Desc,
 		get.Keywords:
-		input.PreviewMeta(w, u.Name, u.Value.(string))
+		if err := input.PreviewMeta(w, u.Name, u.Value.(string)); err != nil {
+			return err
+		}
 		return set.String(w, u.Name, u.Setup)
 	case get.Theme:
 		return theme(w, u)
 	case get.Scheme:
-		input.ColorScheme(w, u)
+		return input.ColorScheme(w, u)
 	case get.Genr:
-		set.Generator(w, u.Value.(bool))
+		return set.Generator(w, u.Value.(bool))
 	case get.Notlate:
-		set.NoTranslate(w, u.Value.(bool), u.Setup)
+		return set.NoTranslate(w, u.Value.(bool), u.Setup)
 	case get.Referr:
 		return referr(w, u)
 	case get.Bot:
 		return bot(w, u)
 	case get.Rtx:
-		set.RetroTxt(w, u.Value.(bool))
+		return set.RetroTxt(w, u.Value.(bool))
 	case get.Title:
-		set.Title(w, u.Name, u.Value.(string), u.Setup)
+		return set.Title(w, u.Name, u.Value.(string), u.Setup)
 	}
-	return fmt.Errorf("%w: %s", ErrNotCfged, u.Name)
+	return fmt.Errorf("%w: %s", prompt.ErrSkip, u.Name)
 }
 
 func theme(w io.Writer, u input.Update) error {
@@ -183,8 +184,7 @@ func bot(w io.Writer, u input.Update) error {
 	}
 	cr := create.Robots()
 	fmt.Fprintf(w, "%s\n  ", str.NumberizeKeys(cr[:]...))
-	set.Index(w, u.Name, u.Setup, cr[:]...)
-	return nil
+	return set.Index(w, u.Name, u.Setup, cr[:]...)
 }
 
 func referr(w io.Writer, u input.Update) error {
@@ -193,8 +193,7 @@ func referr(w io.Writer, u input.Update) error {
 	}
 	cr := create.Referrer()
 	fmt.Fprintf(w, "%s\n  ", str.NumberizeKeys(cr[:]...))
-	set.Index(w, u.Name, u.Setup, cr[:]...)
-	return nil
+	return set.Index(w, u.Name, u.Setup, cr[:]...)
 }
 
 func recommendMeta(w io.Writer, name, value, suggest string) error {

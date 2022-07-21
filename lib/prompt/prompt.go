@@ -2,6 +2,7 @@
 package prompt
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -14,9 +15,10 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/prompt/internal/port"
 	"github.com/bengarrett/retrotxtgo/lib/prompt/internal/read"
 	"github.com/bengarrett/retrotxtgo/lib/str"
-	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/gookit/color"
 )
+
+var ErrSkip = errors.New("skipped, no change")
 
 const (
 	PortMin uint = port.Min
@@ -29,7 +31,7 @@ func CtrlC(w io.Writer) {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		fmt.Fprintf(w, "%s has quit.", meta.Name)
+		fmt.Fprintf(w, "\n  %s\n", ErrSkip)
 		os.Exit(0)
 	}()
 }
@@ -40,6 +42,7 @@ func IndexStrings(w io.Writer, options *[]string, setup bool) string {
 		return ""
 	}
 	var k key.Keys = *options
+	CtrlC(w)
 	return k.Prompt(w, os.Stdin, setup)
 }
 
@@ -52,8 +55,8 @@ func SkipSet(setup bool) string {
 }
 
 // Port asks for and returns a HTTP port value.
-func Port(validate, setup bool) uint {
-	return port.Port(os.Stdin, validate, setup)
+func Port(w io.Writer, validate, setup bool) uint {
+	return port.Port(w, os.Stdin, validate, setup)
 }
 
 // PortValid checks if the network port is within range to serve HTTP.
@@ -68,13 +71,15 @@ func ShortStrings(w io.Writer, options *[]string) string {
 		return ""
 	}
 	var k key.Keys = *options
+	CtrlC(w)
 	return k.ShortPrompt(w, os.Stdin)
 }
 
 // String asks for and returns a multi-word string.
 // Inputting ⏎ the Enter/Return key exits the program,
 // or returns an empty value when in SetupMode.
-func String() (words string) {
+func String(w io.Writer) string {
+	CtrlC(w)
 	return read.Parse(os.Stdin)
 }
 
@@ -102,6 +107,7 @@ func YesNo(w io.Writer, ask string, yesDefault bool) bool {
 		no, _ = str.UnderlineChar(n)
 	}
 	fmt.Fprintf(w, "%s [%ses/%so] ", ask, yes, no)
+	CtrlC(w)
 	input, err := read.Read(os.Stdin)
 	if err != nil {
 		logs.FatalSave(err)

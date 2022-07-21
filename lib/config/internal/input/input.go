@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -30,14 +29,15 @@ type Update struct {
 }
 
 // ColorScheme prompts the user for the color scheme setting.
-func ColorScheme(w io.Writer, u Update) {
-	PreviewMeta(w, u.Name, u.Value.(string))
+func ColorScheme(w io.Writer, u Update) error {
+	if err := PreviewMeta(w, u.Name, u.Value.(string)); err != nil {
+		return err
+	}
 	c := create.ColorScheme()
 	prints := make([]string, len(c[:]))
 	copy(prints, c[:])
-	fmt.Fprintf(w, "%s%s: ",
-		str.UnderlineKeys(prints...), set.Recommend(""))
-	set.ShortStrings(w, u.Name, u.Setup, c[:]...)
+	fmt.Fprintf(w, "%s%s: ", str.UnderlineKeys(prints...), set.Recommend(""))
+	return set.ShortStrings(w, u.Name, u.Setup, c[:]...)
 }
 
 func Defaults(name string) string {
@@ -63,7 +63,7 @@ func Defaults(name string) string {
 }
 
 // Editor prompts the user for the editor setting.
-func Editor(w io.Writer, u Update) {
+func Editor(w io.Writer, u Update) error {
 	s := fmt.Sprint("  Set a " + get.Tip()[u.Name])
 	if u.Value.(string) != "" {
 		s = fmt.Sprint(s, " or use a dash [-] to remove")
@@ -72,11 +72,11 @@ func Editor(w io.Writer, u Update) {
 			meta.Name, str.ColPri(ed), s)
 	}
 	fmt.Fprintf(w, "%s:\n  ", s)
-	set.Editor(w, u.Name, u.Setup)
+	return set.Editor(w, u.Name, u.Setup)
 }
 
 // Layout prompts the user for the layout setting.
-func Layout(w io.Writer, u Update) {
+func Layout(w io.Writer, u Update) error {
 	fmt.Printf("\n%s\n%s\n%s\n%s\n",
 		"  Standard: Recommended, uses external CSS, JS and woff2 fonts and is the recommended layout for online hosting.",
 		"  Inline:   Not recommended as it includes both the CSS and JS as inline elements that cannot be cached.",
@@ -85,7 +85,7 @@ func Layout(w io.Writer, u Update) {
 	fmt.Fprintf(w, "\n%s%s%s ",
 		"  Choose a ", str.Options(get.Tip()[u.Name], true, false, create.Layouts()...),
 		fmt.Sprintf(" (suggestion: %s):", str.Example("standard")))
-	set.ShortStrings(w, u.Name, u.Setup, create.Layouts()...)
+	return set.ShortStrings(w, u.Name, u.Setup, create.Layouts()...)
 }
 
 // PortInfo returns recommended and valid HTTP port values.
@@ -109,11 +109,12 @@ func PortInfo() string {
 }
 
 // PreviewMeta previews and prompts for a meta element content value.
-func PreviewMeta(w io.Writer, name, value string) {
+func PreviewMeta(w io.Writer, name, value string) error {
 	if err := PrintMeta(w, name, value); err != nil {
-		logs.FatalSave(err)
+		return err
 	}
 	fmt.Fprintf(w, "\n%s \n  ", PreviewPrompt(name, value))
+	return nil
 }
 
 // PreviewPrompt returns the available options for the named setting.
@@ -170,15 +171,16 @@ func PrintMeta(w io.Writer, name, value string) error {
 }
 
 // Serve prompts the user for a HTTP server port setting.
-func Serve(w io.Writer, u Update) {
-	reset := func() {
+func Serve(w io.Writer, u Update) error {
+	reset := func() error {
 		var p uint
 		if u, ok := get.Reset()[get.Serve].(uint); ok {
 			p = u
 		}
 		if err := set.Write(w, u.Name, false, p); err != nil {
-			log.Fatal(err)
+			return err
 		}
+		return nil
 	}
 	var p uint
 	switch v := u.Value.(type) {
@@ -187,10 +189,14 @@ func Serve(w io.Writer, u Update) {
 	case int:
 		p = uint(v)
 	default:
-		reset()
+		if err := reset(); err != nil {
+			return err
+		}
 	}
 	if p > prompt.PortMax {
-		reset()
+		if err := reset(); err != nil {
+			return err
+		}
 	}
 	check := str.Bool(create.Port(p))
 	fmt.Fprintf(w, "\n  Internal HTTP server port number: %s%d %s\n",
@@ -200,11 +206,11 @@ func Serve(w io.Writer, u Update) {
 	fmt.Fprintf(w, "\n  Port %s is reserved, port numbers less than %s are not recommended.\n",
 		str.Example("0"), str.Example("1024"))
 	fmt.Fprintf(w, "  Set a HTTP port number, choices %s: ", PortInfo())
-	set.Port(w, u.Name, u.Setup)
+	return set.Port(w, u.Name, u.Setup)
 }
 
 // SaveDir prompts the user for the a save destination directory setting.
-func SaveDir(w io.Writer, u Update) {
+func SaveDir(w io.Writer, u Update) error {
 	fmt.Fprintf(w, "  Choose a new %s.\n\n  Directory aliases, use:", get.Tip()[u.Name])
 	if home, err := os.UserHomeDir(); err == nil {
 		fmt.Fprintf(w, "\n   %s (tilde) to save to your home directory: %s",
@@ -216,35 +222,40 @@ func SaveDir(w io.Writer, u Update) {
 	}
 	fmt.Fprintf(w, "\n   %s (hyphen-minus) to disable the setting and always use the active directory.\n  ",
 		str.Example("-"))
+	// this will loop for all errors (dir does not exist etc.)
+	// but will break when an empty string [Enter key press] is returned
 	for {
-		if err := set.Directory(w, u.Name, u.Setup); err != nil {
+		if err := set.Directory(w, u.Name, u.Setup); errors.Is(err, set.ErrBreak) {
 			break
+		} else if err != nil {
+			return err
 		}
 	}
+	return nil
 }
 
 // StyleHTML prompts the user for the a HTML and CSS style setting.
-func StyleHTML(w io.Writer, u Update) {
+func StyleHTML(w io.Writer, u Update) error {
 	d := ""
 	if s, ok := get.Reset()[u.Name].(string); ok {
 		d = s
 	}
-	b := new(bytes.Buffer)
-	color.ChromaNames(b, "css")
+	italic := new(bytes.Buffer)
+	color.ChromaNames(italic, "css")
 	fmt.Fprintf(w, "\n%s\n\n  Choose the number to set a new HTML syntax style%s: ",
-		str.Italic(b.String()), set.Recommend(d))
-	set.Strings(w, u.Name, u.Setup, styles.Names()...)
+		str.Italic(italic.String()), set.Recommend(d))
+	return set.Strings(w, u.Name, u.Setup, styles.Names()...)
 }
 
 // StyleInfo prompts the user for the a JS style setting.
-func StyleInfo(w io.Writer, u Update) {
+func StyleInfo(w io.Writer, u Update) error {
 	d := ""
 	if s, ok := get.Reset()[u.Name].(string); ok {
 		d = s
 	}
-	b := new(bytes.Buffer)
-	color.ChromaNames(b, "json")
+	italic := new(bytes.Buffer)
+	color.ChromaNames(italic, "json")
 	fmt.Fprintf(w, "\n%s\n\n  Choose the number to set a new %s syntax style%s: ",
-		str.Italic(b.String()), str.Example("config info"), set.Recommend(d))
-	set.Strings(w, u.Name, u.Setup, styles.Names()...)
+		str.Italic(italic.String()), str.Example("config info"), set.Recommend(d))
+	return set.Strings(w, u.Name, u.Setup, styles.Names()...)
 }

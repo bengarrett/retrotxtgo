@@ -2,6 +2,7 @@ package port_test
 
 import (
 	"bytes"
+	"os"
 	"strconv"
 	"testing"
 
@@ -50,7 +51,7 @@ func Test_Port(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			stdin.Write([]byte(tt.input + "\n")) // \n is a requirement
-			if gotPort := port.Port(&stdin, tt.validate, false); gotPort != tt.wantPort {
+			if gotPort := port.Port(os.Stdout, &stdin, tt.validate, false); gotPort != tt.wantPort {
 				t.Errorf("Port() = %v, want %v", gotPort, tt.wantPort)
 			}
 		})

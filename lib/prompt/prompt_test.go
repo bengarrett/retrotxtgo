@@ -54,7 +54,7 @@ func TestPort(t *testing.T) {
 				os.Stdin = stdin
 			}()
 			os.Stdin = r
-			if gotPort := prompt.Port(tt.args.validate, tt.args.setup); gotPort != tt.wantPort {
+			if gotPort := prompt.Port(os.Stdout, tt.args.validate, tt.args.setup); gotPort != tt.wantPort {
 				t.Errorf("Port() = %v, want %v", gotPort, tt.wantPort)
 			}
 		})
@@ -149,7 +149,7 @@ func TestString(t *testing.T) {
 				os.Stdin = stdin
 			}()
 			os.Stdin = r
-			if gotKey := prompt.String(); gotKey != tt.want {
+			if gotKey := prompt.String(os.Stdout); gotKey != tt.want {
 				t.Errorf("String() = %v, want %v", gotKey, tt.want)
 			}
 		})
