@@ -122,15 +122,16 @@ func configMissing(w io.Writer, name, suffix string) {
 
 // Save all viper settings to the named file.
 func Save(w io.Writer, name string) error {
-	fmt.Println("honky honk!")
 	if name != "" {
 		viper.SetConfigName(name)
 	}
 	if viper.ConfigFileUsed() == "" {
 		viper.SetConfigFile(Path())
 	}
-	for key := range get.Reset() {
-		fmt.Println(key, viper.IsSet(key), viper.GetString(key))
+	for key, val := range get.Reset() {
+		if !viper.IsSet(key) {
+			viper.Set(key, val)
+		}
 	}
 	if err := viper.WriteConfig(); err != nil {
 		return err
