@@ -133,7 +133,7 @@ func skipSet(setup bool) string {
 	if !setup {
 		return fmt.Sprintf("  %s\n", ErrSkip.Error())
 	}
-	return str.ColSuc("\r  " + ErrSkip.Error())
+	return str.ColSuc("\r  "+ErrSkip.Error()) + "\n"
 }
 
 // Directory prompts for, checks and saves the directory path.

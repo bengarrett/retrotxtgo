@@ -191,7 +191,7 @@ func NumberizeKeys(keys ...string) string {
 	sort.Strings(keys)
 	for i, key := range keys {
 		if i == 0 {
-			s[i] = fmt.Sprintf("  Use %s for%s%s", Example(strconv.Itoa(i)), nbsp, key)
+			s[i] = fmt.Sprintf("Use %s for%s%s", Example(strconv.Itoa(i)), nbsp, key)
 			continue
 		}
 		s[i] = fmt.Sprintf("      %s for%s%s", Example(strconv.Itoa(i)), nbsp, key)
