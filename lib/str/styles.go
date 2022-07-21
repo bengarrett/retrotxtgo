@@ -241,6 +241,9 @@ func UnderlineChar(c string) (string, error) {
 	if !utf8.ValidString(c) {
 		return "", fmt.Errorf("underlinechar %q: %w", c, ErrRune)
 	}
+	if !color.Enable {
+		return c, nil
+	}
 	var buf bytes.Buffer
 	r, _ := utf8.DecodeRuneInString(c)
 	t, err := template.New("underline").Parse("{{define \"TEXT\"}}\033[0m\033[4m{{.}}\033[0m{{end}}")
