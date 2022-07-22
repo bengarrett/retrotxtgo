@@ -41,7 +41,7 @@ func Info(w io.Writer, style string) error {
 	return Alert(w, Missing()...)
 }
 
-// Alert returns a printed list of missing settings in the config file.
+// Alert returns writes list of missing settings in the config file.
 func Alert(w io.Writer, list ...string) error {
 	if w == nil {
 		return ErrWriter

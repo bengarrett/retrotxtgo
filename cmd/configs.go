@@ -224,7 +224,7 @@ func Load() {
 		return
 	}
 	// configuration file
-	if err := config.SetConfig(w, flag.Command.Config); err != nil {
+	if err := config.Load(w, flag.Command.Config); err != nil {
 		logs.FatalMark(viper.ConfigFileUsed(), logs.ErrConfigOpen, err)
 	}
 }
@@ -241,14 +241,14 @@ func LoadTester(w io.Writer) error {
 	if err := config.Create(w, f.Name(), true); err != nil {
 		return err
 	}
-	if err := config.SetConfig(w, f.Name()); err != nil {
+	if err := config.Load(w, f.Name()); err != nil {
 		return fmt.Errorf("%w, %s: %s", logs.ErrConfigOpen, err, viper.ConfigFileUsed())
 	}
 	return nil
 }
 
 func ConfigInfos(w io.Writer) error {
-	if err := config.SetConfig(w, flag.Command.Config); err != nil {
+	if err := config.Load(w, flag.Command.Config); err != nil {
 		return fmt.Errorf("%w: %s", logs.ErrConfigOpen, err)
 	}
 	// info --configs flag

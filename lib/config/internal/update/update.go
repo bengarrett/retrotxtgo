@@ -11,9 +11,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/meta"
 )
 
-const namedFile = "config.yaml"
-
-// Bool the boolean value of the named setting.
+// Bool returns the boolean value of the named setting.
 func Bool(b bool, name string) string {
 	switch b {
 	case true:
@@ -23,7 +21,7 @@ func Bool(b bool, name string) string {
 	}
 }
 
-// String the string value of the named setting.
+// String writes the string value of the named setting.
 func String(w io.Writer, s, name, value string) {
 	const sd = get.SaveDir
 	switch s {

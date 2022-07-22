@@ -22,7 +22,7 @@ func TestPath(t *testing.T) {
 	})
 }
 
-func TestSetConfig(t *testing.T) {
+func TestLoad(t *testing.T) {
 	color.Enable = false
 	if err := cmd.LoadTester(os.Stdout); err != nil {
 		t.Error(err)
@@ -37,8 +37,8 @@ func TestSetConfig(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := config.SetConfig(os.Stdout, tt.flag); (err != nil) != tt.wantErr {
-				t.Errorf("SetConfig() error = %v, wantErr %v", err, tt.wantErr)
+			if err := config.Load(os.Stdout, tt.flag); (err != nil) != tt.wantErr {
+				t.Errorf("Load() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

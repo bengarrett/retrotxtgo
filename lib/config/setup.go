@@ -16,7 +16,12 @@ import (
 
 var ErrStart = errors.New("setup start argument is out of range")
 
-const logoname = "ansi/retrotxt.utf8ans"
+const (
+	ClearScreen = "\033c"
+	ResetScreen = "\033[0m"
+
+	logoname = "ansi/retrotxt.utf8ans"
+)
 
 // CtrlC intercepts Ctrl-C key combinations to exit out of the Setup.
 func CtrlC(w io.Writer) {
@@ -30,13 +35,13 @@ func CtrlC(w io.Writer) {
 }
 
 // Setup walks through all the settings and saves them to the configuration file.
-// Start the walk through at the provided question number or leave it at 0.
+// The start argument can being the walkthrough at the provided question number or it can be left at 0.
 func Setup(w io.Writer, start int) error {
 	if w == nil {
 		return ErrWriter
 	}
 	const width = 80
-	keys := KeySort()
+	keys := SortKeys()
 	if start < 0 || start > len(keys)-1 {
 		return fmt.Errorf("%w: %d (permitted values 0-%d)", ErrStart, start, len(keys)-1)
 	}
@@ -64,7 +69,7 @@ func Setup(w io.Writer, start int) error {
 	return nil
 }
 
-// enterKey returns the appropriate Setup instructions based on the user's platform.
+// enterKey returns the appropriate Setup instructions based on the host platform.
 func enterKey() string {
 	if runtime.GOOS == "darwin" {
 		return "To quit setup, press ↩ return to skip the question or ⌃ control-C."
@@ -72,17 +77,16 @@ func enterKey() string {
 	return "To quit setup, press ⏎ return to skip the question or Ctrl-C."
 }
 
-// Logo writes an 256-color RetroTxt, ANSI logo.
+// Logo writes a custom 256-color, ANSI logo for RetroTxt.
 func Logo(w io.Writer) error {
 	if w == nil {
 		return ErrWriter
 	}
-	const clearScreen, resetScreen = "\033c", "\033[0m"
 	b, err := static.ANSI.ReadFile(logoname)
 	if err != nil {
 		return fmt.Errorf("%w: %s", ErrLogo, logoname)
 	}
 	// the terminal screen needs to be cleared if the logo is to display correctly
-	fmt.Fprintf(w, "%s%s%s\n", clearScreen, string(b), resetScreen)
+	fmt.Fprintf(w, "%s%s%s\n", ClearScreen, string(b), ResetScreen)
 	return nil
 }

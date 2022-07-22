@@ -18,6 +18,8 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/prompt"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/meta"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 var ErrMeta = errors.New("cannot use name as a meta element")
@@ -165,7 +167,7 @@ func PrintMeta(w io.Writer, name, value string) error {
 	h := strings.Split(get.Tip()[name], " ")
 	a := fmt.Sprintf("%s\n  %s %s.",
 		str.ColFuz("  About this value: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name"),
-		strings.Title(h[0]), strings.Join(h[1:], " "))
+		Title(h[0]), strings.Join(h[1:], " "))
 	fmt.Fprint(w, a)
 	return nil
 }
@@ -258,4 +260,9 @@ func StyleInfo(w io.Writer, u Update) error {
 	fmt.Fprintf(w, "\n%s\n\n  Choose the number to set a new %s syntax style%s: ",
 		str.Italic(italic.String()), str.Example("config info"), set.Recommend(d))
 	return set.Strings(w, u.Name, u.Setup, styles.Names()...)
+}
+
+// Title returns the string titlized.
+func Title(s string) string {
+	return cases.Title(language.English).String(s)
 }

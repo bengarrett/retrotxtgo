@@ -25,13 +25,13 @@ var (
 	ErrWriter     = errors.New("writer cannot be nil")
 )
 
-// List and print all the available configurations.
+// List and write all the available configurations.
 func List(w io.Writer) error {
 	if w == nil {
 		return ErrWriter
 	}
 	capitalize := func(s string) string {
-		return strings.Title(s[:1]) + s[1:]
+		return input.Title(s[:1]) + s[1:]
 	}
 	suffix := func(s string) string {
 		if strings.HasSuffix(s, "?") {
@@ -96,7 +96,7 @@ func Set(w io.Writer, name string) error {
 	}
 }
 
-// Update edits and saves a named setting within a configuration file.
+// Update edits and saves the named setting within a configuration file.
 func Update(w io.Writer, name string, setup bool) error {
 	if w == nil {
 		return ErrWriter
@@ -128,7 +128,7 @@ func Update(w io.Writer, name string, setup bool) error {
 		update.String(w, s, name, value.(string))
 	}
 	u := input.Update{Name: name, Setup: setup, Value: value}
-	err := updatePrompt(w, u)
+	err := prompts(w, u)
 	switch {
 	case errors.Is(err, prompt.ErrSkip):
 		fmt.Fprintln(w, prompt.ErrSkip)
@@ -138,8 +138,8 @@ func Update(w io.Writer, name string, setup bool) error {
 	return nil
 }
 
-// updatePrompt prompts the user for input to a config file setting.
-func updatePrompt(w io.Writer, u input.Update) error {
+// prompts the user for input to a config file setting.
+func prompts(w io.Writer, u input.Update) error {
 	switch u.Name {
 	case "editor":
 		return input.Editor(w, u)
@@ -152,11 +152,11 @@ func updatePrompt(w io.Writer, u input.Update) error {
 	case get.Stylei:
 		return input.StyleInfo(w, u)
 	}
-	return metaPrompts(w, u)
+	return metas(w, u)
 }
 
-// metaPrompts prompts the user for a meta setting.
-func metaPrompts(w io.Writer, u input.Update) error {
+// metas prompts the user for a meta setting.
+func metas(w io.Writer, u input.Update) error {
 	switch u.Name {
 	case get.FontEmbed:
 		return set.FontEmbed(w, u.Value.(bool), u.Setup)
@@ -191,16 +191,8 @@ func metaPrompts(w io.Writer, u input.Update) error {
 	return fmt.Errorf("%w: %s", prompt.ErrSkip, u.Name)
 }
 
-func theme(w io.Writer, u input.Update) error {
-	if err := recommendMeta(w, u.Name, u.Value.(string), ""); err != nil {
-		return err
-	}
-	set.String(w, u.Name, u.Setup)
-	return nil
-}
-
 func bot(w io.Writer, u input.Update) error {
-	if err := recommendMeta(w, u.Name, u.Value.(string), ""); err != nil {
+	if err := suggestions(w, u.Name, u.Value.(string), ""); err != nil {
 		return err
 	}
 	cr := create.Robots()
@@ -209,7 +201,7 @@ func bot(w io.Writer, u input.Update) error {
 }
 
 func referr(w io.Writer, u input.Update) error {
-	if err := recommendMeta(w, u.Name, u.Value.(string), ""); err != nil {
+	if err := suggestions(w, u.Name, u.Value.(string), ""); err != nil {
 		return err
 	}
 	cr := create.Referrer()
@@ -217,16 +209,24 @@ func referr(w io.Writer, u input.Update) error {
 	return set.Index(w, u.Name, u.Setup, cr[:]...)
 }
 
-func recommendMeta(w io.Writer, name, value, suggest string) error {
+func theme(w io.Writer, u input.Update) error {
+	if err := suggestions(w, u.Name, u.Value.(string), ""); err != nil {
+		return err
+	}
+	set.String(w, u.Name, u.Setup)
+	return nil
+}
+
+func suggestions(w io.Writer, name, value, suggest string) error {
 	if err := input.PrintMeta(w, name, value); err != nil {
 		return fmt.Errorf("recommanded meta: %w", err)
 	}
 	fmt.Fprintln(w)
-	fmt.Fprintf(w, "%s\n  ", recommendPrompt(name, value, suggest))
+	fmt.Fprintf(w, "%s\n  ", suggestion(name, value, suggest))
 	return nil
 }
 
-func recommendPrompt(name, value, suggest string) string {
+func suggestion(name, value, suggest string) string {
 	s := input.PreviewPromptS(name, value)
 	return fmt.Sprintf("%s%s:", s, set.Recommend(suggest))
 }

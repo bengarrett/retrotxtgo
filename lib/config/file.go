@@ -53,8 +53,9 @@ func Location() string {
 	return fmt.Sprintln(s)
 }
 
-// SetConfig reads and loads a configuration file.
-func SetConfig(w io.Writer, flag string) error {
+// Load and reads a configuration file.
+// The string argument should be the value of the hidden config flag.
+func Load(w io.Writer, flag string) error {
 	if w == nil {
 		return ErrWriter
 	}
@@ -65,7 +66,7 @@ func SetConfig(w io.Writer, flag string) error {
 	}
 	viper.SetConfigFile(path)
 	if err := viper.ReadInConfig(); err != nil {
-		return readInCfgErr(w, flag, err)
+		return loadErr(w, flag, err)
 	}
 	if flag != "" {
 		if len(viper.AllKeys()) == 0 {
@@ -82,7 +83,7 @@ func SetConfig(w io.Writer, flag string) error {
 	return nil
 }
 
-func readInCfgErr(w io.Writer, flag string, err error) error {
+func loadErr(w io.Writer, flag string, err error) error {
 	if w == nil {
 		return ErrWriter
 	}
@@ -114,7 +115,7 @@ func readInCfgErr(w io.Writer, flag string, err error) error {
 	return err
 }
 
-// ConfigMissing prints an config file error notice.
+// ConfigMissing writes an config file error notice.
 func ConfigMissing(w io.Writer, name, suffix string) {
 	cmd := strings.TrimSuffix(name, suffix) + " create"
 	if used := viper.ConfigFileUsed(); used != "" {
@@ -126,7 +127,7 @@ func ConfigMissing(w io.Writer, name, suffix string) {
 		str.Info(), str.ColPri(cmd))
 }
 
-// Save all viper settings to the named file.
+// Save each of viper settings to the named file.
 func Save(w io.Writer, name string) error {
 	if name != "" {
 		viper.SetConfigName(name)

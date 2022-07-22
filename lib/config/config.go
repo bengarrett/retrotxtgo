@@ -15,19 +15,9 @@ var (
 	ErrEditorNil = errors.New("no suitable text editor can be found")
 	ErrEditorRun = errors.New("editor cannot be run")
 	ErrLogo      = errors.New("program logo is missing")
-	ErrSaveType  = errors.New("save value type is unsupported")
 )
 
-func CmdPath() string {
-	return fmt.Sprintf("%s config", meta.Bin)
-}
-
-// Tip provides a brief help on the config file configurations.
-func Tip() get.Hints {
-	return get.Tip()
-}
-
-// Formats choices for flags.
+// Formats the choices for command flags.
 type Formats struct {
 	Info [5]string
 }
@@ -37,6 +27,10 @@ func Format() Formats {
 	return Formats{
 		Info: [5]string{"color", "json", "json.min", "text", "xml"},
 	}
+}
+
+func CmdPath() string {
+	return fmt.Sprintf("%s config", meta.Bin)
 }
 
 // Enabled returns all the Viper keys holding a value that are used.
@@ -51,12 +45,19 @@ func Enabled() map[string]interface{} {
 	return sets
 }
 
-// KeySort list all the available configuration setting names sorted by hand.
-func KeySort() []string {
+// SortKeys list all the available configuration setting names sorted by hand.
+func SortKeys() []string {
 	all := set.Keys()
 	keys := []string{
-		get.FontFamily, get.Title, get.LayoutTmpl, get.FontEmbed,
-		get.SaveDir, get.Serve, get.Editor, get.Styleh, get.Stylei,
+		get.FontFamily,
+		get.Title,
+		get.LayoutTmpl,
+		get.FontEmbed,
+		get.SaveDir,
+		get.Serve,
+		get.Editor,
+		get.Styleh,
+		get.Stylei,
 	}
 	for _, key := range all {
 		found := false
@@ -87,4 +88,9 @@ func Missing() []string {
 		}
 	}
 	return list
+}
+
+// Tip provides some brief help information of the configurations.
+func Tip() get.Hints {
+	return get.Tip()
 }

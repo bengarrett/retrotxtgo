@@ -25,19 +25,19 @@ func TestMissing(t *testing.T) {
 	}
 }
 
-func TestKeySort(t *testing.T) {
-	got, keys := config.KeySort(), set.Keys()
+func TestSortKeys(t *testing.T) {
+	got, keys := config.SortKeys(), set.Keys()
 	lenG, lenK := len(got), len(keys)
 	if lenG == 0 {
-		t.Errorf("KeySort() is empty")
+		t.Errorf("SortKeys() is empty")
 		return
 	}
 	if lenG != lenK {
-		t.Errorf("KeySort() length = %d, want %d", lenG, lenK)
+		t.Errorf("SortKeys() length = %d, want %d", lenG, lenK)
 	}
 	const want = get.FontFamily
 	if s := got[0]; s != want {
-		t.Errorf("KeySort()[0] = %s, want %s", s, want)
+		t.Errorf("SortKeys()[0] = %s, want %s", s, want)
 	}
 }
 

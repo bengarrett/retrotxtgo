@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -11,13 +12,14 @@ import (
 	"github.com/spf13/viper"
 )
 
+var ErrEd = errors.New("there is no configuration file to edit")
+
 // Edit a configuration file.
 func Edit(w io.Writer) error {
 	fmt.Fprintf(w, "%s%s", str.Info(), Location())
 	file := viper.ConfigFileUsed()
 	if file == "" {
-		//TODO configMissing(CmdPath(), "edit")
-		os.Exit(1)
+		return ErrEd
 	}
 	edit := get.TextEditor(w)
 	if edit == "" {
