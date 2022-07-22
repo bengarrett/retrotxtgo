@@ -13,6 +13,9 @@ import (
 
 // Info prints the content of a configuration file.
 func Info(w io.Writer, style string) error {
+	if w == nil {
+		return ErrWriter
+	}
 	fmt.Fprintf(w, "%s%s\n%s%s\n\n", str.Info(),
 		Location(),
 		meta.Name, " default settings in use.",
@@ -35,33 +38,31 @@ func Info(w io.Writer, style string) error {
 			return fmt.Errorf("failed to run highlighter: %w", err)
 		}
 	}
-	if s := missing(Missing()...); s != "" {
-		fmt.Fprint(w, s)
-	}
-	return nil
+	return Alert(w, Missing()...)
 }
 
-// missing returns a printed list of missing settings in the config file.
-func missing(list ...string) string {
+// Alert returns a printed list of missing settings in the config file.
+func Alert(w io.Writer, list ...string) error {
+	if w == nil {
+		return ErrWriter
+	}
 	const tries = 5
 	l := len(list)
 	if l == 0 {
-		return ""
+		return nil
 	}
 	t := "These settings are missing and should be configured"
 	if l == 1 {
 		t = "This setting is missing and should be configured"
 	}
-	var s string
+	s := str.Example(fmt.Sprintf("%s config set setup\n", meta.Bin))
 	if l < tries {
 		s = str.Example(fmt.Sprintf("%s config set %s\n",
 			meta.Bin, strings.Join(list, " ")))
-	} else {
-		s = str.Example(fmt.Sprintf("%s config set setup\n",
-			meta.Bin))
 	}
-	return fmt.Sprintf("\n\n%s:\n%s\n\n%s:\n%s",
+	fmt.Fprintf(w, "\n\n%s:\n%s\n\n%s:\n%s",
 		color.Warn.Sprint(t),
 		strings.Join(list, ", "),
 		color.Warn.Sprint("To repair"), s)
+	return nil
 }

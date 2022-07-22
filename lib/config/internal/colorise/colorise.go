@@ -1,4 +1,4 @@
-package color
+package colorise
 
 import (
 	"bytes"

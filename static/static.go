@@ -11,6 +11,9 @@ var ErrNotFound = errors.New("internal embed file is not found")
 //go:embed *
 var File embed.FS
 
+//go:embed ansi/*
+var ANSI embed.FS
+
 //go:embed font/*
 var Font embed.FS
 

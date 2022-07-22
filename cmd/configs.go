@@ -72,8 +72,7 @@ func ConfigCreate() *cobra.Command {
 			w := cmd.OutOrStdout()
 			err := config.New(w, overwrite)
 			if errors.Is(err, config.ErrExist) {
-				config.DoesExist(w, config.CmdPath(), "create")
-				return nil
+				return config.DoesExist(w, config.CmdPath(), "create")
 			}
 			if err != nil {
 				return fmt.Errorf("%w: %s", logs.ErrConfigNew, err)
@@ -175,7 +174,9 @@ func ConfigSetup() *cobra.Command {
 		Long:  fmt.Sprintf("Walk through all of the %s settings.", meta.Name),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			const startAt = 0
-			config.Setup(cmd.OutOrStdout(), startAt)
+			if err := config.Setup(cmd.OutOrStdout(), startAt); err != nil {
+				return err
+			}
 			return nil
 		},
 	}

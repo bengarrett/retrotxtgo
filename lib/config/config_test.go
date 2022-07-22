@@ -6,6 +6,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/get"
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/set"
+	"github.com/gookit/color"
 )
 
 func TestMissing(t *testing.T) {
@@ -37,5 +38,18 @@ func TestKeySort(t *testing.T) {
 	const want = get.FontFamily
 	if s := got[0]; s != want {
 		t.Errorf("KeySort()[0] = %s, want %s", s, want)
+	}
+}
+
+func TestTip(t *testing.T) {
+	color.Enable = false
+	tip := config.Tip()
+	i := 0
+	for key := range get.Reset() {
+		i++
+		s := tip[key]
+		if s == "" {
+			t.Errorf("tip[%s] is missing", key)
+		}
 	}
 }

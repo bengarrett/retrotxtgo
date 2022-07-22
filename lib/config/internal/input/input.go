@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/alecthomas/chroma/styles"
-	"github.com/bengarrett/retrotxtgo/lib/config/internal/color"
+	"github.com/bengarrett/retrotxtgo/lib/config/internal/colorise"
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/get"
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/set"
 	"github.com/bengarrett/retrotxtgo/lib/create"
@@ -159,7 +159,7 @@ func PrintMeta(w io.Writer, name, value string) error {
 			fmt.Sprintf("    <meta name=\"%s\" value=\"%s\">", s[2], v),
 			"  </head>")
 	}
-	if err := color.HTML(w, element()); err != nil {
+	if err := colorise.HTML(w, element()); err != nil {
 		return err
 	}
 	h := strings.Split(get.Tip()[name], " ")
@@ -241,7 +241,7 @@ func StyleHTML(w io.Writer, u Update) error {
 		d = s
 	}
 	italic := new(bytes.Buffer)
-	color.ChromaNames(italic, "css")
+	colorise.ChromaNames(italic, "css")
 	fmt.Fprintf(w, "\n%s\n\n  Choose the number to set a new HTML syntax style%s: ",
 		str.Italic(italic.String()), set.Recommend(d))
 	return set.Strings(w, u.Name, u.Setup, styles.Names()...)
@@ -254,7 +254,7 @@ func StyleInfo(w io.Writer, u Update) error {
 		d = s
 	}
 	italic := new(bytes.Buffer)
-	color.ChromaNames(italic, "json")
+	colorise.ChromaNames(italic, "json")
 	fmt.Fprintf(w, "\n%s\n\n  Choose the number to set a new %s syntax style%s: ",
 		str.Italic(italic.String()), str.Example("config info"), set.Recommend(d))
 	return set.Strings(w, u.Name, u.Setup, styles.Names()...)

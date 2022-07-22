@@ -16,7 +16,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const namedFile = "config.yaml"
+const NameFile = "config.yaml"
 
 // InitDefaults initializes flag and configuration defaults.
 func InitDefaults() {
@@ -28,13 +28,13 @@ func InitDefaults() {
 
 // Path returns the absolute path of the configuration file.
 func Path() string {
-	dir, err := gap.NewScope(gap.User, meta.Dir).ConfigPath(namedFile)
+	dir, err := gap.NewScope(gap.User, meta.Dir).ConfigPath(NameFile)
 	if err != nil {
 		var h string
 		if h, err = os.UserHomeDir(); err != nil {
 			return ""
 		}
-		return filepath.Join(h, namedFile)
+		return filepath.Join(h, NameFile)
 	}
 	return dir
 }
@@ -55,6 +55,9 @@ func Location() string {
 
 // SetConfig reads and loads a configuration file.
 func SetConfig(w io.Writer, flag string) error {
+	if w == nil {
+		return ErrWriter
+	}
 	viper.SetConfigType("yaml")
 	path := flag
 	if flag == "" {
@@ -80,6 +83,9 @@ func SetConfig(w io.Writer, flag string) error {
 }
 
 func readInCfgErr(w io.Writer, flag string, err error) error {
+	if w == nil {
+		return ErrWriter
+	}
 	if flag == "" {
 		if errors.Is(err, os.ErrNotExist) {
 			// auto-generate new config except when the --config flag is used
@@ -108,8 +114,8 @@ func readInCfgErr(w io.Writer, flag string, err error) error {
 	return err
 }
 
-// configMissing prints an config file error notice and exits.
-func configMissing(w io.Writer, name, suffix string) {
+// ConfigMissing prints an config file error notice.
+func ConfigMissing(w io.Writer, name, suffix string) {
 	cmd := strings.TrimSuffix(name, suffix) + " create"
 	if used := viper.ConfigFileUsed(); used != "" {
 		fmt.Fprintf(w, "%s %q config file is missing\ncreate it: %s\n",

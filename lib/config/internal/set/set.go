@@ -10,7 +10,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/bengarrett/retrotxtgo/lib/config/internal/color"
+	"github.com/bengarrett/retrotxtgo/lib/config/internal/colorise"
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/get"
 	"github.com/bengarrett/retrotxtgo/lib/create"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
@@ -29,6 +29,7 @@ var (
 	ErrSkip      = errors.New("skipped, no change")
 	ErrUnused    = errors.New("is unused")
 	ErrVal       = errors.New("value is unsupported")
+	ErrWriter    = errors.New("writer argument cannot be nil")
 )
 
 func skip(w io.Writer, name string, setup bool, value interface{}) error {
@@ -46,6 +47,9 @@ func skip(w io.Writer, name string, setup bool, value interface{}) error {
 
 // Write the value of the named setting to the configuration file.
 func Write(w io.Writer, name string, setup bool, value interface{}) error {
+	if w == nil {
+		return ErrWriter
+	}
 	if name == "" {
 		return fmt.Errorf("save: %w", logs.ErrNameNil)
 	}
@@ -68,6 +72,9 @@ func Write(w io.Writer, name string, setup bool, value interface{}) error {
 		if err := skip(w, name, setup, value); err != nil {
 			return err
 		}
+	}
+	if value == nil {
+		return ErrVal
 	}
 	viper.Set(name, value)
 	if err := viper.WriteConfig(); err != nil {
@@ -104,16 +111,17 @@ func SkipWrite(name string, value interface{}) error {
 			return ErrUnused
 		}
 		return nil
-	case int:
-		if viper.Get(name).(int) == int(v) {
+	case uint:
+		i := viper.Get(name).(int)
+		if uint(i) == uint(v) {
 			return ErrSkip
 		}
 		if name == get.Serve && v == 0 {
 			return ErrUnused
 		}
 		return nil
-	case uint:
-		if viper.Get(name).(int) == int(v) {
+	case int:
+		if viper.Get(name) == v {
 			return ErrSkip
 		}
 		if name == get.Serve && v == 0 {
@@ -131,17 +139,17 @@ func skipSet(setup bool) string {
 	return str.ColSuc("\r  "+ErrSkip.Error()) + "\n"
 }
 
-// Directory prompts for, checks and saves the directory path.
+// Directory prompts and checks directory path for save.
 func Directory(w io.Writer, name string, setup bool) error {
+	if w == nil {
+		return ErrWriter
+	}
 	if name == "" {
-		logs.FatalSave(fmt.Errorf("set directory: %w", logs.ErrNameNil))
+		return fmt.Errorf("set directory: %w", logs.ErrNameNil)
 	}
 	s := DirExpansion(prompt.String(w))
 	if s == "" {
-		fmt.Fprint(w, skipSet(true))
-		if setup {
-			return ErrBreak
-		}
+		fmt.Fprint(w, skipSet(setup))
 		return ErrBreak
 	}
 	if s == RemoveChr {
@@ -246,7 +254,7 @@ func Font(w io.Writer, value string, setup bool) error {
 		fmt.Sprintf("    font-family: \"%s\";", f),
 		fmt.Sprintf("    src: url(\"%s.woff2\") format(\"woff2\");", f),
 		"  }")
-	if err := color.CSS(w, s); err != nil {
+	if err := colorise.CSS(w, s); err != nil {
 		return err
 	}
 	fmt.Fprintf(w, "%s\n%s%s %s: ",
@@ -265,7 +273,7 @@ func FontEmbed(w io.Writer, value, setup bool) error {
 		"  font-family: vga8;",
 		"  src: url(data:font/woff2;base64,[a large font binary will be embedded here]...) format('woff2');",
 	)
-	if err := color.CSS(w, elm); err != nil {
+	if err := colorise.CSS(w, elm); err != nil {
 		return err
 	}
 	q := fmt.Sprintf("%s\n%s\n%s",
@@ -295,7 +303,7 @@ func Generator(w io.Writer, value bool) error {
 				meta.Name, meta.Print(), meta.App.Date),
 			"</head>")
 	}
-	if err := color.HTML(w, elm); err != nil {
+	if err := colorise.HTML(w, elm); err != nil {
 		return err
 	}
 	p := "Enable the generator element?"
@@ -348,7 +356,7 @@ func NoTranslate(w io.Writer, value, setup bool) error {
 		"<meta name=\"google\" content=\"notranslate\">",
 		"</head>",
 		"<body class=\"notranslate\">")
-	if err := color.HTML(w, elm); err != nil {
+	if err := colorise.HTML(w, elm); err != nil {
 		return err
 	}
 	q := "Enable the no translate option?"
@@ -388,7 +396,7 @@ func RetroTxt(w io.Writer, value bool) error {
 		"  <head>",
 		"    <meta name=\"retrotxt\" content=\"encoding: IBM437; linebreak: CRLF; length: 50; width: 80; name: file.txt\">",
 		"  </head>")
-	if err := color.HTML(w, elm); err != nil {
+	if err := colorise.HTML(w, elm); err != nil {
 		return err
 	}
 	p := "Enable the retrotxt element?"
@@ -433,7 +441,7 @@ func Title(w io.Writer, name, value string, setup bool) error {
 		"  <head>",
 		fmt.Sprintf("    <title>%s</title>", value),
 		"  </head>")
-	if err := color.HTML(w, elm); err != nil {
+	if err := colorise.HTML(w, elm); err != nil {
 		return err
 	}
 	fmt.Fprintf(w, "%s\n%s\n  ",

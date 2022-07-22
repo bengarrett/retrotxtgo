@@ -1,38 +1,32 @@
 package config_test
 
 import (
-	"io/ioutil"
-	"log"
+	"bytes"
 	"os"
+	"strings"
 	"testing"
 
+	"github.com/bengarrett/retrotxtgo/cmd"
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/gookit/color"
 )
 
 func TestPath(t *testing.T) {
-	tests := []struct {
-		name    string
-		wantDir string
-	}{
-		{"def", ""},
+	if err := cmd.LoadTester(os.Stdout); err != nil {
+		t.Error(err)
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if gotDir := config.Path(); gotDir == tt.wantDir {
-				t.Errorf("Path() = \"\"")
-			}
-		})
-	}
+	t.Run("path test", func(t *testing.T) {
+		if gotDir := config.Path(); gotDir == "tt.wantDir" {
+			t.Errorf("Path() = \"\"")
+		}
+	})
 }
 
 func TestSetConfig(t *testing.T) {
 	color.Enable = false
-	tmpFile, err := ioutil.TempFile(os.TempDir(), "testsetconfig-")
-	if err != nil {
-		log.Fatal("Cannot create the temporary test file", err)
+	if err := cmd.LoadTester(os.Stdout); err != nil {
+		t.Error(err)
 	}
-	defer os.Remove(tmpFile.Name())
 	tests := []struct {
 		name    string
 		flag    string
@@ -48,4 +42,19 @@ func TestSetConfig(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestConfigMissing(t *testing.T) {
+	color.Enable = false
+	if err := cmd.LoadTester(os.Stdout); err != nil {
+		t.Error(err)
+	}
+	t.Run("config missing", func(t *testing.T) {
+		w := new(bytes.Buffer)
+		config.ConfigMissing(w, "aaaxxx", "xxx")
+		const want = "create it: aaa create --config="
+		if gotW := w.String(); !strings.Contains(gotW, want) {
+			t.Errorf("ConfigMissing() = %v, want %v", gotW, want)
+		}
+	})
 }

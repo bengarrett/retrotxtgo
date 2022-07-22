@@ -20,8 +20,16 @@ import (
 	"github.com/spf13/viper"
 )
 
+var (
+	ErrConfigName = errors.New("viper config file cannot be empty")
+	ErrWriter     = errors.New("writer cannot be nil")
+)
+
 // List and print all the available configurations.
 func List(w io.Writer) error {
+	if w == nil {
+		return ErrWriter
+	}
 	capitalize := func(s string) string {
 		return strings.Title(s[:1]) + s[1:]
 	}
@@ -59,7 +67,8 @@ func List(w io.Writer) error {
 	fmt.Fprintln(tw, "\nEither the setting Name or the Alias can be used.")
 	fmt.Fprintf(tw, "\n%s # To change the meta description setting\n",
 		str.Example(cmds+get.Desc))
-	fmt.Fprintf(tw, "%s # Will also change the meta description setting\n", str.Example(cmds+"6"))
+	fmt.Fprintf(tw, "%s # Will also change the meta description setting\n",
+		str.Example(cmds+"6"))
 	fmt.Fprintln(tw, "\nMultiple settings are supported.")
 	fmt.Fprintf(tw, "\n%s\n", str.Example(cmds+"style.html style.info"))
 	return tw.Flush()
@@ -68,6 +77,12 @@ func List(w io.Writer) error {
 // Set edits and saves a named setting within a configuration file.
 // It also accepts numeric index values printed by List().
 func Set(w io.Writer, name string) error {
+	if w == nil {
+		return ErrWriter
+	}
+	if viper.ConfigFileUsed() == "" {
+		return ErrConfigName
+	}
 	i, err := strconv.Atoi(name)
 	namedSetting := err != nil
 	switch {
@@ -83,9 +98,15 @@ func Set(w io.Writer, name string) error {
 
 // Update edits and saves a named setting within a configuration file.
 func Update(w io.Writer, name string, setup bool) error {
+	if w == nil {
+		return ErrWriter
+	}
+	if viper.ConfigFileUsed() == "" {
+		return ErrConfigName
+	}
 	if !set.Validate(name) {
 		fmt.Fprintln(w, logs.Hint("config set --list", logs.ErrConfigName))
-		return nil
+		return logs.ErrConfigName
 	}
 	if !setup {
 		fmt.Fprint(w, Location())

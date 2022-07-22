@@ -17,6 +17,9 @@ var ErrExist = errors.New("a config file already exists")
 
 // New creates a new configuration file and prints the results.
 func New(w io.Writer, overwrite bool) error {
+	if w == nil {
+		return ErrWriter
+	}
 	if err := Create(w, viper.ConfigFileUsed(), overwrite); err != nil {
 		return err
 	}
@@ -28,6 +31,9 @@ func New(w io.Writer, overwrite bool) error {
 
 // Create a named configuration file with the option to overwrite any existing files.
 func Create(w io.Writer, name string, ow bool) error {
+	if w == nil {
+		return ErrWriter
+	}
 	if name == "" {
 		return fmt.Errorf("create configuration: %w", logs.ErrNameNil)
 	}
@@ -58,7 +64,10 @@ func createNew(w io.Writer, name string) error {
 }
 
 // DoesExist prints a how-to message when a config file already exists.
-func DoesExist(w io.Writer, name, suffix string) {
+func DoesExist(w io.Writer, name, suffix string) error {
+	if w == nil {
+		return ErrWriter
+	}
 	example := func(s string) string {
 		x := fmt.Sprintf("%s %s", strings.TrimSuffix(name, suffix), s)
 		return str.Example(x)
@@ -69,6 +78,7 @@ func DoesExist(w io.Writer, name, suffix string) {
 	fmt.Fprintf(w, "Edit:\t%s\n", example("edit"))
 	fmt.Fprintf(w, "Delete:\t%s\n", example("delete"))
 	fmt.Fprintf(w, "Reset:\t%s\n", example("create --overwrite"))
+	return nil
 }
 
 func errMsg(verb string) string {

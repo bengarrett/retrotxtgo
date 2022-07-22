@@ -12,14 +12,17 @@ import (
 
 // Delete a configuration file.
 func Delete(w io.Writer, ask bool) error {
+	if w == nil {
+		return ErrWriter
+	}
 	name := viper.ConfigFileUsed()
 	if name == "" {
-		configMissing(w, CmdPath(), "delete")
+		ConfigMissing(w, CmdPath(), "delete")
 		return nil
 	}
 	f, err := os.Stat(name)
 	if os.IsNotExist(err) {
-		configMissing(w, CmdPath(), "delete")
+		ConfigMissing(w, CmdPath(), "delete")
 		return nil
 	}
 	if err != nil {
