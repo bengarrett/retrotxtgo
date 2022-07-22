@@ -20,6 +20,12 @@ func ExampleDefaults() {
 	// Output: Your name goes here
 }
 
+func ExamplePortInfo() {
+	color.Enable = false
+	fmt.Print(input.PortInfo())
+	// Output: 1-65535 (suggestion: 8086)
+}
+
 func ExamplePrintMeta() {
 	color.Enable = false
 	b := new(bytes.Buffer)

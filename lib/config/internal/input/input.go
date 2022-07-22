@@ -22,16 +22,23 @@ import (
 	"golang.org/x/text/language"
 )
 
-var ErrMeta = errors.New("cannot use name as a meta element")
+var (
+	ErrMeta   = errors.New("cannot use name as a meta element")
+	ErrUpdate = errors.New("update value cannot be nil")
+)
 
+// Update configuration.
 type Update struct {
-	Name  string
-	Setup bool
-	Value interface{}
+	Name  string      // Name of the configuration setting.
+	Setup bool        // Setup tweaks the prompt layout to work with a sequence of configurations.
+	Value interface{} // Value of the configuration setting to store.
 }
 
 // ColorScheme prompts the user for the color scheme setting.
 func ColorScheme(w io.Writer, u Update) error {
+	if u.Value == nil {
+		return ErrUpdate
+	}
 	if err := PreviewMeta(w, u.Name, u.Value.(string)); err != nil {
 		return err
 	}
@@ -42,6 +49,8 @@ func ColorScheme(w io.Writer, u Update) error {
 	return set.ShortStrings(w, u.Name, u.Setup, c[:]...)
 }
 
+// Defaults returns the default value or helper placeholder for a configuration;
+// or an empty string if the configuration name has no default.
 func Defaults(name string) string {
 	switch name {
 	case get.Author:
@@ -66,6 +75,9 @@ func Defaults(name string) string {
 
 // Editor prompts the user for the editor setting.
 func Editor(w io.Writer, u Update) error {
+	if u.Value == nil {
+		return ErrUpdate
+	}
 	s := fmt.Sprint("  Set a " + get.Tip()[u.Name])
 	if u.Value.(string) != "" {
 		s = fmt.Sprint(s, " or use a dash [-] to remove")
@@ -79,6 +91,9 @@ func Editor(w io.Writer, u Update) error {
 
 // Layout prompts the user for the layout setting.
 func Layout(w io.Writer, u Update) error {
+	if u.Value == nil {
+		return ErrUpdate
+	}
 	fmt.Fprintf(w, "\n%s\n%s\n%s\n%s\n",
 		"  Standard: Recommended, uses external CSS, JS and woff2 fonts and is the recommended layout for online hosting.",
 		"  Inline:   Not recommended as it includes both the CSS and JS as inline elements that cannot be cached.",
@@ -138,6 +153,7 @@ func PreviewPromptS(name, value string) string {
 	return fmt.Sprintf("  %s or leave blank to keep it unused", p)
 }
 
+// PrintMeta writes a preview of the HTML meta element using the name and value strings as tag attributes.
 func PrintMeta(w io.Writer, name, value string) error {
 	if name == "" {
 		return fmt.Errorf("preview meta: %w", logs.ErrNameNil)
@@ -172,31 +188,39 @@ func PrintMeta(w io.Writer, name, value string) error {
 	return nil
 }
 
-// Serve prompts the user for a HTTP server port setting.
+// Serve prompts the user for a HTTP server port.
 func Serve(w io.Writer, u Update) error {
-	reset := func() error {
+	if u.Value == nil {
+		return ErrUpdate
+	}
+	reset := func() (uint, error) {
 		var p uint
 		if u, ok := get.Reset()[get.Serve].(uint); ok {
 			p = u
 		}
 		if err := set.Write(w, u.Name, false, p); err != nil {
-			return err
+			return 0, err
 		}
-		return nil
+		return p, nil
 	}
-	var p uint
+	var (
+		err error
+		p   uint
+	)
 	switch v := u.Value.(type) {
 	case uint:
 		p = v
 	case int:
 		p = uint(v)
 	default:
-		if err := reset(); err != nil {
+		p, err = reset()
+		if err != nil {
 			return err
 		}
 	}
 	if p > prompt.PortMax {
-		if err := reset(); err != nil {
+		p, err = reset()
+		if err != nil {
 			return err
 		}
 	}
@@ -211,7 +235,7 @@ func Serve(w io.Writer, u Update) error {
 	return set.Port(w, u.Name, u.Setup)
 }
 
-// SaveDir prompts the user for the a save destination directory setting.
+// SaveDir prompts the user for the save destination directory.
 func SaveDir(w io.Writer, u Update) error {
 	fmt.Fprintf(w, "  Choose a new %s.\n\n  Directory aliases, use:", get.Tip()[u.Name])
 	if home, err := os.UserHomeDir(); err == nil {
@@ -236,7 +260,7 @@ func SaveDir(w io.Writer, u Update) error {
 	return nil
 }
 
-// StyleHTML prompts the user for the a HTML and CSS style setting.
+// StyleHTML prompts the user for the HTML and CSS style settings.
 func StyleHTML(w io.Writer, u Update) error {
 	d := ""
 	if s, ok := get.Reset()[u.Name].(string); ok {
@@ -249,7 +273,7 @@ func StyleHTML(w io.Writer, u Update) error {
 	return set.Strings(w, u.Name, u.Setup, styles.Names()...)
 }
 
-// StyleInfo prompts the user for the a JS style setting.
+// StyleInfo prompts the user for the JavaScript style setting.
 func StyleInfo(w io.Writer, u Update) error {
 	d := ""
 	if s, ok := get.Reset()[u.Name].(string); ok {

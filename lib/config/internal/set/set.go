@@ -32,19 +32,6 @@ var (
 	ErrWriter    = errors.New("writer argument cannot be nil")
 )
 
-func skip(w io.Writer, name string, setup bool, value interface{}) error {
-	err := SkipWrite(name, value)
-	switch {
-	case errors.Is(err, ErrSkip):
-	case errors.Is(err, ErrUnused):
-		fmt.Fprint(w, skipSet(setup))
-		return nil
-	case err != nil:
-		return err
-	}
-	return nil
-}
-
 // Write the value of the named setting to the configuration file.
 func Write(w io.Writer, name string, setup bool, value interface{}) error {
 	if w == nil {
@@ -92,7 +79,21 @@ func Write(w io.Writer, name string, setup bool, value interface{}) error {
 	return nil
 }
 
-// SkipWrite returns an error if the named value doesn't need updating.
+func skip(w io.Writer, name string, setup bool, value interface{}) error {
+	err := SkipWrite(name, value)
+	switch {
+	case errors.Is(err, ErrSkip):
+	case errors.Is(err, ErrUnused):
+		fmt.Fprint(w, skipSet(setup))
+		return nil
+	case err != nil:
+		return err
+	}
+	return nil
+}
+
+// SkipWrite returns an error if the named value has is identical
+// to the configuration value currently in use.
 func SkipWrite(name string, value interface{}) error {
 	if viper.Get(name) == nil {
 		return fmt.Errorf("setting name: %s, type: %T, %w", name, nil, logs.ErrConfigName)
@@ -112,7 +113,7 @@ func SkipWrite(name string, value interface{}) error {
 		}
 		return nil
 	case uint:
-		i := viper.Get(name).(int)
+		i := viper.Get(name).(uint)
 		if uint(i) == uint(v) {
 			return ErrSkip
 		}
@@ -139,7 +140,7 @@ func skipSet(setup bool) string {
 	return str.ColSuc("\r  "+ErrSkip.Error()) + "\n"
 }
 
-// Directory prompts and checks directory path for save.
+// Directory prompts for and checks a directory path.
 func Directory(w io.Writer, name string, setup bool) error {
 	if w == nil {
 		return ErrWriter
@@ -172,7 +173,7 @@ func Directory(w io.Writer, name string, setup bool) error {
 	return ErrBreak
 }
 
-// DirExpansion traverses the named directory to apply shell-like expansions.
+// DirExpansion traverses the named directory to apply shell like expansions.
 // It supports limited Bash tilde, shell dot and double dot syntax.
 func DirExpansion(name string) string {
 	const sep, homeDir, currentDir, parentDir = string(os.PathSeparator), "~", ".", ".."
@@ -219,8 +220,8 @@ func DirExpansion(name string) string {
 	return dir
 }
 
-// Editor checks the existence of given text editor location
-// and saves it as a configuration regardless of the result.
+// Editor prompts for and checks the existence of a text editor location.
+// The configuration is always saved regardless of the result of the checks.
 func Editor(w io.Writer, name string, setup bool) error {
 	if w == nil {
 		return ErrWriter
@@ -268,7 +269,7 @@ func Font(w io.Writer, value string, setup bool) error {
 	return ShortStrings(w, get.FontFamily, setup, create.Fonts()...)
 }
 
-// Font previews and saves the embedded Base64 font setting.
+// FontEmbed previews and saves the embedded Base64 font setting.
 func FontEmbed(w io.Writer, value, setup bool) error {
 	const name = get.FontEmbed
 	elm := fmt.Sprintf("  %s\n  %s\n  %s\n",
@@ -318,7 +319,7 @@ func Generator(w io.Writer, value bool) error {
 	return Write(w, name, true, b)
 }
 
-// Index prompts for a value from a list of valid choices and saves the result.
+// Index saves the result of a prompt for a value from a list of valid choices.
 func Index(w io.Writer, name string, setup bool, data ...string) error {
 	if name == "" {
 		return logs.ErrNameNil
@@ -338,7 +339,7 @@ func Index(w io.Writer, name string, setup bool, data ...string) error {
 	return fmt.Errorf("config set %s %w: %q", name, ErrVal, s)
 }
 
-// Keys list all the available configuration setting names sorted alphabetically.
+// Keys lists all the available configuration setting names, sorted alphabetically.
 func Keys() []string {
 	keys := make([]string, len(get.Reset()))
 	i := 0
@@ -371,7 +372,7 @@ func NoTranslate(w io.Writer, value, setup bool) error {
 	return Write(w, name, setup, b)
 }
 
-// Port prompts for and saves HTTP port.
+// Port prompts for and saves a HTTP port.
 func Port(w io.Writer, name string, setup bool) error {
 	if name == "" {
 		return logs.ErrNameNil
@@ -384,7 +385,7 @@ func Port(w io.Writer, name string, setup bool) error {
 	return Write(w, name, setup, u)
 }
 
-// Recommend uses the s value as a user input suggestion.
+// Recommend returns the s value as a prompt suggestion.
 func Recommend(s string) string {
 	if s == "" {
 		return fmt.Sprintf(" (suggestion: %s)", str.Example("do not use"))
@@ -411,7 +412,7 @@ func RetroTxt(w io.Writer, value bool) error {
 	return Write(w, name, true, b)
 }
 
-// ShortStrings prompts and saves setting values that support 1 character aliases.
+// ShortStrings prompts and saves setting values that support one character aliases.
 func ShortStrings(w io.Writer, name string, setup bool, data ...string) error {
 	if name == "" {
 		return fmt.Errorf("set short string: %w", logs.ErrNameNil)
@@ -429,7 +430,7 @@ func String(w io.Writer, name string, setup bool) error {
 	return Write(w, name, setup, s)
 }
 
-// Strings prompts and saves a string of text setting value.
+// Strings prompt for one item of a string of text values and saves the result.
 func Strings(w io.Writer, name string, setup bool, data ...string) error {
 	if name == "" {
 		return fmt.Errorf("set strings: %w", logs.ErrNameNil)
@@ -453,7 +454,7 @@ func Title(w io.Writer, name, value string, setup bool) error {
 	return String(w, name, setup)
 }
 
-// Validate the existence of the key in a list of settings.
+// Validate the existence of the key against the list of used setting keys.
 func Validate(key string) bool {
 	keys := Keys()
 	// var i must be sorted in ascending order.
