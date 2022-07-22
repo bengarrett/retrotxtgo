@@ -9,15 +9,23 @@ import (
 
 func TestBool(t *testing.T) {
 	tests := []struct {
-		name string
-		key  string
-		want bool
+		name    string
+		key     string
+		want    bool
+		wantErr bool
 	}{
-		{"bool", get.Genr, true},
+		{"empty", "", false, true},
+		{"bad key", "xyz", false, true},
+		{"valid", "html.font.embed", false, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := get.Bool(tt.key); got != tt.want {
+			got, err := get.Bool(tt.key)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bool() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
 				t.Errorf("Bool() = %v, want %v", got, tt.want)
 			}
 		})
@@ -26,16 +34,24 @@ func TestBool(t *testing.T) {
 
 func TestString(t *testing.T) {
 	tests := []struct {
-		name string
-		key  string
-		want string
+		name    string
+		key     string
+		want    string
+		wantErr bool
 	}{
-		{"string", get.LayoutTmpl, "standard"},
+		{"empty", "", "", true},
+		{"bad key", "xyz", "", true},
+		{"valid", get.LayoutTmpl, "standard", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := get.String(tt.key); got != tt.want {
-				t.Errorf("String() = %v, want %v", got, tt.want)
+			got, err := get.String(tt.key)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bool() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("Bool() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -43,15 +59,23 @@ func TestString(t *testing.T) {
 
 func TestUInt(t *testing.T) {
 	tests := []struct {
-		name string
-		key  string
-		want uint
+		name    string
+		key     string
+		want    uint
+		wantErr bool
 	}{
-		{"uint", "serve", meta.WebPort},
+		{"empty", "", 0, true},
+		{"bad key", "xyz", 0, true},
+		{"valid", "serve", meta.WebPort, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := get.UInt(tt.key); got != tt.want {
+			got, err := get.UInt(tt.key)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("UInt() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
 				t.Errorf("UInt() = %v, want %v", got, tt.want)
 			}
 		})

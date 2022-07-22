@@ -47,7 +47,7 @@ type Defaults map[string]interface{}
 // Hints for configuration values.
 type Hints map[string]string
 
-// Tip provides a brief help on the config file configurations.
+// Tip provides brief help on the config file setting.
 func Tip() Hints {
 	return Hints{
 		Editor:     "text editor to launch when using " + str.Example("config edit"),
@@ -72,8 +72,8 @@ func Tip() Hints {
 	}
 }
 
-// Reset configuration values.
-// These are the default values whenever a setting is deleted,
+// Reset returns the default configuration values.
+// These values are used whenever a setting is deleted,
 // or when a new configuration file is created.
 func Reset() Defaults {
 	return Defaults{
@@ -100,45 +100,42 @@ func Reset() Defaults {
 }
 
 // Bool returns the default boolean value for the key.
-func Bool(key string) bool {
+func Bool(key string) (bool, error) {
 	if v := viper.Get(key); v != nil {
-		return v.(bool)
+		return v.(bool), nil
 	}
 	switch Reset()[key].(type) {
 	case bool:
-		return Reset()[key].(bool)
+		return Reset()[key].(bool), nil
 	default:
-		logs.FatalMark(key, ErrBool, logs.ErrConfigName)
+		return false, fmt.Errorf("%w: %s", ErrBool, key)
 	}
-	return false
 }
 
 // String returns the default string value for the key.
-func String(key string) string {
+func String(key string) (string, error) {
 	if v := viper.GetString(key); v != "" {
-		return v
+		return v, nil
 	}
 	switch Reset()[key].(type) {
 	case string:
-		return Reset()[key].(string)
+		return Reset()[key].(string), nil
 	default:
-		logs.FatalMark(key, ErrString, logs.ErrConfigName)
+		return "", fmt.Errorf("%w: %s", ErrString, key)
 	}
-	return ""
 }
 
 // UInt returns the default integer value for the key.
-func UInt(key string) uint {
+func UInt(key string) (uint, error) {
 	if v := viper.GetUint(key); v != 0 {
-		return v
+		return v, nil
 	}
 	switch Reset()[key].(type) {
 	case uint:
-		return Reset()[key].(uint)
+		return Reset()[key].(uint), nil
 	default:
-		logs.FatalMark(key, ErrUint, logs.ErrConfigName)
+		return 0, fmt.Errorf("%w: %s", ErrUint, key)
 	}
-	return 0
 }
 
 // Marshal default values for use in a YAML configuration file.
@@ -188,43 +185,119 @@ type Settings struct {
 func (sc *Settings) marshals(key string) error { // nolint:funlen
 	switch key {
 	case Editor:
-		sc.Editor = String(key)
+		s, err := String(key)
+		if err != nil {
+			return err
+		}
+		sc.Editor = s
 	case FontEmbed:
-		sc.HTML.Font.Embed = Bool(key)
+		b, err := Bool(key)
+		if err != nil {
+			return err
+		}
+		sc.HTML.Font.Embed = b
 	case FontFamily:
-		sc.HTML.Font.Family = String(key)
+		s, err := String(key)
+		if err != nil {
+			return err
+		}
+		sc.HTML.Font.Family = s
 	case LayoutTmpl:
-		sc.HTML.Layout = String(key)
+		s, err := String(key)
+		if err != nil {
+			return err
+		}
+		sc.HTML.Layout = s
 	case Author:
-		sc.HTML.Meta.Author = String(key)
+		s, err := String(key)
+		if err != nil {
+			return err
+		}
+		sc.HTML.Meta.Author = s
 	case Scheme:
-		sc.HTML.Meta.ColorScheme = String(key)
+		s, err := String(key)
+		if err != nil {
+			return err
+		}
+		sc.HTML.Meta.ColorScheme = s
 	case Desc:
-		sc.HTML.Meta.Description = String(key)
+		s, err := String(key)
+		if err != nil {
+			return err
+		}
+		sc.HTML.Meta.Description = s
 	case Genr:
-		sc.HTML.Meta.Generator = Bool(key)
+		b, err := Bool(key)
+		if err != nil {
+			return err
+		}
+		sc.HTML.Meta.Generator = b
 	case Keywords:
-		sc.HTML.Meta.Keywords = String(key)
+		s, err := String(key)
+		if err != nil {
+			return err
+		}
+		sc.HTML.Meta.Keywords = s
 	case Notlate:
-		sc.HTML.Meta.Notranslate = Bool(key)
+		b, err := Bool(key)
+		if err != nil {
+			return err
+		}
+		sc.HTML.Meta.Notranslate = b
 	case Referr:
-		sc.HTML.Meta.Referrer = String(key)
+		s, err := String(key)
+		if err != nil {
+			return err
+		}
+		sc.HTML.Meta.Referrer = s
 	case Rtx:
-		sc.HTML.Meta.RetroTxt = Bool(key)
+		b, err := Bool(key)
+		if err != nil {
+			return err
+		}
+		sc.HTML.Meta.RetroTxt = b
 	case Bot:
-		sc.HTML.Meta.Robots = String(key)
+		s, err := String(key)
+		if err != nil {
+			return err
+		}
+		sc.HTML.Meta.Robots = s
 	case Theme:
-		sc.HTML.Meta.ThemeColor = String(key)
+		s, err := String(key)
+		if err != nil {
+			return err
+		}
+		sc.HTML.Meta.ThemeColor = s
 	case Title:
-		sc.HTML.Title = String(key)
+		s, err := String(key)
+		if err != nil {
+			return err
+		}
+		sc.HTML.Title = s
 	case SaveDir:
-		sc.SaveDirectory = String(key)
+		s, err := String(key)
+		if err != nil {
+			return err
+		}
+		sc.SaveDirectory = s
 	case Serve:
-		sc.ServerPort = UInt(key)
+		i, err := UInt(key)
+		if err != nil {
+			return err
+		}
+		sc.ServerPort = i
 	case Stylei:
-		sc.Style.Info = String(key)
+		s, err := String(key)
+		if err != nil {
+			return err
+		}
+		sc.Style.Info = s
 	case Styleh:
-		sc.Style.HTML = String(key)
+		s, err := String(key)
+		if err != nil {
+			return err
+		}
+		sc.Style.HTML = s
 	default:
 		return fmt.Errorf("marshals %q: %w", key, logs.ErrConfigName)
 	}
