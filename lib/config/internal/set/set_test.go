@@ -11,6 +11,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/cmd"
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/set"
+	"github.com/bengarrett/retrotxtgo/lib/create"
 	"github.com/gookit/color"
 	"github.com/spf13/viper"
 )
@@ -208,6 +209,292 @@ func TestDirectory(t *testing.T) {
 			if !strings.Contains(w.String(), tt.wantW) {
 				t.Errorf("Directory() does not contain %v", tt.wantW)
 				fmt.Printf("%s\n", w)
+			}
+		})
+	}
+}
+
+func TestEditor(t *testing.T) {
+	type args struct {
+		name  string
+		setup bool
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"nil", args{}, true},
+		{"empty", args{name: ""}, true},
+		{"valid", args{name: "blah"}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w := &bytes.Buffer{}
+			if err := set.Editor(w, tt.args.name, tt.args.setup); (err != nil) != tt.wantErr {
+				t.Errorf("Editor() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+		})
+	}
+}
+
+func TestFont(t *testing.T) {
+	color.Enable = false
+	if err := cmd.LoadTester(os.Stdout); err != nil {
+		t.Error(err)
+	}
+	type args struct {
+		value string
+		setup bool
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantW   string
+		wantErr bool
+	}{
+		{"nil", args{}, "font-family: \"vga\";", false},
+		{"mona", args{value: "mona"}, "font-family: \"mona\";", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w := &bytes.Buffer{}
+			if err := set.Font(w, tt.args.value, tt.args.setup); (err != nil) != tt.wantErr {
+				t.Errorf("Font() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !strings.Contains(w.String(), tt.wantW) {
+				t.Errorf("Font() does not contain %v", tt.wantW)
+				fmt.Println(w.String())
+			}
+		})
+	}
+}
+func TestFontEmbed(t *testing.T) {
+	color.Enable = false
+	if err := cmd.LoadTester(os.Stdout); err != nil {
+		t.Error(err)
+	}
+	type args struct {
+		value bool
+		setup bool
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantW   string
+		wantErr bool
+	}{
+		{"false", args{}, "The use of this setting not recommended", false},
+		{"true", args{value: true}, "Keep the embedded font option", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w := &bytes.Buffer{}
+			if err := set.FontEmbed(w, tt.args.value, tt.args.setup); (err != nil) != tt.wantErr {
+				t.Errorf("FontEmbed() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !strings.Contains(w.String(), tt.wantW) {
+				t.Errorf("FontEmbed() does not contain %v", tt.wantW)
+				fmt.Println(w.String())
+			}
+		})
+	}
+}
+
+func TestGenerator(t *testing.T) {
+	color.Enable = false
+	if err := cmd.LoadTester(os.Stdout); err != nil {
+		t.Error(err)
+	}
+	type args struct {
+		value bool
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantW   string
+		wantErr bool
+	}{
+		{"false", args{}, "Enable the generator element", false},
+		{"true", args{value: true}, "Keep the generator element", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w := &bytes.Buffer{}
+			if err := set.Generator(w, tt.args.value); (err != nil) != tt.wantErr {
+				t.Errorf("Generator() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !strings.Contains(w.String(), tt.wantW) {
+				t.Errorf("Generator() does not contain %v", tt.wantW)
+				fmt.Println(w.String())
+			}
+		})
+	}
+}
+
+func TestNoTranslate(t *testing.T) {
+	color.Enable = false
+	if err := cmd.LoadTester(os.Stdout); err != nil {
+		t.Error(err)
+	}
+	type args struct {
+		value bool
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantW   string
+		wantErr bool
+	}{
+		{"false", args{}, "Enable the no translate option", false},
+		{"true", args{value: true}, "Keep the translate option", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w := &bytes.Buffer{}
+			if err := set.NoTranslate(w, tt.args.value, false); (err != nil) != tt.wantErr {
+				t.Errorf("NoTranslate() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !strings.Contains(w.String(), tt.wantW) {
+				t.Errorf("NoTranslate() does not contain %v", tt.wantW)
+				fmt.Println(w.String())
+			}
+		})
+	}
+}
+
+func TestPort(t *testing.T) {
+	color.Enable = false
+	if err := cmd.LoadTester(os.Stdout); err != nil {
+		t.Error(err)
+	}
+	type args struct {
+		name string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantW   string
+		wantErr bool
+	}{
+		{"false", args{}, "", true},
+		{"true", args{name: "true"}, "skipped", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w := &bytes.Buffer{}
+			if err := set.Port(w, tt.args.name, false); (err != nil) != tt.wantErr {
+				t.Errorf("Port() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !strings.Contains(w.String(), tt.wantW) {
+				t.Errorf("Port() does not contain %v", tt.wantW)
+				fmt.Println(w.String())
+			}
+		})
+	}
+}
+
+func TestRetroTxt(t *testing.T) {
+	color.Enable = false
+	if err := cmd.LoadTester(os.Stdout); err != nil {
+		t.Error(err)
+	}
+	type args struct {
+		value bool
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantW   string
+		wantErr bool
+	}{
+		{"false", args{}, "Enable the retrotxt element", false},
+		{"true", args{value: true}, "Keep the retrotxt element", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w := &bytes.Buffer{}
+			if err := set.RetroTxt(w, tt.args.value); (err != nil) != tt.wantErr {
+				t.Errorf("RetroTxt() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !strings.Contains(w.String(), tt.wantW) {
+				t.Errorf("RetroTxt() does not contain %v", tt.wantW)
+				fmt.Println(w.String())
+			}
+		})
+	}
+}
+
+func TestTitle(t *testing.T) {
+	color.Enable = false
+	if err := cmd.LoadTester(os.Stdout); err != nil {
+		t.Error(err)
+	}
+	type args struct {
+		name  string
+		value string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantW   string
+		wantErr bool
+	}{
+		{"nil", args{}, "", true},
+		{"bad name", args{name: "retrotxt", value: ""}, "", true},
+		{"valid name", args{name: "html.title", value: ""},
+			"<title></title>", false},
+		{"valid name", args{name: "html.title", value: "Abc"},
+			"<title>Abc</title>", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w := &bytes.Buffer{}
+			if err := set.Title(w, tt.args.name, tt.args.value, false); (err != nil) != tt.wantErr {
+				t.Errorf("Title() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !strings.Contains(w.String(), tt.wantW) {
+				t.Errorf("Title() does not contain %v", tt.wantW)
+				fmt.Println(w.String())
+			}
+		})
+	}
+}
+
+func TestIndex(t *testing.T) {
+	color.Enable = false
+	cr := create.Robots()
+	type args struct {
+		name string
+		data []string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"nil", args{}, true},
+		{"invalid name", args{name: "invalid"}, true},
+		{"valid name", args{name: "html.meta.robots"}, true},
+		{"valid data", args{name: "html.meta.robots", data: cr[:]}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := cmd.LoadTester(os.Stdout); err != nil {
+				t.Error(err)
+			}
+			w := &bytes.Buffer{}
+			if err := set.Index(w, tt.args.name, false, tt.args.data...); (err != nil) != tt.wantErr {
+				t.Errorf("Index() error = %v, wantErr %v", err, tt.wantErr)
+				return
 			}
 		})
 	}

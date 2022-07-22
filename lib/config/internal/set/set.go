@@ -222,8 +222,11 @@ func DirExpansion(name string) string {
 // Editor checks the existence of given text editor location
 // and saves it as a configuration regardless of the result.
 func Editor(w io.Writer, name string, setup bool) error {
+	if w == nil {
+		return ErrWriter
+	}
 	if name == "" {
-		logs.FatalSave(fmt.Errorf("set editor: %w", logs.ErrNameNil))
+		return fmt.Errorf("set editor: %w", logs.ErrNameNil)
 	}
 	s := prompt.String(w)
 	switch s {
