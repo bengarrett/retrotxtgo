@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bengarrett/retrotxtgo/lib/prompt/internal/chk"
+	"github.com/bengarrett/retrotxtgo/lib/prompt/internal/read"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/gookit/color"
 )
@@ -61,7 +61,7 @@ func (k Keys) Prompt(w io.Writer, r io.Reader, setup bool) string {
 			return n
 		}
 		if !k.Validate(key) {
-			if err := chk.Check(w, prompts); err != nil {
+			if err := read.Check(w, prompts); err != nil {
 				return key
 			}
 			continue
@@ -85,7 +85,7 @@ func (k Keys) ShortPrompt(w io.Writer, r io.Reader) string {
 			return long
 		}
 		if !k.Validate(key) {
-			if err := chk.Check(w, prompts); err != nil {
+			if err := read.Check(w, prompts); err != nil {
 				return ""
 			}
 			continue
@@ -126,7 +126,7 @@ func (k Keys) ShortValidate(key string) string {
 }
 
 // Validate that the key exists in the slice of Keys.
-func (k Keys) Validate(key string) (ok bool) {
+func (k Keys) Validate(key string) bool {
 	if key == "" {
 		return false
 	}

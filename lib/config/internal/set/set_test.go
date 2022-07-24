@@ -83,14 +83,17 @@ func TestSkipWrite(t *testing.T) {
 		wantErr bool
 	}{
 		{"nil", args{}, true},
-		{"title err type", args{name: "html.title", value: 0}, true},
+		{"title err type", args{name: "html.title", value: 0}, false},
 		{"title err", args{name: "title", value: "0"}, true},
 		{"serve int", args{"serve", int(8080)}, false},
 		{"serve uint", args{"serve", uint(8080)}, false},
-		{"serve int skip", args{"serve", uint(skipValue)}, true},
+		{"serve int skip", args{"serve", uint(skipValue)}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			if err := cmd.LoadTester(os.Stdout); err != nil {
+				t.Error(err)
+			}
 			if v := viper.AllKeys(); len(v) == 0 {
 				fmt.Println("init serve example.")
 				viper.Set("serve", skipValue)

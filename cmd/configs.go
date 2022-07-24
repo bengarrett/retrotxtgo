@@ -260,7 +260,10 @@ func ConfigInfos(w io.Writer) error {
 	}
 	// info --styles flag
 	if Config.Styles {
-		fmt.Fprint(w, str.JSONStyles(fmt.Sprintf("%s info --style", meta.Bin)))
+		err := str.JSONStyles(w, fmt.Sprintf("%s info --style", meta.Bin))
+		if err != nil {
+			return err
+		}
 		return nil
 	}
 	// info --style flag

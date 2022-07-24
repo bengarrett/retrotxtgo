@@ -149,7 +149,7 @@ func TestString(t *testing.T) {
 				os.Stdin = stdin
 			}()
 			os.Stdin = r
-			if gotKey := prompt.String(os.Stdout); gotKey != tt.want {
+			if gotKey, _ := prompt.String(os.Stdout); gotKey != tt.want {
 				t.Errorf("String() = %v, want %v", gotKey, tt.want)
 			}
 		})

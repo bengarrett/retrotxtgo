@@ -112,16 +112,7 @@ func SkipWrite(name string, value interface{}) error {
 			return ErrUnused
 		}
 		return nil
-	case uint:
-		i := viper.Get(name).(uint)
-		if uint(i) == uint(v) {
-			return ErrSkip
-		}
-		if name == get.Serve && v == 0 {
-			return ErrUnused
-		}
-		return nil
-	case int:
+	case int, uint:
 		if viper.Get(name) == v {
 			return ErrSkip
 		}
@@ -148,7 +139,11 @@ func Directory(w io.Writer, name string, setup bool) error {
 	if name == "" {
 		return fmt.Errorf("set directory: %w", logs.ErrNameNil)
 	}
-	s := DirExpansion(prompt.String(w))
+	name, err := prompt.String(w)
+	if err != nil {
+		return err
+	}
+	s := DirExpansion(name)
 	if s == "" {
 		fmt.Fprint(w, skipSet(setup))
 		return ErrBreak
@@ -229,7 +224,10 @@ func Editor(w io.Writer, name string, setup bool) error {
 	if name == "" {
 		return fmt.Errorf("set editor: %w", logs.ErrNameNil)
 	}
-	s := prompt.String(w)
+	s, err := prompt.String(w)
+	if err != nil {
+		return err
+	}
 	switch s {
 	case RemoveChr:
 		if err := Write(w, name, setup, RemoveChr); err != nil {
@@ -426,7 +424,10 @@ func String(w io.Writer, name string, setup bool) error {
 	if name == "" {
 		return fmt.Errorf("set string: %w", logs.ErrNameNil)
 	}
-	s := prompt.String(w)
+	s, err := prompt.String(w)
+	if err != nil {
+		return err
+	}
 	return Write(w, name, setup, s)
 }
 

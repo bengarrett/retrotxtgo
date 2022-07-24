@@ -7,7 +7,7 @@ import (
 	"io"
 	"strconv"
 
-	"github.com/bengarrett/retrotxtgo/lib/prompt/internal/chk"
+	"github.com/bengarrett/retrotxtgo/lib/prompt/internal/read"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 )
 
@@ -34,7 +34,7 @@ func Port(w io.Writer, r io.Reader, validate, setup bool) uint {
 			break
 		}
 		if input == "" {
-			if err := chk.Check(w, prompts); err != nil {
+			if err := read.Check(w, prompts); err != nil {
 				return Reset
 			}
 			continue
@@ -42,7 +42,7 @@ func Port(w io.Writer, r io.Reader, validate, setup bool) uint {
 		value, err := strconv.ParseInt(input, baseTen, 0)
 		if err != nil {
 			fmt.Printf("%s %v\n", str.Bool(false), input)
-			if err := chk.Check(w, prompts); err != nil {
+			if err := read.Check(w, prompts); err != nil {
 				return Reset
 			}
 			continue
@@ -51,7 +51,7 @@ func Port(w io.Writer, r io.Reader, validate, setup bool) uint {
 		if validate {
 			if v := Valid(p); !v {
 				fmt.Printf("%s %v, is out of range\n", str.Bool(false), input)
-				if err := chk.Check(w, prompts); err != nil {
+				if err := read.Check(w, prompts); err != nil {
 					return Reset
 				}
 				continue

@@ -6,19 +6,34 @@ import (
 	"fmt"
 	"io"
 	"strings"
-
-	"github.com/bengarrett/retrotxtgo/lib/logs"
 )
 
 var (
+	ErrNoChange = errors.New("no changes applied")
 	ErrNoReader = errors.New("reader interface is empty")
 	ErrPString  = errors.New("prompt string standard input problem")
 )
 
+const (
+	alertLoop = 1
+	maxLoops  = 2
+)
+
+// Check used by the scanner iterations to prompt for valid stdin.
+func Check(w io.Writer, prompts int) error {
+	switch {
+	case prompts == alertLoop:
+		fmt.Fprint(w, "\r  Press enter to keep the existing value\n")
+	case prompts >= maxLoops:
+		return ErrNoChange
+	}
+	return nil
+}
+
 // Read parses a line of text from the reader.
-func Read(r io.Reader) (input string, err error) {
+func Read(r io.Reader) (string, error) {
 	reader := bufio.NewReader(r)
-	input, err = reader.ReadString('\n')
+	input, err := reader.ReadString('\n')
 	input = strings.TrimSpace(input)
 	if err != nil && !errors.Is(err, io.EOF) {
 		return input, fmt.Errorf("prompt string reader error: %w", err)
@@ -27,10 +42,10 @@ func Read(r io.Reader) (input string, err error) {
 }
 
 // ParseYN parses the input to boolean value.
-func ParseYN(input string, yesDefault bool) bool {
+func ParseYN(input string, suggestion bool) bool {
 	switch strings.ToLower(input) {
 	case "":
-		if yesDefault {
+		if suggestion {
 			return true
 		}
 	case "yes", "y":
@@ -40,16 +55,16 @@ func ParseYN(input string, yesDefault bool) bool {
 }
 
 // Parse parses the reader input for any os exit commands.
-func Parse(r io.Reader) (words string) {
+func Parse(r io.Reader) (string, error) {
 	if r == nil {
-		logs.FatalWrap(ErrPString, ErrNoReader)
+		return "", fmt.Errorf("%w: %s", ErrPString, ErrNoReader)
 	}
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
-		return scanner.Text()
+		return scanner.Text(), nil
 	}
 	if err := scanner.Err(); err != nil {
-		logs.FatalWrap(ErrPString, err)
+		return "", fmt.Errorf("%w: %s", ErrPString, err)
 	}
-	return words
+	return "", nil
 }

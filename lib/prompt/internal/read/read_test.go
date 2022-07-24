@@ -83,7 +83,7 @@ func Test_pstring(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotWords := read.Parse(tt.args.r); gotWords != tt.wantWords {
+			if gotWords, _ := read.Parse(tt.args.r); gotWords != tt.wantWords {
 				t.Errorf("Parse() = %v, want %v", gotWords, tt.wantWords)
 			}
 		})

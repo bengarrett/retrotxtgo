@@ -79,9 +79,10 @@ func ShortStrings(w io.Writer, options *[]string) string {
 // String asks for and returns a multi-word string.
 // Inputting ⏎ the Enter/Return key exits the program,
 // or returns an empty value when in SetupMode.
-func String(w io.Writer) string {
+func String(w io.Writer) (string, error) {
 	CtrlC(w)
 	return read.Parse(os.Stdin)
+
 }
 
 // Strings asks for and returns a single choice from a string of keys.
@@ -94,9 +95,9 @@ func Strings(w io.Writer, options *[]string, setup bool) string {
 }
 
 // YesNo asks for a yes or no input.
-func YesNo(w io.Writer, ask string, yesDefault bool) bool {
+func YesNo(w io.Writer, ask string, suggestion bool) bool {
 	y, n := "Y", "n"
-	if !yesDefault {
+	if !suggestion {
 		y, n = "y", "N"
 	}
 	if !strings.HasSuffix(ask, "?") && !strings.HasSuffix(ask, ")") {
@@ -113,5 +114,5 @@ func YesNo(w io.Writer, ask string, yesDefault bool) bool {
 	if err != nil {
 		logs.FatalSave(err)
 	}
-	return read.ParseYN(input, yesDefault)
+	return read.ParseYN(input, suggestion)
 }
