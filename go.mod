@@ -29,7 +29,7 @@ require (
 require (
 	github.com/bengarrett/bbs v0.1.0
 	github.com/bengarrett/sauce v1.1.0
-	github.com/spf13/afero v1.9.0
+	github.com/spf13/afero v1.9.2
 	gopkg.in/yaml.v3 v3.0.1
 )
 
