@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/alecthomas/chroma v0.10.0
-	github.com/gookit/color v1.5.1
+	github.com/gookit/color v1.5.2
 	github.com/karrick/godirwalk v1.17.0
 	github.com/mattn/go-isatty v0.0.14
 	github.com/mozillazg/go-slugify v0.2.0
