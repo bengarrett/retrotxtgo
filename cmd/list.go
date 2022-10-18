@@ -30,6 +30,9 @@ func ListCommand() *cobra.Command {
 
 func ListInit() *cobra.Command {
 	lc := ListCommand()
+	lc.AddGroup(&cobra.Group{ID: "codepages", Title: "Codepages:"})
+	lc.AddGroup(&cobra.Group{ID: "examples", Title: "Examples:"})
+	lc.AddGroup(&cobra.Group{ID: "tables", Title: "Codepage Table:"})
 	lc.AddCommand(ListCodepages())
 	lc.AddCommand(ListExamples())
 	lc.AddCommand(ListTable())

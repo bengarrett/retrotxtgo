@@ -43,6 +43,7 @@ func ListCodepages() *cobra.Command {
 			meta.Name),
 		Long: fmt.Sprintf("List the available legacy codepages that %s can convert to UTF-8.",
 			meta.Name),
+		GroupID: "codepages",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			b := convert.List()
 			fmt.Fprint(cmd.OutOrStdout(), b)
@@ -60,6 +61,7 @@ func ListExamples() *cobra.Command {
 		Long: fmt.Sprintf("List builtin text art and documents available for use with the %s, %s, %s and %s commands.",
 			str.Example("create"), str.Example("save"), str.Example("info"), str.Example("view")),
 		Example: fmt.Sprint(example.ListExamples),
+		GroupID: "examples",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			b, err := list.Examples()
 			if err != nil {
@@ -78,6 +80,7 @@ func ListTable() *cobra.Command {
 		Short:   "Display one or more codepage tables showing all the characters in use",
 		Long:    "Display one or more codepage tables showing all the characters in use.",
 		Example: fmt.Sprint(example.ListTable),
+		GroupID: "tables",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := flag.Help(cmd, args...); err != nil {
 				return err
@@ -94,9 +97,10 @@ func ListTable() *cobra.Command {
 
 func ListTables() *cobra.Command {
 	return &cobra.Command{
-		Use:   "tables",
-		Short: "Display the characters of every codepage table in use",
-		Long:  "Display the characters of every codepage table in use.",
+		Use:     "tables",
+		Short:   "Display the characters of every codepage table in use",
+		Long:    "Display the characters of every codepage table in use.",
+		GroupID: "tables",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			s, err := list.Tables()
 			if err != nil {

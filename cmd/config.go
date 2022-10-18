@@ -36,6 +36,8 @@ func ConfigInit() *cobra.Command {
 	info := Info.Command()
 	sets := Set.Command()
 	cc := ConfigCommand()
+	cc.AddGroup(&cobra.Group{ID: "configfile", Title: "Config File:"})
+	cc.AddGroup(&cobra.Group{ID: "settings", Title: "Settings:"})
 	cc.AddCommand(create)
 	cc.AddCommand(Delete.Command())
 	cc.AddCommand(Edit.Command())
@@ -65,6 +67,7 @@ func ConfigInit() *cobra.Command {
 }
 
 // init is always called by the Cobra library to be used for global flags and commands.
+//
 //nolint:gochecknoinits
 func init() {
 	const highColor, basicColor = "COLORTERM", "TERM"

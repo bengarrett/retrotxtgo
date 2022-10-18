@@ -67,6 +67,7 @@ func ConfigCreate() *cobra.Command {
 		Aliases: []string{"c"},
 		Short:   "Create or reset the config file",
 		Long:    fmt.Sprintf("Create or reset the %s configuration file.", meta.Name),
+		GroupID: "configfile",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			overwrite := Config.OW
 			w := cmd.OutOrStdout()
@@ -88,6 +89,7 @@ func ConfigDel() *cobra.Command {
 		Aliases: []string{"d", "del", "rm"},
 		Short:   "Remove the config file",
 		Long:    fmt.Sprintf("Remove the %s configuration file.", meta.Name),
+		GroupID: "configfile",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := config.Delete(cmd.OutOrStdout(), !flag.Command.Tester); err != nil {
 				return err
@@ -115,6 +117,7 @@ func ConfigEdit() *cobra.Command {
 		Aliases: []string{"e"},
 		Short:   "Edit the config file\n",
 		Long:    long,
+		GroupID: "configfile",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := config.Edit(cmd.OutOrStdout()); err != nil {
 				return err
@@ -131,6 +134,7 @@ func ConfigInfo() *cobra.Command {
 		Example: fmt.Sprint(example.ConfigInfo),
 		Short:   "List all the settings in use",
 		Long:    fmt.Sprintf("List all the %s settings in use.", meta.Name),
+		GroupID: "settings",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := ConfigInfos(cmd.OutOrStdout()); err != nil {
 				return err
@@ -147,6 +151,7 @@ func ConfigSet() *cobra.Command {
 		Short:   "Edit a setting",
 		Long:    fmt.Sprintf("Edit a %s setting.", meta.Name),
 		Example: fmt.Sprint(example.Set),
+		GroupID: "settings",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := ListAll(cmd.OutOrStdout()); err != nil {
 				return err
@@ -169,9 +174,10 @@ func ConfigSet() *cobra.Command {
 
 func ConfigSetup() *cobra.Command {
 	return &cobra.Command{
-		Use:   "setup",
-		Short: "Walk through all the settings",
-		Long:  fmt.Sprintf("Walk through all of the %s settings.", meta.Name),
+		Use:     "setup",
+		Short:   "Walk through all the settings",
+		Long:    fmt.Sprintf("Walk through all of the %s settings.", meta.Name),
+		GroupID: "settings",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			const startAt = 0
 			if err := config.Setup(cmd.OutOrStdout(), startAt); err != nil {
