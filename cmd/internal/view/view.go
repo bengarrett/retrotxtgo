@@ -24,6 +24,9 @@ func Run(cmd *cobra.Command, args ...string) (*bytes.Buffer, error) {
 	}
 	w := new(bytes.Buffer)
 	for i, arg := range args {
+		if i == 0 && arg == "" {
+			return w, nil
+		}
 		if i > 0 && i < len(arg) {
 			const halfPage = 40
 			fmt.Fprintln(w, str.HRPad(halfPage))
