@@ -87,11 +87,7 @@ func (e Example) result() string {
 }
 
 func cmd() string {
-	return fmt.Sprintf("  %s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s",
-		"# save the text files as webpages",
-		fmt.Sprintf("%s create %s", meta.Bin, Filenames),
-		"# save the text files as webpages stored in a zip file",
-		fmt.Sprintf("%s create %s --compress", meta.Bin, Filenames),
+	return fmt.Sprintf("  %s\n%s\n%s\n%s\n%s\n%s",
 		"# print detailed information about the text files",
 		fmt.Sprintf("%s info   %s", meta.Bin, Filenames),
 		"# print the text files as Unicode text",

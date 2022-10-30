@@ -28,8 +28,8 @@ func (t cmdT) tester(args []string) ([]byte, error) {
 	switch t {
 	case confT:
 		c = cmd.ConfigInit()
-	case creaT:
-		c = cmd.CreateInit()
+	// case creaT:
+	// 	c = cmd.CreateInit()
 	case infoT:
 		c = cmd.InfoInit()
 	case listT:
