@@ -87,13 +87,11 @@ func (e Example) result() string {
 }
 
 func cmd() string {
-	return fmt.Sprintf("  %s\n%s\n%s\n%s\n%s\n%s",
+	return fmt.Sprintf("  %s\n%s\n%s\n%s",
 		"# print detailed information about the text files",
 		fmt.Sprintf("%s info   %s", meta.Bin, Filenames),
 		"# print the text files as Unicode text",
 		fmt.Sprintf("%s view   %s", meta.Bin, Filenames),
-		fmt.Sprintf("# configure the %s flags and settings", meta.Name),
-		fmt.Sprintf("%s config setup", meta.Bin),
 	)
 }
 

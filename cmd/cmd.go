@@ -27,6 +27,7 @@ It is the platform agnostic tool that takes nostalgic text files and stylises
 them into a more modern, useful format to view or copy in a web browser.`, meta.Name)
 
 // Cmd represents the base command when called without any subcommands.
+//
 //nolint:gochecknoglobals
 var Cmd = &cobra.Command{
 	Use:     meta.Bin,
@@ -63,7 +64,7 @@ func Execute() {
 }
 
 func CmdInit() {
-	cobra.OnInitialize(Load)
+	//cobra.OnInitialize(Load)
 	// create and hide custom configuration file location flag.
 	Cmd.PersistentFlags().StringVar(&flag.Command.Config, "config", "",
 		"optional config file location")

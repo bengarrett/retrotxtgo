@@ -26,8 +26,8 @@ func (t cmdT) tester(args []string) ([]byte, error) {
 	var c *cobra.Command
 	b := bytes.NewBufferString("")
 	switch t {
-	case confT:
-		c = cmd.ConfigInit()
+	// case confT:
+	// 	c = cmd.ConfigInit()
 	// case creaT:
 	// 	c = cmd.CreateInit()
 	case infoT:
