@@ -7,11 +7,8 @@ import (
 	"strings"
 
 	"github.com/alecthomas/chroma/styles"
-	"github.com/bengarrett/retrotxtgo/lib/config/internal/get"
 	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/lib/str"
-	"github.com/gookit/color"
-	"github.com/spf13/viper"
 )
 
 // ChromaNames returns the chroma style names in color.
@@ -26,12 +23,6 @@ func ChromaNamesMono(w io.Writer, lexer string) {
 	s.String(w, false, lexer)
 }
 
-// CSS returns the element colored using CSS syntax highlights.
-func CSS(w io.Writer, elm string) error {
-	style := viper.GetString(get.Styleh)
-	return Elm(w, elm, "css", style, color.Enable)
-}
-
 // Elm applies color syntax to an element.
 func Elm(w io.Writer, elm, lexer, style string, color bool) error {
 	if elm == "" {
@@ -43,12 +34,6 @@ func Elm(w io.Writer, elm, lexer, style string, color bool) error {
 	}
 	fmt.Fprintln(w)
 	return nil
-}
-
-// HTML returns the element colored using HTML syntax highlights.
-func HTML(w io.Writer, elm string) error {
-	style := viper.GetString(get.Styleh)
-	return Elm(w, elm, "html", style, color.Enable)
 }
 
 // Names of the themes for the HighlightWriter.

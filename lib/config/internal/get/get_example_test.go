@@ -7,12 +7,6 @@ import (
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/get"
 )
 
-func ExampleTip() {
-	tip := get.Tip()
-	fmt.Print(tip[get.FontFamily])
-	// Output: specifies the font to use with the HTML
-}
-
 func ExampleTextEditor() {
 	ed := get.TextEditor(os.Stdout)
 	found := len(ed) > 0

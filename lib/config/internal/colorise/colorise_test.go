@@ -2,20 +2,10 @@ package colorise_test
 
 import (
 	"bytes"
-	"log"
-	"os"
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/colorise"
 )
-
-func ExampleCSS() {
-	//c.Enable = false
-	if err := colorise.CSS(os.Stdout, "hello"); err != nil {
-		log.Print(err)
-	}
-	// Output: [1m[38;5;254mhello[0m
-}
 
 func TestElm(t *testing.T) {
 	tests := []struct {

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/create"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/meta"
@@ -79,19 +78,6 @@ func Sort(flags map[int]Meta) []int {
 	}
 	sort.Ints(k)
 	return k
-}
-
-// Body initializes the hidden body flag.
-func (c *Meta) Body(buf bytes.Buffer) bytes.Buffer {
-	switch {
-	case c.Key == "html.body":
-		fmt.Fprint(&buf, "override and inject a string into the HTML body element")
-	case len(c.Opts) == 0:
-		fmt.Fprint(&buf, config.Tip()[c.Key])
-	default:
-		fmt.Fprint(&buf, str.Options(config.Tip()[c.Key], true, true, c.Opts...))
-	}
-	return buf
 }
 
 // Init initializes the public facing flags.
