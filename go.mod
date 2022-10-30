@@ -11,16 +11,16 @@ require (
 	github.com/mozillazg/go-unidecode v0.2.0 // indirect
 	github.com/muesli/go-app-paths v0.2.2
 	github.com/spf13/cast v1.5.0 // indirect
-	github.com/spf13/cobra v1.6.0
+	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.13.0
 	github.com/tdewolff/minify v2.3.6+incompatible
 	github.com/tdewolff/parse v2.3.4+incompatible // indirect
 	github.com/tdewolff/test v1.0.7 // indirect
 	github.com/zRedShift/mimemagic v1.2.0
-	golang.org/x/net v0.0.0-20221017152216-f25eb7ecb193 // indirect
+	golang.org/x/net v0.1.0 // indirect
 	golang.org/x/sync v0.1.0
 	golang.org/x/sys v0.1.0 // indirect
-	golang.org/x/term v0.0.0-20221017184919-83659145692c
+	golang.org/x/term v0.1.0
 	golang.org/x/text v0.4.0
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
