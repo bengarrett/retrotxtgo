@@ -4,16 +4,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/cmd"
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/gookit/color"
 )
 
 func TestSetup(t *testing.T) {
 	color.Enable = false
-	if err := cmd.LoadTester(os.Stdout); err != nil {
-		t.Error(err)
-	}
 	tests := []struct {
 		name    string
 		start   int

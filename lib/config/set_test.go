@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/cmd"
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/get"
 	"github.com/gookit/color"
@@ -32,9 +31,6 @@ func TestList(t *testing.T) {
 
 func TestSet(t *testing.T) {
 	color.Enable = false
-	if err := cmd.LoadTester(os.Stdout); err != nil {
-		t.Error(err)
-	}
 	tests := []struct {
 		name    string
 		w       io.Writer
@@ -56,9 +52,6 @@ func TestSet(t *testing.T) {
 
 func TestSets(t *testing.T) {
 	color.Enable = false
-	if err := cmd.LoadTester(os.Stdout); err != nil {
-		t.Error(err)
-	}
 	for key := range get.Reset() {
 		t.Run(key, func(t *testing.T) {
 			if err := config.Set(os.Stdout, key); err != nil {

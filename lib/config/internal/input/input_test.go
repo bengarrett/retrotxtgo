@@ -3,11 +3,9 @@ package input_test
 import (
 	"bytes"
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/cmd"
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/get"
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/input"
 	"github.com/gookit/color"
@@ -40,9 +38,6 @@ func Test_previewPrompt(t *testing.T) {
 func TestColorScheme(t *testing.T) {
 	color.Enable = false
 	ue := input.Update{}
-	if err := cmd.LoadTester(os.Stdout); err != nil {
-		t.Error(err)
-	}
 	tests := []struct {
 		name    string
 		u       input.Update
@@ -82,9 +77,7 @@ func TestDefaults(t *testing.T) {
 func TestEditor(t *testing.T) {
 	color.Enable = false
 	ue := input.Update{}
-	if err := cmd.LoadTester(os.Stdout); err != nil {
-		t.Error(err)
-	}
+
 	tests := []struct {
 		name    string
 		u       input.Update
@@ -115,9 +108,7 @@ func TestEditor(t *testing.T) {
 func TestLayout(t *testing.T) {
 	color.Enable = false
 	ue := input.Update{}
-	if err := cmd.LoadTester(os.Stdout); err != nil {
-		t.Error(err)
-	}
+
 	tests := []struct {
 		name    string
 		u       input.Update
@@ -148,9 +139,7 @@ func TestLayout(t *testing.T) {
 func TestServe(t *testing.T) {
 	color.Enable = false
 	ue := input.Update{}
-	if err := cmd.LoadTester(os.Stdout); err != nil {
-		t.Error(err)
-	}
+
 	tests := []struct {
 		name    string
 		u       input.Update
@@ -185,9 +174,7 @@ func TestServe(t *testing.T) {
 func TestSaveDir(t *testing.T) {
 	color.Enable = false
 	ue := input.Update{}
-	if err := cmd.LoadTester(os.Stdout); err != nil {
-		t.Error(err)
-	}
+
 	tests := []struct {
 		name    string
 		u       input.Update
@@ -221,9 +208,7 @@ func TestSaveDir(t *testing.T) {
 func TestStyleHTML(t *testing.T) {
 	color.Enable = false
 	ue := input.Update{}
-	if err := cmd.LoadTester(os.Stdout); err != nil {
-		t.Error(err)
-	}
+
 	tests := []struct {
 		name    string
 		u       input.Update
@@ -256,9 +241,7 @@ func TestStyleHTML(t *testing.T) {
 func TestStyleInfo(t *testing.T) {
 	color.Enable = false
 	ue := input.Update{}
-	if err := cmd.LoadTester(os.Stdout); err != nil {
-		t.Error(err)
-	}
+
 	tests := []struct {
 		name    string
 		u       input.Update

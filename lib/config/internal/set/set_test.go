@@ -9,7 +9,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/cmd"
 	"github.com/bengarrett/retrotxtgo/lib/config/internal/set"
 	"github.com/bengarrett/retrotxtgo/lib/create"
 	"github.com/gookit/color"
@@ -91,9 +90,6 @@ func TestSkipWrite(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := cmd.LoadTester(os.Stdout); err != nil {
-				t.Error(err)
-			}
 			if v := viper.AllKeys(); len(v) == 0 {
 				fmt.Println("init serve example.")
 				viper.Set("serve", skipValue)
@@ -159,10 +155,6 @@ func TestWrite(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := cmd.LoadTester(os.Stdout); err != nil {
-				t.Error(err)
-				return
-			}
 			w := &bytes.Buffer{}
 			if err := set.Write(w, tt.args.name, tt.args.setup, tt.args.value); (err != nil) != tt.wantErr {
 				t.Errorf("Write() error = %v, wantErr %v", err, tt.wantErr)
@@ -199,10 +191,6 @@ func TestDirectory(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := cmd.LoadTester(os.Stdout); err != nil {
-				t.Error(err)
-				return
-			}
 			w := &bytes.Buffer{}
 			err := set.Directory(w, tt.args.name, tt.args.setup)
 			if (err != nil) != tt.wantErr && !errors.Is(err, set.ErrBreak) {
@@ -244,9 +232,7 @@ func TestEditor(t *testing.T) {
 
 func TestFont(t *testing.T) {
 	color.Enable = false
-	if err := cmd.LoadTester(os.Stdout); err != nil {
-		t.Error(err)
-	}
+
 	type args struct {
 		value string
 		setup bool
@@ -276,9 +262,7 @@ func TestFont(t *testing.T) {
 }
 func TestFontEmbed(t *testing.T) {
 	color.Enable = false
-	if err := cmd.LoadTester(os.Stdout); err != nil {
-		t.Error(err)
-	}
+
 	type args struct {
 		value bool
 		setup bool
@@ -309,9 +293,7 @@ func TestFontEmbed(t *testing.T) {
 
 func TestGenerator(t *testing.T) {
 	color.Enable = false
-	if err := cmd.LoadTester(os.Stdout); err != nil {
-		t.Error(err)
-	}
+
 	type args struct {
 		value bool
 	}
@@ -341,9 +323,7 @@ func TestGenerator(t *testing.T) {
 
 func TestNoTranslate(t *testing.T) {
 	color.Enable = false
-	if err := cmd.LoadTester(os.Stdout); err != nil {
-		t.Error(err)
-	}
+
 	type args struct {
 		value bool
 	}
@@ -373,9 +353,7 @@ func TestNoTranslate(t *testing.T) {
 
 func TestPort(t *testing.T) {
 	color.Enable = false
-	if err := cmd.LoadTester(os.Stdout); err != nil {
-		t.Error(err)
-	}
+
 	type args struct {
 		name string
 	}
@@ -405,9 +383,7 @@ func TestPort(t *testing.T) {
 
 func TestRetroTxt(t *testing.T) {
 	color.Enable = false
-	if err := cmd.LoadTester(os.Stdout); err != nil {
-		t.Error(err)
-	}
+
 	type args struct {
 		value bool
 	}
@@ -437,9 +413,7 @@ func TestRetroTxt(t *testing.T) {
 
 func TestTitle(t *testing.T) {
 	color.Enable = false
-	if err := cmd.LoadTester(os.Stdout); err != nil {
-		t.Error(err)
-	}
+
 	type args struct {
 		name  string
 		value string
@@ -491,9 +465,6 @@ func TestIndex(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := cmd.LoadTester(os.Stdout); err != nil {
-				t.Error(err)
-			}
 			w := &bytes.Buffer{}
 			if err := set.Index(w, tt.args.name, false, tt.args.data...); (err != nil) != tt.wantErr {
 				t.Errorf("Index() error = %v, wantErr %v", err, tt.wantErr)

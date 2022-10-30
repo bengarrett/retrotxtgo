@@ -6,16 +6,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/cmd"
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/gookit/color"
 	"github.com/spf13/viper"
 )
 
 func TestCreate(t *testing.T) {
-	if err := cmd.LoadTester(os.Stdout); err != nil {
-		t.Error(err)
-	}
 	type args struct {
 		name string
 		ow   bool
@@ -40,9 +36,6 @@ func TestCreate(t *testing.T) {
 
 func TestNew(t *testing.T) {
 	color.Enable = false
-	if err := cmd.LoadTester(os.Stdout); err != nil {
-		t.Error(err)
-	}
 	tests := []struct {
 		name      string
 		overwrite bool
@@ -64,9 +57,6 @@ func TestNew(t *testing.T) {
 
 func TestDoesExist(t *testing.T) {
 	color.Enable = false
-	if err := cmd.LoadTester(os.Stdout); err != nil {
-		t.Error(err)
-	}
 	type args struct {
 		name   string
 		suffix string

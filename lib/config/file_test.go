@@ -6,15 +6,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/cmd"
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/gookit/color"
 )
 
 func TestPath(t *testing.T) {
-	if err := cmd.LoadTester(os.Stdout); err != nil {
-		t.Error(err)
-	}
 	t.Run("path test", func(t *testing.T) {
 		if gotDir := config.Path(); gotDir == "tt.wantDir" {
 			t.Errorf("Path() = \"\"")
@@ -24,9 +20,6 @@ func TestPath(t *testing.T) {
 
 func TestLoad(t *testing.T) {
 	color.Enable = false
-	if err := cmd.LoadTester(os.Stdout); err != nil {
-		t.Error(err)
-	}
 	tests := []struct {
 		name    string
 		flag    string
@@ -46,9 +39,6 @@ func TestLoad(t *testing.T) {
 
 func TestConfigMissing(t *testing.T) {
 	color.Enable = false
-	if err := cmd.LoadTester(os.Stdout); err != nil {
-		t.Error(err)
-	}
 	t.Run("config missing", func(t *testing.T) {
 		w := new(bytes.Buffer)
 		config.ConfigMissing(w, "aaaxxx", "xxx")

@@ -3,20 +3,15 @@ package config_test
 import (
 	"bytes"
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/cmd"
 	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/gookit/color"
 )
 
 func TestInfo(t *testing.T) {
 	color.Enable = false
-	if err := cmd.LoadTester(os.Stdout); err != nil {
-		t.Error(err)
-	}
 	const success = "RetroTxtGo default settings in use"
 	tests := []struct {
 		name    string
