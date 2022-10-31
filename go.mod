@@ -11,7 +11,7 @@ require (
 	github.com/mozillazg/go-unidecode v0.2.0 // indirect
 	github.com/muesli/go-app-paths v0.2.2
 	github.com/spf13/cast v1.5.0 // indirect
-	github.com/spf13/cobra v1.6.0
+	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.13.0
 	github.com/tdewolff/minify v2.3.6+incompatible
 	github.com/tdewolff/parse v2.3.4+incompatible // indirect
