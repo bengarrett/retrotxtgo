@@ -39,8 +39,8 @@ func Examples() (*bytes.Buffer, error) {
 	for _, k := range keys {
 		fmt.Fprintf(w, "%s\t%s\t\n", k, m[k].Description)
 	}
-	fmt.Fprintf(w, "\nAny of these packaged examples will work with the %s, %s and %s commands.\n",
-		str.Example("create"), str.Example("info"), str.Example("view"))
+	fmt.Fprintf(w, "\nAny of these packaged examples will work with the %s and %s commands.\n",
+		str.Example("info"), str.Example("view"))
 	fmt.Fprintf(w, "\nPrint the Windows-1252 English test to the terminal.\n%s\n",
 		str.Example(bin+"view 1252"))
 	fmt.Fprintf(w, "\nConvert the Windows-1252 English test to UTF-8 encoding and save it to a file.\n%s\n",
@@ -53,12 +53,6 @@ func Examples() (*bytes.Buffer, error) {
 		str.Example(bin+"info 1252"))
 	fmt.Fprintf(w, "\nDisplay statistics, information and SAUCE metadata from the SAUCE test.\n%s\n",
 		str.Example(bin+"info sauce"))
-	fmt.Fprintf(w, "\nCreate and display a HTML document from the Windows-1252 English test.\n%s\n",
-		str.Example(bin+"create 1252"))
-	fmt.Fprintf(w, "\nCreate and save the HTML and assets from the Windows-1252 English test.\n%s\n",
-		str.Example(bin+"create 1252 --save"))
-	fmt.Fprintf(w, "\nServe the Windows-1252 English test over a local web server.\n%s\n",
-		str.Example(bin+"create 1252 -p0"))
 	fmt.Fprintf(w, "\nMultiple examples used together are supported.\n%s\n",
 		str.Example(bin+"view ansi ascii ansi.rgb"))
 	if err := w.Flush(); err != nil {

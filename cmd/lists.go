@@ -56,10 +56,10 @@ func ListExamples() *cobra.Command {
 	return &cobra.Command{
 		Use:     "examples",
 		Aliases: []string{"e", "samples"},
-		Short: fmt.Sprintf("List builtin text files available for use with the %s, %s, %s and %s commands",
-			str.Example("create"), str.Example("save"), str.Example("info"), str.Example("view")),
-		Long: fmt.Sprintf("List builtin text art and documents available for use with the %s, %s, %s and %s commands.",
-			str.Example("create"), str.Example("save"), str.Example("info"), str.Example("view")),
+		Short: fmt.Sprintf("List builtin text files available for use with the %s, %s and %s commands",
+			str.Example("save"), str.Example("info"), str.Example("view")),
+		Long: fmt.Sprintf("List builtin text art and documents available for use with the %s, %s and %s commands.",
+			str.Example("save"), str.Example("info"), str.Example("view")),
 		Example: fmt.Sprint(example.ListExamples),
 		GroupID: "examples",
 		RunE: func(cmd *cobra.Command, args []string) error {
