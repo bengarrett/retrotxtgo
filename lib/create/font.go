@@ -1,13 +1,9 @@
 package create
 
 import (
-	"bytes"
-	"encoding/base64"
 	"fmt"
-	"html/template"
 	"strings"
 
-	"github.com/bengarrett/retrotxtgo/static"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/japanese"
 )
@@ -60,72 +56,4 @@ func Family(name string) Font {
 // Fonts are values for the CSS font-family attribute.
 func Fonts() []string {
 	return []string{Automatic.String(), Mona.String(), VGA.String()}
-}
-
-// FontCSS creates the CSS required for customized fonts.
-func FontCSS(name string, e encoding.Encoding, embed bool) ([]byte, error) {
-	f := Family(name)
-	if f == Automatic {
-		f = AutoFont(e)
-	}
-	const css = `@font-face {
-  font-family: '{{.Name}}';
-  src: url({{.URL}}) format('woff2');
-  font-display: swap;
-}
-
-.font-{{.Name}} {
-  font-family: {{.Name}};
-}
-
-body {
-  font-family: {{.Name}};
-}
-
-main pre {
-  font-family: {{.Name}}; /* temp */
-}
-`
-	data := struct {
-		Name string
-		URL  template.HTML // use HTML type to avoid contextual encoding
-	}{
-		Name: f.String(),
-	}
-	if embed {
-		url, err := fontBase64(f)
-		if err != nil {
-			return nil, fmt.Errorf("binary font to base64 failed: %w", err)
-		}
-		data.URL = template.HTML(url) // nolint:gosec
-	} else {
-		data.URL = template.HTML(f.File()) // nolint:gosec
-	}
-	var out bytes.Buffer
-	t, err := template.New("fontface").Parse(css)
-	if err != nil {
-		return nil, fmt.Errorf("fontface new template failed: %w", err)
-	}
-	err = t.Execute(&out, data)
-	if err != nil {
-		return nil, fmt.Errorf("fontface execute template failed: %w", err)
-	}
-	return out.Bytes(), nil
-}
-
-// fontBase64 encodes a font using the Base64 binary-to-text encoding scheme,
-// for embedding into HTML or CSS textfiles.
-func fontBase64(f Font) (string, error) {
-	name := fmt.Sprintf("font/%s", f.File())
-	b, err := static.Font.ReadFile(name)
-	if err != nil {
-		return "", fmt.Errorf("font base64 %q: %w", f.File(), ErrFont)
-	}
-	var s bytes.Buffer
-	encoder := base64.NewEncoder(base64.StdEncoding, &s)
-	defer encoder.Close()
-	if _, err := encoder.Write(b); err != nil {
-		return "", fmt.Errorf("font base64 failed to write b: %w", err)
-	}
-	return fmt.Sprintf("data:application/font-woff2;charset=utf-8;base64,%s", &s), nil
 }

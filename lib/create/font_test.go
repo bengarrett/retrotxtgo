@@ -67,34 +67,3 @@ func TestFamily(t *testing.T) {
 		})
 	}
 }
-
-func TestFontCSS(t *testing.T) {
-	type args struct {
-		name  string
-		embed bool
-	}
-	tests := []struct {
-		name     string
-		args     args
-		wantSize int
-		wantErr  bool
-	}{
-		{"empty", args{"", false}, 213, false}, // automatic returns vga
-		{"vga embed", args{"vga", true}, 19740, false},
-		{"vga", args{"vga", false}, 213, false},
-		{"mona", args{"mona", false}, 214, false},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotB, err := create.FontCSS(tt.args.name, nil, tt.args.embed)
-			gotSize := len(gotB)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("FontCSS() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if gotSize != tt.wantSize {
-				t.Errorf("FontCSS() = %v, want %v", gotSize, tt.wantSize)
-			}
-		})
-	}
-}
