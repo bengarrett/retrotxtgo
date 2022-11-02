@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/bengarrett/retrotxtgo/lib/create"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/spf13/cobra"
@@ -49,7 +48,6 @@ func Init() map[int]Meta {
 		serve: {"serve", nil, nil, &Build.Port, "serve", "p", nil},
 		// main tag flags
 		style:  {"style.html", &Build.Syntax, nil, nil, "syntax-style", "", nil},
-		layout: {"html.layout", &Build.Layout, nil, nil, "layout", "l", create.Layouts()},
 		title:  {"html.title", &Build.Title.Value, nil, nil, "title", "t", nil},
 		desc:   {"html.meta.description", &Build.Metadata.Description.Value, nil, nil, "meta-description", "d", nil},
 		author: {"html.meta.author", &Build.Metadata.Author.Value, nil, nil, "meta-author", "a", nil},

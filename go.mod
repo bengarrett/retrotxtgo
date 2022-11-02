@@ -13,9 +13,6 @@ require (
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.13.0
-	github.com/tdewolff/minify v2.3.6+incompatible
-	github.com/tdewolff/parse v2.3.4+incompatible // indirect
-	github.com/tdewolff/test v1.0.7 // indirect
 	github.com/zRedShift/mimemagic v1.2.0
 	golang.org/x/net v0.1.0 // indirect
 	golang.org/x/sync v0.1.0
