@@ -44,11 +44,8 @@ func Init() map[int]Meta {
 		cache
 	)
 	return map[int]Meta{
-		// output
-		serve: {"serve", nil, nil, &Build.Port, "serve", "p", nil},
 		// main tag flags
 		style:  {"style.html", &Build.Syntax, nil, nil, "syntax-style", "", nil},
-		title:  {"html.title", &Build.Title.Value, nil, nil, "title", "t", nil},
 		desc:   {"html.meta.description", &Build.Metadata.Description.Value, nil, nil, "meta-description", "d", nil},
 		author: {"html.meta.author", &Build.Metadata.Author.Value, nil, nil, "meta-author", "a", nil},
 		retro:  {"html.meta.retrotxt", nil, &Build.Metadata.RetroTxt, nil, "meta-retrotxt", "r", nil},
@@ -61,10 +58,8 @@ func Init() map[int]Meta {
 		bots:    {"html.meta.robots", &Build.Metadata.Robots.Value, nil, nil, "meta-robots", "", nil},
 		themec:  {"html.meta.theme_color", &Build.Metadata.ThemeColor.Value, nil, nil, "meta-theme-color", "", nil},
 		fontf:   {"html.font.family", &Build.FontFamily.Value, nil, nil, "font-family", "f", nil},
-		fonte:   {"html.font.embed", nil, &Build.FontEmbed, nil, "font-embed", "", nil},
 		// hidden flags
-		body:  {"html.body", &Build.Source.HiddenBody, nil, nil, "body", "b", nil},
-		cache: {"html.layout.cache", nil, &Build.Save.Cache, nil, "cache", "", nil},
+		body: {"html.body", &Build.Source.HiddenBody, nil, nil, "body", "b", nil},
 	}
 }
 

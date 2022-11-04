@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"runtime"
 	"strings"
 	"text/template"
 
@@ -23,7 +22,6 @@ const (
 	Cmd Example = iota
 	Config
 	ConfigInfo
-	Create
 	List
 	ListExamples
 	ListTable
@@ -68,8 +66,6 @@ func (e Example) result() string {
 		return config()
 	case ConfigInfo:
 		return configInfo()
-	case Create:
-		return create()
 	case List:
 		return list()
 	case ListExamples:
@@ -105,28 +101,6 @@ func configInfo() string {
 	return fmt.Sprintf("  %s\n%s",
 		fmt.Sprintf("%s config info   # List the default setting values", meta.Bin),
 		fmt.Sprintf("%s config set -c # List the settings and help hints", meta.Bin))
-}
-
-func create() string {
-	return fmt.Sprintf("  %s%s\n%s%s\n%s%s\n%s%s\n%s%s",
-		"# print a HTML file created from file.txt\n",
-		fmt.Sprintf("%s create file.txt --title \"A text file\" --description \"Some text goes here\"", meta.Bin),
-		"# save HTML files created from file1.txt and file2.asc\n",
-		fmt.Sprintf("%s create file1.txt file2.asc --save", meta.Bin),
-		"# save and compress a HTML file created from file.txt in Downloads.\n",
-		fmt.Sprintf("%s create ~{{.}}Downloads{{.}}file.txt --compress", meta.Bin),
-		"# host the HTML file created from file.txt\n",
-		fmt.Sprintf("%s create file.txt --serve=%d", meta.Bin, meta.WebPort),
-		"# pipe a HTML file created from file.txt\n",
-		fmt.Sprintf("%s create file.txt | %s", meta.Bin, cat()))
-}
-
-// cat returns the os command name to concatenate a file to standard output.
-func cat() string {
-	if runtime.GOOS == "windows" {
-		return "type"
-	}
-	return "cat"
 }
 
 func list() string {
