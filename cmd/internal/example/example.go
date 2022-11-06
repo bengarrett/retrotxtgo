@@ -20,13 +20,10 @@ type Example int
 
 const (
 	Cmd Example = iota
-	Config
-	ConfigInfo
 	List
 	ListExamples
 	ListTable
 	Info
-	Set
 	View
 )
 
@@ -62,10 +59,6 @@ func (e Example) result() string {
 	switch e {
 	case Cmd:
 		return cmd()
-	case Config:
-		return config()
-	case ConfigInfo:
-		return configInfo()
 	case List:
 		return list()
 	case ListExamples:
@@ -74,8 +67,6 @@ func (e Example) result() string {
 		return listTable()
 	case Info:
 		return info()
-	case Set:
-		return set()
 	case View:
 		return view()
 	}
@@ -83,41 +74,25 @@ func (e Example) result() string {
 }
 
 func cmd() string {
-	return fmt.Sprintf("  %s\n%s\n%s\n%s",
-		"# print detailed information about the text files",
-		fmt.Sprintf("%s info   %s", meta.Bin, Filenames),
-		"# print the text files as Unicode text",
-		fmt.Sprintf("%s view   %s", meta.Bin, Filenames),
+	return fmt.Sprintf("  %s\n%s\n%s",
+		fmt.Sprintf("%s info %s", meta.Bin, Filenames),
+		fmt.Sprintf("%s view %s", meta.Bin, Filenames),
+		fmt.Sprintf("%s %s      # print text files partial info TODO", meta.Bin, Filenames),
 	)
 }
 
-func config() string {
-	return fmt.Sprintf("  %s %s %s\n%s %s %s",
-		meta.Bin, "config setup", "# Walk through all the settings",
-		meta.Bin, "config set --list", "# List all the settings in use")
-}
-
-func configInfo() string {
-	return fmt.Sprintf("  %s\n%s",
-		fmt.Sprintf("%s config info   # List the default setting values", meta.Bin),
-		fmt.Sprintf("%s config set -c # List the settings and help hints", meta.Bin))
-}
-
 func list() string {
-	return fmt.Sprintf("  %s\n%s\n%s\n%s",
+	return fmt.Sprintf("  %s\n%s\n%s",
 		fmt.Sprintf("%s list codepages", meta.Bin),
-		fmt.Sprintf("%s list examples", meta.Bin),
 		fmt.Sprintf("%s list table cp437 cp1252", meta.Bin),
 		fmt.Sprintf("%s list tables", meta.Bin))
 }
 
 func listExamples() string {
-	return fmt.Sprintf("  %s\n%s\n%s\n%s\n%s",
+	return fmt.Sprintf("  %s\n%s\n%s",
 		fmt.Sprintf("%s list examples # list the builtin examples", meta.Bin),
 		fmt.Sprintf("%s info ascii    # information on the buildin ascii example", meta.Bin),
-		fmt.Sprintf("%s view ascii    # view the ascii example", meta.Bin),
-		fmt.Sprintf("%s create ascii  # create the ascii example", meta.Bin),
-		fmt.Sprintf("%s save ascii    # save the ascii example", meta.Bin))
+		fmt.Sprintf("%s view ascii    # view the ascii example", meta.Bin))
 }
 
 func listTable() string {
@@ -131,14 +106,6 @@ func info() string {
 	return fmt.Sprintf("  %s %s\n%s %s",
 		meta.Bin, "info text.asc logo.jpg # print the information of multiple files",
 		meta.Bin, "info file.txt --format=json # print the information using a structured syntax")
-}
-
-func set() string {
-	return fmt.Sprintf("  %s %s %s\n%s %s %s\n%s %s %s",
-		meta.Bin, "config set --list", "# List the available settings",
-		meta.Bin, "config set html.meta.description", "# Edit the meta description setting",
-		meta.Bin, "config set style.info style.html", fmt.Sprintf("# Edit both the %s color styles", meta.Name),
-	)
 }
 
 func view() string {

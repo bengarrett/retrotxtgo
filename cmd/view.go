@@ -14,6 +14,7 @@ func ViewCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:     fmt.Sprintf("view %s", example.Filenames),
 		Aliases: []string{"v"},
+		GroupID: "fileCmds",
 		Short:   "Print a text file to the terminal using standard output",
 		Long:    "Print a text file to the terminal using standard output.",
 		Example: fmt.Sprint(example.View),

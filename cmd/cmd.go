@@ -70,6 +70,11 @@ func CmdInit() {
 		logs.FatalMark("config", ErrHide, err)
 	}
 	Cmd = Tester(Cmd)
+
+	Cmd.AddGroup(&cobra.Group{ID: "listCmds", Title: "Codepages:"})
+	Cmd.AddGroup(&cobra.Group{ID: "fileCmds", Title: "Files:"})
+	Cmd.AddGroup(&cobra.Group{ID: "exaCmds", Title: "Testers:"})
+
 	// create a version flag that only works on root.
 	Cmd.LocalNonPersistentFlags().BoolP("version", "v", false, "")
 	// hide the cobra introduced help command.

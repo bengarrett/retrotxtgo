@@ -13,8 +13,9 @@ func ListCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:     "list",
 		Aliases: []string{"l"},
-		Short:   "Available inbuilt examples, codepages and tabled datasets",
-		Long:    "List the available inbuilt text art and text documents, codepages and their tabled values.",
+		GroupID: "listCmds",
+		Short:   "Available codepages and tabled datasets",
+		Long:    "List the available codepages and their tabled values.",
 		Example: fmt.Sprint(example.List),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := flag.Help(cmd, args...); err != nil {
@@ -31,10 +32,8 @@ func ListCommand() *cobra.Command {
 func ListInit() *cobra.Command {
 	lc := ListCommand()
 	lc.AddGroup(&cobra.Group{ID: "codepages", Title: "Codepages:"})
-	lc.AddGroup(&cobra.Group{ID: "examples", Title: "Examples:"})
 	lc.AddGroup(&cobra.Group{ID: "tables", Title: "Codepage Table:"})
 	lc.AddCommand(ListCodepages())
-	lc.AddCommand(ListExamples())
 	lc.AddCommand(ListTable())
 	lc.AddCommand(ListTables())
 	return lc
@@ -43,4 +42,5 @@ func ListInit() *cobra.Command {
 //nolint:gochecknoinits
 func init() {
 	Cmd.AddCommand(ListInit())
+	Cmd.AddCommand(ListExamples())
 }
