@@ -15,20 +15,6 @@ var ErrHide = errors.New("could not hide the flag")
 
 var Build create.Args
 
-type Creates struct {
-	Controls []string // character encoding used by the filename
-	Encode   string   // use these control codes
-	Swap     []string // swap out these characters with UTF8 alternatives
-}
-
-func Create() Creates {
-	return Creates{
-		Controls: []string{"eof", "tab"},
-		Encode:   EncodingDefault,
-		Swap:     []string{"null", "bar"},
-	}
-}
-
 type Commands struct {
 	Config string
 	Tester bool
