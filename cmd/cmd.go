@@ -62,10 +62,6 @@ func Execute() {
 }
 
 func CmdInit() {
-	// create and hide custom configuration file location flag.
-	if err := Cmd.PersistentFlags().MarkHidden("config"); err != nil {
-		logs.FatalMark("config", ErrHide, err)
-	}
 	Cmd = Tester(Cmd)
 
 	Cmd.AddGroup(&cobra.Group{ID: "listCmds", Title: "Codepages:"})
