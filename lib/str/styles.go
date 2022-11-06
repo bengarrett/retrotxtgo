@@ -3,21 +3,16 @@ package str
 import (
 	"bufio"
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
-	"io"
 	"log"
 	"os"
 	"path/filepath"
 	"sort"
-	"strconv"
 	"strings"
 	"unicode/utf8"
 
-	"github.com/alecthomas/chroma/quick"
-	"github.com/alecthomas/chroma/styles"
 	"github.com/gookit/color"
 )
 
@@ -45,33 +40,6 @@ const (
 
 func (t terminal) String() string {
 	return [...]string{none, term, term, "terminal256", "terminal16m"}[t]
-}
-
-// JSONExample is used to preview theme colors.
-type JSONExample struct {
-	Style struct {
-		Name    string `json:"name"`
-		Count   int    `json:"count"`
-		Default bool   `json:"default"`
-	}
-}
-
-func (s JSONExample) String(flag string) (string, error) {
-	w := new(bytes.Buffer)
-	fmt.Fprintln(w)
-	// config is stored as YAML but printed as JSON
-	out, err := json.MarshalIndent(s, "", "  ")
-	if err != nil {
-		return "", fmt.Errorf("json example marshal indent: %w", err)
-	}
-	if flag != "" {
-		fmt.Fprintln(w, "\n"+color.Secondary.Sprintf("%s=%q", flag, s.Style.Name))
-	}
-	if err := HighlightWriter(w, string(out), "json", s.Style.Name, true); err != nil {
-		// cannot use the logs package as it causes an import cycle error
-		return "", fmt.Errorf("json example highlight syntax error: %w", err)
-	}
-	return w.String(), nil
 }
 
 // Border wraps the string around a single line border.
@@ -118,36 +86,6 @@ func GetEnv(key string) string {
 	return strings.TrimSpace(strings.ToLower(os.Getenv(key)))
 }
 
-// Highlight and print the syntax of the source string except when piped to stdout.
-func Highlight(source, lexer, style string, ansi bool) error {
-	return HighlightWriter(os.Stdout, source, lexer, style, ansi)
-}
-
-// HighlightWriter writes the highlight syntax of the source string except when piped to stdout.
-func HighlightWriter(w io.Writer, source, lexer, style string, ansi bool) error {
-	term := Term(GetEnv("COLORTERM"), GetEnv("TERM"))
-	// detect piping for text output or ansi for printing
-	// source: https://stackoverflow.com/questions/43947363/detect-if-a-command-is-piped-or-not
-	fo, err := os.Stdout.Stat()
-	if err != nil {
-		return fmt.Errorf("highlight writer stdout error: %w", err)
-	}
-	if term == none {
-		// user disabled color output, but it doesn't disable ANSI output
-		fmt.Fprintln(w, source)
-		return nil
-	}
-	if !ansi && (fo.Mode()&os.ModeCharDevice) == 0 {
-		// disable color when piping or running unit tests
-		fmt.Fprintln(w, source)
-		return nil
-	}
-	if err := quick.Highlight(w, source, lexer, term, style); err != nil {
-		return fmt.Errorf("highlight writer: %w", err)
-	}
-	return nil
-}
-
 // Head returns a colored and underlined string for use as a header.
 // Provide a fixed width value for the underline border or set to zero.
 func Head(width int, s string) string {
@@ -180,24 +118,6 @@ func HR(width int) string {
 
 func HRPad(width int) string {
 	return fmt.Sprintf(" \n%s\n", ColSec(strings.Repeat(HBar, width)))
-}
-
-// NumberizeKeys uses ANSI to underline and prefix a sequential number in front of each key.
-func NumberizeKeys(keys ...string) string {
-	if len(keys) == 0 {
-		return ""
-	}
-	const nbsp = "\u00A0"
-	s := make([]string, len(keys))
-	sort.Strings(keys)
-	for i, key := range keys {
-		if i == 0 {
-			s[i] = fmt.Sprintf("Use %s for%s%s", Example(strconv.Itoa(i)), nbsp, key)
-			continue
-		}
-		s[i] = fmt.Sprintf("      %s for%s%s", Example(strconv.Itoa(i)), nbsp, key)
-	}
-	return strings.Join(s, "\n")
 }
 
 // Term determines the terminal type based on the COLORTERM and TERM environment variables.
@@ -291,32 +211,4 @@ func UnderlineKeys(keys ...string) string {
 		keys[i] = c
 	}
 	return strings.Join(keys, ", ")
-}
-
-// JSONStyles prints out a list of available YAML color styles.
-func JSONStyles(w io.Writer, cmd string) error {
-	for i, s := range styles.Names() {
-		var example JSONExample
-		example.Style.Name, example.Style.Count = s, i
-		if s == "dracula" {
-			example.Style.Default = true
-		}
-		es, err := example.String(cmd)
-		if err != nil {
-			return err
-		}
-		fmt.Fprint(w, es)
-	}
-	fmt.Fprintln(w)
-	return nil
-}
-
-// Valid checks style name validity.
-func Valid(style string) bool {
-	for _, n := range styles.Names() {
-		if n == style {
-			return true
-		}
-	}
-	return false
 }

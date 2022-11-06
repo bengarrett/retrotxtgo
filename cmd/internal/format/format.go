@@ -1,5 +1,5 @@
-// Package config handles the user configations.
-package config
+// Package format handles data outputs.
+package format
 
 // Formats the choices for command flags.
 type Formats struct {

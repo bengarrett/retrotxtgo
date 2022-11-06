@@ -5,8 +5,8 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
+	"github.com/bengarrett/retrotxtgo/cmd/internal/format"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/info"
-	"github.com/bengarrett/retrotxtgo/lib/config"
 	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/spf13/cobra"
 )
@@ -30,7 +30,7 @@ func InfoCommand() *cobra.Command {
 
 func InfoInit() *cobra.Command {
 	ic := InfoCommand()
-	infos := config.Format().Info
+	infos := format.Format().Info
 	ic.Flags().StringVarP(&flag.Info.Format, "format", "f", "color",
 		str.Options("print format or syntax", true, true, infos[:]...))
 	return ic

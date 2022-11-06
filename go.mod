@@ -3,7 +3,6 @@ module github.com/bengarrett/retrotxtgo
 go 1.18
 
 require (
-	github.com/alecthomas/chroma v0.10.0
 	github.com/gookit/color v1.5.2
 	github.com/karrick/godirwalk v1.17.0
 	github.com/mattn/go-isatty v0.0.16
@@ -27,7 +26,6 @@ require (
 )
 
 require (
-	github.com/dlclark/regexp2 v1.7.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
