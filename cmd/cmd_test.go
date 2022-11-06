@@ -2,7 +2,7 @@ package cmd_test
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 
 	"github.com/bengarrett/retrotxtgo/cmd"
 	"github.com/gookit/color"
@@ -46,7 +46,7 @@ func (t cmdT) tester(args []string) ([]byte, error) {
 	if err := c.Execute(); err != nil {
 		return nil, err
 	}
-	out, err := ioutil.ReadAll(b)
+	out, err := io.ReadAll(b)
 	if err != nil {
 		return nil, err
 	}

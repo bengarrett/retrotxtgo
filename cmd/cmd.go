@@ -19,12 +19,10 @@ var (
 	ErrUsage = errors.New("command usage could not display")
 )
 
-var cmdShort = fmt.Sprintf("%s is the tool that turns ANSI, ASCII, NFO text into browser ready HTML",
-	meta.Name)
+var cmdShort = fmt.Sprintf("Use %s to print text, BBS and ANSI files", meta.Name)
 
-var cmdLong = fmt.Sprintf(`Turn many pieces of ANSI art, ASCII and NFO texts into HTML5 using %s.
-It is the platform agnostic tool that takes nostalgic text files and stylises
-them into a more modern, useful format to view or copy in a web browser.`, meta.Name)
+var cmdLong = fmt.Sprintf(`%s takes legacy encoded text, BBS, and ANSI files
+and print them to a modern UTF-8 terminal.`, meta.Name)
 
 // Cmd represents the base command when called without any subcommands.
 //
