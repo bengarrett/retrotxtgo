@@ -62,10 +62,7 @@ func Execute() {
 }
 
 func CmdInit() {
-	//cobra.OnInitialize(Load)
 	// create and hide custom configuration file location flag.
-	Cmd.PersistentFlags().StringVar(&flag.Command.Config, "config", "",
-		"optional config file location")
 	if err := Cmd.PersistentFlags().MarkHidden("config"); err != nil {
 		logs.FatalMark("config", ErrHide, err)
 	}

@@ -16,8 +16,7 @@ var ErrHide = errors.New("could not hide the flag")
 var Build create.Args
 
 type Commands struct {
-	Config string
-	Tester bool
+	Tester bool // internal automated tester
 }
 
 var Command Commands
