@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/gookit/color v1.5.2
 	github.com/karrick/godirwalk v1.17.0
-	github.com/mattn/go-isatty v0.0.16
+	github.com/mattn/go-isatty v0.0.17
 	github.com/mozillazg/go-slugify v0.2.0
 	github.com/mozillazg/go-unidecode v0.2.0 // indirect
 	github.com/muesli/go-app-paths v0.2.2
