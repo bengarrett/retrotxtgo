@@ -120,7 +120,7 @@ retrotxt -v
 #### Print legacy codepage tables in the terminal.
 
 ```
-retrotext list table cp437 latin1
+retrotxt list table cp437 latin1
 
  ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
          IBM Code Page 437 (DOS, OEM-US) - Extended ASCII
