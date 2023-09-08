@@ -1,6 +1,6 @@
 package sgr
 
-import "github.com/bengarrett/retrotxtgo/lib/ansi/internal/xterm"
+import "github.com/bengarrett/retrotxtgo/pkg/ansi/internal/xterm"
 
 // Extensions are custom color parameters that were not defined
 // in the original VT100 and ANSI documentations. These extend

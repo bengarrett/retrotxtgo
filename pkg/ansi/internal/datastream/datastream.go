@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"unicode"
 
-	"github.com/bengarrett/retrotxtgo/lib/ansi/internal/sgr"
+	"github.com/bengarrett/retrotxtgo/pkg/ansi/internal/sgr"
 )
 
 // Erase parameter number; either 0, 1, 2 or -1 for not found.

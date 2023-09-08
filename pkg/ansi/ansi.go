@@ -7,7 +7,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/bengarrett/retrotxtgo/lib/ansi/internal/sgr"
+	"github.com/bengarrett/retrotxtgo/pkg/ansi/internal/sgr"
 )
 
 const (

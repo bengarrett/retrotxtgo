@@ -3,7 +3,7 @@ package util_test
 import (
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/lib/filesystem/internal/util"
+	"github.com/bengarrett/retrotxtgo/pkg/filesystem/internal/util"
 )
 
 func TestWindows(t *testing.T) {

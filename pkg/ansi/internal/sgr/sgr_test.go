@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/lib/ansi/internal/xterm"
+	"github.com/bengarrett/retrotxtgo/pkg/ansi/internal/xterm"
 )
 
 // func TestDataStream(t *testing.T) {

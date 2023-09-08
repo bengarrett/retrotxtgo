@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/lib/create"
+	"github.com/bengarrett/retrotxtgo/pkg/create"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/japanese"
 )

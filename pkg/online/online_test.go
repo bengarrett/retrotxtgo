@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/bengarrett/retrotxtgo/lib/online"
+	"github.com/bengarrett/retrotxtgo/pkg/online"
 )
 
 func ExampleEndpoint() {

@@ -9,9 +9,9 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/lib/filesystem"
-	"github.com/bengarrett/retrotxtgo/lib/internal/mock"
-	"github.com/bengarrett/retrotxtgo/lib/internal/tmp"
+	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
+	"github.com/bengarrett/retrotxtgo/pkg/internal/mock"
+	"github.com/bengarrett/retrotxtgo/pkg/internal/tmp"
 )
 
 const windows = "windows"

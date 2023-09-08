@@ -7,8 +7,8 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/bengarrett/retrotxtgo/lib/filesystem"
-	"github.com/bengarrett/retrotxtgo/lib/internal/tmp"
+	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
+	"github.com/bengarrett/retrotxtgo/pkg/internal/tmp"
 )
 
 func ExampleZip() {

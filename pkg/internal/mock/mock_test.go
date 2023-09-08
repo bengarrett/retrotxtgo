@@ -3,7 +3,7 @@ package mock_test
 import (
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/lib/internal/mock"
+	"github.com/bengarrett/retrotxtgo/pkg/internal/mock"
 )
 
 func Test_filler(t *testing.T) {

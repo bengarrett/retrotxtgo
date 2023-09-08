@@ -3,8 +3,8 @@ package xterm
 import (
 	"fmt"
 
-	"github.com/bengarrett/retrotxtgo/lib/ansi/internal/bg"
-	"github.com/bengarrett/retrotxtgo/lib/ansi/internal/fg"
+	"github.com/bengarrett/retrotxtgo/pkg/ansi/internal/bg"
+	"github.com/bengarrett/retrotxtgo/pkg/ansi/internal/fg"
 )
 
 const (

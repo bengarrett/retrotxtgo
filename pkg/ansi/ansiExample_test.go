@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/bengarrett/retrotxtgo/lib/ansi"
+	"github.com/bengarrett/retrotxtgo/pkg/ansi"
 )
 
 func ExampleHTMLReader_aix() {

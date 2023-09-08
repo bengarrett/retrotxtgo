@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/lib/filesystem"
-	"github.com/bengarrett/retrotxtgo/lib/internal/mock"
-	"github.com/bengarrett/retrotxtgo/lib/internal/nl"
+	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
+	"github.com/bengarrett/retrotxtgo/pkg/internal/mock"
+	"github.com/bengarrett/retrotxtgo/pkg/internal/nl"
 )
 
 func TestReadColumns(t *testing.T) {

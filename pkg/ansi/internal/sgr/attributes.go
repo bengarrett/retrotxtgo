@@ -7,9 +7,9 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/bengarrett/retrotxtgo/lib/ansi/internal/bg"
-	"github.com/bengarrett/retrotxtgo/lib/ansi/internal/fg"
-	"github.com/bengarrett/retrotxtgo/lib/ansi/internal/xterm"
+	"github.com/bengarrett/retrotxtgo/pkg/ansi/internal/bg"
+	"github.com/bengarrett/retrotxtgo/pkg/ansi/internal/fg"
+	"github.com/bengarrett/retrotxtgo/pkg/ansi/internal/xterm"
 )
 
 // Attributes are values for applying different CSS styles

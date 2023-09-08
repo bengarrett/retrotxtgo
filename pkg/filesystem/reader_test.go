@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/lib/filesystem"
+	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
 	"github.com/bengarrett/retrotxtgo/static"
 )
 
