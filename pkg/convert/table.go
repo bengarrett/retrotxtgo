@@ -25,9 +25,7 @@ const (
 	ascii67 = "ascii-67"
 )
 
-var (
-	ErrNoName = errors.New("there is no encoding name")
-)
+var ErrNoName = errors.New("there is no encoding name")
 
 func ISO11Name(name string) bool {
 	switch strings.ToUpper(name) {

@@ -7,9 +7,7 @@ import (
 	"strconv"
 )
 
-var (
-	ErrNotRGB = errors.New("int is not a valid red-green-blue value")
-)
+var ErrNotRGB = errors.New("int is not a valid red-green-blue value")
 
 // Colors is currently unused.
 func Colors(p Ps, next [][]byte) (value int, length int) {

@@ -26,7 +26,7 @@ func (e *Extensions) Reset() {
 	e.B = -1
 }
 
-func (e *Extensions) Scan(s int) (cont bool) {
+func (e *Extensions) Scan(s int) bool {
 	switch Ps(s) {
 	case Extension:
 		e.SetFG()

@@ -28,9 +28,7 @@ type Cell struct {
 	Alias   string
 }
 
-var (
-	ErrNilEncoding = errors.New("character encoding cannot be a nil value")
-)
+var ErrNilEncoding = errors.New("character encoding cannot be a nil value")
 
 const latin = "isolatin"
 
@@ -48,7 +46,7 @@ func Encodings() []encoding.Encoding {
 		case japanese.EUCJP,
 			japanese.ISO2022JP,
 			charmap.MacintoshCyrillic:
-			//charmap.XUserDefined: // XUserDefined creates a duplicate of Windows 874.
+			// charmap.XUserDefined: // XUserDefined creates a duplicate of Windows 874.
 			continue
 		}
 		e = append(e, m)

@@ -23,7 +23,7 @@ func Foreground(c fg.Colors) Color {
 		return Color(c - fg.IbmAIX + base)
 	}
 	return Color(c)
-	//return Color(fg.System + (c - fg.System))
+	// return Color(fg.System + (c - fg.System))
 }
 
 func Background(c bg.Colors) Color {
@@ -32,5 +32,5 @@ func Background(c bg.Colors) Color {
 		return Color(c - bg.IbmAIX + base)
 	}
 	return Color(c)
-	//return Color(bg.System + (c - bg.System))
+	// return Color(bg.System + (c - bg.System))
 }

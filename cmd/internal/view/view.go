@@ -12,9 +12,7 @@ import (
 	"golang.org/x/text/encoding"
 )
 
-var (
-	ErrConv = errors.New("convert cannot be nil")
-)
+var ErrConv = errors.New("convert cannot be nil")
 
 // Run parses the arguments supplied with the view command.
 func Run(cmd *cobra.Command, args ...string) (*bytes.Buffer, error) {
@@ -52,7 +50,8 @@ func Transform(
 	in encoding.Encoding,
 	out encoding.Encoding,
 	conv *convert.Convert,
-	b ...byte) ([]rune, error) {
+	b ...byte,
+) ([]rune, error) {
 	if conv == nil {
 		return nil, ErrConv
 	}

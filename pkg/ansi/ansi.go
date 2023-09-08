@@ -60,7 +60,7 @@ func HTMLReader(w io.Writer, r io.Reader) error {
 			row++
 			if len(scanner.Bytes()) == 0 {
 				// TODO: if string is empty but sgr changes, override instead of append?
-				//t.DataStream(nil)
+				// t.DataStream(nil)
 				t.Bytes = nil
 				continue
 			}

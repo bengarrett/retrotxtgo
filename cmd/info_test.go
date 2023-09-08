@@ -45,10 +45,12 @@ func Test_InfoFiles(t *testing.T) {
 
 func Test_InfoSamples(t *testing.T) {
 	samplers := []string{"037", "ansi.aix", "shiftjis", "utf8"}
-	wants := []string{"EBCDIC encoded text document",
+	wants := []string{
+		"EBCDIC encoded text document",
 		"Text document with ANSI controls",
 		"plain text document",
-		"UTF-8 compatible"}
+		"UTF-8 compatible",
+	}
 	t.Run("info multiple samples", func(t *testing.T) {
 		for i, sample := range samplers {
 			fmt.Println(i, sample)

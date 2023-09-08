@@ -19,7 +19,7 @@ var (
 	shiftjis = []string{"--encode", "shiftjis", "../static/text/shiftjis.txt"}
 	utf8bom  = []string{"../static/text/utf-8-bom.txt"}
 	utf16    = []string{"--encode", "utf16", "../static/text/utf-16.txt"}
-	//utf32    = []string{"--encode", "utf32", "../static/text/utf-32.txt"} // TODO: failing
+	// utf32    = []string{"--encode", "utf32", "../static/text/utf-32.txt"} // TODO: failing
 	// arguments to test the --controls flag
 	noCtrls = []string{"--controls", "", "../static/text/us-ascii.txt"}
 	eof     = []string{"--controls", "eof", "../static/text/us-ascii.txt"}
@@ -47,65 +47,121 @@ func Test_ViewCommand(t *testing.T) {
 		args       []string
 		checkRunes []rune
 	}{
-		{"default encoding", cp437,
-			[]rune{'≡', '₧', 'Ç'}},
-		{"cp037", cp037,
-			[]rune{'¶', '¦', '÷'}},
-		{"cp865", cp865,
-			[]rune{'█', '▓', '▒'}},
-		{"cp1252", cp1252,
-			[]rune{'‘', '’', '“', '”', '…', '™'}},
-		{"latin-1", latin1,
-			[]rune{'¤', '¾', '½'}},
-		{"latin-15", latin15,
-			[]rune{'€', 'Ÿ', 'œ'}},
-		{"japanese", shiftjis,
-			[]rune{'□', '■', 'つ', '∪'}},
+		{
+			"default encoding", cp437,
+			[]rune{'≡', '₧', 'Ç'},
+		},
+		{
+			"cp037", cp037,
+			[]rune{'¶', '¦', '÷'},
+		},
+		{
+			"cp865", cp865,
+			[]rune{'█', '▓', '▒'},
+		},
+		{
+			"cp1252", cp1252,
+			[]rune{'‘', '’', '“', '”', '…', '™'},
+		},
+		{
+			"latin-1", latin1,
+			[]rune{'¤', '¾', '½'},
+		},
+		{
+			"latin-15", latin15,
+			[]rune{'€', 'Ÿ', 'œ'},
+		},
+		{
+			"japanese", shiftjis,
+			[]rune{'□', '■', 'つ', '∪'},
+		},
 		{"utf-8", utf8bom, utfResults},
 		{"utf-16", utf16, utfResults},
 		//{"utf-32", utf32, utfResults}, // TODO: failing
-		{"no controls", noCtrls,
-			[]rune{'○', '•', '⌂', '←', '→'}},
-		{"hide rune end-of-file", eof,
-			[]rune{'→'}},
-		{"hide rune tab", tab,
-			[]rune{'○'}},
-		{"hide rune bell", bell,
-			[]rune{'•'}},
-		{"hide rune backspace", bs,
-			[]rune{'◘'}},
-		{"hide rune delete", del,
-			[]rune{'⌂'}},
-		{"hide rune escape", esc,
-			[]rune{'←'}},
-		{"hide rune form feed", ff,
-			[]rune{'♀'}},
-		{"hide rune vertical tab", vtab,
-			[]rune{'♂'}},
-		{"all cp-437", allCP437,
-			[]rune{'␀', '|', '⌂', '│', '√', ' '}},
-		{"hide rune c null", null,
-			[]rune{'␀'}},
-		{"hide rune bar", bar,
-			[]rune{'|'}},
-		{"swap bar", bar,
-			[]rune{'¦'}},
-		{"hide rune house", house,
-			[]rune{'⌂'}},
-		{"swap house", house,
-			[]rune{'Δ'}},
-		{"hide rune pipe", pipe,
-			[]rune{'│'}},
-		{"swap pipe", pipe,
-			[]rune{'⎮'}},
-		{"hide rune square root", root,
-			[]rune{'√'}},
-		{"swap square root", root,
-			[]rune{'✓'}},
-		{"hide rune space", space,
-			[]rune{' '}},
-		{"swap space", space,
-			[]rune{'␣'}},
+		{
+			"no controls", noCtrls,
+			[]rune{'○', '•', '⌂', '←', '→'},
+		},
+		{
+			"hide rune end-of-file", eof,
+			[]rune{'→'},
+		},
+		{
+			"hide rune tab", tab,
+			[]rune{'○'},
+		},
+		{
+			"hide rune bell", bell,
+			[]rune{'•'},
+		},
+		{
+			"hide rune backspace", bs,
+			[]rune{'◘'},
+		},
+		{
+			"hide rune delete", del,
+			[]rune{'⌂'},
+		},
+		{
+			"hide rune escape", esc,
+			[]rune{'←'},
+		},
+		{
+			"hide rune form feed", ff,
+			[]rune{'♀'},
+		},
+		{
+			"hide rune vertical tab", vtab,
+			[]rune{'♂'},
+		},
+		{
+			"all cp-437", allCP437,
+			[]rune{'␀', '|', '⌂', '│', '√', ' '},
+		},
+		{
+			"hide rune c null", null,
+			[]rune{'␀'},
+		},
+		{
+			"hide rune bar", bar,
+			[]rune{'|'},
+		},
+		{
+			"swap bar", bar,
+			[]rune{'¦'},
+		},
+		{
+			"hide rune house", house,
+			[]rune{'⌂'},
+		},
+		{
+			"swap house", house,
+			[]rune{'Δ'},
+		},
+		{
+			"hide rune pipe", pipe,
+			[]rune{'│'},
+		},
+		{
+			"swap pipe", pipe,
+			[]rune{'⎮'},
+		},
+		{
+			"hide rune square root", root,
+			[]rune{'√'},
+		},
+		{
+			"swap square root", root,
+			[]rune{'✓'},
+		},
+		{
+			"hide rune space", space,
+			[]rune{' '},
+		},
+		{
+			"swap space", space,
+			[]rune{'␣'},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

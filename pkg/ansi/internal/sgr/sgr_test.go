@@ -1,10 +1,11 @@
-package sgr
+package sgr_test
 
 import (
 	"fmt"
 	"reflect"
 	"testing"
 
+	"github.com/bengarrett/retrotxtgo/pkg/ansi/internal/sgr"
 	"github.com/bengarrett/retrotxtgo/pkg/ansi/internal/xterm"
 )
 
@@ -33,12 +34,12 @@ import (
 func TestPs_Valid(t *testing.T) {
 	tests := []struct {
 		name string
-		p    Ps
+		p    sgr.Ps
 		want bool
 	}{
 		{"empty", -1, false},
-		{"bold", Bold, true},
-		{"bright white", BrightWhite, true},
+		{"bold", sgr.Bold, true},
+		{"bright white", sgr.BrightWhite, true},
 		{"noexist middle", 60, false},
 		{"too big", 999, false},
 	}
@@ -68,7 +69,7 @@ func TestRGBDecimal(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := RGBDecimal(tt.args.r, tt.args.g, tt.args.b); fmt.Sprintf("%06x", got) != tt.want {
+			if got := sgr.RGBDecimal(tt.args.r, tt.args.g, tt.args.b); fmt.Sprintf("%06x", got) != tt.want {
 				t.Errorf("RGBDecimal() = %v, want %v", got, tt.want)
 			}
 		})
@@ -93,7 +94,7 @@ func TestDecimalRGB(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotR, gotG, gotB, err := DecimalRGB(tt.i)
+			gotR, gotG, gotB, err := sgr.DecimalRGB(tt.i)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("DecimalRGB() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -120,7 +121,7 @@ func TestXterm(t *testing.T) {
 	}{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := DataStream([]byte(tt.s))
+			got := sgr.DataStream([]byte(tt.s))
 			if !reflect.DeepEqual(got.Foreground, tt.wantFG) {
 				t.Errorf("DataStream() = \n%v, want \n%v", got, tt.wantFG)
 			}

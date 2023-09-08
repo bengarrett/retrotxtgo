@@ -75,7 +75,7 @@ func Table(names ...string) (string, error) {
 		names = append(names[:i+1], names[i:]...)
 		names[i] = "ascii-63"
 	}
-	var b = strings.Builder{}
+	b := strings.Builder{}
 	// iterate through the tables
 	for _, name := range names {
 		table, err := convert.Table(name)
@@ -93,7 +93,7 @@ func Table(names ...string) (string, error) {
 func Tables() (string, error) {
 	// use strings builder to reduce memory usage
 	// https://yourbasic.org/golang/build-append-concatenate-strings-efficiently/
-	var b = strings.Builder{}
+	b := strings.Builder{}
 	var tables []encoding.Encoding
 	encodings := convert.Encodings()
 	// reorder tables to position X-User-Defined after ISO-8859-10

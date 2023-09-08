@@ -223,6 +223,7 @@ func (t *Attributes) SetItalic(ps Ps) {
 		t.Italic = true
 	}
 }
+
 func (t *Attributes) SetUnderline(ps Ps) {
 	switch ps {
 	case Normal, NotUnderline:
