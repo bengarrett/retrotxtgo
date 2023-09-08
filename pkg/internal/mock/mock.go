@@ -8,8 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/bengarrett/retrotxtgo/lib/internal/save"
-	"github.com/bengarrett/retrotxtgo/lib/internal/tmp"
+	"github.com/bengarrett/retrotxtgo/pkg/internal/save"
+	"github.com/bengarrett/retrotxtgo/pkg/internal/tmp"
 )
 
 // MockInput uses the os pipe to mock the user input.

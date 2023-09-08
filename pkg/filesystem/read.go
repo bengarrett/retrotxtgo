@@ -8,10 +8,10 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/bengarrett/retrotxtgo/lib/filesystem/internal/util"
-	"github.com/bengarrett/retrotxtgo/lib/internal/nl"
-	"github.com/bengarrett/retrotxtgo/lib/internal/save"
-	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/pkg/filesystem/internal/util"
+	"github.com/bengarrett/retrotxtgo/pkg/internal/nl"
+	"github.com/bengarrett/retrotxtgo/pkg/internal/save"
+	"github.com/bengarrett/retrotxtgo/pkg/logs"
 )
 
 // IsPipe determines if Stdin (standard input) is piped from another command.

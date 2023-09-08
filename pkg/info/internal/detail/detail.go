@@ -21,9 +21,9 @@ import (
 	"unicode/utf8"
 
 	"github.com/bengarrett/bbs"
-	"github.com/bengarrett/retrotxtgo/lib/filesystem"
-	"github.com/bengarrett/retrotxtgo/lib/logs"
-	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
+	"github.com/bengarrett/retrotxtgo/pkg/logs"
+	"github.com/bengarrett/retrotxtgo/pkg/str"
 	"github.com/bengarrett/sauce"
 	"github.com/bengarrett/sauce/humanize"
 	gookit "github.com/gookit/color"

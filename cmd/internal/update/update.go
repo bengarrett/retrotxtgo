@@ -7,11 +7,11 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/bengarrett/retrotxtgo/lib/filesystem"
-	"github.com/bengarrett/retrotxtgo/lib/logs"
-	"github.com/bengarrett/retrotxtgo/lib/online"
-	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/meta"
+	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
+	"github.com/bengarrett/retrotxtgo/pkg/logs"
+	"github.com/bengarrett/retrotxtgo/pkg/online"
+	"github.com/bengarrett/retrotxtgo/pkg/str"
 	gap "github.com/muesli/go-app-paths"
 	"gopkg.in/yaml.v3"
 )

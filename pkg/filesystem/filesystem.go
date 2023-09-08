@@ -10,9 +10,9 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/bengarrett/retrotxtgo/lib/filesystem/internal/util"
-	"github.com/bengarrett/retrotxtgo/lib/internal/save"
-	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/pkg/filesystem/internal/util"
+	"github.com/bengarrett/retrotxtgo/pkg/internal/save"
+	"github.com/bengarrett/retrotxtgo/pkg/logs"
 )
 
 // ErrStdErr could not print to stderr.

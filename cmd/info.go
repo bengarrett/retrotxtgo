@@ -7,7 +7,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/format"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/info"
-	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/bengarrett/retrotxtgo/pkg/str"
 	"github.com/spf13/cobra"
 )
 

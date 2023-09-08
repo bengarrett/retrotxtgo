@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/update"
-	"github.com/bengarrett/retrotxtgo/lib/logs"
 	"github.com/bengarrett/retrotxtgo/meta"
+	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/gookit/color"
 	"github.com/mattn/go-isatty"
 	"golang.org/x/term"

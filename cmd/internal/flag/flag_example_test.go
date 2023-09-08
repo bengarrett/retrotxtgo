@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
-	"github.com/bengarrett/retrotxtgo/lib/convert"
+	"github.com/bengarrett/retrotxtgo/pkg/convert"
 )
 
 func ExampleEndOfFile() {

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/view"
-	"github.com/bengarrett/retrotxtgo/lib/convert"
+	"github.com/bengarrett/retrotxtgo/pkg/convert"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 )

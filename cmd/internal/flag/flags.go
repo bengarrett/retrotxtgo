@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/bengarrett/retrotxtgo/lib/create"
-	"github.com/bengarrett/retrotxtgo/lib/str"
 	"github.com/bengarrett/retrotxtgo/meta"
+	"github.com/bengarrett/retrotxtgo/pkg/create"
+	"github.com/bengarrett/retrotxtgo/pkg/str"
 	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 )

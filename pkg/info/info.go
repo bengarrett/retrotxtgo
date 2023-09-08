@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bengarrett/retrotxtgo/lib/filesystem"
-	"github.com/bengarrett/retrotxtgo/lib/info/internal/detail"
-	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
+	"github.com/bengarrett/retrotxtgo/pkg/info/internal/detail"
+	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/karrick/godirwalk"
 	"golang.org/x/sync/errgroup"
 )

@@ -9,7 +9,7 @@ import (
 	"text/tabwriter"
 	"unicode"
 
-	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/bengarrett/retrotxtgo/pkg/str"
 	"github.com/gookit/color"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"

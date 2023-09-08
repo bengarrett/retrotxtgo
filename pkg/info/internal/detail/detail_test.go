@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bengarrett/retrotxtgo/lib/filesystem"
-	"github.com/bengarrett/retrotxtgo/lib/info/internal/detail"
-	"github.com/bengarrett/retrotxtgo/lib/internal/mock"
+	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
+	"github.com/bengarrett/retrotxtgo/pkg/info/internal/detail"
+	"github.com/bengarrett/retrotxtgo/pkg/internal/mock"
 )
 
 func millennia(name string) {

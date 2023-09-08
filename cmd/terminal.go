@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/bengarrett/retrotxtgo/lib/str"
+	"github.com/bengarrett/retrotxtgo/pkg/str"
 	"github.com/gookit/color"
 )
 

@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/bengarrett/retrotxtgo/lib/logs"
+	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/sauce/humanize"
 	"golang.org/x/text/language"
 )

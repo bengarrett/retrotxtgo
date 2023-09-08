@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
-	"github.com/bengarrett/retrotxtgo/lib/create"
-	"github.com/bengarrett/retrotxtgo/lib/filesystem"
-	"github.com/bengarrett/retrotxtgo/lib/sample"
+	"github.com/bengarrett/retrotxtgo/pkg/create"
+	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
+	"github.com/bengarrett/retrotxtgo/pkg/sample"
 	"github.com/spf13/cobra"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"

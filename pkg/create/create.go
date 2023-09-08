@@ -3,7 +3,7 @@ package create
 
 import (
 	"github.com/bengarrett/bbs"
-	"github.com/bengarrett/retrotxtgo/lib/create/internal/assets"
+	"github.com/bengarrett/retrotxtgo/pkg/create/internal/assets"
 	"golang.org/x/text/encoding"
 )
 
