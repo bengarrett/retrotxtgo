@@ -111,7 +111,7 @@ func Filler(sizeMB float64) (length int, random string) {
 	s := make([]rune, int(f))
 	// generate random string
 	for i := range s {
-		s[i] = chars[rand.Intn(charsLen)] // nolint:gosec
+		s[i] = chars[rand.Intn(charsLen)] //nolint:gosec
 	}
 	return len(s), string(s)
 }

@@ -8,17 +8,28 @@ linters:
     - scopelint         # Deprecated
     - golint            # Deprecated
     - maligned          # Deprecated
+
+    - deadcode          # Deprecated
+    - ifshort           # Deprecated
+    - nosnakecase       # Deprecated
+    - varcheck          # Deprecated
+    - exhaustivestruct  # Deprecated
+    - structcheck       # Deprecated
+
+    - wrapcheck         # wrapping 3rd party errors are unnecessary (opinionated)
+    - varnamelen        # doesn't allow short vars (opinionated)
+    
     # unsupported in Go v1.18
-    - bodyclose
-    - contextcheck
-    - nilerr
-    - noctx
-    - rowserrcheck
-    - sqlclosecheck
-    - structcheck
-    - tparallel
-    - unparam
-    - wastedassign
+    # - bodyclose
+    # - contextcheck
+    # - nilerr
+    # - noctx
+    # - rowserrcheck
+    # - sqlclosecheck
+    # - structcheck
+    # - tparallel
+    # - unparam
+    # - wastedassign
 
     # - cyclop            # duplicates gocyclo
     # - exhaustivestruct  # 'It is not recommended to use it for all files in a project'
@@ -26,9 +37,9 @@ linters:
     # - nlreturn          # opinionated
     # - paralleltest      # causes tests to randomly fail
     # - testpackage       # removes the ability to test internal functions
-    - wrapcheck         # wrapping 3rd party errors are unnecessary
+    #- wrapcheck         # wrapping 3rd party errors are unnecessary
     # - wsl               # whitespace linter, slow, aggressive and opinionated
-    - varnamelen          # doesn't allow short vars
+    #- varnamelen          # doesn't allow short vars
 
 linters-settings:
   cyclop:

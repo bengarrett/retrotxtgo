@@ -5,20 +5,15 @@
 # goreleaser release --skip-publish --skip-validate --rm-dist
 
 project_name: retrotxt
+# make a variable description
 
 before:
   hooks:
     - go mod tidy
 builds:
-  - id: FreeBSD
-    goos: ['freebsd']
-    goarch: ['amd64']
   - id: Linux_Intel
     goos: ['linux']
     goarch: ['amd64']
-  - id: Linux arm
-    goos: ['linux']
-    goarch: ['arm', 'arm64']
   - id: macOS
     goos: ['darwin']
     goarch: ['amd64', 'arm64']
@@ -31,61 +26,35 @@ universal_binaries:
     replace: true
 
 archives:
-  - id: FreeBSD
-    builds: ['FreeBSD']
-    format: tar.gz
-    files:
-    - none*
-    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
-    replacements:
-      amd64: Intel
-      freebsd: FreeBSD
   - id: Linux_Intel
     builds: ['Linux_Intel']
     format: tar.gz
     files:
     - none*
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
-    replacements:
-      amd64: Intel
-      linux: Linux
   - id: Linux arm
     builds: ['Linux arm']
     format: tar.gz
     files:
     - none*
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
-    replacements:
-      arm: arm32_
-      arm64: arm64
-      linux: Linux
   - id: macOS
     builds: ['macOS']
     format: tar.gz
     files:
     - none*
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
-    replacements:
-      arm64: M-series
-      amd64: Intel
-      darwin: macOS
   - id: Windows
     builds: ['Windows']
     format: zip
     files:
     - none*
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
-    replacements:
-      amd64: Intel
-      windows: Windows
 
 nfpms:
   - id: Linux
     builds: ['Linux_Intel']
     file_name_template: "{{ .ProjectName }}"
-    replacements:
-      amd64: Intel
-      linux: Linux
     vendor: Ben Garrett.
     homepage: https://retrotxt.com/go
     maintainer: Ben Garrett <code.by.ben@gmail.com>
@@ -96,29 +65,21 @@ nfpms:
       - deb
       - rpm
 
-scoop:
-  bucket:
-    owner: bengarrett
-    name: retrotxtgo
-
-  commit_author:
-    name: goreleaserbot
-    email: goreleaser@carlosbecker.com
-
-  commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
-
-  homepage: https://retrotxt.com/go
-
-  description: RetroTxtGo is the tool that turns ANSI, ASCII, NFO text into in-browser HTML.
-
-  license: LGPL 3.0
-
+scoops:
+  - name: retrotxt
+  - commit_author:
+      name: goreleaserbot
+      email: bot@goreleaser.com
+  - commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
+  - homepage: https://retrotxt.com/go
+  - description: RetroTxtGo is the tool that turns ANSI, ASCII, NFO text into in-browser HTML.
+  - license: LGPL 3.0
   # Setting this will prevent goreleaser to actually try to commit the updated
   # manifest leaving the responsibility of publishing it to the user.
   # If set to auto, the release will not be uploaded to the scoop bucket
   # in case there is an indicator for prerelease in the tag e.g. v1.0.0-rc1
   # Default is false.
-  skip_upload: auto
+  - skip_upload: auto
 
 changelog:
   skip: false

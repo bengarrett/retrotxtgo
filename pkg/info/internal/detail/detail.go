@@ -4,7 +4,7 @@ import (
 	"archive/zip"
 	"bytes"
 
-	// nolint:gosec
+	//nolint:gosec
 	"crypto/md5"
 	"crypto/sha256"
 	"encoding/json"
@@ -248,7 +248,7 @@ func (d *Detail) Parse(name string, stat os.FileInfo, data ...byte) error {
 	}()
 	go func() {
 		defer wg.Done()
-		md5sum := md5.Sum(data) // nolint:gosec
+		md5sum := md5.Sum(data) //nolint:gosec
 		d.Sums.MD5 = fmt.Sprintf("%x", md5sum)
 	}()
 	go func() {

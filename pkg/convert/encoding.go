@@ -229,7 +229,7 @@ func Humanize(name string) string {
 }
 
 // shorten the name to a custom name, a common name or an alias.
-func shorten(name string) string { // nolint:gocognit,cyclop
+func shorten(name string) string { //nolint:gocognit,cyclop
 	n, l := strings.ToLower(name), len(name)
 	switch {
 	case l > 3 && n[:3] == "cp-":
