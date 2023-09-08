@@ -14,16 +14,16 @@ type Convert struct {
 	Flags      Flag   // Commandline supplied flag values.
 	Input      In     // Input text for transformation.
 	Output     []rune // Transformed UTF-8 runes.
-	ignores    []rune // runes to ignore.
-	lineBreaks bool   // use line break controls?
+	Ignores    []rune // runes to ignore.
+	LineBreaks bool   // use line break controls?
 }
 
 // In is the text input for conversion.
 type In struct {
 	Encoding  encoding.Encoding // Bytes text encoding.
 	Bytes     []byte            // Input text as bytes.
-	lineBreak [2]rune           // line break controls used by the text.
-	table     bool              // flag this text as a codepage table.
+	LineBreak [2]rune           // line break controls used by the text.
+	Table     bool              // flag this text as a codepage table.
 }
 
 // Flag are the user supplied values.

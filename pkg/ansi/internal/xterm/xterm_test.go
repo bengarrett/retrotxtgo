@@ -1,17 +1,18 @@
-package xterm
+package xterm_test
 
 import (
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/pkg/ansi/internal/bg"
 	"github.com/bengarrett/retrotxtgo/pkg/ansi/internal/fg"
+	"github.com/bengarrett/retrotxtgo/pkg/ansi/internal/xterm"
 )
 
 func TestForeground(t *testing.T) {
 	tests := []struct {
 		name string
 		c    fg.Colors
-		want Color
+		want xterm.Color
 	}{
 		{"black", fg.Black, 30},
 		{"white", fg.White, 37},
@@ -20,7 +21,7 @@ func TestForeground(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Foreground(tt.c); got != tt.want {
+			if got := xterm.Foreground(tt.c); got != tt.want {
 				t.Errorf("Foreground() = %v, want %v", got, tt.want)
 			}
 		})
@@ -31,7 +32,7 @@ func TestBackground(t *testing.T) {
 	tests := []struct {
 		name string
 		c    bg.Colors
-		want Color
+		want xterm.Color
 	}{
 		{"black", bg.Black, 40},
 		{"white", bg.White, 47},
@@ -40,7 +41,7 @@ func TestBackground(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Background(tt.c); got != tt.want {
+			if got := xterm.Background(tt.c); got != tt.want {
 				t.Errorf("Background() = %v, want %v", got, tt.want)
 			}
 		})

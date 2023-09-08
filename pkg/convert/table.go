@@ -52,7 +52,7 @@ func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 	if ISO11Name(name) {
 		h = "ISO 8859-11"
 	}
-	h += charmapAlias(cp) + charmapStandard(cp)
+	h += CharmapAlias(cp) + charmapStandard(cp)
 	var buf bytes.Buffer
 	const tabWidth = 8
 	w := new(tabwriter.Writer).Init(&buf, 0, tabWidth, 0, '\t', 0)
@@ -76,7 +76,7 @@ func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 	cp = revert(name)
 	const hex = 16
 	for i, r := range runes {
-		char := character(i, r, cp)
+		char := Character(i, r, cp)
 		switch {
 		case i == 0:
 			fmt.Fprintf(w, " %s %s %s %s",
@@ -120,7 +120,7 @@ func codepager(name string) (encoding.Encoding, error) {
 	case ascii67:
 		return x34_1967, nil
 	default:
-		cp, err := defaultCP(name)
+		cp, err := DefaultCP(name)
 		if err != nil {
 			return nil, err
 		}
@@ -128,7 +128,7 @@ func codepager(name string) (encoding.Encoding, error) {
 	}
 }
 
-func defaultCP(name string) (encoding.Encoding, error) {
+func DefaultCP(name string) (encoding.Encoding, error) {
 	cp, err := Encoder(name)
 	if err != nil {
 		return nil, fmt.Errorf("table encoding error: %w", err)
@@ -265,8 +265,8 @@ func chrISO11(pos int, cp encoding.Encoding) string {
 	return ""
 }
 
-// character converts rune to an encoded string.
-func character(pos int, r rune, cp encoding.Encoding) string {
+// Character converts rune to an encoded string.
+func Character(pos int, r rune, cp encoding.Encoding) string {
 	if s := chrX3493(pos, cp); s != "" {
 		return s
 	}
@@ -306,8 +306,8 @@ func character(pos int, r rune, cp encoding.Encoding) string {
 	return string(r)
 }
 
-// charmapAlias humanizes encodings.
-func charmapAlias(cp encoding.Encoding) string { //nolint:cyclop
+// CharmapAlias humanizes encodings.
+func CharmapAlias(cp encoding.Encoding) string { //nolint:cyclop
 	if c := charmapDOS(cp); c != "" {
 		return c
 	}

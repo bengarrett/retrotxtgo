@@ -1,14 +1,16 @@
-package convert
+package convert_test
 
 import (
 	"reflect"
 	"testing"
+
+	"github.com/bengarrett/retrotxtgo/pkg/convert"
 )
 
 const c, h = "═╣░╠═", "cdb9b0cccd"
 
 func TestHexDecode(t *testing.T) {
-	samp, err := E437(c)
+	samp, err := convert.E437(c)
 	if err != nil {
 		t.Errorf("HexDecode() E437() error = %v", err)
 	}
@@ -25,7 +27,7 @@ func TestHexDecode(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotResult, err := HexDecode(tt.args.hexadecimal)
+			gotResult, err := convert.HexDecode(tt.args.hexadecimal)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("HexDecode() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -38,7 +40,7 @@ func TestHexDecode(t *testing.T) {
 }
 
 func TestHexEncode(t *testing.T) {
-	samp, err := E437(c)
+	samp, err := convert.E437(c)
 	if err != nil {
 		t.Errorf("HexDecode() E437() error = %v", err)
 	}
@@ -54,7 +56,7 @@ func TestHexEncode(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotResult := HexEncode(tt.args.text); !reflect.DeepEqual(gotResult, tt.wantResult) {
+			if gotResult := convert.HexEncode(tt.args.text); !reflect.DeepEqual(gotResult, tt.wantResult) {
 				t.Errorf("HexEncode() = %v, want %v", gotResult, tt.wantResult)
 			}
 		})

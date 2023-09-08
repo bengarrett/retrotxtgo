@@ -1,5 +1,5 @@
 //nolint:gochecknoglobals,dupl
-package convert
+package convert_test
 
 import (
 	"fmt"
@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/bengarrett/retrotxtgo/pkg/convert"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/japanese"
@@ -15,9 +16,9 @@ import (
 	"golang.org/x/text/encoding/unicode/utf32"
 )
 
-func Example_swap() {
-	fmt.Print(string(swap(DEL)))
-	fmt.Print(string(swap(SquareRoot)))
+func ExampleSwap() {
+	fmt.Print(string(convert.Swap(convert.DEL)))
+	fmt.Print(string(convert.Swap(convert.SquareRoot)))
 	// Output: Δ✓
 }
 
@@ -73,7 +74,7 @@ func TestSet_Transform(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data := Convert{}
+			data := convert.Convert{}
 			data.Input.Bytes = tt.text
 			data.Input.Encoding = tt.codepage
 			err := data.Transform()
@@ -105,7 +106,7 @@ func TestANSI(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data := Convert{}
+			data := convert.Convert{}
 			data.Input.Bytes = []byte(tt.str)
 			data.Input.Encoding = tt.codepage
 			err := data.Transform()
@@ -179,11 +180,11 @@ func TestEncoder(t *testing.T) { //nolint:funlen
 		{"oem-1257", charmap.Windows1257, false},
 		{"oem-1258", charmap.Windows1258, false},
 		// custom
-		{iso11, charmap.Windows874, false},
+		{convert.Iso11, charmap.Windows874, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Encoder(tt.name)
+			got, err := convert.Encoder(tt.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Encoder() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -209,7 +210,7 @@ func TestRunesControls(t *testing.T) {
 		{"device controls", "\x10\x11", "␐␑", false},
 	}
 	for _, tt := range tests {
-		d := Convert{}
+		d := convert.Convert{}
 		d.Input.Bytes = []byte(tt.text)
 		d.Input.Encoding = cp1252
 		if err := d.Transform(); err != nil {
@@ -241,7 +242,7 @@ func TestRunesKOI8(t *testing.T) {
 		{"invalid", "\x00=NULL & \x1f=?", " =NULL &  =?", false},
 	}
 	for _, tt := range tests {
-		d := Convert{}
+		d := convert.Convert{}
 		d.Input.Bytes = []byte(tt.text)
 		d.Input.Encoding = koi
 		err := d.Transform()
@@ -270,7 +271,7 @@ func TestRunesLatin(t *testing.T) {
 		{"invalid", "\x00=NULL & \x9f=?", " =NULL &  =?", false},
 	}
 	for _, tt := range tests {
-		d := Convert{}
+		d := convert.Convert{}
 		d.Input.Bytes = []byte(tt.text)
 		d.Input.Encoding = iso1
 		err := d.Transform()
@@ -298,7 +299,7 @@ func TestRunesDOS(t *testing.T) {
 		{"dos pipes", "|!\x7c", "|!|", false},
 	}
 	for _, tt := range tests {
-		d := Convert{}
+		d := convert.Convert{}
 		d.Input.Bytes = []byte(tt.text)
 		d.Input.Encoding = cp437
 		err := d.Transform()
@@ -326,7 +327,7 @@ func TestRunesMacintosh(t *testing.T) {
 		{"controls", "\x11+\x12+Z", "⌘+⇧+Z", false},
 	}
 	for _, tt := range tests {
-		d := Convert{}
+		d := convert.Convert{}
 		d.Input.Bytes = []byte(tt.text)
 		d.Input.Encoding = mac
 		err := d.Transform()
@@ -356,7 +357,7 @@ func TestRunesWindows(t *testing.T) {
 		{"invalid", "\x90", " ", false},
 	}
 	for _, tt := range tests {
-		d := Convert{}
+		d := convert.Convert{}
 		d.Input.Bytes = []byte(tt.text)
 		d.Input.Encoding = cp1252
 		err := d.Transform()
@@ -399,7 +400,7 @@ func TestRunesEBCDIC(t *testing.T) {
 	}
 	for _, tt := range tests {
 		c := tt.text
-		d := Convert{}
+		d := convert.Convert{}
 		d.Input.Bytes = c
 		d.Input.Encoding = charmap.CodePage037
 		err := d.Transform()
@@ -416,7 +417,7 @@ func TestRunesEBCDIC(t *testing.T) {
 	}
 }
 
-func Test_equalLB(t *testing.T) {
+func Test_EqualLB(t *testing.T) {
 	o, n, lf, win := [2]rune{0, 0}, [2]rune{-1, -1}, [2]rune{10, 0}, [2]rune{13, 0}
 	type args struct {
 		r  [2]rune
@@ -436,14 +437,14 @@ func Test_equalLB(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := equalLB(tt.args.r, tt.args.nl); got != tt.want {
-				t.Errorf("equalLB() = %v, want %v", got, tt.want)
+			if got := convert.EqualLB(tt.args.r, tt.args.nl); got != tt.want {
+				t.Errorf("EqualLB() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_encodeUTF32(t *testing.T) {
+func Test_EncodeUTF32(t *testing.T) {
 	tests := []struct {
 		name string
 		a    string
@@ -454,8 +455,8 @@ func Test_encodeUTF32(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := encodeUTF32(tt.a); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("encodeUTF32() = %v, want %v", got, tt.want)
+			if got := convert.EncodeUTF32(tt.a); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("EncodeUTF32() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -476,14 +477,14 @@ func TestHumanize(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Humanize(tt.args.name); got != tt.want {
+			if got := convert.Humanize(tt.args.name); got != tt.want {
 				t.Errorf("Humanize() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_shorten(t *testing.T) {
+func Test_Shorten(t *testing.T) {
 	type args struct {
 		name string
 	}
@@ -498,7 +499,7 @@ func Test_shorten(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := shorten(tt.args.name); got != tt.want {
+			if got := convert.Shorten(tt.args.name); got != tt.want {
 				t.Errorf("shorten() = %v, want %v", got, tt.want)
 			}
 		})
@@ -523,13 +524,13 @@ func TestConvert_swaps(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := Convert{
+			c := convert.Convert{
 				Output: tt.output,
 			}
 			c.Flags.SwapChars = tt.swaps
-			c.swaps()
+			c.Swaps()
 			if got := c.Output; !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Convert.swaps() = %v, want %v", string(got), string(tt.want))
+				t.Errorf("Convert.Swaps() = %v, want %v", string(got), string(tt.want))
 			}
 		})
 	}
@@ -547,13 +548,13 @@ func Test_picture(t *testing.T) {
 	}{
 		{"empty", args{}, err},
 		{"Q", args{byte(51)}, err},
-		{"NULL", args{byte(0 + row8)}, 9216},
-		{"SOH", args{byte(1 + row8)}, 9217},
+		{"NULL", args{byte(0 + convert.Row8)}, 9216},
+		{"SOH", args{byte(1 + convert.Row8)}, 9217},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := picture(tt.args.b); got != tt.want {
-				t.Errorf("picture() = %v, want %v", got, tt.want)
+			if got := convert.Picture(tt.args.b); got != tt.want {
+				t.Errorf("convert.Picture() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -578,18 +579,18 @@ func TestConvert_skipIgnores(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := Convert{
+			c := convert.Convert{
 				Output:  tt.args.output,
-				ignores: tt.args.ignore,
+				Ignores: tt.args.ignore,
 			}
-			if got := c.skipIgnores(tt.args.i); got != tt.want {
-				t.Errorf("Convert.skipIgnores() = %v, want %v", got, tt.want)
+			if got := c.SkipIgnores(tt.args.i); got != tt.want {
+				t.Errorf("Convert.SkipIgnores() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_encodeAlias(t *testing.T) {
+func Test_EncodeAlias(t *testing.T) {
 	tests := []struct {
 		name string
 		want string
@@ -603,8 +604,8 @@ func Test_encodeAlias(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := encodeAlias(tt.name); got != tt.want {
-				t.Errorf("encodeAlias() = %v, want %v", got, tt.want)
+			if got := convert.EncodeAlias(tt.name); got != tt.want {
+				t.Errorf("EncodeAlias() = %v, want %v", got, tt.want)
 			}
 		})
 	}

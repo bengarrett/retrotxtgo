@@ -24,10 +24,10 @@ import (
 // It displays ASCII control codes as characters.
 // It obeys the DOS end of file marker.
 func (c *Convert) ANSI(b ...byte) ([]rune, error) {
-	c.lineBreaks = true
+	c.LineBreaks = true
 	c.Flags.SwapChars = nil
 	c.Input.Bytes = TrimEOF(b)
-	if err := c.skipCtrlCodes().Transform(); err != nil {
+	if err := c.SkipCtrlCodes().Transform(); err != nil {
 		return nil, fmt.Errorf("dump transform failed: %w", err)
 	}
 	c.Swap().ANSIControls().wrapWidth(c.Flags.MaxWidth)
@@ -38,7 +38,7 @@ func (c *Convert) ANSI(b ...byte) ([]rune, error) {
 // It displays both ASCII and ANSI control codes as characters.
 // It ignores the DOS end of file marker.
 func (c *Convert) Chars(b ...byte) ([]rune, error) {
-	c.Input.table = true
+	c.Input.Table = true
 	c.Input.Bytes = b
 	if err := c.Transform(); err != nil {
 		return nil, fmt.Errorf("chars transform failed: %w", err)
@@ -51,9 +51,9 @@ func (c *Convert) Chars(b ...byte) ([]rune, error) {
 // It obeys common ASCII control codes.
 // It ignores the DOS end of file marker.
 func (c *Convert) Dump(b ...byte) ([]rune, error) {
-	c.lineBreaks = true
+	c.LineBreaks = true
 	c.Input.Bytes = b
-	if err := c.skipCtrlCodes().Transform(); err != nil {
+	if err := c.SkipCtrlCodes().Transform(); err != nil {
 		return nil, fmt.Errorf("dump transform failed: %w", err)
 	}
 	c.Swap().ANSIControls().wrapWidth(c.Flags.MaxWidth)
@@ -64,9 +64,9 @@ func (c *Convert) Dump(b ...byte) ([]rune, error) {
 // It obeys common ASCII control codes.
 // It obeys the DOS end of file marker.
 func (c *Convert) Text(b ...byte) ([]rune, error) {
-	c.lineBreaks = true
+	c.LineBreaks = true
 	c.Input.Bytes = TrimEOF(b)
-	if err := c.skipCtrlCodes().Transform(); err != nil {
+	if err := c.SkipCtrlCodes().Transform(); err != nil {
 		return nil, fmt.Errorf("text transform failed: %w", err)
 	}
 	c.Swap().ANSIControls().wrapWidth(c.Flags.MaxWidth)
@@ -94,7 +94,7 @@ func (c *Convert) Transform() error {
 		return nil
 	}
 	// transform the input bytes into UTF-8 runes
-	c.fixJISTable()
+	c.FixJISTable()
 	b := bytes.Buffer{}
 	t := transform.NewWriter(&b, c.Input.Encoding.NewDecoder())
 	if _, err := t.Write(c.Input.Bytes); err != nil {
@@ -105,9 +105,9 @@ func (c *Convert) Transform() error {
 	return nil
 }
 
-// fixJISTable blanks invalid ShiftJIS characters while printing 8-bit tables.
-func (c *Convert) fixJISTable() {
-	if c.Input.Encoding == japanese.ShiftJIS && c.Input.table {
+// FixJISTable blanks invalid ShiftJIS characters while printing 8-bit tables.
+func (c *Convert) FixJISTable() {
+	if c.Input.Encoding == japanese.ShiftJIS && c.Input.Table {
 		// this is only for the table command,
 		// it will break normal shift-jis encode text
 		for i, b := range c.Input.Bytes {
@@ -183,9 +183,9 @@ func (c *Convert) wrapWidth(max int) {
 		log.Fatal(ErrChainWrap)
 	}
 	r := strings.NewReader(string(c.Output))
-	cols, err := filesystem.Columns(r, c.Input.lineBreak)
+	cols, err := filesystem.Columns(r, c.Input.LineBreak)
 	if err != nil {
-		logs.FatalMark(fmt.Sprint(c.Input.lineBreak), ErrWidth, err)
+		logs.FatalMark(fmt.Sprint(c.Input.LineBreak), ErrWidth, err)
 	}
 	if cols <= max {
 		return
@@ -209,9 +209,9 @@ func (c *Convert) wrapWidth(max int) {
 	c.Output = []rune(w.String())
 }
 
-// skipCtrlCodes marks control characters to be ignored.
+// SkipCtrlCodes marks control characters to be ignored.
 // It needs to be applied before Convert.transform().
-func (c *Convert) skipCtrlCodes() *Convert {
+func (c *Convert) SkipCtrlCodes() *Convert {
 	unknown := []string{}
 	for _, v := range c.Flags.Controls {
 		switch strings.ToLower(v) {
@@ -247,5 +247,5 @@ func (c *Convert) skipCtrlCodes() *Convert {
 
 // ignore adds the rune to an ignore runes list.
 func (c *Convert) ignore(r rune) {
-	c.ignores = append(c.ignores, r)
+	c.Ignores = append(c.Ignores, r)
 }

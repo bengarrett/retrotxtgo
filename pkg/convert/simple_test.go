@@ -1,4 +1,4 @@
-package convert
+package convert_test
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/bengarrett/retrotxtgo/pkg/convert"
 	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
 	"github.com/bengarrett/retrotxtgo/pkg/internal/mock"
 	"golang.org/x/text/encoding/charmap"
@@ -19,7 +20,7 @@ const (
 
 func ExampleD437() {
 	const name = base + "cp437In.txt"
-	result, err := D437(cp437hex)
+	result, err := convert.D437(cp437hex)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -51,7 +52,7 @@ func TestCP437Decode(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotResult, err := D437(tt.s)
+			gotResult, err := convert.D437(tt.s)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("D437() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -65,7 +66,7 @@ func TestCP437Decode(t *testing.T) {
 
 func ExampleE437() {
 	const name = base + "cp437.txt"
-	result, err := E437(utf)
+	result, err := convert.E437(utf)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -102,7 +103,7 @@ func TestDString(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotResult, err := DString(tt.args.s, &tt.args.cp)
+			gotResult, err := convert.DString(tt.args.s, &tt.args.cp)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("DString() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -140,7 +141,7 @@ func TestEString(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotResult, err := EString(tt.args.s, &tt.args.cp)
+			gotResult, err := convert.EString(tt.args.s, &tt.args.cp)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("EString() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -166,7 +167,7 @@ func TestD437(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotResult, err := D437(tt.s)
+			gotResult, err := convert.D437(tt.s)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("D437() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -192,7 +193,7 @@ func TestE437(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotResult, err := E437(tt.s)
+			gotResult, err := convert.E437(tt.s)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("E437() error = %v, wantErr %v", err, tt.wantErr)
 				return

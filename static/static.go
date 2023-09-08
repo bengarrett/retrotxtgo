@@ -1,4 +1,3 @@
-//nolint:golint,gochecknoglobals
 package static
 
 import (

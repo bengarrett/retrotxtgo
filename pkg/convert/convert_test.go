@@ -1,15 +1,17 @@
 // Package convert is extends Go's x/text/encoding capability
 // to convert legacy encoded text to a modern UTF-8 encoding.
-package convert
+package convert_test
 
 import (
 	"fmt"
 	"reflect"
 	"testing"
+
+	"github.com/bengarrett/retrotxtgo/pkg/convert"
 )
 
 func ExampleBOM() {
-	fmt.Printf("%X", BOM())
+	fmt.Printf("%X", convert.BOM())
 	// Output: EFBBBF
 }
 
@@ -26,7 +28,7 @@ func TestTrimEOF(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := TrimEOF(tt.b); !reflect.DeepEqual(got, tt.want) {
+			if got := convert.TrimEOF(tt.b); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("TrimEOF() = %v, want %v", got, tt.want)
 			}
 		})
@@ -34,7 +36,7 @@ func TestTrimEOF(t *testing.T) {
 }
 
 func TestMakeBytes(t *testing.T) {
-	if l := len(MakeBytes()); l != 256 {
+	if l := len(convert.MakeBytes()); l != 256 {
 		t.Errorf("MakeBytes() = %v, want %v", l, 256)
 	}
 }
@@ -50,11 +52,11 @@ func TestMark(t *testing.T) {
 	}{
 		{"empty string", args{}, []byte{239, 187, 191}},
 		{"ascii string", args{[]byte("hi")}, []byte{239, 187, 191, 104, 105}},
-		{"existing bom string", args{BOM()}, []byte{239, 187, 191}},
+		{"existing bom string", args{convert.BOM()}, []byte{239, 187, 191}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Mark(tt.args.b); !reflect.DeepEqual(got, tt.want) {
+			if got := convert.Mark(tt.args.b); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Mark() = %v, want %v", got, tt.want)
 			}
 		})

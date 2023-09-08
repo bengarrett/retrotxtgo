@@ -1,9 +1,10 @@
-package convert
+package convert_test
 
 import (
 	"reflect"
 	"testing"
 
+	"github.com/bengarrett/retrotxtgo/pkg/convert"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/japanese"
@@ -23,7 +24,7 @@ func TestTable(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Table(tt.name)
+			got, err := convert.Table(tt.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Table() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -35,7 +36,7 @@ func TestTable(t *testing.T) {
 	}
 }
 
-func Test_defaultCP(t *testing.T) {
+func Test_DefaultCP(t *testing.T) {
 	type args struct {
 		name string
 	}
@@ -51,13 +52,13 @@ func Test_defaultCP(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := defaultCP(tt.args.name)
+			got, err := convert.DefaultCP(tt.args.name)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("defaultCP() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("DefaultCP() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("defaultCP() = %v, want %v", got, tt.want)
+				t.Errorf("DefaultCP() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -84,14 +85,14 @@ func Test_character(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := character(tt.args.pos, tt.args.r, tt.args.cp); got != tt.want {
-				t.Errorf("character() = %q, want %q", got, tt.want)
+			if got := convert.Character(tt.args.pos, tt.args.r, tt.args.cp); got != tt.want {
+				t.Errorf("Character() = %q, want %q", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_charmapAlias(t *testing.T) {
+func Test_CharmapAlias(t *testing.T) {
 	type args struct {
 		cp encoding.Encoding
 	}
@@ -106,8 +107,8 @@ func Test_charmapAlias(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := charmapAlias(tt.args.cp); got != tt.want {
-				t.Errorf("charmapAlias() = %v, want %v", got, tt.want)
+			if got := convert.CharmapAlias(tt.args.cp); got != tt.want {
+				t.Errorf("CharmapAlias() = %v, want %v", got, tt.want)
 			}
 		})
 	}
