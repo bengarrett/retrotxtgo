@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/bengarrett/retrotxtgo/cmd/internal/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
+	"github.com/bengarrett/retrotxtgo/cmd/pkg/example"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/spf13/cobra"
 )

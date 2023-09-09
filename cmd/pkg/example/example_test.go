@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/cmd/internal/example"
+	"github.com/bengarrett/retrotxtgo/cmd/pkg/example"
 	"github.com/gookit/color"
 )
 

@@ -3,9 +3,9 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/bengarrett/retrotxtgo/cmd/internal/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/list"
+	"github.com/bengarrett/retrotxtgo/cmd/pkg/example"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/bengarrett/retrotxtgo/pkg/convert"
 	"github.com/bengarrett/retrotxtgo/pkg/str"

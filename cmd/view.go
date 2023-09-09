@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/bengarrett/retrotxtgo/cmd/internal/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/view"
+	"github.com/bengarrett/retrotxtgo/cmd/pkg/example"
 	"github.com/spf13/cobra"
 )
 

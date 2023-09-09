@@ -1,3 +1,4 @@
+// Package example provides help usage examples for the cmd package.
 package example
 
 import (
@@ -14,17 +15,19 @@ import (
 	"github.com/gookit/color"
 )
 
+// Filenames is the placeholder for the filenames in the help usage examples.
 const Filenames = "[filenames]"
 
+// Example is the type for the help usage examples.
 type Example int
 
 const (
-	Cmd Example = iota
-	List
-	ListExamples
-	ListTable
-	Info
-	View
+	Cmd          Example = iota // Cmd is the example for the root command.
+	List                        // List is the example for the list command.
+	ListExamples                // ListExamples are the examples for the list examples command.
+	ListTable                   // ListTable are the examples for the list tables command.
+	Info                        // Info is the example for the info command.
+	View                        // View is the example for the view command.
 )
 
 // Print returns help usage examples.
