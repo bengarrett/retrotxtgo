@@ -240,7 +240,7 @@ func (c *Convert) SkipCtrlCodes() *Convert {
 		}
 	}
 	if len(unknown) > 0 {
-		fmt.Fprintln(os.Stderr, term.Info(), "unsupported --control values:", strings.Join(unknown, ","))
+		fmt.Fprintln(os.Stderr, term.Inform(), "unsupported --control values:", strings.Join(unknown, ","))
 	}
 	return c
 }

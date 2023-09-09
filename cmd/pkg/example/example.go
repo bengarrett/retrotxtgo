@@ -47,12 +47,12 @@ func (e Example) String() string {
 		ss := strings.Split(scanner.Text(), cmmt)
 		l := len(ss)
 		if l < sentence {
-			s += term.ColInf(scanner.Text()) + "\n  "
+			s += term.Info(scanner.Text()) + "\n  "
 			continue
 		}
 		// do not the last hash as a comment
 		ex := strings.Join(ss[:l-1], cmmt)
-		s += term.ColInf(ex)
+		s += term.Info(ex)
 		s += fmt.Sprintf("%s%s\n  ", color.Secondary.Sprint(cmmt), ss[l-1])
 	}
 	return strings.TrimSpace(s)

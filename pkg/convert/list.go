@@ -105,30 +105,30 @@ func List() *bytes.Buffer { //nolint:funlen
 		fmt.Fprintf(w, " %s\t %s\t %s\t %s\t\n",
 			c.Name, c.Value, c.Numeric, c.Alias)
 	}
-	fmt.Fprintln(w, "\n "+term.ColInf("*")+
+	fmt.Fprintln(w, "\n "+term.Info("*")+
 		" A EBCDIC encoding in use on IBM mainframes but is not ASCII compatible.")
-	fmt.Fprintln(w, " "+term.ColInf("†")+
+	fmt.Fprintln(w, " "+term.Info("†")+
 		" UTF-16/32 encodings are NOT usable with the "+term.Example("list table")+" command.")
-	fmt.Fprintln(w, " "+term.ColInf("⁑")+
+	fmt.Fprintln(w, " "+term.Info("⁑")+
 		" ANSI X3.4 encodings are only usable with the "+term.Example("list table")+" command."+
 		"\n   You can use the "+term.Example("list table ascii")+" command to list all three X3.4 tables.")
 	fmt.Fprintln(w, "\nEither named, numeric or alias values are valid codepage arguments.")
 	fmt.Fprintln(w, "  These values all match ISO 8859-1.")
 	cmds := fmt.Sprintf("%s list table ", meta.Bin)
 	fmt.Fprintf(w, "  %s%s  %s\n",
-		term.Example(cmds), term.ColCmt("iso-8859-1"), term.ColFuz("# named"))
+		term.Example(cmds), term.Comment("iso-8859-1"), term.Fuzzy("# named"))
 	fmt.Fprintf(w, "  %s%s           %s\n",
-		term.Example(cmds), term.ColCmt("1"), term.ColFuz("# numeric"))
+		term.Example(cmds), term.Comment("1"), term.Fuzzy("# numeric"))
 	fmt.Fprintf(w, "  %s%s      %s\n",
-		term.Example(cmds), term.ColCmt("latin1"), term.ColFuz("# alias"))
+		term.Example(cmds), term.Comment("latin1"), term.Fuzzy("# alias"))
 	fmt.Fprintf(w, "\n  IBM Code Page 437 (%s) is commonly used on MS-DOS and ANSI art.\n",
-		term.ColCmt("cp437"))
+		term.Comment("cp437"))
 	fmt.Fprintf(w, "  ISO 8859-1 (%s) is found on legacy Unix, Amiga and the early Internet.\n",
-		term.ColCmt("latin1"))
+		term.Comment("latin1"))
 	fmt.Fprintf(w, "  Windows 1252 (%s) is found on legacy Windows 9x and earlier systems.\n",
-		term.ColCmt("cp1252"))
+		term.Comment("cp1252"))
 	fmt.Fprintf(w, "  Macintosh (%s) is found on Mac OS 9 and earlier systems.\n",
-		term.ColCmt("macintosh"))
+		term.Comment("macintosh"))
 	fmt.Fprintf(w, "\n%s, PCs and the web today use Unicode UTF-8. As a subset of ISO 8895-1,\n", meta.Name)
 	fmt.Fprintln(w, "UTF-8 is backwards compatible with it and US-ASCII.")
 	if err := w.Flush(); err != nil {

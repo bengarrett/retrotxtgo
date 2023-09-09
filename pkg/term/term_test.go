@@ -6,7 +6,57 @@ import (
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/pkg/term"
+	"github.com/gookit/color"
 )
+
+func ExampleAlert() {
+	color.Enable = false
+	fmt.Fprint(os.Stdout, term.Alert())
+	// Output:Problem:
+}
+
+func ExampleInform() {
+	color.Enable = false
+	fmt.Fprint(os.Stdout, term.Inform())
+	// Output:Information:
+}
+
+func ExampleSecondary() {
+	color.Enable = false
+	fmt.Fprint(os.Stdout, term.Secondary("Hi"))
+	// Output:Hi
+}
+
+func ExampleComment() {
+	color.Enable = false
+	fmt.Fprint(os.Stdout, term.Comment("Hi"))
+	// Output:Hi
+}
+
+func ExampleFuzzy() {
+	color.Enable = false
+	fmt.Fprint(os.Stdout, term.Fuzzy("Hi"))
+	// Output:Hi
+}
+
+func ExampleInfo() {
+	color.Enable = false
+	fmt.Fprint(os.Stdout, term.Info("Hi"))
+	// Output:Hi
+}
+
+func ExampleBool() {
+	fmt.Fprint(os.Stdout, term.Bool(true))
+	fmt.Fprint(os.Stdout, term.Bool(false))
+	// Output:✓✗
+}
+
+func ExampleOptions() {
+	fmt.Fprint(os.Stdout, term.Options("this is an example of a list of options",
+		false, false, "option3", "option2", "option1"))
+	// Output:this is an example of a list of options.
+	//   Options: option1, option2, option3
+}
 
 func ExampleBorder() {
 	fmt.Fprintf(os.Stdout, "%s", term.Border("hi"))

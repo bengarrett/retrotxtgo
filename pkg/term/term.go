@@ -100,13 +100,16 @@ func Head(width int, s string) string {
 	if width == 0 {
 		r = strings.Repeat(HBar, len(s)+padding)
 		p = strings.Repeat(" ", padding/div)
-	} else {
-		r = strings.Repeat(HBar, width)
-		p = strings.Repeat(" ", (width-len(s))/div)
+		return fmt.Sprintf("\n%s%s%s\n%s", p, h, p, r)
 	}
+	r = strings.Repeat(HBar, width)
+	p = strings.Repeat(" ", (width-len(s))/div)
 	return fmt.Sprintf("\n%s%s%s\n%s", p, h, p, r)
 }
 
+// HeadDark returns a colored and underlined string for use as a header.
+// Provide a fixed width value for the underline border or set to zero.
+// The header is colored with the fuzzy color.
 func HeadDark(width int, s string) string {
 	r := color.OpFuzzy.Sprint(strings.Repeat(HBar, width))
 	h := color.Primary.Sprint(Center(width, s))
@@ -115,11 +118,12 @@ func HeadDark(width int, s string) string {
 
 // HR returns a horizontal ruler or line break.
 func HR(width int) string {
-	return fmt.Sprintf(" %s", ColSec(strings.Repeat(HBar, width)))
+	return fmt.Sprintf(" %s", Secondary(strings.Repeat(HBar, width)))
 }
 
-func HRPad(width int) string {
-	return fmt.Sprintf(" \n%s\n", ColSec(strings.Repeat(HBar, width)))
+// HRLen returns a horizontal ruler or line break with the given column width.
+func HRLen(width int) string {
+	return fmt.Sprintf(" \n%s\n", Secondary(strings.Repeat(HBar, width)))
 }
 
 // Term determines the terminal type based on the COLORTERM and TERM environment variables.
@@ -213,4 +217,66 @@ func UnderlineKeys(keys ...string) string {
 		keys[i] = c
 	}
 	return strings.Join(keys, ", ")
+}
+
+// Alert prints "Problem" using the Error color.
+func Alert() string {
+	return fmt.Sprintf("%s\n", color.Error.Sprint("Problem:"))
+}
+
+// Example prints the string using the Debug color.
+func Example(s string) string {
+	return color.Debug.Sprint(s)
+}
+
+// Inform prints "Information" using the Info color.
+func Inform() string {
+	return fmt.Sprintf("%s\n", color.Info.Sprint("Information:"))
+}
+
+// Bool returns a checkmark ✓ when true or a cross ✗ when false.
+func Bool(b bool) string {
+	const check, cross = "✓", "✗"
+	if b {
+		return color.Success.Sprint(check)
+	}
+	return color.Warn.Sprint(cross)
+}
+
+// Options appends options: ... to the usage string.
+func Options(s string, shorthand, flagHelp bool, opts ...string) string {
+	var keys string
+	if len(opts) == 0 {
+		return s
+	}
+	sort.Strings(opts)
+	if shorthand {
+		keys = UnderlineKeys(opts...)
+	} else {
+		keys = strings.Join(opts, ", ")
+	}
+	if flagHelp {
+		return fmt.Sprintf("%s\nflag options: %s", s, color.Info.Sprint(keys))
+	}
+	return fmt.Sprintf("%s.\n  Options: %s", s, color.Info.Sprint(keys))
+}
+
+// Comment returns a string in the comment color.
+func Comment(s string) string {
+	return color.Comment.Sprint(s)
+}
+
+// Fuzzy returns a string in the fuzzy color.
+func Fuzzy(s string) string {
+	return color.OpFuzzy.Sprint(s)
+}
+
+// Info returns a string in the info color.
+func Info(s string) string {
+	return color.Info.Sprint(s)
+}
+
+// Secondary returns a string in the secondary color.
+func Secondary(s string) string {
+	return color.Secondary.Sprint(s)
 }

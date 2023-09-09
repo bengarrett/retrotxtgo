@@ -94,7 +94,7 @@ func SprintMark(mark string, err, wrap error) string {
 		return ""
 	}
 	return fmt.Sprintf("%s %s %q: %s",
-		term.Alert(), term.ColFuz(fmt.Sprintf("%v", err)), mark, term.ColFuz(fmt.Sprintf("%v", wrap)))
+		term.Alert(), term.Fuzzy(fmt.Sprintf("%v", err)), mark, term.Fuzzy(fmt.Sprintf("%v", wrap)))
 }
 
 // SprintWrap returns the formatted errors.
