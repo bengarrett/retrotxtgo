@@ -3,7 +3,6 @@ package detail
 import (
 	"archive/zip"
 	"bytes"
-
 	//nolint:gosec
 	"crypto/md5"
 	"crypto/sha256"

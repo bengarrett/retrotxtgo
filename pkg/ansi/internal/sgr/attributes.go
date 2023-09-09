@@ -94,20 +94,20 @@ func (a Attributes) String() string {
 	return strings.Join(cls, " ")
 }
 
-func (t *Attributes) DataStream(b []byte) {
+func (a *Attributes) DataStream(b []byte) {
 	if string(b) == "" {
 		return
 	}
 	i := bytes.IndexByte(b, 'm')
 	if i == -1 {
-		t.Bytes = b
+		a.Bytes = b
 		return
 	}
 
 	v := b[0:i]
 	bs := bytes.Split(v, []byte(";"))
 	if len(bs) == 0 {
-		t.Bytes = b
+		a.Bytes = b
 		return
 	}
 
@@ -117,200 +117,200 @@ func (t *Attributes) DataStream(b []byte) {
 		rs := bytes.Runes(ps)
 		for _, r := range rs {
 			if !unicode.IsDigit(r) {
-				t.Bytes = b
+				a.Bytes = b
 				return
 			}
 		}
 		s, err := strconv.Atoi(string(ps))
 		if err != nil {
-			t.Bytes = b
+			a.Bytes = b
 			return
 		}
 		if !Ps(s).Valid() {
-			t.Bytes = b
+			a.Bytes = b
 			return
 		}
 		if cont := ext.Scan(s); cont {
 			// TODO: background and foreground
 			if ext.Color > -1 {
 				// todo bg/fg
-				t.Background = xterm.Color(ext.Color)
+				a.Background = xterm.Color(ext.Color)
 			}
 			continue
 		}
-		t.Set(Ps(s))
+		a.Set(Ps(s))
 	}
 	if string(b[i+1:]) != "" {
-		t.Bytes = b[i+1:]
+		a.Bytes = b[i+1:]
 	}
 }
 
-func (t *Attributes) Set(ps Ps) {
-	t.SetForeground(ps)
-	t.SetBackground(ps)
-	t.SetFont(ps)
-	t.SetBold(ps)
-	t.SetFaint(ps)
-	t.SetItalic(ps)
-	t.SetUnderline(ps)
-	t.SetBlink(ps)
-	t.SetBlinkFast(ps)
-	t.SetInverse(ps)
-	t.SetConceal(ps)
-	t.SetStrike(ps)
-	t.SetUnderline2x(ps)
-	t.SetFramed(ps)
-	t.SetEncircled(ps)
-	t.SetOverlined(ps)
+func (a *Attributes) Set(ps Ps) {
+	a.SetForeground(ps)
+	a.SetBackground(ps)
+	a.SetFont(ps)
+	a.SetBold(ps)
+	a.SetFaint(ps)
+	a.SetItalic(ps)
+	a.SetUnderline(ps)
+	a.SetBlink(ps)
+	a.SetBlinkFast(ps)
+	a.SetInverse(ps)
+	a.SetConceal(ps)
+	a.SetStrike(ps)
+	a.SetUnderline2x(ps)
+	a.SetFramed(ps)
+	a.SetEncircled(ps)
+	a.SetOverlined(ps)
 }
 
-func (t *Attributes) SetForeground(ps Ps) {
+func (a *Attributes) SetForeground(ps Ps) {
 	switch {
 	case ps == Normal:
-		t.Foreground = xterm.Foreground(fg.White)
+		a.Foreground = xterm.Foreground(fg.White)
 	case
 		ps >= Black && ps <= White,
 		ps >= BoldBlack && ps <= BoldWhite:
-		t.Foreground = xterm.Foreground(fg.Colors(ps))
+		a.Foreground = xterm.Foreground(fg.Colors(ps))
 	}
 }
 
-func (t *Attributes) SetBackground(ps Ps) {
+func (a *Attributes) SetBackground(ps Ps) {
 	switch {
 	case ps == Normal:
-		t.Background = xterm.Background(bg.Black)
+		a.Background = xterm.Background(bg.Black)
 	case
 		ps >= BlackB && ps <= WhiteB,
 		ps >= BrightBlack && ps <= BrightWhite:
-		t.Background = xterm.Background(bg.Colors(ps))
+		a.Background = xterm.Background(bg.Colors(ps))
 	}
 }
 
-func (t *Attributes) SetFont(ps Ps) {
+func (a *Attributes) SetFont(ps Ps) {
 	switch ps {
 	case Normal, NotItalicFraktur:
-		t.Font = Primary
+		a.Font = Primary
 	case
 		Font0, Font1, Font2, Font3, Font4, Font5,
 		Font6, Font7, Font8, Font9, Fraktur:
-		t.Font = Fonts(ps)
+		a.Font = Fonts(ps)
 	}
 }
 
-func (t *Attributes) SetBold(ps Ps) {
+func (a *Attributes) SetBold(ps Ps) {
 	switch ps {
 	case Normal, NotBoldFaint:
-		t.Bold = false
+		a.Bold = false
 	case Bold:
-		t.Bold = true
+		a.Bold = true
 	}
 }
 
-func (t *Attributes) SetFaint(ps Ps) {
+func (a *Attributes) SetFaint(ps Ps) {
 	switch ps {
 	case Normal, NotBoldFaint:
-		t.Faint = false
+		a.Faint = false
 	case Faint:
-		t.Faint = true
+		a.Faint = true
 	}
 }
 
-func (t *Attributes) SetItalic(ps Ps) {
+func (a *Attributes) SetItalic(ps Ps) {
 	switch ps {
 	case Normal, NotItalicFraktur:
-		t.Italic = false
+		a.Italic = false
 	case Italic:
-		t.Italic = true
+		a.Italic = true
 	}
 }
 
-func (t *Attributes) SetUnderline(ps Ps) {
+func (a *Attributes) SetUnderline(ps Ps) {
 	switch ps {
 	case Normal, NotUnderline:
-		t.Underline = false
+		a.Underline = false
 	case Underline:
-		t.Underline = true
+		a.Underline = true
 	}
 }
 
-func (t *Attributes) SetBlink(ps Ps) {
+func (a *Attributes) SetBlink(ps Ps) {
 	switch ps {
 	case Normal:
-		t.Blink = false
+		a.Blink = false
 	case Blink:
-		t.Blink = true
+		a.Blink = true
 	}
 }
 
-func (t *Attributes) SetBlinkFast(ps Ps) {
+func (a *Attributes) SetBlinkFast(ps Ps) {
 	switch ps {
 	case Normal:
-		t.BlinkFast = false
+		a.BlinkFast = false
 	case BlinkFast:
-		t.BlinkFast = true
+		a.BlinkFast = true
 	}
 }
 
-func (t *Attributes) SetInverse(ps Ps) {
+func (a *Attributes) SetInverse(ps Ps) {
 	switch ps {
 	case Normal:
-		t.Inverse = false
+		a.Inverse = false
 	case Inverse:
-		t.Inverse = true
+		a.Inverse = true
 	}
 }
 
-func (t *Attributes) SetConceal(ps Ps) {
+func (a *Attributes) SetConceal(ps Ps) {
 	switch ps {
 	case Normal, RevertB:
-		t.Conceal = false
+		a.Conceal = false
 	case Conceal:
-		t.Conceal = true
+		a.Conceal = true
 	}
 }
 
-func (t *Attributes) SetStrike(ps Ps) {
+func (a *Attributes) SetStrike(ps Ps) {
 	switch ps {
 	case Normal, NotStrikeThrough:
-		t.StrikeThrough = false
+		a.StrikeThrough = false
 	case StrikeThrough:
-		t.StrikeThrough = true
+		a.StrikeThrough = true
 	}
 }
 
-func (t *Attributes) SetUnderline2x(ps Ps) {
+func (a *Attributes) SetUnderline2x(ps Ps) {
 	switch ps {
 	case Normal, NotUnderline:
-		t.Underline2x = false
+		a.Underline2x = false
 	case Underline2x:
-		t.Underline2x = true
+		a.Underline2x = true
 	}
 }
 
-func (t *Attributes) SetFramed(ps Ps) {
+func (a *Attributes) SetFramed(ps Ps) {
 	switch ps {
 	case Normal:
-		t.Framed = false
+		a.Framed = false
 	case Framed:
-		t.Framed = true
+		a.Framed = true
 	}
 }
 
-func (t *Attributes) SetEncircled(ps Ps) {
+func (a *Attributes) SetEncircled(ps Ps) {
 	switch ps {
 	case Normal:
-		t.Encircled = false
+		a.Encircled = false
 	case Framed:
-		t.Encircled = true
+		a.Encircled = true
 	}
 }
 
-func (t *Attributes) SetOverlined(ps Ps) {
+func (a *Attributes) SetOverlined(ps Ps) {
 	switch ps {
 	case Normal:
-		t.Overlined = false
+		a.Overlined = false
 	case Framed:
-		t.Overlined = true
+		a.Overlined = true
 	}
 }
 
@@ -318,7 +318,7 @@ func DataStream(b []byte) Attributes {
 	if string(b) == "" {
 		return Attributes{}
 	}
-	var t Attributes
+	a := Attributes{}
 	i := bytes.IndexByte(b, 'm')
 	if i == -1 {
 		return Attributes{Bytes: b}
@@ -348,7 +348,7 @@ func DataStream(b []byte) Attributes {
 		if cont := ext.Scan(s); cont {
 			if ext.Color > -1 {
 				// todo bg/fg
-				t.Background = xterm.Color(ext.Color)
+				a.Background = xterm.Color(ext.Color)
 			}
 			continue
 		}
@@ -361,12 +361,12 @@ func DataStream(b []byte) Attributes {
 		// }
 		// vals[i] = Ps(s)
 
-		t.Set(Ps(s))
+		a.Set(Ps(s))
 	}
 	if string(b[i+1:]) != "" {
-		t.Bytes = b[i+1:]
+		a.Bytes = b[i+1:]
 	}
-	return t
+	return a
 }
 
 // NewSGR creates a new Attributes struct with default values.

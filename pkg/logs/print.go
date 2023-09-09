@@ -103,5 +103,5 @@ func SprintWrap(err, wrap error) string {
 		return ""
 	}
 	return fmt.Sprintf("%s%s",
-		str.Alert(), fmt.Errorf("%s: %w", err, wrap))
+		str.Alert(), fmt.Errorf("%w: %w", err, wrap))
 }

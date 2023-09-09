@@ -36,7 +36,7 @@ func ExampleTar() {
 	// Output:tar_test.tar, 1536
 }
 
-func BenchmarkReadLarge(b *testing.B) {
+func BenchmarkReadLarge(_ *testing.B) {
 	large := mock.LargeExample()
 	if _, err := filesystem.Read(large); err != nil {
 		filesystem.Clean(large)
@@ -45,7 +45,7 @@ func BenchmarkReadLarge(b *testing.B) {
 	filesystem.Clean(large)
 }
 
-func BenchmarkReadMega(b *testing.B) {
+func BenchmarkReadMega(_ *testing.B) {
 	mega := mock.MegaExample()
 	if _, err := filesystem.Read(mega); err != nil {
 		filesystem.Clean(mega)

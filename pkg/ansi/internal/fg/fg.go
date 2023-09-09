@@ -7,7 +7,7 @@ const (
 	IbmAIX Colors = 90
 )
 
-// System colors
+// System colors.
 const (
 	Black Colors = iota + System
 	Red
@@ -19,7 +19,7 @@ const (
 	White
 )
 
-// IBM AIX bright colors
+// IBM AIX bright colors.
 const (
 	BrightBlack Colors = iota + IbmAIX
 	BrightRed

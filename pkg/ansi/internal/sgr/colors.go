@@ -15,14 +15,15 @@ const (
 
 var ErrNotRGB = errors.New("int is not a valid red-green-blue value")
 
-// RGB reads b
+// RGB reads b and returns the color value.
 func RGB(b [][]byte) int {
-	if len(b) < 3 {
+	const expected = 3
+	if len(b) < expected {
 		return -1
 	}
 	var red, green, blue uint8
 	for count, v := range b {
-		if count > 3 {
+		if count > expected {
 			break
 		}
 		i, err := strconv.Atoi(string(v))
@@ -49,7 +50,7 @@ func RGB(b [][]byte) int {
 	return RGBDecimal(red, green, blue)
 }
 
-// XTerm256
+// XTerm256 reads b and returns the color value.
 func XTerm256(b [][]byte) int {
 	if len(b) < 1 {
 		return -1
@@ -70,7 +71,7 @@ func XTerm256(b [][]byte) int {
 // 48;5;0…255 ExtensionB
 // 48;2;R;G;B;
 
-// RGBDecimal
+// RGBDecimal converts red, green and blue values to a decimal color value.
 func RGBDecimal(r uint8, g uint8, b uint8) int {
 	red := int(r)
 	green := int(g)
@@ -78,8 +79,8 @@ func RGBDecimal(r uint8, g uint8, b uint8) int {
 	return red*Color16bit + green*Color8bit + blue
 }
 
-// DecimalRGB
-func DecimalRGB(f float64) (r uint8, g uint8, b uint8, err error) {
+// DecimalRGB converts a decimal color value to red, green and blue values.
+func DecimalRGB(f float64) (uint8, uint8, uint8, error) {
 	red := math.Floor(f / (Color8bit * Color8bit))
 	green := math.Mod(math.Floor(f/Color8bit), Color8bit)
 	blue := math.Mod(f, Color8bit)

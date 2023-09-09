@@ -47,11 +47,11 @@ func HTMLReader(w io.Writer, r io.Reader) error {
 	scanner := bufio.NewScanner(r)
 	scanner.Split(bufio.ScanLines)
 	rows := make(Row, 0)
-	line, row := reset, reset
+	line := reset
 	t := sgr.NewSGR()
 	for scanner.Scan() {
 		line++
-		row = reset
+		row := reset
 		reader := bytes.NewReader(scanner.Bytes())
 		scanner := bufio.NewScanner(reader)
 		scanner.Split(ScanANSI)

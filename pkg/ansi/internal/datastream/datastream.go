@@ -77,7 +77,8 @@ func cursorPos(b []byte, c byte) (line uint8, col uint8) {
 		}
 	}
 	s := bytes.Split(b, []byte(";"))
-	if len(s) != 2 {
+	const expected = 2
+	if len(s) != expected {
 		return 0, 0
 	}
 	if !Number(s[0]) {
@@ -113,7 +114,8 @@ func erase(b []byte, c byte) Erase {
 	if err != nil {
 		return NoErase
 	}
-	if s > 2 {
+	const outOfRange = 2
+	if s > outOfRange {
 		return NoErase
 	}
 	return Erase(s)

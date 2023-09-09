@@ -16,6 +16,7 @@ linters:
     - exhaustivestruct  # Deprecated
     - structcheck       # Deprecated
 
+    - depguard          # unwanted, as it requires a list of packages
     - exhaustruct       # too many values in struct literal (opinionated)
     - wrapcheck         # wrapping 3rd party errors are unnecessary (opinionated)
     - varnamelen        # doesn't allow short vars (opinionated)
@@ -30,6 +31,8 @@ linters:
     - exhaustive        #  temp disabled
     - wsl
     - gocritic          #  temp disabled
+    - cyclop
+    - forbidigo
 
 linters-settings:
   cyclop:

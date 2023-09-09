@@ -49,16 +49,14 @@ func Check() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if !cache { //nolint:nestif
+	if !cache {
 		tag = fmt.Sprint(data["tag_name"])
 		if tag == "" {
 			return "", nil
 		}
-		if fmt.Sprintf("%T", data["etag"]) == "string" {
-			if data["etag"].(string) != "" {
-				if err := CacheSet(data["etag"].(string), tag); err != nil {
-					return "", err
-				}
+		if s, ok := data["etag"].(string); ok && s != "" {
+			if err := CacheSet(s, tag); err != nil {
+				return "", err
 			}
 		}
 	}
