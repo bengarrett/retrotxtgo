@@ -33,6 +33,8 @@ import (
 )
 
 // Detail of a file.
+//
+//nolint:musttag
 type Detail struct {
 	XMLName    xml.Name     `json:"-"          xml:"file"`
 	Name       string       `json:"filename"   xml:"name"`

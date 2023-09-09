@@ -56,7 +56,7 @@ func Examples() (*bytes.Buffer, error) {
 	fmt.Fprintf(w, "\nMultiple examples used together are supported.\n%s\n",
 		str.Example(bin+"view ansi ascii ansi.rgb"))
 	if err := w.Flush(); err != nil {
-		return nil, fmt.Errorf("%w, %s", logs.ErrTabFlush, err)
+		return nil, fmt.Errorf("%w, %w", logs.ErrTabFlush, err)
 	}
 	return &buf, nil
 }
@@ -120,7 +120,7 @@ func Tables() (string, error) {
 		if name == "" {
 			name, err = ianaindex.MIME.Name(e)
 			if err != nil {
-				return "", fmt.Errorf("table %s, %s, %w", e, ErrIANA, err)
+				return "", fmt.Errorf("table %s, %w, %w", e, ErrIANA, err)
 			}
 		}
 		if !Printable(name) {
@@ -128,7 +128,7 @@ func Tables() (string, error) {
 		}
 		table, err := convert.Table(name)
 		if err != nil {
-			return "", fmt.Errorf("table %s, %s, %w", e, ErrTable, err)
+			return "", fmt.Errorf("table %s, %w, %w", e, ErrTable, err)
 		}
 		l := len(table.Bytes())
 		b.Grow(l)

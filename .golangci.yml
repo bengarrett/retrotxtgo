@@ -33,6 +33,7 @@ linters:
     - gocritic          #  temp disabled
     - cyclop
     - forbidigo
+    - goimports         # conflicts with gci
 
 linters-settings:
   cyclop:
