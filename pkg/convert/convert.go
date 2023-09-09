@@ -9,21 +9,18 @@ import (
 	"golang.org/x/text/encoding"
 )
 
-// Convert 8-bit legacy or other Unicode text to UTF-8.
+// Convert legacy 8-bit codepage encode or Unicode byte array text to UTF-8 runes.
 type Convert struct {
-	Flags      Flag   // Commandline supplied flag values.
-	Input      In     // Input text for transformation.
-	Output     []rune // Transformed UTF-8 runes.
-	Ignores    []rune // runes to ignore.
-	LineBreaks bool   // use line break controls?
-}
-
-// In is the text input for conversion.
-type In struct {
-	Encoding  encoding.Encoding // Bytes text encoding.
-	Bytes     []byte            // Input text as bytes.
-	LineBreak [2]rune           // line break controls used by the text.
-	Table     bool              // flag this text as a codepage table.
+	Flags Flag // Flags are the cmd supplied flag values.
+	Input struct {
+		Encoding  encoding.Encoding // Encoding are the encoding of the input text.
+		Bytes     []byte            // Bytes are the input text as bytes.
+		LineBreak [2]rune           // Line break controls used by the text.
+		Table     bool              // Table flags this text as a codepage table.
+	}
+	Output     []rune // Output are the transformed UTF-8 runes.
+	Ignores    []rune // Ignores these runes.
+	LineBreaks bool   // LineBreaks uses line break controls.
 }
 
 // Flag are the user supplied values.
@@ -34,8 +31,8 @@ type Flag struct {
 }
 
 const (
-	DosSUB    = 8594
-	SymbolSUB = 9242
+	DosSUB    = 8594 // DosSub is the Unicode for the right-arrow.
+	SymbolSUB = 9242 // SymbolSUB is the Unicode for the substitute character.
 )
 
 // BOM is the UTF-8 byte order mark prefix.

@@ -1,3 +1,4 @@
+// Package file ascii.go provides the legacy ASA ASCII character encodings.
 package convert
 
 import (
