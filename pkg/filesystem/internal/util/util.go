@@ -2,14 +2,22 @@ package util
 
 import (
 	"archive/tar"
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-// AddTar inserts the named file to the TAR writer.
-func AddTar(name string, w *tar.Writer) error {
+var (
+	ErrNoWriter = errors.New("the tar.writer cannot be nil")
+)
+
+// InsertTar inserts the named file to the TAR writer.
+func InsertTar(w *tar.Writer, name string) error {
+	if w == nil {
+		return ErrNoWriter
+	}
 	f, err := os.Open(name)
 	if err != nil {
 		return err

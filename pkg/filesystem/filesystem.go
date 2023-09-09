@@ -98,7 +98,7 @@ func Tar(name string, files ...string) error {
 	w := tar.NewWriter(f)
 	defer w.Close()
 	for _, file := range files {
-		if err := util.AddTar(file, w); err != nil {
+		if err := util.InsertTar(w, file); err != nil {
 			return err
 		}
 	}
