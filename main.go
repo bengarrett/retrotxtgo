@@ -19,6 +19,7 @@ package main
 import (
 	"github.com/bengarrett/retrotxtgo/cmd"
 	"github.com/bengarrett/retrotxtgo/meta"
+	"github.com/bengarrett/retrotxtgo/pkg/logs"
 )
 
 // goreleaser generated ldflags containers.
@@ -35,5 +36,7 @@ func main() {
 	meta.App.Commit = commit
 	meta.App.Date = date
 	meta.App.BuiltBy = builtBy
-	cmd.Execute()
+	if err := cmd.Execute(); err != nil {
+		logs.FatalExecute(err)
+	}
 }

@@ -12,15 +12,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Lists are the subcommands of the list command.
 type Lists int
 
 const (
-	Codepages Lists = iota
-	Examples
-	Table
-	Tables
+	Codepages Lists = iota // Codepages list command.
+	Examples               // Examples list command.
+	Table                  // Table command lists a single table.
+	Tables                 // Tables command lists all tables.
 )
 
+// Command runs one of the list subcommands.
 func (l Lists) Command() *cobra.Command {
 	switch l {
 	case Codepages:

@@ -20,13 +20,11 @@ var (
 )
 
 // Cmd represents the base command when called without any subcommands.
-//
-//nolint:gochecknoglobals
-var Cmd = &cobra.Command{
+var Cmd = &cobra.Command{ //nolint:gochecknoglobals
 	Use:   meta.Bin,
-	Short: fmt.Sprintf("Use %s to print text, BBS and ANSI files", meta.Name),
-	Long: fmt.Sprintf(`%s takes legacy encoded text, BBS, and ANSI files
-	and print them to a modern UTF-8 terminal.`, meta.Name),
+	Short: fmt.Sprintf("Use %s to print plain, BBS era and ANSI textfiles", meta.Name),
+	Long: meta.Name + " takes legacy codepage and ANSI encoded textfiles and\n" +
+		"prints them to a modern Unicode terminal.",
 	Example: fmt.Sprint(example.Cmd),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Do nothing other than print the help.
@@ -37,8 +35,7 @@ var Cmd = &cobra.Command{
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
-// TODO: MAKE EXECUTE return an error.
-func Execute() {
+func Execute() error {
 	Cmd.CompletionOptions.DisableDefaultCmd = true
 	Cmd.SilenceErrors = true // set to false to debug errors
 	Cmd.Version = meta.Print()
@@ -50,8 +47,9 @@ func Execute() {
 				logs.FatalMark("rootCmd", ErrUsage, err1)
 			}
 		}
-		logs.FatalExecute(err, os.Args[1:]...)
+		return fmt.Errorf("%w: %s", err, os.Args[1:])
 	}
+	return nil
 }
 
 func Init() {

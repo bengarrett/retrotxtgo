@@ -13,7 +13,6 @@ const (
 	static = "../static"
 	file1  = "../static/ansi/ansi-cp.ans"
 	file2  = "../static/bbs/SHEET.ANS"
-	file3  = "../static/font/mona.woff2"
 )
 
 func Test_InfoErrDir(t *testing.T) {
@@ -29,11 +28,11 @@ func Test_InfoErrDir(t *testing.T) {
 
 func Test_InfoFiles(t *testing.T) {
 	t.Run("info multiple files", func(t *testing.T) {
-		gotB, err := infoT.tester([]string{"--format", "color", file1, file2, file3})
+		gotB, err := infoT.tester([]string{"--format", "color", file1, file2})
 		if err != nil {
 			t.Errorf("info arguments threw an unexpected error: %s", err)
 		}
-		files := []string{filepath.Base(file1), filepath.Base(file2), filepath.Base(file3)}
+		files := []string{filepath.Base(file1), filepath.Base(file2)}
 		for _, f := range files {
 			if !bytes.Contains(gotB, []byte(f)) {
 				t.Errorf("could not find filename in the info result, want: %q", f)
