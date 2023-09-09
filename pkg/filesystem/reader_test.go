@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -23,7 +24,7 @@ func ExampleWordsEBCDIC() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("%d words", words)
+	fmt.Fprintf(os.Stdout, "%d words", words)
 	// Output: 16 words
 }
 

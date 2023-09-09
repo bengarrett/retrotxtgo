@@ -124,7 +124,7 @@ func (files *Files) Zip(name, comment string, ow, quiet bool) error {
 		return fmt.Errorf("zip abs %q: %w", s.Name(), err)
 	}
 	if !quiet {
-		fmt.Println("created zip file:", abs, humanize.Decimal(s.Size(), language.AmericanEnglish))
+		fmt.Fprintln(os.Stdout, "created zip file:", abs, humanize.Decimal(s.Size(), language.AmericanEnglish))
 	}
 	return nil
 }
@@ -132,7 +132,7 @@ func (files *Files) Zip(name, comment string, ow, quiet bool) error {
 func AddZip(name string, z *zip.Writer) error {
 	s, err := os.Stat(name)
 	if err != nil {
-		fmt.Println("skipping file, could not stat", name)
+		fmt.Fprintln(os.Stdout, "skipping file, could not stat", name)
 		return nil //nolint:nilerr
 	}
 	fh, err := zip.FileInfoHeader(s)
@@ -145,7 +145,7 @@ func AddZip(name string, z *zip.Writer) error {
 	}
 	b, err := Read(name)
 	if err != nil {
-		fmt.Println("skipping file, could not read", name)
+		fmt.Fprintln(os.Stdout, "skipping file, could not read", name)
 		return nil //nolint:nilerr
 	}
 	_, err = f.Write(b)

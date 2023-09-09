@@ -32,7 +32,6 @@ func TestExample(t *testing.T) {
 		t.Run(fmt.Sprintf("example_%d", val), func(t *testing.T) {
 			if !strings.Contains(example.Example(val).String(), tt.contains) {
 				t.Errorf("example %v does not contain the expected string: %q", val, tt.contains)
-				fmt.Printf("%s", example.Example(val))
 			}
 		})
 	}

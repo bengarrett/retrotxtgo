@@ -3,6 +3,7 @@ package sgr
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"unicode"
@@ -84,11 +85,12 @@ func (a Attributes) String() string {
 		cls = append(cls, StrikeThrough.String())
 	}
 	// Encircled, framed or overlined style
-	if a.Encircled {
+	switch {
+	case a.Encircled:
 		cls = append(cls, Encircled.String())
-	} else if a.Framed {
+	case a.Framed:
 		cls = append(cls, Framed.String())
-	} else if a.Overlined {
+	case a.Overlined:
 		cls = append(cls, Overlined.String())
 	}
 	return strings.Join(cls, " ")
@@ -352,7 +354,7 @@ func DataStream(b []byte) Attributes {
 			}
 			continue
 		}
-		fmt.Println(ps)
+		fmt.Fprintln(os.Stdout, ps)
 		// if color, l := Colors(Ps(s), bs[i:]); color > -1 && l > 0 {
 		// 	//cnt = cnt + l
 		// 	continue

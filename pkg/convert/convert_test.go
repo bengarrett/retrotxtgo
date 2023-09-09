@@ -4,6 +4,7 @@ package convert_test
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 	"testing"
 
@@ -11,7 +12,7 @@ import (
 )
 
 func ExampleBOM() {
-	fmt.Printf("%X", convert.BOM())
+	fmt.Fprintf(os.Stdout, "%X", convert.BOM())
 	// Output: EFBBBF
 }
 

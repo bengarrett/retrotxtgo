@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/pkg/convert"
@@ -70,7 +71,7 @@ func Transform(
 		if err != nil {
 			return nil, err
 		}
-		fmt.Printf("%s\n", b2)
+		fmt.Fprintf(os.Stdout, "%s\n", b2)
 	}
 	// convert the bytes into runes
 	if flag.EndOfFile(conv.Flags) {

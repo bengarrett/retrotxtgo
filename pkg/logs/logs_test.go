@@ -21,7 +21,7 @@ func ExampleSave() {
 	logs.Save(ErrLogTest)
 	last, _ := logs.LastEntry()
 	i := len(last) - len(t) - 1
-	fmt.Print(last[i:])
+	fmt.Fprint(os.Stdout, last[i:])
 	// Output:log test
 }
 

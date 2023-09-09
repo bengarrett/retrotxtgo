@@ -50,7 +50,7 @@ func ExampleZip() {
 		log.Print(err)
 		return
 	}
-	fmt.Printf("%s, %d", s.Name(), s.Size())
+	fmt.Fprintf(os.Stdout, "%s, %d", s.Name(), s.Size())
 	// Output: exampleZip.zip, 149
 }
 
@@ -79,6 +79,6 @@ func ExampleUniqueName() {
 	// As the new unique names vary based on the host operating system
 	// Compare the name lengths to confirm the creation of a new filename
 	unique := bool(len(newName) > len(name))
-	fmt.Print(unique)
+	fmt.Fprint(os.Stdout, unique)
 	// Output: true
 }

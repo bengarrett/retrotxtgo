@@ -3,6 +3,7 @@ package convert_test
 import (
 	"fmt"
 	"log"
+	"os"
 	"reflect"
 	"testing"
 
@@ -32,7 +33,7 @@ func ExampleD437() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Print(t)
+	fmt.Fprint(os.Stdout, t)
 	// Output: ═╣▓╠═
 }
 
@@ -79,7 +80,7 @@ func ExampleE437() {
 		log.Fatal(err)
 	}
 	filesystem.Clean(name)
-	fmt.Print(len(t))
+	fmt.Fprint(os.Stdout, len(t))
 	// Output: 8
 }
 

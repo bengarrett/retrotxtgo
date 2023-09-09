@@ -40,7 +40,7 @@ var (
 	space    = []string{"-c", "", "-x", "space", "../static/text/cp437-crlf.txt"}
 )
 
-func Test_ViewCommand(t *testing.T) {
+func Test_ViewCommand(t *testing.T) { //nolint:funlen
 	utfResults := []rune{'☠', '☮', '♺'}
 	tests := []struct {
 		name       string
@@ -77,7 +77,7 @@ func Test_ViewCommand(t *testing.T) {
 		},
 		{"utf-8", utf8bom, utfResults},
 		{"utf-16", utf16, utfResults},
-		//{"utf-32", utf32, utfResults}, // TODO: failing.
+		// {"utf-32", utf32, utfResults}, // TODO: failing.
 		{
 			"no controls", noCtrls,
 			[]rune{'○', '•', '⌂', '←', '→'},

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"encoding/xml"
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -53,14 +52,12 @@ func Test_InfoSamples(t *testing.T) {
 	}
 	t.Run("info multiple samples", func(t *testing.T) {
 		for i, sample := range samplers {
-			fmt.Println(i, sample)
 			gotB, err := infoT.tester([]string{"--format", "text", sample})
 			if err != nil {
 				t.Error(err)
 			}
 			if !bytes.Contains(gotB, []byte(wants[i])) {
 				t.Errorf("sample %s result does not contain: %s", sample, wants[i])
-				fmt.Printf("%q\n", gotB)
 			}
 		}
 	})
@@ -99,7 +96,7 @@ func Test_InfoText(t *testing.T) {
 	})
 }
 
-func Test_InfoData(t *testing.T) {
+func Test_InfoData(t *testing.T) { //nolint:gocognit
 	type Sizes struct {
 		Bytes int `json:"bytes" xml:"bytes"`
 	}
@@ -141,7 +138,6 @@ func Test_InfoData(t *testing.T) {
 				res = response{}
 				if err := xml.Unmarshal(gotXML, &res); err != nil {
 					t.Error(err)
-					fmt.Print(string(gotXML))
 				}
 				if res.Name != info.Name() {
 					t.Errorf("could not find filename in the xml result, want: %q", info.Name())

@@ -63,7 +63,7 @@ func Args(cmd *cobra.Command, args ...string) ([]string, *convert.Convert, sampl
 }
 
 // Default returns the default encoding when the --encoding flag is unused.
-func Default() encoding.Encoding {
+func Default() encoding.Encoding { //nolint:ireturn
 	if filesystem.IsPipe() {
 		return unicode.UTF16(unicode.LittleEndian, unicode.UseBOM)
 	}

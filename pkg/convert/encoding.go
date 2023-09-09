@@ -163,7 +163,7 @@ const (
 )
 
 // Encoder returns the named character set encoder.
-func Encoder(name string) (encoding.Encoding, error) {
+func Encoder(name string) (encoding.Encoding, error) { //nolint:ireturn
 	// use charmap string
 	for _, c := range charmap.All {
 		if fmt.Sprint(c) == name {
@@ -207,7 +207,7 @@ func Encoder(name string) (encoding.Encoding, error) {
 }
 
 // EncodeUTF32 initializes common UTF-32 encodings.
-func EncodeUTF32(name string) encoding.Encoding {
+func EncodeUTF32(name string) encoding.Encoding { //nolint:ireturn
 	// UTF-32... doesn't return a match in ianaindex.IANA
 	switch strings.ToUpper(name) {
 	case u32:
@@ -229,9 +229,7 @@ func Humanize(name string) string {
 }
 
 // Shorten the name to a custom name, a common name or an alias.
-//
-//nolint:gonmd
-func Shorten(name string) string {
+func Shorten(name string) string { //nolint:cyclop
 	n, l := strings.ToLower(name), len(name)
 	switch {
 	case l > 3 && n[:3] == "cp-":

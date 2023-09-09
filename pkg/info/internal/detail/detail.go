@@ -3,6 +3,7 @@ package detail
 import (
 	"archive/zip"
 	"bytes"
+
 	//nolint:gosec
 	"crypto/md5"
 	"crypto/sha256"
@@ -281,14 +282,14 @@ func (d *Detail) mime(name string, data ...byte) {
 	if d.ValidText() {
 		var err error
 		if d.Count.Chars, err = filesystem.Runes(bytes.NewBuffer(data)); err != nil {
-			fmt.Printf("mine sniffer failure, %s\n", err)
+			fmt.Fprintf(os.Stdout, "mine sniffer failure, %s\n", err)
 		}
 		return
 	}
 	if d.Mime.Type == zipType {
 		r, e := zip.OpenReader(name)
 		if e != nil {
-			fmt.Printf("open zip file failure: %s\n", e)
+			fmt.Fprintf(os.Stdout, "open zip file failure: %s\n", e)
 		}
 		defer r.Close()
 		d.ZipComment = r.Comment

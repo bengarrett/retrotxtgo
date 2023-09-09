@@ -3,6 +3,7 @@ package meta_test
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 	"testing"
 
@@ -10,7 +11,7 @@ import (
 )
 
 func Example_digits() {
-	fmt.Println(meta.Digits("v1.0 (init release)"))
+	fmt.Fprintln(os.Stdout, meta.Digits("v1.0 (init release)"))
 	// Output: 1.0
 }
 

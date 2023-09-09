@@ -1,45 +1,30 @@
-
 # golangci-lint run
-
 linters:
   enable-all: true
   disable:
-    - interfacer        # Deprecated
-    - scopelint         # Deprecated
-    - golint            # Deprecated
-    - maligned          # Deprecated
-
-    - deadcode          # Deprecated
-    - ifshort           # Deprecated
-    - nosnakecase       # Deprecated
-    - varcheck          # Deprecated
-    - exhaustivestruct  # Deprecated
-    - structcheck       # Deprecated
+    - interfacer        # deprecated
+    - scopelint         # deprecated
+    - golint            # deprecated
+    - maligned          # deprecated
+    - deadcode          # deprecated
+    - ifshort           # deprecated
+    - nosnakecase       # deprecated
+    - varcheck          # deprecated
+    - exhaustivestruct  # deprecated
+    - structcheck       # deprecated
 
     - depguard          # unwanted, as it requires a list of packages
+    - exhaustive        # too much boilerplate
     - exhaustruct       # too many values in struct literal (opinionated)
     - wrapcheck         # wrapping 3rd party errors are unnecessary (opinionated)
     - varnamelen        # doesn't allow short vars (opinionated)
-
-    - ireturn           #  temp disabled
-    - funlen            #  temp disabled
-    - testableexamples  #  temp disabled
-    - godox             #  temp disabled
-    - paralleltest      #  temp disabled
-    - gocognit          #  temp disabled
-    - nlreturn          #  temp disabled
-    - exhaustive        #  temp disabled
-    - wsl
-    - gocritic          #  temp disabled
-    - cyclop
-    - forbidigo
     - goimports         # conflicts with gci
+    - godox             # hide, TODOs are fine
+    - nlreturn          # opinionated
+    - wsl               # opinionated
+    - paralleltest      # temp disabled
 
 linters-settings:
   cyclop:
     # the maximal code complexity to report
     max-complexity: 15
-
-# Fixes
-# gofumpt -l -w <file> || <dir>/*
-# gci -w <file>

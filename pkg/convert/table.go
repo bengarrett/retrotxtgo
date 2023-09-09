@@ -103,7 +103,7 @@ func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 	return &buf, nil
 }
 
-func codepager(name string) (encoding.Encoding, error) {
+func codepager(name string) (encoding.Encoding, error) { //nolint:ireturn
 	if name == "" {
 		return nil, ErrNoName
 	}
@@ -126,7 +126,7 @@ func codepager(name string) (encoding.Encoding, error) {
 	}
 }
 
-func DefaultCP(name string) (encoding.Encoding, error) {
+func DefaultCP(name string) (encoding.Encoding, error) { //nolint:ireturn
 	cp, err := Encoder(name)
 	if err != nil {
 		return nil, fmt.Errorf("table encoding error: %w", err)
@@ -154,7 +154,7 @@ func encoder(name string, cp encoding.Encoding) Convert {
 	return conv
 }
 
-func revert(name string) encoding.Encoding {
+func revert(name string) encoding.Encoding { //nolint:ireturn
 	if ISO11Name(name) {
 		return charmap.XUserDefined
 	}

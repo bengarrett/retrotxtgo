@@ -3,6 +3,7 @@ package list_test
 import (
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"testing"
 
@@ -17,7 +18,7 @@ func ExampleTable() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("%d characters in the table", len(t))
+	fmt.Fprintf(os.Stdout, "%d characters in the table", len(t))
 	// Output: 1690 characters in the table
 }
 
@@ -27,7 +28,7 @@ func ExampleTables() {
 	if err != nil {
 		log.Print(err)
 	}
-	fmt.Printf("%d characters in the table", len(t))
+	fmt.Fprintf(os.Stdout, "%d characters in the table", len(t))
 	// Output: 75117 characters in the table
 }
 
@@ -75,7 +76,7 @@ func TestTables(t *testing.T) {
 	tests := []struct {
 		contains string
 	}{
-		//{"ANSI X3.4 1967/77/86 - Extended ASCII"},
+		// {"ANSI X3.4 1967/77/86 - Extended ASCII"},
 		{"IBM Code Page 437 (DOS, OEM-US) - Extended ASCII"},
 		{"UTF-8 - Unicode"},
 		{"Shift JIS (Japanese) - Extended ASCII"},

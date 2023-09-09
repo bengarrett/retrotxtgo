@@ -2,13 +2,14 @@ package str_test
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/pkg/str"
 )
 
 func ExampleBorder() {
-	fmt.Printf("%s", str.Border("hi"))
+	fmt.Fprintf(os.Stdout, "%s", str.Border("hi"))
 	// Output: ┌────┐
 	// │ hi │
 	// └────┘

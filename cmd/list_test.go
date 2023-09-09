@@ -56,7 +56,7 @@ func Test_ListExamples(t *testing.T) {
 	}
 }
 
-func Test_ListTables(t *testing.T) {
+func Test_ListTables(t *testing.T) { //nolint:gocognit,funlen
 	tests := []struct {
 		table      string
 		wantHeader string

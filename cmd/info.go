@@ -19,9 +19,7 @@ func InfoCommand() *cobra.Command {
 		Short:   "Information on a text file",
 		Long:    "Discover details and information about any text or text art file.",
 		Example: fmt.Sprint(example.Info),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return info.Run(cmd, args)
-		},
+		RunE:    info.Run,
 	}
 }
 

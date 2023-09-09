@@ -2,6 +2,7 @@ package update_test
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/update"
@@ -15,7 +16,7 @@ const (
 
 func ExampleString() {
 	s := update.String(alpha, "1.0.0")
-	fmt.Println(s)
+	fmt.Fprintln(os.Stdout, s)
 	// Output:┌─────────────────────────────────────────────┐
 	// │ A newer edition of RetroTxtGo is available! │
 	// │    Learn more at https://retrotxt.com/go    │

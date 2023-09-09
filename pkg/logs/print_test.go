@@ -3,6 +3,7 @@ package logs_test
 import (
 	"errors"
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/meta"
@@ -16,8 +17,8 @@ var ErrTest = errors.New("error")
 
 func ExampleSprint() {
 	color.Enable = false
-	fmt.Println(logs.Sprint(ErrTest))
-	fmt.Println(status)
+	fmt.Fprintln(os.Stdout, logs.Sprint(ErrTest))
+	fmt.Fprintln(os.Stdout, status)
 	// Output: Problem:
 	// error.
 	// exit status 1

@@ -42,7 +42,7 @@ func ExampleMarshal() {
 	filesystem.Clean(tmp)
 	s := strings.ReplaceAll(string(data), "\t", "")
 	ln := strings.Split(s, "\n")
-	fmt.Println(ln[0])
+	fmt.Fprintln(os.Stdout, ln[0])
 	// Output: <file unicode="UTF-8 compatible" id="info-test-txt">
 }
 
@@ -71,7 +71,7 @@ func TestValidText(t *testing.T) {
 
 func TestRead(t *testing.T) {
 	tmp := sampleFile()
-	fmt.Println("path:", tmp)
+	fmt.Fprintln(os.Stdout, "path:", tmp)
 	var got detail.Detail
 	if err := got.Read(tmp); err != nil {
 		t.Errorf("Read() = %v, want %v", err, nil)
@@ -102,7 +102,7 @@ func TestParse(t *testing.T) {
 	tmp := sampleFile()
 	f, err := os.Stat(tmp)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	type args struct {
@@ -160,7 +160,7 @@ func TestMarshal_text(t *testing.T) {
 	var d detail.Detail
 	tmp := sampleFile()
 	if err := d.Read(tmp); err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	b, _ := d.Marshal(detail.PlainText)

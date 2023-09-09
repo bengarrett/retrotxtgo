@@ -4,6 +4,7 @@ package sample_test
 import (
 	"fmt"
 	"log"
+	"os"
 	"reflect"
 	"testing"
 	"unicode/utf8"
@@ -19,7 +20,7 @@ func ExampleOpen() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Print(len(b))
+	fmt.Fprint(os.Stdout, len(b))
 	// Output:130
 }
 

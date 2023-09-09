@@ -32,7 +32,7 @@ func ExampleTar() {
 		log.Print(err)
 		return
 	}
-	fmt.Printf("%s, %d", f.Name(), f.Size())
+	fmt.Fprintf(os.Stdout, "%s, %d", f.Name(), f.Size())
 	// Output:tar_test.tar, 1536
 }
 

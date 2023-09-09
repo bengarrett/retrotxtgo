@@ -12,28 +12,29 @@ import (
 func ExampleHTMLReader() {
 	file, err := os.Open("../../static/ansi/ansi-aixterm.ans")
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 	defer file.Close()
 
 	b := bytes.Buffer{}
 	if err := ansi.HTMLReader(&b, file); err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
-	fmt.Println(b.String())
+	fmt.Fprintln(os.Stdout, b.String())
 	// Output:
 }
 
 func ExampleHTMLReader_ansi() {
 	file, err := os.Open("../../static/ansi/preview_01.ans")
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 	defer file.Close()
 
 	b := bytes.Buffer{}
 	if err := ansi.HTMLReader(&b, file); err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
-	fmt.Println(b.String())
+	fmt.Fprintln(os.Stdout, b.String())
+	// Output:
 }

@@ -2,6 +2,7 @@ package create_test
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 	"testing"
 
@@ -11,7 +12,7 @@ import (
 )
 
 func ExampleFonts() {
-	fmt.Print(create.Fonts()[2])
+	fmt.Fprint(os.Stdout, create.Fonts()[2])
 	// Output: vga
 }
 

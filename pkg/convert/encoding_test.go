@@ -4,6 +4,7 @@ package convert_test
 import (
 	"fmt"
 	"log"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -17,8 +18,8 @@ import (
 )
 
 func ExampleSwap() {
-	fmt.Print(string(convert.Swap(convert.DEL)))
-	fmt.Print(string(convert.Swap(convert.SquareRoot)))
+	fmt.Fprint(os.Stdout, string(convert.Swap(convert.DEL)))
+	fmt.Fprint(os.Stdout, string(convert.Swap(convert.SquareRoot)))
 	// Output: Δ✓
 }
 
@@ -410,7 +411,6 @@ func TestRunesEBCDIC(t *testing.T) {
 		d.RunesEBCDIC()
 		t.Run(tt.name, func(t *testing.T) {
 			if got := string(d.Output); got != tt.want {
-				fmt.Println(c)
 				t.Errorf("RunesEBCDIC() = '%v' (0x%X), want '%v' (0x%X)", got, got, tt.want, tt.want)
 			}
 		})

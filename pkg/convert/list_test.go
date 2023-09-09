@@ -1,7 +1,6 @@
 package convert_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/pkg/convert"
@@ -61,7 +60,6 @@ func TestCells(t *testing.T) {
 			if got := (err != nil); got != tt.wantErr {
 				t.Errorf("Cells() error is %v, want %v", got, tt.wantErr)
 			}
-			fmt.Printf("%#v", c)
 			if c.Name != tt.cell.Name {
 				t.Errorf("Cells() gotN = %v, want %v", c.Name, tt.cell.Name)
 			}
