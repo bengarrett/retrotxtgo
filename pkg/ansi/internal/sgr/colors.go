@@ -6,6 +6,13 @@ import (
 	"strconv"
 )
 
+const (
+	// Color16bit is the maximum value for a 16bit color.
+	Color16bit = 65536
+	// Color8bit is the maximum value for a 8bit color.
+	Color8bit = 256
+)
+
 var ErrNotRGB = errors.New("int is not a valid red-green-blue value")
 
 // RGB reads b
@@ -25,12 +32,17 @@ func RGB(b [][]byte) int {
 		if !Uint8(i) {
 			return -1
 		}
+		const (
+			r = 0
+			g = 1
+			b = 2
+		)
 		switch count {
-		case 0:
+		case r:
 			red = uint8(i)
-		case 1:
+		case g:
 			green = uint8(i)
-		case 2:
+		case b:
 			blue = uint8(i)
 		}
 	}
@@ -63,14 +75,14 @@ func RGBDecimal(r uint8, g uint8, b uint8) int {
 	red := int(r)
 	green := int(g)
 	blue := int(b)
-	return red*65536 + green*256 + blue
+	return red*Color16bit + green*Color8bit + blue
 }
 
 // DecimalRGB
 func DecimalRGB(f float64) (r uint8, g uint8, b uint8, err error) {
-	red := math.Floor(f / (256 * 256))
-	green := math.Mod(math.Floor(f/256), 256)
-	blue := math.Mod(f, 256)
+	red := math.Floor(f / (Color8bit * Color8bit))
+	green := math.Mod(math.Floor(f/Color8bit), Color8bit)
+	blue := math.Mod(f, Color8bit)
 	if !Uint8(int(red)) {
 		return 0, 0, 0, ErrNotRGB
 	}

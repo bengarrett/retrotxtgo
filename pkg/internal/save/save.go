@@ -14,12 +14,13 @@ const (
 )
 
 // Save bytes to the named file location.
-func Save(name string, b ...byte) (written int, path string, err error) {
-	path, err = dir(name)
+// The return values are the number of bytes written, the absolute path and filename, and any error.
+func Save(name string, b ...byte) (int, string, error) {
+	_, err := dir(name)
 	if err != nil {
-		return 0, path, fmt.Errorf("save could not open directory %q: %w", name, err)
+		return 0, "", fmt.Errorf("save could not open directory %q: %w", name, err)
 	}
-	path = name
+	path := name
 	const overwrite = os.O_RDWR | os.O_CREATE | os.O_TRUNC
 	file, err := os.OpenFile(path, overwrite, FileMode)
 	if err != nil {
@@ -28,13 +29,14 @@ func Save(name string, b ...byte) (written int, path string, err error) {
 	defer file.Close()
 	// bufio is the most performant
 	writer := bufio.NewWriter(file)
+	written := 0
 	for i, c := range b {
 		written = i
-		if err = writer.WriteByte(c); err != nil {
+		if err := writer.WriteByte(c); err != nil {
 			return 0, path, fmt.Errorf("save could not write bytes: %w", err)
 		}
 	}
-	if err = writer.Flush(); err != nil {
+	if err := writer.Flush(); err != nil {
 		return 0, path, fmt.Errorf("save could not flush the writer: %w", err)
 	}
 	path, err = filepath.Abs(file.Name())
@@ -48,7 +50,7 @@ func Save(name string, b ...byte) (written int, path string, err error) {
 func dir(name string) (string, error) {
 	path := filepath.Dir(name)
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		if err = os.MkdirAll(path, DirMode); err != nil {
+		if err := os.MkdirAll(path, DirMode); err != nil {
 			return "", fmt.Errorf("dir could not make the directory: %s %s: %w", DirMode, path, err)
 		}
 	}

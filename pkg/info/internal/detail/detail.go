@@ -35,19 +35,19 @@ import (
 
 // Detail of a file.
 type Detail struct {
-	XMLName    xml.Name     `json:"-" xml:"file"`
-	Name       string       `json:"filename" xml:"name"`
-	Unicode    string       `json:"unicode" xml:"unicode,attr"`
-	LineBreak  LineBreaks   `json:"lineBreak" xml:"line_break"`
-	Count      Stats        `json:"counts" xml:"counts"`
-	Size       Sizes        `json:"size" xml:"size"`
-	Lines      int          `json:"lines" xml:"lines"`
-	Width      int          `json:"width" xml:"width"`
-	Modified   ModDates     `json:"modified" xml:"last_modified"`
-	Sums       Checksums    `json:"checksums" xml:"checksums"`
-	Mime       Content      `json:"mime" xml:"mime"`
-	Slug       string       `json:"slug" xml:"id,attr"`
-	Sauce      sauce.Record `json:"sauce" xml:"sauce"`
+	XMLName    xml.Name     `json:"-"          xml:"file"`
+	Name       string       `json:"filename"   xml:"name"`
+	Unicode    string       `json:"unicode"    xml:"unicode,attr"`
+	LineBreak  LineBreaks   `json:"lineBreak"  xml:"line_break"`
+	Count      Stats        `json:"counts"     xml:"counts"`
+	Size       Sizes        `json:"size"       xml:"size"`
+	Lines      int          `json:"lines"      xml:"lines"`
+	Width      int          `json:"width"      xml:"width"`
+	Modified   ModDates     `json:"modified"   xml:"last_modified"`
+	Sums       Checksums    `json:"checksums"  xml:"checksums"`
+	Mime       Content      `json:"mime"       xml:"mime"`
+	Slug       string       `json:"slug"       xml:"id,attr"`
+	Sauce      sauce.Record `json:"sauce"      xml:"sauce"`
 	ZipComment string       `json:"zipComment" xml:"zip_comment"`
 	UTF8       bool
 	sauceIndex int
@@ -55,45 +55,45 @@ type Detail struct {
 
 // Checksums and hashes of the file.
 type Checksums struct {
-	CRC32  string `json:"crc32" xml:"crc32"`
-	CRC64  string `json:"crc64" xml:"crc64"`
-	MD5    string `json:"md5" xml:"md5"`
+	CRC32  string `json:"crc32"  xml:"crc32"`
+	CRC64  string `json:"crc64"  xml:"crc64"`
+	MD5    string `json:"md5"    xml:"md5"`
 	SHA256 string `json:"sha256" xml:"sha256"`
 }
 
 // Content metadata from either MIME content type and magic file data.
 type Content struct {
-	Type  string `json:"-" xml:"-"`
-	Media string `json:"media" xml:"media"`
+	Type  string `json:"-"        xml:"-"`
+	Media string `json:"media"    xml:"media"`
 	Sub   string `json:"subMedia" xml:"sub_media"`
-	Commt string `json:"comment" xml:"comment"`
+	Commt string `json:"comment"  xml:"comment"`
 }
 
 // LineBreaks for new line toggles.
 type LineBreaks struct {
-	Abbr     string  `json:"string" xml:"string,attr"`
-	Escape   string  `json:"escape" xml:"-"`
+	Abbr     string  `json:"string"   xml:"string,attr"`
+	Escape   string  `json:"escape"   xml:"-"`
 	Decimals [2]rune `json:"decimals" xml:"decimal"`
 }
 
 // ModDates is the file last modified dates in multiple output formats.
 type ModDates struct {
-	Time  time.Time `json:"iso" xml:"date"`
+	Time  time.Time `json:"iso"   xml:"date"`
 	Epoch int64     `json:"epoch" xml:"epoch,attr"`
 }
 
 // Sizes of the file in multiples.
 type Sizes struct {
-	Bytes   int64  `json:"bytes" xml:"bytes"`
+	Bytes   int64  `json:"bytes"   xml:"bytes"`
 	Decimal string `json:"decimal" xml:"decimal,attr"`
-	Binary  string `json:"binary" xml:"binary,attr"`
+	Binary  string `json:"binary"  xml:"binary,attr"`
 }
 
 // Stats are the text file content statistics and counts.
 type Stats struct {
-	Chars    int `json:"characters" xml:"characters"`
+	Chars    int `json:"characters"   xml:"characters"`
 	Controls int `json:"ansiControls" xml:"ansi_controls"`
-	Words    int `json:"words" xml:"words"`
+	Words    int `json:"words"        xml:"words"`
 }
 
 // Format of the text to output.
@@ -449,13 +449,13 @@ func (d *Detail) LineBreaks(r [2]rune) {
 }
 
 // printMarshalData returns the data structure used for print marshaling.
-func (d *Detail) printMarshalData() (data []struct{ k, v string }) {
+func (d *Detail) printMarshalData() []struct{ k, v string } {
 	const (
 		noBreakSpace     = "\u00A0"
 		symbolForNewline = "\u2424"
 	)
 	p := message.NewPrinter(lang())
-	data = []struct {
+	data := []struct {
 		k, v string
 	}{
 		{k: "slug", v: d.Slug},

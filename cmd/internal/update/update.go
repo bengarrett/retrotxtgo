@@ -56,7 +56,7 @@ func Check() (string, error) {
 		}
 		if fmt.Sprintf("%T", data["etag"]) == "string" {
 			if data["etag"].(string) != "" {
-				if err = CacheSet(data["etag"].(string), tag); err != nil {
+				if err := CacheSet(data["etag"].(string), tag); err != nil {
 					return "", err
 				}
 			}
@@ -69,6 +69,8 @@ func Check() (string, error) {
 }
 
 // CacheGet reads the stored GitHub API, HTTP ETag header and release version.
+//
+//nolint:nonamedreturns
 func CacheGet() (etag, version string) {
 	cf, err := home().DataPath(cacheFile)
 	if err != nil {
@@ -83,7 +85,7 @@ func CacheGet() (etag, version string) {
 		logs.Save(err)
 	}
 	var cache Cache
-	if err = yaml.Unmarshal(f, &cache); err != nil {
+	if err := yaml.Unmarshal(f, &cache); err != nil {
 		logs.Save(err)
 	}
 	// if either value is missing, delete the broken cache

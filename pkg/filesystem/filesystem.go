@@ -115,6 +115,7 @@ func Touch(name string) (string, error) {
 }
 
 // Write b to the named file.
-func Write(name string, b ...byte) (written int, path string, err error) {
+// The number of bytes written and the path to the file are returned.
+func Write(name string, b ...byte) (int, string, error) {
 	return save.Save(name, b...)
 }

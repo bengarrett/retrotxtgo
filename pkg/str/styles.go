@@ -171,7 +171,7 @@ func UnderlineChar(c string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("underlinechar new template: %w", err)
 	}
-	if err = t.ExecuteTemplate(w, "TEXT", string(r)); err != nil {
+	if err := t.ExecuteTemplate(w, "TEXT", string(r)); err != nil {
 		return "", fmt.Errorf("underlinechar execute template: %w", err)
 	}
 	return w.String(), nil

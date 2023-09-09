@@ -39,7 +39,6 @@ func (n Names) Info(name, format string) (string, error) {
 		return "", fmt.Errorf("%s: %w", err1, err)
 	}
 	if s.IsDir() {
-		const walkMode = -1
 		// godirwalk.Walk is more performant than the standard library filepath.Walk
 		err := godirwalk.Walk(name, &godirwalk.Options{
 			Callback: func(osPathname string, de *godirwalk.Dirent) error {
@@ -48,7 +47,7 @@ func (n Names) Info(name, format string) (string, error) {
 				} else if skip {
 					return nil
 				}
-				_, err := Marshal(osPathname, f, walkMode)
+				_, err := Marshal(osPathname, f)
 				return err
 			},
 			ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {
@@ -61,7 +60,7 @@ func (n Names) Info(name, format string) (string, error) {
 		}
 		return "", nil
 	}
-	res, err := Marshal(name, f, n.Length)
+	res, err := Marshal(name, f)
 	if err != nil {
 		return "", fmt.Errorf("info on %s could not marshal: %w", name, err)
 	}
@@ -86,7 +85,7 @@ func output(argument string) (detail.Format, error) {
 }
 
 // Marshal the metadata and system details of a named file.
-func Marshal(name string, f detail.Format, length int) (string, error) {
+func Marshal(name string, f detail.Format) (string, error) {
 	var d detail.Detail
 	if err := d.Read(name); err != nil {
 		return "", err

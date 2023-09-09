@@ -16,6 +16,7 @@ linters:
     - exhaustivestruct  # Deprecated
     - structcheck       # Deprecated
 
+    - exhaustruct       # too many values in struct literal (opinionated)
     - wrapcheck         # wrapping 3rd party errors are unnecessary (opinionated)
     - varnamelen        # doesn't allow short vars (opinionated)
 
@@ -23,6 +24,12 @@ linters:
     - funlen            #  temp disabled
     - testableexamples  #  temp disabled
     - godox             #  temp disabled
+    - paralleltest      #  temp disabled
+    - gocognit          #  temp disabled
+    - nlreturn          #  temp disabled
+    - exhaustive        #  temp disabled
+    - wsl
+    - gocritic          #  temp disabled
 
 linters-settings:
   cyclop:

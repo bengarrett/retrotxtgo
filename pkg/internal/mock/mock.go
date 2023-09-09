@@ -69,7 +69,7 @@ func FileExample(s string, i int) string {
 // LargeExample generates and saves a 800k file of random us-ascii text.
 func LargeExample() string {
 	const name, sizeMB = "rs_mega_example_save.txt", 0.8
-	_, s := Filler(sizeMB)
+	s := Filler(sizeMB)
 	path, err := SaveTemp(name, []byte(s)...)
 	if err != nil {
 		log.Fatal(err)
@@ -80,7 +80,7 @@ func LargeExample() string {
 // MegaExample generates and saves a 1.5MB file of random us-ascii text.
 func MegaExample() string {
 	const name, sizeMB = "rs_giga_mega_save.txt", 1.5
-	_, s := Filler(sizeMB)
+	s := Filler(sizeMB)
 	path, err := SaveTemp(name, []byte(s)...)
 	if err != nil {
 		log.Fatal(err)
@@ -89,9 +89,9 @@ func MegaExample() string {
 }
 
 // Filler generates random us-ascii text.
-func Filler(sizeMB float64) (length int, random string) {
+func Filler(sizeMB float64) string {
 	if sizeMB <= 0 {
-		return length, random
+		return ""
 	}
 	// make characters to randomize
 	const (
@@ -113,7 +113,7 @@ func Filler(sizeMB float64) (length int, random string) {
 	for i := range s {
 		s[i] = chars[rand.Intn(charsLen)] //nolint:gosec
 	}
-	return len(s), string(s)
+	return string(s)
 }
 
 type DirTests []struct {

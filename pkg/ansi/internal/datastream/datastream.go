@@ -37,6 +37,7 @@ func Number(b []byte) bool {
 // If no match is found then 0 is returned.
 // If the preceding number is greater than 255 then 0 is returned.
 func cursor(b []byte, c byte) uint8 {
+	const max = 255
 	i := bytes.IndexByte(b, c)
 	if i == -1 {
 		return 0
@@ -49,7 +50,7 @@ func cursor(b []byte, c byte) uint8 {
 	if err != nil {
 		return 0
 	}
-	if s > 255 {
+	if s > max {
 		return 0
 	}
 	return uint8(s)
@@ -60,6 +61,7 @@ func cursor(b []byte, c byte) uint8 {
 // If b is invalid then both line and col return 0.
 // If b equals c, then Home is requested and line and col will return 1.
 func cursorPos(b []byte, c byte) (line uint8, col uint8) {
+	const max = 255
 	if len(b) == 0 {
 		return 0, 0
 	}
@@ -85,7 +87,7 @@ func cursorPos(b []byte, c byte) (line uint8, col uint8) {
 	if err != nil {
 		return 0, 0
 	}
-	if r > 255 {
+	if r > max {
 		return 0, 0
 	}
 	col = cursor(s[1], c)

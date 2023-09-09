@@ -97,7 +97,7 @@ func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 		}
 	}
 	fmt.Fprint(w, "\n")
-	if err = w.Flush(); err != nil {
+	if err := w.Flush(); err != nil {
 		return nil, fmt.Errorf("table tab writer failed to flush data: %w", err)
 	}
 	return &buf, nil

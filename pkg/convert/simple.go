@@ -16,7 +16,7 @@ func DString(s string, c *charmap.Charmap) ([]byte, error) {
 	reader := transform.NewReader(strings.NewReader(s), decoder)
 	b, err := io.ReadAll(reader)
 	if err != nil {
-		return nil, fmt.Errorf("dstring ioutil readall error: %w", err)
+		return nil, fmt.Errorf("dstring io.readall error: %w", err)
 	}
 	return b, nil
 }
@@ -30,7 +30,7 @@ func EString(s string, c *charmap.Charmap) ([]byte, error) {
 	reader := transform.NewReader(strings.NewReader(s), encoder)
 	b, err := io.ReadAll(reader)
 	if err != nil {
-		return nil, fmt.Errorf("estring ioutil readall error: %w", err)
+		return nil, fmt.Errorf("estring io.readall error: %w", err)
 	}
 	return b, nil
 }

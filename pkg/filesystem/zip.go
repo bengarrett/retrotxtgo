@@ -101,7 +101,7 @@ func (files *Files) Zip(name, comment string, ow, quiet bool) error {
 	z := zip.NewWriter(w)
 	defer z.Close()
 	if comment != "" {
-		if err = z.SetComment(comment); err != nil {
+		if err := z.SetComment(comment); err != nil {
 			return fmt.Errorf("zip set comment %q: %w", comment, err)
 		}
 	}

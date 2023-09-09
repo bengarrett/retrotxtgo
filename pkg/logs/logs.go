@@ -27,13 +27,13 @@ func FatalSave(err error) {
 		return
 	}
 	// save error to log file
-	if err = SaveErr(err, ""); err != nil {
+	if err := SaveErr(err, ""); err != nil {
 		log.Fatalf("%s %s", color.Danger.Sprint("!"), err)
 	}
 	// print error
 	switch Panic {
 	case true:
-		log.Println(fmt.Sprintf("error type: %T\tmsg: %v", err, err))
+		log.Printf("error type: %T\tmsg: %v\n", err, err)
 		log.Panic(err)
 	default:
 		FatalWrap(ErrSave, err)
@@ -46,13 +46,13 @@ func Save(err error) {
 		return
 	}
 	// save error to log file
-	if err = SaveErr(err, ""); err != nil {
+	if err := SaveErr(err, ""); err != nil {
 		log.Fatalf("%s %s", color.Danger.Sprint("!"), err)
 	}
 }
 
 // LastEntry returns the most recent saved entry in the error log file.
-func LastEntry() (s string, err error) {
+func LastEntry() (string, error) {
 	name := Name()
 	file, err := os.Open(name)
 	if err != nil {
@@ -61,10 +61,11 @@ func LastEntry() (s string, err error) {
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanLines)
+	s := ""
 	for scanner.Scan() {
 		s = scanner.Text()
 	}
-	if err = scanner.Err(); err != nil {
+	if err := scanner.Err(); err != nil {
 		return "", fmt.Errorf("read tail could scan file bytes: %q: %w", name, err)
 	}
 	return s, file.Close()

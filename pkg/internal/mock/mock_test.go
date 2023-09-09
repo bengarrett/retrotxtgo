@@ -18,7 +18,8 @@ func Test_filler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotLength, _ := mock.Filler(tt.sizeMB); gotLength != tt.wantLength {
+			s := mock.Filler(tt.sizeMB)
+			if gotLength := len(s); gotLength != tt.wantLength {
 				t.Errorf("Filler() = %v, want %v", gotLength, tt.wantLength)
 			}
 		})

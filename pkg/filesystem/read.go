@@ -54,7 +54,7 @@ func ReadAllBytes(name string) ([]byte, error) {
 	for scanner.Scan() {
 		buf = append(buf, scanner.Bytes()...)
 	}
-	if err = scanner.Err(); err != nil {
+	if err := scanner.Err(); err != nil {
 		return nil, fmt.Errorf("scanner %q: %w", name, err)
 	}
 	return buf, file.Close()
@@ -81,7 +81,7 @@ func ReadChunk(name string, chars int) ([]byte, error) {
 		}
 		buf = append(buf, scanner.Bytes()...)
 	}
-	if err = scanner.Err(); err != nil {
+	if err := scanner.Err(); err != nil {
 		return nil, fmt.Errorf("read chunk could not scan file: %q: %w", name, err)
 	}
 	return buf, file.Close()
@@ -150,7 +150,7 @@ func ReadLine(name string, lb nl.LineBreaks) (string, error) {
 	for scanner.Scan() {
 		s += fmt.Sprintf("%s%s", scanner.Text(), n)
 	}
-	if err = scanner.Err(); err != nil {
+	if err := scanner.Err(); err != nil {
 		return "", fmt.Errorf("read line could not scan file: %w", err)
 	}
 	return s, file.Close()
@@ -243,7 +243,7 @@ func ReadTail(name string, offset int) ([]byte, error) {
 		}
 		b = append(b, scanner.Bytes()...)
 	}
-	if err = scanner.Err(); err != nil {
+	if err := scanner.Err(); err != nil {
 		return nil, fmt.Errorf("read tail could scan file bytes: %q: %w", name, err)
 	}
 	return b, file.Close()

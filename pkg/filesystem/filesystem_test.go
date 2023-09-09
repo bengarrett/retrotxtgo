@@ -23,7 +23,7 @@ func ExampleTar() {
 		log.Fatal(err)
 	}
 	defer os.Remove(tmpFile)
-	if err = filesystem.Tar(tmpTar, tmpFile); err != nil {
+	if err := filesystem.Tar(tmpTar, tmpFile); err != nil {
 		log.Print(err)
 		return
 	}

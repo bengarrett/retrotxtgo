@@ -55,7 +55,7 @@ func Run(cmd *cobra.Command, args []string) error {
 				}
 				return fmt.Errorf("%w, %s: %s", logs.ErrFileName, err, arg)
 			}
-			if err = cmd.Usage(); err != nil {
+			if err := cmd.Usage(); err != nil {
 				return fmt.Errorf("%w: %s", ErrUsage, err)
 			}
 			return err

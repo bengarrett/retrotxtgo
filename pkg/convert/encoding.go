@@ -229,6 +229,8 @@ func Humanize(name string) string {
 }
 
 // Shorten the name to a custom name, a common name or an alias.
+//
+//nolint:gonmd
 func Shorten(name string) string {
 	n, l := strings.ToLower(name), len(name)
 	switch {
@@ -676,8 +678,9 @@ func (c *Convert) RunesEBCDIC() {
 	}
 }
 
-// control switches out an EBCDIC IBM mainframe control with Unicode picture representation.
-func (c *Convert) control(i int, r rune) (skip bool) { //nolint:funlen,cyclop
+// Control switches out an EBCDIC IBM mainframe control with Unicode picture representation.
+// A return true value means the run should be skipped.
+func (c *Convert) control(i int, r rune) bool { //nolint:funlen,cyclop
 	if i > len(c.Output) {
 		return false
 	}

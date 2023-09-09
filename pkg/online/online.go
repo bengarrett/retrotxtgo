@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -30,34 +30,34 @@ type API map[string]interface{}
 
 // Endpoint request an API endpoint from the URL.
 // A HTTP ETag can be provided to validate local data cache against the server.
-// The useCache will return true with the etag value matches the server's ETag header.
-func Endpoint(url, etag string) (useCache bool, data API, err error) {
-	useCache = false
+// The return is true when the etag value matches the server's ETag header.
+func Endpoint(url, etag string) (bool, API, error) {
 	resp, body, err := Get(url, etag)
 	if err != nil {
-		return useCache, data, fmt.Errorf("endpoint get failed: %w", err)
+		return false, API{}, fmt.Errorf("endpoint get failed: %w", err)
 	}
 	defer resp.Body.Close()
 	if etag != "" {
 		s := resp.StatusCode
 		if s == 304 || (s == 200 && body == nil) {
 			// Not Modified
-			return true, data, nil
+			return true, API{}, nil
 		}
 	}
 	if ok := json.Valid(body); !ok {
-		return useCache, data, fmt.Errorf("endpoint %s: %w", url, ErrJSON)
+		return false, API{}, fmt.Errorf("endpoint %s: %w", url, ErrJSON)
 	}
-	if err = json.Unmarshal(body, &data); err != nil {
-		return useCache, data, fmt.Errorf("endpoint %s: %w", url, ErrMash)
+	var data API
+	if err := json.Unmarshal(body, &data); err != nil {
+		return false, API{}, fmt.Errorf("endpoint %s: %w", url, ErrMash)
 	}
 	data["etag"] = resp.Header.Get("Etag")
-	return useCache, data, nil
+	return false, data, nil
 }
 
 // Get fetches a URL and returns both its response and body.
 // If an etag is provided a "If-None-Match" header request will be included.
-func Get(url, etag string) (resp *http.Response, body []byte, err error) {
+func Get(url, etag string) (*http.Response, []byte, error) {
 	client := &http.Client{
 		Timeout: httpTimeout,
 	}
@@ -66,27 +66,27 @@ func Get(url, etag string) (resp *http.Response, body []byte, err error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	defer cancel()
 	if err != nil {
-		return nil, body, fmt.Errorf("getting a new request error: %w", err)
+		return nil, nil, fmt.Errorf("getting a new request error: %w", err)
 	}
 	if etag != "" {
 		req.Header.Set("If-None-Match", etag)
 	}
 	req.Header.Set("User-Agent", userAgent())
-	resp, err = client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
-		return nil, body, fmt.Errorf("requesting to set the get user-agent header: %w", err)
+		return nil, nil, fmt.Errorf("requesting to set the get user-agent header: %w", err)
 	}
 	defer resp.Body.Close()
-	body, err = ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, body, fmt.Errorf("reading the response body failed: %w", err)
+		return nil, nil, fmt.Errorf("reading the response body failed: %w", err)
 	}
 	return resp, body, resp.Body.Close()
 }
 
 // Ping requests a URL and determines if the status is ok.
-func Ping(url string) (ok bool, err error) {
-	ok = false
+func Ping(url string) (bool, error) {
+	ok := false
 	client := &http.Client{
 		Timeout: httpTimeout,
 	}

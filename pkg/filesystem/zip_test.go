@@ -39,7 +39,7 @@ func ExampleZip() {
 	}
 
 	// Create the Zip archive file
-	if err = zip.Create(); err != nil {
+	if err := zip.Create(); err != nil {
 		log.Print(err)
 		return
 	}

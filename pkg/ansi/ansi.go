@@ -87,6 +87,8 @@ func HTMLReader(w io.Writer, r io.Reader) error {
 }
 
 // ScanANSI is a split function for a Scanner that returns each ANSI control sequence introducer as a token.
+//
+//nolint:nonamedreturns
 func ScanANSI(data []byte, atEOF bool) (advance int, token []byte, err error) {
 	if atEOF && len(data) == 0 {
 		return 0, nil, nil

@@ -40,7 +40,7 @@ func Args(cmd *cobra.Command, args ...string) ([]string, *convert.Convert, sampl
 	if filesystem.IsPipe() {
 		var err error
 		if l > 0 {
-			err = fmt.Errorf("%v;%w for piped text", err, ErrFilenames)
+			err = fmt.Errorf("%w;%w for piped text", err, ErrFilenames)
 			args = []string{""}
 		}
 		if err != nil {

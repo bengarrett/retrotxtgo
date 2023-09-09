@@ -46,7 +46,7 @@ func Temp(name string) string {
 }
 
 // Windows appends Windows style syntax to the directory.
-func Windows(i int, p, platform, dir string) (s string, cont bool) {
+func Windows(i int, p, platform, dir string) (string, bool) {
 	if platform == "windows" {
 		if len(p) == 2 && p[1:] == ":" {
 			dir = strings.ToUpper(p) + "\\"

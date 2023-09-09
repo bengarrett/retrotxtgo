@@ -101,11 +101,11 @@ func Test_InfoText(t *testing.T) {
 
 func Test_InfoData(t *testing.T) {
 	type Sizes struct {
-		Bytes int `json:"bytes"  xml:"bytes"`
+		Bytes int `json:"bytes" xml:"bytes"`
 	}
 	type response struct {
-		Name string `json:"filename"  xml:"name"`
-		Size Sizes  `json:"size"  xml:"size"`
+		Name string `json:"filename" xml:"name"`
+		Size Sizes  `json:"size"     xml:"size"`
 	}
 	t.Run("info format json/xml", func(t *testing.T) {
 		err := filepath.Walk(static,

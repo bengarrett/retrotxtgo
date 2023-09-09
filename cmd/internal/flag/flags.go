@@ -1,3 +1,4 @@
+//nolint:gochecknoglobals
 package flag
 
 import (
@@ -87,7 +88,7 @@ func HiddenTo(p *string, cc *cobra.Command) error {
 	cc.Flags().StringVar(p, name, "",
 		"alternative character encoding to print to stdout\nthis flag is unreliable and not recommended")
 	if err := cc.Flags().MarkHidden(name); err != nil {
-		return fmt.Errorf("%w, %s: %s", ErrHide, name, err)
+		return fmt.Errorf("%w, %s: %w", ErrHide, name, err)
 	}
 	return nil
 }
