@@ -1,3 +1,4 @@
+// Package info provides the info command run function.
 package info
 
 import (
@@ -22,6 +23,7 @@ var (
 	ErrUsage    = errors.New("command usage could not display")
 )
 
+// Run parses the arguments supplied with the info command.
 func Run(cmd *cobra.Command, args []string) error {
 	// piped input from other programs and then exit
 	if filesystem.IsPipe() {

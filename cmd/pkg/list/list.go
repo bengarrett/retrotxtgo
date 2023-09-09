@@ -1,3 +1,4 @@
+// Package list provides the list command run function.
 package list
 
 import (
@@ -24,6 +25,7 @@ var (
 	ErrIANA  = errors.New("could not work out the IANA index or MIME type")
 )
 
+// Examples returns examples commands for the list cmd.
 func Examples() (*bytes.Buffer, error) {
 	m := sample.Map()
 	keys := make([]string, 0, len(m))
@@ -62,7 +64,7 @@ func Examples() (*bytes.Buffer, error) {
 	return &buf, nil
 }
 
-// listTable returns one or more named encodings in a tabled format.
+// Table returns one or more named encodings in a tabled format.
 func Table(names ...string) (string, error) {
 	// custom ascii shortcut
 	tables := names

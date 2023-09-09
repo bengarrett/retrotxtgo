@@ -1,38 +1,17 @@
 package example_test
 
 import (
-	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/cmd/pkg/example"
-	"github.com/gookit/color"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestExample(t *testing.T) {
-	color.Enable = false
-	tests := []struct {
-		contains string
-	}{
-		// TODO: update tests with new examples.
-		// {"config setup"},
-		// {"config info"},
-		// {"# print a HTML file created from file.txt"},
-		// {"list codepages"},
-		// {"list examples"},
-		// {"table cp437"},
-		// {"info text.asc logo.jpg"},
-		// {"config set --list"},
-		// {"view file.txt"},
-		{""},
-	}
-	val := -1
-	for _, tt := range tests {
-		val++
-		t.Run(fmt.Sprintf("example_%d", val), func(t *testing.T) {
-			if !strings.Contains(example.Example(val).String(), tt.contains) {
-				t.Errorf("example %v does not contain the expected string: %q", val, tt.contains)
-			}
-		})
-	}
+	assert.Contains(t, example.Cmd.String(), "print text files partial info")
+	assert.Contains(t, example.Info.String(), "info file.txt")
+	assert.Contains(t, example.ListExamples.String(), "list the builtin examples")
+	assert.Contains(t, example.ListTable.String(), "iso-8859-15")
+	assert.Contains(t, example.List.String(), "list codepages")
+	assert.Contains(t, example.View.String(), "view file.txt")
 }

@@ -1,3 +1,4 @@
+// Package flag provides the command flags handlers.
 package flag
 
 import (

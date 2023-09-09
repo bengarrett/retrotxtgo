@@ -1,3 +1,5 @@
+// Package flag provides the command flags handlers.
+//
 //nolint:gochecknoglobals
 package flag
 
@@ -17,12 +19,15 @@ type Commands struct {
 	Tester bool // internal automated tester
 }
 
+// Command returns the root command.
 var Command Commands
 
+// Info handles the info --format flag.
 var Info struct {
 	Format string
 }
 
+// Views handles the view command flags.
 type Views struct {
 	Controls []string
 	Encode   string
@@ -31,6 +36,7 @@ type Views struct {
 	Width    int
 }
 
+// View returns the Views struct with default values.
 func View() Views {
 	return Views{
 		Controls: []string{"eof", "tab"},
@@ -42,9 +48,7 @@ func View() Views {
 }
 
 // Controls handles the --controls flag.
-//
-//nolint:dupword
-func Controls(p *[]string, cc *cobra.Command) {
+func Controls(p *[]string, cc *cobra.Command) { //nolint:dupword
 	cc.Flags().StringSliceVarP(p, "controls", "c", []string{},
 		`implement these control codes (default "eof,tab")
 separate multiple controls with commas

@@ -1,3 +1,4 @@
+// Package view provides the view command run function.
 package view
 
 import (

@@ -1,3 +1,4 @@
+// Package version provides the stdout template for the version flag.
 package version
 
 import (
@@ -10,7 +11,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/bengarrett/retrotxtgo/cmd/internal/update"
+	"github.com/bengarrett/retrotxtgo/cmd/pkg/update"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/gookit/color"

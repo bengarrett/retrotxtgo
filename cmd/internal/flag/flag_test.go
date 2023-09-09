@@ -1,11 +1,14 @@
 package flag_test
 
 import (
+	"fmt"
+	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
+	"github.com/bengarrett/retrotxtgo/pkg/convert"
 	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
 	"github.com/bengarrett/retrotxtgo/pkg/sample"
 	"github.com/bengarrett/retrotxtgo/pkg/sauce"
@@ -13,6 +16,13 @@ import (
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 )
+
+func ExampleEndOfFile() {
+	var f convert.Flag
+	f.Controls = []string{"eof"}
+	fmt.Fprint(os.Stdout, flag.EndOfFile(f))
+	// Output: true
+}
 
 func TestDefault(t *testing.T) {
 	tests := []struct {

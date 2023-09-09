@@ -1,3 +1,4 @@
+// Package update provides the ability to check GitHub for the newest release tag.
 package update
 
 import (
@@ -67,9 +68,7 @@ func Check() (string, error) {
 }
 
 // CacheGet reads the stored GitHub API, HTTP ETag header and release version.
-//
-//nolint:nonamedreturns
-func CacheGet() (etag, version string) {
+func CacheGet() (etag, version string) { //nolint:nonamedreturns
 	cf, err := home().DataPath(cacheFile)
 	if err != nil {
 		logs.Save(err)
