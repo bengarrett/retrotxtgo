@@ -2,6 +2,7 @@ package filesystem_test
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path"
@@ -35,7 +36,7 @@ func ExampleZip() {
 		Root:      tmpZip,
 		Comment:   "",
 		Overwrite: true,
-		Quiet:     true,
+		Writer:    io.Discard,
 	}
 
 	// Create the Zip archive file

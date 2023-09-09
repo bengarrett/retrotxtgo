@@ -3,6 +3,7 @@ package filesystem
 import (
 	"archive/zip"
 	"fmt"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -27,8 +28,8 @@ type Zip struct {
 	Comment string
 	// Overwrite an existing named zip file if encountered.
 	Overwrite bool
-	// Quiet suppresses all non-error messages.
-	Quiet bool
+	// Writer for all the non-error messages, or use io.Discard to suppress.
+	Writer io.Writer
 }
 
 // Create zip packages and compresses files contained the root directory into an archive using the provided name.
@@ -64,11 +65,11 @@ func (z *Zip) Create() error {
 	if err := filepath.Walk(z.Root, walker); err != nil {
 		return err
 	}
-	return files.Zip(z.Name, z.Comment, z.Overwrite, z.Quiet)
+	return files.Zip(z.Writer, z.Name, z.Comment, z.Overwrite)
 }
 
 // Zip packages and compresses files to an archive using the provided name.
-func (files *Files) Zip(name, comment string, ow, quiet bool) error {
+func (files *Files) Zip(w io.Writer, name, comment string, ow bool) error {
 	const (
 		overwrite    = os.O_RDWR | os.O_CREATE
 		mustNotExist = os.O_RDWR | os.O_CREATE | os.O_EXCL
@@ -77,16 +78,16 @@ func (files *Files) Zip(name, comment string, ow, quiet bool) error {
 	var (
 		err error
 		n   string
-		w   *os.File
+		f   *os.File
 	)
 	switch ow {
 	case true:
 		n = name
-		w, err = os.OpenFile(n, overwrite, readWriteAll)
+		f, err = os.OpenFile(n, overwrite, readWriteAll)
 		if err != nil {
 			return fmt.Errorf("zip create %q: %w", n, err)
 		}
-		defer w.Close()
+		defer f.Close()
 	default:
 		n, err = UniqueName(name)
 		if err != nil {
@@ -96,7 +97,7 @@ func (files *Files) Zip(name, comment string, ow, quiet bool) error {
 		if err != nil {
 			return fmt.Errorf("zip create %q: %w", n, err)
 		}
-		defer w.Close()
+		defer f.Close()
 	}
 	z := zip.NewWriter(w)
 	defer z.Close()
@@ -123,9 +124,8 @@ func (files *Files) Zip(name, comment string, ow, quiet bool) error {
 	if err != nil {
 		return fmt.Errorf("zip abs %q: %w", s.Name(), err)
 	}
-	if !quiet {
-		fmt.Fprintln(os.Stdout, "created zip file:", abs, humanize.Decimal(s.Size(), language.AmericanEnglish))
-	}
+	fmt.Fprintln(w, "created zip file:", abs,
+		humanize.Decimal(s.Size(), language.AmericanEnglish))
 	return nil
 }
 
