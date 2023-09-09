@@ -14,9 +14,9 @@ type SAUCE struct {
 	Lines       uint
 }
 
-// SAUCE returns any SAUCE metadata that is attached to src.
-func (s *SAUCE) Read(src *[]byte) {
-	sr := sauce.Decode(*src)
+// Read returns any SAUCE metadata that is attached to the byte array.
+func (s *SAUCE) Read(b *[]byte) {
+	sr := sauce.Decode(*b)
 	if !sr.Valid() {
 		return
 	}

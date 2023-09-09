@@ -101,7 +101,7 @@ func EncodeAndHide(cmd *cobra.Command, dfault string) (sample.Flags, error) {
 	if err != nil {
 		return sample.Flags{}, err
 	}
-	return sample.Flags{From: frm, To: to}, err
+	return sample.Flags{Input: frm, Output: to}, err
 }
 
 // EndOfFile returns true if the end-of-file control flag was requested.

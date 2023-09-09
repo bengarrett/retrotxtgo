@@ -35,7 +35,7 @@ func Run(cmd *cobra.Command, args ...string) (*bytes.Buffer, error) {
 		if err != nil {
 			return nil, err
 		}
-		r, err := Transform(samp.From, samp.To, conv, b...)
+		r, err := Transform(samp.Input, samp.Output, conv, b...)
 		if err != nil {
 			return nil, err
 		}

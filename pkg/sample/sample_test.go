@@ -55,8 +55,8 @@ func TestFlags_Open(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			f := sample.Flags{
-				From: tt.fields.From,
-				To:   tt.fields.To,
+				Input:  tt.fields.From,
+				Output: tt.fields.To,
 			}
 			gotS, err := f.Open(tt.args.name, tt.args.conv)
 			if (err != nil) != tt.wantErr {
@@ -93,7 +93,7 @@ func TestValid(t *testing.T) {
 	}
 }
 
-func Test_encode(t *testing.T) {
+func TestTransform(t *testing.T) {
 	hi := []byte("hello world")
 	dos := []byte("▒▓█")
 	type args struct {
@@ -114,13 +114,13 @@ func Test_encode(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := sample.Encode(tt.args.e, tt.args.b...)
+			got, err := sample.Transform(tt.args.e, tt.args.b...)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("encode() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Transform() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("encode() = %v, want %v", got, tt.want)
+				t.Errorf("Transform() = %v, want %v", got, tt.want)
 			}
 		})
 	}
