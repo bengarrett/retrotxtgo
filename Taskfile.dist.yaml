@@ -1,0 +1,84 @@
+# https://taskfile.dev/installation/
+
+version: '3'
+
+vars:
+  BINNAME: retrotxt
+
+tasks:
+  default:
+    desc: "Task runner for the retrotxt source code."
+    cmds:
+      - task --list-all
+    silent: true
+  lint:
+    silent: false
+    desc: Runs the go formatter and lints the source code.
+    ignore_error: true
+    cmds:
+      - cmd: clear
+        platforms: [linux, darwin, freebsd]
+      - cmd: gofumpt -w .
+      - cmd: golangci-lint run
+  build:
+    desc: "Build the binary of the program."
+    cmds:
+      - cmd: echo "Building..."
+      - cmd: go build -o {{.BINNAME}} -v main.go
+        platforms: [linux, darwin, freebsd]
+      - cmd: go build -o {{.BINNAME}}.exe -v main.go
+        platforms: [windows]
+      - cmd: echo "Done!"
+  build-race:
+    desc: "Build the binary of the program with race detection."
+    cmds:
+      - cmd: echo "Building with race conditions..."
+      - cmd: go build -o {{.BINNAME}} -race -v main.go
+        platforms: [linux, darwin, freebsd]
+      - cmd: go build -o {{.BINNAME}}.exe -race -v main.go
+        platforms: [windows]
+      - cmd: ./{{.BINNAME}} --version
+        platforms: [linux,darwin]
+      - cmd: ./{{.BINNAME}}.exe --version
+        platforms: [windows]
+      - cmd: echo "Done!"
+  test:
+    desc: "Run the test suite."
+    cmds:
+      - go test -v ./...
+  testr:
+    desc: "Run the test suite with the slower race detection."
+    cmds:
+      - go test -race -v ./...
+  pkg-patch:
+    silent: false
+    desc: Update and apply patches to the web server dependencies.
+    cmds:
+      - cmd: go get -u=patch -x
+      - cmd: go mod verify
+  pkg-update:
+    silent: false
+    desc: Update the web server dependencies.
+    cmds:
+      - cmd: go get -u -x
+      - cmd: go mod verify
+  ver:
+    silent: false
+    desc: Print the versions of the build and compiler tools.
+    ignore_error: true
+    cmds:
+      - cmd: go version
+      - cmd: gofumpt --version
+      - cmd: task --version
+      - cmd: golangci-lint --version
+      - cmd: goreleaser --version
+      - cmd: air -v
+      - cmd: esbuild --version
+  _init:
+    silent: false
+    desc: "Initialise this project for the first time after a git clone."
+    # cmds:
+    #   - cmd: go install mvdan.cc/gofumpt@latest
+    #   - cmd: go install github.com/cosmtrek/air@latest
+    #   - cmd: go install github.com/goreleaser/goreleaser@latest
+    #   - cmd: go install github.com/evanw/esbuild/cmd/esbuild@latest
