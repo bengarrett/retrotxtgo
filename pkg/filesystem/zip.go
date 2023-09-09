@@ -129,6 +129,7 @@ func (files *Files) Zip(name, comment string, ow, quiet bool) error {
 	return nil
 }
 
+// AddZip adds the named file to a zip archive.
 func AddZip(name string, z *zip.Writer) error {
 	s, err := os.Stat(name)
 	if err != nil {
