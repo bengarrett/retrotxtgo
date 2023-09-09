@@ -9,9 +9,9 @@ import (
 )
 
 var (
-	// arguments to test the --encoding flag
+	// arguments to test the --encoding flag.
 	cp037    = []string{"--encode", "cp037", "../static/text/cp037.txt"}
-	cp437    = []string{"--controls", "", "../static/text/cp437-crlf.txt"} // overwrite default controls
+	cp437    = []string{"--controls", "", "../static/text/cp437-crlf.txt"} // overwrite default controls.
 	cp865    = []string{"../static/text/cp865.txt"}
 	cp1252   = []string{"-e", "1252", "../static/text/cp1252.txt"}
 	latin1   = []string{"--encode", "iso-8859-1", "../static/text/iso-8859-1.txt"}
@@ -19,8 +19,8 @@ var (
 	shiftjis = []string{"--encode", "shiftjis", "../static/text/shiftjis.txt"}
 	utf8bom  = []string{"../static/text/utf-8-bom.txt"}
 	utf16    = []string{"--encode", "utf16", "../static/text/utf-16.txt"}
-	// utf32    = []string{"--encode", "utf32", "../static/text/utf-32.txt"} // TODO: failing
-	// arguments to test the --controls flag
+	// utf32    = []string{"--encode", "utf32", "../static/text/utf-32.txt"} // TODO: failing.
+	// arguments to test the --controls flag.
 	noCtrls = []string{"--controls", "", "../static/text/us-ascii.txt"}
 	eof     = []string{"--controls", "eof", "../static/text/us-ascii.txt"}
 	tab     = []string{"--controls", "tab", "../static/text/us-ascii.txt"}
@@ -30,7 +30,7 @@ var (
 	esc     = []string{"--controls", "esc", "../static/text/us-ascii.txt"}
 	ff      = []string{"--controls", "ff", "../static/text/us-ascii.txt"}
 	vtab    = []string{"--controls", "vtab", "../static/text/us-ascii.txt"}
-	// arguments to test the --swap-chars flag
+	// arguments to test the --swap-chars flag.
 	allCP437 = []string{"-c", "", "-x", "", "../static/text/cp437-crlf.txt"}
 	null     = []string{"-c", "", "--swap-chars", "null", "../static/text/cp437-crlf.txt"}
 	bar      = []string{"-c", "", "-x", "bar", "../static/text/cp437-crlf.txt"}
@@ -77,7 +77,7 @@ func Test_ViewCommand(t *testing.T) {
 		},
 		{"utf-8", utf8bom, utfResults},
 		{"utf-16", utf16, utfResults},
-		//{"utf-32", utf32, utfResults}, // TODO: failing
+		//{"utf-32", utf32, utfResults}, // TODO: failing.
 		{
 			"no controls", noCtrls,
 			[]rune{'○', '•', '⌂', '←', '→'},

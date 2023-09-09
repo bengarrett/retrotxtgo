@@ -23,16 +23,17 @@ func DString(s string, c *charmap.Charmap) ([]byte, error) {
 
 // EString encodes text into a simple character encoding.
 func EString(s string, c *charmap.Charmap) ([]byte, error) {
-	if !utf8.Valid([]byte(s)) {
+	b := []byte(s)
+	if !utf8.Valid(b) {
 		return nil, fmt.Errorf("estring: %w", ErrUTF8)
 	}
 	encoder := c.NewEncoder()
 	reader := transform.NewReader(strings.NewReader(s), encoder)
-	b, err := io.ReadAll(reader)
+	p, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, fmt.Errorf("estring io.readall error: %w", err)
 	}
-	return b, nil
+	return p, nil
 }
 
 // D437 decodes IBM Code Page 437 encoded text.

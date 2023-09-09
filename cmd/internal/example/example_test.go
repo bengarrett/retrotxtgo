@@ -14,7 +14,7 @@ func TestExample(t *testing.T) {
 	tests := []struct {
 		contains string
 	}{
-		// TODO: update tests with new examples
+		// TODO: update tests with new examples.
 		// {"config setup"},
 		// {"config info"},
 		// {"# print a HTML file created from file.txt"},

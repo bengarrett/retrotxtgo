@@ -106,14 +106,14 @@ func CacheSet(etag, version string) error {
 	}
 	out, err := yaml.Marshal(&cache)
 	if err != nil {
-		return fmt.Errorf("%s: %w", err, ErrCacheYaml)
+		return fmt.Errorf("%w: %w", err, ErrCacheYaml)
 	}
 	f, err := home().DataPath(cacheFile)
 	if err != nil {
 		return fmt.Errorf("%q: %w", cacheFile, ErrCacheData)
 	}
 	if _, _, err := filesystem.Write(f, out...); err != nil {
-		return fmt.Errorf("%s: %w", err, ErrCacheSave)
+		return fmt.Errorf("%w: %w", err, ErrCacheSave)
 	}
 	return nil
 }

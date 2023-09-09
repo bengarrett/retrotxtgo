@@ -15,7 +15,7 @@ import (
 // Attributes are values for applying different CSS styles
 // and colors to the Bytes of text.
 // TODO: consolidate these bools? Change Bold/Faint bool to Intensity uint (normal 0, bold 1, faint 2)?
-// TODO: then change SetBold() SetFaint() to SetIntensity()
+// TODO: then change SetBold() SetFaint() to SetIntensity().
 type Attributes struct {
 	Bytes         []byte      // Bytes of text for display.
 	Foreground    xterm.Color // Text color 8 bit value.
@@ -39,8 +39,8 @@ type Attributes struct {
 }
 
 // String returns the Attributes as CSS class names.
-// TODO: background, foreground ... BOOL FONTS RGB colors
-// TODO: also return (css, style string)
+// TODO: background, foreground ... BOOL FONTS RGB colors.
+// TODO: also return (css, style string).
 func (a Attributes) String() string {
 	var cls []string
 	// Conceal hides the text so do not return any other styles.
@@ -131,7 +131,7 @@ func (a *Attributes) DataStream(b []byte) {
 			return
 		}
 		if cont := ext.Scan(s); cont {
-			// TODO: background and foreground
+			// TODO: background and foreground.
 			if ext.Color > -1 {
 				// todo bg/fg
 				a.Background = xterm.Color(ext.Color)

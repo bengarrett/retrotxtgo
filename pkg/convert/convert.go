@@ -52,12 +52,13 @@ func TrimEOF(b []byte) []byte {
 		return b[:cut]
 	}
 	// UTF-8 symbol for substitute character
-	if cut := strings.IndexRune(string(b), SymbolSUB); cut > 0 {
-		return []byte(string(b)[:cut])
+	s := string(b)
+	if cut := strings.IndexRune(s, SymbolSUB); cut > 0 {
+		return []byte(s[:cut])
 	}
 	// UTF-8 right-arrow which is displayed for the CP-437 substitute character code point 26
-	if cut := strings.IndexRune(string(b), DosSUB); cut > 0 {
-		return []byte(string(b)[:cut])
+	if cut := strings.IndexRune(s, DosSUB); cut > 0 {
+		return []byte(s[:cut])
 	}
 	return b
 }

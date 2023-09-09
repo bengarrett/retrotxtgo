@@ -45,6 +45,8 @@ func View() Views {
 }
 
 // Controls handles the --controls flag.
+//
+//nolint:dupword
 func Controls(p *[]string, cc *cobra.Command) {
 	cc.Flags().StringSliceVarP(p, "controls", "c", []string{},
 		`implement these control codes (default "eof,tab")

@@ -39,7 +39,7 @@ func Run(cmd *cobra.Command, args []string) error {
 			// embed sample filename
 			filename, err := Sample(arg)
 			if errors.Is(err, ErrNotSamp) {
-				return fmt.Errorf("%w, %s: %s", ErrInfo, err, arg)
+				return fmt.Errorf("%w, %w: %s", ErrInfo, err, arg)
 			}
 			if filename == "" {
 				return ErrNotExist
@@ -53,10 +53,10 @@ func Run(cmd *cobra.Command, args []string) error {
 				if n.Length <= 1 {
 					return err
 				}
-				return fmt.Errorf("%w, %s: %s", logs.ErrFileName, err, arg)
+				return fmt.Errorf("%w, %w: %s", logs.ErrFileName, err, arg)
 			}
 			if err := cmd.Usage(); err != nil {
-				return fmt.Errorf("%w: %s", ErrUsage, err)
+				return fmt.Errorf("%w: %w", ErrUsage, err)
 			}
 			return err
 		}
@@ -93,11 +93,11 @@ func Sample(name string) (string, error) {
 func Pipe(cmd *cobra.Command) error {
 	b, err := filesystem.ReadPipe()
 	if err != nil {
-		return fmt.Errorf("%w, %s", logs.ErrPipeRead, err)
+		return fmt.Errorf("%w, %w", logs.ErrPipeRead, err)
 	}
 	s, err := info.Stdin(flag.Info.Format, b...)
 	if err != nil {
-		return fmt.Errorf("%w, %s", logs.ErrPipeParse, err)
+		return fmt.Errorf("%w, %w", logs.ErrPipeParse, err)
 	}
 	fmt.Fprint(cmd.OutOrStdout(), s)
 	return nil
