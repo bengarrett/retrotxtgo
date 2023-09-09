@@ -97,7 +97,7 @@ type Stats struct {
 }
 
 // Format of the text to output.
-type Format uint
+type Format int
 
 const (
 	// ColorText is ANSI colored text.

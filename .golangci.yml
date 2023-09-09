@@ -22,6 +22,7 @@ linters:
     - ireturn           #  temp disabled
     - funlen            #  temp disabled
     - testableexamples  #  temp disabled
+    - godox             #  temp disabled
 
 linters-settings:
   cyclop:

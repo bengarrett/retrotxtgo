@@ -3,7 +3,6 @@ package info
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -26,10 +25,7 @@ var (
 func Run(cmd *cobra.Command, args []string) error {
 	// piped input from other programs and then exit
 	if filesystem.IsPipe() {
-		if err := Pipe(cmd); err != nil {
-			return err
-		}
-		return nil
+		return Pipe(cmd)
 	}
 	if err := flag.Help(cmd, args...); err != nil {
 		return err
@@ -80,7 +76,7 @@ func Sample(name string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf(" sample file %q: %w", samp.Name, err)
 	}
-	file, err := ioutil.TempFile("", fmt.Sprintf("retrotxt_%s.*.txt", s))
+	file, err := os.CreateTemp("", fmt.Sprintf("retrotxt_%s.*.txt", s))
 	if err != nil {
 		return "", fmt.Errorf(" sample file %q: %w", samp.Name, logs.ErrTmpOpen)
 	}

@@ -72,7 +72,7 @@ func Semantic(ver string) Version {
 		if v == "" {
 			v = "0"
 		}
-		num, err := strconv.Atoi(digits(v))
+		num, err := strconv.Atoi(Digits(v))
 		if err != nil {
 			return invalid
 		}
@@ -85,8 +85,8 @@ func Semantic(ver string) Version {
 	}
 }
 
-// digits returns only the digits and decimal point values from a string.
-func digits(s string) string {
+// Digits returns only the digits and decimal point values from a string.
+func Digits(s string) string {
 	reg := regexp.MustCompile("[^0-9/.]+")
 	return reg.ReplaceAllString(s, "")
 }

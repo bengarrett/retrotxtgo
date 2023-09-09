@@ -1,7 +1,9 @@
-package datastream
+package datastream_test
 
 import (
 	"testing"
+
+	"github.com/bengarrett/retrotxtgo/pkg/ansi/internal/datastream"
 )
 
 func TestNumber(t *testing.T) {
@@ -18,7 +20,7 @@ func TestNumber(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Number(tt.b); got != tt.want {
+			if got := datastream.Number(tt.b); got != tt.want {
 				t.Errorf("Number() = %v, want %v", got, tt.want)
 			}
 		})
@@ -42,7 +44,7 @@ func TestCUU(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := CUU(tt.b); got != tt.want {
+			if got := datastream.CUU(tt.b); got != tt.want {
 				t.Errorf("CUU() = %v, want %v", got, tt.want)
 			}
 		})
@@ -61,7 +63,7 @@ func TestCUB(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := CUB(tt.b); got != tt.want {
+			if got := datastream.CUB(tt.b); got != tt.want {
 				t.Errorf("CUB() = %v, want %v", got, tt.want)
 			}
 		})
@@ -88,7 +90,7 @@ func TestCUP(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotLine, gotCol := CUP(tt.b)
+			gotLine, gotCol := datastream.CUP(tt.b)
 			if gotLine != tt.wantLine {
 				t.Errorf("CUP() gotLine = %v, want %v", gotLine, tt.wantLine)
 			}
@@ -103,7 +105,7 @@ func TestED(t *testing.T) {
 	tests := []struct {
 		name string
 		b    []byte
-		want Erase
+		want datastream.Erase
 	}{
 		{"empty", nil, -1},
 		{"0", []byte("0J"), 0},
@@ -114,7 +116,7 @@ func TestED(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotPs := ED(tt.b); gotPs != tt.want {
+			if gotPs := datastream.ED(tt.b); gotPs != tt.want {
 				t.Errorf("ED() = %v, want %v", gotPs, tt.want)
 			}
 		})

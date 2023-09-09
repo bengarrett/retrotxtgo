@@ -19,26 +19,19 @@ var (
 	ErrUsage = errors.New("command usage could not display")
 )
 
-var cmdShort = fmt.Sprintf("Use %s to print text, BBS and ANSI files", meta.Name)
-
-var cmdLong = fmt.Sprintf(`%s takes legacy encoded text, BBS, and ANSI files
-and print them to a modern UTF-8 terminal.`, meta.Name)
-
 // Cmd represents the base command when called without any subcommands.
 //
 //nolint:gochecknoglobals
 var Cmd = &cobra.Command{
-	Use:     meta.Bin,
-	Short:   cmdShort,
-	Long:    cmdLong,
+	Use:   meta.Bin,
+	Short: fmt.Sprintf("Use %s to print text, BBS and ANSI files", meta.Name),
+	Long: fmt.Sprintf(`%s takes legacy encoded text, BBS, and ANSI files
+	and print them to a modern UTF-8 terminal.`, meta.Name),
 	Example: fmt.Sprint(example.Cmd),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Do nothing other than print the help.
 		// This func must remain otherwise root command flags are ignored by Cobra.
-		if err := flag.Help(cmd); err != nil {
-			return err
-		}
-		return nil
+		return flag.Help(cmd)
 	},
 }
 
@@ -61,7 +54,7 @@ func Execute() {
 	}
 }
 
-func CmdInit() {
+func Init() {
 	Cmd = Tester(Cmd)
 
 	Cmd.AddGroup(&cobra.Group{ID: "listCmds", Title: "Codepages:"})
@@ -88,5 +81,5 @@ func Tester(c *cobra.Command) *cobra.Command {
 
 //nolint:gochecknoinits
 func init() {
-	CmdInit()
+	Init()
 }

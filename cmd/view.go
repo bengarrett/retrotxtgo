@@ -31,13 +31,14 @@ func ViewCommand() *cobra.Command {
 
 func ViewInit() *cobra.Command {
 	vc := ViewCommand()
-	flag.Encode(&flag.View.Encode, vc)
-	flag.Controls(&flag.View.Controls, vc)
-	flag.SwapChars(&flag.View.Swap, vc)
-	if err := flag.HiddenTo(&flag.View.To, vc); err != nil {
+	f := flag.View()
+	flag.Encode(&f.Encode, vc)
+	flag.Controls(&f.Controls, vc)
+	flag.SwapChars(&f.Swap, vc)
+	if err := flag.HiddenTo(&f.To, vc); err != nil {
 		log.Fatal(err)
 	}
-	flag.Width(&flag.View.Width, vc)
+	flag.Width(&f.Width, vc)
 	vc.Flags().SortFlags = false
 	return vc
 }

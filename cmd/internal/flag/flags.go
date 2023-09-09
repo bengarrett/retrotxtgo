@@ -33,9 +33,7 @@ type Views struct {
 	Width    int
 }
 
-var View = views()
-
-func views() Views {
+func View() Views {
 	return Views{
 		Controls: []string{"eof", "tab"},
 		Encode:   "CP437",
@@ -96,6 +94,6 @@ func HiddenTo(p *string, cc *cobra.Command) error {
 
 // Width handles the --width flag.
 func Width(p *int, cc *cobra.Command) {
-	cc.Flags().IntVarP(p, "width", "w", View.Width,
+	cc.Flags().IntVarP(p, "width", "w", View().Width,
 		"maximum document character/column width")
 }

@@ -101,11 +101,11 @@ func Test_InfoText(t *testing.T) {
 
 func Test_InfoData(t *testing.T) {
 	type Sizes struct {
-		Bytes int `json:"bytes" xml:"bytes"`
+		Bytes int `json:"bytes"  xml:"bytes"`
 	}
 	type response struct {
-		Name string `json:"filename" xml:"name"`
-		Size Sizes  `json:"size" xml:"size"`
+		Name string `json:"filename"  xml:"name"`
+		Size Sizes  `json:"size"  xml:"size"`
 	}
 	t.Run("info format json/xml", func(t *testing.T) {
 		err := filepath.Walk(static,
@@ -117,13 +117,13 @@ func Test_InfoData(t *testing.T) {
 					return nil
 				}
 				// test --format=json
-				gotJson, err := infoT.tester([]string{"--format", "json", path})
+				gotJSON, err := infoT.tester([]string{"--format", "json", path})
 				if err != nil {
 					t.Error(err)
 					return nil
 				}
 				res := response{}
-				if err := json.Unmarshal(gotJson, &res); err != nil {
+				if err := json.Unmarshal(gotJSON, &res); err != nil {
 					t.Error(err)
 				}
 				if res.Name != info.Name() {

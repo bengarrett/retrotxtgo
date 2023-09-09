@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 
 	"github.com/bengarrett/retrotxtgo/pkg/filesystem/internal/util"
@@ -172,7 +172,7 @@ func ReadLineBreaks(name string) ([2]rune, error) {
 		return z, err
 	}
 	defer file.Close()
-	b, err := ioutil.ReadAll(file)
+	b, err := io.ReadAll(file)
 	if err != nil {
 		return z, fmt.Errorf("read line breaks could not read the file: %q: %w", name, err)
 	}

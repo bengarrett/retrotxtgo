@@ -15,18 +15,15 @@ import (
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
 )
 
-// ErrStdErr could not print to stderr.
+// ErrStd could not print to stderr.
 var (
 	ErrNotFound = errors.New("cannot find the file or sample file")
-	ErrStdErr   = errors.New("failed to print to stderr")
 )
 
 // Clean removes the named file or directory.
 func Clean(name string) {
 	if err := os.RemoveAll(name); err != nil {
-		if _, err = fmt.Fprintf(os.Stderr, "failed to clean %q: %s", name, err); err != nil {
-			logs.FatalSave(fmt.Errorf("clean %s: %w", name, ErrStdErr))
-		}
+		fmt.Fprintf(os.Stderr, "failed to clean %q: %s", name, err)
 	}
 }
 

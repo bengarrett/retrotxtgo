@@ -25,9 +25,9 @@ var ErrFilenames = errors.New("ignoring [filenames]")
 func Args(cmd *cobra.Command, args ...string) ([]string, *convert.Convert, sample.Flags, error) {
 	conv := convert.Convert{}
 	conv.Flags = convert.Flag{
-		Controls:  View.Controls,
-		SwapChars: View.Swap,
-		MaxWidth:  View.Width,
+		Controls:  View().Controls,
+		SwapChars: View().Swap,
+		MaxWidth:  View().Width,
 	}
 	l := len(args)
 
@@ -120,10 +120,7 @@ func Help(cmd *cobra.Command, args ...string) error {
 	if len(args) != 0 {
 		return nil
 	}
-	if err := cmd.Help(); err != nil {
-		return err
-	}
-	return nil
+	return cmd.Help()
 }
 
 // OpenSample returns the content of the named embed sample file given via an argument.

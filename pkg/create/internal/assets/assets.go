@@ -43,9 +43,9 @@ type Meta struct {
 }
 
 // Destination determines if user supplied arguments are a valid file or directory destination.
-func Destination(args ...string) (path string, err error) {
+func Destination(args ...string) (string, error) {
 	if len(args) == 0 {
-		return path, nil
+		return "", nil
 	}
 	dir := filepath.Clean(strings.Join(args, " "))
 	if len(dir) == 1 {
@@ -53,30 +53,33 @@ func Destination(args ...string) (path string, err error) {
 	}
 	part := strings.Split(dir, string(os.PathSeparator))
 	if len(part) > 1 {
+		var err error
 		part[0], err = dirs(part[0])
 		if err != nil {
-			return path, fmt.Errorf("destination arguments: %w", err)
+			return "", fmt.Errorf("destination arguments: %w", err)
 		}
 	}
 	return strings.Join(part, string(os.PathSeparator)), nil
 }
 
 // dirs parses and expand special directory characters.
-func dirs(dir string) (path string, err error) {
+func dirs(dir string) (string, error) {
 	const (
 		homeDir    = "~"
 		currentDir = "."
 	)
+	s := ""
+	var err error
 	switch dir {
 	case homeDir:
-		return os.UserHomeDir()
+		s, err = os.UserHomeDir()
 	case currentDir:
-		return os.Getwd()
+		s, err = os.Getwd()
 	case string(os.PathSeparator):
-		return filepath.Abs(dir)
+		s, err = filepath.Abs(dir)
 	}
 	if err != nil {
 		return "", fmt.Errorf("parse directory error: %q: %w", dir, err)
 	}
-	return "", nil
+	return s, nil
 }

@@ -41,7 +41,7 @@ type Attributes struct {
 // String returns the Attributes as CSS class names.
 // TODO: background, foreground ... BOOL FONTS RGB colors
 // TODO: also return (css, style string)
-func (a Attributes) String() (css string) {
+func (a Attributes) String() string {
 	var cls []string
 	// Conceal hides the text so do not return any other styles.
 	// TODO: a conceal func to make foreground with background??

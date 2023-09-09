@@ -2,43 +2,11 @@ package sgr
 
 import (
 	"errors"
-	"fmt"
 	"math"
 	"strconv"
 )
 
 var ErrNotRGB = errors.New("int is not a valid red-green-blue value")
-
-// Colors is currently unused.
-func Colors(p Ps, next [][]byte) (value int, length int) {
-	const xterm256, rgb = 5, 2
-	const xtermLen, rgbLen = 2, 5
-	if p != 38 && p != 48 {
-		return -1, 0
-	}
-	if len(next) < 2 {
-		return -1, 0
-	}
-	s, err := strconv.Atoi(string(next[1]))
-	if err != nil {
-		return -1, 0
-	}
-
-	fmt.Println("ps", p, len(next), "s:", s)
-	switch s {
-	case xterm256:
-		value = XTerm256(next[2:])
-		if value != -1 {
-			return value, xtermLen
-		}
-	case rgb:
-		value = RGB(next[2:])
-		if value != -1 {
-			return value, rgbLen
-		}
-	}
-	return -1, 0
-}
 
 // RGB reads b
 func RGB(b [][]byte) int {

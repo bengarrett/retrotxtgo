@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/bengarrett/retrotxtgo/meta"
@@ -79,7 +78,7 @@ func CacheGet() (etag, version string) {
 	if _, err = os.Stat(cf); os.IsNotExist(err) {
 		return
 	}
-	f, err := ioutil.ReadFile(cf)
+	f, err := os.ReadFile(cf)
 	if err != nil {
 		logs.Save(err)
 	}

@@ -48,7 +48,7 @@ func (n Names) Info(name, format string) (string, error) {
 				} else if skip {
 					return nil
 				}
-				_, err := Marshal(osPathname, f, walkMode, walkMode)
+				_, err := Marshal(osPathname, f, walkMode)
 				return err
 			},
 			ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {
@@ -61,7 +61,7 @@ func (n Names) Info(name, format string) (string, error) {
 		}
 		return "", nil
 	}
-	res, err := Marshal(name, f, n.Index, n.Length)
+	res, err := Marshal(name, f, n.Length)
 	if err != nil {
 		return "", fmt.Errorf("info on %s could not marshal: %w", name, err)
 	}
@@ -69,7 +69,7 @@ func (n Names) Info(name, format string) (string, error) {
 }
 
 // output converts the --format argument value to a format type.
-func output(argument string) (f detail.Format, err error) {
+func output(argument string) (detail.Format, error) {
 	switch argument {
 	case "color", "c", "":
 		return detail.ColorText, nil
@@ -82,11 +82,11 @@ func output(argument string) (f detail.Format, err error) {
 	case "xml", "x":
 		return detail.XML, nil
 	}
-	return f, logs.ErrFmt
+	return -1, logs.ErrFmt
 }
 
 // Marshal the metadata and system details of a named file.
-func Marshal(name string, f detail.Format, i, length int) (string, error) {
+func Marshal(name string, f detail.Format, length int) (string, error) {
 	var d detail.Detail
 	if err := d.Read(name); err != nil {
 		return "", err
