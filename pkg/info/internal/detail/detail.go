@@ -23,7 +23,7 @@ import (
 	"github.com/bengarrett/bbs"
 	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
-	"github.com/bengarrett/retrotxtgo/pkg/str"
+	"github.com/bengarrett/retrotxtgo/pkg/term"
 	"github.com/bengarrett/sauce"
 	"github.com/bengarrett/sauce/humanize"
 	gookit "github.com/gookit/color"
@@ -359,27 +359,27 @@ func (d *Detail) printMarshal(color bool) []byte {
 		len(fmt.Sprintf(" filename%s%s", strings.Repeat(" ", padding), data[0].v))
 	const tabWidth = 8
 	w.Init(&buf, 0, tabWidth, 0, '\t', 0)
-	fmt.Fprint(w, str.HeadDark(width, "File information"))
+	fmt.Fprint(w, term.HeadDark(width, "File information"))
 	for _, x := range data {
 		if !d.marshalDataValid(x.k, x.v) {
 			continue
 		}
 		if x.k == zipComment {
 			if x.v != "" {
-				fmt.Fprintln(w, str.HR(l))
+				fmt.Fprintln(w, term.HR(l))
 				fmt.Fprintln(w, x.v)
 				if d.sauceIndex <= 0 {
 					break
 				}
 				// divider for sauce metadata
-				fmt.Fprintln(w, str.HR(l))
+				fmt.Fprintln(w, term.HR(l))
 				continue
 			}
 			if d.sauceIndex <= 0 {
 				break
 			}
 			// divider for sauce metadata
-			fmt.Fprintln(w, str.HR(l))
+			fmt.Fprintln(w, term.HR(l))
 			continue
 		}
 		fmt.Fprintf(w, "\t %s\t  %s\n", x.k, info(x.v))

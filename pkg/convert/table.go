@@ -9,7 +9,7 @@ import (
 	"text/tabwriter"
 	"unicode"
 
-	"github.com/bengarrett/retrotxtgo/pkg/str"
+	"github.com/bengarrett/retrotxtgo/pkg/term"
 	"github.com/gookit/color"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
@@ -54,7 +54,7 @@ func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 	var buf bytes.Buffer
 	const tabWidth = 8
 	w := new(tabwriter.Writer).Init(&buf, 0, tabWidth, 0, '\t', 0)
-	fmt.Fprint(w, " "+str.HeadDark(width, h))
+	fmt.Fprint(w, " "+term.HeadDark(width, h))
 	const start, end, max = 0, 15, 255
 	for i := 0; i < 16; i++ {
 		switch i {

@@ -13,7 +13,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/pkg/convert"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/retrotxtgo/pkg/sample"
-	"github.com/bengarrett/retrotxtgo/pkg/str"
+	"github.com/bengarrett/retrotxtgo/pkg/term"
 	"golang.org/x/exp/slices"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
@@ -38,26 +38,26 @@ func Examples() (*bytes.Buffer, error) {
 	w := tabwriter.NewWriter(&buf, 0, 0, padding, ' ', 0)
 	bin := fmt.Sprintf("  %s ", meta.Bin)
 	fmt.Fprintf(w, "%s\n",
-		str.Head(0, fmt.Sprintf("Packaged example text and ANSI files to test and play with %s", meta.Name)))
+		term.Head(0, fmt.Sprintf("Packaged example text and ANSI files to test and play with %s", meta.Name)))
 	for _, k := range keys {
 		fmt.Fprintf(w, "%s\t%s\t\n", k, m[k].Description)
 	}
 	fmt.Fprintf(w, "\nAny of these packaged examples will work with the %s and %s commands.\n",
-		str.Example("info"), str.Example("view"))
+		term.Example("info"), term.Example("view"))
 	fmt.Fprintf(w, "\nPrint the Windows-1252 English test to the terminal.\n%s\n",
-		str.Example(bin+"view 1252"))
+		term.Example(bin+"view 1252"))
 	fmt.Fprintf(w, "\nConvert the Windows-1252 English test to UTF-8 encoding and save it to a file.\n%s\n",
-		str.Example(bin+"view 1252 > file.txt"))
+		term.Example(bin+"view 1252 > file.txt"))
 	fmt.Fprintf(w, "\nSave the Windows-1252 English test with its original encoding.\n%s\n",
-		str.Example(bin+"view --to=cp1252 1252 > file.txt"))
+		term.Example(bin+"view --to=cp1252 1252 > file.txt"))
 	fmt.Fprintf(w, "\nDisplay statistics and information from a piped source.\n%s\n",
-		str.Example(fmt.Sprintf("%sview --to=cp1252 1252 | %s info", bin, meta.Bin)))
+		term.Example(fmt.Sprintf("%sview --to=cp1252 1252 | %s info", bin, meta.Bin)))
 	fmt.Fprintf(w, "\nDisplay statistics and information from the Windows-1252 English test.\n%s\n",
-		str.Example(bin+"info 1252"))
+		term.Example(bin+"info 1252"))
 	fmt.Fprintf(w, "\nDisplay statistics, information and SAUCE metadata from the SAUCE test.\n%s\n",
-		str.Example(bin+"info sauce"))
+		term.Example(bin+"info sauce"))
 	fmt.Fprintf(w, "\nMultiple examples used together are supported.\n%s\n",
-		str.Example(bin+"view ansi ascii ansi.rgb"))
+		term.Example(bin+"view ansi ascii ansi.rgb"))
 	if err := w.Flush(); err != nil {
 		return nil, fmt.Errorf("%w, %w", logs.ErrTabFlush, err)
 	}

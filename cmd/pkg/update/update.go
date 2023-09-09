@@ -11,7 +11,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/retrotxtgo/pkg/online"
-	"github.com/bengarrett/retrotxtgo/pkg/str"
+	"github.com/bengarrett/retrotxtgo/pkg/term"
 	gap "github.com/muesli/go-app-paths"
 	"gopkg.in/yaml.v3"
 )
@@ -35,7 +35,7 @@ func String(old, current string) *bytes.Buffer {
 	s := fmt.Sprintf("%s%s%s\n%s%s\n%s → %s",
 		"A newer edition of ", meta.Name, " is available!",
 		"Learn more at ", meta.URL, meta.Semantic(old), current)
-	return str.Border(s)
+	return term.Border(s)
 }
 
 // Check the GitHub for the newest release tag.

@@ -11,7 +11,7 @@ import (
 	"text/template"
 
 	"github.com/bengarrett/retrotxtgo/meta"
-	"github.com/bengarrett/retrotxtgo/pkg/str"
+	"github.com/bengarrett/retrotxtgo/pkg/term"
 	"github.com/gookit/color"
 )
 
@@ -47,12 +47,12 @@ func (e Example) String() string {
 		ss := strings.Split(scanner.Text(), cmmt)
 		l := len(ss)
 		if l < sentence {
-			s += str.ColInf(scanner.Text()) + "\n  "
+			s += term.ColInf(scanner.Text()) + "\n  "
 			continue
 		}
 		// do not the last hash as a comment
 		ex := strings.Join(ss[:l-1], cmmt)
-		s += str.ColInf(ex)
+		s += term.ColInf(ex)
 		s += fmt.Sprintf("%s%s\n  ", color.Secondary.Sprint(cmmt), ss[l-1])
 	}
 	return strings.TrimSpace(s)

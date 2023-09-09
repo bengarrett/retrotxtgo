@@ -12,7 +12,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
-	"github.com/bengarrett/retrotxtgo/pkg/str"
+	"github.com/bengarrett/retrotxtgo/pkg/term"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/encoding/unicode"
@@ -240,7 +240,7 @@ func (c *Convert) SkipCtrlCodes() *Convert {
 		}
 	}
 	if len(unknown) > 0 {
-		fmt.Fprintln(os.Stderr, str.Info(), "unsupported --control values:", strings.Join(unknown, ","))
+		fmt.Fprintln(os.Stderr, term.Info(), "unsupported --control values:", strings.Join(unknown, ","))
 	}
 	return c
 }

@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/bengarrett/retrotxtgo/meta"
-	"github.com/bengarrett/retrotxtgo/pkg/str"
+	"github.com/bengarrett/retrotxtgo/pkg/term"
 )
 
 const OSErrCode = 1
@@ -20,7 +20,7 @@ func Hint(s string, err error) string {
 		return Sprint(err)
 	}
 	return fmt.Sprintf("%s\n run %s",
-		Sprint(err), str.Example(fmt.Sprintf("%s %s", meta.Bin, s)))
+		Sprint(err), term.Example(fmt.Sprintf("%s %s", meta.Bin, s)))
 }
 
 // Fatal prints a formatted error and exits.
@@ -61,7 +61,7 @@ func Sprint(err error) string {
 		}
 		seps = append(seps, elm)
 	}
-	return fmt.Sprintf("%s%s.", str.Alert(), strings.Join(seps, ".\n"))
+	return fmt.Sprintf("%s%s.", term.Alert(), strings.Join(seps, ".\n"))
 }
 
 // SprintCmd returns the command does not exist.
@@ -70,7 +70,7 @@ func SprintCmd(cmd string, err error) string {
 		return ""
 	}
 	return fmt.Sprintf("%s the command %s does not exist, %s",
-		str.Alert(), cmd, err)
+		term.Alert(), cmd, err)
 }
 
 // SprintFlag returns a problem with the flag.
@@ -78,7 +78,7 @@ func SprintFlag(cmd, flag string, err error) string {
 	if cmd == "" || err == nil {
 		return ""
 	}
-	alert, toggle := str.Alert(), "--"
+	alert, toggle := term.Alert(), "--"
 	if strings.Contains(flag, "-") {
 		toggle = ""
 	} else if len(flag) == 1 {
@@ -94,7 +94,7 @@ func SprintMark(mark string, err, wrap error) string {
 		return ""
 	}
 	return fmt.Sprintf("%s %s %q: %s",
-		str.Alert(), str.ColFuz(fmt.Sprintf("%v", err)), mark, str.ColFuz(fmt.Sprintf("%v", wrap)))
+		term.Alert(), term.ColFuz(fmt.Sprintf("%v", err)), mark, term.ColFuz(fmt.Sprintf("%v", wrap)))
 }
 
 // SprintWrap returns the formatted errors.
@@ -103,5 +103,5 @@ func SprintWrap(err, wrap error) string {
 		return ""
 	}
 	return fmt.Sprintf("%s%s",
-		str.Alert(), fmt.Errorf("%w: %w", err, wrap))
+		term.Alert(), fmt.Errorf("%w: %w", err, wrap))
 }

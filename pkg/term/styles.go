@@ -1,4 +1,4 @@
-package str
+package term
 
 import (
 	"bufio"
@@ -18,11 +18,12 @@ import (
 
 var ErrRune = errors.New("invalid encoded rune")
 
-type terminal int
+// Terminal colors.
+type Terminal int
 
 const (
 	// TermMono no color.
-	TermMono terminal = iota
+	TermMono Terminal = iota
 	// Term16 ANSI standard 16 color.
 	Term16
 	// Term88 XTerm 88 color.
@@ -38,7 +39,8 @@ const (
 	term = "terminal"
 )
 
-func (t terminal) String() string {
+// Terminal colors.
+func (t Terminal) String() string {
 	return [...]string{none, term, term, "terminal256", "terminal16m"}[t]
 }
 

@@ -7,7 +7,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/cmd/internal/format"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/info"
 	"github.com/bengarrett/retrotxtgo/cmd/pkg/example"
-	"github.com/bengarrett/retrotxtgo/pkg/str"
+	"github.com/bengarrett/retrotxtgo/pkg/term"
 	"github.com/spf13/cobra"
 )
 
@@ -27,7 +27,7 @@ func InfoInit() *cobra.Command {
 	ic := InfoCommand()
 	infos := format.Format().Info
 	ic.Flags().StringVarP(&flag.Info.Format, "format", "f", "color",
-		str.Options("print format or syntax", true, true, infos[:]...))
+		term.Options("print format or syntax", true, true, infos[:]...))
 	return ic
 }
 

@@ -1,15 +1,15 @@
-package str_test
+package term_test
 
 import (
 	"fmt"
 	"os"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/pkg/str"
+	"github.com/bengarrett/retrotxtgo/pkg/term"
 )
 
 func ExampleBorder() {
-	fmt.Fprintf(os.Stdout, "%s", str.Border("hi"))
+	fmt.Fprintf(os.Stdout, "%s", term.Border("hi"))
 	// Output: ┌────┐
 	// │ hi │
 	// └────┘
@@ -28,7 +28,7 @@ func TestTerm(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotTerm := str.Term("", tt.name); gotTerm != tt.wantTerm {
+			if gotTerm := term.Term("", tt.name); gotTerm != tt.wantTerm {
 				t.Errorf("Term() = %v, want %v", gotTerm, tt.wantTerm)
 			}
 		})
@@ -45,7 +45,7 @@ func TestTerm16M(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotTerm := str.Term(tt.name, ""); gotTerm != tt.wantTerm {
+			if gotTerm := term.Term(tt.name, ""); gotTerm != tt.wantTerm {
 				t.Errorf("Term() = %v, want %v", gotTerm, tt.wantTerm)
 			}
 		})
@@ -72,7 +72,7 @@ func TestUnderlineChar(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotS, err := str.UnderlineChar(tt.c)
+			gotS, err := term.UnderlineChar(tt.c)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("underlineChar() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -103,7 +103,7 @@ func TestUnderlineKeys(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := str.UnderlineKeys(tt.keys...); got != tt.want {
+			if got := term.UnderlineKeys(tt.keys...); got != tt.want {
 				t.Errorf("UnderlineKeys() = %v, want %v", got, tt.want)
 			}
 		})
@@ -126,7 +126,7 @@ func TestCenter(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := str.Center(tt.args.width, tt.args.text); got != tt.want {
+			if got := term.Center(tt.args.width, tt.args.text); got != tt.want {
 				t.Errorf("Center() = %q, want %q", got, tt.want)
 			}
 		})

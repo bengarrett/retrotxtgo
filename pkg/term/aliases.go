@@ -1,5 +1,5 @@
-// Package str manipulates strings and standard output text.
-package str
+// Package term manipulates strings and standard output text.
+package term
 
 import (
 	"fmt"
@@ -12,17 +12,13 @@ import (
 type verbs uint
 
 const (
-	confirm verbs = iota
-	info
+	info verbs = iota
 	problem
 )
 
 func (v verbs) String() string {
 	s, c := "", ""
 	switch v {
-	case confirm:
-		s = "Confirm:"
-		c = color.Question.Sprint(s)
 	case info:
 		s = "Information:"
 		c = color.Info.Sprint(s)
@@ -41,11 +37,6 @@ func Alert() string {
 	return problem.String()
 }
 
-// Confirm prints the "Confirm" string using the Question color.
-func Confirm() string {
-	return confirm.String()
-}
-
 // Example prints the string using the Debug color.
 func Example(s string) string {
 	return color.Debug.Sprint(s)
@@ -56,10 +47,6 @@ func Info() string {
 	return info.String()
 }
 
-func Path(s string) string {
-	return color.Secondary.Sprint(s)
-}
-
 // Bool returns a checkmark ✓ when true or a cross ✗ when false.
 func Bool(b bool) string {
 	const check, cross = "✓", "✗"
@@ -67,11 +54,6 @@ func Bool(b bool) string {
 		return color.Success.Sprint(check)
 	}
 	return color.Warn.Sprint(cross)
-}
-
-// Default appends (default ...) to the usage string.
-func Default(s, val string) string {
-	return fmt.Sprintf("%s (default \"%s\")", s, val)
 }
 
 // Options appends options: ... to the usage string.
@@ -92,17 +74,7 @@ func Options(s string, shorthand, flagHelp bool, opts ...string) string {
 	return fmt.Sprintf("%s.\n  Options: %s", s, color.Info.Sprint(keys))
 }
 
-// Required appends (required) to the string.
-func Required(s string) string {
-	return fmt.Sprintf("%s (required)", color.Primary.Sprint(s))
-}
-
 // color aliases.
-
-// Italic returns a string in the italic style.
-func Italic(s string) string {
-	return color.OpItalic.Sprint(s)
-}
 
 // ColCmt returns a string in the comment color.
 func ColCmt(s string) string {
@@ -119,17 +91,7 @@ func ColInf(s string) string {
 	return color.Info.Sprint(s)
 }
 
-// ColPri returns a string in the primary color.
-func ColPri(s string) string {
-	return color.Primary.Sprint(s)
-}
-
 // ColSec returns a string in the secondary color.
 func ColSec(s string) string {
 	return color.Secondary.Sprint(s)
-}
-
-// ColSuc returns a string in the success color.
-func ColSuc(s string) string {
-	return color.Success.Sprint(s)
 }

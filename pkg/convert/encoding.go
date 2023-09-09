@@ -10,7 +10,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
-	"github.com/bengarrett/retrotxtgo/pkg/str"
+	"github.com/bengarrett/retrotxtgo/pkg/term"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/htmlindex"
@@ -487,7 +487,7 @@ func (c *Convert) Swaps() *Convert {
 		replacers = append(replacers, nr...)
 	}
 	if len(unknown) > 0 {
-		fmt.Fprintln(os.Stderr, str.Info(), "unsupported --swap-chars values:", strings.Join(unknown, ","))
+		fmt.Fprintln(os.Stderr, term.Info(), "unsupported --swap-chars values:", strings.Join(unknown, ","))
 	}
 	replace := runes.Map(func(r rune) rune {
 		if !replacer(r, replacers...) {

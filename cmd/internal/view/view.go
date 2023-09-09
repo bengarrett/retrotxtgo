@@ -9,7 +9,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/pkg/convert"
-	"github.com/bengarrett/retrotxtgo/pkg/str"
+	"github.com/bengarrett/retrotxtgo/pkg/term"
 	"github.com/spf13/cobra"
 	"golang.org/x/text/encoding"
 )
@@ -29,7 +29,7 @@ func Run(cmd *cobra.Command, args ...string) (*bytes.Buffer, error) {
 		}
 		if i > 0 && i < len(arg) {
 			const halfPage = 40
-			fmt.Fprintln(w, str.HRPad(halfPage))
+			fmt.Fprintln(w, term.HRPad(halfPage))
 		}
 		b, err := flag.ReadArgument(arg, cmd, conv, samp)
 		if err != nil {
