@@ -44,7 +44,7 @@ const (
 	// Dir is the sub-directory name used for configuration and temporary paths.
 	Dir = "retrotxt"
 	// Name of this program.
-	Name = "RetroTxtGo"
+	Name = "Retrotxt"
 	// URL for this program's website.
 	URL = "https://retrotxt.com/go"
 	// WebPort is the internal server HTTP port.
