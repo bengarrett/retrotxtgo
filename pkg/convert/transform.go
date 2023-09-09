@@ -10,6 +10,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/bengarrett/retrotxtgo/pkg/byter"
 	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/retrotxtgo/pkg/term"
@@ -26,7 +27,7 @@ import (
 func (c *Convert) ANSI(b ...byte) ([]rune, error) {
 	c.LineBreaks = true
 	c.Flags.SwapChars = nil
-	c.Input.Bytes = TrimEOF(b)
+	c.Input.Bytes = byter.TrimEOF(b)
 	if err := c.SkipCtrlCodes().Transform(); err != nil {
 		return nil, fmt.Errorf("dump transform failed: %w", err)
 	}
@@ -65,7 +66,7 @@ func (c *Convert) Dump(b ...byte) ([]rune, error) {
 // It obeys the DOS end of file marker.
 func (c *Convert) Text(b ...byte) ([]rune, error) {
 	c.LineBreaks = true
-	c.Input.Bytes = TrimEOF(b)
+	c.Input.Bytes = byter.TrimEOF(b)
 	if err := c.SkipCtrlCodes().Transform(); err != nil {
 		return nil, fmt.Errorf("text transform failed: %w", err)
 	}

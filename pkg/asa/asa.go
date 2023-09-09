@@ -1,9 +1,15 @@
-// Package file ascii.go provides the legacy ASA ASCII character encodings.
-package convert
+// Package asa provides the legacy ASA ASCII character encodings.
+package asa
 
 import (
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
+)
+
+const (
+	Ascii63 = "ascii-63"
+	Ascii65 = "ascii-65"
+	Ascii67 = "ascii-67"
 )
 
 // Encoding is an implementation of the Encoding interface that adds the String
@@ -45,11 +51,11 @@ func (e Encoding) String() string {
 func AsaX34(e encoding.Encoding) string {
 	switch e {
 	case AsaX34_1963:
-		return ascii63
+		return Ascii63
 	case AsaX34_1965:
-		return ascii65
+		return Ascii65
 	case AnsiX34_1967:
-		return ascii67
+		return Ascii67
 	}
 	return ""
 }

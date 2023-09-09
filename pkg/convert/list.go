@@ -10,6 +10,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/bengarrett/retrotxtgo/meta"
+	"github.com/bengarrett/retrotxtgo/pkg/asa"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/retrotxtgo/pkg/term"
 	"golang.org/x/text/encoding"
@@ -65,7 +66,7 @@ func List() *bytes.Buffer { //nolint:funlen
 	fmt.Fprint(w, term.Head(tblWidth, title))
 	fmt.Fprintf(w, "\n%s\n", header)
 	enc := Encodings()
-	enc = append(enc, AsaX34_1963, AsaX34_1965, AnsiX34_1967)
+	enc = append(enc, asa.AsaX34_1963, asa.AsaX34_1965, asa.AnsiX34_1967)
 	for _, e := range enc {
 		if e == charmap.XUserDefined {
 			continue
@@ -96,7 +97,7 @@ func List() *bytes.Buffer { //nolint:funlen
 			fmt.Fprintf(w, " † %s\t %s\t %s\t %s\t\n",
 				c.Name, c.Value, c.Numeric, c.Alias)
 			continue
-		case AsaX34_1963, AsaX34_1965, AnsiX34_1967:
+		case asa.AsaX34_1963, asa.AsaX34_1965, asa.AnsiX34_1967:
 			fmt.Fprintf(w, " ⁑ %s\t %s\t %s\t %s\t\n",
 				c.Name, c.Value, c.Numeric, c.Alias)
 			continue
@@ -146,8 +147,8 @@ func Cells(e encoding.Encoding) (Cell, error) {
 		Name: fmt.Sprint(e),
 	}
 	switch e {
-	case AsaX34_1963, AsaX34_1965, AnsiX34_1967:
-		c.Value = AsaX34(e)
+	case asa.AsaX34_1963, asa.AsaX34_1965, asa.AnsiX34_1967:
+		c.Value = asa.AsaX34(e)
 		return c, nil
 	}
 

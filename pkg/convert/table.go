@@ -9,6 +9,8 @@ import (
 	"text/tabwriter"
 	"unicode"
 
+	"github.com/bengarrett/retrotxtgo/pkg/asa"
+	"github.com/bengarrett/retrotxtgo/pkg/byter"
 	"github.com/bengarrett/retrotxtgo/pkg/term"
 	"github.com/gookit/color"
 	"golang.org/x/text/encoding"
@@ -19,10 +21,7 @@ import (
 )
 
 const (
-	width   = 67
-	ascii63 = "ascii-63"
-	ascii65 = "ascii-65"
-	ascii67 = "ascii-67"
+	width = 67
 )
 
 var ErrNoName = errors.New("there is no encoding name")
@@ -66,7 +65,7 @@ func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf(" %X  ", i))
 		}
 	}
-	b, conv, row := MakeBytes(), encoder(name, cp), 0
+	b, conv, row := byter.MakeBytes(), encoder(name, cp), 0
 	runes, err := conv.Chars(b...)
 	if err != nil {
 		return nil, fmt.Errorf("table convert bytes error: %w", err)
@@ -111,12 +110,12 @@ func codepager(name string) (encoding.Encoding, error) { //nolint:ireturn
 		return charmap.Windows874, nil
 	}
 	switch strings.ToLower(name) {
-	case ascii63:
-		return AsaX34_1963, nil
-	case ascii65:
-		return AsaX34_1965, nil
-	case ascii67:
-		return x34_1967, nil
+	case asa.Ascii63:
+		return asa.AsaX34_1963, nil
+	case asa.Ascii65:
+		return asa.AsaX34_1965, nil
+	case asa.Ascii67:
+		return asa.AnsiX34_1967, nil
 	default:
 		cp, err := DefaultCP(name)
 		if err != nil {
@@ -147,7 +146,7 @@ func DefaultCP(name string) (encoding.Encoding, error) { //nolint:ireturn
 func encoder(name string, cp encoding.Encoding) Convert {
 	conv := Convert{}
 	switch strings.ToLower(name) {
-	case ascii63, ascii65, ascii67:
+	case asa.Ascii63, asa.Ascii65, asa.Ascii67:
 		cp = charmap.Windows1252
 	}
 	conv.Input.Encoding = cp
@@ -159,18 +158,18 @@ func revert(name string) encoding.Encoding { //nolint:ireturn
 		return charmap.XUserDefined
 	}
 	switch strings.ToLower(name) {
-	case ascii63:
-		return AsaX34_1963
-	case ascii65:
-		return AsaX34_1965
-	case ascii67:
-		return AnsiX34_1967
+	case asa.Ascii63:
+		return asa.AsaX34_1963
+	case asa.Ascii65:
+		return asa.AsaX34_1965
+	case asa.Ascii67:
+		return asa.AnsiX34_1967
 	}
 	return nil
 }
 
 func chrX3493(pos int, cp encoding.Encoding) string {
-	if cp != AsaX34_1963 {
+	if cp != asa.AsaX34_1963 {
 		return ""
 	}
 	const us, end = 31, 128
@@ -215,7 +214,7 @@ func mapX3493(i int) string {
 }
 
 func chrX3495(pos int, cp encoding.Encoding) string {
-	if cp != AsaX34_1965 {
+	if cp != asa.AsaX34_1965 {
 		return ""
 	}
 	const sub, grave, tilde, at, not, bar, end = 26, 64, 92, 96, 124, 126, 128
@@ -240,7 +239,7 @@ func chrX3495(pos int, cp encoding.Encoding) string {
 }
 
 func chrX3497(pos int, cp encoding.Encoding) string {
-	if cp != AnsiX34_1967 {
+	if cp != asa.AnsiX34_1967 {
 		return ""
 	}
 	const end = 128
