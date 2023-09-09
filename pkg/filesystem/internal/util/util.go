@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	ErrNoWriter = errors.New("the tar.writer cannot be nil")
+	ErrNoWriter = errors.New("the w writer cannot be nil")
 )
 
 // InsertTar inserts the named file to the TAR writer.

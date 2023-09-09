@@ -10,6 +10,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/bengarrett/retrotxtgo/pkg/filesystem/internal/util"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/sauce/humanize"
 	"golang.org/x/text/language"
@@ -107,8 +108,7 @@ func (files *Files) Zip(w io.Writer, name, comment string, ow bool) error {
 		}
 	}
 	for _, f := range *files {
-		err = AddZip(f, z)
-		if err != nil {
+		if err := InsertZip(z, f); err != nil {
 			return fmt.Errorf("add zip %q: %w", f, err)
 		}
 	}
@@ -129,8 +129,11 @@ func (files *Files) Zip(w io.Writer, name, comment string, ow bool) error {
 	return nil
 }
 
-// AddZip adds the named file to a zip archive.
-func AddZip(name string, z *zip.Writer) error {
+// InsertZip adds the named file to a zip archive.
+func InsertZip(z *zip.Writer, name string) error {
+	if z == nil {
+		return util.ErrNoWriter
+	}
 	s, err := os.Stat(name)
 	if err != nil {
 		fmt.Fprintln(os.Stdout, "skipping file, could not stat", name)

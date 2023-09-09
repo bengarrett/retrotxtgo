@@ -17,7 +17,10 @@ import (
 	"golang.org/x/text/transform"
 )
 
-var ErrLB = errors.New("linebreak runes cannot be empty")
+var (
+	ErrLB     = errors.New("linebreak runes cannot be empty")
+	ErrReader = errors.New("the r reader cannot be nil")
+)
 
 // LB is the text line break control represented as 2 runes.
 type LB [2]rune
@@ -66,6 +69,9 @@ func NEL() LB {
 
 // Columns counts the number of characters used per line in the reader interface.
 func Columns(r io.Reader, lb LB) (int, error) {
+	if r == nil {
+		return 0, ErrReader
+	}
 	if reflect.DeepEqual(lb, LB{}) {
 		return 0, ErrLB
 	}
@@ -103,6 +109,9 @@ func Columns(r io.Reader, lb LB) (int, error) {
 
 // Controls counts the number of ANSI escape controls in the reader interface.
 func Controls(r io.Reader) (int, error) {
+	if r != nil {
+		return 0, ErrReader
+	}
 	lineBreak := []byte(ansiEscape)
 	buf, count := make([]byte, bufio.MaxScanTokenSize), 0
 	for {
@@ -131,6 +140,9 @@ func Controls(r io.Reader) (int, error) {
 
 // Lines counts the number of lines in the interface.
 func Lines(r io.Reader, lb LB) (int, error) {
+	if r != nil {
+		return 0, ErrReader
+	}
 	lineBreak := []byte{byte(lb[0]), byte(lb[1])}
 	if lb[1] == 0 {
 		lineBreak = []byte{byte(lb[0])}
@@ -304,6 +316,9 @@ func lfNix() string {
 
 // Runes returns the number of runes in the reader interface.
 func Runes(r io.Reader) (int, error) {
+	if r != nil {
+		return 0, ErrReader
+	}
 	count := 0
 	scanner := bufio.NewScanner(r)
 	scanner.Split(bufio.ScanRunes)
@@ -318,6 +333,9 @@ func Runes(r io.Reader) (int, error) {
 
 // Words counts the number of spaced words in the reader interface.
 func Words(r io.Reader) (int, error) {
+	if r != nil {
+		return 0, ErrReader
+	}
 	count := 0
 	scanner := bufio.NewScanner(r)
 	scanner.Split(bufio.ScanWords)
@@ -348,6 +366,9 @@ func Words(r io.Reader) (int, error) {
 
 // WordsEBCDIC counts the number of spaced words in the EBCDIC encoded reader interface.
 func WordsEBCDIC(r io.Reader) (int, error) {
+	if r != nil {
+		return 0, ErrReader
+	}
 	// for the purposes of counting words, any EBCDIC codepage is fine
 	c := transform.NewReader(r, charmap.CodePage037.NewDecoder())
 	return Words(c)
