@@ -6,11 +6,9 @@ import (
 	"os"
 
 	"github.com/bengarrett/retrotxtgo/pkg/convert"
-	"github.com/bengarrett/retrotxtgo/pkg/create"
 	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/retrotxtgo/pkg/sample"
-	"github.com/bengarrett/sauce"
 	"github.com/spf13/cobra"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
@@ -132,12 +130,6 @@ func OpenSample(cmd *cobra.Command, arg string, c *convert.Convert, f sample.Fla
 	if err != nil {
 		return nil, err
 	}
-	// handle flags
-	if ff := cmd.Flags().Lookup("font-family"); ff != nil && !ff.Changed {
-		// only apply the sample font when the --font-family flag is unused
-		// html is a global flag, create.Args
-		Build.FontFamily.Value = p.Font.String()
-	}
 	return []byte(string(p.Runes)), nil
 }
 
@@ -167,21 +159,4 @@ func ReadArgument(arg string, cmd *cobra.Command, c *convert.Convert, f sample.F
 		return nil, err
 	}
 	return b, nil
-}
-
-// SAUCE returns any SAUCE metadata that is attached to src.
-func SAUCE(src *[]byte) create.SAUCE {
-	sr := sauce.Decode(*src)
-	if !sr.Valid() {
-		return create.SAUCE{}
-	}
-	return create.SAUCE{
-		Use:         true,
-		Title:       sr.Title,
-		Author:      sr.Author,
-		Group:       sr.Group,
-		Description: sr.Desc,
-		Width:       uint(sr.Info.Info1.Value),
-		Lines:       uint(sr.Info.Info2.Value),
-	}
 }

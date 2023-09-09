@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
-	"github.com/bengarrett/retrotxtgo/pkg/create"
 	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
 	"github.com/bengarrett/retrotxtgo/pkg/sample"
+	"github.com/bengarrett/retrotxtgo/pkg/sauce"
 	"github.com/spf13/cobra"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
@@ -69,8 +69,9 @@ func TestSAUCE(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	got := flag.SAUCE(&f)
-	if reflect.DeepEqual(got, create.SAUCE{}) {
+	got := sauce.SAUCE{}
+	got.Read(&f)
+	if reflect.DeepEqual(got, sauce.SAUCE{}) {
 		t.Error("SAUCE result is empty")
 		return
 	}

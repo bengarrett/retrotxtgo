@@ -6,15 +6,12 @@ import (
 	"fmt"
 
 	"github.com/bengarrett/retrotxtgo/meta"
-	"github.com/bengarrett/retrotxtgo/pkg/create"
 	"github.com/bengarrett/retrotxtgo/pkg/str"
 	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 )
 
 var ErrHide = errors.New("could not hide the flag")
-
-var Build create.Args
 
 type Commands struct {
 	Tester bool // internal automated tester
