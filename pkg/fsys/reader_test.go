@@ -1,4 +1,4 @@
-package filesystem_test
+package fsys_test
 
 import (
 	"bytes"
@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
+	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/static"
 )
 
@@ -20,7 +20,7 @@ func ExampleWordsEBCDIC() {
 		log.Fatal(err)
 	}
 	nr := bytes.NewReader(b)
-	words, err := filesystem.WordsEBCDIC(nr)
+	words, err := fsys.WordsEBCDIC(nr)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -32,17 +32,17 @@ func TestLineBreaks(t *testing.T) {
 	tests := []struct {
 		name string
 		text []rune
-		want filesystem.LB
+		want fsys.LB
 	}{
-		{"unix", []rune("hello\x0aworld\x0a"), filesystem.LF()},
-		{"win", []rune("hello\x0d\x0aworld\x0d\x0a\x1a"), filesystem.CRLF()},
-		{"c64", []rune("hello\x0dworld\x0d"), filesystem.CR()},
-		{"ibm", []rune("hello\x15world\x15"), filesystem.NL()},
-		{"mix", []rune("\x15Windows line break: \x0d\x0a\x15Unix line break: \x0a\x15"), filesystem.NL()},
+		{"unix", []rune("hello\x0aworld\x0a"), fsys.LF()},
+		{"win", []rune("hello\x0d\x0aworld\x0d\x0a\x1a"), fsys.CRLF()},
+		{"c64", []rune("hello\x0dworld\x0d"), fsys.CR()},
+		{"ibm", []rune("hello\x15world\x15"), fsys.NL()},
+		{"mix", []rune("\x15Windows line break: \x0d\x0a\x15Unix line break: \x0a\x15"), fsys.NL()},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := filesystem.LineBreaks(false, tt.text...); !reflect.DeepEqual(got, tt.want) {
+			if got := fsys.LineBreaks(false, tt.text...); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Data.LineBreaks() = %v, want %v", got, tt.want)
 			}
 		})
@@ -51,7 +51,7 @@ func TestLineBreaks(t *testing.T) {
 
 func TestLineBreak(t *testing.T) {
 	type args struct {
-		r         filesystem.LB
+		r         fsys.LB
 		extraInfo bool
 	}
 	tests := []struct {
@@ -60,12 +60,12 @@ func TestLineBreak(t *testing.T) {
 		want string
 	}{
 		{"empty", args{}, "??"},
-		{"nl", args{filesystem.NL(), false}, "NL"},
-		{"nl", args{filesystem.NL(), true}, "NL (IBM EBCDIC)"},
+		{"nl", args{fsys.NL(), false}, "NL"},
+		{"nl", args{fsys.NL(), true}, "NL (IBM EBCDIC)"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := filesystem.LineBreak(tt.args.r, tt.args.extraInfo); got != tt.want {
+			if got := fsys.LineBreak(tt.args.r, tt.args.extraInfo); got != tt.want {
 				t.Errorf("LineBreak() = %v, want %v", got, tt.want)
 			}
 		})
@@ -75,7 +75,7 @@ func TestLineBreak(t *testing.T) {
 func TestLines(t *testing.T) {
 	type args struct {
 		r  io.Reader
-		lb filesystem.LB
+		lb fsys.LB
 	}
 	tests := []struct {
 		name      string
@@ -83,13 +83,13 @@ func TestLines(t *testing.T) {
 		wantCount int
 		wantErr   bool
 	}{
-		{"empty", args{strings.NewReader(""), filesystem.LF()}, 0, false},
-		{"single line", args{strings.NewReader("hello world"), filesystem.LF()}, 1, false},
-		{"multiple lines", args{strings.NewReader("hello\nworld\neof"), filesystem.LF()}, 3, false},
+		{"empty", args{strings.NewReader(""), fsys.LF()}, 0, false},
+		{"single line", args{strings.NewReader("hello world"), fsys.LF()}, 1, false},
+		{"multiple lines", args{strings.NewReader("hello\nworld\neof"), fsys.LF()}, 3, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotCount, err := filesystem.Lines(tt.args.r, tt.args.lb)
+			gotCount, err := fsys.Lines(tt.args.r, tt.args.lb)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Lines() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -104,7 +104,7 @@ func TestLines(t *testing.T) {
 func TestColumns(t *testing.T) {
 	type args struct {
 		r  io.Reader
-		lb filesystem.LB
+		lb fsys.LB
 	}
 	tests := []struct {
 		name      string
@@ -113,12 +113,12 @@ func TestColumns(t *testing.T) {
 		wantErr   bool
 	}{
 		{"empty", args{}, 0, true},
-		{"4 chars", args{strings.NewReader("abcd\n"), filesystem.LF()}, 4, false},
-		{"4 runes", args{bytes.NewReader([]byte("😁😋😃🤫\n")), filesystem.LF()}, 16, false},
+		{"4 chars", args{strings.NewReader("abcd\n"), fsys.LF()}, 4, false},
+		{"4 runes", args{bytes.NewReader([]byte("😁😋😃🤫\n")), fsys.LF()}, 16, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotWidth, err := filesystem.Columns(tt.args.r, tt.args.lb)
+			gotWidth, err := fsys.Columns(tt.args.r, tt.args.lb)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Columns() error = %v, wantErr %v", err, tt.wantErr)
 				return

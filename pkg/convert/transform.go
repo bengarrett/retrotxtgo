@@ -10,7 +10,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
+	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/retrotxtgo/pkg/str"
 	"golang.org/x/text/encoding"
@@ -183,7 +183,7 @@ func (c *Convert) wrapWidth(max int) {
 		log.Fatal(ErrChainWrap)
 	}
 	r := strings.NewReader(string(c.Output))
-	cols, err := filesystem.Columns(r, c.Input.LineBreak)
+	cols, err := fsys.Columns(r, c.Input.LineBreak)
 	if err != nil {
 		logs.FatalMark(fmt.Sprint(c.Input.LineBreak), ErrWidth, err)
 	}

@@ -5,7 +5,7 @@ import (
 	"log"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
+	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/info"
 	"github.com/bengarrett/retrotxtgo/pkg/info/internal/detail"
 	"github.com/bengarrett/retrotxtgo/pkg/internal/mock"
@@ -23,7 +23,7 @@ func rawData() []byte {
 
 func sampleFile() string {
 	b := []byte(mock.T()["Tabs"]) // Tabs and Unicode glyphs
-	path, err := filesystem.SaveTemp("info_test.txt", b...)
+	path, err := fsys.SaveTemp("info_test.txt", b...)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -56,7 +56,7 @@ func TestMarshal(t *testing.T) {
 			}
 		})
 	}
-	filesystem.Clean(tmp)
+	fsys.Clean(tmp)
 }
 
 func TestStdin(t *testing.T) {

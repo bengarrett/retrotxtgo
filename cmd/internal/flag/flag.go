@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/bengarrett/retrotxtgo/pkg/convert"
-	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
+	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/retrotxtgo/pkg/sample"
 	"github.com/spf13/cobra"
@@ -36,7 +36,7 @@ func Args(cmd *cobra.Command, args ...string) ([]string, *convert.Convert, sampl
 	if s := cmd.Flags().Lookup("swap-chars"); s != nil && !s.Changed {
 		conv.Flags.SwapChars = []string{"null", "bar"}
 	}
-	if filesystem.IsPipe() {
+	if fsys.IsPipe() {
 		var err error
 		if l > 0 {
 			err = fmt.Errorf("%w;%w for piped text", err, ErrFilenames)
@@ -63,7 +63,7 @@ func Args(cmd *cobra.Command, args ...string) ([]string, *convert.Convert, sampl
 
 // Default returns the default encoding when the --encoding flag is unused.
 func Default() encoding.Encoding { //nolint:ireturn
-	if filesystem.IsPipe() {
+	if fsys.IsPipe() {
 		return unicode.UTF16(unicode.LittleEndian, unicode.UseBOM)
 	}
 	return charmap.CodePage437
@@ -142,7 +142,7 @@ func ReadArgument(arg string, cmd *cobra.Command, c *convert.Convert, f sample.F
 	)
 	// if no argument, then assume the source is piped via stdin
 	if arg == "" {
-		b, err = filesystem.ReadPipe()
+		b, err = fsys.ReadPipe()
 		if err != nil {
 			return nil, err
 		}
@@ -155,7 +155,7 @@ func ReadArgument(arg string, cmd *cobra.Command, c *convert.Convert, f sample.F
 		return b, nil
 	}
 	// the arg should be a filepath
-	b, err = filesystem.Read(arg)
+	b, err = fsys.Read(arg)
 	if err != nil {
 		return nil, err
 	}

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
+	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/info/internal/detail"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/karrick/godirwalk"
@@ -93,7 +93,7 @@ func Marshal(name string, f detail.Format) (string, error) {
 	if d.ValidText() {
 		var err error
 		// get the required linebreaks chars before running the multiple tasks
-		if d.LineBreak.Decimals, err = filesystem.ReadLineBreaks(name); err != nil {
+		if d.LineBreak.Decimals, err = fsys.ReadLineBreaks(name); err != nil {
 			return "", err
 		}
 		d.LineBreaks(d.LineBreak.Decimals)
@@ -139,32 +139,32 @@ func Stdin(format string, b ...byte) (string, error) {
 		return "", err
 	}
 	if d.ValidText() { //nolint:nestif
-		d.LineBreaks(filesystem.LineBreaks(true, []rune(string(b))...))
+		d.LineBreaks(fsys.LineBreaks(true, []rune(string(b))...))
 		var g errgroup.Group
 		g.Go(func() error {
 			var err error
-			if d.Count.Controls, err = filesystem.Controls(bytes.NewReader(b)); err != nil {
+			if d.Count.Controls, err = fsys.Controls(bytes.NewReader(b)); err != nil {
 				return err
 			}
 			return nil
 		})
 		g.Go(func() error {
 			var err error
-			if d.Count.Controls, err = filesystem.Controls(bytes.NewReader(b)); err != nil {
+			if d.Count.Controls, err = fsys.Controls(bytes.NewReader(b)); err != nil {
 				return err
 			}
 			return nil
 		})
 		g.Go(func() error {
 			var err error
-			if d.Lines, err = filesystem.Lines(bytes.NewReader(b), d.LineBreak.Decimals); err != nil {
+			if d.Lines, err = fsys.Lines(bytes.NewReader(b), d.LineBreak.Decimals); err != nil {
 				return err
 			}
 			return nil
 		})
 		g.Go(func() error {
 			var err error
-			if d.Width, err = filesystem.Columns(bytes.NewReader(b), d.LineBreak.Decimals); err != nil {
+			if d.Width, err = fsys.Columns(bytes.NewReader(b), d.LineBreak.Decimals); err != nil {
 				return err
 			} else if d.Width < 0 {
 				d.Width = d.Count.Chars
@@ -173,7 +173,7 @@ func Stdin(format string, b ...byte) (string, error) {
 		})
 		g.Go(func() error {
 			var err error
-			if d.Count.Words, err = filesystem.Words(bytes.NewReader(b)); err != nil {
+			if d.Count.Words, err = fsys.Words(bytes.NewReader(b)); err != nil {
 				return err
 			}
 			return nil

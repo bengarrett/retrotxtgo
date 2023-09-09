@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/bengarrett/retrotxtgo/meta"
-	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
+	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/retrotxtgo/pkg/online"
 	"github.com/bengarrett/retrotxtgo/pkg/str"
@@ -111,7 +111,7 @@ func CacheSet(etag, version string) error {
 	if err != nil {
 		return fmt.Errorf("%q: %w", cacheFile, ErrCacheData)
 	}
-	if _, _, err := filesystem.Write(f, out...); err != nil {
+	if _, _, err := fsys.Write(f, out...); err != nil {
 		return fmt.Errorf("%w: %w", err, ErrCacheSave)
 	}
 	return nil

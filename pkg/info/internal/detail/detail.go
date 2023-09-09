@@ -21,7 +21,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/bengarrett/bbs"
-	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
+	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/retrotxtgo/pkg/str"
 	"github.com/bengarrett/sauce"
@@ -144,7 +144,7 @@ func (d *Detail) Ctrls(name string) error {
 	}
 	defer f.Close()
 	var cnt int
-	if cnt, err = filesystem.Controls(f); err != nil {
+	if cnt, err = fsys.Controls(f); err != nil {
 		return err
 	}
 	d.Count.Controls = cnt
@@ -159,7 +159,7 @@ func (d *Detail) LineTotals(name string) error {
 	}
 	defer f.Close()
 	var l int
-	if l, err = filesystem.Lines(f, d.LineBreak.Decimals); err != nil {
+	if l, err = fsys.Lines(f, d.LineBreak.Decimals); err != nil {
 		return err
 	}
 	d.Lines = l
@@ -281,7 +281,7 @@ func (d *Detail) mime(name string, data ...byte) {
 	}
 	if d.ValidText() {
 		var err error
-		if d.Count.Chars, err = filesystem.Runes(bytes.NewBuffer(data)); err != nil {
+		if d.Count.Chars, err = fsys.Runes(bytes.NewBuffer(data)); err != nil {
 			fmt.Fprintf(os.Stdout, "mine sniffer failure, %s\n", err)
 		}
 		return
@@ -464,7 +464,7 @@ func (d *Detail) printMarshalData() []struct{ k, v string } {
 		{k: "filename", v: d.Name},
 		{k: "filetype", v: d.Mime.Commt},
 		{k: "Unicode", v: d.Unicode},
-		{k: "line break", v: filesystem.LineBreak(d.LineBreak.Decimals, true)},
+		{k: "line break", v: fsys.LineBreak(d.LineBreak.Decimals, true)},
 		{k: "characters", v: p.Sprint(d.Count.Chars)},
 		{k: ans, v: p.Sprint(d.Count.Controls)},
 		{k: "words", v: p.Sprint(d.Count.Words)},
@@ -513,7 +513,7 @@ func (d *Detail) Read(name string) error {
 		return err
 	}
 	// Read file content
-	data, err := filesystem.ReadAllBytes(name)
+	data, err := fsys.ReadAllBytes(name)
 	if err != nil {
 		return err
 	}
@@ -544,7 +544,7 @@ func (d *Detail) Len(name string) error {
 	}
 	defer f.Close()
 	var w int
-	if w, err = filesystem.Columns(f, d.LineBreak.Decimals); err != nil {
+	if w, err = fsys.Columns(f, d.LineBreak.Decimals); err != nil {
 		return err
 	} else if w < 0 {
 		w = d.Count.Chars
@@ -563,11 +563,11 @@ func (d *Detail) Words(name string) error {
 	var w int
 	switch d.LineBreak.Decimals {
 	case [2]rune{nl}, [2]rune{nel}:
-		if w, err = filesystem.WordsEBCDIC(f); err != nil {
+		if w, err = fsys.WordsEBCDIC(f); err != nil {
 			return err
 		}
 	default:
-		if w, err = filesystem.Words(f); err != nil {
+		if w, err = fsys.Words(f); err != nil {
 			return err
 		}
 	}

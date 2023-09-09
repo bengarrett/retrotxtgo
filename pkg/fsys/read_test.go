@@ -1,11 +1,11 @@
-package filesystem_test
+package fsys_test
 
 import (
 	"bytes"
 	"os"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
+	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/internal/mock"
 	"github.com/bengarrett/retrotxtgo/pkg/nl"
 )
@@ -36,7 +36,7 @@ func TestReadColumns(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotCount, err := filesystem.ReadColumns(tt.name)
+			gotCount, err := fsys.ReadColumns(tt.name)
 			os.Remove(tt.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadColumns() error = %v, wantErr %v", err, tt.wantErr)
@@ -68,7 +68,7 @@ func TestReadControls(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotCount, err := filesystem.ReadControls(tt.name)
+			gotCount, err := fsys.ReadControls(tt.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadControls() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -89,7 +89,7 @@ func TestIsPipe(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := filesystem.IsPipe(); got != tt.want {
+			if got := fsys.IsPipe(); got != tt.want {
 				t.Errorf("IsPipe() = %v, want %v", got, tt.want)
 			}
 		})
@@ -113,7 +113,7 @@ func TestReadLine(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotText, err := filesystem.ReadLine(tt.args.name, tt.args.linebreak)
+			gotText, err := fsys.ReadLine(tt.args.name, tt.args.linebreak)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadLine() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -141,7 +141,7 @@ func TestReadLines(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotCount, err := filesystem.ReadLines(tt.args.name)
+			gotCount, err := fsys.ReadLines(tt.args.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadLines() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -170,7 +170,7 @@ func TestReadText(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotText, err := filesystem.ReadText(tt.args.name)
+			gotText, err := fsys.ReadText(tt.args.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadText() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -199,7 +199,7 @@ func TestReadWords(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotCount, err := filesystem.ReadWords(tt.args.name)
+			gotCount, err := fsys.ReadWords(tt.args.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadWords() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -237,7 +237,7 @@ func TestReadPipe(t *testing.T) {
 				os.Stdin = stdin
 			}()
 			os.Stdin = r
-			gotB, err := filesystem.ReadPipe()
+			gotB, err := fsys.ReadPipe()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadPipe() error = %v, wantErr %v", err, tt.wantErr)
 				return

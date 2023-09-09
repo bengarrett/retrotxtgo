@@ -1,4 +1,4 @@
-package filesystem_test
+package fsys_test
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
+	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/internal/tmp"
 )
 
@@ -22,7 +22,7 @@ func ExampleZip() {
 	defer os.RemoveAll(tmpZip)
 
 	// Create a temporary 1 byte file in the temporary directory
-	tmpFile, err := filesystem.SaveTemp(path.Join(tmpZip, "temp.zip"), []byte("x")...)
+	tmpFile, err := fsys.SaveTemp(path.Join(tmpZip, "temp.zip"), []byte("x")...)
 	if err != nil {
 		log.Print(err)
 		return
@@ -31,7 +31,7 @@ func ExampleZip() {
 
 	// Initialize the Zip archive file
 	name := tmp.File("exampleZip.zip")
-	zip := filesystem.Zip{
+	zip := fsys.Zip{
 		Name:      name,
 		Root:      tmpZip,
 		Comment:   "",
@@ -59,7 +59,7 @@ func ExampleUniqueName() {
 	name := "retrotxtgo_uniquetest.txt"
 
 	// Create a temporary 1 byte file in the temporary directory
-	tmpFile, err := filesystem.SaveTemp(tmp.File(name), []byte("x")...)
+	tmpFile, err := fsys.SaveTemp(tmp.File(name), []byte("x")...)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -67,7 +67,7 @@ func ExampleUniqueName() {
 
 	// Use UniqueName to find a new unique filename
 	// so not to conflict with the previously saved file
-	u, err := filesystem.UniqueName(tmpFile)
+	u, err := fsys.UniqueName(tmpFile)
 	if err != nil {
 		log.Print(err)
 		return

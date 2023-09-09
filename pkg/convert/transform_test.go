@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/pkg/convert"
-	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
+	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/japanese"
 )
@@ -51,7 +51,7 @@ func TestConvert_ANSI(t *testing.T) {
 		"\x1b[1;33m  ╙──────────────╜\x1b[0m\x0D\x0A"
 	ba := []byte(ascii)
 	be := []byte(eof)
-	hi, err := filesystem.Read("static/test-hello_world.ans")
+	hi, err := fsys.Read("static/test-hello_world.ans")
 	if err != nil {
 		t.Error(err)
 	}
@@ -162,7 +162,7 @@ func TestConvert_Text(t *testing.T) {
 		"\x1b[1;33m  ╙──────────────╜\x1b[0m\x0D\x0A"
 	ba := []byte(ascii)
 	be := []byte(eof)
-	hi, err := filesystem.Read("static/test-hello_world.ans")
+	hi, err := fsys.Read("static/test-hello_world.ans")
 	if err != nil {
 		t.Error(err)
 	}

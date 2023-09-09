@@ -1,5 +1,5 @@
-// Package filesystem handles the opening and reading of text files.
-package filesystem
+// Package fsys handles the opening and reading of text files.
+package fsys
 
 import (
 	"archive/tar"
@@ -10,7 +10,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/bengarrett/retrotxtgo/pkg/filesystem/internal/util"
+	"github.com/bengarrett/retrotxtgo/pkg/fsys/internal/util"
 	"github.com/bengarrett/retrotxtgo/pkg/internal/save"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
 )

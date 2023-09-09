@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
-	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
+	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/info"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/retrotxtgo/pkg/sample"
@@ -26,7 +26,7 @@ var (
 // Run parses the arguments supplied with the info command.
 func Run(cmd *cobra.Command, args []string) error {
 	// piped input from other programs and then exit
-	if filesystem.IsPipe() {
+	if fsys.IsPipe() {
 		return Pipe(cmd)
 	}
 	if err := flag.Help(cmd, args...); err != nil {
@@ -93,7 +93,7 @@ func Sample(name string) (string, error) {
 
 // Pipe parses a standard input (stdin) stream of data.
 func Pipe(cmd *cobra.Command) error {
-	b, err := filesystem.ReadPipe()
+	b, err := fsys.ReadPipe()
 	if err != nil {
 		return fmt.Errorf("%w, %w", logs.ErrPipeRead, err)
 	}

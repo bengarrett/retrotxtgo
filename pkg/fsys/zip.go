@@ -1,4 +1,4 @@
-package filesystem
+package fsys
 
 import (
 	"archive/zip"
@@ -10,7 +10,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/bengarrett/retrotxtgo/pkg/filesystem/internal/util"
+	"github.com/bengarrett/retrotxtgo/pkg/fsys/internal/util"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/sauce/humanize"
 	"golang.org/x/text/language"

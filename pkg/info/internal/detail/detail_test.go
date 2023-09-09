@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
+	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/info/internal/detail"
 	"github.com/bengarrett/retrotxtgo/pkg/internal/mock"
 )
@@ -24,7 +24,7 @@ func millennia(name string) {
 
 func sampleFile() string {
 	b := []byte(mock.T()["Tabs"]) // Tabs and Unicode glyphs
-	path, err := filesystem.SaveTemp("info_test.txt", b...)
+	path, err := fsys.SaveTemp("info_test.txt", b...)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -39,7 +39,7 @@ func ExampleMarshal() {
 		log.Fatal(err)
 	}
 	data, _ := file.Marshal(detail.XML)
-	filesystem.Clean(tmp)
+	fsys.Clean(tmp)
 	s := strings.ReplaceAll(string(data), "\t", "")
 	ln := strings.Split(s, "\n")
 	fmt.Fprintln(os.Stdout, ln[0])
@@ -95,7 +95,7 @@ func TestRead(t *testing.T) {
 	if got.Sums.MD5 != want {
 		t.Errorf("Read() = %v, want %v", got.Sums.MD5, want)
 	}
-	filesystem.Clean(tmp)
+	fsys.Clean(tmp)
 }
 
 func TestParse(t *testing.T) {
@@ -132,7 +132,7 @@ func TestParse(t *testing.T) {
 			}
 		})
 	}
-	filesystem.Clean(tmp)
+	fsys.Clean(tmp)
 }
 
 func TestMarshal_json(t *testing.T) {
@@ -167,5 +167,5 @@ func TestMarshal_text(t *testing.T) {
 	if got := len(b); got != want {
 		t.Errorf("Marshal() text = %v, want %v", got, want)
 	}
-	filesystem.Clean(tmp)
+	fsys.Clean(tmp)
 }

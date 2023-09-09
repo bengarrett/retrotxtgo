@@ -1,4 +1,4 @@
-package filesystem
+package fsys
 
 import (
 	"bufio"
@@ -8,7 +8,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/bengarrett/retrotxtgo/pkg/filesystem/internal/util"
+	"github.com/bengarrett/retrotxtgo/pkg/fsys/internal/util"
 	"github.com/bengarrett/retrotxtgo/pkg/internal/save"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/retrotxtgo/pkg/nl"

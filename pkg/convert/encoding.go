@@ -8,7 +8,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
+	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/retrotxtgo/pkg/str"
 	"golang.org/x/text/encoding"
@@ -576,7 +576,7 @@ func (c *Convert) ANSIControls() *Convert {
 // LineBreak will try to guess the line break representation as a 2 byte value.
 // A guess of Unix will return [10, 0], Windows [13, 10], otherwise a [0, 0] value is returned.
 func (c *Convert) LineBreak() {
-	c.Input.LineBreak = filesystem.LineBreaks(true, c.Output...)
+	c.Input.LineBreak = fsys.LineBreaks(true, c.Output...)
 }
 
 // RunesControls switches out C0 and C1 ASCII controls with Unicode Control Picture represenations.

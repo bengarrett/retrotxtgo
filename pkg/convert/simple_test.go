@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/pkg/convert"
-	"github.com/bengarrett/retrotxtgo/pkg/filesystem"
+	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/internal/mock"
 	"golang.org/x/text/encoding/charmap"
 )
@@ -25,11 +25,11 @@ func ExampleD437() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = filesystem.SaveTemp(name, result...)
+	_, err = fsys.SaveTemp(name, result...)
 	if err != nil {
 		log.Fatal(err)
 	}
-	t, err := filesystem.ReadText(name)
+	t, err := fsys.ReadText(name)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -71,15 +71,15 @@ func ExampleE437() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = filesystem.SaveTemp(name, result...)
+	_, err = fsys.SaveTemp(name, result...)
 	if err != nil {
 		log.Fatal(err)
 	}
-	t, err := filesystem.ReadText(name)
+	t, err := fsys.ReadText(name)
 	if err != nil {
 		log.Fatal(err)
 	}
-	filesystem.Clean(name)
+	fsys.Clean(name)
 	fmt.Fprint(os.Stdout, len(t))
 	// Output: 8
 }
