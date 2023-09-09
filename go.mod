@@ -22,6 +22,7 @@ require (
 require (
 	github.com/bengarrett/bbs v0.1.0
 	github.com/bengarrett/sauce v1.1.0
+	golang.org/x/exp v0.0.0-20220909182711-5c715a9e8561
 	gopkg.in/yaml.v3 v3.0.1
 )
 

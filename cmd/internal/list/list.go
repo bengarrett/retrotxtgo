@@ -13,6 +13,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/retrotxtgo/pkg/sample"
 	"github.com/bengarrett/retrotxtgo/pkg/str"
+	"golang.org/x/exp/slices"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/ianaindex"
@@ -94,7 +95,7 @@ func Tables() (string, error) {
 	// use strings builder to reduce memory usage
 	// https://yourbasic.org/golang/build-append-concatenate-strings-efficiently/
 	b := strings.Builder{}
-	var tables []encoding.Encoding
+	tables := make([]encoding.Encoding, 0, len(convert.Encodings()))
 	encodings := convert.Encodings()
 	// reorder tables to position X-User-Defined after ISO-8859-10
 	for _, e := range encodings {
@@ -108,6 +109,7 @@ func Tables() (string, error) {
 		}
 		tables = append(tables, e)
 	}
+	slices.Compact(tables)
 	// print tables
 	for _, e := range tables {
 		var (
