@@ -128,7 +128,7 @@ const (
 	base     = "rt_sample-"
 )
 
-func ExampleD437() {
+func ExampleDecode() {
 	const name = base + "cp437In.txt"
 	result, err := byter.Decode(charmap.CodePage437, cp437hex)
 	if err != nil {
@@ -174,7 +174,7 @@ func TestCP437Decode(t *testing.T) {
 	}
 }
 
-func ExampleE437() {
+func ExampleEncode() {
 	const name = base + "cp437.txt"
 	result, err := byter.Encode(charmap.CodePage437, utf)
 	if err != nil {
