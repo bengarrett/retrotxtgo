@@ -18,6 +18,8 @@ const (
 	wantAbc  = "␀ ☺ ☻♪◙←[0mA B C"
 	wantEOF1 = "Hello"
 	wantEOF0 = "Hello→world!"
+
+	filename = "convert_test.ans"
 )
 
 func Test_SkipCtrlCodes(t *testing.T) {
@@ -51,7 +53,7 @@ func TestConvert_ANSI(t *testing.T) {
 		"\x1b[1;33m  ╙──────────────╜\x1b[0m\x0D\x0A"
 	ba := []byte(ascii)
 	be := []byte(eof)
-	hi, err := fsys.Read("static/test-hello_world.ans")
+	hi, err := fsys.Read(filename)
 	if err != nil {
 		t.Error(err)
 	}
@@ -162,7 +164,7 @@ func TestConvert_Text(t *testing.T) {
 		"\x1b[1;33m  ╙──────────────╜\x1b[0m\x0D\x0A"
 	ba := []byte(ascii)
 	be := []byte(eof)
-	hi, err := fsys.Read("static/test-hello_world.ans")
+	hi, err := fsys.Read(filename)
 	if err != nil {
 		t.Error(err)
 	}

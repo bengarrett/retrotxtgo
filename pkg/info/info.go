@@ -113,9 +113,6 @@ func Marshal(name string, f detail.Format) (string, error) {
 			return d.LineTotals(name)
 		})
 		g.Go(func() error {
-			return d.Len(name)
-		})
-		g.Go(func() error {
 			return d.Words(name)
 		})
 		if err := g.Wait(); err != nil {
@@ -146,13 +143,6 @@ func Stdin(format string, b ...byte) (string, error) {
 	if d.ValidText() { //nolint:nestif
 		d.LineBreaks(fsys.LineBreaks(true, []rune(string(b))...))
 		var g errgroup.Group
-		g.Go(func() error {
-			var err error
-			if d.Count.Controls, err = fsys.Controls(bytes.NewReader(b)); err != nil {
-				return err
-			}
-			return nil
-		})
 		g.Go(func() error {
 			var err error
 			if d.Count.Controls, err = fsys.Controls(bytes.NewReader(b)); err != nil {

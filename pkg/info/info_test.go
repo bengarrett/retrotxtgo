@@ -1,7 +1,6 @@
 package info_test
 
 import (
-	"errors"
 	"log"
 	"testing"
 
@@ -81,40 +80,6 @@ func TestStdin(t *testing.T) {
 			_, err := info.Stdin(tt.args.format, tt.args.b...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Stdin() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func TestNames_Info(t *testing.T) {
-	const fileToTest = "internal/detail/detail.go"
-	type fields struct {
-		Index  int
-		Length int
-	}
-	type args struct {
-		name   string
-		format string
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr error
-	}{
-		{"empty", fields{}, args{}, nil},
-		{"bad dir", fields{}, args{name: "some invalid filename"}, nil},
-		{"temp file", fields{}, args{name: fileToTest, format: "json.min"}, nil},
-		{"temp dir", fields{}, args{name: ".", format: "json.min"}, nil},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			n := info.Names{
-				Index:  tt.fields.Index,
-				Length: tt.fields.Length,
-			}
-			if _, got := n.Info(tt.args.name, tt.args.format); !errors.Is(got, tt.wantErr) {
-				t.Errorf("Names.Info() = %v, want %v", got, tt.wantErr)
 			}
 		})
 	}

@@ -45,11 +45,11 @@ tasks:
   test:
     desc: "Run the test suite."
     cmds:
-      - go test -v ./...
+      - go test ./...
   testr:
-    desc: "Run the test suite with the slower race detection."
+    desc: "Run the verbose test suite with the slower race detection."
     cmds:
-      - go test -race -v ./...
+      - go test -race ./...
   pkg-patch:
     silent: false
     desc: Update and apply patches to the web server dependencies.
