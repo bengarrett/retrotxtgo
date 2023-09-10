@@ -8,6 +8,7 @@ There are [numerous download](https://github.com/bengarrett/retrotxtgo/releases/
 ### [Scoop](https://scoop.sh/)
 
 ```ps
+# NOT CURRENTLY WORKING
 scoop bucket add retrotxt https://github.com/bengarrett/retrotxtgo.git
 scoop install bengarrett/retrotxt
 retrotxt -v
@@ -17,6 +18,7 @@ retrotxt -v
 ### [Homebrew](https://brew.sh/)
 
 ```sh
+# NOT CURRENTLY WORKING
 brew install bengarrett/retrotxt/retrotxt
 retrotxt -v
 ```
@@ -25,22 +27,15 @@ retrotxt -v
 ### DEB
 ```sh
 # Debian DEB package for Intel
-wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_linux.deb
+wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo.deb
 dpkg -i retrotxt.deb
-retrotxt -v
-```
-
-```sh
-# Debian DEB package for the Raspberry Pi & ARM
-wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_raspberry_pi.deb
-dpkg -i retrotxt_raspberry_pi.deb
 retrotxt -v
 ```
 
 ### RPM
 ```sh
 # Redhat RPM package
-wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_linux.rpm
+wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo.rpm
 rpm -i retrotxt.rpm
 retrotxt -v
 ```
@@ -48,7 +43,7 @@ retrotxt -v
 ### APK
 ```sh
 # Alpine APK package
-wget https://github.com/bengarrett/myip/releases/latest/download/retrotxt.apk
+wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo.apk
 apk add retrotxt.apk
 retrotxt -v
 ```

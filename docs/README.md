@@ -7,9 +7,9 @@ Read legacy codepage and ANSI encoded textfiles in a modern Unicode terminal.
 ## Downloads
 
 There are [numerous downloads](https://github.com/bengarrett/retrotxtgo/releases/latest/) available for
-[Windows](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_Windows_Intel.zip),
-[macOS](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_macOS_all.tar.gz),
-[Linux](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_Linux_Intel.tar.gz) and more.
+[Windows](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo_windows_amd64.zip),
+[macOS](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo_darwin_all.tar.gz),
+[Linux](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo_linux_amd64.tar.gz) and more.
 
 Otherwise [these installation options are available](INSTALL.md).
 

@@ -74,9 +74,9 @@ scoops:
       name: goreleaserbot
       email: bot@goreleaser.com
   - commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
-  - homepage: https://retrotxt.com/go
-  - description: Read legacy codepage encoded textfiles in a modern Unicode terminal.
-  - license: LGPL 3.0
+  - homepage: "https://retrotxt.com/go"
+  - description: "Read legacy codepage encoded textfiles in a modern Unicode terminal."
+  - license: "LGPL 3.0"
   # Setting this will prevent goreleaser to actually try to commit the updated
   # manifest leaving the responsibility of publishing it to the user.
   # If set to auto, the release will not be uploaded to the scoop bucket
