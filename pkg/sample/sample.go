@@ -9,7 +9,6 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/bengarrett/retrotxtgo/pkg/convert"
-	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/retrotxtgo/static"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
@@ -22,6 +21,7 @@ var (
 	ErrEncode  = errors.New("no encoding provided")
 	ErrConvert = errors.New("unknown convert method")
 	ErrConvNil = errors.New("conv argument cannot be empty")
+	ErrName    = errors.New("sample filename does not exist")
 )
 
 // Flags and configuration values by the user.
@@ -113,11 +113,11 @@ func Open(name string) ([]byte, error) {
 	name = strings.ToLower(name)
 	samp, exist := Map()[name]
 	if !exist {
-		return nil, logs.ErrSampleName
+		return nil, fmt.Errorf("%s: %w", name, ErrName)
 	}
 	b, err := static.File.ReadFile(samp.Name)
 	if err != nil {
-		return nil, fmt.Errorf("open sample %q: %w", samp.Name, logs.ErrSampleName)
+		return nil, fmt.Errorf("open sample %q: %w", samp.Name, err)
 	}
 	return b, nil
 }
@@ -146,11 +146,11 @@ func (flag Flags) Open(name string, conv *convert.Convert) (File, error) {
 	}
 	samp, exist := Map()[name]
 	if !exist {
-		return File{}, logs.ErrSampleName
+		return File{}, fmt.Errorf("%s: %w", name, ErrName)
 	}
 	b, err := static.File.ReadFile(samp.Name)
 	if err != nil {
-		return File{}, fmt.Errorf("open sample %q: %w", samp.Name, logs.ErrSampleName)
+		return File{}, fmt.Errorf("open sample %q: %w", samp.Name, err)
 	}
 	if conv == nil {
 		return File{}, ErrConvNil

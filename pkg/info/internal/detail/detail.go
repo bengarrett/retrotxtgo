@@ -3,6 +3,7 @@ package detail
 import (
 	"archive/zip"
 	"bytes"
+	"errors"
 
 	//nolint:gosec
 	"crypto/md5"
@@ -22,7 +23,6 @@ import (
 
 	"github.com/bengarrett/bbs"
 	"github.com/bengarrett/retrotxtgo/pkg/fsys"
-	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/retrotxtgo/pkg/term"
 	"github.com/bengarrett/sauce"
 	"github.com/bengarrett/sauce/humanize"
@@ -31,6 +31,10 @@ import (
 	"github.com/zRedShift/mimemagic"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
+)
+
+var (
+	ErrFmt = errors.New("format is not known")
 )
 
 // Detail of a file.
@@ -172,9 +176,9 @@ func (d *Detail) Marshal(f Format) ([]byte, error) {
 	var b []byte
 	switch f {
 	case ColorText:
-		return d.printMarshal(true), nil
+		return d.printMarshal(true)
 	case PlainText:
-		return d.printMarshal(false), nil
+		return d.printMarshal(false)
 	case JSON:
 		b, err = json.MarshalIndent(d, "", "    ")
 		if err != nil {
@@ -191,7 +195,7 @@ func (d *Detail) Marshal(f Format) ([]byte, error) {
 			return nil, fmt.Errorf("detail xml marshal: %w", err)
 		}
 	default:
-		return nil, fmt.Errorf("detail marshal %q: %w", f, logs.ErrFmt)
+		return nil, fmt.Errorf("detail marshal %q: %w", f, ErrFmt)
 	}
 	return b, nil
 }
@@ -347,7 +351,7 @@ func (d *Detail) input(data int, stat fs.FileInfo) {
 }
 
 // printMarshal returns the marshaled detail data as plain or color text.
-func (d *Detail) printMarshal(color bool) []byte {
+func (d *Detail) printMarshal(color bool) ([]byte, error) {
 	const padding, width = 10, 80
 	info := func(s string) string {
 		return fmt.Sprintf("%s\t", s)
@@ -390,9 +394,9 @@ func (d *Detail) printMarshal(color bool) []byte {
 		}
 	}
 	if err := w.Flush(); err != nil {
-		logs.FatalWrap(logs.ErrTabFlush, err)
+		return nil, err
 	}
-	return buf.Bytes()
+	return buf.Bytes(), nil
 }
 
 // marshalDataValid returns true if the key and value data validates.

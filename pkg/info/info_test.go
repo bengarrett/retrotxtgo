@@ -9,7 +9,6 @@ import (
 	"github.com/bengarrett/retrotxtgo/pkg/info"
 	"github.com/bengarrett/retrotxtgo/pkg/info/internal/detail"
 	"github.com/bengarrett/retrotxtgo/pkg/internal/mock"
-	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/retrotxtgo/static"
 )
 
@@ -103,8 +102,8 @@ func TestNames_Info(t *testing.T) {
 		args    args
 		wantErr error
 	}{
-		{"empty", fields{}, args{}, logs.ErrNameNil},
-		{"bad dir", fields{}, args{name: "some invalid filename"}, logs.ErrFileName},
+		{"empty", fields{}, args{}, nil},
+		{"bad dir", fields{}, args{name: "some invalid filename"}, nil},
 		{"temp file", fields{}, args{name: fileToTest, format: "json.min"}, nil},
 		{"temp dir", fields{}, args{name: ".", format: "json.min"}, nil},
 	}

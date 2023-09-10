@@ -10,23 +10,31 @@ import (
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/info"
-	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/retrotxtgo/pkg/sample"
 	"github.com/bengarrett/retrotxtgo/static"
 	"github.com/spf13/cobra"
 )
 
 var (
-	ErrNotExist = errors.New("no such file or directory")
-	ErrNotSamp  = errors.New("no such example or sample file")
-	ErrInfo     = errors.New("could not any obtain information")
-	ErrUsage    = errors.New("command usage could not display")
+	ErrNotExist  = errors.New("no such file or directory")
+	ErrNotSamp   = errors.New("no such example or sample file")
+	ErrInfo      = errors.New("could not any obtain information")
+	ErrUsage     = errors.New("command usage could not display")
+	ErrPipeRead  = errors.New("could not read text stream from piped stdin (standard input)")
+	ErrPipeParse = errors.New("could not parse the text stream from piped stdin (standard input)")
+	ErrTmpClose  = errors.New("could not close the temporary file")
+	ErrTmpOpen   = errors.New("could not open the temporary file")
+	ErrTmpSave   = errors.New("could not save to the temporary file")
 )
 
 // Run parses the arguments supplied with the info command.
 func Run(cmd *cobra.Command, args []string) error {
 	// piped input from other programs and then exit
-	if fsys.IsPipe() {
+	ok, err := fsys.IsPipe()
+	if err != nil {
+		return err
+	}
+	if ok {
 		return Pipe(cmd)
 	}
 	if err := flag.Help(cmd, args...); err != nil {
@@ -51,12 +59,6 @@ func Run(cmd *cobra.Command, args []string) error {
 		}
 		s, err := n.Info(arg, flag.Info.Format)
 		if err != nil {
-			if errors.Is(logs.ErrFileName, err) {
-				if n.Length <= 1 {
-					return err
-				}
-				return fmt.Errorf("%w, %w: %s", logs.ErrFileName, err, arg)
-			}
 			if err := cmd.Usage(); err != nil {
 				return fmt.Errorf("%w: %w", ErrUsage, err)
 			}
@@ -80,13 +82,13 @@ func Sample(name string) (string, error) {
 	}
 	file, err := os.CreateTemp("", fmt.Sprintf("retrotxt_%s.*.txt", s))
 	if err != nil {
-		return "", fmt.Errorf(" sample file %q: %w", samp.Name, logs.ErrTmpOpen)
+		return "", fmt.Errorf(" sample file %q: %w", samp.Name, ErrTmpOpen)
 	}
 	if _, err = file.Write(b); err != nil {
-		return "", fmt.Errorf(" sample file %q: %w", samp.Name, logs.ErrTmpSave)
+		return "", fmt.Errorf(" sample file %q: %w", samp.Name, ErrTmpSave)
 	}
 	if err := file.Close(); err != nil {
-		return "", fmt.Errorf(" sample file %q: %w", samp.Name, logs.ErrTmpClose)
+		return "", fmt.Errorf(" sample file %q: %w", samp.Name, ErrTmpClose)
 	}
 	return file.Name(), nil
 }
@@ -95,11 +97,11 @@ func Sample(name string) (string, error) {
 func Pipe(cmd *cobra.Command) error {
 	b, err := fsys.ReadPipe()
 	if err != nil {
-		return fmt.Errorf("%w, %w", logs.ErrPipeRead, err)
+		return fmt.Errorf("%w, %w", ErrPipeRead, err)
 	}
 	s, err := info.Stdin(flag.Info.Format, b...)
 	if err != nil {
-		return fmt.Errorf("%w, %w", logs.ErrPipeParse, err)
+		return fmt.Errorf("%w, %w", ErrPipeParse, err)
 	}
 	fmt.Fprint(cmd.OutOrStdout(), s)
 	return nil

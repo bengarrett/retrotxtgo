@@ -2,6 +2,7 @@ package fsys
 
 import (
 	"archive/zip"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -11,9 +12,13 @@ import (
 	"strings"
 
 	"github.com/bengarrett/retrotxtgo/pkg/fsys/internal/util"
-	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/sauce/humanize"
 	"golang.org/x/text/language"
+)
+
+var (
+	ErrName = errors.New("name file cannot be a directory")
+	ErrMax  = errors.New("maximum attempts reached")
 )
 
 // Files to zip.
@@ -175,7 +180,7 @@ func UniqueName(name string) (string, error) {
 		return name, err
 	}
 	if s.IsDir() {
-		return "", fmt.Errorf("unique name is a directory %q: %w", name, logs.ErrFileSaveD)
+		return "", fmt.Errorf("%q: %w", name, ErrName)
 	}
 	i := 1
 	for {
@@ -198,7 +203,7 @@ func UniqueName(name string) (string, error) {
 		}
 		i++
 		if i > maxAttempts {
-			return "", fmt.Errorf("unique name aborted after %d attempts: %w", maxAttempts, logs.ErrMax)
+			return "", fmt.Errorf("unique name aborted after %d attempts: %w", maxAttempts, ErrMax)
 		}
 	}
 }

@@ -12,7 +12,6 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/pkg/fsys/internal/util"
 	"github.com/bengarrett/retrotxtgo/pkg/internal/save"
-	"github.com/bengarrett/retrotxtgo/pkg/logs"
 )
 
 // ErrStd could not print to stderr.
@@ -29,9 +28,9 @@ func Clean(name string) {
 
 // DirExpansion returns the absolute directory path from a named path using shell-like expansions.
 // It currently supports limited Bash tilde, shell dot and double dot syntax.
-func DirExpansion(name string) string {
+func DirExpansion(name string) (string, error) {
 	if name == "" {
-		return ""
+		return "", nil
 	}
 	root := func() bool {
 		return name[:1] == string(os.PathSeparator)
@@ -45,14 +44,14 @@ func DirExpansion(name string) string {
 		switch s {
 		case homeDir:
 			if p, err = os.UserHomeDir(); err != nil {
-				logs.FatalSave(err)
+				return "", err
 			}
 		case currentDir:
 			if i != 0 {
 				continue
 			}
 			if p, err = os.Getwd(); err != nil {
-				logs.FatalSave(err)
+				return "", err
 			}
 		case parentDir:
 			if i != 0 {
@@ -61,7 +60,7 @@ func DirExpansion(name string) string {
 			}
 			wd, err := os.Getwd()
 			if err != nil {
-				logs.FatalSave(err)
+				return "", err
 			}
 			p = filepath.Dir(wd)
 		default:
@@ -76,7 +75,7 @@ func DirExpansion(name string) string {
 	if root() {
 		dir = string(os.PathSeparator) + dir
 	}
-	return dir
+	return dir, nil
 }
 
 // SaveTemp saves bytes to a named temporary file.

@@ -23,14 +23,6 @@ func Hint(s string, err error) string {
 		Sprint(err), term.Example(fmt.Sprintf("%s %s", meta.Bin, s)))
 }
 
-// Fatal prints a formatted error and exits.
-func Fatal(err error) {
-	if err != nil {
-		fmt.Fprintln(os.Stderr, Sprint(err))
-	}
-	os.Exit(OSErrCode)
-}
-
 // FatalFlag prints a problem with the flag and exits.
 func FatalFlag(cmd, flag string, err error) {
 	fmt.Fprintln(os.Stderr, SprintFlag(cmd, flag, err))

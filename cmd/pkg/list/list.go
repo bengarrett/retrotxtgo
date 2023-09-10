@@ -10,7 +10,6 @@ import (
 	"text/tabwriter"
 
 	"github.com/bengarrett/retrotxtgo/meta"
-	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/retrotxtgo/pkg/sample"
 	"github.com/bengarrett/retrotxtgo/pkg/table"
 	"github.com/bengarrett/retrotxtgo/pkg/term"
@@ -59,7 +58,7 @@ func Examples() (*bytes.Buffer, error) {
 	fmt.Fprintf(w, "\nMultiple examples used together are supported.\n%s\n",
 		term.Example(bin+"view ansi ascii ansi.rgb"))
 	if err := w.Flush(); err != nil {
-		return nil, fmt.Errorf("%w, %w", logs.ErrTabFlush, err)
+		return nil, err
 	}
 	return &buf, nil
 }

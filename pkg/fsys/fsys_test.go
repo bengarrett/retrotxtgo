@@ -85,7 +85,7 @@ func Test_DirExpansion(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
-			if gotDir := fsys.DirExpansion(tt.Name); gotDir != tt.WantDir {
+			if gotDir, _ := fsys.DirExpansion(tt.Name); gotDir != tt.WantDir {
 				t.Errorf("DirExpansion(%v) = %v, want %v", tt.Name, gotDir, tt.WantDir)
 			}
 		})

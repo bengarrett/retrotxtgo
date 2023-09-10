@@ -36,7 +36,9 @@ func Args(cmd *cobra.Command, args ...string) ([]string, *convert.Convert, sampl
 	if s := cmd.Flags().Lookup("swap-chars"); s != nil && !s.Changed {
 		conv.Flags.SwapChars = []string{"null", "bar"}
 	}
-	if fsys.IsPipe() {
+	if ok, err := fsys.IsPipe(); err != nil {
+		logs.Fatal(err)
+	} else if ok {
 		var err error
 		if l > 0 {
 			err = fmt.Errorf("%w;%w for piped text", err, ErrFilenames)
@@ -63,7 +65,11 @@ func Args(cmd *cobra.Command, args ...string) ([]string, *convert.Convert, sampl
 
 // Default returns the default encoding when the --encoding flag is unused.
 func Default() encoding.Encoding { //nolint:ireturn
-	if fsys.IsPipe() {
+	ok, err := fsys.IsPipe()
+	if err != nil {
+		logs.Fatal(err)
+	}
+	if ok {
 		return unicode.UTF16(unicode.LittleEndian, unicode.UseBOM)
 	}
 	return charmap.CodePage437

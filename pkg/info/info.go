@@ -3,14 +3,19 @@ package info
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 
 	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/info/internal/detail"
-	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/karrick/godirwalk"
 	"golang.org/x/sync/errgroup"
+)
+
+var (
+	ErrName = errors.New("name value cannot be empty")
+	ErrFmt  = errors.New("format is not known")
 )
 
 type Detail detail.Detail
@@ -23,48 +28,48 @@ type Names struct {
 
 // Info parses the named file and prints out its details in a specific syntax.
 func (n Names) Info(name, format string) (string, error) {
-	err1 := fmt.Sprintf("info on %s failed", name)
+	failure := fmt.Sprintf("info on %s failed", name)
 	if name == "" {
-		return "", fmt.Errorf("%s: %w", err1, logs.ErrNameNil)
+		return "", ErrName
 	}
 	f, err := output(format)
 	if err != nil {
-		return "", fmt.Errorf("%s: %w", err1, logs.ErrFmt)
+		return "", err
 	}
 	s, err := os.Stat(name)
 	if os.IsNotExist(err) {
-		return "", fmt.Errorf("%s: %w", err1, logs.ErrFileName)
+		return "", fmt.Errorf("%s: %w", failure, err)
 	}
 	if err != nil {
-		return "", fmt.Errorf("%s: %w", err1, err)
+		return "", fmt.Errorf("%s: %w", failure, err)
 	}
-	if s.IsDir() {
-		// godirwalk.Walk is more performant than the standard library filepath.Walk
-		err := godirwalk.Walk(name, &godirwalk.Options{
-			Callback: func(osPathname string, de *godirwalk.Dirent) error {
-				if skip, err := de.IsDirOrSymlinkToDir(); err != nil {
-					return err
-				} else if skip {
-					return nil
-				}
-				_, err := Marshal(osPathname, f)
-				return err
-			},
-			ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {
-				return godirwalk.SkipNode
-			},
-			Unsorted: true, // set true for faster yet non-deterministic enumeration
-		})
+	if !s.IsDir() {
+		res, err := Marshal(name, f)
 		if err != nil {
-			return "", fmt.Errorf("info could not walk directory: %w", err)
+			return "", fmt.Errorf("%s: %w", failure, err)
 		}
-		return "", nil
+		return res, nil
 	}
-	res, err := Marshal(name, f)
+	// godirwalk.Walk is more performant than the standard library filepath.Walk
+	err = godirwalk.Walk(name, &godirwalk.Options{
+		Callback: func(osPathname string, de *godirwalk.Dirent) error {
+			if skip, err := de.IsDirOrSymlinkToDir(); err != nil {
+				return err
+			} else if skip {
+				return nil
+			}
+			_, err := Marshal(osPathname, f)
+			return err
+		},
+		ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {
+			return godirwalk.SkipNode
+		},
+		Unsorted: true, // set true for faster yet non-deterministic enumeration
+	})
 	if err != nil {
-		return "", fmt.Errorf("info on %s could not marshal: %w", name, err)
+		return "", fmt.Errorf("info could not walk directory: %w", err)
 	}
-	return res, nil
+	return "", nil
 }
 
 // output converts the --format argument value to a format type.
@@ -81,7 +86,7 @@ func output(argument string) (detail.Format, error) {
 	case "xml", "x":
 		return detail.XML, nil
 	}
-	return -1, logs.ErrFmt
+	return -1, fmt.Errorf("%w: %s", ErrFmt, argument)
 }
 
 // Marshal the metadata and system details of a named file.

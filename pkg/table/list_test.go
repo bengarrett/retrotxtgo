@@ -20,7 +20,7 @@ func TestEncodings(t *testing.T) {
 }
 
 func TestList(t *testing.T) {
-	if got := table.List(); got == nil {
+	if got, _ := table.List(); got == nil {
 		t.Errorf("List() do not want %v", got)
 	}
 }

@@ -35,7 +35,7 @@ func Template() string {
 	}
 	tag, err := update.Check()
 	if err != nil {
-		logs.Save(err)
+		logs.Fatal(err)
 	}
 	appDate := ""
 	if meta.App.Date != meta.Placeholder {

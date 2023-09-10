@@ -11,17 +11,20 @@ import (
 	"github.com/bengarrett/retrotxtgo/pkg/fsys/internal/util"
 	"github.com/bengarrett/retrotxtgo/pkg/fsys/nl"
 	"github.com/bengarrett/retrotxtgo/pkg/internal/save"
-	"github.com/bengarrett/retrotxtgo/pkg/logs"
+)
+
+var (
+	ErrPipeEmpty = errors.New("empty text stream from piped stdin (standard input)")
 )
 
 // IsPipe determines if Stdin (standard input) is piped from another command.
-func IsPipe() bool {
+func IsPipe() (bool, error) {
 	// source: https://dev.to/napicella/linux-pipes-in-golang-2e8j
 	fi, err := os.Stdin.Stat()
 	if err != nil {
-		logs.Save(err)
+		return false, fmt.Errorf("could not stat stdin: %w", err)
 	}
-	return fi.Mode()&os.ModeCharDevice == 0
+	return fi.Mode()&os.ModeCharDevice == 0, nil
 }
 
 // Read opens and returns the content of the named file.
@@ -192,7 +195,7 @@ func ReadPipe() ([]byte, error) {
 		return nil, fmt.Errorf("read pipe could not scan stdin: %w", err)
 	}
 	if len(b) == 0 {
-		return nil, logs.ErrPipeEmpty
+		return nil, ErrPipeEmpty
 	}
 	return b, nil
 }

@@ -71,7 +71,7 @@ func Check() (string, error) {
 func CacheGet() (etag, version string) { //nolint:nonamedreturns
 	cf, err := home().DataPath(cacheFile)
 	if err != nil {
-		logs.Save(err)
+		logs.Sprint(err)
 		return
 	}
 	if _, err = os.Stat(cf); os.IsNotExist(err) {
@@ -79,16 +79,16 @@ func CacheGet() (etag, version string) { //nolint:nonamedreturns
 	}
 	f, err := os.ReadFile(cf)
 	if err != nil {
-		logs.Save(err)
+		logs.Sprint(err)
 	}
 	var cache Cache
 	if err := yaml.Unmarshal(f, &cache); err != nil {
-		logs.Save(err)
+		logs.Sprint(err)
 	}
 	// if either value is missing, delete the broken cache
 	if cache.Etag == "" || cache.Version == "" {
 		err = os.Remove(cf)
-		logs.Save(err)
+		logs.Sprint(err)
 		return "", ""
 	}
 	return cache.Etag, cache.Version

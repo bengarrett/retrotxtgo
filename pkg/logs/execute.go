@@ -10,6 +10,18 @@ import (
 	"github.com/bengarrett/retrotxtgo/meta"
 )
 
+var (
+	ErrNoArgs  = errors.New("no arguments were given for the logs executer")
+	ErrShort   = errors.New("word count is too short, it requires at least 3 words")
+	ErrCmd     = errors.New("the command is invalid")
+	ErrFlag    = errors.New("the flag does not work with this command")
+	ErrFlagNil = errors.New("the flag with a value must be included with this command")
+	ErrNotBool = errors.New("the value must be either true or false")
+	ErrNotInt  = errors.New("the value must be a number")
+	ErrNotInts = errors.New("the value must be a single or a list of numbers")
+	ErrNotNil  = errors.New("the value cannot be empty")
+)
+
 // FatalCmd prints a problem highlighting the unsupported command.
 func FatalCmd(usage string, args ...string) {
 	args = append(args, usage)
@@ -49,23 +61,28 @@ func Execute(err error, test bool, args ...string) string { //nolint:funlen
 		unknownCmd     = "unknown command"
 		unknownFlag    = "unknown flag:"
 		unknownShort   = "unknown shorthand"
+
+		exec = "logs executer problem"
 	)
 	words := strings.Split(fmt.Sprintf("%s", err), " ")
 	argsCnt, wordCnt := len(args), len(words)
 	if wordCnt < minWords {
-		e := fmt.Errorf("cmd error args: %w", ErrShort)
+		e := fmt.Errorf("%s: %w", exec, ErrShort)
 		if test {
 			return e.Error()
 		}
-		FatalSave(e)
+		Fatal(e)
 	}
 	if argsCnt == 0 {
-		e := fmt.Errorf("cmd error err: %w", ErrEmpty)
-		if test {
-			return e.Error()
-		}
-		FatalSave(e)
+		Fatal(err)
+		// do nothing
 	}
+	// 	e := fmt.Errorf("%s: %w", exec, ErrNoArgs)
+	// 	if test {
+	// 		return e.Error()
+	// 	}
+	// 	Fatal(e)
+	// }
 	mark, name := words[wordCnt-1], args[0]
 	if mark == name {
 		name = rt

@@ -4,14 +4,12 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"text/tabwriter"
 
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/bengarrett/retrotxtgo/pkg/asa"
-	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/retrotxtgo/pkg/term"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
@@ -56,7 +54,7 @@ func Encodings() []encoding.Encoding {
 }
 
 // List returns a tabled list of supported IANA character set encodings.
-func List() *bytes.Buffer { //nolint:funlen
+func List() (*bytes.Buffer, error) { //nolint:funlen
 	const header, title = " Formal name\t Named value\t Numeric value\t Alias value\t",
 		" Supported legacy code pages and character encodings "
 	var buf bytes.Buffer
@@ -73,7 +71,7 @@ func List() *bytes.Buffer { //nolint:funlen
 		}
 		c, err := Cells(e)
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
 		switch e {
 		case charmap.ISO8859_10:
@@ -133,9 +131,9 @@ func List() *bytes.Buffer { //nolint:funlen
 	fmt.Fprintf(w, "\n%s, PCs and the web today use Unicode UTF-8. As a subset of ISO 8895-1,\n", meta.Name)
 	fmt.Fprintln(w, "UTF-8 is backwards compatible with it and US-ASCII.")
 	if err := w.Flush(); err != nil {
-		logs.FatalWrap(logs.ErrTabFlush, err)
+		return nil, err
 	}
-	return &buf
+	return &buf, nil
 }
 
 // Cells return character encoding details for use in a text table.

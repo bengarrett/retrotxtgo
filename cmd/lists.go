@@ -47,7 +47,10 @@ func ListCodepages() *cobra.Command {
 			meta.Name),
 		GroupID: "codepages",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			b := table.List()
+			b, err := table.List()
+			if err != nil {
+				return err
+			}
 			fmt.Fprint(cmd.OutOrStdout(), b)
 			return nil
 		},
