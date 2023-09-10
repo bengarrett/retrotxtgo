@@ -228,7 +228,7 @@ retrotxt info retrotxt.ans --format=json
 ```json
 {
     "filename": "retrotxt.ans",
-    "utf8": false,
+    "unicode": "no",
     "lineBreak": {
         "string": "CRLF",
         "escape": "\r\n",
@@ -237,5 +237,98 @@ retrotxt info retrotxt.ans --format=json
             10
         ]
     },
-    ...
+    "counts": {
+        "characters": 8074,
+        "ansiControls": 892,
+        "words": 59
+    },
+    "size": {
+        "bytes": 8101,
+        "decimal": "8.1 kB",
+        "binary": "7.9 KiB"
+    },
+    "lines": 31,
+    "width": 8101,
+    "modified": {
+        "iso": "2023-09-10T06:25:49.00179453Z",
+        "epoch": 1694327149
+    },
+    "checksums": {
+        "crc32": "7aeb63ec",
+        "crc64": "1e8495be4c0edf25",
+        "md5": "5adb64b98a10a87ba9bd02435112b049",
+        "sha256": "ca1b69fa5ed2c01837b66f03402569f84c43fd308d8399abc85737e2abef2c1f"
+    },
+    "mime": {
+        "media": "application",
+        "subMedia": "octet-stream",
+        "comment": "Text document with ANSI controls"
+    },
+    "slug": "retrotxt-ansi",
+    "sauce": {
+        "id": "SAUCE",
+        "version": "00",
+        "title": "RetroTxt logo",
+        "author": "Zeus II",
+        "group": "Blocktronics, FUEL",
+        "date": {
+            "value": "20200701",
+            "iso": "2020-07-01T00:00:00Z",
+            "epoch": 1593561600
+        },
+        "filesize": {
+            "bytes": 7775,
+            "decimal": "7.8 kB",
+            "binary": "7.6 KiB"
+        },
+        "dataType": {
+            "type": 1,
+            "name": "text or character stream"
+        },
+        "fileType": {
+            "type": 1,
+            "name": "ANSI color text"
+        },
+        "typeInfo": {
+            "1": {
+                "value": 80,
+                "info": "character width"
+            },
+            "2": {
+                "value": 31,
+                "info": "number of lines"
+            },
+            "3": {
+                "value": 0,
+                "info": ""
+            },
+            "flags": {
+                "decimal": 3,
+                "binary": "00011",
+                "nonBlinkMode": {
+                    "flag": "0",
+                    "interpretation": "blink mode"
+                },
+                "letterSpacing": {
+                    "flag": "00",
+                    "interpretation": "no preference"
+                },
+                "aspectRatio": {
+                    "flag": "11",
+                    "interpretation": "invalid value"
+                }
+            },
+            "fontName": "IBM VGA"
+        },
+        "comments": {
+            "id": "COMNT",
+            "count": 3,
+            "lines": [
+                "The app that lets you view works of ANSI art, ASCII and NFO text in terminal or as HTML. LGPL and available for Windows, Linux, Unix \u0026 macOS.                                                   "
+            ]
+        }
+    },
+    "zipComment": "",
+    "UTF8": false
+}
 ```
