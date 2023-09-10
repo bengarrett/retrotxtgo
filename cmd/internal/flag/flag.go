@@ -129,7 +129,7 @@ func Help(cmd *cobra.Command, args ...string) error {
 }
 
 // OpenSample returns the content of the named embed sample file given via an argument.
-func OpenSample(cmd *cobra.Command, arg string, c *convert.Convert, f sample.Flags) ([]byte, error) {
+func OpenSample(arg string, c *convert.Convert, f sample.Flags) ([]byte, error) {
 	if ok := sample.Valid(arg); !ok {
 		return nil, nil
 	}
@@ -141,7 +141,7 @@ func OpenSample(cmd *cobra.Command, arg string, c *convert.Convert, f sample.Fla
 }
 
 // ReadArgument returns the content of argument supplied filepath, embed sample file or piped data.
-func ReadArgument(arg string, cmd *cobra.Command, c *convert.Convert, f sample.Flags) ([]byte, error) {
+func ReadArgument(arg string, c *convert.Convert, f sample.Flags) ([]byte, error) {
 	var (
 		b   []byte
 		err error
@@ -155,7 +155,7 @@ func ReadArgument(arg string, cmd *cobra.Command, c *convert.Convert, f sample.F
 		return b, nil
 	}
 	// attempt to see if arg is a embed sample file request
-	if b, err = OpenSample(cmd, arg, c, f); err != nil {
+	if b, err = OpenSample(arg, c, f); err != nil {
 		return nil, err
 	} else if b != nil {
 		return b, nil

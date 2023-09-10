@@ -31,7 +31,7 @@ func Run(cmd *cobra.Command, args ...string) (*bytes.Buffer, error) {
 			const halfPage = 40
 			fmt.Fprintln(w, term.HRLen(halfPage))
 		}
-		b, err := flag.ReadArgument(arg, cmd, conv, samp)
+		b, err := flag.ReadArgument(arg, conv, samp)
 		if err != nil {
 			return nil, err
 		}

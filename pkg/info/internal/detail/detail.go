@@ -3,13 +3,12 @@ package detail
 import (
 	"archive/zip"
 	"bytes"
-	"errors"
-
 	//nolint:gosec
 	"crypto/md5"
 	"crypto/sha256"
 	"encoding/json"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"hash/crc32"
 	"hash/crc64"
@@ -33,9 +32,7 @@ import (
 	"golang.org/x/text/message"
 )
 
-var (
-	ErrFmt = errors.New("format is not known")
-)
+var ErrFmt = errors.New("format is not known")
 
 // Detail of a file.
 //

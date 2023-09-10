@@ -13,9 +13,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/pkg/internal/save"
 )
 
-var (
-	ErrPipeEmpty = errors.New("empty text stream from piped stdin (standard input)")
-)
+var ErrPipeEmpty = errors.New("empty text stream from piped stdin (standard input)")
 
 // IsPipe determines if Stdin (standard input) is piped from another command.
 func IsPipe() (bool, error) {

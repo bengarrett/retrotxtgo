@@ -7,9 +7,9 @@ import (
 )
 
 const (
-	Ascii63 = "ascii-63"
-	Ascii65 = "ascii-65"
-	Ascii67 = "ascii-67"
+	Text63 = "ascii-63"
+	Text65 = "ascii-65"
+	Text67 = "ascii-67"
 )
 
 // Encoding is an implementation of the Encoding interface that adds the String
@@ -20,14 +20,14 @@ type Encoding struct {
 }
 
 var (
-	// ASAX34_1963 ASA X3.4 1963.
-	ASAX34_1963 encoding.Encoding = &x34_1963 //nolint: gochecknoglobals
+	// StdX34_1963 ASA X3.4 1963.
+	StdX34_1963 encoding.Encoding = &x34_1963 //nolint: gochecknoglobals
 
-	// AsaX34_1965 ASA X3.4 1965.
-	ASAX34_1965 encoding.Encoding = &x34_1965 //nolint: gochecknoglobals
+	// StdX34_1965 ASA X3.4 1965.
+	StdX34_1965 encoding.Encoding = &x34_1965 //nolint: gochecknoglobals
 
-	// AnsiX34_1967 ANSI X3.4 1967/77/86.
-	ANSIX34_1967 encoding.Encoding = &x34_1967 //nolint: gochecknoglobals
+	// StdX34_1967 ANSI X3.4 1967/77/86.
+	StdX34_1967 encoding.Encoding = &x34_1967 //nolint: gochecknoglobals
 
 	x34_1963 = Encoding{ //nolint: gochecknoglobals
 		Encoding: charmap.Windows1252,
@@ -50,12 +50,12 @@ func (e Encoding) String() string {
 // Name returns a named value for the legacy ASA ASCII character encodings.
 func Name(e encoding.Encoding) string {
 	switch e {
-	case ASAX34_1963:
-		return Ascii63
-	case ASAX34_1965:
-		return Ascii65
-	case ANSIX34_1967:
-		return Ascii67
+	case StdX34_1963:
+		return Text63
+	case StdX34_1965:
+		return Text65
+	case StdX34_1967:
+		return Text67
 	}
 	return ""
 }
@@ -65,11 +65,11 @@ func Name(e encoding.Encoding) string {
 // If the code matches an existing Windows-1252 character, then -1 is returned.
 func Char(e encoding.Encoding, code int) rune {
 	switch e {
-	case ASAX34_1963:
+	case StdX34_1963:
 		return CharX3463(code)
-	case ASAX34_1965:
+	case StdX34_1965:
 		return CharX3465(code)
-	case ANSIX34_1967:
+	case StdX34_1967:
 		return CharX3467(code)
 	}
 	return -1

@@ -541,7 +541,7 @@ func TestConvert_swaps(t *testing.T) {
 				Output: tt.output,
 			}
 			c.Flags.SwapChars = tt.swaps
-			c.Swaps()
+			_, _ = c.Swaps()
 			if got := c.Output; !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Convert.Swaps() = %v, want %v", string(got), string(tt.want))
 			}

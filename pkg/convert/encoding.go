@@ -25,7 +25,8 @@ import (
 var (
 	ErrChainANSI = errors.New("ansi() is a chain method that is to be used" +
 		" in conjunction with swap: c.swap().ansi()")
-	ErrName = errors.New("encoding cannot match name or alias")
+	ErrName   = errors.New("encoding cannot match name or alias")
+	ErrOutput = errors.New("nothing to output")
 )
 
 const (
@@ -437,7 +438,7 @@ func encodingUnicode(name string) string {
 // Swap transforms character map and control codes into UTF-8 unicode runes.
 func (c *Convert) Swap() (*Convert, error) {
 	if len(c.Output) == 0 {
-		return nil, nil
+		return nil, ErrOutput
 	}
 	c, err := c.Swaps()
 	if err != nil {

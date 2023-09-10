@@ -230,10 +230,16 @@ func Test_ListTables(t *testing.T) { //nolint:gocognit,funlen
 		wantRunes  []rune
 		wantErr    bool
 	}{
-		{"cp037", "IBM Code Page 037 (US/Canada Latin 1) - EBCDIC",
-			[]rune{'␉', '␅', '␖', 'A', '9'}, false},
-		{"cp437", "IBM Code Page 437 (DOS, OEM-US) - Extended ASCII",
-			[]rune{'☺', '♪', '╬', '¿'}, false},
+		{
+			"cp037", "IBM Code Page 037 (US/Canada Latin 1) - EBCDIC",
+			[]rune{'␉', '␅', '␖', 'A', '9'},
+			false,
+		},
+		{
+			"cp437", "IBM Code Page 437 (DOS, OEM-US) - Extended ASCII",
+			[]rune{'☺', '♪', '╬', '¿'},
+			false,
+		},
 		{"cp850", "850 (DOS, Latin 1)", []rune{'§', '®', '¤'}, false},
 		{"cp852", "852 (DOS, Latin 2)", []rune{'Ľ', 'đ', 'ő'}, false},
 		{"cp855", "855 (DOS, Cyrillic)", []rune{'Ж', 'Ы', 'ю'}, false},

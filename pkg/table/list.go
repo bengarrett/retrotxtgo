@@ -64,7 +64,7 @@ func List() (*bytes.Buffer, error) { //nolint:funlen
 	fmt.Fprint(w, term.Head(tblWidth, title))
 	fmt.Fprintf(w, "\n%s\n", header)
 	enc := Encodings()
-	enc = append(enc, asa.ASAX34_1963, asa.ASAX34_1965, asa.ANSIX34_1967)
+	enc = append(enc, asa.StdX34_1963, asa.StdX34_1965, asa.StdX34_1967)
 	for _, e := range enc {
 		if e == charmap.XUserDefined {
 			continue
@@ -95,7 +95,7 @@ func List() (*bytes.Buffer, error) { //nolint:funlen
 			fmt.Fprintf(w, " † %s\t %s\t %s\t %s\t\n",
 				c.Name, c.Value, c.Numeric, c.Alias)
 			continue
-		case asa.ASAX34_1963, asa.ASAX34_1965, asa.ANSIX34_1967:
+		case asa.StdX34_1963, asa.StdX34_1965, asa.StdX34_1967:
 			fmt.Fprintf(w, " ⁑ %s\t %s\t %s\t %s\t\n",
 				c.Name, c.Value, c.Numeric, c.Alias)
 			continue
@@ -145,7 +145,7 @@ func Cells(e encoding.Encoding) (Cell, error) {
 		Name: fmt.Sprint(e),
 	}
 	switch e {
-	case asa.ASAX34_1963, asa.ASAX34_1965, asa.ANSIX34_1967:
+	case asa.StdX34_1963, asa.StdX34_1965, asa.StdX34_1967:
 		c.Value = asa.Name(e)
 		return c, nil
 	}

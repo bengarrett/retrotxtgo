@@ -118,12 +118,12 @@ func CodePager(s string) (encoding.Encoding, error) { //nolint:ireturn
 		return charmap.Windows874, nil
 	}
 	switch strings.ToLower(s) {
-	case asa.Ascii63:
-		return asa.ASAX34_1963, nil
-	case asa.Ascii65:
-		return asa.ASAX34_1965, nil
-	case asa.Ascii67:
-		return asa.ANSIX34_1967, nil
+	case asa.Text63:
+		return asa.StdX34_1963, nil
+	case asa.Text65:
+		return asa.StdX34_1965, nil
+	case asa.Text67:
+		return asa.StdX34_1967, nil
 	default:
 		return CodePage(s)
 	}
@@ -152,12 +152,12 @@ func CodePage(s string) (encoding.Encoding, error) { //nolint:ireturn
 func converter(name string, cp encoding.Encoding) convert.Convert {
 	conv := convert.Convert{}
 	switch strings.ToLower(name) {
-	case asa.Ascii63:
-		cp = asa.ASAX34_1963
-	case asa.Ascii65:
-		cp = asa.ASAX34_1965
-	case asa.Ascii67:
-		cp = asa.ANSIX34_1967
+	case asa.Text63:
+		cp = asa.StdX34_1963
+	case asa.Text65:
+		cp = asa.StdX34_1965
+	case asa.Text67:
+		cp = asa.StdX34_1967
 	}
 	conv.Input.Encoding = cp
 	return conv
@@ -168,12 +168,12 @@ func revert(name string) encoding.Encoding { //nolint:ireturn
 		return charmap.XUserDefined
 	}
 	switch strings.ToLower(name) {
-	case asa.Ascii63:
-		return asa.ASAX34_1963
-	case asa.Ascii65:
-		return asa.ASAX34_1965
-	case asa.Ascii67:
-		return asa.ANSIX34_1967
+	case asa.Text63:
+		return asa.StdX34_1963
+	case asa.Text65:
+		return asa.StdX34_1965
+	case asa.Text67:
+		return asa.StdX34_1967
 	}
 	return nil
 }
@@ -181,8 +181,8 @@ func revert(name string) encoding.Encoding { //nolint:ireturn
 // CharISO11 returns a string for the ISO-8859-11 character codes.
 func CharISO11(cp encoding.Encoding, code int) rune {
 	// ISO-8859-11 is not included in Go so a user defined charmap is used.
-	ISO8859_11 := charmap.XUserDefined
-	if cp != ISO8859_11 {
+	Iso8859_11 := charmap.XUserDefined
+	if cp != Iso8859_11 {
 		return -1
 	}
 	const pad, nbsp = 128, 160
