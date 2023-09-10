@@ -1,4 +1,4 @@
-package convert
+package table
 
 import (
 	"bytes"
@@ -11,6 +11,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/pkg/asa"
 	"github.com/bengarrett/retrotxtgo/pkg/byter"
+	"github.com/bengarrett/retrotxtgo/pkg/convert"
 	"github.com/bengarrett/retrotxtgo/pkg/term"
 	"github.com/gookit/color"
 	"golang.org/x/text/encoding"
@@ -20,11 +21,15 @@ import (
 	"golang.org/x/text/encoding/unicode/utf32"
 )
 
+var (
+	ErrNoName = errors.New("there is no encoding name")
+	ErrUTF16  = errors.New("utf-16 table encodings are not supported")
+	ErrUTF32  = errors.New("utf-32 table encodings are not supported")
+)
+
 const (
 	width = 67
 )
-
-var ErrNoName = errors.New("there is no encoding name")
 
 func ISO11Name(name string) bool {
 	switch strings.ToUpper(name) {
@@ -126,7 +131,7 @@ func codepager(name string) (encoding.Encoding, error) { //nolint:ireturn
 }
 
 func DefaultCP(name string) (encoding.Encoding, error) { //nolint:ireturn
-	cp, err := Encoder(name)
+	cp, err := convert.Encoder(name)
 	if err != nil {
 		return nil, fmt.Errorf("table encoding error: %w", err)
 	}
@@ -143,8 +148,8 @@ func DefaultCP(name string) (encoding.Encoding, error) { //nolint:ireturn
 	return cp, nil
 }
 
-func encoder(name string, cp encoding.Encoding) Convert {
-	conv := Convert{}
+func encoder(name string, cp encoding.Encoding) convert.Convert {
+	conv := convert.Convert{}
 	switch strings.ToLower(name) {
 	case asa.Ascii63, asa.Ascii65, asa.Ascii67:
 		cp = charmap.Windows1252

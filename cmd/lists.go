@@ -7,7 +7,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/cmd/pkg/example"
 	"github.com/bengarrett/retrotxtgo/cmd/pkg/list"
 	"github.com/bengarrett/retrotxtgo/meta"
-	"github.com/bengarrett/retrotxtgo/pkg/convert"
+	"github.com/bengarrett/retrotxtgo/pkg/table"
 	"github.com/bengarrett/retrotxtgo/pkg/term"
 	"github.com/spf13/cobra"
 )
@@ -47,7 +47,7 @@ func ListCodepages() *cobra.Command {
 			meta.Name),
 		GroupID: "codepages",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			b := convert.List()
+			b := table.List()
 			fmt.Fprint(cmd.OutOrStdout(), b)
 			return nil
 		},

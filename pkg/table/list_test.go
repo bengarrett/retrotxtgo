@@ -1,9 +1,9 @@
-package convert_test
+package table_test
 
 import (
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/pkg/convert"
+	"github.com/bengarrett/retrotxtgo/pkg/table"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/ianaindex"
@@ -13,14 +13,14 @@ import (
 
 func TestEncodings(t *testing.T) {
 	const totalEncodings = 53
-	got, want := len(convert.Encodings()), totalEncodings
+	got, want := len(table.Encodings()), totalEncodings
 	if got != want {
 		t.Errorf("Encodings() count = %v, want %v", got, want)
 	}
 }
 
 func TestList(t *testing.T) {
-	if got := convert.List(); got == nil {
+	if got := table.List(); got == nil {
 		t.Errorf("List() do not want %v", got)
 	}
 }
@@ -29,34 +29,34 @@ func TestCells(t *testing.T) {
 	tests := []struct {
 		name    string
 		e       encoding.Encoding
-		cell    convert.Cell
+		cell    table.Cell
 		wantErr bool
 	}{
-		{"unknown", nil, convert.Cell{"", "", "", ""}, true},
+		{"unknown", nil, table.Cell{"", "", "", ""}, true},
 		{
 			"cp437", charmap.CodePage437,
-			convert.Cell{"IBM Code Page 437", "cp437", "437", "msdos"},
+			table.Cell{"IBM Code Page 437", "cp437", "437", "msdos"},
 			false,
 		},
 		{
 			"latin6", charmap.ISO8859_10,
-			convert.Cell{"ISO 8859-10", "iso-8859-10", "10", "latin6"},
+			table.Cell{"ISO 8859-10", "iso-8859-10", "10", "latin6"},
 			false,
 		},
 		{
 			"utf8", unicode.UTF8,
-			convert.Cell{"UTF-8", "utf-8", "", "utf8"},
+			table.Cell{"UTF-8", "utf-8", "", "utf8"},
 			false,
 		},
 		{
 			"utf32", utf32.UTF32(utf32.BigEndian, utf32.UseBOM),
-			convert.Cell{"UTF-32BE (Use BOM)", "utf-32", "", "utf32"},
+			table.Cell{"UTF-32BE (Use BOM)", "utf-32", "", "utf32"},
 			false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c, err := convert.Cells(tt.e)
+			c, err := table.Cells(tt.e)
 			if got := (err != nil); got != tt.wantErr {
 				t.Errorf("Cells() error is %v, want %v", got, tt.wantErr)
 			}
@@ -97,7 +97,7 @@ func TestAliasFmt(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := convert.AliasFmt(tt.args.s, tt.args.val, tt.args.e)
+			got, err := table.AliasFmt(tt.args.s, tt.args.val, tt.args.e)
 			if got != tt.want {
 				t.Errorf("AliasFmt() = %v, want %v", got, tt.want)
 			}
@@ -124,7 +124,7 @@ func TestUniform(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotS := convert.Uniform(tt.args.mime); gotS != tt.wantS {
+			if gotS := table.Uniform(tt.args.mime); gotS != tt.wantS {
 				t.Errorf("uniform() = %v, want %v", gotS, tt.wantS)
 			}
 		})
@@ -146,11 +146,9 @@ func TestNumeric(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := convert.Numeric(tt.name); got != tt.want {
+			if got := table.Numeric(tt.name); got != tt.want {
 				t.Errorf("Numeric() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
-
-// Encodings()

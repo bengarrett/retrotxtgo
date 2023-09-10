@@ -10,9 +10,9 @@ import (
 	"text/tabwriter"
 
 	"github.com/bengarrett/retrotxtgo/meta"
-	"github.com/bengarrett/retrotxtgo/pkg/convert"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/retrotxtgo/pkg/sample"
+	"github.com/bengarrett/retrotxtgo/pkg/table"
 	"github.com/bengarrett/retrotxtgo/pkg/term"
 	"golang.org/x/exp/slices"
 	"golang.org/x/text/encoding"
@@ -81,13 +81,13 @@ func Table(names ...string) (string, error) {
 	b := strings.Builder{}
 	// iterate through the tables
 	for _, name := range names {
-		table, err := convert.Table(name)
+		t, err := table.Table(name)
 		if err != nil {
 			return "", err
 		}
-		l := len(table.Bytes())
+		l := len(t.Bytes())
 		b.Grow(l)
-		fmt.Fprintf(&b, "%s ", table)
+		fmt.Fprintf(&b, "%s ", t)
 	}
 	return b.String(), nil
 }
@@ -97,8 +97,8 @@ func Tables() (string, error) {
 	// use strings builder to reduce memory usage
 	// https://yourbasic.org/golang/build-append-concatenate-strings-efficiently/
 	b := strings.Builder{}
-	tables := make([]encoding.Encoding, 0, len(convert.Encodings()))
-	encodings := convert.Encodings()
+	tables := make([]encoding.Encoding, 0, len(table.Encodings()))
+	encodings := table.Encodings()
 	// reorder tables to position X-User-Defined after ISO-8859-10
 	for _, e := range encodings {
 		switch e {
@@ -130,7 +130,7 @@ func Tables() (string, error) {
 		if !Printable(name) {
 			continue
 		}
-		table, err := convert.Table(name)
+		table, err := table.Table(name)
 		if err != nil {
 			return "", fmt.Errorf("table %s, %w, %w", e, ErrTable, err)
 		}

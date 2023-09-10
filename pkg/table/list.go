@@ -1,4 +1,4 @@
-package convert
+package table
 
 import (
 	"bytes"

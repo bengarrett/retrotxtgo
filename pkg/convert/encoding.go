@@ -2,6 +2,7 @@ package convert
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -20,6 +21,12 @@ import (
 	"golang.org/x/text/encoding/unicode/utf32"
 	"golang.org/x/text/runes"
 	"golang.org/x/text/transform"
+)
+
+var (
+	ErrChainANSI = errors.New("ansi() is a chain method that is to be used" +
+		" in conjunction with swap: c.swap().ansi()")
+	ErrName = errors.New("encoding cannot match name or alias")
 )
 
 const (

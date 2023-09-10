@@ -1,10 +1,10 @@
-package convert_test
+package table_test
 
 import (
 	"reflect"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/pkg/convert"
+	"github.com/bengarrett/retrotxtgo/pkg/table"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/japanese"
@@ -24,7 +24,7 @@ func TestTable(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := convert.Table(tt.name)
+			got, err := table.Table(tt.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Table() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -52,7 +52,7 @@ func Test_DefaultCP(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := convert.DefaultCP(tt.args.name)
+			got, err := table.DefaultCP(tt.args.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("DefaultCP() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -85,7 +85,7 @@ func Test_character(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := convert.Character(tt.args.pos, tt.args.r, tt.args.cp); got != tt.want {
+			if got := table.Character(tt.args.pos, tt.args.r, tt.args.cp); got != tt.want {
 				t.Errorf("Character() = %q, want %q", got, tt.want)
 			}
 		})
@@ -107,7 +107,7 @@ func Test_CharmapAlias(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := convert.CharmapAlias(tt.args.cp); got != tt.want {
+			if got := table.CharmapAlias(tt.args.cp); got != tt.want {
 				t.Errorf("CharmapAlias() = %v, want %v", got, tt.want)
 			}
 		})
