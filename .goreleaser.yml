@@ -8,7 +8,7 @@
 # git tag -a v0.1.0 -m "First release"
 # git push origin v0.1.0
 
-project_name: retrotxt
+project_name: retrotxtgo
 # make a variable description
 
 before:
@@ -71,6 +71,7 @@ nfpms:
 
 scoops:
   - name: retrotxt
+  #- url_template: "ttps://github.com/bengarrett/retrotxtgo/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
   - commit_author:
       name: goreleaserbot
       email: bot@goreleaser.com
@@ -84,7 +85,23 @@ scoops:
   # in case there is an indicator for prerelease in the tag e.g. v1.0.0-rc1
   # Default is false.
   - skip_upload: auto
+  # Repository to push the generated files to.
+  - repository:
+      owner: bengarrett
+      name: retrotxtgo
+      branch: dev
 
 changelog:
   skip: false
   use: git
+
+upx:
+  - 
+    enabled: true
+    ids: [Linux_Intel, Windows]
+    # Valid options are from '1' (faster) to '9' (better), and 'best'.
+    compress: best
+    # Whether to try LZMA (slower).
+    lzma: true
+    # Whether to try all methods and filters (slow).
+    brute: true
