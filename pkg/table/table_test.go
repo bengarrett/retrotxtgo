@@ -36,7 +36,7 @@ func TestTable(t *testing.T) {
 	}
 }
 
-func Test_DefaultCP(t *testing.T) {
+func Test_CodePage(t *testing.T) {
 	type args struct {
 		name string
 	}
@@ -52,13 +52,13 @@ func Test_DefaultCP(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := table.DefaultCP(tt.args.name)
+			got, err := table.CodePage(tt.args.name)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("DefaultCP() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("CodePage() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("DefaultCP() = %v, want %v", got, tt.want)
+				t.Errorf("CodePage() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -85,7 +85,7 @@ func Test_character(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := table.Character(tt.args.pos, tt.args.r, tt.args.cp); got != tt.want {
+			if got := table.Character(tt.args.cp, tt.args.pos, tt.args.r); got != tt.want {
 				t.Errorf("Character() = %q, want %q", got, tt.want)
 			}
 		})

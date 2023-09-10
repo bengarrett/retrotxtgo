@@ -31,27 +31,14 @@ const (
 	width = 67
 )
 
-func ISO11Name(name string) bool {
-	switch strings.ToUpper(name) {
-	case
-		"ISO 8859-11",
-		"ISO-8859-11",
-		"ISO8859-11",
-		"11",
-		"ISO885911":
-		return true
-	}
-	return false
-}
-
 // Table prints out all the characters in the named 8-bit character set.
 func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
-	cp, err := codepager(name)
+	cp, err := CodePager(name)
 	if err != nil {
 		return nil, err
 	}
 	h := fmt.Sprintf("%s", cp)
-	if ISO11Name(name) {
+	if ISO11(name) {
 		h = "ISO 8859-11"
 	}
 	h += CharmapAlias(cp) + charmapStandard(cp)
@@ -70,7 +57,7 @@ func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf(" %X  ", i))
 		}
 	}
-	b, conv, row := byter.MakeBytes(), encoder(name, cp), 0
+	b, conv, row := byter.MakeBytes(), converter(name, cp), 0
 	runes, err := conv.Chars(b...)
 	if err != nil {
 		return nil, fmt.Errorf("table convert bytes error: %w", err)
@@ -78,7 +65,7 @@ func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 	cp = revert(name)
 	const hex = 16
 	for i, r := range runes {
-		char := Character(i, r, cp)
+		char := Character(cp, i, r)
 		switch {
 		case i == 0:
 			fmt.Fprintf(w, " %s %s %s %s",
@@ -107,31 +94,44 @@ func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 	return &buf, nil
 }
 
-func codepager(name string) (encoding.Encoding, error) { //nolint:ireturn
-	if name == "" {
+// ISO11 returns true if s matches an ISO-8859-11 name or alias.
+func ISO11(s string) bool {
+	switch strings.ToUpper(s) {
+	case
+		"ISO 8859-11",
+		"ISO-8859-11",
+		"ISO8859-11",
+		"11",
+		"ISO885911":
+		return true
+	}
+	return false
+}
+
+// CodePager returns the encoding of the code page name or alias.
+func CodePager(s string) (encoding.Encoding, error) { //nolint:ireturn
+	if s == "" {
 		return nil, ErrNoName
 	}
-	if ISO11Name(name) {
+	if ISO11(s) {
 		return charmap.Windows874, nil
 	}
-	switch strings.ToLower(name) {
+	switch strings.ToLower(s) {
 	case asa.Ascii63:
-		return asa.AsaX34_1963, nil
+		return asa.ASAX34_1963, nil
 	case asa.Ascii65:
-		return asa.AsaX34_1965, nil
+		return asa.ASAX34_1965, nil
 	case asa.Ascii67:
-		return asa.AnsiX34_1967, nil
+		return asa.ANSIX34_1967, nil
 	default:
-		cp, err := DefaultCP(name)
-		if err != nil {
-			return nil, err
-		}
-		return cp, nil
+		return CodePage(s)
 	}
 }
 
-func DefaultCP(name string) (encoding.Encoding, error) { //nolint:ireturn
-	cp, err := convert.Encoder(name)
+// CodePage returns the encoding of the code page name or alias.
+// But without any of the custom, ASA ASCII or ISO-8859-11 encodings.
+func CodePage(s string) (encoding.Encoding, error) { //nolint:ireturn
+	cp, err := convert.Encoder(s)
 	if err != nil {
 		return nil, fmt.Errorf("table encoding error: %w", err)
 	}
@@ -148,138 +148,56 @@ func DefaultCP(name string) (encoding.Encoding, error) { //nolint:ireturn
 	return cp, nil
 }
 
-func encoder(name string, cp encoding.Encoding) convert.Convert {
+func converter(name string, cp encoding.Encoding) convert.Convert {
 	conv := convert.Convert{}
 	switch strings.ToLower(name) {
-	case asa.Ascii63, asa.Ascii65, asa.Ascii67:
-		cp = charmap.Windows1252
+	case asa.Ascii63:
+		cp = asa.ASAX34_1963
+	case asa.Ascii65:
+		cp = asa.ASAX34_1965
+	case asa.Ascii67:
+		cp = asa.ANSIX34_1967
 	}
 	conv.Input.Encoding = cp
 	return conv
 }
 
 func revert(name string) encoding.Encoding { //nolint:ireturn
-	if ISO11Name(name) {
+	if ISO11(name) {
 		return charmap.XUserDefined
 	}
 	switch strings.ToLower(name) {
 	case asa.Ascii63:
-		return asa.AsaX34_1963
+		return asa.ASAX34_1963
 	case asa.Ascii65:
-		return asa.AsaX34_1965
+		return asa.ASAX34_1965
 	case asa.Ascii67:
-		return asa.AnsiX34_1967
+		return asa.ANSIX34_1967
 	}
 	return nil
 }
 
-func chrX3493(pos int, cp encoding.Encoding) string {
-	if cp != asa.AsaX34_1963 {
-		return ""
-	}
-	const us, end = 31, 128
-	if pos >= end || pos == 125 {
-		return " "
-	}
-	if x := mapX3493(pos); x != "" {
-		return x
-	}
-	if pos <= us {
-		return " "
-	}
-	if pos >= 96 && pos <= 123 {
-		return " "
-	}
-	return ""
-}
-
-func mapX3493(i int) string {
-	m := map[int]string{
-		0:   "␀",
-		4:   "␄",
-		7:   "␇",
-		9:   "␉",
-		10:  "␊",
-		11:  "␋",
-		12:  "␌",
-		13:  "␍",
-		14:  "␎",
-		15:  "␏",
-		17:  "␑",
-		18:  "␒",
-		19:  "␓",
-		20:  "␔",
-		94:  "↑",
-		95:  "←",
-		124: "␆",
-		126: "␛",
-		127: "␡",
-	}
-	return m[i]
-}
-
-func chrX3495(pos int, cp encoding.Encoding) string {
-	if cp != asa.AsaX34_1965 {
-		return ""
-	}
-	const sub, grave, tilde, at, not, bar, end = 26, 64, 92, 96, 124, 126, 128
-	if pos >= end {
-		return " "
-	}
-	switch pos {
-	case sub:
-		return " "
-	case grave:
-		return "`"
-	case tilde:
-		return "~"
-	case at:
-		return "@"
-	case not:
-		return "¬"
-	case bar:
-		return "|"
-	}
-	return ""
-}
-
-func chrX3497(pos int, cp encoding.Encoding) string {
-	if cp != asa.AnsiX34_1967 {
-		return ""
-	}
-	const end = 128
-	if pos >= end {
-		return " "
-	}
-	return ""
-}
-
-func chrISO11(pos int, cp encoding.Encoding) string {
+// CharISO11 returns a string for the ISO-8859-11 character codes.
+func CharISO11(cp encoding.Encoding, code int) rune {
 	// ISO-8859-11 is not included in Go so a user defined charmap is used.
-	iso8859_11 := charmap.XUserDefined
-	if cp != iso8859_11 {
-		return ""
+	ISO8859_11 := charmap.XUserDefined
+	if cp != ISO8859_11 {
+		return -1
 	}
 	const pad, nbsp = 128, 160
-	if pos >= pad && pos < nbsp {
-		return " "
+	if code >= pad && code < nbsp {
+		return ' '
 	}
-	return ""
+	return -1
 }
 
-// Character converts rune to an encoded string.
-func Character(pos int, r rune, cp encoding.Encoding) string {
-	if s := chrX3493(pos, cp); s != "" {
-		return s
+// Character converts code or rune to an character mapped string.
+func Character(cp encoding.Encoding, code int, r rune) string {
+	if r := asa.Char(cp, code); r > -1 {
+		return string(r)
 	}
-	if s := chrX3495(pos, cp); s != "" {
-		return s
-	}
-	if s := chrX3497(pos, cp); s != "" {
-		return s
-	}
-	if s := chrISO11(pos, cp); s != "" {
-		return s
+	if r := CharISO11(cp, code); r > -1 {
+		return string(r)
 	}
 	// non-spacing mark characters
 	if unicode.In(r, unicode.Mn) {
@@ -298,13 +216,12 @@ func Character(pos int, r rune, cp encoding.Encoding) string {
 	if cp == uni.UTF8 || cp == uni.UTF8BOM {
 		const pad, nbsp = 128, 160
 		switch {
-		case pos >= pad && pos < nbsp:
+		case code >= pad && code < nbsp:
 			return " "
-		case pos >= nbsp:
-			return string(rune(pos))
+		case code >= nbsp:
+			return string(rune(code))
 		}
 	}
-	// rune to string
 	return string(r)
 }
 
