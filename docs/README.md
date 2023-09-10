@@ -64,7 +64,7 @@ type ascii-logo.txt # or, cat ascii-logo.txt
 
 ---
 
-## Known code pages and text encodings.
+### Known code pages and text encodings
 
 ```
 retrotxt list codepages
@@ -182,7 +182,7 @@ retrotxt list table cp437 latin1
  F | ð | ñ | ò | ó | ô | õ | ö | ÷ | ø | ù | ú | û | ü | ý | þ | ÿ |
 ```
 
-#### Print file information and embedded SAUCE metadata.d
+#### Print file information and embedded SAUCE metadata.
 
 ```
 retrotxt info retrotxt.ans
@@ -221,9 +221,11 @@ retrotxt info retrotxt.ans
  text in terminal or as HTML. LGPL and available for Windows, Linux, Unix & macOS.
 ```
 
-```json
+```sh
 retrotxt info retrotxt.ans --format=json
+```
 
+```json
 {
     "filename": "retrotxt.ans",
     "utf8": false,
