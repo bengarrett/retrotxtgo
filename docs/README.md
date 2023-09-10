@@ -11,7 +11,7 @@ There are [numerous downloads](https://github.com/bengarrett/retrotxtgo/releases
 [macOS](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_macOS_all.tar.gz),
 [Linux](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_Linux_Intel.tar.gz) and more.
 
-Otherwise [these package manager installations are available](INSTALL.md).
+Otherwise [these installation options are available](INSTALL.md).
 
 ## Quick Usage
 

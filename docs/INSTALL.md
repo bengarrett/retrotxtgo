@@ -2,7 +2,7 @@
 
 ## Install
 
-There are [numerous download](https://github.com/bengarrett/retrotxtgo/releases/latest/) releases. Otherwise these package manager installations are available.
+There are [numerous download](https://github.com/bengarrett/retrotxtgo/releases/latest/) releases. Otherwise these installation options are available.
 
 ### Windows 
 ### [Scoop](https://scoop.sh/)
