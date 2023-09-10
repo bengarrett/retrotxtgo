@@ -71,7 +71,7 @@ nfpms:
 
 scoops:
   - name: retrotxt
-  #- url_template: "ttps://github.com/bengarrett/retrotxtgo/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+  - url_template: "ttps://github.com/bengarrett/retrotxtgo/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
   - commit_author:
       name: goreleaserbot
       email: bot@goreleaser.com
