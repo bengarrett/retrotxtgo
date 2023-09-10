@@ -2,7 +2,11 @@
 #
 # test the config:
 # goreleaser check
-# goreleaser release --skip-publish --skip-validate --rm-dist
+# goreleaser release --snapshot --clean
+#
+# create a version tag and push it:
+# git tag -a v0.1.0 -m "First release"
+# git push origin v0.1.0
 
 project_name: retrotxt
 # make a variable description

@@ -28,7 +28,9 @@ retrotxt -v
 wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_linux.deb
 dpkg -i retrotxt.deb
 retrotxt -v
+```
 
+```sh
 # Debian DEB package for the Raspberry Pi & ARM
 wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_raspberry_pi.deb
 dpkg -i retrotxt_raspberry_pi.deb
