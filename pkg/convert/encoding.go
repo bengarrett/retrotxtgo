@@ -10,7 +10,6 @@ import (
 	"unicode/utf8"
 
 	"github.com/bengarrett/retrotxtgo/pkg/fsys"
-	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/retrotxtgo/pkg/term"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
@@ -436,11 +435,14 @@ func encodingUnicode(name string) string {
 }
 
 // Swap transforms character map and control codes into UTF-8 unicode runes.
-func (c *Convert) Swap() *Convert {
+func (c *Convert) Swap() (*Convert, error) {
 	if len(c.Output) == 0 {
-		return nil
+		return nil, nil
 	}
-	c = c.Swaps()
+	c, err := c.Swaps()
+	if err != nil {
+		return nil, err
+	}
 	if c.LineBreaks {
 		c.LineBreak()
 	}
@@ -478,12 +480,12 @@ func (c *Convert) Swap() *Convert {
 		c.RunesUTF8()
 	default:
 	}
-	return c
+	return c, nil
 }
 
-func (c *Convert) Swaps() *Convert {
+func (c *Convert) Swaps() (*Convert, error) {
 	if len(c.Flags.SwapChars) == 0 {
-		return c
+		return c, nil
 	}
 	replacers, unknown := []rune{}, []string{}
 	for _, val := range c.Flags.SwapChars {
@@ -504,10 +506,10 @@ func (c *Convert) Swaps() *Convert {
 	})
 	s, _, err := transform.String(replace, string(c.Output))
 	if err != nil {
-		logs.Fatal(err)
+		return nil, err
 	}
 	c.Output = []rune(s)
-	return c
+	return c, nil
 }
 
 func replacer(r rune, replacers ...rune) bool {

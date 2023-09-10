@@ -63,7 +63,11 @@ func (c *Convert) ANSI(b ...byte) ([]rune, error) {
 	if err := c.SkipCtrlCodes().Transform(); err != nil {
 		return nil, fmt.Errorf("dump transform failed: %w", err)
 	}
-	c.Swap().ANSIControls().wrapWidth(c.Flags.MaxWidth)
+	c, err := c.Swap()
+	if err != nil {
+		return nil, err
+	}
+	c.ANSIControls().wrapWidth(c.Flags.MaxWidth)
 	return c.Output, nil
 }
 
@@ -76,7 +80,11 @@ func (c *Convert) Chars(b ...byte) ([]rune, error) {
 	if err := c.Transform(); err != nil {
 		return nil, fmt.Errorf("chars transform failed: %w", err)
 	}
-	c.Swap().wrapWidth(c.Flags.MaxWidth)
+	c, err := c.Swap()
+	if err != nil {
+		return nil, err
+	}
+	c.wrapWidth(c.Flags.MaxWidth)
 	return c.Output, nil
 }
 
@@ -89,7 +97,11 @@ func (c *Convert) Dump(b ...byte) ([]rune, error) {
 	if err := c.SkipCtrlCodes().Transform(); err != nil {
 		return nil, fmt.Errorf("dump transform failed: %w", err)
 	}
-	c.Swap().ANSIControls().wrapWidth(c.Flags.MaxWidth)
+	c, err := c.Swap()
+	if err != nil {
+		return nil, err
+	}
+	c.ANSIControls().wrapWidth(c.Flags.MaxWidth)
 	return c.Output, nil
 }
 
@@ -102,7 +114,11 @@ func (c *Convert) Text(b ...byte) ([]rune, error) {
 	if err := c.SkipCtrlCodes().Transform(); err != nil {
 		return nil, fmt.Errorf("text transform failed: %w", err)
 	}
-	c.Swap().ANSIControls().wrapWidth(c.Flags.MaxWidth)
+	c, err := c.Swap()
+	if err != nil {
+		return nil, err
+	}
+	c.ANSIControls().wrapWidth(c.Flags.MaxWidth)
 	return c.Output, nil
 }
 

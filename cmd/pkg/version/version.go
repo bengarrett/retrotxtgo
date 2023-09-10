@@ -13,7 +13,6 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/cmd/pkg/update"
 	"github.com/bengarrett/retrotxtgo/meta"
-	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/gookit/color"
 	"github.com/mattn/go-isatty"
 	"golang.org/x/term"
@@ -22,12 +21,12 @@ import (
 // TODO: CPU ID? https://github.com/klauspost/cpuid
 
 const (
-	Copyright = "2020-22" // Copyright © years.
+	Copyright = "2020-23" // Copyright © years. TODO: move to metadata.
 	TabWidth  = 8         // Width of tab characters.
 )
 
 // Template returns the application version, copyright and build variables.
-func Template() string {
+func Template() (string, error) {
 	const c = "\u00A9"
 	exe, err := Self()
 	if err != nil {
@@ -35,7 +34,7 @@ func Template() string {
 	}
 	tag, err := update.Check()
 	if err != nil {
-		logs.Fatal(err)
+		return "", err
 	}
 	appDate := ""
 	if meta.App.Date != meta.Placeholder {
@@ -55,8 +54,10 @@ func Template() string {
 	if tag != "" {
 		fmt.Fprintf(w, "\n%s\n", update.String(meta.App.Version, tag))
 	}
-	w.Flush()
-	return b.String()
+	if err := w.Flush(); err != nil {
+		return "", err
+	}
+	return b.String(), nil
 }
 
 // Self returns the path to this executable file.

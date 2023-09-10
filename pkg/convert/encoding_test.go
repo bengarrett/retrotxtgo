@@ -75,7 +75,7 @@ func TestSet_Transform(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data := convert.Convert{}
+			data := &convert.Convert{}
 			data.Input.Bytes = tt.text
 			data.Input.Encoding = tt.codepage
 			err := data.Transform()
@@ -83,7 +83,11 @@ func TestSet_Transform(t *testing.T) {
 				t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			data.Swap()
+			data, err = data.Swap()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Convert.Swap() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
 			if string(data.Output) != tt.want {
 				t.Errorf("Convert.Transform() = %q, want %q", data.Output, tt.want)
 			}
@@ -107,15 +111,20 @@ func TestANSI(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data := convert.Convert{}
+			data := &convert.Convert{}
 			data.Input.Bytes = []byte(tt.str)
 			data.Input.Encoding = tt.codepage
 			err := data.Transform()
-			data.Swap().ANSIControls()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+			data, err = data.Swap()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Convert.Swap() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			data.ANSIControls()
 			if !reflect.DeepEqual(data.Output, tt.want) {
 				t.Errorf("Convert.Transform() = %v %q, want %v", data.Output, data.Output, tt.want)
 			}
@@ -211,7 +220,7 @@ func TestRunesControls(t *testing.T) {
 		{"device controls", "\x10\x11", "␐␑", false},
 	}
 	for _, tt := range tests {
-		d := convert.Convert{}
+		d := &convert.Convert{}
 		d.Input.Bytes = []byte(tt.text)
 		d.Input.Encoding = cp1252
 		if err := d.Transform(); err != nil {
@@ -220,7 +229,11 @@ func TestRunesControls(t *testing.T) {
 			}
 			continue
 		}
-		d.Swap()
+		d, err := d.Swap()
+		if (err != nil) != tt.wantErr {
+			t.Errorf("Convert.Swap() error = %v, wantErr %v", err, tt.wantErr)
+			return
+		}
 		t.Run(tt.name, func(t *testing.T) {
 			if got, w := d.Output, []rune(tt.want); !reflect.DeepEqual(got, w) {
 				t.Errorf("TestRunesControls() = %v (%X) [%s], want %v (%X) [%s]",

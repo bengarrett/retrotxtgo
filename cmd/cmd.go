@@ -39,7 +39,11 @@ func Execute() error {
 	Cmd.CompletionOptions.DisableDefaultCmd = true
 	Cmd.SilenceErrors = true // set to false to debug errors
 	Cmd.Version = meta.Print()
-	Cmd.SetVersionTemplate(version.Template())
+	s, err := version.Template()
+	if err != nil {
+		return err
+	}
+	Cmd.SetVersionTemplate(s)
 	if err := Cmd.Execute(); err != nil {
 		const minArgs = 2
 		if len(os.Args) < minArgs {
