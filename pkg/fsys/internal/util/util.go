@@ -9,9 +9,7 @@ import (
 	"strings"
 )
 
-var (
-	ErrNoWriter = errors.New("the w writer cannot be nil")
-)
+var ErrNoWriter = errors.New("the w writer cannot be nil")
 
 // InsertTar inserts the named file to the TAR writer.
 func InsertTar(w *tar.Writer, name string) error {
