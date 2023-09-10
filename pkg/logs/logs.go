@@ -32,8 +32,28 @@ func Fatal(err error) {
 	}
 }
 
+// FatalFlag prints a problem with the flag and exits.
+// TODO: not in use.
+func FatalFlag(err error, cmd, flag string) {
+	fmt.Fprintln(os.Stderr, SprintFlag(err, cmd, flag))
+	os.Exit(OSErrCode)
+}
+
+// FatalS formats the errors, highlights the string and exits.
+func FatalS(err, wrap error, s string) {
+	fmt.Fprintln(os.Stderr, SprintS(err, wrap, s))
+	os.Exit(OSErrCode)
+}
+
+// FatalWrap formats the errors and exits.
+// TODO: not in use.
+func FatalWrap(err, wrap error) {
+	fmt.Fprintln(os.Stderr, SprintWrap(err, wrap))
+	os.Exit(OSErrCode)
+}
+
 // Hint returns a formatted error with a usage suggestion or hint.
-func Hint(s string, err error) string {
+func Hint(err error, s string) string {
 	if err == nil {
 		return ""
 	}
@@ -42,24 +62,6 @@ func Hint(s string, err error) string {
 	}
 	return fmt.Sprintf("%s\n run %s",
 		Sprint(err), term.Example(fmt.Sprintf("%s %s", meta.Bin, s)))
-}
-
-// FatalFlag prints a problem with the flag and exits.
-func FatalFlag(cmd, flag string, err error) {
-	fmt.Fprintln(os.Stderr, SprintFlag(cmd, flag, err))
-	os.Exit(OSErrCode)
-}
-
-// FatalMark formats the errors, highlights the value and exits.
-func FatalMark(mark string, err, wrap error) {
-	fmt.Fprintln(os.Stderr, SprintMark(mark, err, wrap))
-	os.Exit(OSErrCode)
-}
-
-// FatalWrap formats the errors and exits.
-func FatalWrap(err, wrap error) {
-	fmt.Fprintln(os.Stderr, SprintWrap(err, wrap))
-	os.Exit(OSErrCode)
 }
 
 // Sprint formats and returns the error.
@@ -78,7 +80,7 @@ func Sprint(err error) string {
 }
 
 // SprintCmd returns the command does not exist.
-func SprintCmd(cmd string, err error) string {
+func SprintCmd(err error, cmd string) string {
 	if cmd == "" || err == nil {
 		return ""
 	}
@@ -87,7 +89,7 @@ func SprintCmd(cmd string, err error) string {
 }
 
 // SprintFlag returns a problem with the flag.
-func SprintFlag(cmd, flag string, err error) string {
+func SprintFlag(err error, cmd, flag string) string {
 	if cmd == "" || err == nil {
 		return ""
 	}
@@ -101,16 +103,18 @@ func SprintFlag(cmd, flag string, err error) string {
 		alert, cmd, toggle, flag, err)
 }
 
-// SprintMark formats and returns the errors and highlights the marked string.
-func SprintMark(mark string, err, wrap error) string {
-	if mark == "" || err == nil || wrap == nil {
+// SprintS formats and returns the errors and highlights the string.
+func SprintS(err, wrap error, s string) string {
+	if s == "" || err == nil || wrap == nil {
 		return ""
 	}
 	return fmt.Sprintf("%s %s %q: %s",
-		term.Alert(), term.Fuzzy(fmt.Sprintf("%v", err)), mark, term.Fuzzy(fmt.Sprintf("%v", wrap)))
+		term.Alert(), term.Fuzzy(fmt.Sprintf("%v", err)), s,
+		term.Fuzzy(fmt.Sprintf("%v", wrap)))
 }
 
 // SprintWrap returns the formatted errors.
+// TODO: not in use.
 func SprintWrap(err, wrap error) string {
 	if err == nil || wrap == nil {
 		return ""

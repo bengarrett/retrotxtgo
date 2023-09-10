@@ -41,7 +41,7 @@ func TestHint_String(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := logs.Hint(tt.fields.Hint, tt.fields.Error); got != tt.want {
+			if got := logs.Hint(tt.fields.Error, tt.fields.Hint); got != tt.want {
 				t.Errorf("Hint() = %v, want %v", got, tt.want)
 			}
 		})
@@ -84,7 +84,7 @@ func TestSprintCmd(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := logs.SprintCmd(tt.args.name, tt.args.err); got != tt.want {
+			if got := logs.SprintCmd(tt.args.err, tt.args.name); got != tt.want {
 				t.Errorf("SprintCmd() = %v, want %v", got, tt.want)
 			}
 		})
@@ -109,14 +109,14 @@ func TestSprintFlag(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := logs.SprintFlag(tt.args.name, tt.args.flag, tt.args.err); got != tt.want {
+			if got := logs.SprintFlag(tt.args.err, tt.args.name, tt.args.flag); got != tt.want {
 				t.Errorf("SprintFlag() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestSprintMark(t *testing.T) {
+func TestSprintS(t *testing.T) {
 	color.Enable = false
 	type args struct {
 		value string
@@ -134,8 +134,8 @@ func TestSprintMark(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := logs.SprintMark(tt.args.value, tt.args.err, tt.args.errs); got != tt.want {
-				t.Errorf("SprintMark() = %v, want %v", got, tt.want)
+			if got := logs.SprintS(tt.args.err, tt.args.errs, tt.args.value); got != tt.want {
+				t.Errorf("SprintS() = %v, want %v", got, tt.want)
 			}
 		})
 	}

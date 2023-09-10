@@ -48,7 +48,7 @@ func Execute() error {
 		const minArgs = 2
 		if len(os.Args) < minArgs {
 			if err1 := Cmd.Usage(); err1 != nil {
-				logs.FatalMark("rootCmd", ErrUsage, err1)
+				logs.FatalS(ErrUsage, err1, "rootCmd")
 			}
 		}
 		return fmt.Errorf("%w: %s", err, os.Args[1:])
@@ -76,7 +76,7 @@ func Tester(c *cobra.Command) *cobra.Command {
 	c.PersistentFlags().BoolVar(&flag.Command.Tester, "tester", false,
 		"optional in-memory, tester config file")
 	if err := c.PersistentFlags().MarkHidden("tester"); err != nil {
-		logs.FatalMark("tester", ErrHide, err)
+		logs.FatalS(ErrHide, err, "tester")
 	}
 	return c
 }

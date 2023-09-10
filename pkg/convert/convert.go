@@ -234,7 +234,7 @@ func (c *Convert) wrapWidth(max int) {
 	r := strings.NewReader(string(c.Output))
 	cols, err := fsys.Columns(r, c.Input.LineBreak)
 	if err != nil {
-		logs.FatalMark(fmt.Sprint(c.Input.LineBreak), ErrWidth, err)
+		logs.FatalS(ErrWidth, err, fmt.Sprint(c.Input.LineBreak))
 	}
 	if cols <= max {
 		return

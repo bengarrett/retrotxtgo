@@ -22,8 +22,8 @@ var (
 	ErrNotNil  = errors.New("the value cannot be empty")
 )
 
-// FatalCmd prints a problem highlighting the unsupported command.
-func FatalCmd(usage string, args ...string) {
+// FatalSubCmd prints a problem highlighting the unsupported sub-command.
+func FatalSubCmd(usage string, args ...string) {
 	args = append(args, usage)
 	var err error
 	if len(args) > 0 {
@@ -91,10 +91,10 @@ func Execute(err error, test bool, args ...string) string { //nolint:funlen
 	var c string
 	switch problem {
 	case flagSyntax:
-		c = SprintFlag(name, mark, err)
+		c = SprintFlag(err, name, mark)
 	case invalidFlag:
 		// retroxt config shell -i
-		c = SprintFlag(name, mark, ErrNotNil)
+		c = SprintFlag(ErrNotNil, name, mark)
 	case invalidType:
 		// retroxt --help=foo
 		const min = 6
@@ -106,34 +106,34 @@ func Execute(err error, test bool, args ...string) string { //nolint:funlen
 		c = "invalidSlice placeholder"
 	case invalidCommand:
 		// retrotxt config foo
-		c = Hint(fmt.Sprintf("%s --help", mark), ErrCmd)
+		c = Hint(ErrCmd, fmt.Sprintf("%s --help", mark))
 	case flagRequired:
 		// retrotxt config shell
-		c = SprintCmd(mark, ErrFlagNil)
+		c = SprintCmd(ErrFlagNil, mark)
 	case unknownCmd:
 		// retrotxt foo
 		mark = words[2]
-		c = Hint("--help", fmt.Errorf("%w: %s", ErrCmd, mark))
+		c = Hint(fmt.Errorf("%w: %s", ErrCmd, mark), "--help")
 	case unknownFlag:
 		// retrotxt --foo
 		mark = words[2]
 		if mark == name {
 			name = rt
 		}
-		c = SprintFlag(name, mark, ErrFlag)
+		c = SprintFlag(ErrFlag, name, mark)
 	case unknownShort:
 		// retrotxt -foo
 		mark = words[5]
 		if mark == name {
 			name = rt
 		}
-		c = SprintFlag(name, mark, ErrFlag)
+		c = SprintFlag(ErrFlag, name, mark)
 	case flagChoice:
 		c = "flagChoice placeholder"
 	default:
 		if errors.Is(err, ErrCmd) {
 			mark = strings.Join(args[1:], " ")
-			c = Hint(fmt.Sprintf("%s --help", mark), ErrCmd)
+			c = Hint(ErrCmd, fmt.Sprintf("%s --help", mark))
 			break
 		}
 		c = Sprint(err)
@@ -154,12 +154,12 @@ func parseType(name, flag string, err error) string {
 	s := err.Error()
 	switch {
 	case strings.Contains(s, invalidBool):
-		return SprintFlag(name, flag, ErrNotBool)
+		return SprintFlag(ErrNotBool, name, flag)
 	case strings.Contains(s, invalidInt):
-		return SprintFlag(name, flag, ErrNotInt)
+		return SprintFlag(ErrNotInt, name, flag)
 	case strings.Contains(s, invalidStr):
-		return SprintFlag(name, flag, ErrNotInts)
+		return SprintFlag(ErrNotInts, name, flag)
 	default:
-		return SprintFlag(name, flag, err)
+		return SprintFlag(err, name, flag)
 	}
 }
