@@ -1,8 +1,8 @@
-# RetroTxt go
+# Retrotxt
 
-### [RetroTxt](https://github.com/bengarrett/retrotxt) for the terminal.
+### _[Retrotxt](https://github.com/bengarrett/retrotxt) for the terminal_.
 
-###### version α, work-in-progress.
+Read legacy codepage and ANSI encoded textfiles in a modern Unicode terminal.
 
 [Developer notes](DEV.md), [Dependencies project](https://github.com/bengarrett/retrotxtgo/projects/2), [TO-DO project](https://github.com/bengarrett/retrotxtgo/projects/1)
 
@@ -11,25 +11,13 @@
 There are [numerous downloads](https://github.com/bengarrett/retrotxtgo/releases/latest/) available for
 [Windows](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_Windows_Intel.zip),
 [macOS](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_macOS_all.tar.gz),
-[Linux](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_Linux_Intel.tar.gz), the
-[Raspberry Pi](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_Linux_arm32_.tar.gz), and more.
+[Linux](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_Linux_Intel.tar.gz) and more.
 
 Otherwise [these package manager installations are available](#installations).
 
 ## Quick Usage
 
 #### Text art and files created without Unicode often fail to display on modern systems.
-
-```sh
-type ascii-logo.txt # or, cat ascii-logo.txt
-
-�����ۻ ������ۻ�������ۻ�����ۻ  �����ۻ �������ۻ�ۻ  �ۻ�������ۻ
-������ۻ������ͼ�������ͼ������ۻ�������ۻ�������ͼ��ۻ��ɼ�������ͼ
-������ɼ����ۻ     �ۺ   ������ɼ�ۺ   �ۺ   �ۺ    ����ɼ    �ۺ
-������ۻ����ͼ     �ۺ   ������ۻ�ۺ   �ۺ   �ۺ    ����ۻ    �ۺ
-�ۺ  �ۺ������ۻ   �ۺ   �ۺ  �ۺ�������ɼ   �ۺ   ��ɼ �ۻ   �ۺ
-�ͼ  �ͼ������ͼ   �ͼ   �ͼ  �ͼ �����ͼ    �ͼ   �ͼ  �ͼ   �ͼ
-```
 
 #### Use RetroTxt to print legacy text on modern terminals.
 
@@ -52,17 +40,28 @@ retrotxt view ascii-logo.txt > ascii-logo-utf8.txt
 
 ![Windows Notepad viewing ascii-logo-utf8.txt](img/ascii-logo-utf8.txt.png)
 
+Otherwise, using the common shell programs, the legacy text is often malformed and even unreadable.
+
+```sh
+type ascii-logo.txt # or, cat ascii-logo.txt
+
+�����ۻ ������ۻ�������ۻ�����ۻ  �����ۻ �������ۻ�ۻ  �ۻ�������ۻ
+������ۻ������ͼ�������ͼ������ۻ�������ۻ�������ͼ��ۻ��ɼ�������ͼ
+������ɼ����ۻ     �ۺ   ������ɼ�ۺ   �ۺ   �ۺ    ����ɼ    �ۺ
+������ۻ����ͼ     �ۺ   ������ۻ�ۺ   �ۺ   �ۺ    ����ۻ    �ۺ
+�ۺ  �ۺ������ۻ   �ۺ   �ۺ  �ۺ�������ɼ   �ۺ   ��ɼ �ۻ   �ۺ
+�ͼ  �ͼ������ͼ   �ͼ   �ͼ  �ͼ �����ͼ    �ͼ   �ͼ  �ͼ   �ͼ
+```
+
 ---
 
 ## Features
 
-- Print legacy encoded text, BBS and ANSI files in a modern, UTF-8 terminal.
-- Print or export the meta details of a text file.
-- Print or export SAUCE metadata of a file.
-- Transform the encoding of a text file. CP437 -> UTF8, UTF8 -> ISO8859-1 ...
-- View any legacy encoded text file in a UTF8 terminal by converting on the fly.
-- ANSI compatibility tests, output 16, 88, 256, high and true-color tables.
-- Multi-platform support including Windows, macOS, Linux, Raspberry Pi and FreeBSD.
+- Print legacy codepage encoded texts in a modern terminal.
+- Print or export the legacy details of the textfiles.
+- Print or export the SAUCE metadata of a file.
+- Transform legacy encoded texts and text art into UTF-8 documents for use on the web or with modern systems.
+- Lookup and print codepage character tables for dozens of encodings.
 - IO redirection with piping support.
 
 ---
@@ -218,13 +217,3 @@ retrotxt info retrotxt.ans --format=json
     },
     ...
 ```
-
-### Why create RetroTxt using Go?
-
-- Native [Unicode](https://golang.org/pkg/unicode/) support.
-- [A large selection of native legacy text encodings](golang.org/x/text/encoding/charmap).
-- Builds a standalone binary with no dependencies.
-- [Wide operating system and CPU architecture support](https://gist.github.com/asukakenji/f15ba7e588ac42795f421b48b8aede63).
-- Uses a simple, compact standard library with extremely fast compiling.
-- The standard library has helpful and safe web templating such as HTML, JSON, XML.
-- It is a language I know. 😉

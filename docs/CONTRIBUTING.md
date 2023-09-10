@@ -1,46 +1,10 @@
-### Documentation and code contributions are always welcome.
-
-## Documentation
-
-All documentation is found in the [`README.MD`](README.md) or within [`/docs`](/docs) and is in GitHub flavoured markdown using UK-English for consistency.
-
-* Please use a spellchecker and where possible a grammar checker.
-
-* When referencing variables, functions or libraries, please use the original names,<br>for example, the _image/color_ standard library package, not _image/colour_.
-
-* Use &#96; grave accents to mark inline code, variable or filenames such as `fmt.Sprintf()` or `file.txt`.
-
-* Use \_ underscores to highlight package libraries such as _archive/tar_.
-
-* Hyperlink all internal references such as the [`README.MD`](README.md) and make any links [relative](https://www.w3schools.com/Html/html_filepaths.asp), not absolute.
-
-Whenever possible include hyperlinks over main descriptive words to link back to any [source materials](CONTRIBUTING.md).
-
-Any terminal commands should be written in Github code blocks using bash syntax.
-
-<pre>
-```bash
-# comment what is being done
-command example
-```
-</pre>
-
-Will format as the following.
-
-```bash
-# comment what is being done
-command example
-```
-
-#### Recommended markdown flavoured editors.
-
-I use [Visual Studio Code](https://code.visualstudio.com) with the [Markdown Preview Github Styling](https://marketplace.visualstudio.com/items?itemName=bierner.markdown-preview-github-styles) extension.
+### Contributions are always welcome.
 
 ## Code
 
-_RetroTxtGo is written entirely in native Go as a platform-agnostic command-line only tool._
+_Retrotxt is written entirely in native Go as a platform-agnostic command-line only tool._
 
-* RetroTxtGo uses [Go modules](https://blog.golang.org/using-go-modules).
+* Retrotxt uses [Go modules](https://blog.golang.org/using-go-modules).
 
 * The target Go version is in [`go.mod`](https://github.com/bengarrett/retrotxtgo/blob/master/go.mod).
 
@@ -67,7 +31,7 @@ A [configuration file](https://github.com/bengarrett/retrotxtgo/blob/master/.gol
 cd retrotxtgo
 
 # lint the entire application
-golangci-lint run ./...
+golangci-lint run
 # if nothing returns your code passes
 ```
 

@@ -58,7 +58,7 @@ nfpms:
     vendor: Ben Garrett.
     homepage: https://retrotxt.com/go
     maintainer: Ben Garrett <code.by.ben@gmail.com>
-    description: RetroTxtGo is the tool that turns ANSI, ASCII, NFO text into in-browser HTML.
+    description: Read legacy codepage encoded textfiles in a modern Unicode terminal.
     license: LGPL 3.0
     formats:
       - apk
@@ -72,7 +72,7 @@ scoops:
       email: bot@goreleaser.com
   - commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
   - homepage: https://retrotxt.com/go
-  - description: RetroTxtGo is the tool that turns ANSI, ASCII, NFO text into in-browser HTML.
+  - description: Read legacy codepage encoded textfiles in a modern Unicode terminal.
   - license: LGPL 3.0
   # Setting this will prevent goreleaser to actually try to commit the updated
   # manifest leaving the responsibility of publishing it to the user.

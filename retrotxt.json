@@ -11,5 +11,5 @@
     },
     "homepage": "https://retrotxt.com/go",
     "license": "LGPL 3.0",
-    "description": "RetroTxtGo is the tool that turns ANSI, ASCII, NFO text into in-browser HTML."
+    "description": "Retrotxt is the tool that turns ANSI, ASCII, NFO text into in-browser HTML."
 }
