@@ -4,8 +4,6 @@
 
 Read legacy codepage and ANSI encoded textfiles in a modern Unicode terminal.
 
-[Developer notes](DEV.md), [Dependencies project](https://github.com/bengarrett/retrotxtgo/projects/2), [TO-DO project](https://github.com/bengarrett/retrotxtgo/projects/1)
-
 ## Downloads
 
 There are [numerous downloads](https://github.com/bengarrett/retrotxtgo/releases/latest/) available for
@@ -13,7 +11,7 @@ There are [numerous downloads](https://github.com/bengarrett/retrotxtgo/releases
 [macOS](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_macOS_all.tar.gz),
 [Linux](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_Linux_Intel.tar.gz) and more.
 
-Otherwise [these package manager installations are available](#installations).
+Otherwise [these package manager installations are available](INSTALL.md).
 
 ## Quick Usage
 
@@ -63,54 +61,6 @@ type ascii-logo.txt # or, cat ascii-logo.txt
 - Transform legacy encoded texts and text art into UTF-8 documents for use on the web or with modern systems.
 - Lookup and print codepage character tables for dozens of encodings.
 - IO redirection with piping support.
-
----
-
-## Install
-
-There are [numerous download](https://github.com/bengarrett/retrotxtgo/releases/latest/) releases. Otherwise these package manager installations are available.
-<a id="installations"></a>
-
-#### Windows [Scoop](https://scoop.sh/)
-
-```ps
-scoop bucket add retrotxt https://github.com/bengarrett/retrotxtgo.git
-scoop install bengarrett/retrotxt
-retrotxt -v
-```
-
-#### macOS [Homebrew](https://brew.sh/)
-
-```sh
-brew install bengarrett/retrotxt/retrotxt
-retrotxt -v
-```
-
-#### Linux
-
-```sh
-# Debian DEB package for Intel
-wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_linux.deb
-dpkg -i retrotxt.deb
-retrotxt -v
-
-# Debian DEB package for the Raspberry Pi & ARM
-wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_raspberry_pi.deb
-dpkg -i retrotxt_raspberry_pi.deb
-retrotxt -v
-
-# Redhat RPM package
-wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_linux.rpm
-rpm -i retrotxt.rpm
-retrotxt -v
-
-# Alpine APK package
-wget https://github.com/bengarrett/myip/releases/latest/download/retrotxt.apk
-apk add retrotxt.apk
-retrotxt -v
-```
-
-#### [Building RetroTxt for other systems](BUILD.md)
 
 ---
 
