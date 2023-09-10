@@ -285,7 +285,8 @@ func (d *Detail) mime(name string, data ...byte) {
 	}
 	if d.ValidText() {
 		var err error
-		if d.Count.Chars, err = fsys.Runes(bytes.NewBuffer(data)); err != nil {
+		r := bytes.NewBuffer(data)
+		if d.Count.Chars, err = fsys.Runes(r); err != nil {
 			fmt.Fprintf(os.Stdout, "mine sniffer failure, %s\n", err)
 		}
 		return

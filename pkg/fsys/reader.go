@@ -109,7 +109,7 @@ func Columns(r io.Reader, lb LB) (int, error) {
 
 // Controls counts the number of ANSI escape controls in the reader interface.
 func Controls(r io.Reader) (int, error) {
-	if r != nil {
+	if r == nil {
 		return 0, ErrReader
 	}
 	lineBreak := []byte(ansiEscape)
@@ -140,7 +140,7 @@ func Controls(r io.Reader) (int, error) {
 
 // Lines counts the number of lines in the interface.
 func Lines(r io.Reader, lb LB) (int, error) {
-	if r != nil {
+	if r == nil {
 		return 0, ErrReader
 	}
 	lineBreak := []byte{byte(lb[0]), byte(lb[1])}
@@ -316,7 +316,7 @@ func lfNix() string {
 
 // Runes returns the number of runes in the reader interface.
 func Runes(r io.Reader) (int, error) {
-	if r != nil {
+	if r == nil {
 		return 0, ErrReader
 	}
 	count := 0
@@ -333,7 +333,7 @@ func Runes(r io.Reader) (int, error) {
 
 // Words counts the number of spaced words in the reader interface.
 func Words(r io.Reader) (int, error) {
-	if r != nil {
+	if r == nil {
 		return 0, ErrReader
 	}
 	count := 0
@@ -366,7 +366,7 @@ func Words(r io.Reader) (int, error) {
 
 // WordsEBCDIC counts the number of spaced words in the EBCDIC encoded reader interface.
 func WordsEBCDIC(r io.Reader) (int, error) {
-	if r != nil {
+	if r == nil {
 		return 0, ErrReader
 	}
 	// for the purposes of counting words, any EBCDIC codepage is fine
