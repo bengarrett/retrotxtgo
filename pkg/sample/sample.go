@@ -1,4 +1,4 @@
-// Package sample opens and encodes the example textfiles embedded into the program.
+// Package sample opens and encodes the example embedded textfiles.
 package sample
 
 import (

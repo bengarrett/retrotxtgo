@@ -1,4 +1,4 @@
-// Package fsys handles the opening and reading of text files.
+// Package fsys handles the opening, reading and writing of files.
 package fsys
 
 import (

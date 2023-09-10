@@ -1,4 +1,4 @@
-// Package logs for the display of errors.
+// Package logs handles the printing and saving of errors.
 package logs
 
 import (

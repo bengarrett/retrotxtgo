@@ -1,3 +1,4 @@
+// Package byter provides functions that manipulate or return byte arrays.
 package byter
 
 import (

@@ -1,5 +1,5 @@
 // Package convert is extends Go's x/text/encoding capability
-// to convert legacy encoded text to a modern UTF-8 encoding.
+// to convert legacy encoded text to a UTF-8 rune slice.
 package convert
 
 import (

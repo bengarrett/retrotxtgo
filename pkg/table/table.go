@@ -1,3 +1,4 @@
+// Package table creates a table of all the characters in the named 8-bit character set.
 package table
 
 import (

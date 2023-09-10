@@ -9,9 +9,9 @@ import (
 	"os"
 
 	"github.com/bengarrett/retrotxtgo/pkg/fsys/internal/util"
+	"github.com/bengarrett/retrotxtgo/pkg/fsys/nl"
 	"github.com/bengarrett/retrotxtgo/pkg/internal/save"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
-	"github.com/bengarrett/retrotxtgo/pkg/nl"
 )
 
 // IsPipe determines if Stdin (standard input) is piped from another command.

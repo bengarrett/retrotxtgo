@@ -1,3 +1,4 @@
+// Package term provides colors and text formatting for the terminal.
 package term
 
 import (
