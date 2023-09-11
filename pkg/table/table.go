@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"math"
 	"strings"
 	"text/tabwriter"
@@ -70,12 +71,15 @@ func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 	if err != nil {
 		return nil, fmt.Errorf("table convert bytes error: %w", err)
 	}
-	cp = reverter(name)
+	enc := reverter(name)
 	const hex = 16
 	row := 0
 out:
 	for i, r := range runes {
-		char := Character(cp, i, r)
+		char := Character(enc, i, r)
+		if x := Replacement(name, i); x != "" {
+			char = x
+		}
 		switch {
 		case i == 0:
 			fmt.Fprintf(w, " %s %s %s %s",
@@ -88,7 +92,7 @@ out:
 		case math.Mod(float64(i+1), hex) == 0:
 			// every 16th loop
 			row++
-			if asa.Code7bit(cp) && row >= 8 {
+			if asa.Code7bit(enc) && row >= 8 {
 				// exit after the 7th row
 				fmt.Fprintf(w, " %s %s\n", char,
 					color.OpFuzzy.Sprint("|"))
@@ -104,11 +108,29 @@ out:
 		}
 	}
 	asa.Footnote(w, cp)
+	Footnote(w, name)
 	fmt.Fprint(w, "\n")
 	if err := w.Flush(); err != nil {
 		return nil, fmt.Errorf("table tab writer failed to flush data: %w", err)
 	}
 	return b, nil
+}
+
+// Footnote returns a footnote value for the legacy ASA ASCII character encodings.
+func Footnote(w io.Writer, name string) {
+	if w == nil {
+		w = io.Discard
+	}
+	if SHY173(name) {
+		fmt.Fprintln(w)
+		fmt.Fprintln(w, "* Cell A-D is SHY (soft hyphen), but it is not printable in Unicode.")
+		return
+	}
+	x, _ := CodePage(name)
+	if SHY240(x) {
+		fmt.Fprintln(w)
+		fmt.Fprintln(w, "* Cell F-0 is SHY (soft hyphen), but it is not printable in Unicode.")
+	}
 }
 
 // ISO11 returns true if s matches an ISO-8859-11 name or alias.
@@ -206,6 +228,55 @@ func CharISO11(cp encoding.Encoding, code int) rune {
 		return ' '
 	}
 	return -1
+}
+
+// SHY240 returns true if the code page has a SHY (soft hyphen) at code 240.
+func SHY240(x encoding.Encoding) bool {
+	switch x {
+	case charmap.CodePage850,
+		charmap.CodePage852,
+		charmap.CodePage855,
+		charmap.CodePage858:
+		return true
+	}
+	return false
+}
+
+// SHY173 returns true if the code page has a SHY (soft hyphen) at code 173.
+func SHY173(name string) bool {
+	s := strings.ToLower(name)
+	if strings.Contains(s, "windows 125") ||
+		strings.Contains(s, "iso 8859-") ||
+		strings.Contains(s, "iso-8859-") {
+		return true
+	}
+	return false
+}
+
+// Replacement returns a replacement character for the code page.
+func Replacement(name string, code int) string {
+	x, _ := CodePage(name)
+	switch x {
+	case charmap.CodePage850,
+		charmap.CodePage858,
+		charmap.CodePage865,
+		charmap.CodePage437:
+		if code == 152 {
+			return "\u00FF"
+		}
+	}
+	if SHY240(x) {
+		if code == 240 {
+			return "-"
+		}
+		return ""
+	}
+	if SHY173(name) {
+		if code == 173 {
+			return "-"
+		}
+	}
+	return ""
 }
 
 // Character converts code or rune to an character mapped string.
