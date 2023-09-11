@@ -73,6 +73,7 @@ func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 	cp = reverter(name)
 	const hex = 16
 	row := 0
+out:
 	for i, r := range runes {
 		char := Character(cp, i, r)
 		switch {
@@ -87,6 +88,12 @@ func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 		case math.Mod(float64(i+1), hex) == 0:
 			// every 16th loop
 			row++
+			if asa.Code7bit(cp) && row >= 8 {
+				// exit after the 7th row
+				fmt.Fprintf(w, " %s %s\n", char,
+					color.OpFuzzy.Sprint("|"))
+				break out
+			}
 			fmt.Fprintf(w, " %s %s\n %s %s", char,
 				color.OpFuzzy.Sprint("|"),
 				color.OpFuzzy.Sprintf("%X", row),
@@ -96,6 +103,7 @@ func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 				color.OpFuzzy.Sprint("|"))
 		}
 	}
+	asa.Footnote(w, cp)
 	fmt.Fprint(w, "\n")
 	if err := w.Flush(); err != nil {
 		return nil, fmt.Errorf("table tab writer failed to flush data: %w", err)
@@ -110,8 +118,8 @@ func ISO11(s string) bool {
 		"ISO 8859-11",
 		"ISO-8859-11",
 		"ISO8859-11",
-		"11",
-		"ISO885911":
+		"ISO885911",
+		"11":
 		return true
 	}
 	return false
@@ -126,12 +134,12 @@ func CodePager(s string) (encoding.Encoding, error) { //nolint:ireturn
 		return charmap.Windows874, nil
 	}
 	switch strings.ToLower(s) {
-	case asa.Text63:
-		return asa.StdX34_1963, nil
-	case asa.Text65:
-		return asa.StdX34_1965, nil
-	case asa.Text67:
-		return asa.StdX34_1967, nil
+	case asa.Text63, asa.Numr63:
+		return asa.XUserDefined_1963, nil
+	case asa.Text65, asa.Numr65:
+		return asa.XUserDefined_1965, nil
+	case asa.Text67, asa.Numr67, asa.Alias67:
+		return asa.XUserDefined_1967, nil
 	default:
 		return CodePage(s)
 	}
@@ -157,13 +165,15 @@ func CodePage(s string) (encoding.Encoding, error) { //nolint:ireturn
 	return cp, nil
 }
 
+// swapper returns the Windows1252 charmap for use as the base template
+// for the ASA ASCII encodings.
 func swapper(name string) encoding.Encoding { //nolint:ireturn
 	switch strings.ToLower(name) {
-	case asa.Text63:
+	case asa.Text63, asa.Numr63:
 		return charmap.Windows1252
-	case asa.Text65:
+	case asa.Text65, asa.Numr65:
 		return charmap.Windows1252
-	case asa.Text67:
+	case asa.Text67, asa.Numr67, asa.Alias67:
 		return charmap.Windows1252
 	}
 	return nil
@@ -174,12 +184,12 @@ func reverter(name string) encoding.Encoding { //nolint:ireturn
 		return charmap.XUserDefined
 	}
 	switch strings.ToLower(name) {
-	case asa.Text63:
-		return asa.StdX34_1963
-	case asa.Text65:
-		return asa.StdX34_1965
-	case asa.Text67:
-		return asa.StdX34_1967
+	case asa.Text63, asa.Numr63:
+		return asa.XUserDefined_1963
+	case asa.Text65, asa.Numr65:
+		return asa.XUserDefined_1965
+	case asa.Text67, asa.Numr67, asa.Alias67:
+		return asa.XUserDefined_1967
 	}
 	return nil
 }

@@ -66,9 +66,9 @@ func List() (*bytes.Buffer, error) { //nolint:funlen
 		return nil, err
 	}
 	fmt.Fprintf(w, "\n%s\n", header)
-	enc := Encodings()
-	enc = append(enc, asa.StdX34_1963, asa.StdX34_1965, asa.StdX34_1967)
-	for _, e := range enc {
+	x := Encodings()
+	x = append(x, asa.XUserDefined_1963, asa.XUserDefined_1965, asa.XUserDefined_1967)
+	for _, e := range x {
 		if e == charmap.XUserDefined {
 			continue
 		}
@@ -98,7 +98,7 @@ func List() (*bytes.Buffer, error) { //nolint:funlen
 			fmt.Fprintf(w, " † %s\t %s\t %s\t %s\t\n",
 				c.Name, c.Value, c.Numeric, c.Alias)
 			continue
-		case asa.StdX34_1963, asa.StdX34_1965, asa.StdX34_1967:
+		case asa.XUserDefined_1963, asa.XUserDefined_1965, asa.XUserDefined_1967:
 			fmt.Fprintf(w, " ⁑ %s\t %s\t %s\t %s\t\n",
 				c.Name, c.Value, c.Numeric, c.Alias)
 			continue
@@ -148,8 +148,10 @@ func Rows(e encoding.Encoding) (Row, error) {
 		Name: fmt.Sprint(e),
 	}
 	switch e {
-	case asa.StdX34_1963, asa.StdX34_1965, asa.StdX34_1967:
+	case asa.XUserDefined_1963, asa.XUserDefined_1965, asa.XUserDefined_1967:
 		r.Value = asa.Name(e)
+		r.Numeric = asa.Numeric(e)
+		r.Alias = asa.Alias(e)
 		return r, nil
 	}
 
