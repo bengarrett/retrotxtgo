@@ -93,7 +93,7 @@ func GetEnv(key string) string {
 	return strings.TrimSpace(strings.ToLower(os.Getenv(key)))
 }
 
-// HeadDark returns a colored and underlined string for use as a header.
+// Head returns a colored and underlined string for use as a header.
 // Provide a fixed width value for the underline border or set to zero.
 // The header is colored with the fuzzy color.
 func Head(w io.Writer, width int, s string) (int, error) {
@@ -230,21 +230,22 @@ func Bool(b bool) string {
 }
 
 // Options appends options: ... to the usage string.
-func Options(s string, shorthand, flagHelp bool, opts ...string) string {
-	var keys string
+func Options(w io.Writer, s string, shorthand, flagHelp bool, opts ...string) (int, error) {
+	if w == nil {
+		return 0, fmt.Errorf("options: %w", ErrNoWriter)
+	}
 	if len(opts) == 0 {
-		return s
+		return 0, nil
 	}
 	sort.Strings(opts)
+	keys := strings.Join(opts, ", ")
 	if shorthand {
 		keys = UnderlineKeys(opts...)
-	} else {
-		keys = strings.Join(opts, ", ")
 	}
 	if flagHelp {
-		return fmt.Sprintf("%s\nflag options: %s", s, color.Info.Sprint(keys))
+		return fmt.Fprintf(w, "%s\nflag options: %s", s, color.Info.Sprint(keys))
 	}
-	return fmt.Sprintf("%s.\n  Options: %s", s, color.Info.Sprint(keys))
+	return fmt.Fprintf(w, "%s.\n  Options: %s", s, color.Info.Sprint(keys))
 }
 
 // Comment returns a string in the comment color.

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
@@ -26,8 +27,9 @@ func InfoCommand() *cobra.Command {
 func InfoInit() *cobra.Command {
 	ic := InfoCommand()
 	infos := format.Format().Info
-	ic.Flags().StringVarP(&flag.Info.Format, "format", "f", "color",
-		term.Options("print format or syntax", true, true, infos[:]...))
+	var w bytes.Buffer
+	term.Options(&w, "print format or syntax", true, true, infos[:]...)
+	ic.Flags().StringVarP(&flag.Info.Format, "format", "f", "color", w.String())
 	return ic
 }
 

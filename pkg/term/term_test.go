@@ -52,8 +52,8 @@ func ExampleBool() {
 }
 
 func ExampleOptions() {
-	fmt.Fprint(os.Stdout, term.Options("this is an example of a list of options",
-		false, false, "option3", "option2", "option1"))
+	term.Options(os.Stdout, "this is an example of a list of options",
+		false, false, "option3", "option2", "option1")
 	// Output:this is an example of a list of options.
 	//   Options: option1, option2, option3
 }
