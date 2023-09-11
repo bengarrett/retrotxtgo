@@ -40,7 +40,7 @@ func (l Lists) Command() *cobra.Command {
 func ListCodepages() *cobra.Command {
 	return &cobra.Command{
 		Use:     "codepages",
-		Aliases: []string{"c", "cp"},
+		Aliases: []string{"c", "cp", "codepage"},
 		Short: fmt.Sprintf("List the legacy codepages that %s can convert to UTF-8",
 			meta.Name),
 		Long: fmt.Sprintf("List the available legacy codepages that %s can convert to UTF-8.",
