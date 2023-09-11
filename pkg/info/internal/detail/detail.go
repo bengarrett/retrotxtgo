@@ -3,8 +3,6 @@ package detail
 import (
 	"archive/zip"
 	"bytes"
-	"text/tabwriter"
-
 	//nolint:gosec
 	"crypto/md5"
 	"crypto/sha256"
@@ -18,6 +16,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"text/tabwriter"
 	"time"
 	"unicode/utf8"
 
