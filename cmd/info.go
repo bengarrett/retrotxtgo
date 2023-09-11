@@ -27,9 +27,9 @@ func InfoCommand() *cobra.Command {
 func InfoInit() *cobra.Command {
 	ic := InfoCommand()
 	infos := format.Format().Info
-	var w bytes.Buffer
-	term.Options(&w, "print format or syntax", true, true, infos[:]...)
-	ic.Flags().StringVarP(&flag.Info.Format, "format", "f", "color", w.String())
+	b := &bytes.Buffer{}
+	term.Options(b, "print format or syntax", true, true, infos[:]...)
+	ic.Flags().StringVarP(&flag.Info.Format, "format", "f", "color", b.String())
 	return ic
 }
 

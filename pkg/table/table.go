@@ -43,9 +43,9 @@ func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 		h = "ISO 8859-11"
 	}
 	h += CharmapAlias(cp) + charmapStandard(cp)
-	var output bytes.Buffer
 	const tabWidth = 8
-	w := new(tabwriter.Writer).Init(&output, 0, tabWidth, 0, '\t', 0)
+	b := &bytes.Buffer{}
+	w := tabwriter.NewWriter(b, 0, tabWidth, 0, '\t', 0)
 	if _, err := term.Head(w, width, " "+h); err != nil {
 		return nil, err
 	}
@@ -60,8 +60,8 @@ func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf(" %X  ", i))
 		}
 	}
-	b, conv, row := byter.MakeBytes(), converter(name, cp), 0
-	runes, err := conv.Chars(b...)
+	c, conv, row := byter.MakeBytes(), converter(name, cp), 0
+	runes, err := conv.Chars(c...)
 	if err != nil {
 		return nil, fmt.Errorf("table convert bytes error: %w", err)
 	}
@@ -94,7 +94,7 @@ func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 	if err := w.Flush(); err != nil {
 		return nil, fmt.Errorf("table tab writer failed to flush data: %w", err)
 	}
-	return &output, nil
+	return b, nil
 }
 
 // ISO11 returns true if s matches an ISO-8859-11 name or alias.

@@ -79,9 +79,9 @@ func Columns(r io.Reader, lb LB) (int, error) {
 	if lb[1] == 0 {
 		lineBreak = []byte{byte(lb[0])}
 	}
-	buf, width := make([]byte, bufio.MaxScanTokenSize), 0
+	p, width := make([]byte, bufio.MaxScanTokenSize), 0
 	for {
-		size, err := r.Read(buf)
+		size, err := r.Read(p)
 		if err != nil && err != io.EOF {
 			return -1, fmt.Errorf("columns could not read buffer: %w", err)
 		}
@@ -90,7 +90,7 @@ func Columns(r io.Reader, lb LB) (int, error) {
 			if size == pos {
 				break
 			}
-			i := bytes.Index(buf[pos:], lineBreak)
+			i := bytes.Index(p[pos:], lineBreak)
 			if i == -1 {
 				width = size
 				break
@@ -113,15 +113,15 @@ func Controls(r io.Reader) (int, error) {
 		return 0, ErrReader
 	}
 	lineBreak := []byte(ansiEscape)
-	buf, count := make([]byte, bufio.MaxScanTokenSize), 0
+	p, count := make([]byte, bufio.MaxScanTokenSize), 0
 	for {
-		size, err := r.Read(buf)
+		size, err := r.Read(p)
 		if err != nil && err != io.EOF {
 			return 0, fmt.Errorf("controls could not read buffer: %w", err)
 		}
 		pos := 0
 		for {
-			i := bytes.Index(buf[pos:], lineBreak)
+			i := bytes.Index(p[pos:], lineBreak)
 			if size == pos {
 				break
 			}
@@ -147,15 +147,15 @@ func Lines(r io.Reader, lb LB) (int, error) {
 	if lb[1] == 0 {
 		lineBreak = []byte{byte(lb[0])}
 	}
-	buf, count := make([]byte, bufio.MaxScanTokenSize), 0
+	p, count := make([]byte, bufio.MaxScanTokenSize), 0
 	for {
-		size, err := r.Read(buf)
+		size, err := r.Read(p)
 		if err != nil && err != io.EOF {
 			return 0, fmt.Errorf("lines could not read buffer: %w", err)
 		}
 		pos := 0
 		for {
-			i := bytes.Index(buf[pos:], lineBreak)
+			i := bytes.Index(p[pos:], lineBreak)
 			if size == pos {
 				break
 			}

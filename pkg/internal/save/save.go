@@ -28,15 +28,15 @@ func Save(name string, b ...byte) (int, string, error) {
 	}
 	defer file.Close()
 	// bufio is the most performant
-	writer := bufio.NewWriter(file)
+	w := bufio.NewWriter(file)
 	written := 0
 	for i, c := range b {
 		written = i
-		if err := writer.WriteByte(c); err != nil {
+		if err := w.WriteByte(c); err != nil {
 			return 0, path, fmt.Errorf("save could not write bytes: %w", err)
 		}
 	}
-	if err := writer.Flush(); err != nil {
+	if err := w.Flush(); err != nil {
 		return 0, path, fmt.Errorf("save could not flush the writer: %w", err)
 	}
 	path, err = filepath.Abs(file.Name())

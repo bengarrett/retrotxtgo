@@ -58,10 +58,10 @@ func Encodings() []encoding.Encoding {
 func List() (*bytes.Buffer, error) { //nolint:funlen
 	const header, title = " Formal name\t Named value\t Numeric value\t Alias value\t",
 		" Known legacy code pages and character encodings "
-	var buf bytes.Buffer
+	b := &bytes.Buffer{}
 	const verticalBars = tabwriter.Debug
 	const padding, width = 2, 76
-	w := tabwriter.NewWriter(&buf, 0, 0, padding, ' ', verticalBars)
+	w := tabwriter.NewWriter(b, 0, 0, padding, ' ', verticalBars)
 	if _, err := term.Head(w, width, title); err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func List() (*bytes.Buffer, error) { //nolint:funlen
 	if err := w.Flush(); err != nil {
 		return nil, err
 	}
-	return &buf, nil
+	return b, nil
 }
 
 // Rows return character encoding details for use in a text table.

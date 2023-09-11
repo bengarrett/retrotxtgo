@@ -32,9 +32,9 @@ func Examples() (*bytes.Buffer, error) {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
-	var buf bytes.Buffer
 	const padding = 2
-	w := tabwriter.NewWriter(&buf, 0, 0, padding, ' ', 0)
+	b := &bytes.Buffer{}
+	w := tabwriter.NewWriter(b, 0, 0, padding, ' ', 0)
 	bin := fmt.Sprintf("  %s ", meta.Bin)
 	if _, err := term.Head(w, 0,
 		fmt.Sprintf("Packaged example text and ANSI files to test and play with %s\n", meta.Name)); err != nil {
@@ -62,7 +62,7 @@ func Examples() (*bytes.Buffer, error) {
 	if err := w.Flush(); err != nil {
 		return nil, err
 	}
-	return &buf, nil
+	return b, nil
 }
 
 // Table returns one or more named encodings in a tabled format.

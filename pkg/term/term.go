@@ -63,8 +63,8 @@ func Border(s string) *bytes.Buffer {
 	maxLen += split
 	scanner = bufio.NewScanner(strings.NewReader(s))
 	scanner.Split(bufio.ScanLines)
-	w := new(bytes.Buffer)
-	fmt.Fprintln(w, ("┌" + strings.Repeat("─", maxLen) + "┐"))
+	b := &bytes.Buffer{}
+	fmt.Fprintln(b, ("┌" + strings.Repeat("─", maxLen) + "┐"))
 	for scanner.Scan() {
 		l := utf8.RuneCountInString(scanner.Text())
 		lp := ((maxLen - l) / split)
@@ -73,10 +73,10 @@ func Border(s string) *bytes.Buffer {
 		if float32((maxLen-l)/split) != float32(maxLen-l)/split {
 			rp++
 		}
-		fmt.Fprintf(w, "│%s%s%s│\n", strings.Repeat(" ", lp), scanner.Text(), strings.Repeat(" ", rp))
+		fmt.Fprintf(b, "│%s%s%s│\n", strings.Repeat(" ", lp), scanner.Text(), strings.Repeat(" ", rp))
 	}
-	fmt.Fprintln(w, "└"+strings.Repeat("─", maxLen)+"┘")
-	return w
+	fmt.Fprintln(b, "└"+strings.Repeat("─", maxLen)+"┘")
+	return b
 }
 
 // Center align text to a the width of an area.
@@ -157,16 +157,16 @@ func UnderlineChar(c string) (string, error) {
 	if !color.Enable {
 		return c, nil
 	}
-	var w *bytes.Buffer
+	b := &bytes.Buffer{}
 	r, _ := utf8.DecodeRuneInString(c)
 	t, err := template.New("underline").Parse("{{define \"TEXT\"}}\033[0m\033[4m{{.}}\033[0m{{end}}")
 	if err != nil {
 		return "", fmt.Errorf("underlinechar new template: %w", err)
 	}
-	if err := t.ExecuteTemplate(w, "TEXT", string(r)); err != nil {
+	if err := t.ExecuteTemplate(b, "TEXT", string(r)); err != nil {
 		return "", fmt.Errorf("underlinechar execute template: %w", err)
 	}
-	return w.String(), nil
+	return b.String(), nil
 }
 
 // UnderlineKeys uses ANSI to underline the first letter of each key.

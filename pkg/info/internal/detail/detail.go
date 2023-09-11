@@ -3,6 +3,7 @@ package detail
 import (
 	"archive/zip"
 	"bytes"
+	"text/tabwriter"
 
 	//nolint:gosec
 	"crypto/md5"
@@ -17,7 +18,6 @@ import (
 	"os"
 	"strings"
 	"sync"
-	"text/tabwriter"
 	"time"
 	"unicode/utf8"
 
@@ -283,8 +283,8 @@ func (d *Detail) mime(name string, data ...byte) {
 	}
 	if d.ValidText() {
 		var err error
-		r := bytes.NewBuffer(data)
-		if d.Count.Chars, err = fsys.Runes(r); err != nil {
+		b := bytes.NewBuffer(data)
+		if d.Count.Chars, err = fsys.Runes(b); err != nil {
 			fmt.Fprintf(os.Stdout, "mine sniffer failure, %s\n", err)
 		}
 		return
@@ -356,12 +356,11 @@ func (d *Detail) printMarshal(color bool) ([]byte, error) {
 		return fmt.Sprintf("%s\t", s)
 	}
 	gookit.Enable = color
-	buf := bytes.Buffer{}
 	data := d.printMarshalData()
-	w, l := new(tabwriter.Writer),
-		len(fmt.Sprintf(" filename%s%s", strings.Repeat(" ", padding), data[0].v))
+	l := len(fmt.Sprintf(" filename%s%s", strings.Repeat(" ", padding), data[0].v))
 	const tabWidth = 8
-	w.Init(&buf, 0, tabWidth, 0, '\t', 0)
+	b := &bytes.Buffer{}
+	w := tabwriter.NewWriter(b, 0, tabWidth, 0, '\t', 0)
 	if _, err := term.Head(w, width, "File information"); err != nil {
 		return nil, err
 	}
@@ -397,7 +396,7 @@ func (d *Detail) printMarshal(color bool) ([]byte, error) {
 	if err := w.Flush(); err != nil {
 		return nil, err
 	}
-	return buf.Bytes(), nil
+	return b.Bytes(), nil
 }
 
 // marshalDataValid returns true if the key and value data validates.

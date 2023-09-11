@@ -40,9 +40,8 @@ func Template() (string, error) {
 	if meta.App.Date != meta.Placeholder {
 		appDate = fmt.Sprintf(" (%s)", meta.App.Date)
 	}
-	var b bytes.Buffer
-	w := new(tabwriter.Writer)
-	w.Init(&b, 0, TabWidth, 0, '\t', 0)
+	b := &bytes.Buffer{}
+	w := tabwriter.NewWriter(b, 0, TabWidth, 0, '\t', 0)
 	fmt.Fprintf(w, "%s %s\n", meta.Name, meta.Print())
 	fmt.Fprintf(w, "%s %s Ben Garrett\n", Copyright, c)
 	fmt.Fprintln(w, color.Primary.Sprint(meta.URL))

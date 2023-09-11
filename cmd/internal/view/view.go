@@ -22,7 +22,7 @@ func Run(cmd *cobra.Command, args ...string) (*bytes.Buffer, error) {
 	if err != nil {
 		return nil, err
 	}
-	w := new(bytes.Buffer)
+	w := &bytes.Buffer{}
 	for i, arg := range args {
 		if i == 0 && arg == "" {
 			return w, nil

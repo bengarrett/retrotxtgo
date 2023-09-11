@@ -144,8 +144,8 @@ func (c *Convert) Transform() error {
 	}
 	// transform the input bytes into UTF-8 runes
 	c.FixJISTable()
-	b := bytes.Buffer{}
-	t := transform.NewWriter(&b, c.Input.Encoding.NewDecoder())
+	b := &bytes.Buffer{}
+	t := transform.NewWriter(b, c.Input.Encoding.NewDecoder())
 	if _, err := t.Write(c.Input.Bytes); err != nil {
 		return err
 	}
@@ -240,22 +240,22 @@ func (c *Convert) wrapWidth(max int) {
 		return
 	}
 	limit := math.Ceil(float64(cnt) / float64(max))
-	var w bytes.Buffer
+	b := &bytes.Buffer{}
 	for f := float64(1); f <= limit; f++ {
 		switch f {
 		case 1:
-			fmt.Fprintf(&w, "%s\n", string(c.Output[0:max]))
+			fmt.Fprintf(b, "%s\n", string(c.Output[0:max]))
 		default:
 			i := int(f)
-			a, b := (i-1)*max, i*max
-			if b >= cnt {
-				fmt.Fprintf(&w, "%s\n", string(c.Output[a:cnt]))
+			x, y := (i-1)*max, i*max
+			if y >= cnt {
+				fmt.Fprintf(b, "%s\n", string(c.Output[x:cnt]))
 				continue
 			}
-			fmt.Fprintf(&w, "%s\n", string(c.Output[a:b]))
+			fmt.Fprintf(b, "%s\n", string(c.Output[x:y]))
 		}
 	}
-	c.Output = []rune(w.String())
+	c.Output = []rune(b.String())
 }
 
 // SkipCtrlCodes marks control characters to be ignored.

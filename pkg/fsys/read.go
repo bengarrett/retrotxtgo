@@ -47,18 +47,18 @@ func ReadAllBytes(name string) ([]byte, error) {
 	// Go by default will scan 64 * 1024 bytes (64KB) per iteration
 	const KB = 1024
 	const max = 64 * KB
-	buf := []byte{}
-	scanner.Buffer(buf, max)
+	b := []byte{}
+	scanner.Buffer(b, max)
 	// required, split scan into Buffer(data, x) sized byte chuncks
 	// otherwise scanner will panic on files larger than 64 * 1024 bytes
 	scanner.Split(bufio.ScanBytes)
 	for scanner.Scan() {
-		buf = append(buf, scanner.Bytes()...)
+		b = append(b, scanner.Bytes()...)
 	}
 	if err := scanner.Err(); err != nil {
 		return nil, fmt.Errorf("scanner %q: %w", name, err)
 	}
-	return buf, file.Close()
+	return b, file.Close()
 }
 
 // ReadChunk reads and returns the start of the named file.

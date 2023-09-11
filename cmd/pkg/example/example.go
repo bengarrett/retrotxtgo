@@ -32,17 +32,17 @@ const (
 
 // Print returns help usage examples.
 func (e Example) String() string {
-	var b bytes.Buffer
+	b := &bytes.Buffer{}
 	// change example operating system path separator
 	t := template.Must(template.New("example").Parse(e.result()))
-	err := t.Execute(&b, string(os.PathSeparator))
+	err := t.Execute(b, string(os.PathSeparator))
 	if err != nil {
 		log.Fatal(err)
 	}
 	// color the example text except text following
 	// the last hash #, which is treated as a comment
 	const cmmt, sentence = "#", 2
-	scanner, s := bufio.NewScanner(&b), ""
+	scanner, s := bufio.NewScanner(b), ""
 	for scanner.Scan() {
 		ss := strings.Split(scanner.Text(), cmmt)
 		l := len(ss)
