@@ -44,7 +44,9 @@ func FatalExecute(err error, args ...string) {
 }
 
 // Execute is the error handler for command flags and arguments.
-func Execute(err error, test bool, args ...string) string { //nolint:funlen
+//
+//nolint:funlen,cyclop
+func Execute(err error, test bool, args ...string) string {
 	if err == nil {
 		return ""
 	}

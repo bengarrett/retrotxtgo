@@ -36,8 +36,10 @@ func Examples() (*bytes.Buffer, error) {
 	const padding = 2
 	w := tabwriter.NewWriter(&buf, 0, 0, padding, ' ', 0)
 	bin := fmt.Sprintf("  %s ", meta.Bin)
-	fmt.Fprintf(w, "%s\n",
-		term.Head(0, fmt.Sprintf("Packaged example text and ANSI files to test and play with %s", meta.Name)))
+	if _, err := term.Head(w, 0,
+		fmt.Sprintf("Packaged example text and ANSI files to test and play with %s\n", meta.Name)); err != nil {
+		return nil, err
+	}
 	for _, k := range keys {
 		fmt.Fprintf(w, "%s\t%s\t\n", k, m[k].Description)
 	}

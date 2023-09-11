@@ -3,6 +3,7 @@ package detail
 import (
 	"archive/zip"
 	"bytes"
+
 	//nolint:gosec
 	"crypto/md5"
 	"crypto/sha256"
@@ -361,7 +362,9 @@ func (d *Detail) printMarshal(color bool) ([]byte, error) {
 		len(fmt.Sprintf(" filename%s%s", strings.Repeat(" ", padding), data[0].v))
 	const tabWidth = 8
 	w.Init(&buf, 0, tabWidth, 0, '\t', 0)
-	fmt.Fprint(w, term.HeadDark(width, "File information"))
+	if _, err := term.Head(w, width, "File information"); err != nil {
+		return nil, err
+	}
 	for _, x := range data {
 		if !d.marshalDataValid(x.k, x.v) {
 			continue

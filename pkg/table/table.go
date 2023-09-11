@@ -43,10 +43,12 @@ func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 		h = "ISO 8859-11"
 	}
 	h += CharmapAlias(cp) + charmapStandard(cp)
-	var buf bytes.Buffer
+	var output bytes.Buffer
 	const tabWidth = 8
-	w := new(tabwriter.Writer).Init(&buf, 0, tabWidth, 0, '\t', 0)
-	fmt.Fprint(w, " "+term.HeadDark(width, h))
+	w := new(tabwriter.Writer).Init(&output, 0, tabWidth, 0, '\t', 0)
+	if _, err := term.Head(w, width, " "+h); err != nil {
+		return nil, err
+	}
 	const start, end, max = 0, 15, 255
 	for i := 0; i < 16; i++ {
 		switch i {
@@ -92,7 +94,7 @@ func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 	if err := w.Flush(); err != nil {
 		return nil, fmt.Errorf("table tab writer failed to flush data: %w", err)
 	}
-	return &buf, nil
+	return &output, nil
 }
 
 // ISO11 returns true if s matches an ISO-8859-11 name or alias.
@@ -194,7 +196,11 @@ func CharISO11(cp encoding.Encoding, code int) rune {
 
 // Character converts code or rune to an character mapped string.
 func Character(cp encoding.Encoding, code int, r rune) string {
-	if r := asa.Char(cp, code); r > -1 {
+	if asa.Name(cp) != "" {
+		if x := asa.Char(cp, code); x > -1 {
+			return string(x)
+		}
+		fmt.Println(r, code)
 		return string(r)
 	}
 	if r := CharISO11(cp, code); r > -1 {

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -17,7 +18,10 @@ import (
 	"github.com/gookit/color"
 )
 
-var ErrRune = errors.New("invalid encoded rune")
+var (
+	ErrRune     = errors.New("invalid encoded rune")
+	ErrNoWriter = errors.New("the w writer cannot be nil")
+)
 
 // Terminal colors.
 type Terminal int
@@ -89,32 +93,13 @@ func GetEnv(key string) string {
 	return strings.TrimSpace(strings.ToLower(os.Getenv(key)))
 }
 
-// Head returns a colored and underlined string for use as a header.
-// Provide a fixed width value for the underline border or set to zero.
-func Head(width int, s string) string {
-	const div, padding = 2, 4
-	var (
-		h string
-		p string
-		r string
-	)
-	if width == 0 {
-		r = strings.Repeat(HBar, len(s)+padding)
-		p = strings.Repeat(" ", padding/div)
-		return fmt.Sprintf("\n%s%s%s\n%s", p, h, p, r)
-	}
-	r = strings.Repeat(HBar, width)
-	p = strings.Repeat(" ", (width-len(s))/div)
-	return fmt.Sprintf("\n%s%s%s\n%s", p, h, p, r)
-}
-
 // HeadDark returns a colored and underlined string for use as a header.
 // Provide a fixed width value for the underline border or set to zero.
 // The header is colored with the fuzzy color.
-func HeadDark(width int, s string) string {
+func Head(w io.Writer, width int, s string) (int, error) {
 	r := color.OpFuzzy.Sprint(strings.Repeat(HBar, width))
 	h := color.Primary.Sprint(Center(width, s))
-	return fmt.Sprintf("%s\n%s\n", r, h)
+	return fmt.Fprintf(w, "%s\n%s\n", r, h)
 }
 
 // HR returns a horizontal ruler or line break.
@@ -172,7 +157,7 @@ func UnderlineChar(c string) (string, error) {
 	if !color.Enable {
 		return c, nil
 	}
-	w := new(bytes.Buffer)
+	var w *bytes.Buffer
 	r, _ := utf8.DecodeRuneInString(c)
 	t, err := template.New("underline").Parse("{{define \"TEXT\"}}\033[0m\033[4m{{.}}\033[0m{{end}}")
 	if err != nil {
