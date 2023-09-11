@@ -370,20 +370,20 @@ func (d *Detail) printMarshal(color bool) ([]byte, error) {
 		}
 		if x.k == zipComment {
 			if x.v != "" {
-				fmt.Fprintln(w, term.HR(l))
+				term.HR(w, l)
 				fmt.Fprintln(w, x.v)
 				if d.sauceIndex <= 0 {
 					break
 				}
 				// divider for sauce metadata
-				fmt.Fprintln(w, term.HR(l))
+				term.HR(w, l)
 				continue
 			}
 			if d.sauceIndex <= 0 {
 				break
 			}
 			// divider for sauce metadata
-			fmt.Fprintln(w, term.HR(l))
+			term.HR(w, l)
 			continue
 		}
 		fmt.Fprintf(w, "\t %s\t  %s\n", x.k, info(x.v))

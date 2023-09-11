@@ -103,14 +103,12 @@ func Head(w io.Writer, width int, s string) (int, error) {
 	return fmt.Fprintf(w, "%s\n%s\n", r, h)
 }
 
-// HR returns a horizontal ruler or line break.
-func HR(width int) string {
-	return fmt.Sprintf(" %s", Secondary(strings.Repeat(HBar, width)))
-}
-
-// HRLen returns a horizontal ruler or line break with the given column width.
-func HRLen(width int) string {
-	return fmt.Sprintf(" \n%s\n", Secondary(strings.Repeat(HBar, width)))
+// HR returns a horizontal ruler and a line break.
+func HR(w io.Writer, width int) {
+	if w == nil {
+		w = io.Discard
+	}
+	fmt.Fprintf(w, " %s\n", Secondary(strings.Repeat(HBar, width)))
 }
 
 // Term determines the terminal type based on the COLORTERM and TERM environment variables.
