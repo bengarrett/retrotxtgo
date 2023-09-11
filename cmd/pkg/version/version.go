@@ -51,7 +51,9 @@ func Template() (string, error) {
 	fmt.Fprintf(w, "%s\t%s\n", color.Secondary.Sprint("go:"), strings.Replace(runtime.Version(), "go", "v", 1))
 	fmt.Fprintf(w, "%s\t%s\n", color.Secondary.Sprint("path:"), exe)
 	if tag != "" {
-		fmt.Fprintf(w, "\n%s\n", update.String(meta.App.Version, tag))
+		fmt.Fprintln(w)
+		update.String(w, meta.App.Version, tag)
+		fmt.Fprintln(w)
 	}
 	if err := w.Flush(); err != nil {
 		return "", err

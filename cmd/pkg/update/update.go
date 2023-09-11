@@ -2,9 +2,9 @@
 package update
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/bengarrett/retrotxtgo/meta"
@@ -31,11 +31,14 @@ type Cache struct {
 const cacheFile = "api.github.cache"
 
 // String the new release notification box and text.
-func String(old, current string) *bytes.Buffer {
+func String(w io.Writer, old, current string) {
+	if w == nil {
+		w = io.Discard
+	}
 	s := fmt.Sprintf("%s%s%s\n%s%s\n%s → %s",
 		"A newer edition of ", meta.Name, " is available!",
 		"Learn more at ", meta.URL, meta.Semantic(old), current)
-	return term.Border(s)
+	term.Border(w, s)
 }
 
 // Check the GitHub for the newest release tag.

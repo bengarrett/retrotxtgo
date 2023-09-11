@@ -59,7 +59,7 @@ func ExampleOptions() {
 }
 
 func ExampleBorder() {
-	fmt.Fprintf(os.Stdout, "%s", term.Border("hi"))
+	term.Border(os.Stdout, "hi")
 	// Output: ┌────┐
 	// │ hi │
 	// └────┘

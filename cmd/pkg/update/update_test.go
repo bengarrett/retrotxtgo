@@ -1,7 +1,6 @@
 package update_test
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -15,8 +14,7 @@ const (
 )
 
 func ExampleString() {
-	s := update.String(alpha, "1.0.0")
-	fmt.Fprintln(os.Stdout, s)
+	update.String(os.Stdout, alpha, "1.0.0")
 	// Output:┌───────────────────────────────────────────┐
 	// │ A newer edition of Retrotxt is available! │
 	// │   Learn more at https://retrotxt.com/go   │

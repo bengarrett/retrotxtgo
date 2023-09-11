@@ -50,7 +50,10 @@ func (t Terminal) String() string {
 }
 
 // Border wraps the string around a single line border.
-func Border(s string) *bytes.Buffer {
+func Border(w io.Writer, s string) {
+	if w == nil {
+		w = io.Discard
+	}
 	const split = 2
 	maxLen, scanner := 0, bufio.NewScanner(strings.NewReader(s))
 	scanner.Split(bufio.ScanLines)
@@ -63,8 +66,7 @@ func Border(s string) *bytes.Buffer {
 	maxLen += split
 	scanner = bufio.NewScanner(strings.NewReader(s))
 	scanner.Split(bufio.ScanLines)
-	b := &bytes.Buffer{}
-	fmt.Fprintln(b, ("┌" + strings.Repeat("─", maxLen) + "┐"))
+	fmt.Fprintln(w, ("┌" + strings.Repeat("─", maxLen) + "┐"))
 	for scanner.Scan() {
 		l := utf8.RuneCountInString(scanner.Text())
 		lp := ((maxLen - l) / split)
@@ -73,10 +75,9 @@ func Border(s string) *bytes.Buffer {
 		if float32((maxLen-l)/split) != float32(maxLen-l)/split {
 			rp++
 		}
-		fmt.Fprintf(b, "│%s%s%s│\n", strings.Repeat(" ", lp), scanner.Text(), strings.Repeat(" ", rp))
+		fmt.Fprintf(w, "│%s%s%s│\n", strings.Repeat(" ", lp), scanner.Text(), strings.Repeat(" ", rp))
 	}
-	fmt.Fprintln(b, "└"+strings.Repeat("─", maxLen)+"┘")
-	return b
+	fmt.Fprintln(w, "└"+strings.Repeat("─", maxLen)+"┘")
 }
 
 // Center align text to a the width of an area.
