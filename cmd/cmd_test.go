@@ -32,13 +32,9 @@ const (
 // args are the command line arguments to test with the command.
 func (t cmdT) tester(args []string) ([]byte, error) {
 	color.Enable = false
-	var c *cobra.Command
-	b := bytes.NewBufferString("")
+	c := &cobra.Command{}
+	b := &bytes.Buffer{}
 	switch t {
-	// case confT:
-	// 	c = cmd.ConfigInit()
-	// case creaT:
-	// 	c = cmd.CreateInit()
 	case infoT:
 		c = cmd.InfoInit()
 	case listT:

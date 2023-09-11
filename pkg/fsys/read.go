@@ -71,7 +71,7 @@ func ReadChunk(name string, chars int) ([]byte, error) {
 		return nil, err
 	}
 	defer file.Close()
-	buf := []byte{}
+	p := []byte{}
 	scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanRunes)
 	count := 0
@@ -80,12 +80,12 @@ func ReadChunk(name string, chars int) ([]byte, error) {
 		if count > chars {
 			break
 		}
-		buf = append(buf, scanner.Bytes()...)
+		p = append(p, scanner.Bytes()...)
 	}
 	if err := scanner.Err(); err != nil {
 		return nil, fmt.Errorf("read chunk could not scan file: %q: %w", name, err)
 	}
-	return buf, file.Close()
+	return p, file.Close()
 }
 
 // ReadColumns counts the number of characters used per line in the named file.
