@@ -47,7 +47,7 @@ func TestTransform(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := view.Transform(tt.args.in, tt.args.out, tt.args.conv, tt.args.b...)
+			got, err := view.Transform(tt.args.conv, tt.args.in, tt.args.out, tt.args.b...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Transform() error = %v, wantErr %v", err, tt.wantErr)
 				return

@@ -18,7 +18,7 @@ var ErrConv = errors.New("convert cannot be nil")
 
 // Run parses the arguments supplied with the view command.
 func Run(cmd *cobra.Command, args ...string) (*bytes.Buffer, error) {
-	args, conv, samp, err := flag.Args(cmd, args...)
+	args, c, samp, err := flag.Args(cmd, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -32,11 +32,11 @@ func Run(cmd *cobra.Command, args ...string) (*bytes.Buffer, error) {
 			fmt.Fprintln(w)
 			term.HR(w, halfPage)
 		}
-		b, err := flag.ReadArgument(arg, conv, samp)
+		b, err := flag.ReadArgument(arg, c, samp)
 		if err != nil {
 			return nil, err
 		}
-		r, err := Transform(samp.Input, samp.Output, conv, b...)
+		r, err := Transform(c, samp.Input, samp.Output, b...)
 		if err != nil {
 			return nil, err
 		}
@@ -49,13 +49,9 @@ func Run(cmd *cobra.Command, args ...string) (*bytes.Buffer, error) {
 // The optional in encoding argument is the bytes original character encoding.
 // The optional out encoding argument is the encoding to replicate.
 // When no encoding arguments are provided, UTF-8 unicode encoding is used.
-func Transform(
-	in encoding.Encoding,
-	out encoding.Encoding,
-	conv *convert.Convert,
-	b ...byte,
+func Transform(c *convert.Convert, in, out encoding.Encoding, b ...byte,
 ) ([]rune, error) {
-	if conv == nil {
+	if c == nil {
 		return nil, ErrConv
 	}
 	var err error
@@ -64,20 +60,20 @@ func Transform(
 	}
 	// handle input source encoding
 	if in != nil {
-		conv.Input.Encoding = in
+		c.Input.Encoding = in
 	}
-	b2 := b
+	p := b
 	// handle any output re-encoding BEFORE converting to Unicode
 	if out != nil {
-		b2, err = out.NewDecoder().Bytes(b)
+		p, err = out.NewDecoder().Bytes(b)
 		if err != nil {
 			return nil, err
 		}
-		fmt.Fprintf(os.Stdout, "%s\n", b2)
+		fmt.Fprintf(os.Stdout, "%s\n", p)
 	}
 	// convert the bytes into runes
-	if flag.EndOfFile(conv.Flags) {
-		return conv.Text(b2...)
+	if flag.EndOfFile(c.Flags) {
+		return c.Text(p...)
 	}
-	return conv.Dump(b2...)
+	return c.Dump(p...)
 }

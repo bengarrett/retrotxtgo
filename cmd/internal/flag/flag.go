@@ -16,8 +16,6 @@ import (
 	"golang.org/x/text/encoding/unicode"
 )
 
-const EncodingDefault = "CP437"
-
 var ErrFilenames = errors.New("ignoring [filenames]")
 
 // Args initializes the command arguments and flags.
@@ -36,19 +34,18 @@ func Args(cmd *cobra.Command, args ...string) ([]string, *convert.Convert, sampl
 	if s := cmd.Flags().Lookup("swap-chars"); s != nil && !s.Changed {
 		conv.Flags.SwapChars = []string{"null", "bar"}
 	}
-	if ok, err := fsys.IsPipe(); err != nil {
+	ok, err := fsys.IsPipe()
+	if err != nil {
 		logs.Fatal(err)
-	} else if ok {
-		var err error
-		if l > 0 {
-			err = fmt.Errorf("%w;%w for piped text", err, ErrFilenames)
-			args = []string{""}
+	}
+	if !ok {
+		if err := Help(cmd, args...); err != nil {
+			logs.Fatal(err)
 		}
-		if err != nil {
-			fmt.Fprintln(os.Stderr, logs.Sprint(err))
-		}
-	} else if err := Help(cmd, args...); err != nil {
-		logs.Fatal(err)
+	} else if l > 0 {
+		err := fmt.Errorf("%w;%w for piped text", err, ErrFilenames)
+		fmt.Fprintln(os.Stderr, logs.Sprint(err))
+		args = []string{""}
 	}
 	if l == 0 {
 		args = []string{""}
@@ -91,23 +88,23 @@ func EncodeAndHide(cmd *cobra.Command, dfault string) (sample.Flags, error) {
 		return convert.Encoder(lookup)
 	}
 	var (
-		frm encoding.Encoding
-		to  encoding.Encoding
+		in  encoding.Encoding
+		out encoding.Encoding
 	)
 	if cmd == nil {
 		return sample.Flags{}, nil
 	}
 	// handle encode flag or apply the default
-	frm, err := parse("encode")
+	in, err := parse("encode")
 	if err != nil {
 		return sample.Flags{}, err
 	}
 	// handle the hidden reencode (--to) flag
-	to, err = parse("to")
+	out, err = parse("to")
 	if err != nil {
 		return sample.Flags{}, err
 	}
-	return sample.Flags{Input: frm, Output: to}, err
+	return sample.Flags{Input: in, Output: out}, err
 }
 
 // EndOfFile returns true if the end-of-file control flag was requested.
