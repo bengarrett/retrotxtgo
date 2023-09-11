@@ -19,7 +19,7 @@ var (
 )
 
 const (
-	httpTimeout = time.Second * 3
+	timeout = time.Second * 3
 	// ReleaseAPI GitHub API v3 releases endpoint.
 	// See: https://developer.github.com/v3/repos/releases/
 	ReleaseAPI = "https://api.github.com/repos/bengarrett/retrotxtgo/releases/latest"
@@ -59,10 +59,10 @@ func Endpoint(url, etag string) (bool, API, error) {
 // If an etag is provided a "If-None-Match" header request will be included.
 func Get(url, etag string) (*http.Response, []byte, error) {
 	client := &http.Client{
-		Timeout: httpTimeout,
+		Timeout: timeout,
 	}
 	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, httpTimeout)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	defer cancel()
 	if err != nil {
@@ -88,10 +88,10 @@ func Get(url, etag string) (*http.Response, []byte, error) {
 func Ping(url string) (bool, error) {
 	ok := false
 	client := &http.Client{
-		Timeout: httpTimeout,
+		Timeout: timeout,
 	}
 	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, httpTimeout)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	req, err := http.NewRequestWithContext(ctx, http.MethodHead, url, nil)
 	defer cancel()
 	if err != nil {

@@ -54,7 +54,7 @@ func TestTable(t *testing.T) {
 		wantErr  bool
 	}{
 		{"", "", true},
-		{"ansi", "", true},
+		{"aix", "", true},
 		{"ascii", "ANSI X3.4 1967/77/86 - Extended ASCII", false},
 		{"CP437", "IBM Code Page 437 (DOS, OEM-US) - Extended ASCII", false},
 		{"utf8", "UTF-8 - Unicode", false},
