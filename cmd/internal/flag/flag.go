@@ -130,7 +130,7 @@ func OpenSample(arg string, c *convert.Convert, f sample.Flags) ([]byte, error) 
 	if ok := sample.Valid(arg); !ok {
 		return nil, nil
 	}
-	p, err := f.Open(arg, c)
+	p, err := f.Open(c, arg)
 	if err != nil {
 		return nil, err
 	}

@@ -138,7 +138,7 @@ func Transform(e encoding.Encoding, b ...byte) ([]byte, error) {
 }
 
 // Open and convert the named sample textfile.
-func (flag Flags) Open(name string, conv *convert.Convert) (File, error) {
+func (flag Flags) Open(conv *convert.Convert, name string) (File, error) {
 	var f File
 	name = strings.ToLower(name)
 	if _, err := os.Stat(name); !os.IsNotExist(err) {
@@ -161,44 +161,38 @@ func (flag Flags) Open(name string, conv *convert.Convert) (File, error) {
 		conv.Input.Encoding = f.Encoding
 	}
 	// override --control flag values for codepage table samples
-	ignCtrlCodes := false
+	ignoreCtrls := false
 	switch name {
 	case "437", "437.cr", "437.lf":
-		ignCtrlCodes = true
+		ignoreCtrls = true
 	default:
 	}
-	f, err = samp.transform(&f, conv, ignCtrlCodes, b)
+	if ignoreCtrls {
+		conv.Flags.Controls = []string{}
+	}
+	r, err := samp.transform(&f, conv, b...)
+	if err != nil {
+		return File{}, err
+	}
+	f.Runes = r
 	return f, err
 }
 
 // Transform converts the raw byte data of the textfile into UTF8 runes.
 // Set the cc bool to true to ignore the --controls flag.
-func (samp *Sample) transform(f *File, conv *convert.Convert, cc bool, b []byte) (File, error) {
-	var err error
-	if cc {
-		conv.Flags.Controls = []string{}
-	}
+func (samp *Sample) transform(f *File, conv *convert.Convert, b ...byte) ([]rune, error) {
 	switch samp.Convert {
 	case Ansi:
-		if f.Runes, err = conv.ANSI(b...); err != nil {
-			return File{}, err
-		}
+		return conv.ANSI(b...)
 	case Ctrl:
-		if f.Runes, err = conv.Chars(b...); err != nil {
-			return File{}, err
-		}
+		return conv.Chars(b...)
 	case Dump:
-		if f.Runes, err = conv.Dump(b...); err != nil {
-			return File{}, err
-		}
+		return conv.Dump(b...)
 	case Text:
-		if f.Runes, err = conv.Text(b...); err != nil {
-			return File{}, err
-		}
+		return conv.Text(b...)
 	default:
-		return File{}, fmt.Errorf("transform sample %q: %w", samp.Convert, ErrConvert)
+		return nil, fmt.Errorf("transform sample %q: %w", samp.Convert, ErrConvert)
 	}
-	return *f, nil
 }
 
 // Valid conforms the named sample textfile exists.
