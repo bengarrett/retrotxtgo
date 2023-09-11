@@ -40,7 +40,7 @@ func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 		return nil, err
 	}
 	h := fmt.Sprintf("%s", cp)
-	if XUserDefined_ISO_11(name) {
+	if XUserDefinedISO11(name) {
 		h = "ISO 8859-11"
 	}
 	h += CharmapAlias(cp) + charmapStandard(cp)
@@ -133,8 +133,8 @@ func Footnote(w io.Writer, name string) {
 	}
 }
 
-// XUserDefined_ISO_11 returns true if s matches an ISO-8859-11 name or alias.
-func XUserDefined_ISO_11(s string) bool {
+// XUserDefinedISO11 returns true if s matches an ISO-8859-11 name or alias.
+func XUserDefinedISO11(s string) bool {
 	switch strings.ToUpper(s) {
 	case
 		"ISO 8859-11",
@@ -152,16 +152,16 @@ func CodePager(s string) (encoding.Encoding, error) { //nolint:ireturn
 	if s == "" {
 		return nil, ErrNoName
 	}
-	if XUserDefined_ISO_11(s) {
+	if XUserDefinedISO11(s) {
 		return charmap.Windows874, nil
 	}
 	switch strings.ToLower(s) {
 	case asa.Text63, asa.Numr63:
-		return asa.XUserDefined_1963, nil
+		return asa.XUserDefined1963, nil
 	case asa.Text65, asa.Numr65:
-		return asa.XUserDefined_1965, nil
+		return asa.XUserDefined1965, nil
 	case asa.Text67, asa.Numr67, asa.Alias67:
-		return asa.XUserDefined_1967, nil
+		return asa.XUserDefined1967, nil
 	default:
 		return CodePage(s)
 	}
@@ -202,22 +202,22 @@ func swapper(name string) encoding.Encoding { //nolint:ireturn
 }
 
 func reverter(name string) encoding.Encoding { //nolint:ireturn
-	if XUserDefined_ISO_11(name) {
+	if XUserDefinedISO11(name) {
 		return charmap.XUserDefined
 	}
 	switch strings.ToLower(name) {
 	case asa.Text63, asa.Numr63:
-		return asa.XUserDefined_1963
+		return asa.XUserDefined1963
 	case asa.Text65, asa.Numr65:
-		return asa.XUserDefined_1965
+		return asa.XUserDefined1965
 	case asa.Text67, asa.Numr67, asa.Alias67:
-		return asa.XUserDefined_1967
+		return asa.XUserDefined1967
 	}
 	return nil
 }
 
-// Char_ISO_11 returns a string for the ISO-8859-11 character codes.
-func Char_ISO_11(cp encoding.Encoding, code int) rune {
+// CharISO11 returns a string for the ISO-8859-11 character codes.
+func CharISO11(cp encoding.Encoding, code int) rune {
 	// ISO-8859-11 is not included in Go so a user defined charmap is used.
 	Iso8859_11 := charmap.XUserDefined
 	if cp != Iso8859_11 {
@@ -261,18 +261,21 @@ func Replacement(name string, code int) string {
 		charmap.CodePage858,
 		charmap.CodePage865,
 		charmap.CodePage437:
-		if code == 152 {
+		const shy = 152
+		if code == shy {
 			return "\u00FF"
 		}
 	}
 	if SHY240(x) {
-		if code == 240 {
+		const shy = 240
+		if code == shy {
 			return "-"
 		}
 		return ""
 	}
 	if SHY173(name) {
-		if code == 173 {
+		const shy = 173
+		if code == shy {
 			return "-"
 		}
 	}
@@ -287,7 +290,7 @@ func Character(cp encoding.Encoding, code int, r rune) string {
 		}
 		return string(r)
 	}
-	if r := Char_ISO_11(cp, code); r > -1 {
+	if r := CharISO11(cp, code); r > -1 {
 		return string(r)
 	}
 	// non-spacing mark characters

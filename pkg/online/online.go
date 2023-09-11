@@ -61,8 +61,7 @@ func Get(url, etag string) (*http.Response, []byte, error) {
 	client := &http.Client{
 		Timeout: timeout,
 	}
-	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	defer cancel()
 	if err != nil {
@@ -90,8 +89,7 @@ func Ping(url string) (bool, error) {
 	client := &http.Client{
 		Timeout: timeout,
 	}
-	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	req, err := http.NewRequestWithContext(ctx, http.MethodHead, url, nil)
 	defer cancel()
 	if err != nil {

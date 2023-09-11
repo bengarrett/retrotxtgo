@@ -27,14 +27,14 @@ type Encoding struct {
 }
 
 var (
-	// XUserDefined_1963 ASA X3.4 1963.
-	XUserDefined_1963 encoding.Encoding = &x34_1963 //nolint: gochecknoglobals
+	// XUserDefined1963 ASA X3.4 1963.
+	XUserDefined1963 encoding.Encoding = &x34_1963 //nolint: gochecknoglobals
 
-	// XUserDefined_1965 ASA X3.4 1965.
-	XUserDefined_1965 encoding.Encoding = &x34_1965 //nolint: gochecknoglobals
+	// XUserDefined1965 ASA X3.4 1965.
+	XUserDefined1965 encoding.Encoding = &x34_1965 //nolint: gochecknoglobals
 
-	// XUserDefined_1967 ANSI X3.4 1967/77/86.
-	XUserDefined_1967 encoding.Encoding = &x34_1967 //nolint: gochecknoglobals
+	// XUserDefined1967 ANSI X3.4 1967/77/86.
+	XUserDefined1967 encoding.Encoding = &x34_1967 //nolint: gochecknoglobals
 
 	x34_1963 = Encoding{ //nolint: gochecknoglobals
 		Encoding: charmap.Windows1252,
@@ -59,7 +59,7 @@ func (e Encoding) String() string {
 // The more common 8-bit encodings are limited to 255 characters.
 func Code7bit(e encoding.Encoding) bool {
 	switch e {
-	case XUserDefined_1963, XUserDefined_1965, XUserDefined_1967:
+	case XUserDefined1963, XUserDefined1965, XUserDefined1967:
 		return true
 	}
 	return false
@@ -68,11 +68,11 @@ func Code7bit(e encoding.Encoding) bool {
 // Name returns a named value for the legacy ASA ASCII character encodings.
 func Name(e encoding.Encoding) string {
 	switch e {
-	case XUserDefined_1963:
+	case XUserDefined1963:
 		return Text63
-	case XUserDefined_1965:
+	case XUserDefined1965:
 		return Text65
-	case XUserDefined_1967:
+	case XUserDefined1967:
 		return Text67
 	}
 	return ""
@@ -81,11 +81,11 @@ func Name(e encoding.Encoding) string {
 // Numeric returns a numeric value for the legacy ASA ASCII character encodings.
 func Numeric(e encoding.Encoding) string {
 	switch e {
-	case XUserDefined_1963:
+	case XUserDefined1963:
 		return Numr63
-	case XUserDefined_1965:
+	case XUserDefined1965:
 		return Numr65
-	case XUserDefined_1967:
+	case XUserDefined1967:
 		return Numr67
 	}
 	return ""
@@ -93,8 +93,7 @@ func Numeric(e encoding.Encoding) string {
 
 // Alias returns an alias value for the legacy ASA ASCII character encodings.
 func Alias(e encoding.Encoding) string {
-	switch e {
-	case XUserDefined_1967:
+	if e == XUserDefined1967 {
 		return Alias67
 	}
 	return ""
@@ -106,11 +105,11 @@ func Footnote(w io.Writer, e encoding.Encoding) {
 		w = io.Discard
 	}
 	switch e {
-	case XUserDefined_1963:
+	case XUserDefined1963:
 		fmt.Fprintln(w)
 		fmt.Fprintln(w, "* ASA X3.4 1963 has a number of historic control codes in"+
 			"\n  rows 0 and 1 that are not printable in Unicode.")
-	case XUserDefined_1965:
+	case XUserDefined1965:
 		fmt.Fprintln(w)
 		fmt.Fprintln(w, "* ASA X3.4 1965 cell 1-A is SUB, but it is not printable in Unicode.")
 	}
@@ -121,11 +120,11 @@ func Footnote(w io.Writer, e encoding.Encoding) {
 // If the code matches an existing Windows-1252 character, then -1 is returned.
 func Char(e encoding.Encoding, code int) rune {
 	switch e {
-	case XUserDefined_1963:
+	case XUserDefined1963:
 		return CharX3463(code)
-	case XUserDefined_1965:
+	case XUserDefined1965:
 		return CharX3465(code)
-	case XUserDefined_1967:
+	case XUserDefined1967:
 		return CharX3467(code)
 	}
 	return -1

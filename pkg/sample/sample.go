@@ -170,7 +170,7 @@ func (flag Flags) Open(conv *convert.Convert, name string) (File, error) {
 	if ignoreCtrls {
 		conv.Flags.Controls = []string{}
 	}
-	r, err := samp.transform(&f, conv, b...)
+	r, err := samp.transform(conv, b...)
 	if err != nil {
 		return File{}, err
 	}
@@ -180,7 +180,7 @@ func (flag Flags) Open(conv *convert.Convert, name string) (File, error) {
 
 // Transform converts the raw byte data of the textfile into UTF8 runes.
 // Set the cc bool to true to ignore the --controls flag.
-func (samp *Sample) transform(f *File, conv *convert.Convert, b ...byte) ([]rune, error) {
+func (samp *Sample) transform(conv *convert.Convert, b ...byte) ([]rune, error) {
 	switch samp.Convert {
 	case Ansi:
 		return conv.ANSI(b...)

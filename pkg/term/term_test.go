@@ -52,7 +52,7 @@ func ExampleBool() {
 }
 
 func ExampleOptions() {
-	term.Options(os.Stdout, "this is an example of a list of options",
+	_, _ = term.Options(os.Stdout, "this is an example of a list of options",
 		false, false, "option3", "option2", "option1")
 	// Output:this is an example of a list of options.
 	//   Options: option1, option2, option3
