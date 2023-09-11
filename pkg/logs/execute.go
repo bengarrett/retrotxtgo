@@ -31,15 +31,7 @@ func FatalSubCmd(usage string, args ...string) {
 	}
 	if s := Execute(err, false, args...); s != "" {
 		fmt.Fprintln(os.Stderr, s)
-		os.Exit(OSErrCode)
-	}
-}
-
-// FatalExecute is the error handler for the root command flags and arguments.
-func FatalExecute(err error, args ...string) {
-	if s := Execute(err, false, args...); s != "" {
-		fmt.Fprintln(os.Stderr, s)
-		os.Exit(OSErrCode)
+		os.Exit(OSErr)
 	}
 }
 

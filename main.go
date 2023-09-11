@@ -17,6 +17,9 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/bengarrett/retrotxtgo/cmd"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
@@ -37,6 +40,9 @@ func main() {
 	meta.App.Date = date
 	meta.App.BuiltBy = builtBy
 	if err := cmd.Execute(); err != nil {
-		logs.FatalExecute(err)
+		if s := logs.Execute(err, false); s != "" {
+			fmt.Fprintln(os.Stderr, s)
+			os.Exit(logs.OSErr)
+		}
 	}
 }

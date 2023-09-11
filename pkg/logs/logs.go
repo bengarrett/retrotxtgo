@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	Panic     = false
-	OSErrCode = 1
+	Panic = false
+	OSErr = 1 // OSErr is the operating system exit code for a program error.
 )
 
 // Fatal saves the error to the logfile and exits.
@@ -28,7 +28,7 @@ func Fatal(err error) {
 		log.Panic(err)
 	default:
 		fmt.Fprintln(os.Stderr, Sprint(err))
-		os.Exit(OSErrCode)
+		os.Exit(OSErr)
 	}
 }
 
@@ -36,20 +36,20 @@ func Fatal(err error) {
 // TODO: not in use.
 func FatalFlag(err error, cmd, flag string) {
 	fmt.Fprintln(os.Stderr, SprintFlag(err, cmd, flag))
-	os.Exit(OSErrCode)
+	os.Exit(OSErr)
 }
 
 // FatalS formats the errors, highlights the string and exits.
 func FatalS(err, wrap error, s string) {
 	fmt.Fprintln(os.Stderr, SprintS(err, wrap, s))
-	os.Exit(OSErrCode)
+	os.Exit(OSErr)
 }
 
 // FatalWrap formats the errors and exits.
 // TODO: not in use.
 func FatalWrap(err, wrap error) {
 	fmt.Fprintln(os.Stderr, SprintWrap(err, wrap))
-	os.Exit(OSErrCode)
+	os.Exit(OSErr)
 }
 
 // Hint returns a formatted error with a usage suggestion or hint.
