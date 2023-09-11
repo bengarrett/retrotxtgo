@@ -60,13 +60,19 @@ func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf(" %X  ", i))
 		}
 	}
-	c, conv, row := byter.MakeBytes(), converter(name, cp), 0
-	runes, err := conv.Chars(c...)
+	if x := swapper(name); x != nil {
+		cp = x
+	}
+	c := convert.Convert{}
+	c.Input.Encoding = cp
+	p := byter.MakeBytes()
+	runes, err := c.Chars(p...)
 	if err != nil {
 		return nil, fmt.Errorf("table convert bytes error: %w", err)
 	}
-	cp = revert(name)
+	cp = reverter(name)
 	const hex = 16
+	row := 0
 	for i, r := range runes {
 		char := Character(cp, i, r)
 		switch {
@@ -151,21 +157,19 @@ func CodePage(s string) (encoding.Encoding, error) { //nolint:ireturn
 	return cp, nil
 }
 
-func converter(name string, cp encoding.Encoding) convert.Convert {
-	conv := convert.Convert{}
+func swapper(name string) encoding.Encoding { //nolint:ireturn
 	switch strings.ToLower(name) {
 	case asa.Text63:
-		cp = asa.StdX34_1963
+		return charmap.Windows1252
 	case asa.Text65:
-		cp = asa.StdX34_1965
+		return charmap.Windows1252
 	case asa.Text67:
-		cp = asa.StdX34_1967
+		return charmap.Windows1252
 	}
-	conv.Input.Encoding = cp
-	return conv
+	return nil
 }
 
-func revert(name string) encoding.Encoding { //nolint:ireturn
+func reverter(name string) encoding.Encoding { //nolint:ireturn
 	if ISO11(name) {
 		return charmap.XUserDefined
 	}
