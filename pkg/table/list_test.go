@@ -11,11 +11,11 @@ import (
 	"golang.org/x/text/encoding/unicode/utf32"
 )
 
-func TestEncodings(t *testing.T) {
-	const totalEncodings = 53
-	got, want := len(table.Encodings()), totalEncodings
+func TestCharmaps(t *testing.T) {
+	const totalCharmaps = 53
+	got, want := len(table.Charmaps()), totalCharmaps
 	if got != want {
-		t.Errorf("Encodings() count = %v, want %v", got, want)
+		t.Errorf("Charmaps() count = %v, want %v", got, want)
 	}
 }
 
@@ -97,12 +97,12 @@ func TestAliasFmt(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := table.AliasFmt(tt.args.s, tt.args.val, tt.args.e)
+			got, err := table.Alias(tt.args.e, tt.args.s, tt.args.val)
 			if got != tt.want {
-				t.Errorf("AliasFmt() = %v, want %v", got, tt.want)
+				t.Errorf("Alias() = %v, want %v", got, tt.want)
 			}
 			if (err != nil) != tt.WantErr {
-				t.Errorf("AliasFmt() error = %v, want %v", err, tt.WantErr)
+				t.Errorf("Alias() error = %v, want %v", err, tt.WantErr)
 			}
 		})
 	}

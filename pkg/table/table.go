@@ -40,7 +40,7 @@ func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 		return nil, err
 	}
 	h := fmt.Sprintf("%s", cp)
-	if ISO11(name) {
+	if XUserDefined_ISO_11(name) {
 		h = "ISO 8859-11"
 	}
 	h += CharmapAlias(cp) + charmapStandard(cp)
@@ -133,8 +133,8 @@ func Footnote(w io.Writer, name string) {
 	}
 }
 
-// ISO11 returns true if s matches an ISO-8859-11 name or alias.
-func ISO11(s string) bool {
+// XUserDefined_ISO_11 returns true if s matches an ISO-8859-11 name or alias.
+func XUserDefined_ISO_11(s string) bool {
 	switch strings.ToUpper(s) {
 	case
 		"ISO 8859-11",
@@ -152,7 +152,7 @@ func CodePager(s string) (encoding.Encoding, error) { //nolint:ireturn
 	if s == "" {
 		return nil, ErrNoName
 	}
-	if ISO11(s) {
+	if XUserDefined_ISO_11(s) {
 		return charmap.Windows874, nil
 	}
 	switch strings.ToLower(s) {
@@ -202,7 +202,7 @@ func swapper(name string) encoding.Encoding { //nolint:ireturn
 }
 
 func reverter(name string) encoding.Encoding { //nolint:ireturn
-	if ISO11(name) {
+	if XUserDefined_ISO_11(name) {
 		return charmap.XUserDefined
 	}
 	switch strings.ToLower(name) {
@@ -216,8 +216,8 @@ func reverter(name string) encoding.Encoding { //nolint:ireturn
 	return nil
 }
 
-// CharISO11 returns a string for the ISO-8859-11 character codes.
-func CharISO11(cp encoding.Encoding, code int) rune {
+// Char_ISO_11 returns a string for the ISO-8859-11 character codes.
+func Char_ISO_11(cp encoding.Encoding, code int) rune {
 	// ISO-8859-11 is not included in Go so a user defined charmap is used.
 	Iso8859_11 := charmap.XUserDefined
 	if cp != Iso8859_11 {
@@ -287,7 +287,7 @@ func Character(cp encoding.Encoding, code int, r rune) string {
 		}
 		return string(r)
 	}
-	if r := CharISO11(cp, code); r > -1 {
+	if r := Char_ISO_11(cp, code); r > -1 {
 		return string(r)
 	}
 	// non-spacing mark characters

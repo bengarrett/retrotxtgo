@@ -98,8 +98,8 @@ func Tables() (string, error) {
 	// use strings builder to reduce memory usage
 	// https://yourbasic.org/golang/build-append-concatenate-strings-efficiently/
 	b := strings.Builder{}
-	tables := make([]encoding.Encoding, 0, len(table.Encodings()))
-	encodings := table.Encodings()
+	tables := make([]encoding.Encoding, 0, len(table.Charmaps()))
+	encodings := table.Charmaps()
 	// reorder tables to position X-User-Defined after ISO-8859-10
 	for _, e := range encodings {
 		switch e {

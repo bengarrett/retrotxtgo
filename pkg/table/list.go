@@ -32,8 +32,8 @@ type Row struct {
 	Alias   string // Alias is an optional, informal but common use value of the character encoding.
 }
 
-// Encodings returns all the supported legacy text encodings.
-func Encodings() []encoding.Encoding {
+// Charmaps returns all the supported legacy text encodings.
+func Charmaps() []encoding.Encoding {
 	e := []encoding.Encoding{}
 	// create a collection of all the encodings
 	a := charmap.All
@@ -66,7 +66,7 @@ func List() (*bytes.Buffer, error) { //nolint:funlen
 		return nil, err
 	}
 	fmt.Fprintf(w, "\n%s\n", header)
-	x := Encodings()
+	x := Charmaps()
 	x = append(x, asa.XUserDefined_1963, asa.XUserDefined_1965, asa.XUserDefined_1967)
 	for _, e := range x {
 		if e == charmap.XUserDefined {
@@ -154,26 +154,23 @@ func Rows(e encoding.Encoding) (Row, error) {
 		r.Alias = asa.Alias(e)
 		return r, nil
 	}
-
 	var err error
-	if r.Value, err = htmlindex.Name(e); err == nil {
-		r.Alias, err = ianaindex.MIME.Name(e)
+	if r.Value, err = htmlindex.Name(e); err != nil {
+		r.Value, err = ianaindex.MIME.Name(e)
 		if err != nil {
 			return Row{}, err
 		}
 	} else {
-		r.Value, err = ianaindex.MIME.Name(e)
+		r.Alias, err = ianaindex.MIME.Name(e)
 		if err != nil {
 			return Row{}, err
 		}
 	}
 	r.Value = strings.ToLower(Uniform(r.Value))
-
 	if i := Numeric(r.Name); i > -1 {
 		r.Numeric = fmt.Sprint(i)
 	}
-
-	r.Alias, err = AliasFmt(r.Alias, r.Value, e)
+	r.Alias, err = Alias(e, r.Alias, r.Value)
 	if err != nil {
 		return Row{}, err
 	}
@@ -198,8 +195,8 @@ func Numeric(name string) int {
 	return -1
 }
 
-// AliasFmt return character encoding aliases.
-func AliasFmt(alias, value string, e encoding.Encoding) (string, error) {
+// Alias return character encoding aliases.
+func Alias(e encoding.Encoding, alias, value string) (string, error) {
 	a := strings.ToLower(alias)
 	if a == value {
 		a = ""
@@ -217,8 +214,7 @@ func AliasFmt(alias, value string, e encoding.Encoding) (string, error) {
 	case "macintosh":
 		return "mac", nil
 	}
-	var err error
-	a, err = ianaindex.MIB.Name(e)
+	a, err := ianaindex.MIB.Name(e)
 	if err != nil {
 		return "", err
 	}
