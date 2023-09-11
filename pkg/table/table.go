@@ -200,7 +200,6 @@ func Character(cp encoding.Encoding, code int, r rune) string {
 		if x := asa.Char(cp, code); x > -1 {
 			return string(x)
 		}
-		fmt.Println(r, code)
 		return string(r)
 	}
 	if r := CharISO11(cp, code); r > -1 {

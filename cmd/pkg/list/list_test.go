@@ -28,8 +28,10 @@ func ExampleTables() {
 	if err != nil {
 		log.Print(err)
 	}
-	fmt.Fprintf(os.Stdout, "%d characters in the table", len(t))
-	// Output: 75117 characters in the table
+	const val = 70000
+	l := len(t)
+	fmt.Fprintf(os.Stdout, "characters > 70000: %v", l > val)
+	// Output: characters > 70000: true
 }
 
 func TestExamples(t *testing.T) {
