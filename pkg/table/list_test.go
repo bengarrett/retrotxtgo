@@ -25,52 +25,52 @@ func TestList(t *testing.T) {
 	}
 }
 
-func TestCells(t *testing.T) {
+func TestRows(t *testing.T) {
 	tests := []struct {
 		name    string
 		e       encoding.Encoding
-		cell    table.Cell
+		cell    table.Row
 		wantErr bool
 	}{
-		{"unknown", nil, table.Cell{"", "", "", ""}, true},
+		{"unknown", nil, table.Row{"", "", "", ""}, true},
 		{
 			"cp437", charmap.CodePage437,
-			table.Cell{"IBM Code Page 437", "cp437", "437", "msdos"},
+			table.Row{"IBM Code Page 437", "cp437", "437", "msdos"},
 			false,
 		},
 		{
 			"latin6", charmap.ISO8859_10,
-			table.Cell{"ISO 8859-10", "iso-8859-10", "10", "latin6"},
+			table.Row{"ISO 8859-10", "iso-8859-10", "10", "latin6"},
 			false,
 		},
 		{
 			"utf8", unicode.UTF8,
-			table.Cell{"UTF-8", "utf-8", "", "utf8"},
+			table.Row{"UTF-8", "utf-8", "", "utf8"},
 			false,
 		},
 		{
 			"utf32", utf32.UTF32(utf32.BigEndian, utf32.UseBOM),
-			table.Cell{"UTF-32BE (Use BOM)", "utf-32", "", "utf32"},
+			table.Row{"UTF-32BE (Use BOM)", "utf-32", "", "utf32"},
 			false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c, err := table.Cells(tt.e)
+			c, err := table.Rows(tt.e)
 			if got := (err != nil); got != tt.wantErr {
-				t.Errorf("Cells() error is %v, want %v", got, tt.wantErr)
+				t.Errorf("Rows() error is %v, want %v", got, tt.wantErr)
 			}
 			if c.Name != tt.cell.Name {
-				t.Errorf("Cells() gotN = %v, want %v", c.Name, tt.cell.Name)
+				t.Errorf("Rows() gotN = %v, want %v", c.Name, tt.cell.Name)
 			}
 			if c.Value != tt.cell.Value {
-				t.Errorf("Cells() gotV = %v, want %v", c.Value, tt.cell.Value)
+				t.Errorf("Rows() gotV = %v, want %v", c.Value, tt.cell.Value)
 			}
 			if c.Numeric != tt.cell.Numeric {
-				t.Errorf("Cells() gotV = %v, want %v", c.Numeric, tt.cell.Numeric)
+				t.Errorf("Rows() gotV = %v, want %v", c.Numeric, tt.cell.Numeric)
 			}
 			if c.Alias != tt.cell.Alias {
-				t.Errorf("Cells() gotA = %v, want %v", c.Alias, tt.cell.Alias)
+				t.Errorf("Rows() gotA = %v, want %v", c.Alias, tt.cell.Alias)
 
 				a, _ := ianaindex.MIB.Name(tt.e)
 				t.Error(a)

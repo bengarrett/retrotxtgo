@@ -20,16 +20,17 @@ import (
 	"golang.org/x/text/encoding/unicode/utf32"
 )
 
-type Cell struct {
-	Name    string
-	Value   string
-	Numeric string
-	Alias   string
-}
-
 var ErrNilEncoding = errors.New("character encoding cannot be a nil value")
 
 const latin = "isolatin"
+
+// Row is an item for the list of code pages.
+type Row struct {
+	Name    string // Name is the formal name of the character encoding.
+	Value   string // Value is the short name of the character encoding.
+	Numeric string // Numeric is an optional, shorter numeric value of the character encoding.
+	Alias   string // Alias is an optional, informal but common use value of the character encoding.
+}
 
 // Encodings returns all the supported legacy text encodings.
 func Encodings() []encoding.Encoding {
@@ -56,12 +57,14 @@ func Encodings() []encoding.Encoding {
 // List returns a tabled list of supported IANA character set encodings.
 func List() (*bytes.Buffer, error) { //nolint:funlen
 	const header, title = " Formal name\t Named value\t Numeric value\t Alias value\t",
-		" Supported legacy code pages and character encodings "
+		" Known legacy code pages and character encodings "
 	var buf bytes.Buffer
-	flags := tabwriter.Debug // tabwriter.AlignRight | tabwriter.Debug
-	const padding, tblWidth = 2, 73
-	w := tabwriter.NewWriter(&buf, 0, 0, padding, ' ', flags)
-	fmt.Fprint(w, term.Head(tblWidth, title))
+	const verticalBars = tabwriter.Debug
+	const padding, width = 2, 76
+	w := tabwriter.NewWriter(&buf, 0, 0, padding, ' ', verticalBars)
+	if _, err := term.Head(w, width, title); err != nil {
+		return nil, err
+	}
 	fmt.Fprintf(w, "\n%s\n", header)
 	enc := Encodings()
 	enc = append(enc, asa.StdX34_1963, asa.StdX34_1965, asa.StdX34_1967)
@@ -69,7 +72,7 @@ func List() (*bytes.Buffer, error) { //nolint:funlen
 		if e == charmap.XUserDefined {
 			continue
 		}
-		c, err := Cells(e)
+		c, err := Rows(e)
 		if err != nil {
 			return nil, err
 		}
@@ -136,43 +139,43 @@ func List() (*bytes.Buffer, error) { //nolint:funlen
 	return &buf, nil
 }
 
-// Cells return character encoding details for use in a text table.
-func Cells(e encoding.Encoding) (Cell, error) {
+// Rows return character encoding details for use in a text table.
+func Rows(e encoding.Encoding) (Row, error) {
 	if e == nil {
-		return Cell{}, ErrNilEncoding
+		return Row{}, ErrNilEncoding
 	}
-	c := Cell{
+	r := Row{
 		Name: fmt.Sprint(e),
 	}
 	switch e {
 	case asa.StdX34_1963, asa.StdX34_1965, asa.StdX34_1967:
-		c.Value = asa.Name(e)
-		return c, nil
+		r.Value = asa.Name(e)
+		return r, nil
 	}
 
 	var err error
-	if c.Value, err = htmlindex.Name(e); err == nil {
-		c.Alias, err = ianaindex.MIME.Name(e)
+	if r.Value, err = htmlindex.Name(e); err == nil {
+		r.Alias, err = ianaindex.MIME.Name(e)
 		if err != nil {
-			return Cell{}, err
+			return Row{}, err
 		}
 	} else {
-		c.Value, err = ianaindex.MIME.Name(e)
+		r.Value, err = ianaindex.MIME.Name(e)
 		if err != nil {
-			return Cell{}, err
+			return Row{}, err
 		}
 	}
-	c.Value = strings.ToLower(Uniform(c.Value))
+	r.Value = strings.ToLower(Uniform(r.Value))
 
-	if i := Numeric(c.Name); i > -1 {
-		c.Numeric = fmt.Sprint(i)
+	if i := Numeric(r.Name); i > -1 {
+		r.Numeric = fmt.Sprint(i)
 	}
 
-	c.Alias, err = AliasFmt(c.Alias, c.Value, e)
+	r.Alias, err = AliasFmt(r.Alias, r.Value, e)
 	if err != nil {
-		return Cell{}, err
+		return Row{}, err
 	}
-	return c, nil
+	return r, nil
 }
 
 // Numeric returns a numeric alias for a character encoding.
