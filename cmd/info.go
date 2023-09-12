@@ -27,12 +27,12 @@ func InfoCommand() *cobra.Command {
 }
 
 func InfoInit() *cobra.Command {
-	ic := InfoCommand()
+	infoc := InfoCommand()
 	infos := format.Format().Info
 	s := &strings.Builder{}
 	_, _ = term.Options(s, "print format or syntax", true, true, infos[:]...)
-	ic.Flags().StringVarP(&flag.Info.Format, "format", "f", "color", s.String())
-	return ic
+	infoc.Flags().StringVarP(&flag.Info.Format, "format", "f", "color", s.String())
+	return infoc
 }
 
 //nolint:gochecknoinits

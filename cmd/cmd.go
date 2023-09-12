@@ -21,17 +21,26 @@ var (
 )
 
 // Cmd represents the base command when called without any subcommands.
-var Cmd = &cobra.Command{ //nolint:gochecknoglobals
-	Use:   meta.Bin,
-	Short: fmt.Sprintf("Use %s to print plain, BBS era and ANSI textfiles", meta.Name),
-	Long: meta.Name + " takes legacy codepage and ANSI encoded textfiles and\n" +
-		"prints them to a modern Unicode terminal.",
-	Example: fmt.Sprint(example.Cmd),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		// Do nothing other than print the help.
-		// This func must remain otherwise root command flags are ignored by Cobra.
-		return flag.Help(cmd)
-	},
+var Cmd = base()
+
+func base() *cobra.Command {
+	s := fmt.Sprintf("Use %s to print plain, BBS era and ANSI textfiles", meta.Name)
+	l := meta.Name + " takes legacy codepage and ANSI encoded textfiles and\n" +
+		"prints them to a modern Unicode terminal."
+	expl := strings.Builder{}
+	example.Cmd.String(&expl)
+	return &cobra.Command{
+		Use:     meta.Bin,
+		Short:   s,
+		Long:    l,
+		Example: expl.String(),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// Do nothing other than print the help.
+			// This func must remain otherwise root
+			// command flags are ignored by Cobra.
+			return flag.Help(cmd)
+		},
+	}
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -59,11 +68,9 @@ func Execute() error {
 
 func Init() {
 	Cmd = Tester(Cmd)
-
 	Cmd.AddGroup(&cobra.Group{ID: "listCmds", Title: "Codepages:"})
 	Cmd.AddGroup(&cobra.Group{ID: "fileCmds", Title: "Files:"})
 	Cmd.AddGroup(&cobra.Group{ID: "exaCmds", Title: "Testers:"})
-
 	// create a version flag that only works on root.
 	Cmd.LocalNonPersistentFlags().BoolP("version", "v", false, "")
 	// hide the cobra introduced help command.
