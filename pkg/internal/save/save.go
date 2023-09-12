@@ -16,8 +16,7 @@ const (
 // Save bytes to the named file location.
 // The return values are the number of bytes written, the absolute path and filename, and any error.
 func Save(name string, b ...byte) (int, string, error) {
-	_, err := dir(name)
-	if err != nil {
+	if _, err := dir(name); err != nil {
 		return 0, "", fmt.Errorf("save could not open directory %q: %w", name, err)
 	}
 	path := name

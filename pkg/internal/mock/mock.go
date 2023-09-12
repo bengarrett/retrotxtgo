@@ -12,28 +12,14 @@ import (
 	"github.com/bengarrett/retrotxtgo/pkg/internal/tmp"
 )
 
-// MockInput uses the os pipe to mock the user input.
-// os.Pipe() https://stackoverflow.com/questions/46365221/fill-os-stdin-for-function-that-reads-from-it
-/*
-	Usage:
-	r, err := filesystem.MockInput(tt.args.input)
-	if err != nil {
-		t.Error(err)
-	}
-	stdin := os.Stdin
-	defer func() {
-		os.Stdin = stdin
-	}()
-	os.Stdin = r
-*/
+// Input returns a file pointer to a temporary file containing the input string.
 func Input(input string) (*os.File, error) {
 	s := []byte(input)
 	r, w, err := os.Pipe()
 	if err != nil {
 		return r, err
 	}
-	_, err = w.Write(s)
-	if err != nil {
+	if _, err = w.Write(s); err != nil {
 		return r, err
 	}
 	w.Close()

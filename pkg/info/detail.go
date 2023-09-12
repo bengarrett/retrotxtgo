@@ -1,8 +1,9 @@
-package detail
+package info
 
 import (
 	"archive/zip"
 	"bytes"
+
 	//nolint:gosec
 	"crypto/md5"
 	"crypto/sha256"
@@ -12,6 +13,7 @@ import (
 	"fmt"
 	"hash/crc32"
 	"hash/crc64"
+	"io"
 	"io/fs"
 	"os"
 	"strings"
@@ -34,7 +36,7 @@ import (
 
 var ErrFmt = errors.New("format is not known")
 
-// Detail of a file.
+// Detail is the exported type for the detail package.
 //
 //nolint:musttag
 type Detail struct {
@@ -70,13 +72,6 @@ type Content struct {
 	Media string `json:"media"    xml:"media"`
 	Sub   string `json:"subMedia" xml:"sub_media"`
 	Commt string `json:"comment"  xml:"comment"`
-}
-
-// LineBreaks for new line toggles.
-type LineBreaks struct {
-	Abbr     string  `json:"string"   xml:"string,attr"`
-	Escape   string  `json:"escape"   xml:"-"`
-	Decimals [2]rune `json:"decimals" xml:"decimal"`
 }
 
 // ModDates is the file last modified dates in multiple output formats.
@@ -116,18 +111,15 @@ const (
 )
 
 const (
-	ans        = "ANSI controls"
-	cmmt       = "comment"
-	txt        = "text"
-	zipComment = "zip comment"
-	lf         = 10
-	cr         = 13
-	nl         = 21
-	nel        = 133
-	uc8        = "UTF-8"
-)
-
-const (
+	lf          = 10
+	cr          = 13
+	nl          = 21
+	nel         = 133
+	uc8         = "UTF-8"
+	ans         = "ANSI controls"
+	cmmt        = "comment"
+	txt         = "text"
+	zipComment  = "zip comment"
 	octetStream = "application/octet-stream"
 	zipType     = "application/zip"
 )
@@ -144,57 +136,48 @@ func (d *Detail) Ctrls(name string) error {
 		return err
 	}
 	defer f.Close()
-	var cnt int
-	if cnt, err = fsys.Controls(f); err != nil {
+	cnt, err := fsys.Controls(f)
+	if err != nil {
 		return err
 	}
 	d.Count.Controls = cnt
 	return f.Close()
 }
 
-// LineTotals counts the totals lines in the named file.
-func (d *Detail) LineTotals(name string) error {
-	f, err := os.Open(name)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	var l int
-	if l, err = fsys.Lines(f, d.LineBreak.Decimals); err != nil {
-		return err
-	}
-	d.Lines = l
-	return f.Close()
-}
-
 // Marshal the Detail data to a text format syntax.
-func (d *Detail) Marshal(f Format) ([]byte, error) {
+func (d *Detail) Marshal(w io.Writer, f Format) error {
+	if w == nil {
+		w = io.Discard
+	}
 	var err error
 	var b []byte
 	switch f {
 	case ColorText:
-		return d.printMarshal(true)
+		return d.marshal(w, true)
 	case PlainText:
-		return d.printMarshal(false)
+		return d.marshal(w, false)
 	case JSON:
 		b, err = json.MarshalIndent(d, "", "    ")
 		if err != nil {
-			return nil, fmt.Errorf("detail json indent marshal: %w", err)
+			return fmt.Errorf("detail json indent marshal: %w", err)
 		}
 	case JSONMin:
 		b, err = json.Marshal(d)
 		if err != nil {
-			return nil, fmt.Errorf("detail json marshal: %w", err)
+			return fmt.Errorf("detail json marshal: %w", err)
 		}
 	case XML:
 		b, err = xml.MarshalIndent(d, "", "\t")
 		if err != nil {
-			return nil, fmt.Errorf("detail xml marshal: %w", err)
+			return fmt.Errorf("detail xml marshal: %w", err)
 		}
 	default:
-		return nil, fmt.Errorf("detail marshal %q: %w", f, ErrFmt)
+		return fmt.Errorf("detail marshal %q: %w", f, ErrFmt)
 	}
-	return b, nil
+	if _, err := w.Write(b); err != nil {
+		return fmt.Errorf("detail marshal write: %w", err)
+	}
+	return nil
 }
 
 // MimeUnknown detects non-Standard legacy data.
@@ -220,9 +203,9 @@ func (d *Detail) MimeUnknown() {
 }
 
 // Parse the file and the raw data content.
-func (d *Detail) Parse(name string, stat os.FileInfo, data ...byte) error {
+func (d *Detail) Parse(stat os.FileInfo, name string, data ...byte) error {
 	const routines = 8
-	var wg sync.WaitGroup
+	wg := sync.WaitGroup{}
 	wg.Add(routines)
 	go func() {
 		defer wg.Done()
@@ -262,7 +245,7 @@ func (d *Detail) Parse(name string, stat os.FileInfo, data ...byte) error {
 	go func() {
 		defer wg.Done()
 		d.UTF8 = utf8.Valid(data)
-		d.Unicode = unicode(&data, d.UTF8)
+		d.Unicode = unicode(d.UTF8, data...)
 	}()
 	wg.Wait()
 	return nil
@@ -280,7 +263,7 @@ func (d *Detail) mime(name string, data ...byte) {
 			d.Mime.Commt += fmt.Sprintf(" with %s BBS color codes", s)
 		}
 	}
-	if d.ValidText() {
+	if ValidText(d.Mime.Type) {
 		var err error
 		b := bytes.NewBuffer(data)
 		if d.Count.Chars, err = fsys.Runes(b); err != nil {
@@ -298,7 +281,7 @@ func (d *Detail) mime(name string, data ...byte) {
 	}
 }
 
-func unicode(b *[]byte, uni8 bool) string {
+func unicode(uni bool, b ...byte) string {
 	UTF8Bom := []byte{0xEF, 0xBB, 0xBF}
 	// little endianness, x86, ARM
 	UTF16LEBom := []byte{0xFF, 0xFE}
@@ -307,18 +290,18 @@ func unicode(b *[]byte, uni8 bool) string {
 	UTF16BEBom := []byte{0xFE, 0xFF}
 	UTF32BEBom := []byte{0x00, 0x00, 0xFE, 0xFF}
 	switch {
-	case bytes.HasPrefix(*b, UTF8Bom):
+	case bytes.HasPrefix(b, UTF8Bom):
 		return uc8
-	case bytes.HasPrefix(*b, UTF16LEBom):
+	case bytes.HasPrefix(b, UTF16LEBom):
 		return "UTF-16 LE"
-	case bytes.HasPrefix(*b, UTF16BEBom):
+	case bytes.HasPrefix(b, UTF16BEBom):
 		return "UTF-16 BE"
-	case bytes.HasPrefix(*b, UTF32LEBom):
+	case bytes.HasPrefix(b, UTF32LEBom):
 		return "UTF-32 LE"
-	case bytes.HasPrefix(*b, UTF32BEBom):
+	case bytes.HasPrefix(b, UTF32BEBom):
 		return "UTF-32 BE"
 	default:
-		if uni8 {
+		if uni {
 			return "UTF-8 compatible"
 		}
 		return "no"
@@ -348,113 +331,84 @@ func (d *Detail) input(data int, stat fs.FileInfo) {
 	d.Modified.Epoch = time.Now().Unix()
 }
 
-// printMarshal returns the marshaled detail data as plain or color text.
-func (d *Detail) printMarshal(color bool) ([]byte, error) {
+// marshal returns the marshaled detail data as plain or color text.
+func (d *Detail) marshal(w io.Writer, color bool) error {
 	const padding, width = 10, 80
 	info := func(s string) string {
 		return fmt.Sprintf("%s\t", s)
 	}
 	gookit.Enable = color
-	data := d.printMarshalData()
+	data := d.marshalled()
 	l := len(fmt.Sprintf(" filename%s%s", strings.Repeat(" ", padding), data[0].v))
 	const tabWidth = 8
-	b := &bytes.Buffer{}
-	w := tabwriter.NewWriter(b, 0, tabWidth, 0, '\t', 0)
-	if _, err := term.Head(w, width, "File information"); err != nil {
-		return nil, err
+	tw := tabwriter.NewWriter(w, 0, tabWidth, 0, '\t', 0)
+	if _, err := term.Head(tw, width, "File information"); err != nil {
+		return err
 	}
 	for _, x := range data {
-		if !d.marshalDataValid(x.k, x.v) {
+		if !d.validate(x) {
 			continue
 		}
 		if x.k == zipComment {
 			if x.v != "" {
-				term.HR(w, l)
-				fmt.Fprintln(w, x.v)
+				term.HR(tw, l)
+				fmt.Fprintln(tw, x.v)
 				if d.sauceIndex <= 0 {
 					break
 				}
 				// divider for sauce metadata
-				term.HR(w, l)
+				term.HR(tw, l)
 				continue
 			}
 			if d.sauceIndex <= 0 {
 				break
 			}
 			// divider for sauce metadata
-			term.HR(w, l)
+			term.HR(tw, l)
 			continue
 		}
-		fmt.Fprintf(w, "\t %s\t  %s\n", x.k, info(x.v))
+		fmt.Fprintf(tw, "\t %s\t  %s\n", x.k, info(x.v))
 		if x.k == cmmt {
 			if d.Sauce.Comnt.Count <= 0 {
 				break
 			}
 		}
 	}
-	if err := w.Flush(); err != nil {
-		return nil, err
-	}
-	return b.Bytes(), nil
+	return tw.Flush()
 }
 
-// marshalDataValid returns true if the key and value data validates.
-func (d *Detail) marshalDataValid(k, v string) bool {
-	if !d.ValidText() {
-		switch k {
+// validate returns true if the key and value data validates.
+func (d Detail) validate(x struct{ k, v string }) bool {
+	if !ValidText(d.Mime.Type) {
+		switch x.k {
 		case uc8, "line break", "characters", ans, "words", "lines", "width":
 			return false
 		}
-	} else if k == ans {
+	} else if x.k == ans {
 		if d.Count.Controls == 0 {
 			return false
 		}
 	}
-	if k == "description" && v == "" {
+	if x.k == "description" && x.v == "" {
 		return false
 	}
-	if k == d.Sauce.Info.Info1.Info && d.Sauce.Info.Info1.Value == 0 {
+	if x.k == d.Sauce.Info.Info1.Info && d.Sauce.Info.Info1.Value == 0 {
 		return false
 	}
-	if k == d.Sauce.Info.Info2.Info && d.Sauce.Info.Info2.Value == 0 {
+	if x.k == d.Sauce.Info.Info2.Info && d.Sauce.Info.Info2.Value == 0 {
 		return false
 	}
-	if k == d.Sauce.Info.Info3.Info && d.Sauce.Info.Info3.Value == 0 {
+	if x.k == d.Sauce.Info.Info3.Info && d.Sauce.Info.Info3.Value == 0 {
 		return false
 	}
-	if k == "interpretation" && v == "" {
+	if x.k == "interpretation" && x.v == "" {
 		return false
 	}
 	return true
 }
 
-// LineBreaks determines the new lines characters found in the rune pair.
-func (d *Detail) LineBreaks(r [2]rune) {
-	a, e := "", ""
-	switch r {
-	case [2]rune{lf}:
-		a = "lf"
-		e = "\n"
-	case [2]rune{cr}:
-		a = "cr"
-		e = "\r"
-	case [2]rune{cr, lf}:
-		a = "crlf"
-		e = "\r\n"
-	case [2]rune{lf, cr}:
-		a = "lfcr"
-		e = "\n\r"
-	case [2]rune{nl}, [2]rune{nel}:
-		a = "nl"
-		e = "\025"
-	}
-	d.LineBreak.Decimals = r
-	d.LineBreak.Abbr = strings.ToUpper(a)
-	d.LineBreak.Escape = e
-}
-
-// printMarshalData returns the data structure used for print marshaling.
-func (d *Detail) printMarshalData() []struct{ k, v string } {
+// marshalled returns the data structure used for print marshaling.
+func (d Detail) marshalled() []struct{ k, v string } {
 	const (
 		noBreakSpace     = "\u00A0"
 		symbolForNewline = "\u2424"
@@ -516,16 +470,16 @@ func (d *Detail) Read(name string) error {
 		return err
 	}
 	// Read file content
-	data, err := fsys.ReadAllBytes(name)
+	p, err := fsys.ReadAllBytes(name)
 	if err != nil {
 		return err
 	}
-	return d.Parse(name, stat, data...)
+	return d.Parse(stat, name, p...)
 }
 
 // ValidText returns true if the MIME content-type value is valid for text files.
-func (d *Detail) ValidText() bool {
-	s := strings.Split(d.Mime.Type, "/")
+func ValidText(mime string) bool {
+	s := strings.Split(mime, "/")
 	const req = 2
 	if len(s) != req {
 		return false
@@ -533,7 +487,7 @@ func (d *Detail) ValidText() bool {
 	if s[0] == txt {
 		return true
 	}
-	if d.Mime.Type == octetStream {
+	if mime == octetStream {
 		return true
 	}
 	return false
@@ -546,10 +500,11 @@ func (d *Detail) Len(name string) error {
 		return err
 	}
 	defer f.Close()
-	var w int
-	if w, err = fsys.Columns(f, d.LineBreak.Decimals); err != nil {
+	w, err := fsys.Columns(f, d.LineBreak.Decimals)
+	if err != nil {
 		return err
-	} else if w < 0 {
+	}
+	if w < 0 {
 		w = d.Count.Chars
 	}
 	d.Width = w
@@ -563,17 +518,15 @@ func (d *Detail) Words(name string) error {
 		return err
 	}
 	defer f.Close()
-	var w int
 	switch d.LineBreak.Decimals {
 	case [2]rune{nl}, [2]rune{nel}:
-		if w, err = fsys.WordsEBCDIC(f); err != nil {
+		if d.Count.Words, err = fsys.WordsEBCDIC(f); err != nil {
 			return err
 		}
 	default:
-		if w, err = fsys.Words(f); err != nil {
+		if d.Count.Words, err = fsys.Words(f); err != nil {
 			return err
 		}
 	}
-	d.Count.Words = w
 	return f.Close()
 }

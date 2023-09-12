@@ -57,14 +57,15 @@ func Run(cmd *cobra.Command, args []string) error {
 			defer os.Remove(filename)
 			arg = filename
 		}
-		s, err := n.Info(arg, flag.Info.Format)
+		// TODO: replace fmt.Fprintln with io.Writer
+		fmt.Fprintln(cmd.OutOrStdout())
+		err = n.Info(cmd.OutOrStdout(), arg, flag.Info.Format)
 		if err != nil {
 			if err := cmd.Usage(); err != nil {
 				return fmt.Errorf("%w: %w", ErrUsage, err)
 			}
 			return err
 		}
-		fmt.Fprintln(cmd.OutOrStdout(), s)
 	}
 	return nil
 }
@@ -99,10 +100,9 @@ func Pipe(cmd *cobra.Command) error {
 	if err != nil {
 		return fmt.Errorf("%w, %w", ErrPipeRead, err)
 	}
-	s, err := info.Stdin(flag.Info.Format, b...)
+	err = info.Stdin(cmd.OutOrStdout(), flag.Info.Format, b...)
 	if err != nil {
 		return fmt.Errorf("%w, %w", ErrPipeParse, err)
 	}
-	fmt.Fprint(cmd.OutOrStdout(), s)
 	return nil
 }

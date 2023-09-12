@@ -1,4 +1,6 @@
 // Package table creates a table of all the characters in the named 8-bit character set.
+//
+//nolint:ireturn
 package table
 
 import (
@@ -50,17 +52,7 @@ func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 	if _, err := term.Head(w, width, " "+h); err != nil {
 		return nil, err
 	}
-	const start, end, max = 0, 15, 255
-	for i := 0; i < 16; i++ {
-		switch i {
-		case start:
-			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf("     %X  ", i))
-		case end:
-			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf(" %X  \n", i))
-		default:
-			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf(" %X  ", i))
-		}
-	}
+	columns(w)
 	if x := swapper(name); x != nil {
 		cp = x
 	}
@@ -72,7 +64,7 @@ func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 		return nil, fmt.Errorf("table convert bytes error: %w", err)
 	}
 	enc := reverter(name)
-	const hex = 16
+	const hex, max = 16, 255
 	row := 0
 out:
 	for i, r := range runes {
@@ -116,6 +108,20 @@ out:
 	return b, nil
 }
 
+func columns(w io.Writer) {
+	const start, end = 0, 15
+	for i := 0; i < 16; i++ {
+		switch i {
+		case start:
+			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf("     %X  ", i))
+		case end:
+			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf(" %X  \n", i))
+		default:
+			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf(" %X  ", i))
+		}
+	}
+}
+
 // Footnote returns a footnote value for the legacy ASA ASCII character encodings.
 func Footnote(w io.Writer, name string) {
 	if w == nil {
@@ -148,7 +154,7 @@ func XUserDefinedISO11(s string) bool {
 }
 
 // CodePager returns the encoding of the code page name or alias.
-func CodePager(s string) (encoding.Encoding, error) { //nolint:ireturn
+func CodePager(s string) (encoding.Encoding, error) {
 	if s == "" {
 		return nil, ErrNoName
 	}
@@ -189,7 +195,7 @@ func CodePage(s string) (encoding.Encoding, error) { //nolint:ireturn
 
 // swapper returns the Windows1252 charmap for use as the base template
 // for the ASA ASCII encodings.
-func swapper(name string) encoding.Encoding { //nolint:ireturn
+func swapper(name string) encoding.Encoding {
 	switch strings.ToLower(name) {
 	case asa.Text63, asa.Numr63:
 		return charmap.Windows1252
@@ -201,7 +207,7 @@ func swapper(name string) encoding.Encoding { //nolint:ireturn
 	return nil
 }
 
-func reverter(name string) encoding.Encoding { //nolint:ireturn
+func reverter(name string) encoding.Encoding {
 	if XUserDefinedISO11(name) {
 		return charmap.XUserDefined
 	}

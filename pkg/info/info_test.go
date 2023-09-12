@@ -6,7 +6,6 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/info"
-	"github.com/bengarrett/retrotxtgo/pkg/info/internal/detail"
 	"github.com/bengarrett/retrotxtgo/pkg/internal/mock"
 	"github.com/bengarrett/retrotxtgo/static"
 )
@@ -19,7 +18,7 @@ func rawData() []byte {
 	return b
 }
 
-func sampleFile() string {
+func sampleFileB() string {
 	b := []byte(mock.T()["Tabs"]) // Tabs and Unicode glyphs
 	path, err := fsys.SaveTemp("info_test.txt", b...)
 	if err != nil {
@@ -29,27 +28,27 @@ func sampleFile() string {
 }
 
 func TestMarshal(t *testing.T) {
-	tmp := sampleFile()
+	tmp := sampleFileB()
 	type args struct {
 		filename string
-		format   detail.Format
+		format   info.Format
 	}
 	tests := []struct {
 		name    string
 		args    args
 		wantErr bool
 	}{
-		{"empty", args{"", detail.PlainText}, true},
-		{"file not exist", args{"notexistingfile", detail.JSON}, true},
-		{"color", args{tmp, detail.ColorText}, false},
-		{"json", args{tmp, detail.JSON}, false},
-		{"json.min", args{tmp, detail.JSONMin}, false},
-		{"text", args{tmp, detail.PlainText}, false},
-		{"xml", args{tmp, detail.XML}, false},
+		{"empty", args{"", info.PlainText}, true},
+		{"file not exist", args{"notexistingfile", info.JSON}, true},
+		{"color", args{tmp, info.ColorText}, false},
+		{"json", args{tmp, info.JSON}, false},
+		{"json.min", args{tmp, info.JSONMin}, false},
+		{"text", args{tmp, info.PlainText}, false},
+		{"xml", args{tmp, info.XML}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if _, err := info.Marshal(tt.args.filename, tt.args.format); (err != nil) != tt.wantErr {
+			if err := info.Marshal(nil, tt.args.filename, tt.args.format); (err != nil) != tt.wantErr {
 				t.Errorf("Marshal() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -77,7 +76,7 @@ func TestStdin(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := info.Stdin(tt.args.format, tt.args.b...)
+			err := info.Stdin(nil, tt.args.format, tt.args.b...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Stdin() error = %v, wantErr %v", err, tt.wantErr)
 			}

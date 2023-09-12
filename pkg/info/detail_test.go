@@ -1,6 +1,7 @@
-package detail_test
+package info_test
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -11,7 +12,7 @@ import (
 	"time"
 
 	"github.com/bengarrett/retrotxtgo/pkg/fsys"
-	"github.com/bengarrett/retrotxtgo/pkg/info/internal/detail"
+	"github.com/bengarrett/retrotxtgo/pkg/info"
 	"github.com/bengarrett/retrotxtgo/pkg/internal/mock"
 )
 
@@ -32,15 +33,16 @@ func sampleFile() string {
 }
 
 func ExampleMarshal() {
-	var file detail.Detail
+	var file info.Detail
 	tmp := sampleFile()
 	millennia(tmp)
 	if err := file.Read(tmp); err != nil {
 		log.Fatal(err)
 	}
-	data, _ := file.Marshal(detail.XML)
+	b := &strings.Builder{}
+	_ = file.Marshal(b, info.XML)
 	fsys.Clean(tmp)
-	s := strings.ReplaceAll(string(data), "\t", "")
+	s := strings.ReplaceAll(b.String(), "\t", "")
 	ln := strings.Split(s, "\n")
 	fmt.Fprintln(os.Stdout, ln[0])
 	// Output: <file unicode="UTF-8 compatible" id="info-test-txt">
@@ -58,11 +60,9 @@ func TestValidText(t *testing.T) {
 		{"text", "text/plain", true},
 		{"js", "text/javascript", true},
 	}
-	var d detail.Detail
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			d.Mime.Type = tt.contentType
-			if got := d.ValidText(); got != tt.want {
+			if got := info.ValidText(tt.contentType); got != tt.want {
 				t.Errorf("ValidText() = %v, want %v", got, tt.want)
 			}
 		})
@@ -72,7 +72,7 @@ func TestValidText(t *testing.T) {
 func TestRead(t *testing.T) {
 	tmp := sampleFile()
 	fmt.Fprintln(os.Stdout, "path:", tmp)
-	var got detail.Detail
+	var got info.Detail
 	if err := got.Read(tmp); err != nil {
 		t.Errorf("Read() = %v, want %v", err, nil)
 	}
@@ -121,8 +121,8 @@ func TestParse(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var got detail.Detail
-			err := got.Parse("", tt.args.stat, tt.args.data...)
+			var got info.Detail
+			err := got.Parse(tt.args.stat, "", tt.args.data...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Parse() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -138,17 +138,18 @@ func TestParse(t *testing.T) {
 func TestMarshal_json(t *testing.T) {
 	tests := []struct {
 		name   string
-		d      detail.Detail
-		format detail.Format
+		d      info.Detail
+		format info.Format
 		want   bool
 	}{
-		{"no indent", detail.Detail{}, detail.JSONMin, true},
-		{"indent", detail.Detail{}, detail.JSON, true},
+		{"no indent", info.Detail{}, info.JSONMin, true},
+		{"indent", info.Detail{}, info.JSON, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			j, _ := tt.d.Marshal(tt.format)
-			if got := json.Valid(j); !reflect.DeepEqual(got, tt.want) {
+			j := &bytes.Buffer{}
+			_ = tt.d.Marshal(j, tt.format)
+			if got := json.Valid(j.Bytes()); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Marshal() json = %v, want %v", got, tt.want)
 			}
 		})
@@ -157,14 +158,15 @@ func TestMarshal_json(t *testing.T) {
 
 func TestMarshal_text(t *testing.T) {
 	const want = 830
-	var d detail.Detail
+	var d info.Detail
 	tmp := sampleFile()
 	if err := d.Read(tmp); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	b, _ := d.Marshal(detail.PlainText)
-	if got := len(b); got != want {
+	s := &strings.Builder{}
+	_ = d.Marshal(s, info.PlainText)
+	if got := len(s.String()); got != want {
 		t.Errorf("Marshal() text = %v, want %v", got, want)
 	}
 	fsys.Clean(tmp)
