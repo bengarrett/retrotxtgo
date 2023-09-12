@@ -322,7 +322,7 @@ func Test_ListTables(t *testing.T) { //nolint:gocognit,funlen
 			// as all the tables are dumped together, there are too many duplicates
 		})
 	}
-	// test the list table command
+	// test the table command
 	for _, tt := range tests {
 		t.Run(tt.table, func(t *testing.T) {
 			args := []string{"table", tt.table}

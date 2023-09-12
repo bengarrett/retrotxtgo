@@ -7,7 +7,7 @@ There are [numerous download](https://github.com/bengarrett/retrotxtgo/releases/
 ### Windows 
 ### [Scoop](https://scoop.sh/)
 
-```ps
+```sh
 # NOT CURRENTLY WORKING
 scoop bucket add retrotxt https://github.com/bengarrett/retrotxtgo.git
 scoop install bengarrett/retrotxt
