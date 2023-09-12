@@ -76,6 +76,9 @@ func (z *Zip) Create() error {
 
 // Zip packages and compresses files to an archive using the provided name.
 func (files *Files) Zip(w io.Writer, name, comment string, ow bool) error {
+	if w == nil {
+		w = io.Discard
+	}
 	const (
 		overwrite    = os.O_RDWR | os.O_CREATE
 		mustNotExist = os.O_RDWR | os.O_CREATE | os.O_EXCL

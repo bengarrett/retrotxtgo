@@ -57,7 +57,6 @@ func Run(cmd *cobra.Command, args []string) error {
 			defer os.Remove(filename)
 			arg = filename
 		}
-		// TODO: replace fmt.Fprintln with io.Writer
 		fmt.Fprintln(cmd.OutOrStdout())
 		err = n.Info(cmd.OutOrStdout(), arg, flag.Info.Format)
 		if err != nil {

@@ -19,8 +19,7 @@ import (
 )
 
 var (
-	ErrRune     = errors.New("invalid encoded rune")
-	ErrNoWriter = errors.New("the w writer cannot be nil")
+	ErrRune = errors.New("invalid encoded rune")
 )
 
 // Terminal colors.
@@ -98,6 +97,9 @@ func GetEnv(key string) string {
 // Provide a fixed width value for the underline border or set to zero.
 // The header is colored with the fuzzy color.
 func Head(w io.Writer, width int, s string) (int, error) {
+	if w == nil {
+		w = io.Discard
+	}
 	r := color.OpFuzzy.Sprint(strings.Repeat(HBar, width))
 	h := color.Primary.Sprint(Center(width, s))
 	return fmt.Fprintf(w, "%s\n%s\n", r, h)
@@ -231,7 +233,7 @@ func Bool(b bool) string {
 // Options appends options: ... to the usage string.
 func Options(w io.Writer, s string, shorthand, flagHelp bool, opts ...string) (int, error) {
 	if w == nil {
-		return 0, fmt.Errorf("options: %w", ErrNoWriter)
+		w = io.Discard
 	}
 	if len(opts) == 0 {
 		return 0, nil

@@ -23,6 +23,9 @@ type Names struct {
 
 // Info parses the named file and prints out its details in a specific syntax.
 func (n Names) Info(w io.Writer, name, format string) error {
+	if w == nil {
+		w = io.Discard
+	}
 	failure := fmt.Sprintf("info on %s failed", name)
 	if name == "" {
 		return ErrName
@@ -84,6 +87,9 @@ func output(argument string) (Format, error) {
 
 // Marshal the metadata and system details of a named file.
 func Marshal(w io.Writer, name string, f Format) error {
+	if w == nil {
+		w = io.Discard
+	}
 	var d Detail
 	if err := d.Read(name); err != nil {
 		return err
@@ -127,6 +133,9 @@ func Marshal(w io.Writer, name string, f Format) error {
 
 // Stdin parses piped data and prints out the details in a specific syntax.
 func Stdin(w io.Writer, format string, b ...byte) error {
+	if w == nil {
+		w = io.Discard
+	}
 	var d Detail
 	f, e := output(format)
 	if e != nil {
@@ -182,6 +191,9 @@ func Stdin(w io.Writer, format string, b ...byte) error {
 
 // printnl appends a newline to JSON and XML text.
 func printnl(w io.Writer, f Format) {
+	if w == nil {
+		w = io.Discard
+	}
 	switch f {
 	case ColorText, PlainText:
 		return

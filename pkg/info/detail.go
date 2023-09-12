@@ -3,6 +3,7 @@ package info
 import (
 	"archive/zip"
 	"bytes"
+
 	//nolint:gosec
 	"crypto/md5"
 	"crypto/sha256"
@@ -332,6 +333,9 @@ func (d *Detail) input(data int, stat fs.FileInfo) {
 
 // marshal returns the marshaled detail data as plain or color text.
 func (d *Detail) marshal(w io.Writer, color bool) error {
+	if w == nil {
+		w = io.Discard
+	}
 	const padding, width = 10, 80
 	info := func(s string) string {
 		return fmt.Sprintf("%s\t", s)

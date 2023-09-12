@@ -109,6 +109,9 @@ out:
 }
 
 func columns(w io.Writer) {
+	if w == nil {
+		w = io.Discard
+	}
 	const start, end = 0, 15
 	for i := 0; i < 16; i++ {
 		switch i {
