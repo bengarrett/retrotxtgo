@@ -20,13 +20,19 @@ var (
 	ErrUsage = errors.New("command usage could not display")
 )
 
+const (
+	IDcodepage = "idcp"
+	IDfile     = "idfile"
+	IDsample   = "idsample"
+)
+
 // Cmd represents the base command when called without any subcommands.
 var Cmd = base()
 
 func base() *cobra.Command {
-	s := fmt.Sprintf("Use %s to print plain, BBS era and ANSI textfiles", meta.Name)
-	l := meta.Name + " takes legacy codepage and ANSI encoded textfiles and\n" +
-		"prints them to a modern Unicode terminal."
+	s := "Use " + meta.Name + " to print legacy text on modern terminals."
+	l := "Text files and art created without Unicode often fail to display on modern systems. " +
+		"\n" + s
 	expl := strings.Builder{}
 	example.Cmd.String(&expl)
 	return &cobra.Command{
@@ -68,9 +74,9 @@ func Execute() error {
 
 func Init() {
 	Cmd = Tester(Cmd)
-	Cmd.AddGroup(&cobra.Group{ID: "listCmds", Title: "Codepages:"})
-	Cmd.AddGroup(&cobra.Group{ID: "fileCmds", Title: "Files:"})
-	Cmd.AddGroup(&cobra.Group{ID: "exaCmds", Title: "Testers:"})
+	Cmd.AddGroup(&cobra.Group{ID: IDcodepage, Title: "Codepage:"})
+	Cmd.AddGroup(&cobra.Group{ID: IDfile, Title: "File:"})
+	Cmd.AddGroup(&cobra.Group{ID: IDsample, Title: "Sample:"})
 	// create a version flag that only works on root.
 	Cmd.LocalNonPersistentFlags().BoolP("version", "v", false, "")
 	// hide the cobra introduced help command.

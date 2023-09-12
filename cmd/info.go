@@ -13,13 +13,17 @@ import (
 )
 
 func InfoCommand() *cobra.Command {
+	s := "Information on a text file"
+	l := "Discover details and information about any text or text art file."
+	expl := strings.Builder{}
+	example.Info.String(&expl)
 	return &cobra.Command{
 		Use:     fmt.Sprintf("info %s", example.Filenames),
 		Aliases: []string{"i"},
-		GroupID: "fileCmds",
-		Short:   "Information on a text file",
-		Long:    "Discover details and information about any text or text art file.",
-		Example: fmt.Sprint(example.Info),
+		GroupID: IDfile,
+		Short:   s,
+		Long:    l,
+		Example: expl.String(),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return info.Run(cmd.OutOrStdout(), cmd, args...)
 		},

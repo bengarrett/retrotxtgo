@@ -47,17 +47,26 @@ func (e Example) String(w io.Writer) {
 	// the last hash #, which is treated as a comment
 	const cmmt, sentence = "#", 2
 	scanner := bufio.NewScanner(b)
+	cnt := 0
+	rows := len(strings.Split(b.String(), "\n"))
 	for scanner.Scan() {
+		cnt++
 		s := strings.Split(scanner.Text(), cmmt)
 		l := len(s)
 		if l < sentence {
-			fmt.Fprintln(w, term.Info(scanner.Text()))
+			fmt.Fprint(w, term.Info(scanner.Text()))
+			if cnt < rows {
+				fmt.Fprintln(w)
+			}
 			continue
 		}
 		// do not the last hash as a comment
 		ex := strings.Join(s[:l-1], cmmt)
 		fmt.Fprint(w, term.Info(ex))
-		fmt.Fprintf(w, "%s%s\n  ", color.Secondary.Sprint(cmmt), s[l-1])
+		fmt.Fprintf(w, "%s%s", color.Secondary.Sprint(cmmt), s[l-1])
+		if cnt < rows {
+			fmt.Fprintln(w)
+		}
 	}
 }
 
@@ -80,43 +89,51 @@ func (e Example) result() string {
 }
 
 func cmd() string {
-	return fmt.Sprintf("  %s\n%s\n%s",
-		fmt.Sprintf("%s info %s", meta.Bin, Filenames),
-		fmt.Sprintf("%s view %s", meta.Bin, Filenames),
-		fmt.Sprintf("%s %s      # print text files partial info TODO", meta.Bin, Filenames),
-	)
+	const todo = "  # print text files partial info TODO"
+	s := &strings.Builder{}
+	fmt.Fprintf(s, "  %s info %s\n", meta.Bin, Filenames)
+	fmt.Fprintf(s, "  %s view %s\n", meta.Bin, Filenames)
+	fmt.Fprintf(s, "  %s %s      %s", meta.Bin, Filenames, todo)
+	return s.String()
 }
 
 func list() string {
-	return fmt.Sprintf("  %s\n%s\n%s",
-		fmt.Sprintf("%s list codepages", meta.Bin),
-		fmt.Sprintf("%s list table cp437 cp1252", meta.Bin),
-		fmt.Sprintf("%s list tables", meta.Bin))
+	s := &strings.Builder{}
+	fmt.Fprintf(s, "  %s list codepages\n", meta.Bin)
+	fmt.Fprintf(s, "  %s list table cp437 cp1252\n", meta.Bin)
+	fmt.Fprintf(s, "  %s list tables", meta.Bin)
+	return s.String()
 }
 
 func listExamples() string {
-	return fmt.Sprintf("  %s\n%s\n%s",
-		fmt.Sprintf("%s list examples # list the builtin examples", meta.Bin),
-		fmt.Sprintf("%s info ascii    # information on the buildin ascii example", meta.Bin),
-		fmt.Sprintf("%s view ascii    # view the ascii example", meta.Bin))
+	s := &strings.Builder{}
+	fmt.Fprintf(s, "  %s examples      # list the builtin examples\n", meta.Bin)
+	fmt.Fprintf(s, "  %s info ascii    # information on the buildin ascii example\n", meta.Bin)
+	fmt.Fprintf(s, "  %s view ascii    # view the ascii example\n", meta.Bin)
+	fmt.Fprintf(s, "  %s info ansi.rgb # information on the 24-bit color ansi example\n", meta.Bin)
+	fmt.Fprintf(s, "  %s view ansi.rgb # view the 24-bit color ansi example", meta.Bin)
+	return s.String()
 }
 
 func listTable() string {
-	return fmt.Sprintf("  %s\n%s\n%s",
-		fmt.Sprintf("%s table cp437", meta.Bin),
-		fmt.Sprintf("%s table cp437 latin1 windows-1252", meta.Bin),
-		fmt.Sprintf("%s table iso-8859-15", meta.Bin))
+	s := &strings.Builder{}
+	fmt.Fprintf(s, "  %s table cp437\n", meta.Bin)
+	fmt.Fprintf(s, "  %s table cp437 latin1 windows-1252\n", meta.Bin)
+	fmt.Fprintf(s, "  %s table iso-8859-15", meta.Bin)
+	return s.String()
 }
 
 func info() string {
-	return fmt.Sprintf("  %s %s\n%s %s",
-		meta.Bin, "info text.asc logo.jpg # print the information of multiple files",
-		meta.Bin, "info file.txt --format=json # print the information using a structured syntax")
+	s := &strings.Builder{}
+	fmt.Fprintf(s, "  %s info text.asc logo.jpg      # print the information of multiple files\n", meta.Bin)
+	fmt.Fprintf(s, "  %s info file.txt --format=json # print the information using a structured syntax\n", meta.Bin)
+	return s.String()
 }
 
 func view() string {
-	return fmt.Sprintf("  %s\n%s\n%s",
-		fmt.Sprintf("%s view file.txt -e latin1", meta.Bin),
-		fmt.Sprintf("%s view file1.txt file2.txt --encode=\"iso-8859-1\"", meta.Bin),
-		fmt.Sprintf("cat file.txt | %s view", meta.Bin))
+	s := &strings.Builder{}
+	fmt.Fprintf(s, "  %s view file.txt -e latin1\n", meta.Bin)
+	fmt.Fprintf(s, "  %s view file1.txt file2.txt --encode=\"iso-8859-1\"\n", meta.Bin)
+	fmt.Fprintf(s, "  cat file.txt | %s view", meta.Bin)
+	return s.String()
 }
