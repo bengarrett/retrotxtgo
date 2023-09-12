@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strings"
@@ -31,7 +32,10 @@ const (
 )
 
 // Print returns help usage examples.
-func (e Example) String() string {
+func (e Example) String(w io.Writer) {
+	if w == nil {
+		w = io.Discard
+	}
 	b := &bytes.Buffer{}
 	// change example operating system path separator
 	t := template.Must(template.New("example").Parse(e.result()))
@@ -42,20 +46,19 @@ func (e Example) String() string {
 	// color the example text except text following
 	// the last hash #, which is treated as a comment
 	const cmmt, sentence = "#", 2
-	scanner, s := bufio.NewScanner(b), ""
+	scanner := bufio.NewScanner(b)
 	for scanner.Scan() {
-		ss := strings.Split(scanner.Text(), cmmt)
-		l := len(ss)
+		s := strings.Split(scanner.Text(), cmmt)
+		l := len(s)
 		if l < sentence {
-			s += term.Info(scanner.Text()) + "\n  "
+			fmt.Fprintln(w, term.Info(scanner.Text()))
 			continue
 		}
 		// do not the last hash as a comment
-		ex := strings.Join(ss[:l-1], cmmt)
-		s += term.Info(ex)
-		s += fmt.Sprintf("%s%s\n  ", color.Secondary.Sprint(cmmt), ss[l-1])
+		ex := strings.Join(s[:l-1], cmmt)
+		fmt.Fprint(w, term.Info(ex))
+		fmt.Fprintf(w, "%s%s\n  ", color.Secondary.Sprint(cmmt), s[l-1])
 	}
-	return strings.TrimSpace(s)
 }
 
 func (e Example) result() string {

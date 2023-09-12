@@ -2,9 +2,9 @@
 package list
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"sort"
 	"strings"
 	"text/tabwriter"
@@ -25,7 +25,10 @@ var (
 )
 
 // Examples returns examples commands for the list cmd.
-func Examples() (*bytes.Buffer, error) {
+func Examples(wr io.Writer) error {
+	if wr == nil {
+		wr = io.Discard
+	}
 	m := sample.Map()
 	keys := make([]string, 0, len(m))
 	for k := range m {
@@ -33,12 +36,11 @@ func Examples() (*bytes.Buffer, error) {
 	}
 	sort.Strings(keys)
 	const padding = 2
-	b := &bytes.Buffer{}
-	w := tabwriter.NewWriter(b, 0, 0, padding, ' ', 0)
+	w := tabwriter.NewWriter(wr, 0, 0, padding, ' ', 0)
 	bin := fmt.Sprintf("  %s ", meta.Bin)
 	if _, err := term.Head(w, 0,
 		fmt.Sprintf("Packaged example text and ANSI files to test and play with %s\n", meta.Name)); err != nil {
-		return nil, err
+		return err
 	}
 	for _, k := range keys {
 		fmt.Fprintf(w, "%s\t%s\t\n", k, m[k].Description)
@@ -59,14 +61,14 @@ func Examples() (*bytes.Buffer, error) {
 		term.Example(bin+"info sauce"))
 	fmt.Fprintf(w, "\nMultiple examples used together are supported.\n%s\n",
 		term.Example(bin+"view ansi ascii ansi.rgb"))
-	if err := w.Flush(); err != nil {
-		return nil, err
-	}
-	return b, nil
+	return w.Flush()
 }
 
 // Table returns one or more named encodings in a tabled format.
-func Table(names ...string) (string, error) {
+func Table(w io.Writer, names ...string) error {
+	if w == nil {
+		w = io.Discard
+	}
 	// custom ascii shortcut
 	tables := names
 	for i, name := range tables {
@@ -79,25 +81,23 @@ func Table(names ...string) (string, error) {
 		names = append(names[:i+1], names[i:]...)
 		names[i] = "ascii-63"
 	}
-	b := strings.Builder{}
 	// iterate through the tables
 	for _, name := range names {
-		t, err := table.Table(name)
-		if err != nil {
-			return "", err
+		if err := table.Table(w, name); err != nil {
+			return err
 		}
-		l := len(t.Bytes())
-		b.Grow(l)
-		fmt.Fprintf(&b, "%s ", t)
+		fmt.Fprintln(w)
 	}
-	return b.String(), nil
+	return nil
 }
 
 // Tables returns all the supported encodings in a tabled format.
-func Tables() (string, error) {
+func Tables(w io.Writer) error {
+	if w == nil {
+		w = io.Discard
+	}
 	// use strings builder to reduce memory usage
 	// https://yourbasic.org/golang/build-append-concatenate-strings-efficiently/
-	b := strings.Builder{}
 	tables := make([]encoding.Encoding, 0, len(table.Charmaps()))
 	encodings := table.Charmaps()
 	// reorder tables to position X-User-Defined after ISO-8859-10
@@ -125,21 +125,17 @@ func Tables() (string, error) {
 		if name == "" {
 			name, err = ianaindex.MIME.Name(e)
 			if err != nil {
-				return "", fmt.Errorf("table %s, %w, %w", e, ErrIANA, err)
+				return fmt.Errorf("table %s, %w, %w", e, ErrIANA, err)
 			}
 		}
 		if !Printable(name) {
 			continue
 		}
-		table, err := table.Table(name)
-		if err != nil {
-			return "", fmt.Errorf("table %s, %w, %w", e, ErrTable, err)
+		if err := table.Table(w, name); err != nil {
+			return fmt.Errorf("table %s, %w, %w", e, ErrTable, err)
 		}
-		l := len(table.Bytes())
-		b.Grow(l)
-		fmt.Fprintf(&b, "%s ", table)
 	}
-	return b.String(), nil
+	return nil
 }
 
 // Printable returns true if the named encoding can be shown in an 8-bit table.

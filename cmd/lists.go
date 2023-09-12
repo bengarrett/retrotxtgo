@@ -38,42 +38,34 @@ func (l Lists) Command() *cobra.Command {
 }
 
 func ListCodepages() *cobra.Command {
+	s := fmt.Sprintf("List the legacy codepages that %s can convert to UTF-8", meta.Name)
+	l := fmt.Sprintf("List the available legacy codepages that %s can convert to UTF-8.", meta.Name)
 	return &cobra.Command{
 		Use:     "codepages",
 		Aliases: []string{"c", "cp", "codepage"},
-		Short: fmt.Sprintf("List the legacy codepages that %s can convert to UTF-8",
-			meta.Name),
-		Long: fmt.Sprintf("List the available legacy codepages that %s can convert to UTF-8.",
-			meta.Name),
+		Short:   s,
+		Long:    l,
 		GroupID: "codepages",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			b, err := table.List()
-			if err != nil {
-				return err
-			}
-			fmt.Fprint(cmd.OutOrStdout(), b)
-			return nil
+			return table.List(cmd.OutOrStdout())
 		},
 	}
 }
 
 func ListExamples() *cobra.Command {
+	s := fmt.Sprintf("List builtin tester text files available for use with the %s and %s commands",
+		term.Example("info"), term.Example("view"))
+	l := fmt.Sprintf("List builtin tester text art and documents available for use with the %s and %s commands.",
+		term.Example("info"), term.Example("view"))
 	return &cobra.Command{
 		Use:     "examples",
 		Aliases: []string{"e", "samples"},
 		GroupID: "exaCmds",
-		Short: fmt.Sprintf("List builtin tester text files available for use with the %s and %s commands",
-			term.Example("info"), term.Example("view")),
-		Long: fmt.Sprintf("List builtin tester text art and documents available for use with the %s and %s commands.",
-			term.Example("info"), term.Example("view")),
+		Short:   s,
+		Long:    l,
 		Example: fmt.Sprint(example.ListExamples),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			b, err := list.Examples()
-			if err != nil {
-				return err
-			}
-			fmt.Fprint(cmd.OutOrStdout(), b)
-			return nil
+			return list.Examples(cmd.OutOrStdout())
 		},
 	}
 }
@@ -90,12 +82,7 @@ func ListTable() *cobra.Command {
 			if err := flag.Help(cmd, args...); err != nil {
 				return err
 			}
-			s, err := list.Table(args...)
-			if err != nil {
-				return err
-			}
-			fmt.Fprint(cmd.OutOrStdout(), fmt.Sprintln(s))
-			return nil
+			return list.Table(cmd.OutOrStdout(), args...)
 		},
 	}
 }
@@ -107,12 +94,7 @@ func ListTables() *cobra.Command {
 		Long:    "Display the characters of every codepage table in use.",
 		GroupID: "tables",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			s, err := list.Tables()
-			if err != nil {
-				return err
-			}
-			fmt.Fprint(cmd.OutOrStdout(), fmt.Sprintln(s))
-			return nil
+			return list.Tables(cmd.OutOrStdout())
 		},
 	}
 }

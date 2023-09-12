@@ -2,8 +2,8 @@
 package version
 
 import (
-	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"runtime"
@@ -26,7 +26,10 @@ const (
 )
 
 // Template returns the application version, copyright and build variables.
-func Template() (string, error) {
+func Template(wr io.Writer) error {
+	if wr == nil {
+		wr = io.Discard
+	}
 	const c = "\u00A9"
 	exe, err := Self()
 	if err != nil {
@@ -34,14 +37,13 @@ func Template() (string, error) {
 	}
 	tag, err := update.Check()
 	if err != nil {
-		return "", err
+		return err
 	}
 	appDate := ""
 	if meta.App.Date != meta.Placeholder {
 		appDate = fmt.Sprintf(" (%s)", meta.App.Date)
 	}
-	b := &bytes.Buffer{}
-	w := tabwriter.NewWriter(b, 0, TabWidth, 0, '\t', 0)
+	w := tabwriter.NewWriter(wr, 0, TabWidth, 0, '\t', 0)
 	fmt.Fprintf(w, "%s %s\n", meta.Name, meta.Print())
 	fmt.Fprintf(w, "%s %s Ben Garrett\n", Copyright, c)
 	fmt.Fprintln(w, color.Primary.Sprint(meta.URL))
@@ -55,10 +57,7 @@ func Template() (string, error) {
 		update.String(w, meta.App.Version, tag)
 		fmt.Fprintln(w)
 	}
-	if err := w.Flush(); err != nil {
-		return "", err
-	}
-	return b.String(), nil
+	return w.Flush()
 }
 
 // Self returns the path to this executable file.

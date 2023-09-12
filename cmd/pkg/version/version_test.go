@@ -20,10 +20,11 @@ func TestTemplate(t *testing.T) {
 	color.Enable = false
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, _ := version.Template()
-			if !strings.Contains(got, tt.want) {
+			s := strings.Builder{}
+			_ = version.Template(&s)
+			if !strings.Contains(s.String(), tt.want) {
 				t.Errorf("Template() does not contain %v", tt.want)
-				t.Error(got)
+				t.Error(s.String())
 				return
 			}
 		})

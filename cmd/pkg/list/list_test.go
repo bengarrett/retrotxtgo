@@ -14,34 +14,35 @@ import (
 func ExampleTable() {
 	color.Enable = false
 	names := []string{"cp437"}
-	t, err := list.Table(names...)
-	if err != nil {
+	s := strings.Builder{}
+	if err := list.Table(&s, names...); err != nil {
 		log.Fatal(err)
 	}
-	fmt.Fprintf(os.Stdout, "%d characters in the table", len(t))
+	fmt.Fprintf(os.Stdout, "%d characters in the table", len(s.String()))
 	// Output: 1690 characters in the table
 }
 
 func ExampleTables() {
 	color.Enable = false
-	t, err := list.Tables()
-	if err != nil {
+	s := strings.Builder{}
+	if err := list.Tables(&s); err != nil {
 		log.Print(err)
 	}
 	const val = 70000
-	l := len(t)
+	l := s.Len()
 	fmt.Fprintf(os.Stdout, "characters > 70000: %v", l > val)
 	// Output: characters > 70000: true
 }
 
 func TestExamples(t *testing.T) {
 	t.Run("example", func(t *testing.T) {
-		got, err := list.Examples()
+		s := strings.Builder{}
+		err := list.Examples(&s)
 		if err != nil {
 			t.Error(err)
 			return
 		}
-		if got == nil {
+		if s.String() == "" {
 			t.Errorf("examples() failed to return anything")
 		}
 	})
@@ -62,12 +63,13 @@ func TestTable(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			table, err := list.Table(tt.name)
+			s := strings.Builder{}
+			err := list.Table(&s, tt.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("table returned error: %s, wanted %v", err, tt.wantErr)
 				return
 			}
-			if !strings.Contains(table, tt.contains) {
+			if !strings.Contains(s.String(), tt.contains) {
 				t.Errorf("table does not contain the header: %s", tt.contains)
 			}
 		})
@@ -83,13 +85,13 @@ func TestTables(t *testing.T) {
 		{"UTF-8 - Unicode"},
 		{"Shift JIS (Japanese) - Extended ASCII"},
 	}
-	tables, err := list.Tables()
-	if err != nil {
+	s := &strings.Builder{}
+	if err := list.Tables(s); err != nil {
 		t.Error(err)
 	}
 	for _, tt := range tests {
 		t.Run(tt.contains, func(t *testing.T) {
-			if !strings.Contains(tables, tt.contains) {
+			if !strings.Contains(s.String(), tt.contains) {
 				t.Errorf("tables does not contain the header: %s", tt.contains)
 			}
 		})

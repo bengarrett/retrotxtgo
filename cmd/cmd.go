@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/cmd/pkg/example"
@@ -39,11 +40,11 @@ func Execute() error {
 	Cmd.CompletionOptions.DisableDefaultCmd = true
 	Cmd.SilenceErrors = true // set to false to debug errors
 	Cmd.Version = meta.Print()
-	s, err := version.Template()
-	if err != nil {
+	s := strings.Builder{}
+	if err := version.Template(&s); err != nil {
 		return err
 	}
-	Cmd.SetVersionTemplate(s)
+	Cmd.SetVersionTemplate(s.String())
 	if err := Cmd.Execute(); err != nil {
 		const minArgs = 2
 		if len(os.Args) < minArgs {

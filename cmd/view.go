@@ -19,12 +19,7 @@ func ViewCommand() *cobra.Command {
 		Long:    "Print a text file to the terminal using standard output.",
 		Example: fmt.Sprint(example.View),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			b, err := view.Run(cmd, args...)
-			if err != nil {
-				return err
-			}
-			fmt.Fprint(cmd.OutOrStdout(), b)
-			return nil
+			return view.Run(cmd.OutOrStdout(), cmd, args...)
 		},
 	}
 }

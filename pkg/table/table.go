@@ -4,7 +4,6 @@
 package table
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -36,10 +35,13 @@ const (
 )
 
 // Table prints out all the characters in the named 8-bit character set.
-func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
+func Table(wr io.Writer, name string) error { //nolint:funlen
+	if wr == nil {
+		wr = io.Discard
+	}
 	cp, err := CodePager(name)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	h := fmt.Sprintf("%s", cp)
 	if XUserDefinedISO11(name) {
@@ -47,10 +49,9 @@ func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 	}
 	h += CharmapAlias(cp) + charmapStandard(cp)
 	const tabWidth = 8
-	b := &bytes.Buffer{}
-	w := tabwriter.NewWriter(b, 0, tabWidth, 0, '\t', 0)
+	w := tabwriter.NewWriter(wr, 0, tabWidth, 0, '\t', 0)
 	if _, err := term.Head(w, width, " "+h); err != nil {
-		return nil, err
+		return err
 	}
 	columns(w)
 	if x := swapper(name); x != nil {
@@ -61,7 +62,7 @@ func Table(name string) (*bytes.Buffer, error) { //nolint:funlen
 	p := byter.MakeBytes()
 	runes, err := c.Chars(p...)
 	if err != nil {
-		return nil, fmt.Errorf("table convert bytes error: %w", err)
+		return fmt.Errorf("table convert bytes error: %w", err)
 	}
 	enc := reverter(name)
 	const hex, max = 16, 255
@@ -102,10 +103,7 @@ out:
 	asa.Footnote(w, cp)
 	Footnote(w, name)
 	fmt.Fprint(w, "\n")
-	if err := w.Flush(); err != nil {
-		return nil, fmt.Errorf("table tab writer failed to flush data: %w", err)
-	}
-	return b, nil
+	return w.Flush()
 }
 
 func columns(w io.Writer) {

@@ -2,9 +2,9 @@
 package view
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
@@ -17,15 +17,17 @@ import (
 var ErrConv = errors.New("convert cannot be nil")
 
 // Run parses the arguments supplied with the view command.
-func Run(cmd *cobra.Command, args ...string) (*bytes.Buffer, error) {
+func Run(w io.Writer, cmd *cobra.Command, args ...string) error {
+	if w == nil {
+		w = io.Discard
+	}
 	args, c, samp, err := flag.Args(cmd, args...)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	w := &bytes.Buffer{}
 	for i, arg := range args {
 		if i == 0 && arg == "" {
-			return w, nil
+			return nil
 		}
 		if i > 0 && i < len(arg) {
 			const halfPage = 40
@@ -34,15 +36,16 @@ func Run(cmd *cobra.Command, args ...string) (*bytes.Buffer, error) {
 		}
 		b, err := flag.ReadArgument(arg, c, samp)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		r, err := Transform(c, samp.Input, samp.Output, b...)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		fmt.Fprint(w, string(r))
 	}
-	return w, nil
+	fmt.Fprintln(w)
+	return nil
 }
 
 // Transform bytes into Unicode runes.

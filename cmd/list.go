@@ -22,7 +22,8 @@ func ListCommand() *cobra.Command {
 				return err
 			}
 			if len(args) > 0 {
-				logs.FatalSubCmd("list", args...) // TODO replace with a print and error return
+				logs.FatalSubCmd("list", args...)
+				// TODO replace with a print and error return
 			}
 			return nil
 		},

@@ -1,6 +1,7 @@
 package table_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/pkg/table"
@@ -20,8 +21,10 @@ func TestCharmaps(t *testing.T) {
 }
 
 func TestList(t *testing.T) {
-	if got, _ := table.List(); got == nil {
-		t.Errorf("List() do not want %v", got)
+	w := &strings.Builder{}
+	_ = table.List(w)
+	if w.String() == "" {
+		t.Errorf("List() do not want %v", w)
 	}
 }
 

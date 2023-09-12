@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"bytes"
 	"fmt"
+	"strings"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/format"
@@ -20,16 +20,18 @@ func InfoCommand() *cobra.Command {
 		Short:   "Information on a text file",
 		Long:    "Discover details and information about any text or text art file.",
 		Example: fmt.Sprint(example.Info),
-		RunE:    info.Run,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return info.Run(cmd.OutOrStdout(), cmd, args...)
+		},
 	}
 }
 
 func InfoInit() *cobra.Command {
 	ic := InfoCommand()
 	infos := format.Format().Info
-	b := &bytes.Buffer{}
-	_, _ = term.Options(b, "print format or syntax", true, true, infos[:]...)
-	ic.Flags().StringVarP(&flag.Info.Format, "format", "f", "color", b.String())
+	s := &strings.Builder{}
+	_, _ = term.Options(s, "print format or syntax", true, true, infos[:]...)
+	ic.Flags().StringVarP(&flag.Info.Format, "format", "f", "color", s.String())
 	return ic
 }
 

@@ -4,6 +4,7 @@ package info
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -28,14 +29,17 @@ var (
 )
 
 // Run parses the arguments supplied with the info command.
-func Run(cmd *cobra.Command, args []string) error {
+func Run(w io.Writer, cmd *cobra.Command, args ...string) error {
+	if w == nil {
+		w = io.Discard
+	}
 	// piped input from other programs and then exit
 	ok, err := fsys.IsPipe()
 	if err != nil {
 		return err
 	}
 	if ok {
-		return Pipe(cmd)
+		return Pipe(w, cmd)
 	}
 	if err := flag.Help(cmd, args...); err != nil {
 		return err
@@ -57,8 +61,8 @@ func Run(cmd *cobra.Command, args []string) error {
 			defer os.Remove(filename)
 			arg = filename
 		}
-		fmt.Fprintln(cmd.OutOrStdout())
-		err = n.Info(cmd.OutOrStdout(), arg, flag.Info.Format)
+		fmt.Fprintln(w)
+		err = n.Info(w, arg, flag.Info.Format)
 		if err != nil {
 			if err := cmd.Usage(); err != nil {
 				return fmt.Errorf("%w: %w", ErrUsage, err)
@@ -94,12 +98,15 @@ func Sample(name string) (string, error) {
 }
 
 // Pipe parses a standard input (stdin) stream of data.
-func Pipe(cmd *cobra.Command) error {
+func Pipe(w io.Writer, cmd *cobra.Command) error {
+	if w == nil {
+		w = io.Discard
+	}
 	b, err := fsys.ReadPipe()
 	if err != nil {
 		return fmt.Errorf("%w, %w", ErrPipeRead, err)
 	}
-	err = info.Stdin(cmd.OutOrStdout(), flag.Info.Format, b...)
+	err = info.Stdin(w, flag.Info.Format, b...)
 	if err != nil {
 		return fmt.Errorf("%w, %w", ErrPipeParse, err)
 	}

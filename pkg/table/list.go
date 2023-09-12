@@ -1,9 +1,9 @@
 package table
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"strconv"
 	"strings"
 	"text/tabwriter"
@@ -55,15 +55,17 @@ func Charmaps() []encoding.Encoding {
 }
 
 // List returns a tabled list of supported IANA character set encodings.
-func List() (*bytes.Buffer, error) { //nolint:funlen
+func List(wr io.Writer) error { //nolint:funlen
+	if wr == nil {
+		wr = io.Discard
+	}
 	const header, title = " Formal name\t Named value\t Numeric value\t Alias value\t",
 		" Known legacy code pages and character encodings "
-	b := &bytes.Buffer{}
 	const verticalBars = tabwriter.Debug
 	const padding, width = 2, 76
-	w := tabwriter.NewWriter(b, 0, 0, padding, ' ', verticalBars)
+	w := tabwriter.NewWriter(wr, 0, 0, padding, ' ', verticalBars)
 	if _, err := term.Head(w, width, title); err != nil {
-		return nil, err
+		return err
 	}
 	fmt.Fprintf(w, "\n%s\n", header)
 	x := Charmaps()
@@ -74,7 +76,7 @@ func List() (*bytes.Buffer, error) { //nolint:funlen
 		}
 		c, err := Rows(e)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		switch e {
 		case charmap.ISO8859_10:
@@ -133,10 +135,7 @@ func List() (*bytes.Buffer, error) { //nolint:funlen
 		term.Comment("macintosh"))
 	fmt.Fprintf(w, "\n%s, PCs and the web today use Unicode UTF-8. As a subset of ISO 8895-1,\n", meta.Name)
 	fmt.Fprintln(w, "UTF-8 is backwards compatible with it and US-ASCII.")
-	if err := w.Flush(); err != nil {
-		return nil, err
-	}
-	return b, nil
+	return w.Flush()
 }
 
 // Rows return character encoding details for use in a text table.
