@@ -89,11 +89,13 @@ func (e Example) result() string {
 }
 
 func cmd() string {
-	const todo = "  # print text files partial info TODO"
 	s := &strings.Builder{}
 	fmt.Fprintf(s, "  %s info %s\n", meta.Bin, Filenames)
 	fmt.Fprintf(s, "  %s view %s\n", meta.Bin, Filenames)
-	fmt.Fprintf(s, "  %s %s      %s", meta.Bin, Filenames, todo)
+	fmt.Fprintf(s, "  %s example\n\n", meta.Bin)
+	fmt.Fprintf(s, "  %s list\n", meta.Bin)
+	fmt.Fprintf(s, "  %s tables\n", meta.Bin)
+	fmt.Fprintf(s, "  %s table [codepage names or aliases]", meta.Bin)
 	return s.String()
 }
 
@@ -107,11 +109,12 @@ func list() string {
 
 func listExamples() string {
 	s := &strings.Builder{}
-	fmt.Fprintf(s, "  %s examples      # list the builtin examples\n", meta.Bin)
-	fmt.Fprintf(s, "  %s info ascii    # information on the buildin ascii example\n", meta.Bin)
-	fmt.Fprintf(s, "  %s view ascii    # view the ascii example\n", meta.Bin)
-	fmt.Fprintf(s, "  %s info ansi.rgb # information on the 24-bit color ansi example\n", meta.Bin)
-	fmt.Fprintf(s, "  %s view ansi.rgb # view the 24-bit color ansi example", meta.Bin)
+	fmt.Fprintf(s, "  %s examples\t\t# list the builtin examples\n", meta.Bin)
+	fmt.Fprintf(s, "  %s info ascii\t\t# information on the buildin ascii sample\n", meta.Bin)
+	fmt.Fprintf(s, "  %s info ascii -f json\t# information in json format on the ascii sample\n", meta.Bin)
+	fmt.Fprintf(s, "  %s view ascii\t\t# view the ascii example\n", meta.Bin)
+	fmt.Fprintf(s, "  %s info ansi.rgb\t# information on the 24-bit color ansi example\n", meta.Bin)
+	fmt.Fprintf(s, "  %s view ansi.rgb\t# view the 24-bit color ansi example", meta.Bin)
 	return s.String()
 }
 
@@ -119,7 +122,8 @@ func listTable() string {
 	s := &strings.Builder{}
 	fmt.Fprintf(s, "  %s table cp437\n", meta.Bin)
 	fmt.Fprintf(s, "  %s table cp437 latin1 windows-1252\n", meta.Bin)
-	fmt.Fprintf(s, "  %s table iso-8859-15", meta.Bin)
+	fmt.Fprintf(s, "  %s table iso-8859-15\n", meta.Bin)
+	fmt.Fprintf(s, "  %s list\t# list the supported codepage tables\n", meta.Bin)
 	return s.String()
 }
 

@@ -149,35 +149,35 @@ func (d *Detail) Marshal(w io.Writer, f Format) error {
 	if w == nil {
 		w = io.Discard
 	}
-	var err error
-	var b []byte
 	switch f {
 	case ColorText:
 		return d.marshal(w, true)
 	case PlainText:
 		return d.marshal(w, false)
 	case JSON:
-		b, err = json.MarshalIndent(d, "", "    ")
+		b, err := json.MarshalIndent(d, "", "    ")
 		if err != nil {
 			return fmt.Errorf("detail json indent marshal: %w", err)
 		}
+		_, err = w.Write(b)
+		return err
 	case JSONMin:
-		b, err = json.Marshal(d)
+		b, err := json.Marshal(d)
 		if err != nil {
 			return fmt.Errorf("detail json marshal: %w", err)
 		}
+		_, err = w.Write(b)
+		return err
 	case XML:
-		b, err = xml.MarshalIndent(d, "", "\t")
+		b, err := xml.MarshalIndent(d, "", "\t")
 		if err != nil {
 			return fmt.Errorf("detail xml marshal: %w", err)
 		}
+		_, err = w.Write(b)
+		return err
 	default:
 		return fmt.Errorf("detail marshal %q: %w", f, ErrFmt)
 	}
-	if _, err := w.Write(b); err != nil {
-		return fmt.Errorf("detail marshal write: %w", err)
-	}
-	return nil
 }
 
 // MimeUnknown detects non-Standard legacy data.
@@ -341,13 +341,14 @@ func (d *Detail) marshal(w io.Writer, color bool) error {
 		return fmt.Sprintf("%s\t", s)
 	}
 	gookit.Enable = color
+	if _, err := term.Head(w, width, "File information"); err != nil {
+		return err
+	}
+	fmt.Fprintln(w)
 	data := d.marshalled()
 	l := len(fmt.Sprintf(" filename%s%s", strings.Repeat(" ", padding), data[0].v))
 	const tabWidth = 8
 	tw := tabwriter.NewWriter(w, 0, tabWidth, 0, '\t', 0)
-	if _, err := term.Head(tw, width, "File information"); err != nil {
-		return err
-	}
 	for _, x := range data {
 		if !d.validate(x) {
 			continue

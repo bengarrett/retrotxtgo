@@ -29,6 +29,7 @@ func Examples(wr io.Writer) error {
 	if wr == nil {
 		wr = io.Discard
 	}
+	const width = 80
 	m := sample.Map()
 	keys := make([]string, 0, len(m))
 	for k := range m {
@@ -38,15 +39,20 @@ func Examples(wr io.Writer) error {
 	const padding = 2
 	w := tabwriter.NewWriter(wr, 0, 0, padding, ' ', 0)
 	bin := fmt.Sprintf("  %s ", meta.Bin)
-	if _, err := term.Head(w, 0,
-		fmt.Sprintf("Packaged example text and ANSI files to test and play with %s\n", meta.Name)); err != nil {
+	header := "Packaged example text and ANSI files to test and play with " + meta.Name
+	if _, err := term.Head(w, width, header); err != nil {
 		return err
-	}
-	for _, k := range keys {
-		fmt.Fprintf(w, "%s\t%s\t\n", k, m[k].Description)
 	}
 	fmt.Fprintf(w, "\nAny of these packaged examples will work with the %s and %s commands.\n",
 		term.Example("info"), term.Example("view"))
+	fmt.Fprintln(w)
+	for _, k := range keys {
+		fmt.Fprintf(w, " %s\t%s\t\n", k, m[k].Description)
+	}
+	fmt.Fprintln(w)
+	if _, err := term.Head(w, width, "Usage sample commands"); err != nil {
+		return err
+	}
 	fmt.Fprintf(w, "\nPrint the Windows-1252 English test to the terminal.\n%s\n",
 		term.Example(bin+"view 1252"))
 	fmt.Fprintf(w, "\nConvert the Windows-1252 English test to UTF-8 encoding and save it to a file.\n%s\n",

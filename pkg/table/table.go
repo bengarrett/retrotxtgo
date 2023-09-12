@@ -31,7 +31,7 @@ var (
 )
 
 const (
-	width = 67
+	width = 68
 )
 
 // Table prints out all the characters in the named 8-bit character set.

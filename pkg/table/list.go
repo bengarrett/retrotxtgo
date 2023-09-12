@@ -127,14 +127,14 @@ func List(wr io.Writer) error { //nolint:funlen
 		term.Example(cmds), term.Comment("latin1"), term.Fuzzy("# alias"))
 	fmt.Fprintf(w, "\n  IBM Code Page 437 (%s) is commonly used on MS-DOS and ANSI art.\n",
 		term.Comment("cp437"))
-	fmt.Fprintf(w, "  ISO 8859-1 (%s) is found on legacy Unix, Amiga and the early Internet.\n",
+	fmt.Fprintf(w, "  ISO 8859-1 (%s) is found on historic Unix, Amiga and the early Internet.\n",
 		term.Comment("latin1"))
-	fmt.Fprintf(w, "  Windows 1252 (%s) is found on legacy Windows 9x and earlier systems.\n",
+	fmt.Fprintf(w, "  Windows 1252 (%s) is found on Windows ME/98 and earlier systems.\n",
 		term.Comment("cp1252"))
 	fmt.Fprintf(w, "  Macintosh (%s) is found on Mac OS 9 and earlier systems.\n",
 		term.Comment("macintosh"))
-	fmt.Fprintf(w, "\n%s, PCs and the web today use Unicode UTF-8. As a subset of ISO 8895-1,\n", meta.Name)
-	fmt.Fprintln(w, "UTF-8 is backwards compatible with it and US-ASCII.")
+	fmt.Fprintf(w, "\n%s, PCs and the web today use Unicode UTF-8. As a subset,\n", meta.Name)
+	fmt.Fprintln(w, "UTF-8 is backwards compatible with both ISO 8895-1 and US-ASCII.")
 	return w.Flush()
 }
 
