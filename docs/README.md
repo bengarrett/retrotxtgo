@@ -1,4 +1,5 @@
 # Retrotxt
+[![Go Reference](https://pkg.go.dev/badge/github.com/bengarrett/retrotxtgo.svg)](https://pkg.go.dev/github.com/bengarrett/retrotxtgo)
 
 ### _[Retrotxt](https://github.com/bengarrett/retrotxt) for the terminal_.
 
