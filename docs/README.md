@@ -3,7 +3,7 @@
 
 ### _[Retrotxt](https://github.com/bengarrett/retrotxt) for the terminal_.
 
-Read legacy codepage and ANSI encoded textfiles in a modern Unicode terminal.
+Read legacy codepage and ANSI encoded text files in a modern Unicode terminal.
 
 ## Downloads
 
@@ -16,7 +16,7 @@ Otherwise [these installation options are available](INSTALL.md).
 
 ## Quick Usage
 
-#### Text art and files created without Unicode often fail to display on modern systems.
+#### Text files and art created before the adoption of Unicode often fail to display on modern systems.
 
 #### Use RetroTxt to print legacy text on modern terminals.
 
@@ -39,7 +39,7 @@ retrotxt view ascii-logo.txt > ascii-logo-utf8.txt
 
 ![Windows Notepad viewing ascii-logo-utf8.txt](img/ascii-logo-utf8.txt.png)
 
-Otherwise, using the common shell programs, the legacy text is often malformed and even unreadable.
+Otherwise, when using many command prompt or terminal apps, legacy text is often malformed and even unreadable.
 
 ```sh
 type ascii-logo.txt # or, cat ascii-logo.txt
@@ -57,11 +57,12 @@ type ascii-logo.txt # or, cat ascii-logo.txt
 ## Features
 
 - Print legacy codepage encoded texts in a modern terminal.
-- Print or export the legacy details of the textfiles.
-- Print or export the SAUCE metadata of a file.
+- Print or export the details of the text files.
+- Print or export the [SAUCE metadata](https://www.acid.org/info/sauce/sauce.htm) of a file.
 - Transform legacy encoded texts and text art into UTF-8 documents for use on the web or with modern systems.
 - Lookup and print codepage character tables for dozens of encodings.
-- IO redirection with piping support.
+- Support for ISO, PC-DOS/Windows codepages plus IBM EBCDIC, Macintosh, and ShiftJIS.
+- Use io redirection with piping support.
 
 ---
 
