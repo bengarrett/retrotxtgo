@@ -106,16 +106,18 @@ func readLineBreaks(name string, cols bool) (int, error) {
 	if err != nil {
 		return -1, fmt.Errorf("could not find the line break method: %w", err)
 	}
-	var count int
 	if !cols {
-		count, err = Lines(file, lb)
-	} else {
-		count, err = Columns(file, lb)
+		cnt, err := Lines(file, lb)
+		if err != nil {
+			return -1, fmt.Errorf("read lines count the file: %q: %w", name, err)
+		}
+		return cnt, file.Close()
 	}
+	cnt, err := Columns(file, lb)
 	if err != nil {
-		return -1, fmt.Errorf("read columns count the file: %q: %w", name, err)
+		return -1, fmt.Errorf("read lines count the file: %q: %w", name, err)
 	}
-	return count, file.Close()
+	return cnt, file.Close()
 }
 
 // ReadControls counts the number of ANSI escape sequences in the named file.
@@ -128,11 +130,11 @@ func ReadControls(name string) (int, error) {
 		return -1, err
 	}
 	defer file.Close()
-	count, err := Controls(file)
+	cnt, err := Controls(file)
 	if err != nil {
 		return -1, fmt.Errorf("read countrols could not parse the file: %q: %w", name, err)
 	}
-	return count, file.Close()
+	return cnt, file.Close()
 }
 
 // ReadLine reads a named file location or a named temporary file and returns its content.
@@ -208,11 +210,11 @@ func ReadRunes(name string) (int, error) {
 		return -1, err
 	}
 	defer file.Close()
-	count, err := Runes(file)
+	cnt, err := Runes(file)
 	if err != nil {
 		return 0, fmt.Errorf("read runes could not calculate this file: %q: %w", name, err)
 	}
-	return count, file.Close()
+	return cnt, file.Close()
 }
 
 // ReadTail reads the named file from the offset position relative to the end of the file.
@@ -225,21 +227,17 @@ func ReadTail(name string, offset int) ([]byte, error) {
 		return nil, err
 	}
 	defer file.Close()
-	var (
-		count int
-		total int
-	)
-	total, err = ReadRunes(name)
+	total, err := ReadRunes(name)
 	if err != nil {
 		return nil, fmt.Errorf("read tail could not read runes: %q: %w", name, err)
 	}
 	// bufio is the most performant
 	scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanRunes)
-	b := []byte{}
+	b, cnt := []byte{}, 0
 	for scanner.Scan() {
-		count++
-		if count <= (total - offset) {
+		cnt++
+		if cnt <= (total - offset) {
 			continue
 		}
 		b = append(b, scanner.Bytes()...)
@@ -265,9 +263,9 @@ func ReadWords(name string) (int, error) {
 		return -1, err
 	}
 	defer file.Close()
-	count, err := Words(file)
+	cnt, err := Words(file)
 	if err != nil {
 		return -1, fmt.Errorf("read words failed to count words: %q: %w", name, err)
 	}
-	return count, file.Close()
+	return cnt, file.Close()
 }

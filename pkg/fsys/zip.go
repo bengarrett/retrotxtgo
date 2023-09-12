@@ -157,8 +157,7 @@ func InsertZip(z *zip.Writer, name string) error {
 		fmt.Fprintln(os.Stdout, "skipping file, could not read", name)
 		return nil //nolint:nilerr
 	}
-	_, err = f.Write(b)
-	if err != nil {
+	if _, err = f.Write(b); err != nil {
 		return fmt.Errorf("io writer: %w", err)
 	}
 	return nil

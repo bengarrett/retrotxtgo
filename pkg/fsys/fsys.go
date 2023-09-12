@@ -36,21 +36,23 @@ func DirExpansion(name string) (string, error) {
 		return name[:1] == string(os.PathSeparator)
 	}
 	const homeDir, currentDir, parentDir = "~", ".", ".."
-	var err error
 	// Bash tilde expension http://www.gnu.org/software/bash/manual/html_node/Tilde-Expansion.html
 	dir, paths := "", strings.Split(name, string(os.PathSeparator))
+	var err error
+	var p string
 	for i, s := range paths {
-		var p string
 		switch s {
 		case homeDir:
-			if p, err = os.UserHomeDir(); err != nil {
+			p, err = os.UserHomeDir()
+			if err != nil {
 				return "", err
 			}
 		case currentDir:
 			if i != 0 {
 				continue
 			}
-			if p, err = os.Getwd(); err != nil {
+			p, err = os.Getwd()
+			if err != nil {
 				return "", err
 			}
 		case parentDir:
@@ -66,11 +68,11 @@ func DirExpansion(name string) (string, error) {
 		default:
 			p = s
 		}
-		var cont bool
-		if dir, cont = util.Windows(i, p, runtime.GOOS, dir); cont {
+		d, cont := util.Windows(i, p, runtime.GOOS, dir)
+		if cont {
 			continue
 		}
-		dir = filepath.Join(dir, p)
+		dir = filepath.Join(d, p)
 	}
 	if root() {
 		dir = string(os.PathSeparator) + dir
