@@ -16,14 +16,11 @@ func TestExample(t *testing.T) {
 	example.Info.String(s)
 	assert.Contains(t, s.String(), "info file.txt")
 
-	example.ListExamples.String(s)
+	example.Examples.String(s)
 	assert.Contains(t, s.String(), "list the builtin examples")
 
-	example.ListTable.String(s)
+	example.Table.String(s)
 	assert.Contains(t, s.String(), "iso-8859-15")
-
-	example.List.String(s)
-	assert.Contains(t, s.String(), "list codepages")
 
 	example.View.String(s)
 	assert.Contains(t, s.String(), "view file.txt")

@@ -125,14 +125,14 @@ retrotxt list codepages
  † UTF-32BE (Use BOM)     | utf-32        |                | utf32         |
  † UTF-32BE (Ignore BOM)  | utf-32be      |                | utf32be       |
  † UTF-32LE (Ignore BOM)  | utf-32le      |                | utf32le       |
- ⁑ ASA X3.4 1963          | ascii-63      |                |               |
- ⁑ ASA X3.4 1965          | ascii-65      |                |               |
- ⁑ ANSI X3.4 1967/77/86   | ascii-67      |                |               |
+ ⁑ ASA X3.4 1963          | ascii-63      | 1963           |               |
+ ⁑ ASA X3.4 1965          | ascii-65      | 1965           |               |
+ ⁑ ANSI X3.4 1967/77/86   | ascii-67      | 1967           | ansi          |
 
  * A EBCDIC encoding in use on IBM mainframes but is not ASCII compatible.
- † UTF-16/32 encodings are NOT usable with the list table command.
- ⁑ ANSI X3.4 encodings are only usable with the list table command.
-   You can use the list table ascii command to list all three X3.4 tables.
+ † UTF-16/32 encodings are NOT usable with the table command.
+ ⁑ ANSI X3.4 encodings are only usable with the table command.
+   You can use the table ascii command to list all three X3.4 tables.
 ```
 
 ### Even More Uses
@@ -145,7 +145,7 @@ retrotxt list table cp437 latin1
  ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
          IBM Code Page 437 (DOS, OEM-US) - Extended ASCII
      0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
- 0 |   | ☺ | ☻ | ♥ | ♦ | ♣ | ♠ | • | ◘ | ○ | ◙ | ♂ | ♀ | ♪ | ♫ | ☼ |
+ 0 | ␀ | ☺ | ☻ | ♥ | ♦ | ♣ | ♠ | • | ◘ | ○ | ◙ | ♂ | ♀ | ♪ | ♫ | ☼ |
  1 | ► | ◄ | ↕ | ‼ | ¶ | § | ▬ | ↨ | ↑ | ↓ | → | ← | ∟ | ↔ | ▲ | ▼ |
  2 |   | ! | " | # | $ | % | & | ' | ( | ) | * | + | , | - | . | / |
  3 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | : | ; | < | = | > | ? |
@@ -154,7 +154,7 @@ retrotxt list table cp437 latin1
  6 | ` | a | b | c | d | e | f | g | h | i | j | k | l | m | n | o |
  7 | p | q | r | s | t | u | v | w | x | y | z | { | | | } | ~ | ⌂ |
  8 | Ç | ü | é | â | ä | à | å | ç | ê | ë | è | ï | î | ì | Ä | Å |
- 9 | É | æ | Æ | ô | ö | ò | û | ù |   | Ö | Ü | ¢ | £ | ¥ | ₧ | ƒ |
+ 9 | É | æ | Æ | ô | ö | ò | û | ù | ÿ | Ö | Ü | ¢ | £ | ¥ | ₧ | ƒ |
  A | á | í | ó | ú | ñ | Ñ | ª | º | ¿ | ⌐ | ¬ | ½ | ¼ | ¡ | « | » |
  B | ░ | ▒ | ▓ | │ | ┤ | ╡ | ╢ | ╖ | ╕ | ╣ | ║ | ╗ | ╝ | ╜ | ╛ | ┐ |
  C | └ | ┴ | ┬ | ├ | ─ | ┼ | ╞ | ╟ | ╚ | ╔ | ╩ | ╦ | ╠ | ═ | ╬ | ╧ |

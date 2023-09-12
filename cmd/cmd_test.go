@@ -284,7 +284,6 @@ func Test_ListTables(t *testing.T) { //nolint:gocognit,funlen
 		{"utf-8", "UTF-8 - Unicode", []rune{'␀', '␟', '␗'}, false},
 		// ASA/early ASCII
 		{"ascii-63", "", []rune{'␉', '0', 'A'}, false},
-		// TODO: confirm fix
 		{"ascii-65", "", []rune{'␉', '0', 'A', 'a', '{'}, false},
 		{"ascii-67", "", []rune{'␉', '0', 'A', 'a', '~'}, false},
 		// // UTF16 & UTF32 tables are not supported

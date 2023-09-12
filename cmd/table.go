@@ -9,11 +9,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func ListTable() *cobra.Command {
+func Table() *cobra.Command {
 	s := "Display one or more codepage tables showing all the characters in use"
 	l := "Display one or more codepage tables showing all the characters in use."
 	expl := strings.Builder{}
-	example.ListTable.String(&expl)
+	example.Table.String(&expl)
 	return &cobra.Command{
 		Use:     "table [codepage names or aliases]",
 		Aliases: []string{"t"},
@@ -30,7 +30,7 @@ func ListTable() *cobra.Command {
 	}
 }
 
-func ListTables() *cobra.Command {
+func Tables() *cobra.Command {
 	return &cobra.Command{
 		Use:     "tables",
 		Short:   "Display the characters of every codepage table in use",
@@ -43,6 +43,6 @@ func ListTables() *cobra.Command {
 }
 
 func init() { //nolint:gochecknoinits
-	Cmd.AddCommand(ListTable())
-	Cmd.AddCommand(ListTables())
+	Cmd.AddCommand(Table())
+	Cmd.AddCommand(Tables())
 }

@@ -23,12 +23,11 @@ const Filenames = "[filenames]"
 type Example int
 
 const (
-	Cmd          Example = iota // Cmd is the example for the root command.
-	List                        // List is the example for the list command.
-	ListExamples                // ListExamples are the examples for the list examples command.
-	ListTable                   // ListTable are the examples for the list tables command.
-	Info                        // Info is the example for the info command.
-	View                        // View is the example for the view command.
+	Cmd      Example = iota // Cmd is the example for the root command.
+	Examples                // Examples are the examples for the list examples command.
+	Table                   // Table are the examples for the list tables command.
+	Info                    // Info is the example for the info command.
+	View                    // View is the example for the view command.
 )
 
 // Print returns help usage examples.
@@ -74,12 +73,10 @@ func (e Example) result() string {
 	switch e {
 	case Cmd:
 		return cmd()
-	case List:
-		return list()
-	case ListExamples:
-		return listExamples()
-	case ListTable:
-		return listTable()
+	case Examples:
+		return examples()
+	case Table:
+		return table()
 	case Info:
 		return info()
 	case View:
@@ -99,15 +96,7 @@ func cmd() string {
 	return s.String()
 }
 
-func list() string {
-	s := &strings.Builder{}
-	fmt.Fprintf(s, "  %s list codepages\n", meta.Bin)
-	fmt.Fprintf(s, "  %s list table cp437 cp1252\n", meta.Bin)
-	fmt.Fprintf(s, "  %s list tables", meta.Bin)
-	return s.String()
-}
-
-func listExamples() string {
+func examples() string {
 	s := &strings.Builder{}
 	fmt.Fprintf(s, "  %s examples\t\t# list the builtin examples\n", meta.Bin)
 	fmt.Fprintf(s, "  %s info ascii\t\t# information on the buildin ascii sample\n", meta.Bin)
@@ -118,7 +107,7 @@ func listExamples() string {
 	return s.String()
 }
 
-func listTable() string {
+func table() string {
 	s := &strings.Builder{}
 	fmt.Fprintf(s, "  %s table cp437\n", meta.Bin)
 	fmt.Fprintf(s, "  %s table cp437 latin1 windows-1252\n", meta.Bin)

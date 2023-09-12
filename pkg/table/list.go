@@ -112,13 +112,13 @@ func List(wr io.Writer) error { //nolint:funlen
 	fmt.Fprintln(w, "\n "+term.Info("*")+
 		" A EBCDIC encoding in use on IBM mainframes but is not ASCII compatible.")
 	fmt.Fprintln(w, " "+term.Info("†")+
-		" UTF-16/32 encodings are NOT usable with the "+term.Example("list table")+" command.")
+		" UTF-16/32 encodings are NOT usable with the "+term.Example("table")+" command.")
 	fmt.Fprintln(w, " "+term.Info("⁑")+
-		" ANSI X3.4 encodings are only usable with the "+term.Example("list table")+" command."+
-		"\n   You can use the "+term.Example("list table ascii")+" command to list all three X3.4 tables.")
+		" ANSI X3.4 encodings are only usable with the "+term.Example("table")+" command."+
+		"\n   You can use the "+term.Example("table ascii")+" command to list all three X3.4 tables.")
 	fmt.Fprintln(w, "\nEither named, numeric or alias values are valid codepage arguments.")
 	fmt.Fprintln(w, "  These values all match ISO 8859-1.")
-	cmds := fmt.Sprintf("%s list table ", meta.Bin)
+	cmds := fmt.Sprintf("%s table ", meta.Bin)
 	fmt.Fprintf(w, "  %s%s  %s\n",
 		term.Example(cmds), term.Comment("iso-8859-1"), term.Fuzzy("# named"))
 	fmt.Fprintf(w, "  %s%s           %s\n",

@@ -16,7 +16,7 @@ func ListExample() *cobra.Command {
 	l := fmt.Sprintf("List the included sample text art and documents available for use with the %s and %s commands.",
 		term.Example("info"), term.Example("view"))
 	expl := strings.Builder{}
-	example.ListExamples.String(&expl)
+	example.Examples.String(&expl)
 	return &cobra.Command{
 		Use:     "example",
 		Aliases: []string{"e", "sample", "s"},
