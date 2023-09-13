@@ -71,7 +71,7 @@ type ascii-logo.txt # or, cat ascii-logo.txt
 ```
 retrotxt list
 
-─────────────────────────────────────────────────────────────────────────
+──────────────────────────────────────────────────────────────────────────────
  Formal name              | Named value   | Numeric value  | Alias value   |
  * IBM Code Page 037      | cp037         | 37             | ibm037        |
  IBM Code Page 437        | cp437         | 437            | msdos         |
