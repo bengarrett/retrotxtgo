@@ -12,7 +12,7 @@ There are [numerous downloads](https://github.com/bengarrett/retrotxtgo/releases
 [macOS](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo_darwin_all.tar.gz),
 [Linux](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo_linux_amd64.tar.gz) and more.
 
-Otherwise [these installation options are available](INSTALL.md).
+Retrotxt is a sandalone terminal program, [but there are installation options and instructions](INSTALL.md).
 
 ## Quick Usage
 

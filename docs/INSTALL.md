@@ -15,12 +15,25 @@ retrotxt -v
 ```
 
 ### macOS 
-### [Homebrew](https://brew.sh/)
+
+Unfortunately, newer macOS versions do not permit the running of unsigned terminal applications out of the box. But there is a workaround.
+
+In System Settings, Privacy & Security, Security, toggle **Allow applications downloaded from App store and identified developers**.
+
+Use Finder to extract the download for macOS, [`retrotxtgo_darwin_all.tar.gz`](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo_darwin_all.tar.gz).
+
+Use Finder to select the extracted `retrotxtgo` binary. <kbd>^</kbd> control-click the binary and choose _Open_. macOS will ask if you are sure you want to open it. Confirm by choosing _Open_, which will open a terminal and run the program. After this one-time confirmation, you can run this program within the terminal.
+
+#### Terminal download
 
 ```sh
-# NOT CURRENTLY WORKING
-brew install bengarrett/retrotxt/retrotxt
-retrotxt -v
+# download the program
+curl -OL https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo_darwin_all.tar.gz
+# decompress and unpack the program
+tar -xvzf retrotxtgo_darwin_all.tar.gz
+# if needed, follow the instructions above
+# then run the command
+retrotxtgo --version
 ```
 
 ### Linux
