@@ -3,7 +3,6 @@ package term
 
 import (
 	"bufio"
-	"bytes"
 	"errors"
 	"fmt"
 	"html/template"
@@ -78,6 +77,8 @@ func Border(w io.Writer, s string) {
 }
 
 // Center align text to a the width of an area.
+// If the width is less than the length of the string, the string is returned.
+// There is no padding after the string.
 func Center(width int, s string) string {
 	const split, space = 2, "\u0020"
 	if w := (width - len(s)) / split; w > 0 {
@@ -94,13 +95,14 @@ func GetEnv(key string) string {
 // Head returns a colored and underlined string for use as a header.
 // Provide a fixed width value for the underline border or set to zero.
 // The header is colored with the fuzzy color.
-func Head(w io.Writer, width int, s string) (int, error) {
+func Head(w io.Writer, width int, s string) {
 	if w == nil {
 		w = io.Discard
 	}
 	r := color.OpFuzzy.Sprint(strings.Repeat(HBar, width))
 	h := color.Primary.Sprint(Center(width, s))
-	return fmt.Fprintf(w, "%s\n%s\n", r, h)
+	fmt.Fprintln(w, r)
+	fmt.Fprintln(w, h)
 }
 
 // HR returns a horizontal ruler and a line break.
@@ -112,6 +114,16 @@ func HR(w io.Writer, width int) {
 }
 
 // Term determines the terminal type based on the COLORTERM and TERM environment variables.
+//
+// Possible reply values are: terminal, terminal16, terminal256, terminal16m.
+//
+// The value terminal is a monochrome terminal.
+//
+// The value terminal16 is a 4-bit, 16 color terminal.
+//
+// The value terminal256 is a 8-bit, 256 color terminal.
+//
+// The value terminal16m is a 24-bit, 16 million color terminal.
 func Term(colorEnv, env string) string {
 	// 9.11.2 The environment variable TERM
 	// https://www.gnu.org/software/gettext/manual/html_node/The-TERM-variable.html
@@ -146,18 +158,18 @@ func Term(colorEnv, env string) string {
 }
 
 // UnderlineChar uses ANSI to underline the first character of a string.
-func UnderlineChar(c string) (string, error) {
-	if c == "" {
+func UnderlineChar(s string) (string, error) {
+	if s == "" {
 		return "", nil
 	}
-	if !utf8.ValidString(c) {
-		return "", fmt.Errorf("underlinechar %q: %w", c, ErrRune)
+	if !utf8.ValidString(s) {
+		return "", fmt.Errorf("underlinechar %q: %w", s, ErrRune)
 	}
 	if !color.Enable {
-		return c, nil
+		return s, nil
 	}
-	b := &bytes.Buffer{}
-	r, _ := utf8.DecodeRuneInString(c)
+	b := &strings.Builder{}
+	r, _ := utf8.DecodeRuneInString(s)
 	t, err := template.New("underline").Parse("{{define \"TEXT\"}}\033[0m\033[4m{{.}}\033[0m{{end}}")
 	if err != nil {
 		return "", fmt.Errorf("underlinechar new template: %w", err)
@@ -204,17 +216,17 @@ func UnderlineKeys(keys ...string) string {
 	return strings.Join(keys, ", ")
 }
 
-// Alert prints "Problem" using the Error color.
+// Alert returns the string "Problem:" using the error color.
 func Alert() string {
 	return fmt.Sprintf("%s\n", color.Error.Sprint("Problem:"))
 }
 
-// Example prints the string using the Debug color.
+// Example returns the string using the debug color.
 func Example(s string) string {
 	return color.Debug.Sprint(s)
 }
 
-// Inform prints "Information" using the Info color.
+// Inform returns "Information:" using the info color.
 func Inform() string {
 	return fmt.Sprintf("%s\n", color.Info.Sprint("Information:"))
 }
@@ -228,23 +240,28 @@ func Bool(b bool) string {
 	return color.Warn.Sprint(cross)
 }
 
-// Options appends options: ... to the usage string.
-func Options(w io.Writer, s string, shorthand, flagHelp bool, opts ...string) (int, error) {
+// Options writes the string and a sorted list of opts to the writer.
+// If shorthand is true, the options are underlined.
+// If flag is true, the string is prepended with "flag".
+func Options(w io.Writer, s string, shorthand, flag bool, opts ...string) {
 	if w == nil {
 		w = io.Discard
 	}
 	if len(opts) == 0 {
-		return 0, nil
+		return
 	}
 	sort.Strings(opts)
 	keys := strings.Join(opts, ", ")
 	if shorthand {
 		keys = UnderlineKeys(opts...)
 	}
-	if flagHelp {
-		return fmt.Fprintf(w, "%s\nflag options: %s", s, color.Info.Sprint(keys))
+	if flag {
+		fmt.Fprintln(w, s)
+		fmt.Fprintf(w, "flag options: %s", color.Info.Sprint(keys))
+		return
 	}
-	return fmt.Fprintf(w, "%s.\n  Options: %s", s, color.Info.Sprint(keys))
+	fmt.Fprintln(w, s+".")
+	fmt.Fprintf(w, "  Options: %s", color.Info.Sprint(keys))
 }
 
 // Comment returns a string in the comment color.

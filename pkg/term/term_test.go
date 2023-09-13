@@ -6,55 +6,30 @@ import (
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/pkg/term"
-	"github.com/gookit/color"
 )
 
 func ExampleAlert() {
-	color.Enable = false
-	fmt.Fprint(os.Stdout, term.Alert())
+	fmt.Print(term.Alert(), "something went wrong")
 	// Output:Problem:
-}
-
-func ExampleInform() {
-	color.Enable = false
-	fmt.Fprint(os.Stdout, term.Inform())
-	// Output:Information:
-}
-
-func ExampleSecondary() {
-	color.Enable = false
-	fmt.Fprint(os.Stdout, term.Secondary("Hi"))
-	// Output:Hi
+	// something went wrong
 }
 
 func ExampleComment() {
-	color.Enable = false
-	fmt.Fprint(os.Stdout, term.Comment("Hi"))
-	// Output:Hi
-}
-
-func ExampleFuzzy() {
-	color.Enable = false
-	fmt.Fprint(os.Stdout, term.Fuzzy("Hi"))
-	// Output:Hi
-}
-
-func ExampleInfo() {
-	color.Enable = false
-	fmt.Fprint(os.Stdout, term.Info("Hi"))
+	fmt.Print(term.Comment("Hi"))
 	// Output:Hi
 }
 
 func ExampleBool() {
-	fmt.Fprint(os.Stdout, term.Bool(true))
-	fmt.Fprint(os.Stdout, term.Bool(false))
-	// Output:✓✗
+	fmt.Println(term.Bool(true), "yes")
+	fmt.Println(term.Bool(false), "no")
+	// Output:✓ yes
+	// ✗ no
 }
 
 func ExampleOptions() {
-	_, _ = term.Options(os.Stdout, "this is an example of a list of options",
+	term.Options(os.Stdout, "this is a list of options",
 		false, false, "option3", "option2", "option1")
-	// Output:this is an example of a list of options.
+	// Output:this is a list of options.
 	//   Options: option1, option2, option3
 }
 
@@ -63,6 +38,28 @@ func ExampleBorder() {
 	// Output: ┌────┐
 	// │ hi │
 	// └────┘
+}
+
+func ExampleCenter() {
+	fmt.Print("[" + term.Center(10, "hi") + "]")
+	// Output:[    hi]
+}
+
+func ExampleHR() {
+	term.HR(os.Stdout, 8)
+	// Output:────────
+}
+
+func ExampleHead() {
+	term.Head(os.Stdout, 10, "heading")
+	// Output:──────────
+	//  heading
+}
+
+func ExampleUnderlineChar() {
+	s, _ := term.UnderlineChar("Z")
+	fmt.Print(s)
+	// Output:[0m[4mZ[0m
 }
 
 func TestTerm(t *testing.T) {

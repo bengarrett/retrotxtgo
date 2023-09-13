@@ -34,7 +34,7 @@ func InfoInit() *cobra.Command {
 	infoc := InfoCommand()
 	infos := format.Format().Info
 	s := &strings.Builder{}
-	_, _ = term.Options(s, "print format or syntax", true, true, infos[:]...)
+	term.Options(s, "print format or syntax", true, true, infos[:]...)
 	infoc.Flags().StringVarP(&flag.Info.Format, "format", "f", "color", s.String())
 	return infoc
 }

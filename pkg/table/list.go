@@ -64,9 +64,7 @@ func List(wr io.Writer) error { //nolint:funlen
 	const verticalBars = tabwriter.Debug
 	const padding, width = 2, 76
 	w := tabwriter.NewWriter(wr, 0, 0, padding, ' ', verticalBars)
-	if _, err := term.Head(w, width, title); err != nil {
-		return err
-	}
+	term.Head(w, width, title)
 	fmt.Fprintf(w, "\n%s\n", header)
 	x := Charmaps()
 	x = append(x, asa.XUserDefined1963, asa.XUserDefined1965, asa.XUserDefined1967)

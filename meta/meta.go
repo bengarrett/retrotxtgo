@@ -1,4 +1,6 @@
 // Package meta handles the metadata generated through the go builder using ldflags.
+//
+//nolint:gochecknoglobals
 package meta
 
 import (
@@ -22,13 +24,13 @@ type Release struct {
 
 // Version using semantic syntax values.
 type Version struct {
-	Major int
-	Minor int
-	Patch int
+	Major int // Major for incompatible API changes.
+	Minor int // Minor for functionality in a backwards compatible manner.
+	Patch int // Patch for backwards compatible bug fixes.
 }
 
 // App contains the version release and build metadata.
-var App = Release{} //nolint:gochecknoglobals
+var App = Release{}
 
 const (
 	// Alpha Greek character.
@@ -49,13 +51,8 @@ const (
 	URL = "https://retrotxt.com/go"
 )
 
-// IsGoBuild returns true if this version of RetroTxt was manually built.
-func IsGoBuild() bool {
-	return Semantic(App.Version) == Semantic(GoBuild)
-}
-
-// Print the release version string.
-func Print() string {
+// String returns the release version string.
+func String() string {
 	return Semantic(App.Version).String()
 }
 
@@ -85,10 +82,12 @@ func Semantic(ver string) Version {
 
 // Digits returns only the digits and decimal point values from a string.
 func Digits(s string) string {
-	reg := regexp.MustCompile("[^0-9/.]+")
-	return reg.ReplaceAllString(s, "")
+	r := regexp.MustCompile("[^0-9/.]+")
+	return r.ReplaceAllString(s, "")
 }
 
+// String returns the semantic version string.
+// If the version is invalid, it returns a placeholder, unset string.
 func (v Version) String() string {
 	if !v.Valid() {
 		return Placeholder
@@ -105,7 +104,8 @@ func (v Version) String() string {
 	return fmt.Sprintf("%s%d.%d.%d", p, v.Major, v.Minor, v.Patch)
 }
 
-// Valid checks the version syntax.
+// Valid checks the version syntax and returns false
+// if any of the values are less than zero.
 func (v Version) Valid() bool {
 	if v.Major < 0 && v.Minor < 0 && v.Patch < 0 {
 		return false

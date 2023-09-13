@@ -44,7 +44,7 @@ func Template(wr io.Writer) error {
 		appDate = fmt.Sprintf(" (%s)", meta.App.Date)
 	}
 	w := tabwriter.NewWriter(wr, 0, TabWidth, 0, '\t', 0)
-	fmt.Fprintf(w, "%s %s\n", meta.Name, meta.Print())
+	fmt.Fprintf(w, "%s %s\n", meta.Name, meta.String())
 	fmt.Fprintf(w, "%s %s Ben Garrett\n", Copyright, c)
 	fmt.Fprintln(w, color.Primary.Sprint(meta.URL))
 	fmt.Fprintf(w, "\n%s\t%s %s%s\n", color.Secondary.Sprint("build:"), runtime.Compiler, meta.App.BuiltBy, appDate)

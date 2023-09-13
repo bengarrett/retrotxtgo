@@ -3,7 +3,6 @@ package meta_test
 
 import (
 	"fmt"
-	"os"
 	"reflect"
 	"testing"
 
@@ -11,8 +10,21 @@ import (
 )
 
 func Example_digits() {
-	fmt.Fprintln(os.Stdout, meta.Digits("v1.0 (init release)"))
+	fmt.Print(meta.Digits("v1.0 (init release)"))
 	// Output: 1.0
+}
+
+func Example_string() {
+	fmt.Print(meta.String())
+	// Output: unset
+}
+
+func Example_semantic() {
+	const ver = "v1.0.0 (init release)"
+	fmt.Println(meta.Semantic(ver))
+	fmt.Println(meta.Semantic(ver).Major)
+	// Output: 1.0.0
+	// 1
 }
 
 func Test_digits(t *testing.T) {

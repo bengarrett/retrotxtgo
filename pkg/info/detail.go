@@ -3,6 +3,7 @@ package info
 import (
 	"archive/zip"
 	"bytes"
+
 	//nolint:gosec
 	"crypto/md5"
 	"crypto/sha256"
@@ -340,9 +341,7 @@ func (d *Detail) marshal(w io.Writer, color bool) error {
 		return fmt.Sprintf("%s\t", s)
 	}
 	gookit.Enable = color
-	if _, err := term.Head(w, width, "File information"); err != nil {
-		return err
-	}
+	term.Head(w, width, "File information")
 	fmt.Fprintln(w)
 	data := d.marshalled()
 	l := len(fmt.Sprintf(" filename%s%s", strings.Repeat(" ", padding), data[0].v))

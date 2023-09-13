@@ -50,9 +50,7 @@ func Table(wr io.Writer, name string) error { //nolint:funlen
 	h += CharmapAlias(cp) + charmapStandard(cp)
 	const tabWidth = 8
 	w := tabwriter.NewWriter(wr, 0, tabWidth, 0, '\t', 0)
-	if _, err := term.Head(w, width, " "+h); err != nil {
-		return err
-	}
+	term.Head(w, width, " "+h)
 	columns(w)
 	if x := swapper(name); x != nil {
 		cp = x

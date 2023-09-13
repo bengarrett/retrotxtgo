@@ -54,7 +54,7 @@ func base() *cobra.Command {
 func Execute() error {
 	Cmd.CompletionOptions.DisableDefaultCmd = true
 	Cmd.SilenceErrors = true // set to false to debug errors
-	Cmd.Version = meta.Print()
+	Cmd.Version = meta.String()
 	s := strings.Builder{}
 	if err := version.Template(&s); err != nil {
 		return err
