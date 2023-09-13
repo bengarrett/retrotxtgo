@@ -15,9 +15,15 @@ before:
   hooks:
     - go mod tidy
 builds:
+  - id: BSD
+    goos: ['freebsd']
+    goarch: ['amd64']
   - id: Linux_Intel
     goos: ['linux']
     goarch: ['amd64']
+  - id: Linux_arm64
+    goos: ['linux']
+    goarch: ['arm64']
   - id: macOS
     goos: ['darwin']
     goarch: ['amd64', 'arm64']
@@ -29,15 +35,21 @@ universal_binaries:
     name_template: "{{ .ProjectName }}"
     replace: true
 
-archives:
+archives:  
+  - id: BSD
+    builds: ['BSD']
+    format: tar.gz
+    files:
+    - none*
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
   - id: Linux_Intel
     builds: ['Linux_Intel']
     format: tar.gz
     files:
     - none*
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
-  - id: Linux arm
-    builds: ['Linux arm']
+  - id: Linux_arm64
+    builds: ['Linux_arm64']
     format: tar.gz
     files:
     - none*
@@ -69,28 +81,28 @@ nfpms:
       - deb
       - rpm
 
-scoops:
-  - commit_author:
-      name: goreleaserbot
-      email: bot@goreleaser.com
-  - commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
-  - homepage: "https://retrotxt.com/go"
-  - description: "Read legacy codepage encoded textfiles in a modern Unicode terminal."
-  - license: "LGPL 3.0"
-  # Setting this will prevent goreleaser to actually try to commit the updated
-  # manifest leaving the responsibility of publishing it to the user.
-  # If set to auto, the release will not be uploaded to the scoop bucket
-  # in case there is an indicator for prerelease in the tag e.g. v1.0.0-rc1
-  # Default is false.
-  - skip_upload: auto
-  # Repository to push the generated files to.
-  - repository:
-      owner: bengarrett
-      name: retrotxtgo
-      branch: dev
+# scoops:
+#   - commit_author:
+#       name: goreleaserbot
+#       email: bot@goreleaser.com
+#   - commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
+#   - homepage: "https://retrotxt.com/go"
+#   - description: "Read legacy codepage encoded textfiles in a modern Unicode terminal."
+#   - license: "LGPL 3.0"
+#   # Setting this will prevent goreleaser to actually try to commit the updated
+#   # manifest leaving the responsibility of publishing it to the user.
+#   # If set to auto, the release will not be uploaded to the scoop bucket
+#   # in case there is an indicator for prerelease in the tag e.g. v1.0.0-rc1
+#   # Default is false.
+#   - skip_upload: auto
+#   # Repository to push the generated files to.
+#   - repository:
+#       owner: bengarrett
+#       name: retrotxtgo
+#       branch: dev
 
 changelog:
-  skip: false
+  skip: true
   use: git
 
 upx:
