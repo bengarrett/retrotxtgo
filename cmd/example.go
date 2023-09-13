@@ -30,6 +30,6 @@ func ListExample() *cobra.Command {
 	}
 }
 
-func init() {
+func init() { //nolint:gochecknoinits
 	Cmd.AddCommand(ListExample())
 }

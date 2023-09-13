@@ -39,7 +39,7 @@ func Run(w io.Writer, cmd *cobra.Command, args ...string) error {
 		return err
 	}
 	if ok {
-		return Pipe(w, cmd)
+		return Pipe(w)
 	}
 	if err := flag.Help(cmd, args...); err != nil {
 		return err
@@ -98,7 +98,7 @@ func Sample(name string) (string, error) {
 }
 
 // Pipe parses a standard input (stdin) stream of data.
-func Pipe(w io.Writer, cmd *cobra.Command) error {
+func Pipe(w io.Writer) error {
 	if w == nil {
 		w = io.Discard
 	}

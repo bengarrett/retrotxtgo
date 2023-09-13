@@ -28,7 +28,7 @@ func Languages() Lang {
 		charmap.CodePage862:  "Hebrew",
 		charmap.CodePage863:  "French Canadian",
 		charmap.CodePage865:  "Danish, Norwegian",
-		charmap.CodePage866:  "USSR Cyrillic",
+		charmap.CodePage866:  "USSR Cyrillic script",
 		charmap.CodePage1047: "West Europe",
 		charmap.CodePage1140: "US English",
 		charmap.ISO8859_1:    "West Europe",
@@ -55,7 +55,7 @@ func Languages() Lang {
 		charmap.Macintosh:    "West Europe",
 		charmap.Windows874:   "Thai",
 		charmap.Windows1250:  "Central Europe Latin script",
-		charmap.Windows1251:  "Cyrillic",
+		charmap.Windows1251:  "Cyrillic script",
 		charmap.Windows1252:  "English and West Europe",
 		charmap.Windows1253:  "Greek",
 		charmap.Windows1254:  "Turkish",
@@ -79,7 +79,7 @@ func Language(e encoding.Encoding) string {
 
 // ListLanguage returns a tabled list of supported IANA character set encodings
 // and the languages they target.
-func ListLanguage(wr io.Writer) error { //nolint:funlen
+func ListLanguage(wr io.Writer) error {
 	if wr == nil {
 		wr = io.Discard
 	}

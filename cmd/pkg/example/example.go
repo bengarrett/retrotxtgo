@@ -92,7 +92,8 @@ func cmd() string {
 	fmt.Fprintf(s, "  %s example\n\n", meta.Bin)
 	fmt.Fprintf(s, "  %s list\n", meta.Bin)
 	fmt.Fprintf(s, "  %s tables\n", meta.Bin)
-	fmt.Fprintf(s, "  %s table [codepage names or aliases]", meta.Bin)
+	fmt.Fprintf(s, "  %s table [codepage names or aliases]\n", meta.Bin)
+	fmt.Fprintf(s, "  %s lang", meta.Bin)
 	return s.String()
 }
 
