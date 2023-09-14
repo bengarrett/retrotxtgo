@@ -22,6 +22,7 @@ func Clean(name string) {
 }
 
 // SaveTemp saves bytes to a named temporary file.
+// The path to the file is returned.
 func SaveTemp(name string, b ...byte) (string, error) {
 	_, path, err := save.Save(util.Temp(name), b...)
 	if err != nil {

@@ -13,26 +13,49 @@ import (
 	"github.com/bengarrett/retrotxtgo/pkg/internal/tmp"
 )
 
-const windows = "windows"
-
-func ExampleTar() {
-	tmpTar := tmp.File("tar_test.tar")
-	tmpFile, err := fsys.SaveTemp(tmpTar, []byte("x")...)
+func ExampleClean() {
+	path, err := fsys.SaveTemp("examplesave.txt", []byte("hello world")...)
 	if err != nil {
+		fsys.Clean(path)
 		log.Fatal(err)
 	}
-	defer os.Remove(tmpFile)
-	if err := fsys.Tar(tmpTar, tmpFile); err != nil {
-		log.Print(err)
-		return
-	}
-	f, err := os.Stat(tmpFile)
-	if err != nil {
-		log.Print(err)
-		return
-	}
-	fmt.Fprintf(os.Stdout, "%s, %d", f.Name(), f.Size())
+	fsys.Clean(path)
+	// Output:
+}
+
+func ExampleSaveTemp() {
+	file, _ := fsys.SaveTemp("example.txt", []byte("hello world")...)
+	defer os.Remove(file)
+	s, _ := os.Stat(file)
+	fmt.Printf("%s, %d", s.Name(), s.Size())
+	// Output:example.txt, 11
+}
+
+func ExampleTar() {
+	name := tmp.File("tar_test.tar")
+	file, _ := fsys.SaveTemp(name, []byte("x")...)
+	defer os.Remove(file)
+	_ = fsys.Tar(name, file)
+	s, _ := os.Stat(file)
+	fmt.Printf("%s, %d", s.Name(), s.Size())
 	// Output:tar_test.tar, 1536
+}
+
+func ExampleTouch() {
+	file, _ := fsys.Touch("example.txt")
+	defer os.Remove(file)
+	s, _ := os.Stat(file)
+	fmt.Printf("%s, %d", s.Name(), s.Size())
+	// Output:example.txt, 0
+}
+
+func ExampleWrite() {
+	file, _ := fsys.Touch("example.txt")
+	defer os.Remove(file)
+	_, _, _ = fsys.Write(file, []byte("hello world")...)
+	s, _ := os.Stat(file)
+	fmt.Printf("%s, %d", s.Name(), s.Size())
+	// Output:example.txt, 11
 }
 
 func BenchmarkReadLarge(_ *testing.B) {
@@ -51,16 +74,6 @@ func BenchmarkReadMega(_ *testing.B) {
 		log.Fatal(err)
 	}
 	fsys.Clean(mega)
-}
-
-func ExampleClean() {
-	path, err := fsys.SaveTemp("examplesave.txt", []byte("hello world")...)
-	if err != nil {
-		fsys.Clean(path)
-		log.Fatal(err)
-	}
-	fsys.Clean(path)
-	// Output:
 }
 
 func TestRead(t *testing.T) {
