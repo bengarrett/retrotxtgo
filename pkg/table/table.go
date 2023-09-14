@@ -178,7 +178,7 @@ func swapper(name string) encoding.Encoding {
 func reverter(name string) encoding.Encoding {
 	switch strings.ToLower(name) {
 	case xud.Name11, xud.Numr11, xud.Alias11:
-		return xud.XUserDefinedISO11
+		return nil // we don't want to revert to the custom charmap
 	case xud.Name63, xud.Numr63:
 		return xud.XUserDefined1963
 	case xud.Name65, xud.Numr65:
