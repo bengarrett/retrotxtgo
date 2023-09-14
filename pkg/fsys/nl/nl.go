@@ -1,21 +1,19 @@
 // Package nl provides line break characters for multiple system and microcomputer platforms.
 package nl
 
-import "fmt"
-
-// LineBreaks is a system or microcomputer platform.
-type LineBreaks int
+// System is a system or microcomputer platform.
+type System int
 
 const (
-	NL     LineBreaks = iota // NL is the operating system default.
-	Dos                      // Dos is an Microsoft DOS line break.
-	Win                      // Win is a Windows line break.
-	C64                      // C64 is a Commodore 64 line break.
-	Darwin                   // Darwin is a macOS line break.
-	Mac                      // Mac is an Apple Macintosh line break.
-	Amiga                    // Amiga is a Commodore Amiga line break.
-	Linux                    // Linux is a Linux line break.
-	Unix                     // Unix is a Unix line break.
+	NL     System = iota // NL is the operating system default.
+	Dos                  // Dos is an Microsoft DOS line break.
+	Win                  // Win is a Windows line break.
+	C64                  // C64 is a Commodore 64 line break.
+	Darwin               // Darwin is a macOS line break.
+	Mac                  // Mac is an Apple Macintosh line break.
+	Amiga                // Amiga is a Commodore Amiga line break.
+	Linux                // Linux is a Linux line break.
+	Unix                 // Unix is a Unix line break.
 )
 
 const (
@@ -25,15 +23,15 @@ const (
 	CarriageReturn rune = 13
 )
 
-// LineBreak returns line break character for the system platform.
-func LineBreak(platform LineBreaks) string {
-	switch platform {
+// NewLine returns a new line or line break characters for the system platform.
+func NewLine(s System) string {
+	switch s {
 	case Dos, Win:
-		return fmt.Sprintf("%x%x", CarriageReturn, Linefeed)
+		return string(CarriageReturn) + string(Linefeed)
 	case C64, Darwin, Mac:
-		return fmt.Sprintf("%x", CarriageReturn)
+		return string(CarriageReturn)
 	case Amiga, Linux, Unix:
-		return fmt.Sprintf("%x", Linefeed)
+		return string(Linefeed)
 	case NL: // use operating system default
 		return "\n"
 	}
