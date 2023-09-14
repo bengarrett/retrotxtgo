@@ -77,7 +77,7 @@ func TestCharX3465(t *testing.T) {
 	r := asa.Char(asa.XUserDefined1965, 94)
 	assert.Equal(t, skip, r)
 	r = asa.Char(asa.XUserDefined1965, 92)
-	assert.Equal(t, 126, r)
+	assert.Equal(t, int32(126), r)
 }
 
 func TestCharX3467(t *testing.T) {

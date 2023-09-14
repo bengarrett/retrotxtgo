@@ -2,20 +2,63 @@ package byter_test
 
 import (
 	"fmt"
-	"log"
-	"os"
 	"reflect"
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/pkg/byter"
-	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/internal/mock"
 	"golang.org/x/text/encoding/charmap"
 )
 
+func ExampleDecode() {
+	s := "\xCD\xB9\xB2\xCC\xCD"
+	p, _ := byter.Decode(charmap.CodePage437, s)
+	fmt.Printf("%s\n", p)
+	p, _ = byter.Decode(charmap.ISO8859_1, s)
+	fmt.Printf("%s\n", p)
+	// Output: ═╣▓╠═
+	// Í¹²ÌÍ
+}
+
+func ExampleEncode() {
+	p, _ := byter.Encode(charmap.CodePage437, "═╣▓╠═")
+	fmt.Printf("%X\n", p)
+	p, _ = byter.Encode(charmap.ISO8859_1, "hello")
+	fmt.Printf("%s (%X)\n", p, p)
+	p, _ = byter.Encode(charmap.CodePage1140, "hello")
+	fmt.Printf("%X\n", p) // not ascii compatible
+	// Output: CDB9B2CCCD
+	// hello (68656C6C6F)
+	// 8885939396
+}
+
 func ExampleBOM() {
-	fmt.Fprintf(os.Stdout, "%X", byter.BOM())
-	// Output: EFBBBF
+	fmt.Printf("#%x", byter.BOM())
+	// Output: #efbbbf
+}
+
+func ExampleTrimEOF() {
+	fmt.Printf("%q", byter.TrimEOF([]byte("hello world\x1a")))
+	// Output: "hello world"
+}
+
+func ExampleMakeBytes() {
+	fmt.Printf("%d", len(byter.MakeBytes()))
+	// Output: 256
+}
+
+func ExampleHexDecode() {
+	b, _ := byter.HexDecode("6F6B")
+	fmt.Printf("%s\n", b)
+	fmt.Printf("%d\n", b)
+	// Output: ok
+	// [111 107]
+}
+
+func ExampleHexEncode() {
+	b := byter.HexEncode("ok")
+	fmt.Printf("#%s\n", b)
+	// Output: #6f6b
 }
 
 func TestTrimEOF(t *testing.T) {
@@ -128,24 +171,6 @@ const (
 	base     = "rt_sample-"
 )
 
-func ExampleDecode() {
-	const name = base + "cp437In.txt"
-	result, err := byter.Decode(charmap.CodePage437, cp437hex)
-	if err != nil {
-		log.Fatal(err)
-	}
-	_, err = fsys.SaveTemp(name, result...)
-	if err != nil {
-		log.Fatal(err)
-	}
-	t, err := fsys.ReadText(name)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Fprint(os.Stdout, t)
-	// Output: ═╣▓╠═
-}
-
 func TestCP437Decode(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -172,25 +197,6 @@ func TestCP437Decode(t *testing.T) {
 			}
 		})
 	}
-}
-
-func ExampleEncode() {
-	const name = base + "cp437.txt"
-	result, err := byter.Encode(charmap.CodePage437, utf)
-	if err != nil {
-		log.Fatal(err)
-	}
-	_, err = fsys.SaveTemp(name, result...)
-	if err != nil {
-		log.Fatal(err)
-	}
-	t, err := fsys.ReadText(name)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fsys.Clean(name)
-	fmt.Fprint(os.Stdout, len(t))
-	// Output: 8
 }
 
 func TestDString(t *testing.T) {

@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	ErrCharmap = fmt.Errorf("the c charmap cannot be nil")
+	ErrCharmap = errors.New("the c charmap cannot be nil")
 	ErrUTF8    = errors.New("string cannot encode to utf-8")
 )
 
