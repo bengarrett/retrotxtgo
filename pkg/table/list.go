@@ -20,7 +20,7 @@ import (
 	"golang.org/x/text/encoding/unicode/utf32"
 )
 
-var ErrNilEncoding = errors.New("character encoding cannot be a nil value")
+var ErrNil = errors.New("character encoding cannot be a nil value")
 
 const latin = "isolatin"
 
@@ -139,7 +139,7 @@ func List(wr io.Writer) error { //nolint:funlen
 // Rows return character encoding details for use in a text table.
 func Rows(e encoding.Encoding) (Row, error) {
 	if e == nil {
-		return Row{}, ErrNilEncoding
+		return Row{}, ErrNil
 	}
 	r := Row{
 		Name: fmt.Sprint(e),
@@ -167,7 +167,7 @@ func Rows(e encoding.Encoding) (Row, error) {
 	if i := Numeric(r.Name); i > -1 {
 		r.Numeric = fmt.Sprint(i)
 	}
-	r.Alias, err = Alias(e, r.Alias, r.Value)
+	r.Alias, err = Alias(r.Alias, r.Value, e)
 	if err != nil {
 		return Row{}, err
 	}
@@ -192,8 +192,9 @@ func Numeric(name string) int {
 	return -1
 }
 
-// Alias return character encoding aliases.
-func Alias(e encoding.Encoding, alias, value string) (string, error) {
+// Alias returns an alias for a encoding.
+// Only the alias argument is required.
+func Alias(alias, value string, e encoding.Encoding) (string, error) {
 	a := strings.ToLower(alias)
 	if a == value {
 		a = ""

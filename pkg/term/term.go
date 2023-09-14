@@ -40,7 +40,7 @@ const (
 	term = "terminal"
 )
 
-// Terminal colors.
+// String returns the terminal as a named color value.
 func (t Terminal) String() string {
 	return [...]string{none, term, term, "terminal256", "terminal16m"}[t]
 }

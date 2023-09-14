@@ -1,6 +1,7 @@
 package table_test
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -11,6 +12,12 @@ import (
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/encoding/unicode/utf32"
 )
+
+func ExampleAlias() {
+	s, _ := table.Alias("", "cp437", nil)
+	fmt.Println(s)
+	// Output:msdos
+}
 
 func TestCharmaps(t *testing.T) {
 	const totalCharmaps = 53
@@ -100,7 +107,7 @@ func TestAliasFmt(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := table.Alias(tt.args.e, tt.args.s, tt.args.val)
+			got, err := table.Alias(tt.args.s, tt.args.val, tt.args.e)
 			if got != tt.want {
 				t.Errorf("Alias() = %v, want %v", got, tt.want)
 			}

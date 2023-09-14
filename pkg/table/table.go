@@ -161,11 +161,11 @@ func CodePager(s string) (encoding.Encoding, error) {
 		return charmap.Windows874, nil
 	}
 	switch strings.ToLower(s) {
-	case asa.Text63, asa.Numr63:
+	case asa.Name63, asa.Numr63:
 		return asa.XUserDefined1963, nil
-	case asa.Text65, asa.Numr65:
+	case asa.Name65, asa.Numr65:
 		return asa.XUserDefined1965, nil
-	case asa.Text67, asa.Numr67, asa.Alias67:
+	case asa.Name67, asa.Numr67, asa.Alias67:
 		return asa.XUserDefined1967, nil
 	default:
 		return CodePage(s)
@@ -196,11 +196,11 @@ func CodePage(s string) (encoding.Encoding, error) { //nolint:ireturn
 // for the ASA ASCII encodings.
 func swapper(name string) encoding.Encoding {
 	switch strings.ToLower(name) {
-	case asa.Text63, asa.Numr63:
+	case asa.Name63, asa.Numr63:
 		return charmap.Windows1252
-	case asa.Text65, asa.Numr65:
+	case asa.Name65, asa.Numr65:
 		return charmap.Windows1252
-	case asa.Text67, asa.Numr67, asa.Alias67:
+	case asa.Name67, asa.Numr67, asa.Alias67:
 		return charmap.Windows1252
 	}
 	return nil
@@ -211,11 +211,11 @@ func reverter(name string) encoding.Encoding {
 		return charmap.XUserDefined
 	}
 	switch strings.ToLower(name) {
-	case asa.Text63, asa.Numr63:
+	case asa.Name63, asa.Numr63:
 		return asa.XUserDefined1963
-	case asa.Text65, asa.Numr65:
+	case asa.Name65, asa.Numr65:
 		return asa.XUserDefined1965
-	case asa.Text67, asa.Numr67, asa.Alias67:
+	case asa.Name67, asa.Numr67, asa.Alias67:
 		return asa.XUserDefined1967
 	}
 	return nil
