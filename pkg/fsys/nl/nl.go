@@ -17,10 +17,8 @@ const (
 )
 
 const (
-	// Linefeed is a Linux/macOS line break.
-	Linefeed rune = 10
-	// CarriageReturn is a partial line break for Windows/DOS.
-	CarriageReturn rune = 13
+	Linefeed       rune = 10 // Linefeed is a Linux/macOS line break.
+	CarriageReturn rune = 13 // CarriageReturn is a partial line break for Windows/DOS.
 )
 
 // NewLine returns a new line or line break characters for the system platform.

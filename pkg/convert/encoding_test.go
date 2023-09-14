@@ -4,7 +4,6 @@ package convert_test
 import (
 	"fmt"
 	"log"
-	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -17,10 +16,64 @@ import (
 	"golang.org/x/text/encoding/unicode/utf32"
 )
 
+func ExampleEncodeAlias() {
+	s := convert.EncodeAlias("437")
+	fmt.Println(s)
+	s = convert.EncodeAlias("koi8u")
+	fmt.Println(s)
+	// Output: IBM437
+	// KOI8-U
+}
+
+func ExampleEncodeUTF32() {
+	s := convert.EncodeUTF32("utf-32")
+	fmt.Println(s)
+	// Output: UTF-32LE (Use BOM)
+}
+
+func ExampleEncoder() {
+	e, _ := convert.Encoder("cp437")
+	fmt.Println(e)
+	e, _ = convert.Encoder("1252")
+	fmt.Println(e)
+	// Output: IBM Code Page 437
+	// Windows 1252
+}
+
+func ExampleHumanize() {
+	s := convert.Humanize("cp437")
+	fmt.Println(s)
+	s = convert.Humanize("cp1252")
+	fmt.Println(s)
+	// Output: IBM437
+	// Windows-1252
+}
+
+func ExampleShorten() {
+	s := convert.Shorten("cp437")
+	fmt.Println(s)
+	s = convert.Shorten("IBM-437")
+	fmt.Println(s)
+	// Output: 437
+	// 437
+}
+
 func ExampleSwap() {
-	fmt.Fprint(os.Stdout, string(convert.Swap(convert.DEL)))
-	fmt.Fprint(os.Stdout, string(convert.Swap(convert.SquareRoot)))
-	// Output: Δ✓
+	fmt.Println(string(convert.Swap(convert.DEL)))
+	fmt.Println(string(convert.Swap(convert.SquareRoot)))
+	// Output: Δ
+	// ✓
+}
+
+func ExamplePicture() {
+	const lf = byte(138)
+	r := convert.Picture(lf)
+	fmt.Printf("%U %s\n", r, string(r))
+	const esc = byte(155)
+	r = convert.Picture(esc)
+	fmt.Printf("%U %s\n", r, string(r))
+	// Output: U+240A ␊
+	// U+241B ␛
 }
 
 var (

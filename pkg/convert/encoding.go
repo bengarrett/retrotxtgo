@@ -941,7 +941,8 @@ func Picture(b byte) rune {
 	return r
 }
 
-// EqualLB returns true when r matches the single or multi-byte, line break character runes.
+// EqualLB returns true when r matches the single
+// or multi-byte, line break character runes.
 func EqualLB(r, nl [2]rune) bool {
 	// single-byte line break
 	if nl[1] == 0 {

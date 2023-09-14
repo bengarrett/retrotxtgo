@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"runtime"
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/pkg/fsys"
@@ -62,34 +61,6 @@ func ExampleClean() {
 	}
 	fsys.Clean(path)
 	// Output:
-}
-
-func Test_DirExpansion(t *testing.T) {
-	h, err := os.UserHomeDir()
-	if err != nil {
-		t.Error(err)
-	}
-	hp := filepath.Dir(h)
-	w, err := os.Getwd()
-	if err != nil {
-		t.Error(err)
-	}
-	wp := filepath.Dir(w)
-	s := string(os.PathSeparator)
-
-	var tests mock.DirTests
-	if runtime.GOOS == windows {
-		tests = mock.WindowsTests(h, hp, s, w, wp)
-	} else {
-		tests = mock.NixTests(h, hp, s, w, wp)
-	}
-	for _, tt := range tests {
-		t.Run(tt.Name, func(t *testing.T) {
-			if gotDir, _ := fsys.DirExpansion(tt.Name); gotDir != tt.WantDir {
-				t.Errorf("DirExpansion(%v) = %v, want %v", tt.Name, gotDir, tt.WantDir)
-			}
-		})
-	}
 }
 
 func TestRead(t *testing.T) {

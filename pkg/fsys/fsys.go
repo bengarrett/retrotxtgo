@@ -6,78 +6,19 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
-	"runtime"
-	"strings"
 
 	"github.com/bengarrett/retrotxtgo/pkg/fsys/internal/util"
 	"github.com/bengarrett/retrotxtgo/pkg/internal/save"
 )
 
-// ErrStd could not print to stderr.
-var (
-	ErrNotFound = errors.New("cannot find the file or sample file")
-)
+var ErrNotFound = errors.New("cannot find the file or sample file")
 
 // Clean removes the named file or directory.
+// It is intended to be used as a helper in unit tests.
 func Clean(name string) {
 	if err := os.RemoveAll(name); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to clean %q: %s", name, err)
 	}
-}
-
-// DirExpansion returns the absolute directory path from a named path using shell-like expansions.
-// It currently supports limited Bash tilde, shell dot and double dot syntax.
-func DirExpansion(name string) (string, error) {
-	if name == "" {
-		return "", nil
-	}
-	root := func() bool {
-		return name[:1] == string(os.PathSeparator)
-	}
-	const homeDir, currentDir, parentDir = "~", ".", ".."
-	// Bash tilde expension http://www.gnu.org/software/bash/manual/html_node/Tilde-Expansion.html
-	dir, paths := "", strings.Split(name, string(os.PathSeparator))
-	var err error
-	var p string
-	for i, s := range paths {
-		switch s {
-		case homeDir:
-			p, err = os.UserHomeDir()
-			if err != nil {
-				return "", err
-			}
-		case currentDir:
-			if i != 0 {
-				continue
-			}
-			p, err = os.Getwd()
-			if err != nil {
-				return "", err
-			}
-		case parentDir:
-			if i != 0 {
-				dir = filepath.Dir(dir)
-				continue
-			}
-			wd, err := os.Getwd()
-			if err != nil {
-				return "", err
-			}
-			p = filepath.Dir(wd)
-		default:
-			p = s
-		}
-		d, cont := util.Windows(i, p, runtime.GOOS, dir)
-		if cont {
-			continue
-		}
-		dir = filepath.Join(d, p)
-	}
-	if root() {
-		dir = string(os.PathSeparator) + dir
-	}
-	return dir, nil
 }
 
 // SaveTemp saves bytes to a named temporary file.

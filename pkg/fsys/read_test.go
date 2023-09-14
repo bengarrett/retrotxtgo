@@ -100,7 +100,7 @@ func TestReadLine(t *testing.T) {
 	tmp0 := mock.FileExample("hello\nworld\n", 0)
 	type args struct {
 		name      string
-		linebreak nl.LineBreaks
+		linebreak nl.System
 	}
 	tests := []struct {
 		name     string

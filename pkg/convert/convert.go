@@ -33,6 +33,13 @@ var (
 )
 
 // Convert legacy 8-bit codepage encode or Unicode byte array text to UTF-8 runes.
+//
+// todo: clean this up to simplify
+// remove the output runes?
+// merge in Flag struct into Input struct?
+// rename Input struct to Source or Arg struct?
+// rename Input.Bytes to Bytes or Input
+// make examples and tests after the refactoring
 type Convert struct {
 	Flags Flag // Flags are the cmd supplied flag values.
 	Input struct {
