@@ -1,4 +1,12 @@
-// Package asa provides the 1960s, American Standards Association (ASA) ASCII character encodings.
+// Package asa provides the early American Standards Association (ASA) ASCII character encodings.
+// It does not encode or decode text, only provides information about the encodings.
+//
+// There are three encodings, X3.4-1963, X3.4-1965, and X3.4-1967.
+// These encodings are not compatible with each other.
+// But the X3.4-1967 character codes are compatible with the ANSI X3.4-1977 and ANSI X3.4-1986 encodings.
+// Which are also compatible with many of the IBM Codepage and ISO 8859 encodings, as-well as Unicode.
+//
+// nolint: gochecknoglobals
 package asa
 
 import (
@@ -10,46 +18,47 @@ import (
 )
 
 const (
-	Text63  = "ascii-63"
-	Numr63  = "1963"
-	Text65  = "ascii-65"
-	Numr65  = "1965"
-	Text67  = "ascii-67"
-	Numr67  = "1967"
-	Alias67 = "ansi"
+	Name63  = "ascii-63" // Named value for ASA X3.4 1963.
+	Name65  = "ascii-65" // Named value for ASA X3.4 1965.
+	Name67  = "ascii-67" // Named value for ANSI X3.4 1967/77/86.
+	Numr63  = "1963"     // Numeric value for ASA X3.4 1963.
+	Numr65  = "1965"     // Numeric value for ASA X3.4 1965.
+	Numr67  = "1967"     // Numeric value for ANSI X3.4 1967/77/86.
+	Alias67 = "ansi"     // Alias value for ANSI X3.4 1967/77/86.
 )
 
-// Encoding is an implementation of the Encoding interface that adds the String
-// and ID methods to an existing encoding.
+// Encoding is an implementation of the Encoding interface that adds a formal name
+// to a custom encoding.
 type Encoding struct {
-	encoding.Encoding
-	Name string
+	encoding.Encoding        // Encoding is the underlying encoding.
+	Name              string // Name is the formal name of the character encoding.
 }
 
 var (
 	// XUserDefined1963 ASA X3.4 1963.
-	XUserDefined1963 encoding.Encoding = &x34_1963 //nolint: gochecknoglobals
+	XUserDefined1963 encoding.Encoding = &x34_1963
 
 	// XUserDefined1965 ASA X3.4 1965.
-	XUserDefined1965 encoding.Encoding = &x34_1965 //nolint: gochecknoglobals
+	XUserDefined1965 encoding.Encoding = &x34_1965
 
 	// XUserDefined1967 ANSI X3.4 1967/77/86.
-	XUserDefined1967 encoding.Encoding = &x34_1967 //nolint: gochecknoglobals
+	XUserDefined1967 encoding.Encoding = &x34_1967
 
-	x34_1963 = Encoding{ //nolint: gochecknoglobals
+	x34_1963 = Encoding{
 		Encoding: charmap.Windows1252,
 		Name:     "ASA X3.4 1963",
 	}
-	x34_1965 = Encoding{ //nolint: gochecknoglobals
+	x34_1965 = Encoding{
 		Encoding: charmap.Windows1252,
 		Name:     "ASA X3.4 1965",
 	}
-	x34_1967 = Encoding{ //nolint: gochecknoglobals
+	x34_1967 = Encoding{
 		Encoding: charmap.Windows1252,
 		Name:     "ANSI X3.4 1967/77/86",
 	}
 )
 
+// String returns the formal name of the ASA encoding.
 func (e Encoding) String() string {
 	return e.Name
 }
@@ -69,11 +78,11 @@ func Code7bit(e encoding.Encoding) bool {
 func Name(e encoding.Encoding) string {
 	switch e {
 	case XUserDefined1963:
-		return Text63
+		return Name63
 	case XUserDefined1965:
-		return Text65
+		return Name65
 	case XUserDefined1967:
-		return Text67
+		return Name67
 	}
 	return ""
 }
