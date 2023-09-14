@@ -9,8 +9,8 @@ import (
 	"text/tabwriter"
 
 	"github.com/bengarrett/retrotxtgo/meta"
-	"github.com/bengarrett/retrotxtgo/pkg/asa"
 	"github.com/bengarrett/retrotxtgo/pkg/term"
+	"github.com/bengarrett/retrotxtgo/pkg/xud"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/htmlindex"
@@ -46,7 +46,6 @@ func Charmaps() []encoding.Encoding {
 		case japanese.EUCJP,
 			japanese.ISO2022JP,
 			charmap.MacintoshCyrillic:
-			// charmap.XUserDefined: // XUserDefined creates a duplicate of Windows 874.
 			continue
 		}
 		e = append(e, m)
@@ -67,7 +66,7 @@ func List(wr io.Writer) error { //nolint:funlen
 	term.Head(w, width, title)
 	fmt.Fprintf(w, "\n%s\n", header)
 	x := Charmaps()
-	x = append(x, asa.XUserDefined1963, asa.XUserDefined1965, asa.XUserDefined1967)
+	x = append(x, xud.XUserDefined1963, xud.XUserDefined1965, xud.XUserDefined1967)
 	for _, e := range x {
 		if e == charmap.XUserDefined {
 			continue
@@ -81,8 +80,9 @@ func List(wr io.Writer) error { //nolint:funlen
 			fmt.Fprintf(w, " %s\t %s\t %s\t %s\t\n",
 				c.Name, c.Value, c.Numeric, c.Alias)
 			// intentionally insert ISO-8895-11 after 10.
+			x := xud.XUserDefinedISO11
 			fmt.Fprintf(w, " %s\t %s\t %s\t %s\t\n",
-				"ISO 8895-11", "iso-8895-11", "11", "iso889511")
+				x, xud.Name(x), xud.Numeric(x), xud.Alias(x))
 			continue
 		case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
 			fmt.Fprintf(w, " * %s\t %s\t %s\t %s\t\n",
@@ -98,7 +98,7 @@ func List(wr io.Writer) error { //nolint:funlen
 			fmt.Fprintf(w, " † %s\t %s\t %s\t %s\t\n",
 				c.Name, c.Value, c.Numeric, c.Alias)
 			continue
-		case asa.XUserDefined1963, asa.XUserDefined1965, asa.XUserDefined1967:
+		case xud.XUserDefined1963, xud.XUserDefined1965, xud.XUserDefined1967:
 			fmt.Fprintf(w, " ⁑ %s\t %s\t %s\t %s\t\n",
 				c.Name, c.Value, c.Numeric, c.Alias)
 			continue
@@ -145,10 +145,10 @@ func Rows(e encoding.Encoding) (Row, error) {
 		Name: fmt.Sprint(e),
 	}
 	switch e {
-	case asa.XUserDefined1963, asa.XUserDefined1965, asa.XUserDefined1967:
-		r.Value = asa.Name(e)
-		r.Numeric = asa.Numeric(e)
-		r.Alias = asa.Alias(e)
+	case xud.XUserDefined1963, xud.XUserDefined1965, xud.XUserDefined1967:
+		r.Value = xud.Name(e)
+		r.Numeric = xud.Numeric(e)
+		r.Alias = xud.Alias(e)
 		return r, nil
 	}
 	var err error

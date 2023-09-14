@@ -19,20 +19,15 @@ import (
 
 var ErrRune = errors.New("invalid encoded rune")
 
-// Terminal colors.
+// Terminal color support.
 type Terminal int
 
 const (
-	// TermMono no color.
-	TermMono Terminal = iota
-	// Term16 ANSI standard 16 color.
-	Term16
-	// Term88 XTerm 88 color.
-	Term88
-	// Term256 XTerm 256 color.
-	Term256
-	// Term16M ANSI high-color.
-	Term16M
+	TermMono Terminal = iota // TermMono is monochrome, no color.
+	Term16                   // Term16 is ANSI standard 16 color.
+	Term88                   // Term88 is XTerm 88 color.
+	Term256                  // Term256 is XTerm 256 color.
+	Term16M                  // Term16M is ANSI high-color.
 	// HBar is a the Unicode horizontal bar character.
 	HBar = "\u2500"
 

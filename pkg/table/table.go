@@ -1,7 +1,7 @@
 // Package table creates a table of all the characters in the named 8-bit character set.
-//
-//nolint:ireturn
 package table
+
+//nolint:ireturn
 
 import (
 	"errors"
@@ -12,10 +12,10 @@ import (
 	"text/tabwriter"
 	"unicode"
 
-	"github.com/bengarrett/retrotxtgo/pkg/asa"
 	"github.com/bengarrett/retrotxtgo/pkg/byter"
 	"github.com/bengarrett/retrotxtgo/pkg/convert"
 	"github.com/bengarrett/retrotxtgo/pkg/term"
+	"github.com/bengarrett/retrotxtgo/pkg/xud"
 	"github.com/gookit/color"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
@@ -25,28 +25,28 @@ import (
 )
 
 var (
-	ErrNoName = errors.New("there is no encoding name")
-	ErrUTF16  = errors.New("utf-16 table encodings are not supported")
-	ErrUTF32  = errors.New("utf-32 table encodings are not supported")
+	ErrUTF16 = errors.New("utf-16 table encodings are not supported")
+	ErrUTF32 = errors.New("utf-32 table encodings are not supported")
 )
 
-const (
-	width = 68
-)
+const width = 68 // width of the table in characters.
 
-// Table prints out all the characters in the named 8-bit character set.
+// Table prints, aligns and formats to the writer all characters in the named 8-bit character set.
 func Table(wr io.Writer, name string) error { //nolint:funlen
 	if wr == nil {
 		wr = io.Discard
 	}
-	cp, err := CodePager(name)
+	cp, err := xud.CodePage(name)
 	if err != nil {
 		return err
 	}
-	h := fmt.Sprintf("%s", cp)
-	if XUserDefinedISO11(name) {
-		h = "ISO 8859-11"
+	if cp == nil {
+		cp, err = CodePage(name)
+		if err != nil {
+			return err
+		}
 	}
+	h := fmt.Sprintf("%s", cp)
 	h += CharmapAlias(cp) + charmapStandard(cp)
 	const tabWidth = 8
 	w := tabwriter.NewWriter(wr, 0, tabWidth, 0, '\t', 0)
@@ -83,7 +83,7 @@ out:
 		case math.Mod(float64(i+1), hex) == 0:
 			// every 16th loop
 			row++
-			if asa.Code7bit(enc) && row >= 8 {
+			if xud.Code7bit(enc) && row >= 8 {
 				// exit after the 7th row
 				fmt.Fprintf(w, " %s %s\n", char,
 					color.OpFuzzy.Sprint("|"))
@@ -98,7 +98,7 @@ out:
 				color.OpFuzzy.Sprint("|"))
 		}
 	}
-	asa.Footnote(w, cp)
+	xud.Footnote(w, cp)
 	Footnote(w, name)
 	fmt.Fprint(w, "\n")
 	return w.Flush()
@@ -121,7 +121,8 @@ func columns(w io.Writer) {
 	}
 }
 
-// Footnote returns a footnote value for the legacy ASA ASCII character encodings.
+// Footnote writes a footnote with extra details or corrections for the named
+// code page or encoding. It is called by Table.
 func Footnote(w io.Writer, name string) {
 	if w == nil {
 		w = io.Discard
@@ -135,40 +136,6 @@ func Footnote(w io.Writer, name string) {
 	if SHY240(x) {
 		fmt.Fprintln(w)
 		fmt.Fprintln(w, "* Cell F-0 is SHY (soft hyphen), but it is not printable in Unicode.")
-	}
-}
-
-// XUserDefinedISO11 returns true if s matches an ISO-8859-11 name or alias.
-func XUserDefinedISO11(s string) bool {
-	switch strings.ToUpper(s) {
-	case
-		"ISO 8859-11",
-		"ISO-8859-11",
-		"ISO8859-11",
-		"ISO885911",
-		"11":
-		return true
-	}
-	return false
-}
-
-// CodePager returns the encoding of the code page name or alias.
-func CodePager(s string) (encoding.Encoding, error) {
-	if s == "" {
-		return nil, ErrNoName
-	}
-	if XUserDefinedISO11(s) {
-		return charmap.Windows874, nil
-	}
-	switch strings.ToLower(s) {
-	case asa.Name63, asa.Numr63:
-		return asa.XUserDefined1963, nil
-	case asa.Name65, asa.Numr65:
-		return asa.XUserDefined1965, nil
-	case asa.Name67, asa.Numr67, asa.Alias67:
-		return asa.XUserDefined1967, nil
-	default:
-		return CodePage(s)
 	}
 }
 
@@ -192,47 +159,34 @@ func CodePage(s string) (encoding.Encoding, error) { //nolint:ireturn
 	return cp, nil
 }
 
-// swapper returns the Windows1252 charmap for use as the base template
+// Swapper returns the Windows1252 charmap for use as the base template
 // for the ASA ASCII encodings.
 func swapper(name string) encoding.Encoding {
 	switch strings.ToLower(name) {
-	case asa.Name63, asa.Numr63:
+	case xud.Name11, xud.Numr11, xud.Alias11:
+		return charmap.Windows874
+	case xud.Name63, xud.Numr63:
 		return charmap.Windows1252
-	case asa.Name65, asa.Numr65:
+	case xud.Name65, xud.Numr65:
 		return charmap.Windows1252
-	case asa.Name67, asa.Numr67, asa.Alias67:
+	case xud.Name67, xud.Numr67, xud.Alias67:
 		return charmap.Windows1252
 	}
 	return nil
 }
 
 func reverter(name string) encoding.Encoding {
-	if XUserDefinedISO11(name) {
-		return charmap.XUserDefined
-	}
 	switch strings.ToLower(name) {
-	case asa.Name63, asa.Numr63:
-		return asa.XUserDefined1963
-	case asa.Name65, asa.Numr65:
-		return asa.XUserDefined1965
-	case asa.Name67, asa.Numr67, asa.Alias67:
-		return asa.XUserDefined1967
+	case xud.Name11, xud.Numr11, xud.Alias11:
+		return xud.XUserDefinedISO11
+	case xud.Name63, xud.Numr63:
+		return xud.XUserDefined1963
+	case xud.Name65, xud.Numr65:
+		return xud.XUserDefined1965
+	case xud.Name67, xud.Numr67, xud.Alias67:
+		return xud.XUserDefined1967
 	}
 	return nil
-}
-
-// CharISO11 returns a string for the ISO-8859-11 character codes.
-func CharISO11(cp encoding.Encoding, code int) rune {
-	// ISO-8859-11 is not included in Go so a user defined charmap is used.
-	Iso8859_11 := charmap.XUserDefined
-	if cp != Iso8859_11 {
-		return -1
-	}
-	const pad, nbsp = 128, 160
-	if code >= pad && code < nbsp {
-		return ' '
-	}
-	return -1
 }
 
 // SHY240 returns true if the code page has a SHY (soft hyphen) at code 240.
@@ -289,13 +243,10 @@ func Replacement(name string, code int) string {
 
 // Character converts code or rune to an character mapped string.
 func Character(cp encoding.Encoding, code int, r rune) string {
-	if asa.Name(cp) != "" {
-		if x := asa.Char(cp, code); x > -1 {
+	if xud.Name(cp) != "" {
+		if x := xud.Char(cp, code); x > -1 {
 			return string(x)
 		}
-		return string(r)
-	}
-	if r := CharISO11(cp, code); r > -1 {
 		return string(r)
 	}
 	// non-spacing mark characters
@@ -354,7 +305,7 @@ func CharmapAlias(cp encoding.Encoding) string { //nolint:cyclop
 		return " (Turkish)"
 	case charmap.ISO8859_10:
 		return " (Nordic)"
-	case charmap.Windows874, charmap.XUserDefined:
+	case charmap.Windows874, xud.XUserDefinedISO11:
 		return " (Thai)"
 	case charmap.ISO8859_13, charmap.Windows1257:
 		return " (Baltic Rim)"

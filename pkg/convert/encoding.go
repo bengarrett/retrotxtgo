@@ -11,6 +11,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/term"
+	"github.com/bengarrett/retrotxtgo/pkg/xud"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/htmlindex"
@@ -188,11 +189,11 @@ func Encoder(name string) (encoding.Encoding, error) { //nolint:ireturn
 	}
 	s := Shorten(name)
 	a := EncodeAlias(s)
-	if a == Iso11 {
+	if a == xud.Name(xud.XUserDefinedISO11) {
 		// ISO-8859-11 uses the same characters as Windows 847
 		// except for 9 characters in rows 8 and 9.
 		// https://en.wikipedia.org/wiki/ISO/IEC_8859-11#Code_page_874_(IBM)_/_9066
-		return charmap.XUserDefined, nil
+		return xud.XUserDefinedISO11, nil
 	}
 	if e := EncodeUTF32(a); e != nil {
 		return e, nil

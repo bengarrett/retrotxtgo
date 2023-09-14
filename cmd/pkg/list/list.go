@@ -13,6 +13,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/pkg/sample"
 	"github.com/bengarrett/retrotxtgo/pkg/table"
 	"github.com/bengarrett/retrotxtgo/pkg/term"
+	"github.com/bengarrett/retrotxtgo/pkg/xud"
 	"golang.org/x/exp/slices"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
@@ -107,9 +108,9 @@ func Tables(w io.Writer) error {
 		switch e {
 		case charmap.ISO8859_10:
 			tables = append(tables, charmap.ISO8859_10)
-			tables = append(tables, charmap.XUserDefined)
+			tables = append(tables, xud.XUserDefinedISO11)
 			continue
-		case charmap.XUserDefined:
+		case xud.XUserDefinedISO11:
 			continue
 		}
 		tables = append(tables, e)
@@ -121,9 +122,6 @@ func Tables(w io.Writer) error {
 			err  error
 			name string
 		)
-		if e == charmap.XUserDefined {
-			name = "iso-8859-11"
-		}
 		if name == "" {
 			name, err = ianaindex.MIME.Name(e)
 			if err != nil {

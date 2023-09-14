@@ -1,31 +1,40 @@
-// Package asa provides the early American Standards Association (ASA) ASCII character encodings.
+// Package xud provides X User Defined, character encodings.
 // It does not encode or decode text, only provides information about the encodings.
 //
-// There are three encodings, X3.4-1963, X3.4-1965, and X3.4-1967.
+// This includes the early American Standards Association (ASA) ASCII character encodings.
+// There are three ASA encodings, X3.4-1963, X3.4-1965, X3.4-1967 and one missing ISO 8859-11 encoding.
 // These encodings are not compatible with each other.
+//
 // But the X3.4-1967 character codes are compatible with the ANSI X3.4-1977 and ANSI X3.4-1986 encodings.
 // Which are also compatible with many of the IBM Codepage and ISO 8859 encodings, as-well as Unicode.
 //
 // nolint: gochecknoglobals
-package asa
+package xud
 
 import (
+	"errors"
 	"fmt"
 	"io"
+	"strings"
 
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 )
 
 const (
-	Name63  = "ascii-63" // Named value for ASA X3.4 1963.
-	Name65  = "ascii-65" // Named value for ASA X3.4 1965.
-	Name67  = "ascii-67" // Named value for ANSI X3.4 1967/77/86.
-	Numr63  = "1963"     // Numeric value for ASA X3.4 1963.
-	Numr65  = "1965"     // Numeric value for ASA X3.4 1965.
-	Numr67  = "1967"     // Numeric value for ANSI X3.4 1967/77/86.
-	Alias67 = "ansi"     // Alias value for ANSI X3.4 1967/77/86.
+	Name11  = "iso-8859-11" // Named value for ISO 8859-11.
+	Name63  = "ascii-63"    // Named value for ASA X3.4 1963.
+	Name65  = "ascii-65"    // Named value for ASA X3.4 1965.
+	Name67  = "ascii-67"    // Named value for ANSI X3.4 1967/77/86.
+	Numr11  = "11"          // Numeric value for ISO 8859-11.
+	Numr63  = "1963"        // Numeric value for ASA X3.4 1963.
+	Numr65  = "1965"        // Numeric value for ASA X3.4 1965.
+	Numr67  = "1967"        // Numeric value for ANSI X3.4 1967/77/86.
+	Alias11 = "iso885911"   // Alias value for ISO 8859-11.
+	Alias67 = "ansi"        // Alias value for ANSI X3.4 1967/77/86.
 )
+
+var ErrName = errors.New("there is no encoding name")
 
 // Encoding is an implementation of the Encoding interface that adds a formal name
 // to a custom encoding.
@@ -35,6 +44,9 @@ type Encoding struct {
 }
 
 var (
+	// XUserDefinedISO11 ISO-8859-11.
+	XUserDefinedISO11 encoding.Encoding = &xISO_11
+
 	// XUserDefined1963 ASA X3.4 1963.
 	XUserDefined1963 encoding.Encoding = &x34_1963
 
@@ -43,6 +55,11 @@ var (
 
 	// XUserDefined1967 ANSI X3.4 1967/77/86.
 	XUserDefined1967 encoding.Encoding = &x34_1967
+
+	xISO_11 = Encoding{
+		Encoding: charmap.Windows874,
+		Name:     "ISO-8859-11",
+	}
 
 	x34_1963 = Encoding{
 		Encoding: charmap.Windows1252,
@@ -63,6 +80,25 @@ func (e Encoding) String() string {
 	return e.Name
 }
 
+// CodePage returns the encoding of the code page name or alias.
+func CodePage(s string) (encoding.Encoding, error) {
+	if s == "" {
+		return nil, ErrName
+	}
+	switch strings.ToLower(s) {
+	case Name11, Numr11, Alias11:
+		return XUserDefinedISO11, nil
+	case Name63, Numr63:
+		return XUserDefined1963, nil
+	case Name65, Numr65:
+		return XUserDefined1965, nil
+	case Name67, Numr67, Alias67:
+		return XUserDefined1967, nil
+	default:
+		return nil, nil
+	}
+}
+
 // Code7bit returns true if the encoding is a 7-bit ASCII encoding.
 // The 7-bit encodings are limited to 127 characters.
 // The more common 8-bit encodings are limited to 255 characters.
@@ -77,6 +113,8 @@ func Code7bit(e encoding.Encoding) bool {
 // Name returns a named value for the legacy ASA ASCII character encodings.
 func Name(e encoding.Encoding) string {
 	switch e {
+	case XUserDefinedISO11:
+		return Name11
 	case XUserDefined1963:
 		return Name63
 	case XUserDefined1965:
@@ -90,6 +128,8 @@ func Name(e encoding.Encoding) string {
 // Numeric returns a numeric value for the legacy ASA ASCII character encodings.
 func Numeric(e encoding.Encoding) string {
 	switch e {
+	case XUserDefinedISO11:
+		return Numr11
 	case XUserDefined1963:
 		return Numr63
 	case XUserDefined1965:
@@ -102,7 +142,10 @@ func Numeric(e encoding.Encoding) string {
 
 // Alias returns an alias value for the legacy ASA ASCII character encodings.
 func Alias(e encoding.Encoding) string {
-	if e == XUserDefined1967 {
+	switch e {
+	case XUserDefinedISO11:
+		return Alias11
+	case XUserDefined1967:
 		return Alias67
 	}
 	return ""
@@ -124,17 +167,30 @@ func Footnote(w io.Writer, e encoding.Encoding) {
 	}
 }
 
-// CharX3463 returns a string for the legacy ASA X3.4 character codes.
+// Char returns a string for the 8-bit, character encoding decimal code.
 // If the code is not defined in the encoding, then a space is returned.
 // If the code matches an existing Windows-1252 character, then -1 is returned.
 func Char(e encoding.Encoding, code int) rune {
 	switch e {
+	case XUserDefinedISO11:
+		return CharISO885911(code)
 	case XUserDefined1963:
 		return CharX3463(code)
 	case XUserDefined1965:
 		return CharX3465(code)
 	case XUserDefined1967:
 		return CharX3467(code)
+	}
+	return -1
+}
+
+// CharISO885911 returns a rune for the ISO-8859-11 character code.
+// If the code is not defined in the encoding, then a space is returned.
+// If the code matches an existing Windows-1252 character, then -1 is returned.
+func CharISO885911(code int) rune {
+	const pad, nbsp = 128, 160
+	if code >= pad && code < nbsp {
+		return ' '
 	}
 	return -1
 }
