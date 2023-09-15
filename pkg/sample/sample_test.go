@@ -3,8 +3,6 @@ package sample_test
 
 import (
 	"fmt"
-	"log"
-	"os"
 	"reflect"
 	"testing"
 	"unicode/utf8"
@@ -15,13 +13,24 @@ import (
 	"golang.org/x/text/encoding/charmap"
 )
 
+func ExampleMap() {
+	s := sample.Map()["037"]
+	fmt.Printf("%s - %s, %s", s.Name, s.Description, s.Encoding)
+	// Output: text/cp037.txt - EBCDIC 037 IBM mainframe test, IBM Code Page 037
+}
+
 func ExampleOpen() {
-	b, err := sample.Open("037")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Fprint(os.Stdout, len(b))
+	b, _ := sample.Open("037")
+	fmt.Print(len(b))
 	// Output:130
+}
+
+func ExampleFlags_Open() {
+	c := convert.Convert{}
+	f := sample.Flags{Input: charmap.CodePage037}
+	r, _ := f.Open(&c, "037")
+	fmt.Print(string(r[0:15]))
+	// Output: RetroTxt EBCDIC
 }
 
 func TestFlags_Open(t *testing.T) {
@@ -58,12 +67,12 @@ func TestFlags_Open(t *testing.T) {
 				Input:  tt.fields.From,
 				Output: tt.fields.To,
 			}
-			gotS, err := f.Open(tt.args.conv, tt.args.name)
+			gotR, err := f.Open(tt.args.conv, tt.args.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Flags.Open() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			r := bool(len(gotS.Runes) > 0)
+			r := bool(len(gotR) > 0)
 			if r != tt.wantRunes {
 				t.Errorf("Flags.Open() runes = %v, want %v", r, tt.wantRunes)
 			}

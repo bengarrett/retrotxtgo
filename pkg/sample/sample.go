@@ -1,4 +1,5 @@
-// Package sample opens and encodes the example embedded textfiles.
+// Package sample opens and encodes the example embedded text files.
+// These files are used for demostrating the info and the view commands.
 package sample
 
 import (
@@ -30,12 +31,6 @@ type Flags struct {
 	Output encoding.Encoding // Output encoding is set using the --to flag.
 }
 
-// File container.
-type File struct {
-	Encoding encoding.Encoding // Encoding of the file.
-	Runes    []rune            // Runes comprising the file content.
-}
-
 // Sample textfile data.
 type Sample struct {
 	// the order of these fields must not be changed
@@ -55,7 +50,8 @@ const (
 	Dump               // Dump obeys the common text controls except for EOF, end-of-file.
 )
 
-// Map the samples.
+// Map is the collection of sample text files.
+// Each sample includes the output method, character encoding, the filename and a brief description.
 func Map() map[string]Sample {
 	var (
 		cp037  = charmap.CodePage037
@@ -122,43 +118,41 @@ func Open(name string) ([]byte, error) {
 	return b, nil
 }
 
-// Transform b to use the encoding.
+// Transform the byte array to use the supplied character encoding.
 func Transform(e encoding.Encoding, b ...byte) ([]byte, error) {
 	if e == nil {
 		return nil, ErrEncode
 	}
-	nb, err := e.NewEncoder().Bytes(b)
+	p, err := e.NewEncoder().Bytes(b)
 	if err != nil {
-		if len(nb) == 0 {
+		if len(p) == 0 {
 			return b, fmt.Errorf("encoder could not convert bytes to %s: %w", e, err)
 		}
-		return nb, nil
+		return nil, fmt.Errorf("%s: %w", e, err)
 	}
-	return nb, nil
+	return p, nil
 }
 
-// Open and convert the named sample textfile.
-func (flag Flags) Open(conv *convert.Convert, name string) (File, error) {
-	var f File
+// Open and convert the named sample text file into Unicode runes.
+func (flag Flags) Open(conv *convert.Convert, name string) ([]rune, error) {
 	name = strings.ToLower(name)
 	if _, err := os.Stat(name); !os.IsNotExist(err) {
-		return File{}, nil
+		return nil, nil
 	}
 	samp, exist := Map()[name]
 	if !exist {
-		return File{}, fmt.Errorf("%s: %w", name, ErrName)
+		return nil, fmt.Errorf("%s: %w", name, ErrName)
 	}
 	b, err := static.File.ReadFile(samp.Name)
 	if err != nil {
-		return File{}, fmt.Errorf("open sample %q: %w", samp.Name, err)
+		return nil, fmt.Errorf("open sample %q: %w", samp.Name, err)
 	}
 	if conv == nil {
-		return File{}, ErrConvNil
+		return nil, ErrConvNil
 	}
-	f.Encoding = samp.Encoding
 	conv.Input.Encoding = flag.Input
 	if conv.Input.Encoding == nil {
-		conv.Input.Encoding = f.Encoding
+		conv.Input.Encoding = samp.Encoding
 	}
 	// override --control flag values for codepage table samples
 	ignoreCtrls := false
@@ -172,14 +166,11 @@ func (flag Flags) Open(conv *convert.Convert, name string) (File, error) {
 	}
 	r, err := samp.transform(conv, b...)
 	if err != nil {
-		return File{}, err
+		return nil, err
 	}
-	f.Runes = r
-	return f, err
+	return r, err
 }
 
-// Transform converts the raw byte data of the textfile into UTF8 runes.
-// Set the cc bool to true to ignore the --controls flag.
 func (samp *Sample) transform(conv *convert.Convert, b ...byte) ([]rune, error) {
 	switch samp.Convert {
 	case Ansi:
@@ -195,7 +186,7 @@ func (samp *Sample) transform(conv *convert.Convert, b ...byte) ([]rune, error) 
 	}
 }
 
-// Valid conforms the named sample textfile exists.
+// Valid conforms the named sample text file exists.
 func Valid(name string) bool {
 	if _, exist := Map()[name]; !exist {
 		return false

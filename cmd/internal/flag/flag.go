@@ -130,11 +130,11 @@ func OpenSample(arg string, c *convert.Convert, f sample.Flags) ([]byte, error) 
 	if ok := sample.Valid(arg); !ok {
 		return nil, nil
 	}
-	p, err := f.Open(c, arg)
+	r, err := f.Open(c, arg)
 	if err != nil {
 		return nil, err
 	}
-	return []byte(string(p.Runes)), nil
+	return []byte(string(r)), nil
 }
 
 // ReadArgument returns the content of argument supplied filepath, embed sample file or piped data.
