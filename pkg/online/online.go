@@ -1,4 +1,5 @@
-// Package online is for HTTP interactions.
+// Package online is for simple HTTP interactions with the GitHub API.
+// It is used to fetch the latest release information of the program.
 package online
 
 import (
@@ -14,21 +15,21 @@ import (
 )
 
 var (
-	ErrJSON = errors.New("cannot understand the response body as the syntax is not json")
+	ErrJSON = errors.New("the response body syntax is not json")
 	ErrMash = errors.New("cannot unmarshal the json response body")
 )
 
 const (
-	timeout = time.Second * 3
 	// ReleaseAPI GitHub API v3 releases endpoint.
 	// See: https://developer.github.com/v3/repos/releases/
 	ReleaseAPI = "https://api.github.com/repos/bengarrett/retrotxtgo/releases/latest"
+	timeout    = time.Second * 3
 )
 
 // API interface to store the JSON results from GitHub.
 type API map[string]interface{}
 
-// Endpoint request an API endpoint from the URL.
+// Endpoint requests an API endpoint from the URL.
 // A HTTP ETag can be provided to validate local data cache against the server.
 // The return is true when the etag value matches the server's ETag header.
 func Endpoint(url, etag string) (bool, API, error) {
@@ -83,9 +84,9 @@ func Get(url, etag string) (*http.Response, []byte, error) {
 	return resp, body, resp.Body.Close()
 }
 
-// Ping requests a URL and determines if the status is ok.
+// Ping requests a URL and determines if the status is successful.
+// It returns true when the status code is between 200 and 299.
 func Ping(url string) (bool, error) {
-	ok := false
 	client := &http.Client{
 		Timeout: timeout,
 	}
@@ -93,14 +94,16 @@ func Ping(url string) (bool, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodHead, url, nil)
 	defer cancel()
 	if err != nil {
-		return ok, fmt.Errorf("pinging a new request error: %w", err)
+		return false, fmt.Errorf("pinging a new request error: %w", err)
 	}
 	req.Header.Set("User-Agent", userAgent())
 	resp, err := client.Do(req)
 	if err != nil {
-		return ok, fmt.Errorf("requesting to set the ping user-agent header: %w", err)
+		return false, fmt.Errorf("requesting to set the ping user-agent header: %w", err)
 	}
-	return (resp.StatusCode >= 200 && resp.StatusCode <= 299), resp.Body.Close()
+	const ok, max = http.StatusOK, 299
+	success2xx := resp.StatusCode >= ok && resp.StatusCode <= max
+	return success2xx, resp.Body.Close()
 }
 
 func userAgent() string {

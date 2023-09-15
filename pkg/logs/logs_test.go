@@ -3,7 +3,6 @@ package logs_test
 import (
 	"errors"
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/meta"
@@ -11,17 +10,43 @@ import (
 	"github.com/gookit/color"
 )
 
-const status = "exit status 1"
+var ErrTest = errors.New("something went wrong")
 
-var ErrTest = errors.New("error")
+func ExampleHint() {
+	err := errors.New("oops")
+	fmt.Print(logs.Hint(err, "helpme"))
+	// Output: Problem:
+	// oops.
+	//  run retrotxt helpme
+}
 
 func ExampleSprint() {
-	color.Enable = false
-	fmt.Fprintln(os.Stdout, logs.Sprint(ErrTest))
-	fmt.Fprintln(os.Stdout, status)
+	err := errors.New("oops")
+	fmt.Print(logs.Sprint(err))
 	// Output: Problem:
-	// error.
-	// exit status 1
+	// oops.
+}
+
+func ExampleSprintCmd() {
+	err := errors.New("oops")
+	fmt.Print(logs.SprintCmd(err, "helpme"))
+	// Output: Problem:
+	//  the command helpme does not exist, oops
+}
+
+func ExampleSprintFlag() {
+	err := errors.New("oops")
+	fmt.Print(logs.SprintFlag(err, "error", "err"))
+	// Output: Problem:
+	//  with the error --err flag, oops
+}
+
+func ExampleSprintS() {
+	err := errors.New("oops")
+	wrap := errors.New("uh-oh")
+	fmt.Print(logs.SprintS(err, wrap, "we have some errors"))
+	// Output: Problem:
+	//  oops "we have some errors": uh-oh
 }
 
 func TestHint_String(t *testing.T) {
@@ -136,30 +161,6 @@ func TestSprintS(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := logs.SprintS(tt.args.err, tt.args.errs, tt.args.value); got != tt.want {
 				t.Errorf("SprintS() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestSprintWrap(t *testing.T) {
-	color.Enable = false
-	type args struct {
-		err  error
-		errs error
-	}
-	tests := []struct {
-		name string
-		args args
-		want string
-	}{
-		{"empty", args{}, ""},
-		{"partial", args{ErrTest, nil}, ""},
-		{"errors", args{ErrTest, ErrTest}, "Problem:\nerror: error"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := logs.SprintWrap(tt.args.err, tt.args.errs); got != tt.want {
-				t.Errorf("SprintWrap() = %v, want %v", got, tt.want)
 			}
 		})
 	}
