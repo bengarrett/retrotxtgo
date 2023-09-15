@@ -242,8 +242,6 @@ func TestEncoder(t *testing.T) { //nolint:funlen
 		{"oem-1256", charmap.Windows1256, false},
 		{"oem-1257", charmap.Windows1257, false},
 		{"oem-1258", charmap.Windows1258, false},
-		// custom
-		{convert.Iso11, charmap.Windows874, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

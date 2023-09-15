@@ -162,7 +162,6 @@ const (
 	cp037 = "IBM037"
 	cp858 = "IBM00858"
 	ibm   = "ibm"
-	Iso11 = "iso-8859-11"
 	msdos = "msdos"
 	u32   = "UTF-32"
 	u32be = "UTF-32BE"
@@ -384,8 +383,8 @@ func encodingISO(name string) string {
 		return "ISO-8859-9"
 	case "10", "919", "28600":
 		return "ISO-8859-10"
-	case "11", Iso11:
-		return strings.ToUpper(Iso11)
+	case "11", xud.Name(xud.XUserDefinedISO11):
+		return fmt.Sprint(xud.XUserDefinedISO11)
 	case "13", "921", "28603":
 		return "ISO-8859-13"
 	case "14", "28604":

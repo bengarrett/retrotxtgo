@@ -14,8 +14,10 @@ import (
 	"golang.org/x/text/encoding/unicode/utf32"
 )
 
+// Lang describes the common natural language uses of the encoding.
 type Lang map[encoding.Encoding]string
 
+// Languages returns a list of codepage encodings and their target natural languages.
 func Languages() Lang {
 	return Lang{
 		charmap.CodePage037:   "US English",
@@ -71,13 +73,13 @@ func Languages() Lang {
 	}
 }
 
-// Create a list of Language encodings and their target languages.
+// Language returns the natural language usge of the encoding.
 func Language(e encoding.Encoding) string {
 	l := Languages()
 	return l[e]
 }
 
-// ListLanguage returns a tabled list of supported IANA character set encodings
+// ListLanguage writes a tabled list of supported IANA character set encodings
 // and the languages they target.
 func ListLanguage(wr io.Writer) error {
 	if wr == nil {
@@ -87,7 +89,7 @@ func ListLanguage(wr io.Writer) error {
 		" Known legacy code pages and their target languages "
 	const padding, width = 2, 76
 	w := tabwriter.NewWriter(wr, 0, 0, padding, ' ', 0)
-	term.Head(w, width, title)
+	term.Head(wr, width, title)
 	fmt.Fprintf(w, "\n%s\n", header)
 	x := Charmaps()
 	x = append(x,
@@ -95,14 +97,21 @@ func ListLanguage(wr io.Writer) error {
 		xud.XUserDefined1965,
 		xud.XUserDefined1967)
 	for _, e := range x {
-		if e == xud.XUserDefinedISO11 {
-			continue
-		}
-		c, err := Rows(e)
-		if err != nil {
-			return err
-		}
 		switch e {
+		case charmap.XUserDefined:
+			continue
+		case charmap.ISO8859_10:
+			c, err := Rows(e)
+			if err != nil {
+				return fmt.Errorf("%q: %v", e, err)
+			}
+			fmt.Fprintf(w, " %s\t %s\t %s\t\n",
+				c.Name, c.Value, Language(e))
+			// intentionally insert ISO-8895-11 after 10.
+			x := xud.XUserDefinedISO11
+			fmt.Fprintf(w, " %s\t %s\t %s\t\n",
+				x, xud.Name(x), Language(x))
+			continue
 		case
 			unicode.UTF16(unicode.BigEndian, unicode.UseBOM),
 			unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM),
@@ -112,9 +121,16 @@ func ListLanguage(wr io.Writer) error {
 			utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM):
 			continue
 		}
+		c, err := Rows(e)
+		if err != nil {
+			return fmt.Errorf("%q: %v", e, err)
+		}
 		// do not use ANSI colors in cells as it will break the table layout
 		fmt.Fprintf(w, " %s\t %s\t %s\t\n",
 			c.Name, c.Value, Language(e))
 	}
-	return w.Flush()
+	if err := w.Flush(); err != nil {
+		return err
+	}
+	return nil
 }
