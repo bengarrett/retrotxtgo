@@ -13,6 +13,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/bengarrett/retrotxtgo/pkg/nl"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/transform"
 )
@@ -25,46 +26,36 @@ var (
 // LB is the text line break control represented as 2 runes.
 type LB [2]rune
 
-const (
-	ansiEscape string = "\x1B\x5b" // esc[
-	// Linefeed is a Linux/macOS line break.
-	Linefeed rune = 10
-	// CarriageReturn is a partial line break for Windows/DOS.
-	CarriageReturn rune = 13
-	// NewLine EBCDIC control.
-	NewLine rune = 21
-	// NextLine EBCDIC control in UTF-8 documents.
-	NextLine rune = 133
-)
+const ansiEscape string = "\x1B\x5b" // esc[
 
 // LF linefeed.
 func LF() LB {
-	return LB{Linefeed}
+	return LB{nl.LF}
 }
 
 // CR carriage return.
 func CR() LB {
-	return LB{CarriageReturn}
+	return LB{nl.CR}
 }
 
 // CRLF carriage return + linefeed.
 func CRLF() LB {
-	return LB{CarriageReturn, Linefeed}
+	return LB{nl.CR, nl.LF}
 }
 
 // LFCR linefeed + carriage return.
 func LFCR() LB {
-	return LB{Linefeed, CarriageReturn}
+	return LB{nl.LF, nl.CR}
 }
 
 // NL new line.
 func NL() LB {
-	return LB{NewLine}
+	return LB{nl.NL}
 }
 
 // NEL next line.
 func NEL() LB {
-	return LB{NextLine}
+	return LB{nl.NEL}
 }
 
 // Columns counts the number of characters used per line in the reader interface.
@@ -138,47 +129,6 @@ func Controls(r io.Reader) (int, error) {
 	return count, nil
 }
 
-// Lines counts the number of lines in the interface.
-func Lines(r io.Reader, lb LB) (int, error) {
-	if r == nil {
-		return 0, ErrReader
-	}
-	lineBreak := []byte{byte(lb[0]), byte(lb[1])}
-	if lb[1] == 0 {
-		lineBreak = []byte{byte(lb[0])}
-	}
-	p, count := make([]byte, bufio.MaxScanTokenSize), 0
-	for {
-		size, err := r.Read(p)
-		if err != nil && err != io.EOF {
-			return 0, fmt.Errorf("lines could not read buffer: %w", err)
-		}
-		pos := 0
-		for {
-			i := bytes.Index(p[pos:], lineBreak)
-			if size == pos {
-				break
-			}
-			if i == -1 {
-				if size == 0 {
-					return 0, nil // empty file
-				}
-				if count == 0 {
-					return 1, nil // no line breaks = 1 line
-				}
-				count++
-				return count, nil
-			}
-			pos += i + 1
-			count++
-		}
-		if err == io.EOF {
-			break
-		}
-	}
-	return count, nil
-}
-
 // LineBreaks will try to guess the line break representation as a 2 byte value.
 // A guess of Unix will return [10, 0], Windows [13, 10], otherwise a [0, 0] value is returned.
 func LineBreaks(utf bool, runes ...rune) LB {
@@ -196,26 +146,26 @@ func LineBreaks(utf bool, runes ...rune) LB {
 	l := len(runes) - 1 // range limit
 	for i, r := range runes {
 		switch r {
-		case Linefeed:
+		case nl.LF:
 			c[0].count = lfCnt(c[0].count, i, l, runes...)
-		case CarriageReturn:
-			if i < l && runes[i+1] == Linefeed {
+		case nl.CR:
+			if i < l && runes[i+1] == nl.LF {
 				c[2].count++ // crlf
 				continue
 			}
-			if i != 0 && runes[i-1] == Linefeed {
+			if i != 0 && runes[i-1] == nl.LF {
 				// lfcr (already counted)
 				continue
 			}
 			// carriage return on modern terminals will overwrite the existing line of text
 			// todo: add flag or change behavor to replace CR (\r) with NL (\n)
 			c[1].count++
-		case NewLine, NextLine:
-			if utf && r == NextLine {
+		case nl.NL, nl.NEL:
+			if utf && r == nl.NEL {
 				c[4].count++ // NL
 				continue
 			}
-			if r == NewLine {
+			if r == nl.NL {
 				c[4].count++ // NEL
 				continue
 			}
@@ -229,12 +179,11 @@ func LineBreaks(utf bool, runes ...rune) LB {
 }
 
 func lfCnt(c, i, l int, runes ...rune) int {
-	const cr = 13
-	if i < l && runes[i+1] == cr {
+	if i < l && runes[i+1] == nl.CR {
 		c++ // lfcr
 		return c
 	}
-	if i != 0 && runes[i-1] == cr {
+	if i != 0 && runes[i-1] == nl.CR {
 		// crlf (already counted)
 		return c
 	}

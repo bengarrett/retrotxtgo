@@ -107,7 +107,7 @@ func readLineBreaks(name string, cols bool) (int, error) {
 		return -1, fmt.Errorf("could not find the line break method: %w", err)
 	}
 	if !cols {
-		cnt, err := Lines(file, lb)
+		cnt, err := nl.Lines(file, lb)
 		if err != nil {
 			return -1, fmt.Errorf("read lines count the file: %q: %w", name, err)
 		}
@@ -250,7 +250,7 @@ func ReadTail(name string, offset int) ([]byte, error) {
 
 // ReadText reads a named file location or a named temporary file and returns its content.
 func ReadText(name string) (string, error) {
-	return ReadLine(name, nl.NL)
+	return ReadLine(name, nl.Host)
 }
 
 // ReadWords counts the number of spaced words in the named file.

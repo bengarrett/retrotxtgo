@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/bengarrett/retrotxtgo/pkg/fsys"
+	"github.com/bengarrett/retrotxtgo/pkg/nl"
 	"github.com/karrick/godirwalk"
 	"golang.org/x/sync/errgroup"
 )
@@ -156,7 +157,7 @@ func Stdin(w io.Writer, format string, b ...byte) error {
 		})
 		g.Go(func() error {
 			var err error
-			if d.Lines, err = fsys.Lines(bytes.NewReader(b), d.LineBreak.Decimal); err != nil {
+			if d.Lines, err = nl.Lines(bytes.NewReader(b), d.LineBreak.Decimal); err != nil {
 				return err
 			}
 			return nil

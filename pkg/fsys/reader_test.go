@@ -71,36 +71,6 @@ func TestLineBreak(t *testing.T) {
 		})
 	}
 }
-
-func TestLines(t *testing.T) {
-	type args struct {
-		r  io.Reader
-		lb fsys.LB
-	}
-	tests := []struct {
-		name      string
-		args      args
-		wantCount int
-		wantErr   bool
-	}{
-		{"empty", args{strings.NewReader(""), fsys.LF()}, 0, false},
-		{"single line", args{strings.NewReader("hello world"), fsys.LF()}, 1, false},
-		{"multiple lines", args{strings.NewReader("hello\nworld\neof"), fsys.LF()}, 3, false},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotCount, err := fsys.Lines(tt.args.r, tt.args.lb)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Lines() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if gotCount != tt.wantCount {
-				t.Errorf("Lines() = %v, want %v", gotCount, tt.wantCount)
-			}
-		})
-	}
-}
-
 func TestColumns(t *testing.T) {
 	type args struct {
 		r  io.Reader

@@ -108,8 +108,8 @@ func TestReadLine(t *testing.T) {
 		wantText string
 		wantErr  bool
 	}{
-		{"none", args{"", nl.NL}, "", true},
-		{"tmp0", args{tmp0, nl.NL}, "hello\nworld\n", false},
+		{"none", args{"", nl.Host}, "", true},
+		{"tmp0", args{tmp0, nl.Host}, "hello\nworld\n", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

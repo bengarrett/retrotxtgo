@@ -24,6 +24,7 @@ import (
 
 	"github.com/bengarrett/bbs"
 	"github.com/bengarrett/retrotxtgo/pkg/fsys"
+	"github.com/bengarrett/retrotxtgo/pkg/nl"
 	"github.com/bengarrett/retrotxtgo/pkg/term"
 	"github.com/bengarrett/sauce"
 	"github.com/bengarrett/sauce/humanize"
@@ -43,7 +44,7 @@ type Detail struct {
 	XMLName    xml.Name     `json:"-"          xml:"file"`
 	Name       string       `json:"filename"   xml:"name"`
 	Unicode    string       `json:"unicode"    xml:"unicode,attr"`
-	LineBreak  LineBreak    `json:"lineBreak"  xml:"line_break"`
+	LineBreak  nl.LineBreak `json:"lineBreak"  xml:"line_break"`
 	Count      Stats        `json:"counts"     xml:"counts"`
 	Size       Sizes        `json:"size"       xml:"size"`
 	Lines      int          `json:"lines"      xml:"lines"`
@@ -111,10 +112,6 @@ const (
 )
 
 const (
-	lf          = 10
-	cr          = 13
-	nl          = 21
-	nel         = 133
 	uc8         = "UTF-8"
 	ans         = "ANSI controls"
 	cmmt        = "comment"
@@ -521,7 +518,7 @@ func (d *Detail) Words(name string) error {
 	}
 	defer f.Close()
 	switch d.LineBreak.Decimal {
-	case [2]rune{nl}, [2]rune{nel}:
+	case [2]rune{rune(nl.NL)}, [2]rune{nl.NEL}:
 		if d.Count.Words, err = fsys.WordsEBCDIC(f); err != nil {
 			return err
 		}
