@@ -9,19 +9,11 @@ import (
 	"reflect"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/info"
 	"github.com/bengarrett/retrotxtgo/pkg/internal/mock"
 )
-
-func millennia(name string) {
-	mtime := time.Date(2000, time.January, 1, 0, 0, 0, 0, time.UTC)
-	if err := os.Chtimes(name, mtime, mtime); err != nil {
-		log.Fatal(err)
-	}
-}
 
 func sampleFile() string {
 	b := []byte(mock.T()["Tabs"]) // Tabs and Unicode glyphs
@@ -30,22 +22,6 @@ func sampleFile() string {
 		log.Fatal(err)
 	}
 	return path
-}
-
-func ExampleMarshal() {
-	var file info.Detail
-	tmp := sampleFile()
-	millennia(tmp)
-	if err := file.Read(tmp); err != nil {
-		log.Fatal(err)
-	}
-	b := &strings.Builder{}
-	_ = file.Marshal(b, info.XML)
-	fsys.Clean(tmp)
-	s := strings.ReplaceAll(b.String(), "\t", "")
-	ln := strings.Split(s, "\n")
-	fmt.Fprintln(os.Stdout, ln[0])
-	// Output: <file unicode="UTF-8 compatible" id="info-test-txt">
 }
 
 func TestValidText(t *testing.T) {

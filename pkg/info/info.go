@@ -63,9 +63,9 @@ func Info(w io.Writer, name, format string) error {
 	return nil
 }
 
-// output converts the --format argument value to a format type.
-func output(argument string) (Format, error) {
-	switch argument {
+// output converts the argument string to a format type.
+func output(arg string) (Format, error) {
+	switch arg {
 	case "color", "c", "":
 		return ColorText, nil
 	case "text", "t":
@@ -77,10 +77,10 @@ func output(argument string) (Format, error) {
 	case "xml", "x":
 		return XML, nil
 	}
-	return -1, fmt.Errorf("%w: %s", ErrFmt, argument)
+	return -1, fmt.Errorf("%w: %s", ErrFmt, arg)
 }
 
-// Marshal the metadata and system details of a named file.
+// Marshal and write the metadata and system details of a named file.
 func Marshal(w io.Writer, name string, f Format) error {
 	if w == nil {
 		w = io.Discard
@@ -126,8 +126,8 @@ func Marshal(w io.Writer, name string, f Format) error {
 	return nil
 }
 
-// Stdin parses piped data and prints out the details in a specific syntax.
-func Stdin(w io.Writer, format string, b ...byte) error {
+// Stream parses piped data and writes out the details in a specific syntax.
+func Stream(w io.Writer, format string, b ...byte) error {
 	if w == nil {
 		w = io.Discard
 	}

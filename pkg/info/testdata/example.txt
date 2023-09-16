@@ -1,0 +1,4 @@
+A test example text file.
+It is using LF and UTF-8.
+😉
+The emoji is to force the use of Unicode features.

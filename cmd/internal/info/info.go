@@ -103,7 +103,7 @@ func Pipe(w io.Writer) error {
 	if err != nil {
 		return fmt.Errorf("%w, %w", ErrPipeRead, err)
 	}
-	err = info.Stdin(w, flag.Info.Format, b...)
+	err = info.Stream(w, flag.Info.Format, b...)
 	if err != nil {
 		return fmt.Errorf("%w, %w", ErrPipeParse, err)
 	}
