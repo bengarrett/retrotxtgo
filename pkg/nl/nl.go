@@ -115,6 +115,7 @@ type System int
 
 const (
 	Host      System = iota // Host is the host operating system default.
+	Acorn                   // Acorn is the Acorn Archimedes.
 	Amiga                   // Amiga is the Commodore Amiga.
 	Commodore               // Commodore is the Commodore 64 and compatibles.
 	Darwin                  // Darwin is Apple macOS.
@@ -134,6 +135,8 @@ func NewLine(s System) string {
 		return string(CR)
 	case Amiga, Linux, Unix:
 		return string(LF)
+	case Acorn:
+		return string(LF) + string(CR)
 	case Host:
 		return "\n"
 	}
