@@ -43,7 +43,7 @@ type Detail struct {
 	XMLName    xml.Name     `json:"-"          xml:"file"`
 	Name       string       `json:"filename"   xml:"name"`
 	Unicode    string       `json:"unicode"    xml:"unicode,attr"`
-	LineBreak  LineBreaks   `json:"lineBreak"  xml:"line_break"`
+	LineBreak  LineBreak    `json:"lineBreak"  xml:"line_break"`
 	Count      Stats        `json:"counts"     xml:"counts"`
 	Size       Sizes        `json:"size"       xml:"size"`
 	Lines      int          `json:"lines"      xml:"lines"`
@@ -189,7 +189,7 @@ func (d *Detail) MimeUnknown() {
 		d.Mime.Commt = "Text document with ANSI controls"
 		return
 	}
-	switch d.LineBreak.Decimals {
+	switch d.LineBreak.Decimal {
 	case [2]rune{21}, [2]rune{133}:
 		d.Mime.Commt = "EBCDIC encoded text document"
 		return
@@ -423,7 +423,7 @@ func (d Detail) marshalled() []struct{ k, v string } {
 		{k: "filename", v: d.Name},
 		{k: "filetype", v: d.Mime.Commt},
 		{k: "Unicode", v: d.Unicode},
-		{k: "line break", v: fsys.LineBreak(d.LineBreak.Decimals, true)},
+		{k: "line break", v: fsys.LineBreak(d.LineBreak.Decimal, true)},
 		{k: "characters", v: p.Sprint(d.Count.Chars)},
 		{k: ans, v: p.Sprint(d.Count.Controls)},
 		{k: "words", v: p.Sprint(d.Count.Words)},
@@ -502,7 +502,7 @@ func (d *Detail) Len(name string) error {
 		return err
 	}
 	defer f.Close()
-	w, err := fsys.Columns(f, d.LineBreak.Decimals)
+	w, err := fsys.Columns(f, d.LineBreak.Decimal)
 	if err != nil {
 		return err
 	}
@@ -520,7 +520,7 @@ func (d *Detail) Words(name string) error {
 		return err
 	}
 	defer f.Close()
-	switch d.LineBreak.Decimals {
+	switch d.LineBreak.Decimal {
 	case [2]rune{nl}, [2]rune{nel}:
 		if d.Count.Words, err = fsys.WordsEBCDIC(f); err != nil {
 			return err

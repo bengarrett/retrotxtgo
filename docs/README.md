@@ -234,7 +234,7 @@ retrotxt info retrotxt.ans --format=json
     "lineBreak": {
         "string": "CRLF",
         "escape": "\r\n",
-        "decimals": [
+        "decimal": [
             13,
             10
         ]

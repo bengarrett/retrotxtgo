@@ -97,10 +97,10 @@ func Marshal(w io.Writer, name string, f Format) error {
 	if ValidText(d.Mime.Type) {
 		var err error
 		// get the required linebreaks chars before running the multiple tasks
-		if d.LineBreak.Decimals, err = fsys.ReadLineBreaks(name); err != nil {
+		if d.LineBreak.Decimal, err = fsys.ReadLineBreaks(name); err != nil {
 			return err
 		}
-		d.LineBreak.Find(d.LineBreak.Decimals)
+		d.LineBreak.Find(d.LineBreak.Decimal)
 		g := errgroup.Group{}
 		g.Go(func() error {
 			return d.Ctrls(name)
@@ -156,14 +156,14 @@ func Stdin(w io.Writer, format string, b ...byte) error {
 		})
 		g.Go(func() error {
 			var err error
-			if d.Lines, err = fsys.Lines(bytes.NewReader(b), d.LineBreak.Decimals); err != nil {
+			if d.Lines, err = fsys.Lines(bytes.NewReader(b), d.LineBreak.Decimal); err != nil {
 				return err
 			}
 			return nil
 		})
 		g.Go(func() error {
 			var err error
-			if d.Width, err = fsys.Columns(bytes.NewReader(b), d.LineBreak.Decimals); err != nil {
+			if d.Width, err = fsys.Columns(bytes.NewReader(b), d.LineBreak.Decimal); err != nil {
 				return err
 			} else if d.Width < 0 {
 				d.Width = d.Count.Chars

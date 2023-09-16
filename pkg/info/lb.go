@@ -7,15 +7,15 @@ import (
 	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 )
 
-// LineBreaks for new line toggles.
-type LineBreaks struct {
-	Abbr     string  `json:"string"   xml:"string,attr"`
-	Escape   string  `json:"escape"   xml:"-"`
-	Decimals [2]rune `json:"decimals" xml:"decimal"`
+// LineBreak contains details on the line break sequence used to create a new line in a text file.
+type LineBreak struct {
+	Abbr    string  `json:"string"   xml:"string,attr"` // Abbr is the abbreviation for the line break.
+	Escape  string  `json:"escape"   xml:"-"`           // Escape is the escape sequence for the line break.
+	Decimal [2]rune `json:"decimal" xml:"decimal"`      // Decimal is the numeric character code for the line break.
 }
 
 // Find determines the new lines characters found in the rune pair.
-func (lb *LineBreaks) Find(r [2]rune) {
+func (lb *LineBreak) Find(r [2]rune) {
 	a, e := "", ""
 	switch r {
 	case [2]rune{lf}:
@@ -34,19 +34,20 @@ func (lb *LineBreaks) Find(r [2]rune) {
 		a = "nl"
 		e = "\025"
 	}
-	lb.Decimals = r
+	lb.Decimal = r
 	lb.Abbr = strings.ToUpper(a)
 	lb.Escape = e
 }
 
-// Total counts the totals lines in the named file.
-func (lb *LineBreaks) Total(name string) (int, error) {
+// Total counts the number of lines in the named file
+// based on the line break sequence.
+func (lb *LineBreak) Total(name string) (int, error) {
 	f, err := os.Open(name)
 	if err != nil {
 		return 0, err
 	}
 	defer f.Close()
-	l, err := fsys.Lines(f, lb.Decimals)
+	l, err := fsys.Lines(f, lb.Decimal)
 	if err != nil {
 		return 0, err
 	}
