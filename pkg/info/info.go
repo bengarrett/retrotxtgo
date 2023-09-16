@@ -1,4 +1,4 @@
-// Package info that extracts file statistics and metadata.
+// Package info that extracts and returns file statistics and metadata.
 package info
 
 import (
@@ -16,14 +16,8 @@ import (
 
 var ErrName = errors.New("name value cannot be empty")
 
-// Names index and totals.
-type Names struct {
-	Index  int // Index of the file in the list.
-	Length int // Total number of files in the list.
-}
-
-// Info parses the named file and prints out its details in a specific syntax.
-func (n Names) Info(w io.Writer, name, format string) error {
+// Info parses the named file and writes the details in a formal syntax.
+func Info(w io.Writer, name, format string) error {
 	if w == nil {
 		w = io.Discard
 	}

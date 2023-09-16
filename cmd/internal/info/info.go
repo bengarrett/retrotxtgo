@@ -44,10 +44,7 @@ func Run(w io.Writer, cmd *cobra.Command, args ...string) error {
 	if err := flag.Help(cmd, args...); err != nil {
 		return err
 	}
-	n := info.Names{}
-	n.Length = len(args)
-	for i, arg := range args {
-		n.Index = i + 1
+	for _, arg := range args {
 		_, err := os.Stat(arg)
 		if os.IsNotExist(err) {
 			// embed sample filename
@@ -62,7 +59,7 @@ func Run(w io.Writer, cmd *cobra.Command, args ...string) error {
 			arg = filename
 		}
 		fmt.Fprintln(w)
-		err = n.Info(w, arg, flag.Info.Format)
+		err = info.Info(w, arg, flag.Info.Format)
 		if err != nil {
 			if err := cmd.Usage(); err != nil {
 				return fmt.Errorf("%w: %w", ErrUsage, err)
