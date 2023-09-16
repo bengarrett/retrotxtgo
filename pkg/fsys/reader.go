@@ -23,47 +23,44 @@ var (
 	ErrReader = errors.New("the r reader cannot be nil")
 )
 
-// LB is the text line break control represented as 2 runes.
-type LB [2]rune
-
-const ansiEscape string = "\x1B\x5b" // esc[
+const ansiEscape string = "\x1B\x5b" // equals runes 27 and 91 or "ESC["
 
 // LF linefeed.
-func LF() LB {
-	return LB{nl.LF}
+func LF() [2]rune {
+	return [2]rune{nl.LF}
 }
 
 // CR carriage return.
-func CR() LB {
-	return LB{nl.CR}
+func CR() [2]rune {
+	return [2]rune{nl.CR}
 }
 
 // CRLF carriage return + linefeed.
-func CRLF() LB {
-	return LB{nl.CR, nl.LF}
+func CRLF() [2]rune {
+	return [2]rune{nl.CR, nl.LF}
 }
 
 // LFCR linefeed + carriage return.
-func LFCR() LB {
-	return LB{nl.LF, nl.CR}
+func LFCR() [2]rune {
+	return [2]rune{nl.LF, nl.CR}
 }
 
 // NL new line.
-func NL() LB {
-	return LB{nl.NL}
+func NL() [2]rune {
+	return [2]rune{nl.NL}
 }
 
 // NEL next line.
-func NEL() LB {
-	return LB{nl.NEL}
+func NEL() [2]rune {
+	return [2]rune{nl.NEL}
 }
 
 // Columns counts the number of characters used per line in the reader interface.
-func Columns(r io.Reader, lb LB) (int, error) {
+func Columns(r io.Reader, lb [2]rune) (int, error) {
 	if r == nil {
 		return 0, ErrReader
 	}
-	if reflect.DeepEqual(lb, LB{}) {
+	if reflect.DeepEqual(lb, [2]rune{}) {
 		return 0, ErrLB
 	}
 	lineBreak := []byte{byte(lb[0]), byte(lb[1])}
@@ -131,7 +128,7 @@ func Controls(r io.Reader) (int, error) {
 
 // LineBreaks will try to guess the line break representation as a 2 byte value.
 // A guess of Unix will return [10, 0], Windows [13, 10], otherwise a [0, 0] value is returned.
-func LineBreaks(utf bool, runes ...rune) LB {
+func LineBreaks(utf bool, runes ...rune) [2]rune {
 	// scan data for possible line breaks
 	c := []struct {
 		abbr  string
@@ -191,7 +188,7 @@ func lfCnt(c, i, l int, runes ...rune) int {
 	return c
 }
 
-func abbr(utf bool, s string) LB {
+func abbr(utf bool, s string) [2]rune {
 	switch s {
 	case "lf":
 		return LF()
@@ -207,11 +204,11 @@ func abbr(utf bool, s string) LB {
 		}
 		return NL()
 	}
-	return LB{}
+	return [2]rune{}
 }
 
 // LineBreak humanizes the value of LineBreaks().
-func LineBreak(r LB, extraInfo bool) string {
+func LineBreak(r [2]rune, extraInfo bool) string {
 	if !extraInfo {
 		switch r {
 		case LF():

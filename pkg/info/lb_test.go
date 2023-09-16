@@ -1,1 +1,0 @@
-package info_test

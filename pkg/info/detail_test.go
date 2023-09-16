@@ -157,7 +157,7 @@ func TestMarshal_json(t *testing.T) {
 }
 
 func TestMarshal_text(t *testing.T) {
-	const want = 830
+	const want = 831
 	var d info.Detail
 	tmp := sampleFile()
 	if err := d.Read(tmp); err != nil {

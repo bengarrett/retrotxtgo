@@ -32,7 +32,7 @@ func TestLineBreaks(t *testing.T) {
 	tests := []struct {
 		name string
 		text []rune
-		want fsys.LB
+		want [2]rune
 	}{
 		{"unix", []rune("hello\x0aworld\x0a"), fsys.LF()},
 		{"win", []rune("hello\x0d\x0aworld\x0d\x0a\x1a"), fsys.CRLF()},
@@ -51,7 +51,7 @@ func TestLineBreaks(t *testing.T) {
 
 func TestLineBreak(t *testing.T) {
 	type args struct {
-		r         fsys.LB
+		r         [2]rune
 		extraInfo bool
 	}
 	tests := []struct {
@@ -74,7 +74,7 @@ func TestLineBreak(t *testing.T) {
 func TestColumns(t *testing.T) {
 	type args struct {
 		r  io.Reader
-		lb fsys.LB
+		lb [2]rune
 	}
 	tests := []struct {
 		name      string
