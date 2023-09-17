@@ -15,6 +15,23 @@ import (
 	"github.com/bengarrett/retrotxtgo/pkg/internal/mock"
 )
 
+func ExampleDetail_Ctrls() {
+	d := info.Detail{}
+	_ = d.Ctrls("testdata/example.ans")
+	fmt.Printf("%d controls\n", d.Count.Controls)
+	// Output: 12 controls
+}
+
+func ExampleDetail_Marshal() {
+	d := info.Detail{
+		Name: "example.ans",
+	}
+	b := bytes.Buffer{}
+	d.Marshal(&b, info.JSON)
+	fmt.Printf("%d bytes, is json = %t", b.Len(), json.Valid(b.Bytes()))
+	// Output: 2130 bytes, is json = true
+}
+
 func sampleFile() string {
 	b := []byte(mock.T()["Tabs"]) // Tabs and Unicode glyphs
 	path, err := fsys.SaveTemp("info_test.txt", b...)
@@ -76,14 +93,8 @@ func TestRead(t *testing.T) {
 
 func TestParse(t *testing.T) {
 	tmp := sampleFile()
-	f, err := os.Stat(tmp)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
 	type args struct {
 		data []byte
-		stat os.FileInfo
 	}
 	tests := []struct {
 		name    string
@@ -91,14 +102,14 @@ func TestParse(t *testing.T) {
 		want    int
 		wantErr bool
 	}{
-		{"empty", args{[]byte(""), f}, 0, false},
-		{"string", args{[]byte("hello"), f}, 5, false},
-		{"string", args{[]byte("世界你好"), f}, 4, false},
+		{"empty", args{[]byte("")}, 0, false},
+		{"string", args{[]byte("hello")}, 5, false},
+		{"string", args{[]byte("世界你好")}, 4, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var got info.Detail
-			err := got.Parse(tt.args.stat, "", tt.args.data...)
+			err := got.Parse("", tt.args.data...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Parse() error = %v, wantErr %v", err, tt.wantErr)
 				return

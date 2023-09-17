@@ -3,12 +3,12 @@ package info
 import (
 	"archive/zip"
 	"bytes"
+
 	//nolint:gosec
 	"crypto/md5"
 	"crypto/sha256"
 	"encoding/json"
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"hash/crc32"
 	"hash/crc64"
@@ -33,8 +33,6 @@ import (
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
-
-var ErrFmt = errors.New("format is not known")
 
 // Detail is the exported file details.
 type Detail struct {
@@ -133,7 +131,7 @@ func (d *Detail) Ctrls(name string) error {
 	return f.Close()
 }
 
-// Marshal the Detail data to a text format syntax.
+// Marshal writes the Detail data in a given format syntax.
 func (d *Detail) Marshal(w io.Writer, f Format) error {
 	if w == nil {
 		w = io.Discard
@@ -194,7 +192,7 @@ func (d *Detail) MimeUnknown() {
 }
 
 // Parse the file and the raw data content.
-func (d *Detail) Parse(stat os.FileInfo, name string, data ...byte) error {
+func (d *Detail) Parse(name string, data ...byte) error {
 	const routines = 8
 	wg := sync.WaitGroup{}
 	wg.Add(routines)
@@ -211,6 +209,7 @@ func (d *Detail) Parse(stat os.FileInfo, name string, data ...byte) error {
 	}()
 	go func() {
 		defer wg.Done()
+		stat, _ := os.Stat(name)
 		d.input(len(data), stat)
 	}()
 	go func() {
@@ -457,17 +456,12 @@ func (d Detail) marshalled() []struct{ k, v string } {
 
 // Read and parse the named file and content.
 func (d *Detail) Read(name string) error {
-	// Get the file details
-	stat, err := os.Stat(name)
-	if err != nil {
-		return err
-	}
 	// Read file content
 	p, err := fsys.ReadAllBytes(name)
 	if err != nil {
 		return err
 	}
-	return d.Parse(stat, name, p...)
+	return d.Parse(name, p...)
 }
 
 // ValidText returns true if the MIME content-type value is valid for text files.

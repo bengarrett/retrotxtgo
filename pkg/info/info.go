@@ -14,7 +14,10 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-var ErrName = errors.New("name value cannot be empty")
+var (
+	ErrFmt  = errors.New("format is not known")
+	ErrName = errors.New("name value cannot be empty")
+)
 
 // Info parses the named file and writes the details in a formal syntax.
 func Info(w io.Writer, name, format string) error {
@@ -136,7 +139,7 @@ func Stream(w io.Writer, format string, b ...byte) error {
 	if e != nil {
 		return e
 	}
-	if err := d.Parse(nil, "", b...); err != nil {
+	if err := d.Parse("", b...); err != nil {
 		return err
 	}
 	if ValidText(d.Mime.Type) { //nolint:nestif
