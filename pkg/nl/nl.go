@@ -22,9 +22,9 @@ const (
 
 // LineBreak contains details on the line break sequence used to create a new line in a text file.
 type LineBreak struct {
-	Abbr    string  `json:"string"   xml:"string,attr"` // Abbr is the abbreviation for the line break.
-	Escape  string  `json:"escape"   xml:"-"`           // Escape is the escape sequence for the line break.
-	Decimal [2]rune `json:"decimal" xml:"decimal"`      // Decimal is the numeric character code for the line break.
+	Abbr    string  `json:"string"  xml:"string,attr"` // Abbr is the abbreviation for the line break.
+	Escape  string  `json:"escape"  xml:"-"`           // Escape is the escape sequence for the line break.
+	Decimal [2]rune `json:"decimal" xml:"decimal"`     // Decimal is the numeric character code for the line break.
 }
 
 // Find determines the new lines characters found in the rune pair.

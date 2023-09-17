@@ -36,12 +36,14 @@ func ExampleMarshal() {
 func ExampleStream() {
 	s := strings.Builder{}
 	file, _ := os.Open("testdata/example.txt")
+
 	b := make([]byte, 25)
-	file.Read(b)
-	info.Stream(&s, "text", b...)
+	i, _ := file.Read(b)
+	_ = info.Stream(&s, "text", b...)
+
 	stdin := strings.Contains(s.String(), "n/a (stdin)")
-	fmt.Print("stdin? ", stdin)
-	// Output: stdin? true
+	fmt.Printf("stdin? %t, %d bytes", stdin, i)
+	// Output: stdin? true, 25 bytes
 }
 
 func rawData() []byte {

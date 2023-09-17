@@ -28,3 +28,19 @@ linters-settings:
   cyclop:
     # the maximal code complexity to report
     max-complexity: 15
+
+issues:
+  exclude-rules:
+    - path: pkg/info/detail.go
+      linters:
+        - lll
+    - path: pkg/logs/logs_test.go
+      linters:
+        - goerr113
+    - path: pkg/table/table.go
+      linters:
+        - ireturn
+    - path: pkg/xud/xud.go
+      linters:
+        - gochecknoglobals
+        - ireturn

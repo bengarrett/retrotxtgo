@@ -39,7 +39,7 @@ var (
 // merge in Flag struct into Input struct?
 // rename Input struct to Source or Arg struct?
 // rename Input.Bytes to Bytes or Input
-// make examples and tests after the refactoring
+// make examples and tests after the refactoring.
 type Convert struct {
 	Flags Flag // Flags are the cmd supplied flag values.
 	Input struct {

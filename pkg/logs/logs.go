@@ -18,8 +18,8 @@ func Fatal(err error) {
 	if err == nil {
 		return
 	}
-	const panic = false
-	switch panic {
+	const panicing = false
+	switch panicing {
 	case true:
 		log.Printf("error type: %T\tmsg: %v\n", err, err)
 		log.Panic(err)

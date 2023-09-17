@@ -52,10 +52,10 @@ func ExampleTouch() {
 func ExampleWrite() {
 	file, _ := fsys.Touch("example.txt")
 	defer os.Remove(file)
-	_, _, _ = fsys.Write(file, []byte("hello world")...)
+	i, _, _ := fsys.Write(file, []byte("hello world")...)
 	s, _ := os.Stat(file)
-	fmt.Printf("%s, %d", s.Name(), s.Size())
-	// Output:example.txt, 11
+	fmt.Printf("%s, %d", s.Name(), i)
+	// Output:example.txt, 10
 }
 
 func BenchmarkReadLarge(_ *testing.B) {

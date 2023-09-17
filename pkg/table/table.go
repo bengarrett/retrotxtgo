@@ -1,8 +1,6 @@
 // Package table creates a table of all the characters in the named 8-bit character set.
 package table
 
-//nolint:ireturn
-
 import (
 	"errors"
 	"fmt"
@@ -141,7 +139,7 @@ func Footnote(w io.Writer, name string) {
 
 // CodePage returns the encoding of the code page name or alias.
 // But without any of the custom, ASA ASCII or ISO-8859-11 encodings.
-func CodePage(s string) (encoding.Encoding, error) { //nolint:ireturn
+func CodePage(s string) (encoding.Encoding, error) {
 	cp, err := convert.Encoder(s)
 	if err != nil {
 		return nil, fmt.Errorf("table encoding error: %w", err)

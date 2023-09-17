@@ -3,7 +3,6 @@ package info
 import (
 	"archive/zip"
 	"bytes"
-
 	//nolint:gosec
 	"crypto/md5"
 	"crypto/sha256"
@@ -37,78 +36,71 @@ import (
 
 var ErrFmt = errors.New("format is not known")
 
-// Detail is the exported type for the detail package.
-//
-//nolint:musttag
+// Detail is the exported file details.
 type Detail struct {
 	XMLName    xml.Name     `json:"-"          xml:"file"`
-	Name       string       `json:"filename"   xml:"name"`
-	Unicode    string       `json:"unicode"    xml:"unicode,attr"`
-	LineBreak  nl.LineBreak `json:"lineBreak"  xml:"line_break"`
-	Count      Stats        `json:"counts"     xml:"counts"`
-	Size       Sizes        `json:"size"       xml:"size"`
-	Lines      int          `json:"lines"      xml:"lines"`
-	Width      int          `json:"width"      xml:"width"`
-	Modified   ModDates     `json:"modified"   xml:"last_modified"`
-	Sums       Checksums    `json:"checksums"  xml:"checksums"`
-	Mime       Content      `json:"mime"       xml:"mime"`
-	Slug       string       `json:"slug"       xml:"id,attr"`
-	Sauce      sauce.Record `json:"sauce"      xml:"sauce"`
-	ZipComment string       `json:"zipComment" xml:"zip_comment"`
-	UTF8       bool
-	sauceIndex int
+	Name       string       `json:"filename"   xml:"name"`          // Name is the file name.
+	Unicode    string       `json:"unicode"    xml:"unicode,attr"`  // Unicode is the file encoding if in Unicode.
+	LineBreak  nl.LineBreak `json:"lineBreak"  xml:"line_break"`    // LineBreak is the line break used in the file.
+	Count      Stats        `json:"counts"     xml:"counts"`        // Count is the file content statistics.
+	Size       Sizes        `json:"size"       xml:"size"`          // Size is the file size in multiples.
+	Lines      int          `json:"lines"      xml:"lines"`         // Lines is the number of lines in the file.
+	Width      int          `json:"width"      xml:"width"`         // Width is the number of characters per line in the file, this may be inaccurate.
+	Modified   ModDates     `json:"modified"   xml:"last_modified"` // Modified is the last modified date of the file.
+	Sums       Checksums    `json:"checksums"  xml:"checksums"`     // Sums are the checksums of the file.
+	Mime       Content      `json:"mime"       xml:"mime"`          // Mime is the file content metadata.
+	Slug       string       `json:"slug"       xml:"id,attr"`       // Slug is the file name slugified.
+	Sauce      sauce.Record `json:"sauce"      xml:"sauce"`         // Sauce is the SAUCE metadata.
+	ZipComment string       `json:"zipComment" xml:"zip_comment"`   // ZipComment is the zip file comment.
+	UTF8       bool         `json:"-"          xml:"-"`             // UTF8 is true if the file is UTF-8 encoded.
+	sauceIndex int          // sauceIndex is the index of the SAUCE record in the file.
 }
 
-// Checksums and hashes of the file.
+// Checksums act as a fingerprint of the file for uniqueness and data corruption checks.
 type Checksums struct {
-	CRC32  string `json:"crc32"  xml:"crc32"`
-	CRC64  string `json:"crc64"  xml:"crc64"`
-	MD5    string `json:"md5"    xml:"md5"`
-	SHA256 string `json:"sha256" xml:"sha256"`
+	CRC32  string `json:"crc32"  xml:"crc32"`  // CRC32 is a cyclic redundancy check of the file.
+	CRC64  string `json:"crc64"  xml:"crc64"`  // CRC64 is a cyclic redundancy check of the file.
+	MD5    string `json:"md5"    xml:"md5"`    // MD5 is a weak cryptographic hash function.
+	SHA256 string `json:"sha256" xml:"sha256"` // SHA256 is a strong cryptographic hash function.
 }
 
 // Content metadata from either MIME content type and magic file data.
 type Content struct {
 	Type  string `json:"-"        xml:"-"`
-	Media string `json:"media"    xml:"media"`
-	Sub   string `json:"subMedia" xml:"sub_media"`
-	Commt string `json:"comment"  xml:"comment"`
+	Media string `json:"media"    xml:"media"`     // Media is the MIME media type.
+	Sub   string `json:"subMedia" xml:"sub_media"` // Sub is the MIME sub type.
+	Commt string `json:"comment"  xml:"comment"`   // Commt is the MIME comment.
 }
 
 // ModDates is the file last modified dates in multiple output formats.
 type ModDates struct {
-	Time  time.Time `json:"iso"   xml:"date"`
-	Epoch int64     `json:"epoch" xml:"epoch,attr"`
+	Time  time.Time `json:"iso"   xml:"date"`       // Time is the last modified date of the file.
+	Epoch int64     `json:"epoch" xml:"epoch,attr"` // Epoch is the last modified date of the file in seconds since the Unix epoch.
 }
 
 // Sizes of the file in multiples.
 type Sizes struct {
-	Bytes   int64  `json:"bytes"   xml:"bytes"`
-	Decimal string `json:"decimal" xml:"decimal,attr"`
-	Binary  string `json:"binary"  xml:"binary,attr"`
+	Bytes   int64  `json:"bytes"   xml:"bytes"`        // Bytes is the size of the file in bytes.
+	Decimal string `json:"decimal" xml:"decimal,attr"` // Decimal is the size of the file with decimal units.
+	Binary  string `json:"binary"  xml:"binary,attr"`  // Binary is the size of the file with binary units.
 }
 
 // Stats are the text file content statistics and counts.
 type Stats struct {
-	Chars    int `json:"characters"   xml:"characters"`
-	Controls int `json:"ansiControls" xml:"ansi_controls"`
-	Words    int `json:"words"        xml:"words"`
+	Chars    int `json:"characters"   xml:"characters"`    // Chars is the number of characters in the file.
+	Controls int `json:"ansiControls" xml:"ansi_controls"` // Controls is the number of ANSI escape controls in the file.
+	Words    int `json:"words"        xml:"words"`         // Words is the number of words in the file, this may be inaccurate.
 }
 
 // Format of the text to output.
 type Format int
 
 const (
-	// ColorText is ANSI colored text.
-	ColorText Format = iota
-	// PlainText is standard text.
-	PlainText
-	// JSON data-interchange format.
-	JSON
-	// JSONMin is JSON data minified.
-	JSONMin
-	// XML markup data.
-	XML
+	ColorText Format = iota // ColorText is ANSI colored text.
+	PlainText               // PlainText is standard text.
+	JSON                    // JSON data-interchange format.
+	JSONMin                 // JSONMin is JSON data minified.
+	XML                     // XML markup data.
 )
 
 const (
@@ -146,13 +138,15 @@ func (d *Detail) Marshal(w io.Writer, f Format) error {
 	if w == nil {
 		w = io.Discard
 	}
+	const jsTab = "    "
+	const xmlTab = "\t"
 	switch f {
 	case ColorText:
 		return d.marshal(w, true)
 	case PlainText:
 		return d.marshal(w, false)
 	case JSON:
-		b, err := json.MarshalIndent(d, "", "    ")
+		b, err := json.MarshalIndent(d, "", jsTab)
 		if err != nil {
 			return fmt.Errorf("detail json indent marshal: %w", err)
 		}
@@ -166,7 +160,7 @@ func (d *Detail) Marshal(w io.Writer, f Format) error {
 		_, err = w.Write(b)
 		return err
 	case XML:
-		b, err := xml.MarshalIndent(d, "", "\t")
+		b, err := xml.MarshalIndent(d, "", xmlTab)
 		if err != nil {
 			return fmt.Errorf("detail xml marshal: %w", err)
 		}
@@ -518,7 +512,7 @@ func (d *Detail) Words(name string) error {
 	}
 	defer f.Close()
 	switch d.LineBreak.Decimal {
-	case [2]rune{rune(nl.NL)}, [2]rune{nl.NEL}:
+	case [2]rune{nl.NL}, [2]rune{nl.NEL}:
 		if d.Count.Words, err = fsys.WordsEBCDIC(f); err != nil {
 			return err
 		}

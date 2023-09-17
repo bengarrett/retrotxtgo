@@ -103,7 +103,7 @@ func ListLanguage(wr io.Writer) error {
 		case charmap.ISO8859_10:
 			c, err := Rows(e)
 			if err != nil {
-				return fmt.Errorf("%q: %v", e, err)
+				return fmt.Errorf("%q: %w", e, err)
 			}
 			fmt.Fprintf(w, " %s\t %s\t %s\t\n",
 				c.Name, c.Value, Language(e))
@@ -123,14 +123,11 @@ func ListLanguage(wr io.Writer) error {
 		}
 		c, err := Rows(e)
 		if err != nil {
-			return fmt.Errorf("%q: %v", e, err)
+			return fmt.Errorf("%q: %w", e, err)
 		}
 		// do not use ANSI colors in cells as it will break the table layout
 		fmt.Fprintf(w, " %s\t %s\t %s\t\n",
 			c.Name, c.Value, Language(e))
 	}
-	if err := w.Flush(); err != nil {
-		return err
-	}
-	return nil
+	return w.Flush()
 }

@@ -7,8 +7,6 @@
 //
 // But the X3.4-1967 character codes are compatible with the ANSI X3.4-1977 and ANSI X3.4-1986 encodings.
 // Which are also compatible with many of the IBM Codepage and ISO 8859 encodings, as-well as Unicode.
-//
-// nolint: gochecknoglobals
 package xud
 
 import (
@@ -45,18 +43,15 @@ type Encoding struct {
 
 var (
 	// XUserDefinedISO11 ISO-8859-11.
-	XUserDefinedISO11 encoding.Encoding = &xISO_11
-
+	XUserDefinedISO11 encoding.Encoding = &xThaiISO11
 	// XUserDefined1963 ASA X3.4 1963.
 	XUserDefined1963 encoding.Encoding = &x34_1963
-
 	// XUserDefined1965 ASA X3.4 1965.
 	XUserDefined1965 encoding.Encoding = &x34_1965
-
 	// XUserDefined1967 ANSI X3.4 1967/77/86.
 	XUserDefined1967 encoding.Encoding = &x34_1967
 
-	xISO_11 = Encoding{
+	xThaiISO11 = Encoding{
 		Encoding: charmap.Windows874,
 		Name:     "ISO-8859-11",
 	}

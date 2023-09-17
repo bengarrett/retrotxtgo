@@ -71,6 +71,7 @@ func TestLineBreak(t *testing.T) {
 		})
 	}
 }
+
 func TestColumns(t *testing.T) {
 	type args struct {
 		r  io.Reader
