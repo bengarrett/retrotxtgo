@@ -647,8 +647,8 @@ func TestConvert_skipIgnores(t *testing.T) {
 				Output: tt.args.output,
 			}
 			c.Input.Ignore = tt.args.ignore
-			if got := c.SkipIgnores(tt.args.i); got != tt.want {
-				t.Errorf("Convert.SkipIgnores() = %v, want %v", got, tt.want)
+			if got := c.SkipIgnore(tt.args.i); got != tt.want {
+				t.Errorf("Convert.SkipIgnore() = %v, want %v", got, tt.want)
 			}
 		})
 	}

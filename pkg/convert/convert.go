@@ -62,7 +62,7 @@ func (c *Convert) ANSI(b ...byte) ([]rune, error) {
 	c.Input.UseBreaks = true
 	c.Args.SwapChars = nil
 	c.Input.Input = byter.TrimEOF(b)
-	if err := c.SkipCtrlCodes().Transform(); err != nil {
+	if err := c.SkipCode().Transform(); err != nil {
 		return nil, fmt.Errorf("dump transform failed: %w", err)
 	}
 	c, err := c.Swap()
@@ -96,7 +96,7 @@ func (c *Convert) Chars(b ...byte) ([]rune, error) {
 func (c *Convert) Dump(b ...byte) ([]rune, error) {
 	c.Input.UseBreaks = true
 	c.Input.Input = b
-	if err := c.SkipCtrlCodes().Transform(); err != nil {
+	if err := c.SkipCode().Transform(); err != nil {
 		return nil, fmt.Errorf("dump transform failed: %w", err)
 	}
 	c, err := c.Swap()
@@ -113,7 +113,7 @@ func (c *Convert) Dump(b ...byte) ([]rune, error) {
 func (c *Convert) Text(b ...byte) ([]rune, error) {
 	c.Input.UseBreaks = true
 	c.Input.Input = byter.TrimEOF(b)
-	if err := c.SkipCtrlCodes().Transform(); err != nil {
+	if err := c.SkipCode().Transform(); err != nil {
 		return nil, fmt.Errorf("text transform failed: %w", err)
 	}
 	c, err := c.Swap()
@@ -216,7 +216,7 @@ func unicodeDecoder(e encoding.Encoding, b ...byte) ([]rune, error) {
 	return nil, nil
 }
 
-func replaceNL(r []rune) []rune {
+func replaceNL(r ...rune) []rune {
 	re := regexp.MustCompile(`\r?\n`)
 	s := re.ReplaceAllString(string(r), "")
 	return []rune(s)
@@ -228,7 +228,7 @@ func (c *Convert) wrapWidth(max int) {
 		return
 	}
 	// remove newlines
-	c.Output = replaceNL(c.Output)
+	c.Output = replaceNL(c.Output...)
 	cnt := len(c.Output)
 	if cnt == 0 {
 		log.Fatal(ErrWrap)
@@ -260,9 +260,9 @@ func (c *Convert) wrapWidth(max int) {
 	c.Output = []rune(b.String())
 }
 
-// SkipCtrlCodes marks control characters to be ignored.
+// SkipCode marks control characters to be ignored.
 // It needs to be applied before Convert.transform().
-func (c *Convert) SkipCtrlCodes() *Convert {
+func (c *Convert) SkipCode() *Convert {
 	unknown := []string{}
 	for _, v := range c.Args.Controls {
 		switch strings.ToLower(v) {
@@ -291,7 +291,8 @@ func (c *Convert) SkipCtrlCodes() *Convert {
 		}
 	}
 	if len(unknown) > 0 {
-		fmt.Fprintln(os.Stderr, term.Inform(), "unsupported --control values:", strings.Join(unknown, ","))
+		fmt.Fprintln(os.Stderr, term.Inform(),
+			"unsupported --control values:", strings.Join(unknown, ","))
 	}
 	return c
 }

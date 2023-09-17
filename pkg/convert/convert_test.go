@@ -38,9 +38,9 @@ func Test_SkipCtrlCodes(t *testing.T) {
 			c := convert.Convert{}
 			c.Input.UseBreaks = true
 			c.Args.Controls = tt.ctrl
-			c.SkipCtrlCodes()
+			c.SkipCode()
 			if got := c.Input.Ignore; string(got) != string(tt.want) {
-				t.Errorf("Convert.SkipCtrlCodes() got = %v, want %v", got, tt.want)
+				t.Errorf("Convert.SkipCode() got = %v, want %v", got, tt.want)
 			}
 		})
 	}

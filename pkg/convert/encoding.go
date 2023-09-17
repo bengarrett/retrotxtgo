@@ -589,10 +589,10 @@ func (c *Convert) RunesControls() {
 	const z = byte(Row8)
 	for i := 0; i < len(c.Output); i++ {
 		r := c.Output[i]
-		if c.SkipIgnores(i) {
+		if c.SkipIgnore(i) {
 			continue
 		}
-		if c.skipLineBreaks(i) {
+		if c.skipBreak(i) {
 			if c.Input.LineBreak == [2]rune{CR, 0} {
 				c.Output[i] = LF
 			}
@@ -613,7 +613,7 @@ func (c *Convert) RunesControlsEBCDIC() {
 	const z = byte(Row8)
 	for i := 0; i < len(c.Output); i++ {
 		r := c.Output[i]
-		if c.SkipIgnores(i) {
+		if c.SkipIgnore(i) {
 			continue
 		}
 		if r >= NUL && r <= US {
@@ -638,10 +638,10 @@ func (c *Convert) RunesDOS() {
 	}
 	for i := 0; i < len(c.Output); i++ {
 		r := c.Output[i]
-		if c.SkipIgnores(i) {
+		if c.SkipIgnore(i) {
 			continue
 		}
-		if c.skipLineBreaks(i) {
+		if c.skipBreak(i) {
 			if c.Input.LineBreak == [2]rune{13, 0} {
 				c.Output[i] = LF // swap CR with LF
 			}
@@ -669,7 +669,7 @@ func (c *Convert) RunesEBCDIC() {
 	}
 	for i := 0; i < len(c.Output); i++ {
 		r := c.Output[i]
-		if c.SkipIgnores(i) {
+		if c.SkipIgnore(i) {
 			continue
 		}
 		if c.control(i, r) {
@@ -799,7 +799,7 @@ func (c *Convert) RunesKOI8() {
 	}
 	for i := 0; i < len(c.Output); i++ {
 		r := c.Output[i]
-		if c.skipLineBreaks(i) {
+		if c.skipBreak(i) {
 			i++
 			continue
 		}
@@ -821,7 +821,7 @@ func (c *Convert) RunesLatin() {
 	}
 	for i := 0; i < len(c.Output); i++ {
 		r := c.Output[i]
-		if c.skipLineBreaks(i) {
+		if c.skipBreak(i) {
 			i++
 			continue
 		}
@@ -848,7 +848,7 @@ func (c *Convert) RunesMacintosh() {
 	)
 	for i := 0; i < len(c.Output); i++ {
 		r := c.Output[i]
-		if c.skipLineBreaks(i) {
+		if c.skipBreak(i) {
 			i++
 			continue
 		}
@@ -945,8 +945,8 @@ func EqualLB(r, nl [2]rune) bool {
 		[]byte{byte(nl[0]), byte(nl[1])})
 }
 
-// skipLineBreaks returns true if rune is a linebreak.
-func (c *Convert) skipLineBreaks(i int) bool {
+// skipBreak returns true if rune is a linebreak.
+func (c Convert) skipBreak(i int) bool {
 	if !c.Input.UseBreaks {
 		return false
 	}
@@ -961,8 +961,8 @@ func (c *Convert) skipLineBreaks(i int) bool {
 	return false
 }
 
-// SkipIgnores returns true if the rune should be skipped.
-func (c *Convert) SkipIgnores(i int) bool {
+// SkipIgnore returns true if the rune should be skipped.
+func (c Convert) SkipIgnore(i int) bool {
 	for _, ign := range c.Input.Ignore {
 		if c.Output[i] == ign {
 			return true
