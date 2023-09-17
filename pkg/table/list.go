@@ -1,7 +1,6 @@
 package table
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"strconv"
@@ -19,8 +18,6 @@ import (
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/encoding/unicode/utf32"
 )
-
-var ErrNil = errors.New("character encoding cannot be a nil value")
 
 const latin = "isolatin"
 

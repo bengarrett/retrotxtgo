@@ -11,7 +11,14 @@ import (
 	"github.com/bengarrett/retrotxtgo/pkg/internal/save"
 )
 
-var ErrNotFound = errors.New("cannot find the file or sample file")
+var (
+	ErrLB        = errors.New("linebreak runes cannot be empty")
+	ErrMax       = errors.New("maximum attempts reached")
+	ErrName      = errors.New("name file cannot be a directory")
+	ErrNotFound  = errors.New("cannot find the file or sample file")
+	ErrPipeEmpty = errors.New("empty text stream from piped stdin (standard input)")
+	ErrReader    = errors.New("the r reader cannot be nil")
+)
 
 // Clean removes the named file or directory.
 // It is intended to be used as a helper in unit tests.

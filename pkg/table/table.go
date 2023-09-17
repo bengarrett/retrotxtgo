@@ -23,6 +23,7 @@ import (
 )
 
 var (
+	ErrNil   = errors.New("character encoding cannot be a nil value")
 	ErrUTF16 = errors.New("utf-16 table encodings are not supported")
 	ErrUTF32 = errors.New("utf-32 table encodings are not supported")
 )

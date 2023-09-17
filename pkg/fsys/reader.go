@@ -3,7 +3,6 @@ package fsys
 import (
 	"bufio"
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"reflect"
@@ -16,11 +15,6 @@ import (
 	"github.com/bengarrett/retrotxtgo/pkg/nl"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/transform"
-)
-
-var (
-	ErrLB     = errors.New("linebreak runes cannot be empty")
-	ErrReader = errors.New("the r reader cannot be nil")
 )
 
 const ansiEscape string = "\x1B\x5b" // equals runes 27 and 91 or "ESC["

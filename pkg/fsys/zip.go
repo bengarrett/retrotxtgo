@@ -2,7 +2,6 @@ package fsys
 
 import (
 	"archive/zip"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -14,11 +13,6 @@ import (
 	"github.com/bengarrett/retrotxtgo/pkg/fsys/internal/util"
 	"github.com/bengarrett/sauce/humanize"
 	"golang.org/x/text/language"
-)
-
-var (
-	ErrName = errors.New("name file cannot be a directory")
-	ErrMax  = errors.New("maximum attempts reached")
 )
 
 // Files to zip.

@@ -19,6 +19,13 @@ import (
 
 var ErrRune = errors.New("invalid encoded rune")
 
+const (
+	// HBar is a the Unicode horizontal bar character.
+	HBar = "\u2500"
+	none = "none"
+	term = "terminal"
+)
+
 // Terminal color support.
 type Terminal int
 
@@ -28,11 +35,6 @@ const (
 	Term88                   // Term88 is XTerm 88 color.
 	Term256                  // Term256 is XTerm 256 color.
 	Term16M                  // Term16M is ANSI high-color.
-	// HBar is a the Unicode horizontal bar character.
-	HBar = "\u2500"
-
-	none = "none"
-	term = "terminal"
 )
 
 // String returns the terminal as a named color value.

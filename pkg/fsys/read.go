@@ -13,8 +13,6 @@ import (
 	"github.com/bengarrett/retrotxtgo/pkg/nl"
 )
 
-var ErrPipeEmpty = errors.New("empty text stream from piped stdin (standard input)")
-
 // IsPipe determines if Stdin (standard input) is piped from another command.
 func IsPipe() (bool, error) {
 	// source: https://dev.to/napicella/linux-pipes-in-golang-2e8j
