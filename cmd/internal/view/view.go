@@ -75,7 +75,7 @@ func Transform(c *convert.Convert, in, out encoding.Encoding, b ...byte,
 		fmt.Fprintf(os.Stdout, "%s\n", p)
 	}
 	// convert the bytes into runes
-	if flag.EndOfFile(c.Flags) {
+	if flag.EndOfFile(c.Args) {
 		return c.Text(p...)
 	}
 	return c.Dump(p...)

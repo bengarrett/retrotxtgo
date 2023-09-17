@@ -21,7 +21,7 @@ var ErrFilenames = errors.New("ignoring [filenames]")
 // Args initializes the command arguments and flags.
 func Args(cmd *cobra.Command, args ...string) ([]string, *convert.Convert, sample.Flags, error) {
 	conv := convert.Convert{}
-	conv.Flags = convert.Flag{
+	conv.Args = convert.Flag{
 		Controls:  View().Controls,
 		SwapChars: View().Swap,
 		MaxWidth:  View().Width,
@@ -29,10 +29,10 @@ func Args(cmd *cobra.Command, args ...string) ([]string, *convert.Convert, sampl
 	l := len(args)
 
 	if c := cmd.Flags().Lookup("controls"); c != nil && !c.Changed {
-		conv.Flags.Controls = []string{"eof", "tab"}
+		conv.Args.Controls = []string{"eof", "tab"}
 	}
 	if s := cmd.Flags().Lookup("swap-chars"); s != nil && !s.Changed {
-		conv.Flags.SwapChars = []string{"null", "bar"}
+		conv.Args.SwapChars = []string{"null", "bar"}
 	}
 	ok, err := fsys.IsPipe()
 	if err != nil {

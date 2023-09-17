@@ -2,7 +2,6 @@ package convert
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -21,13 +20,6 @@ import (
 	"golang.org/x/text/encoding/unicode/utf32"
 	"golang.org/x/text/runes"
 	"golang.org/x/text/transform"
-)
-
-var (
-	ErrChainANSI = errors.New("ansi() is a chain method that is to be used" +
-		" in conjunction with swap: c.swap().ansi()")
-	ErrName   = errors.New("encoding cannot match name or alias")
-	ErrOutput = errors.New("nothing to output")
 )
 
 const (
@@ -444,7 +436,7 @@ func (c *Convert) Swap() (*Convert, error) {
 	if err != nil {
 		return nil, err
 	}
-	if c.LineBreaks {
+	if c.Input.UseBreaks {
 		c.LineBreak()
 	}
 	switch c.Input.Encoding {
@@ -485,11 +477,11 @@ func (c *Convert) Swap() (*Convert, error) {
 }
 
 func (c *Convert) Swaps() (*Convert, error) {
-	if len(c.Flags.SwapChars) == 0 {
+	if len(c.Args.SwapChars) == 0 {
 		return c, nil
 	}
 	replacers, unknown := []rune{}, []string{}
-	for _, val := range c.Flags.SwapChars {
+	for _, val := range c.Args.SwapChars {
 		nr := newReplacer(val)
 		if nr == nil {
 			unknown = append(unknown, val)
@@ -566,7 +558,7 @@ func (c *Convert) ANSIControls() *Convert {
 		return nil
 	}
 	if len(c.Output) == 0 {
-		log.Fatal(ErrChainANSI)
+		log.Fatal(ErrANSI)
 	}
 	for i, r := range c.Output {
 		if i+1 >= len(c.Output) {
@@ -718,7 +710,7 @@ func (c *Convert) control(i int, r rune) bool { //nolint:funlen,cyclop
 		c.Output[i] = Picture(del)
 		return false
 	case nel:
-		if c.LineBreaks {
+		if c.Input.UseBreaks {
 			c.Output[i] = LF // Go will automatically convert this to CRLF on Windows
 			return true
 		}
@@ -955,7 +947,7 @@ func EqualLB(r, nl [2]rune) bool {
 
 // skipLineBreaks returns true if rune is a linebreak.
 func (c *Convert) skipLineBreaks(i int) bool {
-	if !c.LineBreaks {
+	if !c.Input.UseBreaks {
 		return false
 	}
 	l, r0, r1 := len(c.Output)-1, c.Output[i], rune(0)
@@ -971,7 +963,7 @@ func (c *Convert) skipLineBreaks(i int) bool {
 
 // SkipIgnores returns true if the rune should be skipped.
 func (c *Convert) SkipIgnores(i int) bool {
-	for _, ign := range c.Ignores {
+	for _, ign := range c.Input.Ignore {
 		if c.Output[i] == ign {
 			return true
 		}

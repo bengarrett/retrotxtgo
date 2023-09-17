@@ -25,32 +25,27 @@ import (
 )
 
 var (
-	ErrBytes     = errors.New("cannot transform an empty byte slice")
-	ErrChainWrap = errors.New("wrapWidth() is a chain method that is to be" +
-		" used in conjunction with swap: c.swap().wrapWidth()")
-	ErrEncoding = errors.New("no encoding provided")
-	ErrWidth    = errors.New("cannot determine the number columns from using line break")
+	ErrANSI   = errors.New("ansi controls must be chained to c.swap")
+	ErrBytes  = errors.New("cannot transform an empty byte slice")
+	ErrEncode = errors.New("no input encoding provided")
+	ErrName   = errors.New("encoding cannot match name or alias")
+	ErrOutput = errors.New("nothing to output")
+	ErrWidth  = errors.New("cannot find the number columns from using line break")
+	ErrWrap   = errors.New("wrap width must be chained to c.swap")
 )
 
-// Convert legacy 8-bit codepage encode or Unicode byte array text to UTF-8 runes.
-//
-// todo: clean this up to simplify
-// remove the output runes?
-// merge in Flag struct into Input struct?
-// rename Input struct to Source or Arg struct?
-// rename Input.Bytes to Bytes or Input
-// make examples and tests after the refactoring.
+// Convert 8-bit codepage text encodings or Unicode byte array text to UTF-8 runes.
 type Convert struct {
-	Flags Flag // Flags are the cmd supplied flag values.
+	Args  Flag // Args are the cmd supplied flag arguments.
 	Input struct {
 		Encoding  encoding.Encoding // Encoding are the encoding of the input text.
-		Bytes     []byte            // Bytes are the input text as bytes.
+		Input     []byte            // Bytes are the input text as bytes.
+		Ignore    []rune            // Ignore these runes.
 		LineBreak [2]rune           // Line break controls used by the text.
+		UseBreaks bool              // UseBreaks uses line break controls.
 		Table     bool              // Table flags this text as a codepage table.
 	}
-	Output     []rune // Output are the transformed UTF-8 runes.
-	Ignores    []rune // Ignores these runes.
-	LineBreaks bool   // LineBreaks uses line break controls.
+	Output []rune // Output are the transformed UTF-8 runes.
 }
 
 // Flag are the user supplied values.
@@ -64,9 +59,9 @@ type Flag struct {
 // It displays ASCII control codes as characters.
 // It obeys the DOS end of file marker.
 func (c *Convert) ANSI(b ...byte) ([]rune, error) {
-	c.LineBreaks = true
-	c.Flags.SwapChars = nil
-	c.Input.Bytes = byter.TrimEOF(b)
+	c.Input.UseBreaks = true
+	c.Args.SwapChars = nil
+	c.Input.Input = byter.TrimEOF(b)
 	if err := c.SkipCtrlCodes().Transform(); err != nil {
 		return nil, fmt.Errorf("dump transform failed: %w", err)
 	}
@@ -74,7 +69,7 @@ func (c *Convert) ANSI(b ...byte) ([]rune, error) {
 	if err != nil {
 		return nil, err
 	}
-	c.ANSIControls().wrapWidth(c.Flags.MaxWidth)
+	c.ANSIControls().wrapWidth(c.Args.MaxWidth)
 	return c.Output, nil
 }
 
@@ -83,7 +78,7 @@ func (c *Convert) ANSI(b ...byte) ([]rune, error) {
 // It ignores the DOS end of file marker.
 func (c *Convert) Chars(b ...byte) ([]rune, error) {
 	c.Input.Table = true
-	c.Input.Bytes = b
+	c.Input.Input = b
 	if err := c.Transform(); err != nil {
 		return nil, fmt.Errorf("chars transform failed: %w", err)
 	}
@@ -91,7 +86,7 @@ func (c *Convert) Chars(b ...byte) ([]rune, error) {
 	if err != nil {
 		return nil, err
 	}
-	c.wrapWidth(c.Flags.MaxWidth)
+	c.wrapWidth(c.Args.MaxWidth)
 	return c.Output, nil
 }
 
@@ -99,8 +94,8 @@ func (c *Convert) Chars(b ...byte) ([]rune, error) {
 // It obeys common ASCII control codes.
 // It ignores the DOS end of file marker.
 func (c *Convert) Dump(b ...byte) ([]rune, error) {
-	c.LineBreaks = true
-	c.Input.Bytes = b
+	c.Input.UseBreaks = true
+	c.Input.Input = b
 	if err := c.SkipCtrlCodes().Transform(); err != nil {
 		return nil, fmt.Errorf("dump transform failed: %w", err)
 	}
@@ -108,7 +103,7 @@ func (c *Convert) Dump(b ...byte) ([]rune, error) {
 	if err != nil {
 		return nil, err
 	}
-	c.ANSIControls().wrapWidth(c.Flags.MaxWidth)
+	c.ANSIControls().wrapWidth(c.Args.MaxWidth)
 	return c.Output, nil
 }
 
@@ -116,8 +111,8 @@ func (c *Convert) Dump(b ...byte) ([]rune, error) {
 // It obeys common ASCII control codes.
 // It obeys the DOS end of file marker.
 func (c *Convert) Text(b ...byte) ([]rune, error) {
-	c.LineBreaks = true
-	c.Input.Bytes = byter.TrimEOF(b)
+	c.Input.UseBreaks = true
+	c.Input.Input = byter.TrimEOF(b)
 	if err := c.SkipCtrlCodes().Transform(); err != nil {
 		return nil, fmt.Errorf("text transform failed: %w", err)
 	}
@@ -125,35 +120,35 @@ func (c *Convert) Text(b ...byte) ([]rune, error) {
 	if err != nil {
 		return nil, err
 	}
-	c.ANSIControls().wrapWidth(c.Flags.MaxWidth)
+	c.ANSIControls().wrapWidth(c.Args.MaxWidth)
 	return c.Output, nil
 }
 
 // Transform byte data from named character map encoded text into UTF-8.
 func (c *Convert) Transform() error {
 	if c.Input.Encoding == nil {
-		return ErrEncoding
+		return ErrEncode
 	}
-	if len(c.Input.Bytes) == 0 {
+	if len(c.Input.Input) == 0 {
 		return ErrBytes
 	}
 	// transform unicode encodings
-	if r, err := unicodeDecoder(c.Input.Encoding, c.Input.Bytes); err != nil {
+	if r, err := unicodeDecoder(c.Input.Encoding, c.Input.Input...); err != nil {
 		return err
 	} else if len(r) > 0 {
 		c.Output = r
 		return nil
 	}
 	// use the input bytes if they are already valid UTF-8 runes
-	if utf8.Valid(c.Input.Bytes) {
-		c.Output = bytes.Runes(c.Input.Bytes)
+	if utf8.Valid(c.Input.Input) {
+		c.Output = bytes.Runes(c.Input.Input)
 		return nil
 	}
 	// transform the input bytes into UTF-8 runes
 	c.FixJISTable()
 	b := &bytes.Buffer{}
 	t := transform.NewWriter(b, c.Input.Encoding.NewDecoder())
-	if _, err := t.Write(c.Input.Bytes); err != nil {
+	if _, err := t.Write(c.Input.Input); err != nil {
 		return err
 	}
 	defer t.Close()
@@ -166,28 +161,28 @@ func (c *Convert) FixJISTable() {
 	if c.Input.Encoding == japanese.ShiftJIS && c.Input.Table {
 		// this is only for the table command,
 		// it will break normal shift-jis encode text
-		for i, b := range c.Input.Bytes {
+		for i, b := range c.Input.Input {
 			switch {
 			case b > 0x7f && b <= 0xa0,
 				b >= 0xe0 && b <= 0xff:
-				c.Input.Bytes[i] = SP
+				c.Input.Input[i] = SP
 			}
 		}
 	}
 }
 
-// decode transforms encoded input bytes into UTF-8 runes.
-func decode(e encoding.Encoding, input []byte) ([]rune, error) {
-	b, err := e.NewDecoder().Bytes(input)
+// decode transforms encoded bytes into UTF-8 runes.
+func decode(e encoding.Encoding, b ...byte) ([]rune, error) {
+	p, err := e.NewDecoder().Bytes(b)
 	if err != nil {
 		return nil, err
 	}
 	// c.Output
-	return bytes.Runes(b), nil
+	return bytes.Runes(p), nil
 }
 
 // unicodeDecoder transforms UTF-8, UTF-16 or UTF-32 bytes into UTF-8 runes.
-func unicodeDecoder(e encoding.Encoding, input []byte) ([]rune, error) {
+func unicodeDecoder(e encoding.Encoding, b ...byte) ([]rune, error) {
 	var (
 		u16be  = unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM)
 		u16beB = unicode.UTF16(unicode.BigEndian, unicode.ExpectBOM)
@@ -200,23 +195,23 @@ func unicodeDecoder(e encoding.Encoding, input []byte) ([]rune, error) {
 	)
 	switch e {
 	case unicode.UTF8, unicode.UTF8BOM:
-		return bytes.Runes(input), nil
+		return bytes.Runes(b), nil
 	case u16be:
-		return decode(u16be, input)
+		return decode(u16be, b...)
 	case u16le:
-		return decode(u16le, input)
+		return decode(u16le, b...)
 	case u16beB:
-		return decode(u16beB, input)
+		return decode(u16beB, b...)
 	case u16leB:
-		return decode(u16leB, input)
+		return decode(u16leB, b...)
 	case u32be:
-		return decode(u32be, input)
+		return decode(u32be, b...)
 	case u32beB:
-		return decode(u32beB, input)
+		return decode(u32beB, b...)
 	case u32le:
-		return decode(u32le, input)
+		return decode(u32le, b...)
 	case u32leB:
-		return decode(u32leB, input)
+		return decode(u32leB, b...)
 	}
 	return nil, nil
 }
@@ -236,7 +231,7 @@ func (c *Convert) wrapWidth(max int) {
 	c.Output = replaceNL(c.Output)
 	cnt := len(c.Output)
 	if cnt == 0 {
-		log.Fatal(ErrChainWrap)
+		log.Fatal(ErrWrap)
 	}
 	r := strings.NewReader(string(c.Output))
 	cols, err := fsys.Columns(r, c.Input.LineBreak)
@@ -269,7 +264,7 @@ func (c *Convert) wrapWidth(max int) {
 // It needs to be applied before Convert.transform().
 func (c *Convert) SkipCtrlCodes() *Convert {
 	unknown := []string{}
-	for _, v := range c.Flags.Controls {
+	for _, v := range c.Args.Controls {
 		switch strings.ToLower(v) {
 		case "eof", "=":
 			continue
@@ -303,5 +298,5 @@ func (c *Convert) SkipCtrlCodes() *Convert {
 
 // ignore adds the rune to an ignore runes list.
 func (c *Convert) ignore(r rune) {
-	c.Ignores = append(c.Ignores, r)
+	c.Input.Ignore = append(c.Input.Ignore, r)
 }

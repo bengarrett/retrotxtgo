@@ -36,10 +36,10 @@ func Test_SkipCtrlCodes(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := convert.Convert{}
-			c.LineBreaks = true
-			c.Flags.Controls = tt.ctrl
+			c.Input.UseBreaks = true
+			c.Args.Controls = tt.ctrl
 			c.SkipCtrlCodes()
-			if got := c.Ignores; string(got) != string(tt.want) {
+			if got := c.Input.Ignore; string(got) != string(tt.want) {
 				t.Errorf("Convert.SkipCtrlCodes() got = %v, want %v", got, tt.want)
 			}
 		})
@@ -185,7 +185,7 @@ func TestConvert_Text(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := convert.Convert{}
-			c.Flags.SwapChars = []string{"null", "bar"}
+			c.Args.SwapChars = []string{"null", "bar"}
 			c.Input.Encoding = charmap.CodePage437
 			got, err := c.Text(tt.args.b...)
 			if (err != nil) != tt.wantErr {
@@ -204,17 +204,17 @@ func TestConvert_Text(t *testing.T) {
 func TestConvert_FixJISTable(t *testing.T) {
 	fix := []byte("\x7f\xa0\xe0\xff")
 	c := convert.Convert{}
-	c.Input.Bytes = fix
+	c.Input.Input = fix
 	c.Input.Table = true
 	c.FixJISTable()
-	if !reflect.DeepEqual(c.Input.Bytes, fix) {
-		t.Errorf("Convert.FixJISTable() = %s, want %s", c.Input.Bytes, fix)
+	if !reflect.DeepEqual(c.Input.Input, fix) {
+		t.Errorf("Convert.FixJISTable() = %s, want %s", c.Input.Input, fix)
 	}
 	c.Input.Encoding = japanese.ShiftJIS
-	c.Input.Bytes = fix
+	c.Input.Input = fix
 	c.FixJISTable()
-	if want := []byte("\u007f   "); !reflect.DeepEqual(c.Input.Bytes, want) {
-		t.Errorf("Convert.FixJISTable() = %q, want %q", c.Input.Bytes, want)
+	if want := []byte("\u007f   "); !reflect.DeepEqual(c.Input.Input, want) {
+		t.Errorf("Convert.FixJISTable() = %q, want %q", c.Input.Input, want)
 	}
 }
 
@@ -238,14 +238,14 @@ func TestConvert_wrapWidth(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := convert.Convert{}
 			c.Input.Encoding = charmap.CodePage437
-			c.Flags.MaxWidth = tt.args.max
+			c.Args.MaxWidth = tt.args.max
 			c.Input.LineBreak = [2]rune{13, 0}
 			r, err := c.Chars([]byte(tt.args.input)...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Convert.wrapWidth() error = %v, want %v", err, tt.wantErr)
 			}
 			if string(r) != tt.want {
-				t.Errorf("Convert.wrapWidth(%d) = %q, want %q", c.Flags.MaxWidth, string(r), tt.want)
+				t.Errorf("Convert.wrapWidth(%d) = %q, want %q", c.Args.MaxWidth, string(r), tt.want)
 			}
 		})
 	}

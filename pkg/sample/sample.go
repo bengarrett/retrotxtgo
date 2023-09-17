@@ -162,7 +162,7 @@ func (flag Flags) Open(conv *convert.Convert, name string) ([]rune, error) {
 	default:
 	}
 	if ignoreCtrls {
-		conv.Flags.Controls = []string{}
+		conv.Args.Controls = []string{}
 	}
 	r, err := samp.transform(conv, b...)
 	if err != nil {

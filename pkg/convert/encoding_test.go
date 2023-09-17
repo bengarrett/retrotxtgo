@@ -129,7 +129,7 @@ func TestSet_Transform(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			data := &convert.Convert{}
-			data.Input.Bytes = tt.text
+			data.Input.Input = tt.text
 			data.Input.Encoding = tt.codepage
 			err := data.Transform()
 			if (err != nil) != tt.wantErr {
@@ -165,7 +165,7 @@ func TestANSI(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			data := &convert.Convert{}
-			data.Input.Bytes = []byte(tt.str)
+			data.Input.Input = []byte(tt.str)
 			data.Input.Encoding = tt.codepage
 			err := data.Transform()
 			if (err != nil) != tt.wantErr {
@@ -272,7 +272,7 @@ func TestRunesControls(t *testing.T) {
 	}
 	for _, tt := range tests {
 		d := &convert.Convert{}
-		d.Input.Bytes = []byte(tt.text)
+		d.Input.Input = []byte(tt.text)
 		d.Input.Encoding = cp1252
 		if err := d.Transform(); err != nil {
 			if (err != nil) != tt.wantErr {
@@ -308,7 +308,7 @@ func TestRunesKOI8(t *testing.T) {
 	}
 	for _, tt := range tests {
 		d := convert.Convert{}
-		d.Input.Bytes = []byte(tt.text)
+		d.Input.Input = []byte(tt.text)
 		d.Input.Encoding = koi
 		err := d.Transform()
 		if (err != nil) != tt.wantErr {
@@ -337,7 +337,7 @@ func TestRunesLatin(t *testing.T) {
 	}
 	for _, tt := range tests {
 		d := convert.Convert{}
-		d.Input.Bytes = []byte(tt.text)
+		d.Input.Input = []byte(tt.text)
 		d.Input.Encoding = iso1
 		err := d.Transform()
 		if (err != nil) != tt.wantErr {
@@ -365,7 +365,7 @@ func TestRunesDOS(t *testing.T) {
 	}
 	for _, tt := range tests {
 		d := convert.Convert{}
-		d.Input.Bytes = []byte(tt.text)
+		d.Input.Input = []byte(tt.text)
 		d.Input.Encoding = cp437
 		err := d.Transform()
 		if (err != nil) != tt.wantErr {
@@ -393,7 +393,7 @@ func TestRunesMacintosh(t *testing.T) {
 	}
 	for _, tt := range tests {
 		d := convert.Convert{}
-		d.Input.Bytes = []byte(tt.text)
+		d.Input.Input = []byte(tt.text)
 		d.Input.Encoding = mac
 		err := d.Transform()
 		if (err != nil) != tt.wantErr {
@@ -423,7 +423,7 @@ func TestRunesWindows(t *testing.T) {
 	}
 	for _, tt := range tests {
 		d := convert.Convert{}
-		d.Input.Bytes = []byte(tt.text)
+		d.Input.Input = []byte(tt.text)
 		d.Input.Encoding = cp1252
 		err := d.Transform()
 		if (err != nil) != tt.wantErr {
@@ -466,7 +466,7 @@ func TestRunesEBCDIC(t *testing.T) {
 	for _, tt := range tests {
 		c := tt.text
 		d := convert.Convert{}
-		d.Input.Bytes = c
+		d.Input.Input = c
 		d.Input.Encoding = charmap.CodePage037
 		err := d.Transform()
 		if (err != nil) != tt.wantErr {
@@ -591,7 +591,7 @@ func TestConvert_swaps(t *testing.T) {
 			c := convert.Convert{
 				Output: tt.output,
 			}
-			c.Flags.SwapChars = tt.swaps
+			c.Args.SwapChars = tt.swaps
 			_, _ = c.Swaps()
 			if got := c.Output; !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Convert.Swaps() = %v, want %v", string(got), string(tt.want))
@@ -644,9 +644,9 @@ func TestConvert_skipIgnores(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := convert.Convert{
-				Output:  tt.args.output,
-				Ignores: tt.args.ignore,
+				Output: tt.args.output,
 			}
+			c.Input.Ignore = tt.args.ignore
 			if got := c.SkipIgnores(tt.args.i); got != tt.want {
 				t.Errorf("Convert.SkipIgnores() = %v, want %v", got, tt.want)
 			}
