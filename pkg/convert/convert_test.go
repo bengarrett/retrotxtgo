@@ -19,7 +19,7 @@ const (
 	wantEOF1 = "Hello"
 	wantEOF0 = "Hello→world!"
 
-	filename = "convert_test.ans"
+	filename = "testdata/convert_test.ans"
 )
 
 func Test_SkipCtrlCodes(t *testing.T) {
