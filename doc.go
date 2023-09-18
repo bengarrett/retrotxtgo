@@ -1,0 +1,83 @@
+// Copyright © 2023 Ben Garrett. All rights reserved.
+// Use of this source code is governed by a GNU
+// license that can be found in the LICENSE file.
+
+/*
+Retrotxt for the terminal.
+Read legacy codepage and ANSI encoded text files in a modern
+Unicode terminal.
+
+Text files and art created before the adoption of Unicode often
+fail to display on modern systems.
+Use RetroTxt to print legacy text on modern terminals.
+Or save it to a Unicode file and use it in other apps.
+Otherwise, when using many command prompt or terminal apps,
+legacy text is often malformed and even unreadable.
+
+# Features
+
+Print legacy codepage encoded texts in a modern terminal.
+Print or export the details of the text files.
+Print or export the SAUCE metadata of a file.
+Transform legacy encoded texts and text art into UTF-8 documents for use on the web or with modern systems.
+Lookup and print codepage character tables for dozens of encodings.
+Support for ISO, PC-DOS/Windows codepages plus IBM EBCDIC, Macintosh, and ShiftJIS.
+Use io redirection with piping support.
+
+Usage:
+
+	retrotxt [command]
+
+The commands are:
+
+	lang        List the legacy codepage target languages
+	list        List the legacy codepages that Retrotxt can convert to UTF-8
+	table       Display one or more codepage tables showing all the characters in use
+	tables      Display the characters of every codepage table in use
+	info        Information on a text file
+	view        Print a text file to the terminal using standard output
+	example     List the included sample text files available for use with the info and view commands
+
+# Examples
+
+To display information about a text file:
+
+	retrotxt info [filenames]
+
+To display information about a file in JSON format:
+
+	retrotxt info [filenames] --format json
+
+To display a text file to the terminal:
+
+	retrotxt view [filenames]
+
+To display a text file to the terminal by supplying the source encoding:
+
+	retrotxt view [filenames] --encoding iso-8859-1
+
+To list the sample text files:
+
+	retrotxt example
+
+To list the supported codepage encodings with names and aliases:
+
+	retrotxt list
+
+To list the supported codepages and characters as tables:
+
+	retrotxt tables
+
+To list the a codepage and characters as a table:
+
+	retrotxt table [codepage names or aliases]
+
+To list both the table of Codepage 437 and ISO 8859-1 using aliases:
+
+	retrotxt table cp437 latin1
+
+To list the target natural languages of the supported codepages:
+
+	retrotxt lang
+*/
+package main
