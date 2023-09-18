@@ -48,12 +48,13 @@ func Check() (string, error) {
 	if meta.App.Version == meta.GoBuild {
 		return "", nil
 	}
-	etag, tag := CacheGet()
-	cache, data, err := online.Endpoint(online.ReleaseAPI, etag)
+	cache := CacheGet()
+	etag, tag := cache.Etag, cache.Version
+	c, data, err := online.Endpoint(online.ReleaseAPI, etag)
 	if err != nil {
 		return "", err
 	}
-	if !cache {
+	if !c {
 		tag = fmt.Sprint(data["tag_name"])
 		if tag == "" {
 			return "", nil
@@ -70,15 +71,15 @@ func Check() (string, error) {
 	return "", nil
 }
 
-// CacheGet reads the stored GitHub API, HTTP ETag header and release version.
-func CacheGet() (etag, version string) { //nolint:nonamedreturns
+// CacheGet reads and returns the locally cached GitHub API.
+func CacheGet() Cache {
 	cf, err := home().DataPath(cacheFile)
 	if err != nil {
 		logs.Sprint(err)
-		return
+		return Cache{}
 	}
 	if _, err = os.Stat(cf); os.IsNotExist(err) {
-		return
+		return Cache{}
 	}
 	f, err := os.ReadFile(cf)
 	if err != nil {
@@ -92,9 +93,9 @@ func CacheGet() (etag, version string) { //nolint:nonamedreturns
 	if cache.Etag == "" || cache.Version == "" {
 		err = os.Remove(cf)
 		logs.Sprint(err)
-		return "", ""
+		return Cache{}
 	}
-	return cache.Etag, cache.Version
+	return cache
 }
 
 // CacheSet saves the Github API, ETag HTTP header and release version.
