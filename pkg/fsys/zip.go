@@ -10,7 +10,6 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/bengarrett/retrotxtgo/pkg/fsys/internal/util"
 	"github.com/bengarrett/sauce/humanize"
 	"golang.org/x/text/language"
 )
@@ -134,7 +133,7 @@ func (files *Files) Zip(w io.Writer, name, comment string, ow bool) error {
 // InsertZip adds the named file to a zip archive.
 func InsertZip(z *zip.Writer, name string) error {
 	if z == nil {
-		return util.ErrNoWriter
+		return ErrWriter
 	}
 	s, err := os.Stat(name)
 	if err != nil {

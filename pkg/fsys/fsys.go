@@ -5,9 +5,10 @@ import (
 	"archive/tar"
 	"errors"
 	"fmt"
+	"io"
 	"os"
+	"path/filepath"
 
-	"github.com/bengarrett/retrotxtgo/pkg/fsys/internal/util"
 	"github.com/bengarrett/retrotxtgo/pkg/internal/save"
 )
 
@@ -18,6 +19,7 @@ var (
 	ErrNotFound  = errors.New("cannot find the file or sample file")
 	ErrPipeEmpty = errors.New("empty text stream from piped stdin (standard input)")
 	ErrReader    = errors.New("the r reader cannot be nil")
+	ErrWriter    = errors.New("the w writer cannot be nil")
 )
 
 // Clean removes the named file or directory.
@@ -31,11 +33,21 @@ func Clean(name string) {
 // SaveTemp saves bytes to a named temporary file.
 // The path to the file is returned.
 func SaveTemp(name string, b ...byte) (string, error) {
-	_, path, err := save.Save(util.Temp(name), b...)
+	_, path, err := save.Save(temp(name), b...)
 	if err != nil {
 		return path, fmt.Errorf("could not save the temporary file: %w", err)
 	}
 	return path, nil
+}
+
+// temp returns a path to the named file
+// if it was stored in the system's temporary directory.
+func temp(name string) string {
+	path := name
+	if filepath.Base(name) == name {
+		path = filepath.Join(os.TempDir(), name)
+	}
+	return path
 }
 
 // Tar add files to a named tar file archive.
@@ -48,11 +60,41 @@ func Tar(name string, files ...string) error {
 	w := tar.NewWriter(f)
 	defer w.Close()
 	for _, file := range files {
-		if err := util.InsertTar(w, file); err != nil {
+		if err := InsertTar(w, file); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+// InsertTar inserts the named file to the TAR writer.
+func InsertTar(w *tar.Writer, name string) error {
+	if w == nil {
+		return ErrWriter
+	}
+	f, err := os.Open(name)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	s, err := f.Stat()
+	if err != nil {
+		return err
+	}
+	h := &tar.Header{
+		Name:    f.Name(),
+		Size:    s.Size(),
+		Mode:    int64(s.Mode()),
+		ModTime: s.ModTime(),
+	}
+	if err1 := w.WriteHeader(h); err1 != nil {
+		return err1
+	}
+	_, err = io.Copy(w, f)
+	if err != nil {
+		return nil //nolint:nilerr
+	}
+	return f.Close()
 }
 
 // Touch creates an empty file at the named location.
