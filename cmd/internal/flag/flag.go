@@ -61,7 +61,7 @@ func Args(cmd *cobra.Command, args ...string) ([]string, *convert.Convert, sampl
 }
 
 // Default returns the default encoding when the --encoding flag is unused.
-func Default() encoding.Encoding { //nolint:ireturn
+func Default() encoding.Encoding {
 	ok, err := fsys.IsPipe()
 	if err != nil {
 		logs.Fatal(err)

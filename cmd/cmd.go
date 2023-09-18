@@ -27,7 +27,7 @@ const (
 )
 
 // Cmd represents the base command when called without any subcommands.
-var Cmd = base() //nolint:gochecknoglobals
+var Cmd = base()
 
 func base() *cobra.Command {
 	s := "Use " + meta.Name + " to print legacy text on modern terminals."
@@ -95,7 +95,6 @@ func Tester(c *cobra.Command) *cobra.Command {
 	return c
 }
 
-//nolint:gochecknoinits
 func init() {
 	Init()
 }

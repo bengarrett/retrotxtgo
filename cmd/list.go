@@ -23,7 +23,6 @@ func ListCodepage() *cobra.Command {
 	}
 }
 
-//nolint:gochecknoinits
 func init() {
 	Cmd.AddCommand(ListCodepage())
 }

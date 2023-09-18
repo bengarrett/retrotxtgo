@@ -42,7 +42,7 @@ func Tables() *cobra.Command {
 	}
 }
 
-func init() { //nolint:gochecknoinits
+func init() {
 	Cmd.AddCommand(Table())
 	Cmd.AddCommand(Tables())
 }

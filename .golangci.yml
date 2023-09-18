@@ -31,12 +31,25 @@ linters-settings:
 
 issues:
   exclude-rules:
+    - path: 'cmd/(.+)\.go'
+      linters:
+        - gochecknoglobals
+        - gochecknoinits
+    - path: main.go
+      linters:
+        - gochecknoglobals
     - path: pkg/info/detail.go
       linters:
         - lll
+    - path: cmd/internal/flag/flag.go
+      linters:
+        - ireturn
     - path: pkg/logs/logs_test.go
       linters:
         - goerr113
+    - path: meta/meta.go
+      linters:
+        - gochecknoglobals
     - path: pkg/table/table.go
       linters:
         - ireturn

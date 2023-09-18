@@ -20,7 +20,6 @@ func Language() *cobra.Command {
 	}
 }
 
-//nolint:gochecknoinits
 func init() {
 	Cmd.AddCommand(Language())
 }

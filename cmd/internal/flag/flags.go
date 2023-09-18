@@ -1,6 +1,4 @@
 // Package flag provides the command flags handlers.
-//
-//nolint:gochecknoglobals
 package flag
 
 import (
@@ -48,9 +46,8 @@ func View() Views {
 }
 
 // Controls handles the --controls flag.
-//
-//nolint:dupword
 func Controls(p *[]string, cc *cobra.Command) {
+	//nolint:dupword
 	cc.Flags().StringSliceVarP(p, "controls", "c", []string{},
 		`implement these control codes (default "eof,tab")`+
 			`separate multiple controls with commas

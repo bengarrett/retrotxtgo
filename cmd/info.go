@@ -39,7 +39,6 @@ func InfoInit() *cobra.Command {
 	return infoc
 }
 
-//nolint:gochecknoinits
 func init() {
 	Cmd.AddCommand(InfoInit())
 }

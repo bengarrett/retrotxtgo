@@ -27,7 +27,7 @@ func ExampleDetail_Marshal() {
 		Name: "example.ans",
 	}
 	b := bytes.Buffer{}
-	d.Marshal(&b, info.JSON)
+	_ = d.Marshal(&b, info.JSON)
 	fmt.Printf("%d bytes, is json = %t", b.Len(), json.Valid(b.Bytes()))
 	// Output: 2130 bytes, is json = true
 }

@@ -43,6 +43,6 @@ func ViewInit() *cobra.Command {
 	return vc
 }
 
-func init() { //nolint:gochecknoinits
+func init() {
 	Cmd.AddCommand(ViewInit())
 }

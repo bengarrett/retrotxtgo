@@ -1,6 +1,4 @@
 // Package meta handles the metadata generated through the go builder using ldflags.
-//
-//nolint:gochecknoglobals
 package meta
 
 import (
