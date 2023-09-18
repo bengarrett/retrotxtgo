@@ -13,6 +13,7 @@ import (
 
 var ErrReader = errors.New("the r reader cannot be nil")
 
+// Common ASCII and EBCDIC control codes for new lines.
 const (
 	LF  rune = 10  // LF is the control code for a line feed.
 	CR  rune = 13  // CR is the control code for a carriage return.

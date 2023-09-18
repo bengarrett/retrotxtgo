@@ -30,11 +30,11 @@ const (
 type Terminal int
 
 const (
-	TermMono Terminal = iota // TermMono is monochrome, no color.
-	Term16                   // Term16 is ANSI standard 16 color.
-	Term88                   // Term88 is XTerm 88 color.
-	Term256                  // Term256 is XTerm 256 color.
-	Term16M                  // Term16M is ANSI high-color.
+	TermMono Terminal = iota // monochrome with no color
+	Term16                   // ANSI standard 16 color
+	Term88                   // XTerm with 88 colors
+	Term256                  // XTerm with 256 colors
+	Term16M                  // ANSI high-color with 16 million colors
 )
 
 // String returns the terminal as a named color value.

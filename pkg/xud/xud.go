@@ -19,17 +19,18 @@ import (
 	"golang.org/x/text/encoding/charmap"
 )
 
+// Named, numeric and alias values for the legacy ASA ASCII character encodings.
 const (
-	Name11  = "iso-8859-11" // Named value for ISO 8859-11.
-	Name63  = "ascii-63"    // Named value for ASA X3.4 1963.
-	Name65  = "ascii-65"    // Named value for ASA X3.4 1965.
-	Name67  = "ascii-67"    // Named value for ANSI X3.4 1967/77/86.
-	Numr11  = "11"          // Numeric value for ISO 8859-11.
-	Numr63  = "1963"        // Numeric value for ASA X3.4 1963.
-	Numr65  = "1965"        // Numeric value for ASA X3.4 1965.
-	Numr67  = "1967"        // Numeric value for ANSI X3.4 1967/77/86.
-	Alias11 = "iso885911"   // Alias value for ISO 8859-11.
-	Alias67 = "ansi"        // Alias value for ANSI X3.4 1967/77/86.
+	Name11  = "iso-8859-11" // name of ISO 8859-11
+	Name63  = "ascii-63"    // name of ASA X3.4 1963
+	Name65  = "ascii-65"    // name of ASA X3.4 1965
+	Name67  = "ascii-67"    // name of ANSI X3.4 1967/77/86
+	Numr11  = "11"          // numeric value for ISO 8859-11
+	Numr63  = "1963"        // numeric value for ASA X3.4 1963
+	Numr65  = "1965"        // numeric value for ASA X3.4 1965
+	Numr67  = "1967"        // numeric value for ANSI X3.4 1967/77/86
+	Alias11 = "iso885911"   // alias for ISO 8859-11
+	Alias67 = "ansi"        // alias for ANSI X3.4 1967/77/86
 )
 
 var ErrName = errors.New("there is no encoding name")

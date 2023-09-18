@@ -22,6 +22,7 @@ import (
 	"golang.org/x/text/transform"
 )
 
+// The common ASCII and Unicode control decimal values.
 const (
 	// NUL Null control code.
 	NUL = iota
@@ -91,6 +92,7 @@ const (
 	SP
 )
 
+// Special ASCII and Unicode character codes and symbols.
 const (
 	// LeftSquareBracket [.
 	LeftSquareBracket = 91
@@ -145,7 +147,7 @@ const (
 )
 
 const (
-	Row8  = 128
+	Row8  = 128 // the first cell after the end of a 7-bit row.
 	row8f = 143
 	row9  = 144
 	row9f = 159

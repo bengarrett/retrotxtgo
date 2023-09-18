@@ -90,7 +90,7 @@ type Stats struct {
 	Words    int `json:"words"        xml:"words"`         // Words is the number of words in the file, this may be inaccurate.
 }
 
-// Format of the text to output.
+// Format of the output text.
 type Format int
 
 const (

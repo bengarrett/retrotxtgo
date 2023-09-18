@@ -40,18 +40,19 @@ type Sample struct {
 	Description string            // Description of the sample.
 }
 
-// Output method.
+// Output method for the embedded text files.
 type Output int
 
 const (
-	Ansi Output = iota // Ansi method should only be use with ANSI text.
-	Ctrl               // Ctrl method print the common text control codes as characters.
-	Text               // Text obeys the common text controls.
-	Dump               // Dump obeys the common text controls except for EOF, end-of-file.
+	Ansi Output = iota // should only be use with ANSI text
+	Ctrl               // print the common text control codes as characters
+	Text               // obeys the common text controls
+	Dump               // obeys the common text controls except for EOF, end-of-file
 )
 
 // Map is the collection of sample text files.
-// Each sample includes the output method, character encoding, the filename and a brief description.
+// Each sample includes the output method, character encoding,
+// the filename and a brief description.
 func Map() map[string]Sample {
 	var (
 		cp037  = charmap.CodePage037

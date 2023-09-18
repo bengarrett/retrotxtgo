@@ -16,13 +16,13 @@ legacy text is often malformed and even unreadable.
 
 # Features
 
-Print legacy codepage encoded texts in a modern terminal.
-Print or export the details of the text files.
-Print or export the SAUCE metadata of a file.
-Transform legacy encoded texts and text art into UTF-8 documents for use on the web or with modern systems.
-Lookup and print codepage character tables for dozens of encodings.
-Support for ISO, PC-DOS/Windows codepages plus IBM EBCDIC, Macintosh, and ShiftJIS.
-Use io redirection with piping support.
+  - Print legacy codepage encoded texts in a modern terminal.
+  - Print or export the details of the text files.
+  - Print or export the SAUCE metadata of a file.
+  - Transform legacy encoded texts and text art into UTF-8 documents for use on the web or with modern systems.
+  - Lookup and print codepage character tables for dozens of encodings.
+  - Support for ISO, PC-DOS/Windows codepages plus IBM EBCDIC, Macintosh, and ShiftJIS.
+  - Use io redirection with piping support.
 
 Usage:
 
