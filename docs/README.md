@@ -224,7 +224,7 @@ retrotxt info retrotxt.ans
 ```
 
 ```sh
-retrotxt info retrotxt.ans --format=json
+retrotxt info retrotxt.ans --format json
 ```
 
 ```json

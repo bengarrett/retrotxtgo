@@ -9,7 +9,6 @@
 *.test
 retrotxt
 retrotxt.exe
-retrotxtgo
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out

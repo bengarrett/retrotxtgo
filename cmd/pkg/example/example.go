@@ -120,7 +120,7 @@ func table() string {
 func info() string {
 	s := &strings.Builder{}
 	fmt.Fprintf(s, "  %s info text.asc logo.jpg      # print the information of multiple files\n", meta.Bin)
-	fmt.Fprintf(s, "  %s info file.txt --format=json # print the information using a structured syntax\n", meta.Bin)
+	fmt.Fprintf(s, "  %s info file.txt --format json # print the information using a structured syntax\n", meta.Bin)
 	return s.String()
 }
 
