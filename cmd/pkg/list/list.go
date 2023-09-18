@@ -138,7 +138,7 @@ func Tables(w io.Writer) error {
 	return nil
 }
 
-// Printable returns true if the named encoding can be shown in an 8-bit table.
+// Printable reports whether the named encoding can be shown in an 8-bit table.
 func Printable(name string) bool {
 	const (
 		utf16 = "utf-16"

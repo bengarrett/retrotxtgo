@@ -188,7 +188,7 @@ func reverter(name string) encoding.Encoding {
 	return nil
 }
 
-// SHY240 returns true if the code page has a SHY (soft hyphen) at code 240.
+// SHY240 reports whether the code page has a SHY (soft hyphen) at code 240.
 func SHY240(x encoding.Encoding) bool {
 	switch x {
 	case charmap.CodePage850,
@@ -200,7 +200,7 @@ func SHY240(x encoding.Encoding) bool {
 	return false
 }
 
-// SHY173 returns true if the code page has a SHY (soft hyphen) at code 173.
+// SHY173 reports whether the code page has a SHY (soft hyphen) at code 173.
 func SHY173(name string) bool {
 	s := strings.ToLower(name)
 	if strings.Contains(s, "windows 125") ||

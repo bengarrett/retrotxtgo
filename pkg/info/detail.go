@@ -369,7 +369,7 @@ func (d *Detail) marshal(w io.Writer, color bool) error {
 	return tw.Flush()
 }
 
-// validate returns true if the key and value data validates.
+// validate reports whether the key and value data validate.
 func (d Detail) validate(x struct{ k, v string }) bool {
 	if !ValidText(d.Mime.Type) {
 		switch x.k {
@@ -464,7 +464,7 @@ func (d *Detail) Read(name string) error {
 	return d.Parse(name, p...)
 }
 
-// ValidText returns true if the MIME content-type value is valid for text files.
+// ValidText reports whether the MIME content-type value is valid for text files.
 func ValidText(mime string) bool {
 	s := strings.Split(mime, "/")
 	const req = 2

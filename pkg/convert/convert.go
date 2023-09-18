@@ -42,7 +42,7 @@ type Convert struct {
 		Input     []byte            // Bytes are the input text as bytes.
 		Ignore    []rune            // Ignore these runes.
 		LineBreak [2]rune           // Line break controls used by the text.
-		UseBreaks bool              // UseBreaks uses line break controls.
+		UseBreaks bool              // UseBreaks uses the line break controls as new lines.
 		Table     bool              // Table flags this text as a codepage table.
 	}
 	Output []rune // Output are the transformed UTF-8 runes.

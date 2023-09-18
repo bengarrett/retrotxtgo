@@ -120,7 +120,8 @@ func CacheSet(etag, version string) error {
 	return nil
 }
 
-// Compare the release version of this program against the latest version hosted on GitHub.
+// Compare reports whether the release version of this program
+// matches the latest version hosted on GitHub.
 func Compare(current, fetched string) bool {
 	cur := meta.Semantic(current)
 	if !cur.Valid() {

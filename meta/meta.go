@@ -104,8 +104,8 @@ func (v Version) String() string {
 	return fmt.Sprintf("%s%d.%d.%d", p, v.Major, v.Minor, v.Patch)
 }
 
-// Valid checks the version syntax and returns false
-// if any of the values are less than zero.
+// Valid reports whether the sematic versioning values are valid.
+// Values that are less than zero are considered invalid.
 func (v Version) Valid() bool {
 	if v.Major < 0 && v.Minor < 0 && v.Patch < 0 {
 		return false

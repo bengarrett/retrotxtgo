@@ -678,8 +678,8 @@ func (c *Convert) RunesEBCDIC() {
 	}
 }
 
-// Control switches out an EBCDIC IBM mainframe control with Unicode picture representation.
-// A return true value means the run should be skipped.
+// Control switches out an EBCDIC IBM mainframe controls with Unicode picture representations.
+// It also reports whether int character index should be skipped.
 func (c *Convert) control(i int, r rune) bool { //nolint:funlen,cyclop
 	if i > len(c.Output) {
 		return false
@@ -933,8 +933,8 @@ func Picture(b byte) rune {
 	return r
 }
 
-// EqualLB returns true when r matches the single
-// or multi-byte, line break character runes.
+// EqualLB reports whether r matches the single or multi-byte,
+// line break character runes.
 func EqualLB(r, nl [2]rune) bool {
 	// single-byte line break
 	if nl[1] == 0 {
@@ -945,7 +945,7 @@ func EqualLB(r, nl [2]rune) bool {
 		[]byte{byte(nl[0]), byte(nl[1])})
 }
 
-// skipBreak returns true if rune is a linebreak.
+// skipBreak reports whether the rune is a linebreak.
 func (c Convert) skipBreak(i int) bool {
 	if !c.Input.UseBreaks {
 		return false
@@ -961,7 +961,7 @@ func (c Convert) skipBreak(i int) bool {
 	return false
 }
 
-// SkipIgnore returns true if the rune should be skipped.
+// SkipIgnore reports whether the rune should be skipped.
 func (c Convert) SkipIgnore(i int) bool {
 	for _, ign := range c.Input.Ignore {
 		if c.Output[i] == ign {

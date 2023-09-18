@@ -314,9 +314,9 @@ func WordsEBCDIC(r io.Reader) (int, error) {
 	return Words(c)
 }
 
-// Word scans the content of a word for characters that are not digits,
-// letters or punctuation and if discovered returns false.
-// If a space or line break is encountered the scan will end.
+// Word reports whether content of s contains only characters
+// that are comprised of digits, letters and punctuation.
+// If a space or line break is encountered the scan ends.
 func Word(s string) bool {
 	if s == "" {
 		return false

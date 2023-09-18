@@ -13,7 +13,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/pkg/nl"
 )
 
-// IsPipe determines if Stdin (standard input) is piped from another command.
+// IsPipe reports whether Stdin (standard input) is piped from another command.
 func IsPipe() (bool, error) {
 	// source: https://dev.to/napicella/linux-pipes-in-golang-2e8j
 	fi, err := os.Stdin.Stat()

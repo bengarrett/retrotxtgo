@@ -186,7 +186,7 @@ func (samp *Sample) transform(conv *convert.Convert, b ...byte) ([]rune, error) 
 	}
 }
 
-// Valid conforms the named sample text file exists.
+// Valid reports whether the named sample text file exists.
 func Valid(name string) bool {
 	if _, exist := Map()[name]; !exist {
 		return false

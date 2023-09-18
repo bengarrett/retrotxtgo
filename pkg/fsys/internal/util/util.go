@@ -6,7 +6,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 var ErrNoWriter = errors.New("the w writer cannot be nil")
@@ -49,19 +48,4 @@ func Temp(name string) string {
 		path = filepath.Join(os.TempDir(), name)
 	}
 	return path
-}
-
-// Windows appends Windows style syntax to the directory.
-func Windows(i int, p, platform, dir string) (string, bool) {
-	if platform == "windows" {
-		if len(p) == 2 && p[1:] == ":" {
-			dir = strings.ToUpper(p) + "\\"
-			return dir, true
-		}
-		if dir == "" && i > 0 {
-			dir = p + "\\"
-			return dir, true
-		}
-	}
-	return dir, false
 }

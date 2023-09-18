@@ -94,9 +94,9 @@ func CodePage(s string) (encoding.Encoding, error) {
 	}
 }
 
-// Code7bit returns true if the encoding is a 7-bit ASCII encoding.
+// Code7bit reports whether the encoding is a 7-bit ASCII encoding.
 // The 7-bit encodings are limited to 127 characters.
-// The more common 8-bit encodings are limited to 255 characters.
+// The more common 8-bit encodings are limited to 256 characters.
 func Code7bit(e encoding.Encoding) bool {
 	switch e {
 	case XUserDefined1963, XUserDefined1965, XUserDefined1967:

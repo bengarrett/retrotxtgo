@@ -31,7 +31,7 @@ type API map[string]interface{}
 
 // Endpoint requests an API endpoint from the URL.
 // A HTTP ETag can be provided to validate local data cache against the server.
-// The return is true when the etag value matches the server's ETag header.
+// It also reports whether the etag value matches the server ETag header.
 func Endpoint(url, etag string) (bool, API, error) {
 	resp, body, err := Get(url, etag)
 	if err != nil {
@@ -84,8 +84,8 @@ func Get(url, etag string) (*http.Response, []byte, error) {
 	return resp, body, resp.Body.Close()
 }
 
-// Ping requests a URL and determines if the status is successful.
-// It returns true when the status code is between 200 and 299.
+// Ping requests a URL and reports whether if the status is successful.
+// A server response status code between 200 and 299 is considered a success.
 func Ping(url string) (bool, error) {
 	client := &http.Client{
 		Timeout: timeout,
