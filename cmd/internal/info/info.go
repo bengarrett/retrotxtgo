@@ -58,7 +58,10 @@ func Run(w io.Writer, cmd *cobra.Command, args ...string) error {
 			defer os.Remove(filename)
 			arg = filename
 		}
-		fmt.Fprintln(w)
+		switch flag.Info.Format {
+		case "color", "c", "", "text", "t":
+			fmt.Fprintln(w)
+		}
 		err = info.Info(w, arg, flag.Info.Format)
 		if err != nil {
 			if err := cmd.Usage(); err != nil {
