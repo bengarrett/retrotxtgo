@@ -102,5 +102,6 @@ func Width(p *int, cc *cobra.Command) {
 	cc.Flags().IntVarP(p, "width", "w", View().Width,
 		`maximum document character/column width
 any horizontal tab characters are replaced with two spaces
+any newline characters are replaced with a space
 `)
 }

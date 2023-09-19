@@ -216,9 +216,11 @@ func unicodeDecoder(e encoding.Encoding, b ...byte) ([]rune, error) {
 	return nil, nil
 }
 
+// replaceNL replaces newlines with single spaces.
 func replaceNL(r ...rune) []rune {
 	re := regexp.MustCompile(`\r?\n`)
-	s := re.ReplaceAllString(string(r), "")
+	const space = " "
+	s := re.ReplaceAllString(string(r), space)
 	return []rune(s)
 }
 
