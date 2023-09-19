@@ -67,7 +67,7 @@ func Controls(p *[]string, cc *cobra.Command) {
 func Encode(p *string, cc *cobra.Command) {
 	cc.Flags().StringVarP(p, "input", "i", "",
 		fmt.Sprintf("character encoding used by the filename(s) (default \"CP437\")\n%s\n%s%s\n",
-			color.Info.Sprint("this flag has no effect for Unicode and EBCDIC samples"),
+			color.Info.Sprint("this flag has no effect for some samples"),
 			"see the list of encode values ",
 			term.Example(meta.Bin+" list codepages")))
 }
@@ -101,7 +101,7 @@ func HiddenTo(p *string, cc *cobra.Command) error {
 func Width(p *int, cc *cobra.Command) {
 	cc.Flags().IntVarP(p, "width", "w", View().Width,
 		`maximum document character/column width
-any horizontal tab characters are replaced with two spaces
+any horizontal tab characters are replaced with three spaces
 any newline characters are replaced with a space
 `)
 }

@@ -225,16 +225,17 @@ func replaceNL(r ...rune) []rune {
 }
 
 // wrapWidth enforces a row length by inserting newline characters.
-// Any tab characters are replaced with two spaces.
+// Any tab characters are replaced with three spaces.
 func (c *Convert) wrapWidth(max int) {
 	if max < 1 {
 		return
 	}
 	// remove newlines
 	c.Output = replaceNL(c.Output...)
-	// replace tabs with two spaces
+	// replace tabs with three spaces
 	s := string(c.Output)
-	s = strings.ReplaceAll(s, "\t", "  ")
+	const threeSpaces = "   "
+	s = strings.ReplaceAll(s, "\t", threeSpaces)
 	c.Output = []rune(s)
 	cnt := len(c.Output)
 	if cnt == 0 {
