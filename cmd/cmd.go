@@ -87,7 +87,7 @@ func Init() {
 // Tester creates and hides a custom tester flag.
 // It is its own function so it can also be applied to unit tests as well as init.
 func Tester(c *cobra.Command) *cobra.Command {
-	c.PersistentFlags().BoolVar(&flag.Command.Tester, "tester", false,
+	c.PersistentFlags().BoolVar(&flag.Cmd.Tester, "tester", false,
 		"optional in-memory, tester config file")
 	if err := c.PersistentFlags().MarkHidden("tester"); err != nil {
 		logs.FatalS(ErrHide, err, "tester")

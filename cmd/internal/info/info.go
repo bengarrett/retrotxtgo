@@ -70,7 +70,7 @@ func Run(w io.Writer, cmd *cobra.Command, args ...string) error {
 	return nil
 }
 
-// Sample extracts and saves an embed sample file then returns its location.
+// Sample extracts and saves the named embed sample file then returns the filepath.
 func Sample(name string) (string, error) {
 	s := strings.ToLower(name)
 	samp, exist := sample.Map()[s]

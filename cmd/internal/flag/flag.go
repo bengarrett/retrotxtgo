@@ -131,11 +131,11 @@ func Help(cmd *cobra.Command, args ...string) error {
 }
 
 // OpenSample returns the content of the named embed sample file given via an argument.
-func OpenSample(arg string, c *convert.Convert, f sample.Flags) ([]byte, error) {
-	if ok := sample.Valid(arg); !ok {
+func OpenSample(name string, c *convert.Convert, f sample.Flags) ([]byte, error) {
+	if ok := sample.Valid(name); !ok {
 		return nil, nil
 	}
-	r, err := f.Open(c, arg)
+	r, err := f.Open(c, name)
 	if err != nil {
 		return nil, err
 	}

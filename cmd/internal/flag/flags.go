@@ -13,16 +13,17 @@ import (
 
 var ErrHide = errors.New("could not hide the flag")
 
-type Commands struct {
+// Command flags for the main cmd.
+type Command struct {
 	Tester bool // internal automated tester
 }
 
-// Command returns the root command.
-var Command Commands
+// Command returns the main cmd flags.
+var Cmd Command
 
 // Info handles the info "format" flag.
 var Info struct {
-	Format string
+	Format string // output format
 }
 
 // Views handles the view command flags.
