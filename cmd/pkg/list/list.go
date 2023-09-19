@@ -55,9 +55,9 @@ func Examples(wr io.Writer) error {
 	fmt.Fprintf(w, "\nConvert the Windows-1252 English test to UTF-8 encoding and save it to a file.\n%s\n",
 		term.Example(bin+"view 1252 > file.txt"))
 	fmt.Fprintf(w, "\nSave the Windows-1252 English test with its original encoding.\n%s\n",
-		term.Example(bin+"view --output cp1252 1252 > file.txt"))
+		term.Example(bin+"view 1252 --output cp1252 > file.txt"))
 	fmt.Fprintf(w, "\nDisplay statistics and information from a piped source.\n%s\n",
-		term.Example(fmt.Sprintf("%sview --output cp1252 1252 | %s info", bin, meta.Bin)))
+		term.Example(fmt.Sprintf("%sview 1252 --output cp1252 | %s info", bin, meta.Bin)))
 	fmt.Fprintf(w, "\nDisplay statistics and information from the Windows-1252 English test.\n%s\n",
 		term.Example(bin+"info 1252"))
 	fmt.Fprintf(w, "\nDisplay statistics, information and SAUCE metadata from the SAUCE test.\n%s\n",
