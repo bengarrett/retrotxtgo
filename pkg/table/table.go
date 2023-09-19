@@ -143,7 +143,7 @@ func Footnote(w io.Writer, name string) {
 func CodePage(s string) (encoding.Encoding, error) {
 	cp, err := convert.Encoder(s)
 	if err != nil {
-		return nil, fmt.Errorf("table encoding error: %w", err)
+		return nil, err
 	}
 	switch cp {
 	case uni.UTF16(uni.BigEndian, uni.UseBOM),

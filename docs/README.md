@@ -130,7 +130,7 @@ retrotxt list
  ⁑ ASA X3.4 1965          | ascii-65      | 1965           |               |
  ⁑ ANSI X3.4 1967/77/86   | ascii-67      | 1967           | ansi          |
 
- * A EBCDIC encoding in use on IBM mainframes but is not ASCII compatible.
+ * An EBCDIC encoding found on IBM mainframes that is not ASCII compatible.
  † UTF-16/32 encodings are NOT usable with the table command.
  ⁑ ANSI X3.4 encodings are only usable with the table command.
    You can use the table ascii command to list all three X3.4 tables.

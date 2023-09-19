@@ -28,7 +28,7 @@ var (
 	ErrANSI   = errors.New("ansi controls must be chained to c.swap")
 	ErrBytes  = errors.New("cannot transform an empty byte slice")
 	ErrEncode = errors.New("no input encoding provided")
-	ErrName   = errors.New("encoding cannot match name or alias")
+	ErrName   = errors.New("unknown or unsupported codepage name or alias")
 	ErrOutput = errors.New("nothing to output")
 	ErrWidth  = errors.New("cannot find the number columns from using line break")
 	ErrWrap   = errors.New("wrap width must be chained to c.swap")

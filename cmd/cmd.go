@@ -67,7 +67,8 @@ func Execute() error {
 				logs.FatalS(ErrUsage, err1, "rootCmd")
 			}
 		}
-		return fmt.Errorf("%w: %s", err, os.Args[1:])
+		jerr := strings.Join(os.Args[1:], " ")
+		return fmt.Errorf("%w: %s %s", err, meta.Bin, strings.TrimSpace(jerr))
 	}
 	return nil
 }

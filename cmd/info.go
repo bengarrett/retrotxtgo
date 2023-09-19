@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const iCmdLong = `Discover details and information about any text or text art file.
+const infoLong = `Discover details and information about any text or text art file.
 
 The info command will return the following information about a text file:
 
@@ -61,7 +61,7 @@ func InfoCommand() *cobra.Command {
 		Aliases: []string{"i"},
 		GroupID: IDfile,
 		Short:   s,
-		Long:    iCmdLong,
+		Long:    infoLong,
 		Example: expl.String(),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return info.Run(cmd.OutOrStdout(), cmd, args...)

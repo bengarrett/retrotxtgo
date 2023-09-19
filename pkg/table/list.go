@@ -105,7 +105,7 @@ func List(wr io.Writer) error { //nolint:funlen
 			c.Name, c.Value, c.Numeric, c.Alias)
 	}
 	fmt.Fprintln(w, "\n "+term.Info("*")+
-		" A EBCDIC encoding in use on IBM mainframes but is not ASCII compatible.")
+		" An EBCDIC encoding found on IBM mainframes that is not ASCII compatible.")
 	fmt.Fprintln(w, " "+term.Info("†")+
 		" UTF-16/32 encodings are NOT usable with the "+term.Example("table")+" command.")
 	fmt.Fprintln(w, " "+term.Info("⁑")+
