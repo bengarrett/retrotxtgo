@@ -18,7 +18,7 @@ type Command struct {
 	Tester bool // internal automated tester
 }
 
-// Command returns the main cmd flags.
+// Cmd returns the flags for the main cmd.
 var Cmd Command
 
 // Info handles the info "format" flag.
@@ -100,5 +100,7 @@ func HiddenTo(p *string, cc *cobra.Command) error {
 // Width handles the "width" flag.
 func Width(p *int, cc *cobra.Command) {
 	cc.Flags().IntVarP(p, "width", "w", View().Width,
-		"maximum document character/column width")
+		`maximum document character/column width
+any horizontal tab characters are replaced with two spaces
+`)
 }

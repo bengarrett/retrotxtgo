@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/bengarrett/retrotxtgo/pkg/convert"
 	"github.com/bengarrett/retrotxtgo/pkg/fsys"
@@ -20,7 +21,8 @@ var ErrNames = errors.New("ignoring [filenames]")
 
 // Args initializes the command arguments and flags.
 func Args(cmd *cobra.Command, args ...string) (
-	[]string, *convert.Convert, sample.Flags, error) {
+	[]string, *convert.Convert, sample.Flags, error,
+) {
 	conv := convert.Convert{}
 	conv.Args = convert.Flag{
 		Controls:  View().Controls,
@@ -28,12 +30,19 @@ func Args(cmd *cobra.Command, args ...string) (
 		MaxWidth:  View().Width,
 	}
 	l := len(args)
-
+	// set flag arguments to convert flag
 	if c := cmd.Flags().Lookup("controls"); c != nil && !c.Changed {
 		conv.Args.Controls = []string{"eof", "tab"}
 	}
 	if s := cmd.Flags().Lookup("swap-chars"); s != nil && !s.Changed {
 		conv.Args.SwapChars = []string{"null", "bar"}
+	}
+	if w := cmd.Flags().Lookup("width"); w != nil && w.Changed {
+		i, err := strconv.Atoi(w.Value.String())
+		if err != nil {
+			logs.Fatal(err)
+		}
+		conv.Args.MaxWidth = i
 	}
 	ok, err := fsys.IsPipe()
 	if err != nil {
@@ -104,7 +113,7 @@ func EncodeAndHide(cmd *cobra.Command, dfault string) (sample.Flags, error) {
 	if err != nil {
 		return sample.Flags{}, err
 	}
-	// handle the hidden output output flag
+	// handle the hidden output flag
 	out, err = parse("output")
 	if err != nil {
 		return sample.Flags{}, err
