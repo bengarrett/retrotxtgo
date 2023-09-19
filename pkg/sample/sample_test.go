@@ -64,8 +64,8 @@ func TestFlags_Open(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			f := sample.Flags{
-				Input:  tt.fields.From,
-				Output: tt.fields.To,
+				Input: tt.fields.From,
+				//Output: tt.fields.To,
 			}
 			gotR, err := f.Open(tt.args.conv, tt.args.name)
 			if (err != nil) != tt.wantErr {

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
+	"unicode/utf8"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/pkg/convert"
@@ -38,7 +38,14 @@ func Run(w io.Writer, cmd *cobra.Command, args ...string) error {
 		if err != nil {
 			return err
 		}
-		r, err := Transform(c, samp.Input, samp.Output, b...)
+		// write out the sample with its original encoding
+		// this could display poorly in a terminal
+		if samp.Original {
+			fmt.Fprint(w, string(b))
+			continue
+		}
+		// write out the sample with the utf-8 encoding
+		r, err := Transform(c, samp.Input, nil, b...)
 		if err != nil {
 			return err
 		}
@@ -67,12 +74,13 @@ func Transform(c *convert.Convert, in, out encoding.Encoding, b ...byte,
 	}
 	p := b
 	// handle any encoding BEFORE outputing to Unicode
-	if out != nil {
+	// we also make sure the bytes are not valid UTF-8
+	// otherwise the bytes will become corrupted
+	if out != nil && !utf8.Valid(b) {
 		p, err = out.NewDecoder().Bytes(b)
 		if err != nil {
 			return nil, err
 		}
-		fmt.Fprintf(os.Stdout, "%s\n", p)
 	}
 	// convert the bytes into runes
 	if flag.EndOfFile(c.Args) {

@@ -37,7 +37,7 @@ func TestDefault(t *testing.T) {
 	}
 }
 
-func Test_initEncodings(t *testing.T) {
+func TestInputOriginal(t *testing.T) {
 	type args struct {
 		cmd    *cobra.Command
 		dfault string
@@ -53,13 +53,13 @@ func Test_initEncodings(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := flag.EncodeAndHide(tt.args.cmd, tt.args.dfault)
+			got, err := flag.InputOriginal(tt.args.cmd, tt.args.dfault)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("EncodeAndHide() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("InputOriginal() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("EncodeAndHide() = %v, want %v", got, tt.want)
+				t.Errorf("InputOriginal() = %v, want %v", got, tt.want)
 			}
 		})
 	}

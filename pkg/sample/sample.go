@@ -27,8 +27,8 @@ var (
 
 // Flags and configuration values by the user.
 type Flags struct {
-	Input  encoding.Encoding // Input encoding is set using the input flag.
-	Output encoding.Encoding // Output encoding is set using the output flag.
+	Input    encoding.Encoding // Input encoding is set using the input flag.
+	Original bool              // Original encoding is set using the original flag.
 }
 
 // Sample textfile data.
@@ -106,6 +106,7 @@ func Map() map[string]Sample {
 }
 
 // Open the named sample text file.
+// The byte array is encoded using the original character encoding.
 func Open(name string) ([]byte, error) {
 	name = strings.ToLower(name)
 	samp, exist := Map()[name]
@@ -135,6 +136,7 @@ func Transform(e encoding.Encoding, b ...byte) ([]byte, error) {
 }
 
 // Open and convert the named sample text file into Unicode runes.
+// Use the other open function to return the raw bytes in their original encoding.
 func (flag Flags) Open(conv *convert.Convert, name string) ([]rune, error) {
 	name = strings.ToLower(name)
 	if _, err := os.Stat(name); !os.IsNotExist(err) {
@@ -148,6 +150,8 @@ func (flag Flags) Open(conv *convert.Convert, name string) ([]rune, error) {
 	if err != nil {
 		return nil, fmt.Errorf("open sample %q: %w", samp.Name, err)
 	}
+	// TODO: b is encoded!
+	//
 	if conv == nil {
 		return nil, ErrConvNil
 	}

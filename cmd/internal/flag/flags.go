@@ -32,7 +32,7 @@ type Views struct {
 	Controls []string // control codes to implement
 	Swap     []string // swap out these characters with Unicode control pictures
 	Width    int      // maximum document character/column width
-	Output   string   // output character encoding to print to stdout
+	Original bool     // output the sample's original character encoding to stdout
 }
 
 // View returns the Views struct with default values.
@@ -42,7 +42,7 @@ func View() Views {
 		Controls: []string{"eof", "tab"},
 		Swap:     []string{"null", "bar"},
 		Width:    0,
-		Output:   "",
+		Original: false,
 	}
 }
 
@@ -86,11 +86,11 @@ func SwapChars(p *[]string, cc *cobra.Command) {
   `)
 }
 
-// HiddenTo handles the hidden output flag.
-func HiddenTo(p *string, cc *cobra.Command) error {
-	const name = "output"
-	cc.Flags().StringVar(p, name, "",
-		"alternative character encoding to print to stdout\nthis flag is unreliable and not recommended")
+// HiddenOG handles the hidden original flag.
+func HideOG(p *bool, cc *cobra.Command) error {
+	const name = "original"
+	cc.Flags().BoolVar(p, name, false,
+		"use the original document character encoding to print to stdout\nthis flag only works with the samples")
 	if err := cc.Flags().MarkHidden(name); err != nil {
 		return fmt.Errorf("%w, %s: %w", ErrHide, name, err)
 	}

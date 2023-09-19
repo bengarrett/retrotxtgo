@@ -177,7 +177,6 @@ func decode(e encoding.Encoding, b ...byte) ([]rune, error) {
 	if err != nil {
 		return nil, err
 	}
-	// c.Output
 	return bytes.Runes(p), nil
 }
 

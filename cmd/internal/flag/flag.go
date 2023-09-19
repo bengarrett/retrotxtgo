@@ -74,7 +74,7 @@ func Args(cmd *cobra.Command, args ...string) (
 	if l == 0 {
 		args = []string{""}
 	}
-	samp, err := EncodeAndHide(cmd, "")
+	samp, err := InputOriginal(cmd, "")
 	if err != nil {
 		return nil, nil, samp, err
 	}
@@ -98,9 +98,9 @@ func Default() encoding.Encoding {
 	return charmap.CodePage437
 }
 
-// EncodeAndHide applies the "input" and the (hidden) "output" encoding flag values
-// to embed sample data.
-func EncodeAndHide(cmd *cobra.Command, dfault string) (sample.Flags, error) {
+// InputOriginal applies the "input" and the (hidden) "original" encoding flag values
+// to the sample data.
+func InputOriginal(cmd *cobra.Command, dfault string) (sample.Flags, error) {
 	parse := func(name string) (encoding.Encoding, error) {
 		cp := cmd.Flags().Lookup(name)
 		lookup := dfault
@@ -114,10 +114,6 @@ func EncodeAndHide(cmd *cobra.Command, dfault string) (sample.Flags, error) {
 		}
 		return convert.Encoder(lookup)
 	}
-	var (
-		in  encoding.Encoding
-		out encoding.Encoding
-	)
 	if cmd == nil {
 		return sample.Flags{}, nil
 	}
@@ -126,12 +122,13 @@ func EncodeAndHide(cmd *cobra.Command, dfault string) (sample.Flags, error) {
 	if err != nil {
 		return sample.Flags{}, err
 	}
-	// handle the hidden output flag
-	out, err = parse("output")
-	if err != nil {
-		return sample.Flags{}, err
+	// handle the hidden original flag
+	og := false
+	l := cmd.Flags().Lookup("original")
+	if l != nil && l.Changed {
+		og = true
 	}
-	return sample.Flags{Input: in, Output: out}, err
+	return sample.Flags{Input: in, Original: og}, err
 }
 
 // EndOfFile reports whether end-of-file control flag was requested.
@@ -157,10 +154,20 @@ func OpenSample(name string, c *convert.Convert, f sample.Flags) ([]byte, error)
 	if ok := sample.Valid(name); !ok {
 		return nil, nil
 	}
+	// return the sample with the original encoding
+	if f.Original {
+		p, err := sample.Open(name)
+		if err != nil {
+			return nil, err
+		}
+		return p, nil
+	}
+	// return the sample with utf-8 encoding
 	r, err := f.Open(c, name)
 	if err != nil {
 		return nil, err
 	}
+
 	return []byte(string(r)), nil
 }
 
