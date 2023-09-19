@@ -47,6 +47,8 @@ const (
 	Name = "Retrotxt"
 	// URL for this program's website.
 	URL = "https://retrotxt.com/go"
+	// Copyright © year range.
+	Copyright = "2020-23"
 )
 
 // String returns the release version string.

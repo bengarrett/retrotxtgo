@@ -22,16 +22,19 @@ var (
 	ErrCacheSave = errors.New("set cache cannot save data")
 )
 
-// Cache the release data.
+// Cache of the newest production release.
+// The Etag string is used to check if the release has changed,
+// by requesting a tiny HTTP header from the GitHub API instead
+// of the full response.
 type Cache struct {
-	Etag    string `yaml:"etag"`
-	Version string `yaml:"version"`
+	Etag    string `yaml:"etag"`    // http etag header
+	Version string `yaml:"version"` // semantic version
 }
 
 const cacheFile = "api.github.cache"
 
-// String the new release notification box and text.
-func String(w io.Writer, old, current string) {
+// Notice writes a new release notification box and text.
+func Notice(w io.Writer, old, current string) {
 	if w == nil {
 		w = io.Discard
 	}

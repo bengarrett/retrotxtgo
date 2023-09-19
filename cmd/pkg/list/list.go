@@ -25,7 +25,7 @@ var (
 	ErrIANA  = errors.New("could not work out the IANA index or MIME type")
 )
 
-// Examples returns examples commands for the list cmd.
+// Examples writes the list command examples.
 func Examples(wr io.Writer) error {
 	if wr == nil {
 		wr = io.Discard
@@ -67,7 +67,7 @@ func Examples(wr io.Writer) error {
 	return w.Flush()
 }
 
-// Table returns one or more named encodings in a tabled format.
+// Table writes one or more named encodings as a formatted table.
 func Table(w io.Writer, names ...string) error {
 	if w == nil {
 		w = io.Discard
@@ -94,7 +94,7 @@ func Table(w io.Writer, names ...string) error {
 	return nil
 }
 
-// Tables returns all the supported encodings in a tabled format.
+// Tables writes all the supported encodings as formatted tables.
 func Tables(w io.Writer) error {
 	if w == nil {
 		w = io.Discard
@@ -138,7 +138,8 @@ func Tables(w io.Writer) error {
 	return nil
 }
 
-// Printable reports whether the named encoding can be shown in an 8-bit table.
+// Printable reports whether the named encoding can be shown as
+// a 256 character table. UTF-16 and UTF-32 are not printable.
 func Printable(name string) bool {
 	const (
 		utf16 = "utf-16"

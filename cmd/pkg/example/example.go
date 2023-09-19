@@ -30,7 +30,7 @@ const (
 	View                    // View is the example for the view command.
 )
 
-// Print returns help usage examples.
+// Example string writes the example usage help.
 func (e Example) String(w io.Writer) {
 	if w == nil {
 		w = io.Discard

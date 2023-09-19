@@ -21,11 +21,10 @@ import (
 // TODO: CPU ID? https://github.com/klauspost/cpuid
 
 const (
-	Copyright = "2020-23" // Copyright © years. TODO: move to metadata.
-	TabWidth  = 8         // Width of tab characters.
+	TabWidth = 8 // Width of tab characters.
 )
 
-// Template returns the application version, copyright and build variables.
+// Template writes the application version, copyright and build variables.
 func Template(wr io.Writer) error {
 	if wr == nil {
 		wr = io.Discard
@@ -45,7 +44,7 @@ func Template(wr io.Writer) error {
 	}
 	w := tabwriter.NewWriter(wr, 0, TabWidth, 0, '\t', 0)
 	fmt.Fprintf(w, "%s %s\n", meta.Name, meta.String())
-	fmt.Fprintf(w, "%s %s Ben Garrett\n", Copyright, c)
+	fmt.Fprintf(w, "%s %s Ben Garrett\n", meta.Copyright, c)
 	fmt.Fprintln(w, color.Primary.Sprint(meta.URL))
 	fmt.Fprintf(w, "\n%s\t%s %s%s\n", color.Secondary.Sprint("build:"), runtime.Compiler, meta.App.BuiltBy, appDate)
 	fmt.Fprintf(w, "%s\t%s/%s\n", color.Secondary.Sprint("platform:"), runtime.GOOS, runtime.GOARCH)
@@ -54,13 +53,13 @@ func Template(wr io.Writer) error {
 	fmt.Fprintf(w, "%s\t%s\n", color.Secondary.Sprint("path:"), exe)
 	if tag != "" {
 		fmt.Fprintln(w)
-		update.String(w, meta.App.Version, tag)
+		update.Notice(w, meta.App.Version, tag)
 		fmt.Fprintln(w)
 	}
 	return w.Flush()
 }
 
-// Self returns the path to this executable file.
+// Self returns the path to the executable (this) program.
 func Self() (string, error) {
 	exe, err := os.Executable()
 	if err != nil {

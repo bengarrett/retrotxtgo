@@ -14,7 +14,7 @@ const (
 )
 
 func ExampleString() {
-	update.String(os.Stdout, alpha, "1.0.0")
+	update.Notice(os.Stdout, alpha, "1.0.0")
 	// Output:┌───────────────────────────────────────────┐
 	// │ A newer edition of Retrotxt is available! │
 	// │   Learn more at https://retrotxt.com/go   │

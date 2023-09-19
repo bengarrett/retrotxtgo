@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/cmd/pkg/version"
+	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/gookit/color"
 )
 
@@ -14,7 +15,7 @@ func TestTemplate(t *testing.T) {
 		want string
 	}{
 		{"©", "©"},
-		{"© date", version.Copyright},
+		{"© date", meta.Copyright},
 		{"path", "path:"},
 	}
 	color.Enable = false
