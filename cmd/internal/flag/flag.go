@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/bengarrett/retrotxtgo/pkg/convert"
 	"github.com/bengarrett/retrotxtgo/pkg/fsys"
@@ -31,11 +32,23 @@ func Args(cmd *cobra.Command, args ...string) (
 	}
 	l := len(args)
 	// set flag arguments to convert flag
-	if c := cmd.Flags().Lookup("controls"); c != nil && !c.Changed {
-		conv.Args.Controls = []string{"eof", "tab"}
+	if c := cmd.Flags().Lookup("controls"); c != nil && c.Changed {
+		const sep = ","
+		val := c.Value.String()
+		if len(val) > 2 {
+			val = val[1 : len(val)-1]
+		}
+		ctrls := strings.Split(val, sep)
+		conv.Args.Controls = ctrls
 	}
-	if s := cmd.Flags().Lookup("swap-chars"); s != nil && !s.Changed {
-		conv.Args.SwapChars = []string{"null", "bar"}
+	if s := cmd.Flags().Lookup("swap-chars"); s != nil && s.Changed {
+		const sep = ","
+		val := s.Value.String()
+		if len(val) > 2 {
+			val = val[1 : len(val)-1]
+		}
+		swaps := strings.Split(val, sep)
+		conv.Args.SwapChars = swaps
 	}
 	if w := cmd.Flags().Lookup("width"); w != nil && w.Changed {
 		i, err := strconv.Atoi(w.Value.String())

@@ -272,6 +272,7 @@ func (c *Convert) wrapWidth(max int) {
 func (c *Convert) SkipCode() *Convert {
 	unknown := []string{}
 	for _, v := range c.Args.Controls {
+		v = strings.TrimSpace(v)
 		switch strings.ToLower(v) {
 		case "eof", "=":
 			continue
@@ -297,7 +298,7 @@ func (c *Convert) SkipCode() *Convert {
 			unknown = append(unknown, v)
 		}
 	}
-	if len(unknown) > 0 {
+	if len(unknown) > 1 {
 		fmt.Fprintln(os.Stderr, term.Inform(),
 			"unsupported control values:", strings.Join(unknown, ","))
 	}
