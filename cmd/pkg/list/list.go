@@ -103,6 +103,10 @@ func Tables(w io.Writer) error {
 	// https://yourbasic.org/golang/build-append-concatenate-strings-efficiently/
 	tables := make([]encoding.Encoding, 0, len(table.Charmaps()))
 	encodings := table.Charmaps()
+	encodings = append(encodings,
+		xud.XUserDefined1963,
+		xud.XUserDefined1965,
+		xud.XUserDefined1967)
 	// reorder tables to position X-User-Defined after ISO-8859-10
 	for _, e := range encodings {
 		switch e {
@@ -122,6 +126,16 @@ func Tables(w io.Writer) error {
 			err  error
 			name string
 		)
+		switch e {
+		case charmap.XUserDefined:
+			continue
+		case xud.XUserDefinedISO11:
+			name = fmt.Sprint(e)
+		case xud.XUserDefined1963,
+			xud.XUserDefined1965,
+			xud.XUserDefined1967:
+			name = xud.Name(e)
+		}
 		if name == "" {
 			name, err = ianaindex.MIME.Name(e)
 			if err != nil {
