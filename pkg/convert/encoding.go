@@ -491,7 +491,7 @@ func (c *Convert) Swaps() (*Convert, error) {
 		replacers = append(replacers, nr...)
 	}
 	if len(unknown) > 0 {
-		fmt.Fprintln(os.Stderr, term.Inform(), "unsupported --swap-chars values:", strings.Join(unknown, ","))
+		fmt.Fprintln(os.Stderr, term.Inform(), "unsupported swap-chars values:", strings.Join(unknown, ","))
 	}
 	replace := runes.Map(func(r rune) rune {
 		if !replacer(r, replacers...) {

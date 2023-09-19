@@ -292,7 +292,7 @@ func (c *Convert) SkipCode() *Convert {
 	}
 	if len(unknown) > 0 {
 		fmt.Fprintln(os.Stderr, term.Inform(),
-			"unsupported --control values:", strings.Join(unknown, ","))
+			"unsupported control values:", strings.Join(unknown, ","))
 	}
 	return c
 }

@@ -46,7 +46,7 @@ func View() Views {
 	}
 }
 
-// Controls handles the --controls flag.
+// Controls handles the "controls" flag.
 func Controls(p *[]string, cc *cobra.Command) {
 	//nolint:dupword
 	cc.Flags().StringSliceVarP(p, "controls", "c", []string{},
@@ -72,7 +72,7 @@ func Encode(p *string, cc *cobra.Command) {
 			term.Example(meta.Bin+" list codepages")))
 }
 
-// SwapChars handles the --swap-chars flag.
+// SwapChars handles the "swap-chars" flag.
 func SwapChars(p *[]string, cc *cobra.Command) {
 	cc.Flags().StringSliceVarP(p, "swap-chars", "x", []string{},
 		`swap out these characters with common alternatives (default "null,bar")
@@ -97,7 +97,7 @@ func HiddenTo(p *string, cc *cobra.Command) error {
 	return nil
 }
 
-// Width handles the --width flag.
+// Width handles the "width" flag.
 func Width(p *int, cc *cobra.Command) {
 	cc.Flags().IntVarP(p, "width", "w", View().Width,
 		"maximum document character/column width")

@@ -155,7 +155,7 @@ func (flag Flags) Open(conv *convert.Convert, name string) ([]rune, error) {
 	if conv.Input.Encoding == nil {
 		conv.Input.Encoding = samp.Encoding
 	}
-	// override --control flag values for codepage table samples
+	// override "control" flag values for codepage table samples
 	ignoreCtrls := false
 	switch name {
 	case "437", "437.cr", "437.lf":
