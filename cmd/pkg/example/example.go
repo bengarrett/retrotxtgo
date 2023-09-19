@@ -126,8 +126,8 @@ func info() string {
 
 func view() string {
 	s := &strings.Builder{}
-	fmt.Fprintf(s, "  %s view file.txt -e latin1\n", meta.Bin)
-	fmt.Fprintf(s, "  %s view file1.txt file2.txt --encode=\"iso-8859-1\"\n", meta.Bin)
+	fmt.Fprintf(s, "  %s view file.txt -i latin1\n", meta.Bin)
+	fmt.Fprintf(s, "  %s view file1.txt file2.txt --input \"iso-8859-1\"\n", meta.Bin)
 	fmt.Fprintf(s, "  cat file.txt | %s view", meta.Bin)
 	return s.String()
 }

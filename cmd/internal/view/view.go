@@ -66,7 +66,7 @@ func Transform(c *convert.Convert, in, out encoding.Encoding, b ...byte,
 		c.Input.Encoding = in
 	}
 	p := b
-	// handle any output re-encoding BEFORE converting to Unicode
+	// handle any encoding BEFORE outputing to Unicode
 	if out != nil {
 		p, err = out.NewDecoder().Bytes(b)
 		if err != nil {

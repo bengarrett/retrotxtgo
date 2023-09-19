@@ -51,7 +51,7 @@ type Convert struct {
 // Flag are the user supplied values.
 type Flag struct {
 	Controls  []string // Always use these control codes.
-	SwapChars []string // Swap out these characters with UTF-8 alternatives.
+	SwapChars []string // Swap out these characters with common alternatives.
 	MaxWidth  int      // Maximum text width per-line.
 }
 

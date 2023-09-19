@@ -16,10 +16,11 @@ import (
 	"golang.org/x/text/encoding/unicode"
 )
 
-var ErrFilenames = errors.New("ignoring [filenames]")
+var ErrNames = errors.New("ignoring [filenames]")
 
 // Args initializes the command arguments and flags.
-func Args(cmd *cobra.Command, args ...string) ([]string, *convert.Convert, sample.Flags, error) {
+func Args(cmd *cobra.Command, args ...string) (
+	[]string, *convert.Convert, sample.Flags, error) {
 	conv := convert.Convert{}
 	conv.Args = convert.Flag{
 		Controls:  View().Controls,
@@ -42,8 +43,9 @@ func Args(cmd *cobra.Command, args ...string) ([]string, *convert.Convert, sampl
 		if err := Help(cmd, args...); err != nil {
 			logs.Fatal(err)
 		}
-	} else if l > 0 {
-		err := fmt.Errorf("%w;%w for piped text", err, ErrFilenames)
+	}
+	if ok && l > 0 {
+		err := fmt.Errorf("%w;%w for piped text", err, ErrNames)
 		fmt.Fprintln(os.Stderr, logs.Sprint(err))
 		args = []string{""}
 	}
@@ -60,7 +62,9 @@ func Args(cmd *cobra.Command, args ...string) ([]string, *convert.Convert, sampl
 	return args, &conv, samp, nil
 }
 
-// Default returns the default encoding when the --encoding flag is unused.
+// Default returns a default encoding when the "input" flag is unused.
+// If the input is a pipe, then the default encoding is UTF-16.
+// Otherwise, the default encoding is CodePage437.
 func Default() encoding.Encoding {
 	ok, err := fsys.IsPipe()
 	if err != nil {
@@ -72,7 +76,8 @@ func Default() encoding.Encoding {
 	return charmap.CodePage437
 }
 
-// EncodeAndHide applies the public --encode and the hidden --to encoding values to embed sample data.
+// EncodeAndHide applies the "input" and the (hidden) "output" encoding flag values
+// to embed sample data.
 func EncodeAndHide(cmd *cobra.Command, dfault string) (sample.Flags, error) {
 	parse := func(name string) (encoding.Encoding, error) {
 		cp := cmd.Flags().Lookup(name)
@@ -95,12 +100,12 @@ func EncodeAndHide(cmd *cobra.Command, dfault string) (sample.Flags, error) {
 		return sample.Flags{}, nil
 	}
 	// handle encode flag or apply the default
-	in, err := parse("encode")
+	in, err := parse("input")
 	if err != nil {
 		return sample.Flags{}, err
 	}
-	// handle the hidden reencode (--to) flag
-	out, err = parse("to")
+	// handle the hidden output output flag
+	out, err = parse("output")
 	if err != nil {
 		return sample.Flags{}, err
 	}

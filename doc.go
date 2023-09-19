@@ -54,7 +54,7 @@ To display a text file to the terminal:
 
 To display a text file to the terminal by supplying the source encoding:
 
-	retrotxt view [filenames] --encoding iso-8859-1
+	retrotxt view [filenames] --input iso-8859-1
 
 To list the sample text files:
 

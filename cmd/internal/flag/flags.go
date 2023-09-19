@@ -20,28 +20,28 @@ type Commands struct {
 // Command returns the root command.
 var Command Commands
 
-// Info handles the info --format flag.
+// Info handles the info "format" flag.
 var Info struct {
 	Format string
 }
 
 // Views handles the view command flags.
 type Views struct {
-	Controls []string
-	Encode   string
-	Swap     []string
-	To       string
-	Width    int
+	Input    string   // input character encoding used by the files
+	Controls []string // control codes to implement
+	Swap     []string // swap out these characters with Unicode control pictures
+	Width    int      // maximum document character/column width
+	Output   string   // output character encoding to print to stdout
 }
 
 // View returns the Views struct with default values.
 func View() Views {
 	return Views{
+		Input:    "CP437",
 		Controls: []string{"eof", "tab"},
-		Encode:   "CP437",
 		Swap:     []string{"null", "bar"},
-		To:       "",
 		Width:    0,
+		Output:   "",
 	}
 }
 
@@ -50,7 +50,8 @@ func Controls(p *[]string, cc *cobra.Command) {
 	//nolint:dupword
 	cc.Flags().StringSliceVarP(p, "controls", "c", []string{},
 		`implement these control codes (default "eof,tab")`+
-			`separate multiple controls with commas
+			`
+  separate multiple controls with commas
   eof    end of file mark
   tab    horizontal tab
   bell   bell or terminal alert
@@ -61,9 +62,9 @@ func Controls(p *[]string, cc *cobra.Command) {
 `)
 }
 
-// Encode handles the --encode flag.
+// Encode handles the "input" flag.
 func Encode(p *string, cc *cobra.Command) {
-	cc.Flags().StringVarP(p, "encode", "e", "",
+	cc.Flags().StringVarP(p, "input", "i", "",
 		fmt.Sprintf("character encoding used by the filename(s) (default \"CP437\")\n%s\n%s%s\n",
 			color.Info.Sprint("this flag has no effect for Unicode and EBCDIC samples"),
 			"see the list of encode values ",
@@ -73,8 +74,8 @@ func Encode(p *string, cc *cobra.Command) {
 // SwapChars handles the --swap-chars flag.
 func SwapChars(p *[]string, cc *cobra.Command) {
 	cc.Flags().StringSliceVarP(p, "swap-chars", "x", []string{},
-		`swap out these characters with UTF8 alternatives (default "null,bar")
-separate multiple values with commas
+		`swap out these characters with common alternatives (default "null,bar")
+  separate multiple values with commas
   null	C null for a space
   bar	Unicode vertical bar | for the IBM broken pipe ¦
   house	IBM house ⌂ for the Greek capital delta Δ
@@ -84,9 +85,9 @@ separate multiple values with commas
   `)
 }
 
-// HiddenTo handles the hidden --to flag.
+// HiddenTo handles the hidden output flag.
 func HiddenTo(p *string, cc *cobra.Command) error {
-	const name = "to"
+	const name = "output"
 	cc.Flags().StringVar(p, name, "",
 		"alternative character encoding to print to stdout\nthis flag is unreliable and not recommended")
 	if err := cc.Flags().MarkHidden(name); err != nil {

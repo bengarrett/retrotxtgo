@@ -27,8 +27,8 @@ var (
 
 // Flags and configuration values by the user.
 type Flags struct {
-	Input  encoding.Encoding // Input encoding is set using the --from flag.
-	Output encoding.Encoding // Output encoding is set using the --to flag.
+	Input  encoding.Encoding // Input encoding is set using the input flag.
+	Output encoding.Encoding // Output encoding is set using the output flag.
 }
 
 // Sample textfile data.
