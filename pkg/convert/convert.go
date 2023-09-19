@@ -130,7 +130,7 @@ func (c *Convert) Transform() error {
 		return ErrEncode
 	}
 	if len(c.Input.Input) == 0 {
-		return ErrBytes
+		return nil
 	}
 	// transform unicode encodings
 	if r, err := unicodeDecoder(c.Input.Encoding, c.Input.Input...); err != nil {
