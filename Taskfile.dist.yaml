@@ -1,3 +1,5 @@
+# Task is a task runner / build tool that aims
+# to be simpler and easier to use.
 # https://taskfile.dev/installation/
 
 version: '3'

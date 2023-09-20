@@ -1,3 +1,6 @@
+# golangci-lint is a fast Go linters runner.
+# https://golangci-lint.run 
+#
 # golangci-lint run
 linters:
   enable-all: true
@@ -19,7 +22,7 @@ linters:
     - wrapcheck         # wrapping 3rd party errors are unnecessary (opinionated)
     - varnamelen        # doesn't allow short vars (opinionated)
     - goimports         # conflicts with gci
-    - godox             # hide, TODOs are fine
+    #- godox             # hide, TODOs are fine
     - nlreturn          # opinionated
     - wsl               # opinionated
     - paralleltest      # temp disabled

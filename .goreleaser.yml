@@ -1,6 +1,10 @@
+# GoReleaser configuration
+# Release Go projects as fast and easily as possible.
+# https://goreleaser.com
+#
 # .goreleaser.yml
 #
-# test the config:
+# to test this config:
 # goreleaser check
 # goreleaser release --snapshot --clean
 #

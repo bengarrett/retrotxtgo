@@ -25,6 +25,11 @@ In System Settings, Privacy & Security, Security, toggle **Allow applications do
 1. Confirm by choosing _Open_, which will open a terminal and run the program. 
 1. After this one-time confirmation, you can run this program within the terminal.
 
+```sh
+# A common location for terminal programs on macOS
+/usr/local/bin
+```
+
 #### Terminal download
 
 ```sh
