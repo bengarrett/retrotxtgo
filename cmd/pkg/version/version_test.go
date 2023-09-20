@@ -10,6 +10,7 @@ import (
 )
 
 func TestTemplate(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		want string
@@ -19,8 +20,9 @@ func TestTemplate(t *testing.T) {
 		{"path", "path:"},
 	}
 	color.Enable = false
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			s := strings.Builder{}
 			_ = version.Template(&s)
 			if !strings.Contains(s.String(), tt.want) {
@@ -28,6 +30,6 @@ func TestTemplate(t *testing.T) {
 				t.Error(s.String())
 				return
 			}
-		})
-	}
+		}
+	})
 }

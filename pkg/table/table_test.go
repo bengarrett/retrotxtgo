@@ -12,6 +12,7 @@ import (
 )
 
 func TestTable(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name    string
 		wantErr bool
@@ -21,18 +22,20 @@ func TestTable(t *testing.T) {
 		{"win", false},
 		{"xxx", true},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			err := table.Table(nil, tt.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Table() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-		})
-	}
+		}
+	})
 }
 
 func Test_CodePage(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		name string
 	}
@@ -46,8 +49,9 @@ func Test_CodePage(t *testing.T) {
 		{"none", args{"helloworld"}, nil, true},
 		{"437", args{"cp437"}, charmap.CodePage437, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			got, err := table.CodePage(tt.args.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("CodePage() error = %v, wantErr %v", err, tt.wantErr)
@@ -56,11 +60,12 @@ func Test_CodePage(t *testing.T) {
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("CodePage() = %v, want %v", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func Test_character(t *testing.T) {
+	t.Parallel()
 	const RLM = 8207
 	iso11 := charmap.XUserDefined
 	type args struct {
@@ -79,16 +84,18 @@ func Test_character(t *testing.T) {
 		{"utf8 space", args{160, 0, uni.UTF8}, "\u00a0"},
 		{"utf8 space", args{RLM, 0, uni.UTF8}, "\u200f"},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if got := table.Character(tt.args.cp, tt.args.pos, tt.args.r); got != tt.want {
 				t.Errorf("Character() = %q, want %q", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func Test_CharmapAlias(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		cp encoding.Encoding
 	}
@@ -101,11 +108,12 @@ func Test_CharmapAlias(t *testing.T) {
 		{"win874", args{charmap.Windows874}, " (Thai)"},
 		{"shiftjis", args{japanese.ShiftJIS}, " (Japanese)"},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if got := table.CharmapAlias(tt.args.cp); got != tt.want {
 				t.Errorf("CharmapAlias() = %v, want %v", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }

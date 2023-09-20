@@ -28,6 +28,7 @@ func Example_semantic() {
 }
 
 func Test_digits(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		s    string
@@ -39,16 +40,18 @@ func Test_digits(t *testing.T) {
 		{"mixed", "A0B1C2D3E4F5G6H7I8J9K0L", "01234567890"},
 		{"semantic", "v1.0.0 (FINAL)", "1.0.0"},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if got := meta.Digits(tt.s); got != tt.want {
 				t.Errorf("digits() = %v, want %v", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestSemantic(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name        string
 		ver         string
@@ -63,8 +66,9 @@ func TestSemantic(t *testing.T) {
 		{"short", "V1", true, meta.Version{1, 0, 0}},
 		{"short.", "V1.1", true, meta.Version{1, 1, 0}},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			gotVersion := meta.Semantic(tt.ver)
 			gotOk := gotVersion.Valid()
 			if gotOk != tt.wantOk {
@@ -73,11 +77,12 @@ func TestSemantic(t *testing.T) {
 			if !reflect.DeepEqual(gotVersion, tt.wantVersion) {
 				t.Errorf("Semantic() gotVersion = %v, want %v", gotVersion, tt.wantVersion)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestVersion_String(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		v    meta.Version
@@ -88,11 +93,12 @@ func TestVersion_String(t *testing.T) {
 		{"beta", meta.Version{0, 5, 11}, "β0.5.11"},
 		{"release", meta.Version{10, 0, 9}, "10.0.9"},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if got := tt.v.String(); got != tt.want {
 				t.Errorf("Version.String() = %v, want %v", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }

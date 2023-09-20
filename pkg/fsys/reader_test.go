@@ -29,6 +29,7 @@ func ExampleWordsEBCDIC() {
 }
 
 func TestLineBreaks(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		text []rune
@@ -40,16 +41,18 @@ func TestLineBreaks(t *testing.T) {
 		{"ibm", []rune("hello\x15world\x15"), fsys.NL()},
 		{"mix", []rune("\x15Windows line break: \x0d\x0a\x15Unix line break: \x0a\x15"), fsys.NL()},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if got := fsys.LineBreaks(false, tt.text...); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Data.LineBreaks() = %v, want %v", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestLineBreak(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		r         [2]rune
 		extraInfo bool
@@ -63,16 +66,18 @@ func TestLineBreak(t *testing.T) {
 		{"nl", args{fsys.NL(), false}, "NL"},
 		{"nl", args{fsys.NL(), true}, "NL (IBM EBCDIC)"},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if got := fsys.LineBreak(tt.args.r, tt.args.extraInfo); got != tt.want {
 				t.Errorf("LineBreak() = %v, want %v", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestColumns(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		r  io.Reader
 		lb [2]rune
@@ -87,8 +92,9 @@ func TestColumns(t *testing.T) {
 		{"4 chars", args{strings.NewReader("abcd\n"), fsys.LF()}, 4, false},
 		{"4 runes", args{bytes.NewReader([]byte("😁😋😃🤫\n")), fsys.LF()}, 16, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			gotWidth, err := fsys.Columns(tt.args.r, tt.args.lb)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Columns() error = %v, wantErr %v", err, tt.wantErr)
@@ -97,6 +103,6 @@ func TestColumns(t *testing.T) {
 			if gotWidth != tt.wantWidth {
 				t.Errorf("Columns() = %v, want %v", gotWidth, tt.wantWidth)
 			}
-		})
-	}
+		}
+	})
 }

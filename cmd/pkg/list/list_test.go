@@ -35,7 +35,9 @@ func ExampleTables() {
 }
 
 func TestExamples(t *testing.T) {
+	t.Parallel()
 	t.Run("example", func(t *testing.T) {
+		t.Parallel()
 		s := strings.Builder{}
 		err := list.Examples(&s)
 		if err != nil {
@@ -49,6 +51,7 @@ func TestExamples(t *testing.T) {
 }
 
 func TestTable(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name     string
 		contains string
@@ -61,8 +64,9 @@ func TestTable(t *testing.T) {
 		{"utf8", "UTF-8 - Unicode", false},
 		{"shiftjis", "Shift JIS (Japanese) - Extended ASCII", false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			s := strings.Builder{}
 			err := list.Table(&s, tt.name)
 			if (err != nil) != tt.wantErr {
@@ -72,11 +76,12 @@ func TestTable(t *testing.T) {
 			if !strings.Contains(s.String(), tt.contains) {
 				t.Errorf("table does not contain the header: %s", tt.contains)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestTables(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		contains string
 	}{
@@ -89,16 +94,18 @@ func TestTables(t *testing.T) {
 	if err := list.Tables(s); err != nil {
 		t.Error(err)
 	}
-	for _, tt := range tests {
-		t.Run(tt.contains, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if !strings.Contains(s.String(), tt.contains) {
 				t.Errorf("tables does not contain the header: %s", tt.contains)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestPrintable(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		n    string
 		name string
@@ -109,11 +116,12 @@ func TestPrintable(t *testing.T) {
 		{"utf32", "UTF-32Be", false},
 		{"cp437", "CP-437", true},
 	}
-	for _, tt := range tests {
-		t.Run(tt.n, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if got := list.Printable(tt.name); got != tt.want {
 				t.Errorf("Printable() = %v, want %v", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }

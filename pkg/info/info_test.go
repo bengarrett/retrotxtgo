@@ -64,7 +64,11 @@ func sampleFileB() string {
 }
 
 func TestMarshal(t *testing.T) {
+	t.Parallel()
 	tmp := sampleFileB()
+	t.Cleanup(func() {
+		fsys.Clean(tmp)
+	})
 	type args struct {
 		filename string
 		format   info.Format
@@ -82,17 +86,18 @@ func TestMarshal(t *testing.T) {
 		{"text", args{tmp, info.PlainText}, false},
 		{"xml", args{tmp, info.XML}, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if err := info.Marshal(nil, tt.args.filename, tt.args.format); (err != nil) != tt.wantErr {
 				t.Errorf("Marshal() error = %v, wantErr %v", err, tt.wantErr)
 			}
-		})
-	}
-	fsys.Clean(tmp)
+		}
+	})
 }
 
 func TestStream(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		format string
 		b      []byte
@@ -110,12 +115,13 @@ func TestStream(t *testing.T) {
 		{"json.min", args{format: "jm", b: rawData()}, false},
 		{"xml", args{format: "x", b: rawData()}, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			err := info.Stream(nil, tt.args.format, tt.args.b...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Stream() error = %v, wantErr %v", err, tt.wantErr)
 			}
-		})
-	}
+		}
+	})
 }

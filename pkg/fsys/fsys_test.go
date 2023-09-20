@@ -77,6 +77,7 @@ func BenchmarkReadMega(_ *testing.B) {
 }
 
 func TestRead(t *testing.T) {
+	t.Parallel()
 	f := mock.FileExample("hello", 0)
 	large := mock.LargeExample()
 	type args struct {
@@ -93,19 +94,21 @@ func TestRead(t *testing.T) {
 		{"valid", args{f}, false},
 		{"1.5MB", args{large}, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			_, err := fsys.Read(tt.args.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Read() error = %v, wantErr %v", err, tt.wantErr)
 			}
-		})
-	}
-	fsys.Clean(f)
-	fsys.Clean(large)
+		}
+		fsys.Clean(f)
+		fsys.Clean(large)
+	})
 }
 
 func TestReadAllBytes(t *testing.T) {
+	t.Parallel()
 	f2 := mock.FileExample(mock.T()["Symbols"], 2)
 	f3 := mock.FileExample(mock.T()["Tabs"], 3)
 	f4 := mock.FileExample(mock.T()["Escapes"], 4)
@@ -129,8 +132,9 @@ func TestReadAllBytes(t *testing.T) {
 		{"digs", args{f5}, []byte(mock.T()["Digits"]), false},
 		{"1.5MB", args{large}, nil, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			gotData, err := fsys.ReadAllBytes(tt.args.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadAllBytes() error = %v, wantErr %v", err, tt.wantErr)
@@ -139,16 +143,17 @@ func TestReadAllBytes(t *testing.T) {
 			if tt.wantData != nil && !reflect.DeepEqual(gotData, tt.wantData) {
 				t.Errorf("ReadAllBytes() = %q, want %q", string(gotData), string(tt.wantData))
 			}
-		})
-	}
-	fsys.Clean(f2)
-	fsys.Clean(f3)
-	fsys.Clean(f4)
-	fsys.Clean(f5)
-	fsys.Clean(large)
+		}
+		fsys.Clean(f2)
+		fsys.Clean(f3)
+		fsys.Clean(f4)
+		fsys.Clean(f5)
+		fsys.Clean(large)
+	})
 }
 
 func TestReadChunk(t *testing.T) {
+	t.Parallel()
 	f1 := mock.FileExample(mock.T()["Newline"], 1)
 	f2 := mock.FileExample(mock.T()["Symbols"], 2)
 	f3 := mock.FileExample(mock.T()["Tabs"], 3)
@@ -176,8 +181,9 @@ func TestReadChunk(t *testing.T) {
 		{"escs", args{f4, 13}, []byte("bell:\a,back:\b"), false},
 		{large, args{large, 100}, nil, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			gotData, err := fsys.ReadChunk(tt.args.name, tt.args.size)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadChunk() error = %v, wantErr %v", err, tt.wantErr)
@@ -189,16 +195,17 @@ func TestReadChunk(t *testing.T) {
 			if tt.name != large && !reflect.DeepEqual(gotData, tt.wantData) {
 				t.Errorf("ReadChunk() = %v, want %v", gotData, tt.wantData)
 			}
-		})
-	}
-	fsys.Clean(f1)
-	fsys.Clean(f2)
-	fsys.Clean(f3)
-	fsys.Clean(f4)
-	fsys.Clean(large)
+		}
+		fsys.Clean(f1)
+		fsys.Clean(f2)
+		fsys.Clean(f3)
+		fsys.Clean(f4)
+		fsys.Clean(large)
+	})
 }
 
 func TestReadTail(t *testing.T) {
+	t.Parallel()
 	f1 := mock.FileExample(mock.T()["Newline"], 1)
 	f2 := mock.FileExample(mock.T()["Symbols"], 2)
 	f3 := mock.FileExample(mock.T()["Tabs"], 3)
@@ -223,8 +230,9 @@ func TestReadTail(t *testing.T) {
 		{"escs", args{f4, 9}, []byte("\v,quote:\""), false},
 		{large, args{large, 100}, nil, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			gotData, err := fsys.ReadTail(tt.args.name, tt.args.offset)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadTail() error = %v, wantErr %v", err, tt.wantErr)
@@ -236,16 +244,17 @@ func TestReadTail(t *testing.T) {
 			if tt.name != large && !reflect.DeepEqual(gotData, tt.wantData) {
 				t.Errorf("ReadTail() = %q, want %q", string(gotData), string(tt.wantData))
 			}
-		})
-	}
-	fsys.Clean(f1)
-	fsys.Clean(f2)
-	fsys.Clean(f3)
-	fsys.Clean(f4)
-	fsys.Clean(large)
+		}
+		defer fsys.Clean(f1)
+		defer fsys.Clean(f2)
+		defer fsys.Clean(f3)
+		defer fsys.Clean(f4)
+		defer fsys.Clean(large)
+	})
 }
 
 func Test_word(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		s    string
@@ -264,16 +273,18 @@ func Test_word(t *testing.T) {
 		{"nl😀", "hello\n😀", true},
 		{"😀nl", "😀\nsmiley", false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if got := fsys.Word(tt.s); got != tt.want {
 				t.Errorf("Word() = %v, want %v", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestTouch(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		name string
 	}
@@ -287,8 +298,9 @@ func TestTouch(t *testing.T) {
 		{"empty", args{}, "", true},
 		{"tmp", args{tmpFile}, tmpFile, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			gotPath, err := fsys.Touch(tt.args.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Touch() error = %v, wantErr %v", err, tt.wantErr)
@@ -297,7 +309,7 @@ func TestTouch(t *testing.T) {
 			if gotPath != tt.wantPath {
 				t.Errorf("Touch() = %v, want %v", gotPath, tt.wantPath)
 			}
-		})
-	}
+		}
+	})
 	fsys.Clean(tmpFile)
 }

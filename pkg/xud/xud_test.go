@@ -58,6 +58,7 @@ func ExampleChar() {
 }
 
 func TestCode7bit(t *testing.T) {
+	t.Parallel()
 	b := xud.Code7bit(nil)
 	assert.False(t, b)
 	b = xud.Code7bit(charmap.CodePage037)
@@ -67,12 +68,14 @@ func TestCode7bit(t *testing.T) {
 }
 
 func TestFootnote(t *testing.T) {
+	t.Parallel()
 	s := &strings.Builder{}
 	xud.Footnote(s, xud.XUserDefined1963)
 	assert.Contains(t, s.String(), "* ASA X3.4 1963")
 }
 
 func TestCharX3465(t *testing.T) {
+	t.Parallel()
 	const skip = int32(-1)
 	r := xud.Char(xud.XUserDefined1965, 94)
 	assert.Equal(t, skip, r)
@@ -81,6 +84,7 @@ func TestCharX3465(t *testing.T) {
 }
 
 func TestCharX3467(t *testing.T) {
+	t.Parallel()
 	const skip = int32(-1)
 	r := xud.Char(xud.XUserDefined1967, 94)
 	assert.Equal(t, skip, r)

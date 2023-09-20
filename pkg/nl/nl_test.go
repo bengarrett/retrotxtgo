@@ -49,6 +49,7 @@ func ExampleLineBreak_Total() {
 }
 
 func TestLines(t *testing.T) {
+	t.Parallel()
 	lf := [2]rune{nl.LF}
 	type args struct {
 		r  io.Reader
@@ -64,8 +65,9 @@ func TestLines(t *testing.T) {
 		{"single line", args{strings.NewReader("hello world"), lf}, 1, false},
 		{"multiple lines", args{strings.NewReader("hello\nworld\neof"), lf}, 3, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			gotCount, err := nl.Lines(tt.args.r, tt.args.lb)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Lines() error = %v, wantErr %v", err, tt.wantErr)
@@ -74,6 +76,6 @@ func TestLines(t *testing.T) {
 			if gotCount != tt.wantCount {
 				t.Errorf("Lines() = %v, want %v", gotCount, tt.wantCount)
 			}
-		})
-	}
+		}
+	})
 }

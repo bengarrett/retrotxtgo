@@ -74,6 +74,7 @@ func Test_InfoErrDir(t *testing.T) {
 func Test_InfoFiles(t *testing.T) {
 	t.Parallel()
 	t.Run("info multiple files", func(t *testing.T) {
+		t.Parallel()
 		gotB, err := infoT.tester([]string{"--format", "color", file1, file2})
 		if err != nil {
 			t.Errorf("info arguments threw an unexpected error: %s", err)
@@ -113,6 +114,7 @@ func Test_InfoSamples(t *testing.T) {
 func Test_InfoText(t *testing.T) {
 	t.Parallel()
 	t.Run("info format text", func(t *testing.T) {
+		t.Parallel()
 		err := filepath.Walk(static,
 			func(path string, info os.FileInfo, err error) error {
 				if err != nil {
@@ -144,7 +146,8 @@ func Test_InfoText(t *testing.T) {
 	})
 }
 
-func Test_InfoData(t *testing.T) { //nolint:gocognit
+func Test_InfoData(t *testing.T) {
+	t.Parallel()
 	type Sizes struct {
 		Bytes int `json:"bytes" xml:"bytes"`
 	}
@@ -153,6 +156,7 @@ func Test_InfoData(t *testing.T) { //nolint:gocognit
 		Size Sizes  `json:"size"     xml:"size"`
 	}
 	t.Run("info format json/xml", func(t *testing.T) {
+		t.Parallel()
 		err := filepath.Walk(static,
 			func(path string, info os.FileInfo, err error) error {
 				if err != nil {

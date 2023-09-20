@@ -42,6 +42,7 @@ func sampleFile() string {
 }
 
 func TestValidText(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name        string
 		contentType string
@@ -53,16 +54,18 @@ func TestValidText(t *testing.T) {
 		{"text", "text/plain", true},
 		{"js", "text/javascript", true},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if got := info.ValidText(tt.contentType); got != tt.want {
 				t.Errorf("ValidText() = %v, want %v", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestRead(t *testing.T) {
+	t.Parallel()
 	tmp := sampleFile()
 	fmt.Fprintln(os.Stdout, "path:", tmp)
 	var got info.Detail
@@ -92,6 +95,7 @@ func TestRead(t *testing.T) {
 }
 
 func TestParse(t *testing.T) {
+	t.Parallel()
 	tmp := sampleFile()
 	type args struct {
 		data []byte
@@ -106,8 +110,9 @@ func TestParse(t *testing.T) {
 		{"string", args{[]byte("hello")}, 5, false},
 		{"string", args{[]byte("世界你好")}, 4, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			var got info.Detail
 			err := got.Parse("", tt.args.data...)
 			if (err != nil) != tt.wantErr {
@@ -117,12 +122,13 @@ func TestParse(t *testing.T) {
 			if !reflect.DeepEqual(got.Count.Chars, tt.want) {
 				t.Errorf("Parse() = %v, want %v", got.Count.Chars, tt.want)
 			}
-		})
-	}
-	fsys.Clean(tmp)
+		}
+		fsys.Clean(tmp)
+	})
 }
 
 func TestMarshal_json(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name   string
 		d      info.Detail
@@ -132,18 +138,20 @@ func TestMarshal_json(t *testing.T) {
 		{"no indent", info.Detail{}, info.JSONMin, true},
 		{"indent", info.Detail{}, info.JSON, true},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			j := &bytes.Buffer{}
 			_ = tt.d.Marshal(j, tt.format)
 			if got := json.Valid(j.Bytes()); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Marshal() json = %v, want %v", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestMarshal_text(t *testing.T) {
+	t.Parallel()
 	const want = 831
 	var d info.Detail
 	tmp := sampleFile()

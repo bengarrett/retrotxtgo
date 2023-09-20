@@ -8,9 +8,11 @@ import (
 	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/internal/mock"
 	"github.com/bengarrett/retrotxtgo/pkg/nl"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestReadColumns(t *testing.T) {
+	t.Parallel()
 	tmp0 := mock.FileExample("hello world\n", 0)
 	tmp1 := mock.FileExample("hello\x0aworld\x0a", 1)
 	tmp2 := mock.FileExample("hello 😄😄😄\n", 2)
@@ -34,8 +36,9 @@ func TestReadColumns(t *testing.T) {
 		{tmp6, 0, false},
 		{tmp7, 19, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			gotCount, err := fsys.ReadColumns(tt.name)
 			os.Remove(tt.name)
 			if (err != nil) != tt.wantErr {
@@ -45,11 +48,12 @@ func TestReadColumns(t *testing.T) {
 			if gotCount != tt.wantCount {
 				t.Errorf("ReadColumns() = %v, want %v", gotCount, tt.wantCount)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestReadControls(t *testing.T) {
+	t.Parallel()
 	tmp0 := mock.FileExample("\x1B\x5b0mhello world\n", 0)
 	tmp1 := mock.FileExample("\x1B\x5b1mhello world\x1B\x5b0m\n", 1)
 	tmp2 := mock.FileExample("hello \x1B\x5b1m😄😄😄\x1B\x5b0m\n", 2)
@@ -66,8 +70,9 @@ func TestReadControls(t *testing.T) {
 		{tmp2, 2, false},
 		{tmp3, 13, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			gotCount, err := fsys.ReadControls(tt.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadControls() error = %v, wantErr %v", err, tt.wantErr)
@@ -76,27 +81,19 @@ func TestReadControls(t *testing.T) {
 			if gotCount != tt.wantCount {
 				t.Errorf("ReadControls() = %v, want %v", gotCount, tt.wantCount)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestIsPipe(t *testing.T) {
-	tests := []struct {
-		name string
-		want bool
-	}{
-		{"none", false},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got, _ := fsys.IsPipe(); got != tt.want {
-				t.Errorf("IsPipe() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	t.Parallel()
+	x, err := fsys.IsPipe()
+	assert.Nil(t, err)
+	assert.False(t, x)
 }
 
 func TestReadLine(t *testing.T) {
+	t.Parallel()
 	tmp0 := mock.FileExample("hello\nworld\n", 0)
 	type args struct {
 		name      string
@@ -111,8 +108,9 @@ func TestReadLine(t *testing.T) {
 		{"none", args{"", nl.Host}, "", true},
 		{"tmp0", args{tmp0, nl.Host}, "hello\nworld\n", false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			gotText, err := fsys.ReadLine(tt.args.name, tt.args.linebreak)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadLine() error = %v, wantErr %v", err, tt.wantErr)
@@ -121,11 +119,12 @@ func TestReadLine(t *testing.T) {
 			if gotText != tt.wantText {
 				t.Errorf("ReadLine() = %v, want %v", gotText, tt.wantText)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestReadLines(t *testing.T) {
+	t.Parallel()
 	tmp0 := mock.FileExample("hello\nworld\n", 0)
 	type args struct {
 		name string
@@ -139,8 +138,9 @@ func TestReadLines(t *testing.T) {
 		{"none", args{""}, -1, true},
 		{"tmp0", args{tmp0}, 2, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			gotCount, err := fsys.ReadLines(tt.args.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadLines() error = %v, wantErr %v", err, tt.wantErr)
@@ -149,11 +149,12 @@ func TestReadLines(t *testing.T) {
 			if gotCount != tt.wantCount {
 				t.Errorf("ReadLines() = %v, want %v", gotCount, tt.wantCount)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestReadText(t *testing.T) {
+	t.Parallel()
 	tmp0 := mock.FileExample("hello\nworld\n", 0)
 	type args struct {
 		name string
@@ -168,8 +169,9 @@ func TestReadText(t *testing.T) {
 		{"invalid", args{"this_file_doesnt_exist"}, "", true},
 		{"tmp0", args{tmp0}, "hello\nworld\n", false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			gotText, err := fsys.ReadText(tt.args.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadText() error = %v, wantErr %v", err, tt.wantErr)
@@ -178,11 +180,12 @@ func TestReadText(t *testing.T) {
 			if gotText != tt.wantText {
 				t.Errorf("ReadText() = %v, want %v", gotText, tt.wantText)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestReadWords(t *testing.T) {
+	t.Parallel()
 	tmp0 := mock.FileExample("hello\nworld,\nmy name is Ben\n", 0)
 	type args struct {
 		name string
@@ -197,8 +200,9 @@ func TestReadWords(t *testing.T) {
 		{"invalid", args{"this_file_doesnt_exist"}, -1, true},
 		{"tmp0", args{tmp0}, 6, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			gotCount, err := fsys.ReadWords(tt.args.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadWords() error = %v, wantErr %v", err, tt.wantErr)
@@ -207,11 +211,12 @@ func TestReadWords(t *testing.T) {
 			if gotCount != tt.wantCount {
 				t.Errorf("ReadWords() = %v, want %v", gotCount, tt.wantCount)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestReadPipe(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		input string
 	}
@@ -226,8 +231,9 @@ func TestReadPipe(t *testing.T) {
 		{"nl", args{"hello\nworld"}, []byte("hello\nworld\n"), false},
 		{"utf8", args{"hello 😄"}, []byte("hello 😄\n"), false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			r, err := mock.Input(tt.args.input)
 			if err != nil {
 				t.Error(err)
@@ -245,6 +251,6 @@ func TestReadPipe(t *testing.T) {
 			if !bytes.Equal(gotB, tt.want) {
 				t.Errorf("ReadPipe() = %v, want %v", gotB, tt.want)
 			}
-		})
-	}
+		}
+	})
 }

@@ -20,6 +20,7 @@ func ExampleAlias() {
 }
 
 func TestCharmaps(t *testing.T) {
+	t.Parallel()
 	const totalCharmaps = 53
 	got, want := len(table.Charmaps()), totalCharmaps
 	if got != want {
@@ -28,6 +29,7 @@ func TestCharmaps(t *testing.T) {
 }
 
 func TestList(t *testing.T) {
+	t.Parallel()
 	w := &strings.Builder{}
 	_ = table.List(w)
 	if w.String() == "" {
@@ -36,6 +38,7 @@ func TestList(t *testing.T) {
 }
 
 func TestRows(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name    string
 		e       encoding.Encoding
@@ -64,8 +67,9 @@ func TestRows(t *testing.T) {
 			false,
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			c, err := table.Rows(tt.e)
 			if got := (err != nil); got != tt.wantErr {
 				t.Errorf("Rows() error is %v, want %v", got, tt.wantErr)
@@ -85,11 +89,12 @@ func TestRows(t *testing.T) {
 				a, _ := ianaindex.MIB.Name(tt.e)
 				t.Error(a)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestAliasFmt(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		s   string
 		val string
@@ -105,8 +110,9 @@ func TestAliasFmt(t *testing.T) {
 		{"empty cp037", args{"", "", charmap.CodePage037}, "ibm037", false},
 		{"dupe cp037", args{"", "ibm037", charmap.CodePage037}, "", false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			got, err := table.Alias(tt.args.s, tt.args.val, tt.args.e)
 			if got != tt.want {
 				t.Errorf("Alias() = %v, want %v", got, tt.want)
@@ -114,11 +120,12 @@ func TestAliasFmt(t *testing.T) {
 			if (err != nil) != tt.WantErr {
 				t.Errorf("Alias() error = %v, want %v", err, tt.WantErr)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestUniform(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		mime string
 	}
@@ -132,16 +139,18 @@ func TestUniform(t *testing.T) {
 		{"IBM", args{"IBM850"}, "CP850"},
 		{"windows-1252", args{"windows-1252"}, "CP1252"},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if gotS := table.Uniform(tt.args.mime); gotS != tt.wantS {
 				t.Errorf("uniform() = %v, want %v", gotS, tt.wantS)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestNumeric(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		want int
@@ -154,11 +163,12 @@ func TestNumeric(t *testing.T) {
 		{"ISO 8859-1", 1},
 		{"ISO 8859-16", 16},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if got := table.Numeric(tt.name); got != tt.want {
 				t.Errorf("Numeric() = %v, want %v", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }

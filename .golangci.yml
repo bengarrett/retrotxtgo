@@ -33,10 +33,16 @@ linters-settings:
 
 issues:
   exclude-rules:
+    # all test files
+    - path: '(.+)_test\.go'
+      linters:
+        - gocognit
+    # all cmd files
     - path: 'cmd/(.+)\.go'
       linters:
         - gochecknoglobals
         - gochecknoinits
+    # individual files
     - path: main.go
       linters:
         - gochecknoglobals

@@ -17,12 +17,13 @@ func Test_filler(t *testing.T) {
 		{"0.1", 0.1, 100000},
 		{"1.5", 1.5, 1500000},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			s := mock.Filler(tt.sizeMB)
 			if gotLength := len(s); gotLength != tt.wantLength {
 				t.Errorf("Filler() = %v, want %v", gotLength, tt.wantLength)
 			}
-		})
-	}
+		}
+	})
 }

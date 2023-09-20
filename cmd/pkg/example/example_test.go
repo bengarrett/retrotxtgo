@@ -9,6 +9,7 @@ import (
 )
 
 func TestExample(t *testing.T) {
+	t.Parallel()
 	s := &strings.Builder{}
 	example.Cmd.String(s)
 	assert.Contains(t, s.String(), "print text files partial info")
