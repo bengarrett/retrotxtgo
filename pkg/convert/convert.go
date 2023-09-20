@@ -28,13 +28,13 @@ var (
 	ErrANSI   = errors.New("ansi controls must be chained to c.swap")
 	ErrBytes  = errors.New("cannot transform an empty byte slice")
 	ErrEncode = errors.New("no input encoding provided")
-	ErrName   = errors.New("unknown or unsupported codepage name or alias")
+	ErrName   = errors.New("unknown or unsupported code page name or alias")
 	ErrOutput = errors.New("nothing to output")
 	ErrWidth  = errors.New("cannot find the number columns from using line break")
 	ErrWrap   = errors.New("wrap width must be chained to c.swap")
 )
 
-// Convert 8-bit codepage text encodings or Unicode byte array text to UTF-8 runes.
+// Convert 8-bit code page text encodings or Unicode byte array text to UTF-8 runes.
 type Convert struct {
 	Args  Flag // Args are the cmd supplied flag arguments.
 	Input struct {
@@ -43,7 +43,7 @@ type Convert struct {
 		Ignore    []rune            // Ignore these runes.
 		LineBreak [2]rune           // Line break controls used by the text.
 		UseBreaks bool              // UseBreaks uses the line break controls as new lines.
-		Table     bool              // Table flags this text as a codepage table.
+		Table     bool              // Table flags this text as a code page table.
 	}
 	Output []rune // Output are the transformed UTF-8 runes.
 }

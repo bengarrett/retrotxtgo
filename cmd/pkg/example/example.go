@@ -92,7 +92,7 @@ func cmd() string {
 	fmt.Fprintf(s, "  %s example\n\n", meta.Bin)
 	fmt.Fprintf(s, "  %s list\n", meta.Bin)
 	fmt.Fprintf(s, "  %s tables\n", meta.Bin)
-	fmt.Fprintf(s, "  %s table [codepage names or aliases]\n", meta.Bin)
+	fmt.Fprintf(s, "  %s table [code page names or aliases]\n", meta.Bin)
 	fmt.Fprintf(s, "  %s lang", meta.Bin)
 	return s.String()
 }
@@ -113,7 +113,7 @@ func table() string {
 	fmt.Fprintf(s, "  %s table cp437\n", meta.Bin)
 	fmt.Fprintf(s, "  %s table cp437 latin1 windows-1252\n", meta.Bin)
 	fmt.Fprintf(s, "  %s table iso-8859-15\n", meta.Bin)
-	fmt.Fprintf(s, "  %s list\t# list the supported codepage tables\n", meta.Bin)
+	fmt.Fprintf(s, "  %s list\t# list the supported code page tables\n", meta.Bin)
 	return s.String()
 }
 

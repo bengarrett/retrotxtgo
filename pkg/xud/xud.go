@@ -6,7 +6,7 @@
 // These encodings are not compatible with each other.
 //
 // But the X3.4-1967 character codes are compatible with the ANSI X3.4-1977 and ANSI X3.4-1986 encodings.
-// Which are also compatible with many of the IBM Codepage and ISO 8859 encodings, as-well as Unicode.
+// Which are also compatible with many of the IBM Code Page and ISO 8859-X encodings, as-well as Unicode.
 package xud
 
 import (

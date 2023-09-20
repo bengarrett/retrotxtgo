@@ -7,7 +7,6 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/bengarrett/retrotxtgo/pkg/term"
-	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 )
 
@@ -66,10 +65,10 @@ func Controls(p *[]string, cc *cobra.Command) {
 // Encode handles the "input" flag.
 func Encode(p *string, cc *cobra.Command) {
 	cc.Flags().StringVarP(p, "input", "i", "",
-		fmt.Sprintf("character encoding used by the filename(s) (default \"CP437\")\n%s\n%s%s\n",
-			color.Info.Sprint("this flag has no effect for some samples"),
+		fmt.Sprintf("character encoding used by the filename(s) (default \"CP437\")\n%s%s\n%s\n",
 			"see the list of encode values ",
-			term.Example(meta.Bin+" list codepages")))
+			term.Example(meta.Bin+" list codepages"),
+			"this flag has no effect for the inbuilt samples"))
 }
 
 // SwapChars handles the "swap-chars" flag.
@@ -86,14 +85,13 @@ func SwapChars(p *[]string, cc *cobra.Command) {
   `)
 }
 
-// HiddenOG handles the hidden original flag.
-func HideOG(p *bool, cc *cobra.Command) error {
+// FlagOG handles the hidden original flag.
+func FlagOG(p *bool, cc *cobra.Command) error {
 	const name = "original"
 	cc.Flags().BoolVar(p, name, false,
-		"use the original document character encoding to print to stdout\nthis flag only works with the samples")
-	if err := cc.Flags().MarkHidden(name); err != nil {
-		return fmt.Errorf("%w, %s: %w", ErrHide, name, err)
-	}
+		"use the original document character encoding to print to terminal"+
+			"\nby default, "+meta.Bin+" view always prints texts as UTF-8"+
+			"\nthis flag only works with the inbuilt samples\n")
 	return nil
 }
 

@@ -10,12 +10,12 @@ import (
 )
 
 func Table() *cobra.Command {
-	s := "Display one or more codepage tables showing all the characters in use"
-	l := "Display one or more codepage tables showing all the characters in use."
+	s := "Display one or more code page tables showing all the characters in use"
+	l := "Display one or more code page tables showing all the characters in use."
 	expl := strings.Builder{}
 	example.Table.String(&expl)
 	return &cobra.Command{
-		Use:     "table [codepage names or aliases]",
+		Use:     "table [code page names or aliases]",
 		Aliases: []string{"t"},
 		Short:   s,
 		Long:    l,
@@ -33,8 +33,8 @@ func Table() *cobra.Command {
 func Tables() *cobra.Command {
 	return &cobra.Command{
 		Use:     "tables",
-		Short:   "Display the characters of every codepage table in use",
-		Long:    "Display the characters of every codepage table in use.",
+		Short:   "Display the characters of every code page table in use",
+		Long:    "Display the characters of every code page table in use.",
 		GroupID: IDcodepage,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return list.Tables(cmd.OutOrStdout())

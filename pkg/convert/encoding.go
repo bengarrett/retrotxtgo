@@ -282,7 +282,7 @@ func EncodeAlias(name string) string {
 	return ""
 }
 
-// encodingIBM returns a valid IANA index encoding name for IBM codepages using a custom alias.
+// encodingIBM returns a valid IANA index encoding name for IBM code pages using a custom alias.
 func encodingIBM(name string) string {
 	switch name {
 	case "37", "037":
@@ -335,7 +335,7 @@ func encodingMisc(name string) string {
 	return ""
 }
 
-// encodingIBM returns a valid IANA index encoding name for Microsoft codepages using a custom alias.
+// encodingIBM returns a valid IANA index encoding name for Microsoft code pages using a custom alias.
 func encodingWin(name string) string {
 	switch name {
 	case "874":
@@ -362,7 +362,7 @@ func encodingWin(name string) string {
 	return ""
 }
 
-// encodingIBM returns a valid IANA index encoding name for ISO codepages using a custom alias.
+// encodingIBM returns a valid IANA index encoding name for ISO code pages using a custom alias.
 func encodingISO(name string) string {
 	switch name {
 	case "5", "1124", "28595":
@@ -395,7 +395,7 @@ func encodingISO(name string) string {
 	return ""
 }
 
-// encodingIBM returns a valid IANA index encoding name for Latin codepages using a custom alias.
+// encodingIBM returns a valid IANA index encoding name for Latin code pages using a custom alias.
 func encodingEurope(name string) string {
 	switch name {
 	case "1", "819", "28591":

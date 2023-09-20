@@ -17,7 +17,7 @@ import (
 // Lang describes the common natural language uses of the encoding.
 type Lang map[encoding.Encoding]string
 
-// Languages returns a list of codepage encodings and their target natural languages.
+// Languages returns a list of code page encodings and their target natural languages.
 func Languages() Lang {
 	return Lang{
 		charmap.CodePage037:   "US English",

@@ -4,7 +4,7 @@
 
 /*
 Retrotxt for the terminal.
-Read legacy codepage and ANSI encoded text files in a modern
+Read legacy code page and ANSI encoded text files in a modern
 Unicode terminal.
 
 Text files and art created before the adoption of Unicode often
@@ -16,12 +16,12 @@ legacy text is often malformed and even unreadable.
 
 # Features
 
-  - Print legacy codepage encoded texts in a modern terminal.
+  - Print legacy code page encoded texts in a modern terminal.
   - Print or export the details of the text files.
   - Print or export the SAUCE metadata of a file.
   - Transform legacy encoded texts and text art into UTF-8 documents for use on the web or with modern systems.
-  - Lookup and print codepage character tables for dozens of encodings.
-  - Support for ISO, PC-DOS/Windows codepages plus IBM EBCDIC, Macintosh, and ShiftJIS.
+  - Lookup and print code page character tables for dozens of encodings.
+  - Support for ISO, PC-DOS/Windows code pages plus IBM EBCDIC, Macintosh, and ShiftJIS.
   - Use io redirection with piping support.
 
 Usage:
@@ -30,10 +30,10 @@ Usage:
 
 The commands are:
 
-	lang        List the legacy codepage target languages
-	list        List the legacy codepages that Retrotxt can convert to UTF-8
-	table       Display one or more codepage tables showing all the characters in use
-	tables      Display the characters of every codepage table in use
+	lang        List the legacy code page target languages
+	list        List the legacy code pages that Retrotxt can convert to UTF-8
+	table       Display one or more code page tables showing all the characters in use
+	tables      Display the characters of every code page table in use
 	info        Information on a text file
 	view        Print a text file to the terminal using standard output
 	example     List the included sample text files available for use with the info and view commands
@@ -60,23 +60,23 @@ To list the sample text files:
 
 	retrotxt example
 
-To list the supported codepage encodings with names and aliases:
+To list the supported code page encodings with names and aliases:
 
 	retrotxt list
 
-To list the supported codepages and characters as tables:
+To list the supported code pages and characters as tables:
 
 	retrotxt tables
 
-To list the a codepage and characters as a table:
+To list the a code page and characters as a table:
 
-	retrotxt table [codepage names or aliases]
+	retrotxt table [code page names or aliases]
 
-To list both the table of Codepage 437 and ISO 8859-1 using aliases:
+To list both the table of Code Page 437 and ISO 8859-1 using aliases:
 
 	retrotxt table cp437 latin1
 
-To list the target natural languages of the supported codepages:
+To list the target natural languages of the supported code pages:
 
 	retrotxt lang
 */

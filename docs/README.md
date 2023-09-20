@@ -3,7 +3,7 @@
 
 ### _[Retrotxt](https://github.com/bengarrett/retrotxt) for the terminal_.
 
-Read legacy codepage and ANSI encoded text files in a modern Unicode terminal.
+Read legacy code page and ANSI encoded text files in a modern Unicode terminal.
 
 ## Downloads
 
@@ -56,12 +56,12 @@ type ascii-logo.txt # or, cat ascii-logo.txt
 
 ## Features
 
-- Print legacy codepage encoded texts in a modern terminal.
+- Print legacy code page encoded texts in a modern terminal.
 - Print or export the details of the text files.
 - Print or export the [SAUCE metadata](https://www.acid.org/info/sauce/sauce.htm) of a file.
 - Transform legacy encoded texts and text art into UTF-8 documents for use on the web or with modern systems.
-- Lookup and print codepage character tables for dozens of encodings.
-- Support for ISO, PC-DOS/Windows codepages plus IBM EBCDIC, Macintosh, and ShiftJIS.
+- Lookup and print code page character tables for dozens of encodings.
+- Support for ISO, PC-DOS/Windows code pages plus IBM EBCDIC, Macintosh, and ShiftJIS.
 - Use io redirection with piping support.
 
 ---
@@ -138,7 +138,7 @@ retrotxt list
 
 ### Even More Uses
 
-#### Print legacy codepage tables in the terminal.
+#### Print legacy code page tables in the terminal.
 
 ```
 retrotxt table cp437 latin1

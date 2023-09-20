@@ -309,7 +309,7 @@ func WordsEBCDIC(r io.Reader) (int, error) {
 	if r == nil {
 		return 0, ErrReader
 	}
-	// for the purposes of counting words, any EBCDIC codepage is fine
+	// for the purposes of counting words, any EBCDIC code page is fine
 	c := transform.NewReader(r, charmap.CodePage037.NewDecoder())
 	return Words(c)
 }

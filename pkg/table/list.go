@@ -111,7 +111,7 @@ func List(wr io.Writer) error { //nolint:funlen
 	fmt.Fprintln(w, " "+term.Info("⁑")+
 		" ANSI X3.4 encodings are only usable with the "+term.Example("table")+" command."+
 		"\n   You can use the "+term.Example("table ascii")+" command to list all three X3.4 tables.")
-	fmt.Fprintln(w, "\nEither named, numeric or alias values are valid codepage arguments.")
+	fmt.Fprintln(w, "\nEither named, numeric or alias values are valid code page arguments.")
 	fmt.Fprintln(w, "  These values all match ISO 8859-1.")
 	cmds := fmt.Sprintf("%s table ", meta.Bin)
 	fmt.Fprintf(w, "  %s%s  %s\n",
