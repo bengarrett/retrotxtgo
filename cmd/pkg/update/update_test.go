@@ -23,7 +23,9 @@ func ExampleString() {
 }
 
 func TestCacheSet(t *testing.T) {
+	t.Parallel()
 	t.Run("cache set", func(t *testing.T) {
+		t.Parallel()
 		if err := update.CacheSet(etag, alpha); err != nil {
 			t.Error(err)
 		}
@@ -31,7 +33,9 @@ func TestCacheSet(t *testing.T) {
 }
 
 func TestCheck(t *testing.T) {
+	t.Parallel()
 	t.Run("check as sourcecode", func(t *testing.T) {
+		t.Parallel()
 		meta.App.Version = alpha
 		s, err := update.Check()
 		if err != nil {
@@ -44,6 +48,7 @@ func TestCheck(t *testing.T) {
 }
 
 func TestCompare(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		current string
 		fetched string
@@ -64,11 +69,12 @@ func TestCompare(t *testing.T) {
 		{"v2.0.1", args{"v1.0.0", "v2.0.1"}, true},
 		{"v2", args{"v1", "v2.0.1"}, true},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if got := update.Compare(tt.args.current, tt.args.fetched); got != tt.want {
 				t.Errorf("compare() = %v, want %v", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }

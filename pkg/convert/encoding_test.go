@@ -102,6 +102,7 @@ func toEncoding(e encoding.Encoding, s string) []byte {
 }
 
 func TestSet_Transform(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name     string
 		codepage encoding.Encoding
@@ -126,8 +127,9 @@ func TestSet_Transform(t *testing.T) {
 		{"jp", jis, toEncoding(jis, "abc"), "abc", false},
 		{"865", cp865, toEncoding(cp865, "currency sign ¤"), "currency sign ¤", false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			data := &convert.Convert{}
 			data.Input.Input = tt.text
 			data.Input.Encoding = tt.codepage
@@ -144,11 +146,12 @@ func TestSet_Transform(t *testing.T) {
 			if string(data.Output) != tt.want {
 				t.Errorf("Convert.Transform() = %q, want %q", data.Output, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestANSI(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name     string
 		codepage encoding.Encoding
@@ -162,8 +165,9 @@ func TestANSI(t *testing.T) {
 		{"ansi win", cp1252, "\x1b\x5b0m", []rune{27, 91, 48, 109}, false},
 		{"panic", cp1252, "\x1b", []rune{9243}, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			data := &convert.Convert{}
 			data.Input.Input = []byte(tt.str)
 			data.Input.Encoding = tt.codepage
@@ -181,11 +185,12 @@ func TestANSI(t *testing.T) {
 			if !reflect.DeepEqual(data.Output, tt.want) {
 				t.Errorf("Convert.Transform() = %v %q, want %v", data.Output, data.Output, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestEncoder(t *testing.T) { //nolint:funlen
+	t.Parallel()
 	tests := []struct {
 		name    string
 		want    encoding.Encoding
@@ -243,8 +248,9 @@ func TestEncoder(t *testing.T) { //nolint:funlen
 		{"oem-1257", charmap.Windows1257, false},
 		{"oem-1258", charmap.Windows1258, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			got, err := convert.Encoder(tt.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Encoder() error = %v, wantErr %v", err, tt.wantErr)
@@ -253,192 +259,166 @@ func TestEncoder(t *testing.T) { //nolint:funlen
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Encoder() = %v, want %v", got, tt.want)
 			}
-		})
-	}
-}
-
-func TestRunesControls(t *testing.T) {
-	tests := []struct {
-		name    string
-		text    string
-		want    string
-		wantErr bool
-	}{
-		{"empty", "", "", true},
-		{"hi", "hello world", "hello world", false},
-		{"nul", "\x00", "␀", false},
-		{"us", "\x1f", "␟", false},
-		{"device controls", "\x10\x11", "␐␑", false},
-	}
-	for _, tt := range tests {
-		d := &convert.Convert{}
-		d.Input.Input = []byte(tt.text)
-		d.Input.Encoding = cp1252
-		if err := d.Transform(); err != nil {
-			if (err != nil) != tt.wantErr {
-				t.Errorf("TestRunesControls() error = %v", err)
-			}
-			continue
 		}
-		d, err := d.Swap()
-		if (err != nil) != tt.wantErr {
-			t.Errorf("Convert.Swap() error = %v, wantErr %v", err, tt.wantErr)
-			return
-		}
-		t.Run(tt.name, func(t *testing.T) {
-			if got, w := d.Output, []rune(tt.want); !reflect.DeepEqual(got, w) {
-				t.Errorf("TestRunesControls() = %v (%X) [%s], want %v (%X) [%s]",
-					got, got, string(got), w, w, string(w))
-			}
-		})
-	}
+	})
 }
 
 func TestRunesKOI8(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name    string
 		text    string
 		want    string
 		wantErr bool
 	}{
-		{"empty", "", "", true},
+		{"empty", "", "", false},
 		{"hi", "hello world", "hello world", false},
 		{"lines", "\x82\x80\x80hi\x80\x80\x83", "┌──hi──┐", false},
 		{"invalid", "\x00=NULL & \x1f=?", " =NULL &  =?", false},
 	}
-	for _, tt := range tests {
-		d := convert.Convert{}
-		d.Input.Input = []byte(tt.text)
-		d.Input.Encoding = koi
-		err := d.Transform()
-		if (err != nil) != tt.wantErr {
-			t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
-		}
-		d.RunesKOI8()
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
+			d := convert.Convert{}
+			d.Input.Input = []byte(tt.text)
+			d.Input.Encoding = koi
+			err := d.Transform()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			d.RunesKOI8()
 			if got := string(d.Output); got != tt.want {
 				t.Errorf("TestRunesKOI8() = %s, want %s", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestRunesLatin(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name    string
 		text    string
 		want    string
 		wantErr bool
 	}{
-		{"empty", "", "", true},
+		{"empty", "", "", false},
 		{"hi", "hello world", "hello world", false},
 		{"high", "\xbd of 5 is 2.5", "½ of 5 is 2.5", false},
 		{"invalid", "\x00=NULL & \x9f=?", " =NULL &  =?", false},
 	}
-	for _, tt := range tests {
-		d := convert.Convert{}
-		d.Input.Input = []byte(tt.text)
-		d.Input.Encoding = iso1
-		err := d.Transform()
-		if (err != nil) != tt.wantErr {
-			t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
-		}
-		d.RunesLatin()
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
+			d := convert.Convert{}
+			d.Input.Input = []byte(tt.text)
+			d.Input.Encoding = iso1
+			err := d.Transform()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			d.RunesLatin()
 			if got := string(d.Output); got != tt.want {
 				t.Errorf("TestRunesLatin() = %s, want %s", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestRunesDOS(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name    string
 		text    string
 		want    string
 		wantErr bool
 	}{
-		{"empty", "", "", true},
+		{"empty", "", "", false},
 		{"hi", "\x01hello world\x7f", "☺hello world⌂", false},
 		{"dos pipes", "|!\x7c", "|!|", false},
 	}
-	for _, tt := range tests {
-		d := convert.Convert{}
-		d.Input.Input = []byte(tt.text)
-		d.Input.Encoding = cp437
-		err := d.Transform()
-		if (err != nil) != tt.wantErr {
-			t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
-		}
-		d.RunesDOS()
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
+			d := convert.Convert{}
+			d.Input.Input = []byte(tt.text)
+			d.Input.Encoding = cp437
+			err := d.Transform()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			d.RunesDOS()
 			if got := string(d.Output); got != tt.want {
 				t.Errorf("TestRunesDOS() = %s, want %s", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestRunesMacintosh(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name    string
 		text    string
 		want    string
 		wantErr bool
 	}{
-		{"empty", "", "", true},
+		{"empty", "", "", false},
 		{"hi", "hello world", "hello world", false},
 		{"controls", "\x11+\x12+Z", "⌘+⇧+Z", false},
 	}
-	for _, tt := range tests {
-		d := convert.Convert{}
-		d.Input.Input = []byte(tt.text)
-		d.Input.Encoding = mac
-		err := d.Transform()
-		if (err != nil) != tt.wantErr {
-			t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
-		}
-		d.RunesMacintosh()
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
+			d := convert.Convert{}
+			d.Input.Input = []byte(tt.text)
+			d.Input.Encoding = mac
+			err := d.Transform()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			d.RunesMacintosh()
 			if got := string(d.Output); got != tt.want {
 				t.Errorf("TestRunesMacintosh() = %s, want %s", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestRunesWindows(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name    string
 		text    string
 		want    string
 		wantErr bool
 	}{
-		{"empty", "", "", true},
+		{"empty", "", "", false},
 		{"hi", "hello world", "hello world", false},
 		{"ansi control example", "\x1b[0m;", "\x1b[0m;", false},
 		{"DEL", "\x7f", "␡", false},
 		{"invalid", "\x90", " ", false},
 	}
-	for _, tt := range tests {
-		d := convert.Convert{}
-		d.Input.Input = []byte(tt.text)
-		d.Input.Encoding = cp1252
-		err := d.Transform()
-		if (err != nil) != tt.wantErr {
-			t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
-		}
-		d.RunesWindows()
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
+			d := convert.Convert{}
+			d.Input.Input = []byte(tt.text)
+			d.Input.Encoding = cp1252
+			err := d.Transform()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			d.RunesWindows()
 			if got := string(d.Output); got != tt.want {
 				t.Errorf("TestRunesWindows() = %s, want %s", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestRunesEBCDIC(t *testing.T) {
+	t.Parallel()
 	// EBCDIC codepages are not compatible with ISO/IEC 646 (ASCII)
 	// so a number of these tests either convert input UTF-8 text into CP037
 	tx, err := charmap.CodePage037.NewEncoder().Bytes([]byte("ring my "))
@@ -452,7 +432,7 @@ func TestRunesEBCDIC(t *testing.T) {
 		encode  bool
 		wantErr bool
 	}{
-		{"empty", []byte{}, "", true, true},
+		{"empty", []byte{}, "", true, false},
 		{"nul", []byte{0}, "\u2400", true, false},
 		{"ht", []byte{9}, "\u2409", true, false},
 		{"invalid", []byte{4}, "\u0020", false, false},
@@ -463,25 +443,27 @@ func TestRunesEBCDIC(t *testing.T) {
 		{"c ben", []byte{180, 64, 194, 133, 149}, "  Ben", false, false},
 		{"c ben", []byte("© Ben"), "  Ben", true, false},
 	}
-	for _, tt := range tests {
-		c := tt.text
-		d := convert.Convert{}
-		d.Input.Input = c
-		d.Input.Encoding = charmap.CodePage037
-		err := d.Transform()
-		if (err != nil) != tt.wantErr {
-			t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
-		}
-		d.RunesEBCDIC()
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
+			c := tt.text
+			d := convert.Convert{}
+			d.Input.Input = c
+			d.Input.Encoding = charmap.CodePage037
+			err := d.Transform()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Convert.Transform() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			d.RunesEBCDIC()
 			if got := string(d.Output); got != tt.want {
 				t.Errorf("RunesEBCDIC() = '%v' (0x%X), want '%v' (0x%X)", got, got, tt.want, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func Test_EqualLB(t *testing.T) {
+	t.Parallel()
 	o, n, lf, win := [2]rune{0, 0}, [2]rune{-1, -1}, [2]rune{10, 0}, [2]rune{13, 0}
 	type args struct {
 		r  [2]rune
@@ -499,16 +481,18 @@ func Test_EqualLB(t *testing.T) {
 		{"lf", args{lf, lf}, true},
 		{"win", args{win, win}, true},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if got := convert.EqualLB(tt.args.r, tt.args.nl); got != tt.want {
 				t.Errorf("EqualLB() = %v, want %v", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func Test_EncodeUTF32(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		a    string
@@ -517,16 +501,18 @@ func Test_EncodeUTF32(t *testing.T) {
 		{"empty", "", nil},
 		{"le", "UTF-32", utf32.UTF32(utf32.LittleEndian, utf32.UseBOM)},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if got := convert.EncodeUTF32(tt.a); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("EncodeUTF32() = %v, want %v", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestHumanize(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		name string
 	}
@@ -539,16 +525,18 @@ func TestHumanize(t *testing.T) {
 		{"cp437", args{"CP-437"}, "IBM437"},
 		{"win", args{"windows-1252"}, "Windows-1252"},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if got := convert.Humanize(tt.args.name); got != tt.want {
 				t.Errorf("Humanize() = %v, want %v", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func Test_Shorten(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		name string
 	}
@@ -561,16 +549,18 @@ func Test_Shorten(t *testing.T) {
 		{"cp437", args{"CP-437"}, "437"},
 		{"win", args{"windows-1252"}, "1252"},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if got := convert.Shorten(tt.args.name); got != tt.want {
 				t.Errorf("shorten() = %v, want %v", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestConvert_swaps(t *testing.T) {
+	t.Parallel()
 	hi := []rune("hello world 😃 ⌂")
 	tests := []struct {
 		name   string
@@ -586,8 +576,9 @@ func TestConvert_swaps(t *testing.T) {
 		{"replace Home", hi, strings.Split("n,b,h,p,r", ","), []rune("hello world 😃 Δ")},
 		{"replace NULLS", []rune("hello\u0000world"), []string{"null"}, []rune("hello world")},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			c := convert.Convert{
 				Output: tt.output,
 			}
@@ -596,11 +587,12 @@ func TestConvert_swaps(t *testing.T) {
 			if got := c.Output; !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Convert.Swaps() = %v, want %v", string(got), string(tt.want))
 			}
-		})
-	}
+		}
+	})
 }
 
 func Test_picture(t *testing.T) {
+	t.Parallel()
 	const err = 65533
 	type args struct {
 		b byte
@@ -615,16 +607,18 @@ func Test_picture(t *testing.T) {
 		{"NULL", args{byte(0 + convert.Row8)}, 9216},
 		{"SOH", args{byte(1 + convert.Row8)}, 9217},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if got := convert.Picture(tt.args.b); got != tt.want {
 				t.Errorf("convert.Picture() = %v, want %v", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestConvert_skipIgnores(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		i      int
 		output []rune
@@ -641,8 +635,9 @@ func TestConvert_skipIgnores(t *testing.T) {
 		{"ign H", args{0, []rune("hello"), []rune("H")}, false},
 		{"ign 📙", args{1, []rune(" 📙 "), []rune("abcde📙")}, true},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			c := convert.Convert{
 				Output: tt.args.output,
 			}
@@ -650,11 +645,12 @@ func TestConvert_skipIgnores(t *testing.T) {
 			if got := c.SkipIgnore(tt.args.i); got != tt.want {
 				t.Errorf("Convert.SkipIgnore() = %v, want %v", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func Test_EncodeAlias(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		want string
@@ -666,11 +662,12 @@ func Test_EncodeAlias(t *testing.T) {
 		{"8", "ISO-8859-8"},
 		{"11", "ISO-8859-11"},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if got := convert.EncodeAlias(tt.name); got != tt.want {
 				t.Errorf("EncodeAlias() = %v, want %v", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }

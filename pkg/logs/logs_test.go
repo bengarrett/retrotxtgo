@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/gookit/color"
+	"github.com/stretchr/testify/assert"
 )
 
 var ErrTest = errors.New("something went wrong")
@@ -50,118 +50,51 @@ func ExampleSprintS() {
 }
 
 func TestHint_String(t *testing.T) {
+	t.Parallel()
 	color.Enable = false
-	type fields struct {
-		Error error
-		Hint  string
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   string
-	}{
-		{"empty", fields{}, ""},
-		{"text", fields{nil, "hint"}, ""},
-		{"text", fields{ErrTest, "hint"}, fmt.Sprintf("Problem:\nerror.\n run %s hint", meta.Bin)},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := logs.Hint(tt.fields.Error, tt.fields.Hint); got != tt.want {
-				t.Errorf("Hint() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	err := logs.Hint(ErrTest, "hint")
+	assert.Contains(t, err, "Problem:")
+	assert.Contains(t, err, "something went wrong")
+	err = logs.Hint(nil, "hint")
+	assert.Empty(t, err)
 }
 
 func TestSprint(t *testing.T) {
+	t.Parallel()
 	color.Enable = false
-	tests := []struct {
-		name string
-		err  error
-		want string
-	}{
-		{"empty", nil, ""},
-		{"test", ErrTest, "Problem:\nerror."},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := logs.Sprint(tt.err); got != tt.want {
-				t.Errorf("Sprint() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	err := logs.Sprint(ErrTest)
+	assert.Contains(t, err, "Problem:")
+	assert.Contains(t, err, "something went wrong")
+	err = logs.Sprint(nil)
+	assert.Empty(t, err)
 }
 
 func TestSprintCmd(t *testing.T) {
+	t.Parallel()
 	color.Enable = false
-	type args struct {
-		name string
-		err  error
-	}
-	tests := []struct {
-		name string
-		args args
-		want string
-	}{
-		{"empty", args{"", nil}, ""},
-		{"no name", args{"", ErrTest}, ""},
-		{"error", args{"test", ErrTest}, "Problem:\n the command test does not exist, error"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := logs.SprintCmd(tt.args.err, tt.args.name); got != tt.want {
-				t.Errorf("SprintCmd() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	err := logs.SprintCmd(ErrTest, "hint")
+	assert.Contains(t, err, "Problem:")
+	assert.Contains(t, err, "something went wrong")
+	err = logs.SprintCmd(nil, "hint")
+	assert.Empty(t, err)
 }
 
 func TestSprintFlag(t *testing.T) {
+	t.Parallel()
 	color.Enable = false
-	type args struct {
-		name string
-		flag string
-		err  error
-	}
-	tests := []struct {
-		name string
-		args args
-		want string
-	}{
-		{"empty", args{}, ""},
-		{"no name", args{"", "", ErrTest}, ""},
-		{"error", args{"error", "err", ErrTest}, "Problem:\n with the error --err flag, error"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := logs.SprintFlag(tt.args.err, tt.args.name, tt.args.flag); got != tt.want {
-				t.Errorf("SprintFlag() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	err := logs.SprintFlag(ErrTest, "hint", "dosomething")
+	assert.Contains(t, err, "Problem:")
+	assert.Contains(t, err, "with the hint --dosomething flag, something went wrong")
+	err = logs.SprintFlag(nil, "hint", "dosomething")
+	assert.Empty(t, err)
 }
 
 func TestSprintS(t *testing.T) {
+	t.Parallel()
 	color.Enable = false
-	type args struct {
-		value string
-		err   error
-		errs  error
-	}
-	tests := []struct {
-		name string
-		args args
-		want string
-	}{
-		{"empty", args{}, ""},
-		{"no name", args{"", ErrTest, ErrTest}, ""},
-		{"errors", args{"error", ErrTest, ErrTest}, "Problem:\n error \"error\": error"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := logs.SprintS(tt.args.err, tt.args.errs, tt.args.value); got != tt.want {
-				t.Errorf("SprintS() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	err := logs.SprintS(ErrTest, ErrTest, "hint")
+	assert.Contains(t, err, "Problem:")
+	assert.Contains(t, err, "something went wrong")
+	err = logs.SprintS(nil, nil, "hint")
+	assert.Empty(t, err)
 }

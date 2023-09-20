@@ -34,6 +34,7 @@ func ExampleFlags_Open() {
 }
 
 func TestFlags_Open(t *testing.T) {
+	t.Parallel()
 	var file convert.Convert
 	type fields struct {
 		From encoding.Encoding
@@ -61,8 +62,9 @@ func TestFlags_Open(t *testing.T) {
 		{"ansi", fields{}, args{&file, "ansi"}, true, false},
 		{"cp437 dump", fields{}, args{&file, "437.cr"}, true, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			f := sample.Flags{
 				Input: tt.fields.From,
 				// Output: tt.fields.To,
@@ -76,11 +78,12 @@ func TestFlags_Open(t *testing.T) {
 			if r != tt.wantRunes {
 				t.Errorf("Flags.Open() runes = %v, want %v", r, tt.wantRunes)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestValid(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		name string
 	}
@@ -93,16 +96,18 @@ func TestValid(t *testing.T) {
 		{"invalid", args{"invalid filename"}, false},
 		{"okay", args{"ansi.setmodes"}, true},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if got := sample.Valid(tt.args.name); got != tt.want {
 				t.Errorf("Valid() = %v, want %v", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestTransform(t *testing.T) {
+	t.Parallel()
 	hi := []byte("hello world")
 	dos := []byte("▒▓█")
 	type args struct {
@@ -121,8 +126,9 @@ func TestTransform(t *testing.T) {
 		{"ascii text", args{charmap.CodePage437, hi}, hi, false},
 		{"dos text", args{charmap.CodePage437, dos}, []byte{177, 178, 219}, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			got, err := sample.Transform(tt.args.e, tt.args.b...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Transform() error = %v, wantErr %v", err, tt.wantErr)
@@ -131,11 +137,12 @@ func TestTransform(t *testing.T) {
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Transform() = %v, want %v", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestOpen(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		name string
 	}
@@ -150,8 +157,9 @@ func TestOpen(t *testing.T) {
 		{"865", args{"865"}, 117, false},
 		{"utf8", args{"utf8"}, 128, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			got, err := sample.Open(tt.args.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Open() error = %v, wantErr %v", err, tt.wantErr)
@@ -160,6 +168,6 @@ func TestOpen(t *testing.T) {
 			if gotLen := utf8.RuneCount(got); gotLen != tt.wantLen {
 				t.Errorf("Open() = %v, want %v", gotLen, tt.wantLen)
 			}
-		})
-	}
+		}
+	})
 }

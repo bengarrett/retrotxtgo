@@ -63,6 +63,7 @@ func ExampleUnderlineChar() {
 }
 
 func TestTerm(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name     string
 		wantTerm string
@@ -73,16 +74,18 @@ func TestTerm(t *testing.T) {
 		{"xterm-mono", "none"},
 		{"rxvt-unicode-256color", "terminal256"},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if gotTerm := term.Term("", tt.name); gotTerm != tt.wantTerm {
 				t.Errorf("Term() = %v, want %v", gotTerm, tt.wantTerm)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestTerm16M(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name     string
 		wantTerm string
@@ -90,16 +93,18 @@ func TestTerm16M(t *testing.T) {
 		{"24bit", "terminal16m"},
 		{"truecolor", "terminal16m"},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if gotTerm := term.Term(tt.name, ""); gotTerm != tt.wantTerm {
 				t.Errorf("Term() = %v, want %v", gotTerm, tt.wantTerm)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestUnderlineChar(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name    string
 		c       string
@@ -117,8 +122,9 @@ func TestUnderlineChar(t *testing.T) {
 		{"😀b", string([]byte{240, 159, 152, 128}), "\x1b[0m\x1b[4m😀\x1b[0m", false},
 		{"string", "blahblah", "\x1b[0m\x1b[4mb\x1b[0m", false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			gotS, err := term.UnderlineChar(tt.c)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("underlineChar() error = %v, wantErr %v", err, tt.wantErr)
@@ -127,11 +133,12 @@ func TestUnderlineChar(t *testing.T) {
 			if gotS != tt.wantS {
 				t.Errorf("underlineChar() = %v, want %v", gotS, tt.wantS)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestUnderlineKeys(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		keys []string
@@ -148,16 +155,18 @@ func TestUnderlineKeys(t *testing.T) {
 		{"file.js.min", []string{"file.js.min"}, "\x1b[0m\x1b[4mf\x1b[0mile.js.\x1b[0m\x1b[4mm\x1b[0min"},
 		{"📁.min", []string{"📁.min"}, "\x1b[0m\x1b[4m📁\x1b[0m.\x1b[0m\x1b[4mm\x1b[0min"},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if got := term.UnderlineKeys(tt.keys...); got != tt.want {
 				t.Errorf("UnderlineKeys() = %v, want %v", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestCenter(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		text  string
 		width int
@@ -171,11 +180,12 @@ func TestCenter(t *testing.T) {
 		{"even", args{"hi", 10}, "    hi"},
 		{"odd", args{"hello", 10}, "  hello"},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if got := term.Center(tt.args.width, tt.args.text); got != tt.want {
 				t.Errorf("Center() = %q, want %q", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }

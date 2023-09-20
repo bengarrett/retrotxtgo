@@ -23,6 +23,7 @@ const (
 )
 
 func Test_SkipCtrlCodes(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		ctrl []string
@@ -33,20 +34,22 @@ func Test_SkipCtrlCodes(t *testing.T) {
 		{"v,del", []string{"v", "del"}, []rune{convert.VT, convert.DEL}},
 		{"invalid", []string{"xxx"}, []rune{}},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			c := convert.Convert{}
 			c.Input.UseBreaks = true
 			c.Args.Controls = tt.ctrl
 			c.SkipCode()
 			if got := c.Input.Ignore; string(got) != string(tt.want) {
-				t.Errorf("Convert.SkipCode() got = %v, want %v", got, tt.want)
+				t.Errorf("Convert.SkipCode(%s) got = %v, want %v", tt.name, got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestConvert_ANSI(t *testing.T) {
+	t.Parallel()
 	const wantHi = "\x1b[0m\x0D\x0A" +
 		"\x1b[1;33m  ╓──────────────╖\x1b[0m\x0D\x0A" +
 		"\x1b[1;33m  ║\x1b[0m  Hello world \x1b[1;33m║\x1b[0m\x0D\x0A" +
@@ -71,8 +74,9 @@ func TestConvert_ANSI(t *testing.T) {
 		{"eof", args{be}, bytes.Runes([]byte(wantEOF1)), false},
 		{"ansi", args{hi}, bytes.Runes([]byte(wantHi)), false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			c := convert.Convert{}
 			c.Input.Encoding = charmap.CodePage437
 			got, err := c.ANSI(tt.args.b...)
@@ -85,11 +89,12 @@ func TestConvert_ANSI(t *testing.T) {
 				t.Errorf("Convert.ANSI() = %s (%d), want %s (%d)",
 					g, len(g), w, len(w))
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestConvert_Chars(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		b []byte
 	}
@@ -104,8 +109,9 @@ func TestConvert_Chars(t *testing.T) {
 		{"eof", args{[]byte(eof)}, bytes.Runes([]byte(wantEOF0)), false},
 		{"ansi", args{[]byte(abc)}, bytes.Runes([]byte(wantAbc)), false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			c := convert.Convert{}
 			c.Input.Encoding = charmap.CodePage437
 			got, err := c.Chars(tt.args.b...)
@@ -118,11 +124,12 @@ func TestConvert_Chars(t *testing.T) {
 				t.Errorf("Convert.Chars() = %s (%d), want %s (%d)",
 					g, len(g), w, len(w))
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestConvert_Dump(t *testing.T) {
+	t.Parallel()
 	bhi := []byte("hello\nworld")
 	type args struct {
 		b []byte
@@ -139,8 +146,9 @@ func TestConvert_Dump(t *testing.T) {
 		{"eof", args{[]byte(eof)}, bytes.Runes([]byte(wantEOF0)), false},
 		{"abc", args{[]byte(abc)}, []rune("␀ ☺ ☻\r\n\x1b[0mA B C"), false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			c := convert.Convert{}
 			c.Input.Encoding = charmap.CodePage437
 			got, err := c.Dump(tt.args.b...)
@@ -153,11 +161,12 @@ func TestConvert_Dump(t *testing.T) {
 				t.Errorf("Convert.Dump() = %q (%dB), want %q (%dB)",
 					g, len(g), w, len(w))
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestConvert_Text(t *testing.T) {
+	t.Parallel()
 	const wantHi = "\x1b[0m\x0D\x0A" +
 		"\x1b[1;33m  ╓──────────────╖\x1b[0m\x0D\x0A" +
 		"\x1b[1;33m  ║\x1b[0m  Hello world \x1b[1;33m║\x1b[0m\x0D\x0A" +
@@ -182,8 +191,9 @@ func TestConvert_Text(t *testing.T) {
 		{"eof", args{be}, bytes.Runes([]byte(wantEOF1)), false},
 		{"ansi", args{hi}, bytes.Runes([]byte(wantHi)), false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			c := convert.Convert{}
 			c.Args.SwapChars = []string{"null", "bar"}
 			c.Input.Encoding = charmap.CodePage437
@@ -197,11 +207,12 @@ func TestConvert_Text(t *testing.T) {
 				t.Errorf("Convert.Text() = %s (%d), want %s (%d)",
 					g, len(g), w, len(w))
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestConvert_FixJISTable(t *testing.T) {
+	t.Parallel()
 	fix := []byte("\x7f\xa0\xe0\xff")
 	c := convert.Convert{}
 	c.Input.Input = fix
@@ -219,6 +230,7 @@ func TestConvert_FixJISTable(t *testing.T) {
 }
 
 func TestConvert_wrapWidth(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		max   int
 		input string
@@ -234,8 +246,9 @@ func TestConvert_wrapWidth(t *testing.T) {
 		{"string", args{80, "abcdefghi"}, "abcdefghi", false},
 		{"3 chrs", args{3, "abcdefghi"}, "abc\ndef\nghi\n", false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			c := convert.Convert{}
 			c.Input.Encoding = charmap.CodePage437
 			c.Args.MaxWidth = tt.args.max
@@ -247,6 +260,6 @@ func TestConvert_wrapWidth(t *testing.T) {
 			if string(r) != tt.want {
 				t.Errorf("Convert.wrapWidth(%d) = %q, want %q", c.Args.MaxWidth, string(r), tt.want)
 			}
-		})
-	}
+		}
+	})
 }

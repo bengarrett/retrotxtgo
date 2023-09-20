@@ -22,10 +22,9 @@ linters:
     - wrapcheck         # wrapping 3rd party errors are unnecessary (opinionated)
     - varnamelen        # doesn't allow short vars (opinionated)
     - goimports         # conflicts with gci
-    #- godox             # hide, TODOs are fine
     - nlreturn          # opinionated
     - wsl               # opinionated
-    - paralleltest      # temp disabled
+    #- paralleltest      # temp disabled
 
 linters-settings:
   cyclop:

@@ -62,6 +62,7 @@ func ExampleHexEncode() {
 }
 
 func TestTrimEOF(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		b    []byte
@@ -72,22 +73,25 @@ func TestTrimEOF(t *testing.T) {
 		{"one", []byte("hello\x1aworld"), []byte("hello")},
 		{"two", []byte("hello\x1aworld\x1athis should be hidden"), []byte("hello")},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if got := byter.TrimEOF(tt.b); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("TrimEOF() = %v, want %v", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestMakeBytes(t *testing.T) {
+	t.Parallel()
 	if l := len(byter.MakeBytes()); l != 256 {
 		t.Errorf("MakeBytes() = %v, want %v", l, 256)
 	}
 }
 
 func TestMark(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		b []byte
 	}
@@ -100,18 +104,20 @@ func TestMark(t *testing.T) {
 		{"ascii string", args{[]byte("hi")}, []byte{239, 187, 191, 104, 105}},
 		{"existing bom string", args{byter.BOM()}, []byte{239, 187, 191}},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if got := byter.Mark(tt.args.b); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Mark() = %v, want %v", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
 
 const c, h = "═╣░╠═", "cdb9b0cccd"
 
 func TestHexDecode(t *testing.T) {
+	t.Parallel()
 	samp, err := byter.Encode(charmap.CodePage437, c)
 	if err != nil {
 		t.Errorf("HexDecode() E437() error = %v", err)
@@ -127,8 +133,9 @@ func TestHexDecode(t *testing.T) {
 	}{
 		{"═╣░╠═", args{h}, samp, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			gotResult, err := byter.HexDecode(tt.args.hexadecimal)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("HexDecode() error = %v, wantErr %v", err, tt.wantErr)
@@ -137,11 +144,12 @@ func TestHexDecode(t *testing.T) {
 			if !reflect.DeepEqual(gotResult, tt.wantResult) {
 				t.Errorf("HexDecode() = %v, want %v", gotResult, tt.wantResult)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestHexEncode(t *testing.T) {
+	t.Parallel()
 	samp, err := byter.Encode(charmap.CodePage437, c)
 	if err != nil {
 		t.Errorf("HexDecode() E437() error = %v", err)
@@ -156,13 +164,14 @@ func TestHexEncode(t *testing.T) {
 	}{
 		{"═╣░╠═", args{string(samp)}, []byte{99, 100, 98, 57, 98, 48, 99, 99, 99, 100}},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			if gotResult := byter.HexEncode(tt.args.text); !reflect.DeepEqual(gotResult, tt.wantResult) {
 				t.Errorf("HexEncode() = %v, want %v", gotResult, tt.wantResult)
 			}
-		})
-	}
+		}
+	})
 }
 
 const (
@@ -172,6 +181,7 @@ const (
 )
 
 func TestCP437Decode(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name       string
 		s          string
@@ -185,8 +195,9 @@ func TestCP437Decode(t *testing.T) {
 		{"escapes", mock.T()["Escapes"], "bell:\a,back:\b,tab:\t,form:\f,vertical:\v,quote:\"", false},
 		{"digits", mock.T()["Digits"], "░░┼░┼░", false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			gotResult, err := byter.Decode(charmap.CodePage437, tt.s)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("D437() error = %v, wantErr %v", err, tt.wantErr)
@@ -195,11 +206,12 @@ func TestCP437Decode(t *testing.T) {
 			if !reflect.DeepEqual(string(gotResult), tt.wantResult) {
 				t.Errorf("D437() = %v, want %v", string(gotResult), tt.wantResult)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestDString(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		s  string
 		cp charmap.Charmap
@@ -217,8 +229,9 @@ func TestDString(t *testing.T) {
 			*charmap.CodePage037,
 		}, []byte("hello world"), false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			c := tt.args.cp
 			gotResult, err := byter.Decode(&c, tt.args.s)
 			if (err != nil) != tt.wantErr {
@@ -228,11 +241,12 @@ func TestDString(t *testing.T) {
 			if !reflect.DeepEqual(gotResult, tt.wantResult) {
 				t.Errorf("DString() = %v, want %v", gotResult, tt.wantResult)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestEString(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		s  string
 		cp charmap.Charmap
@@ -256,8 +270,9 @@ func TestEString(t *testing.T) {
 			false,
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			c := tt.args.cp
 			gotResult, err := byter.Encode(&c, tt.args.s)
 			if (err != nil) != tt.wantErr {
@@ -267,11 +282,12 @@ func TestEString(t *testing.T) {
 			if !reflect.DeepEqual(gotResult, tt.wantResult) {
 				t.Errorf("Encode() = %v, want %v", gotResult, tt.wantResult)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestD437(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name       string
 		s          string
@@ -283,8 +299,9 @@ func TestD437(t *testing.T) {
 		{"hex", "\xe0 alpha \xe1 beta", []byte("α alpha ß beta"), false},
 		{"octal", "\253 half \254 quarter", []byte("½ half ¼ quarter"), false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			gotResult, err := byter.Decode(charmap.CodePage437, tt.s)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("D437() error = %v, wantErr %v", err, tt.wantErr)
@@ -293,11 +310,12 @@ func TestD437(t *testing.T) {
 			if !reflect.DeepEqual(gotResult, tt.wantResult) {
 				t.Errorf("D437() = %s, want %v", gotResult, tt.wantResult)
 			}
-		})
-	}
+		}
+	})
 }
 
 func TestE437(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name       string
 		s          string
@@ -309,8 +327,9 @@ func TestE437(t *testing.T) {
 		{"hex", "α alpha ß beta", []byte("\xe0 alpha \xe1 beta"), false},
 		{"octal", "½ half ¼ quarter", []byte("\253 half \254 quarter"), false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			gotResult, err := byter.Encode(charmap.CodePage437, tt.s)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("E437() error = %v, wantErr %v", err, tt.wantErr)
@@ -319,6 +338,6 @@ func TestE437(t *testing.T) {
 			if !reflect.DeepEqual(gotResult, tt.wantResult) {
 				t.Errorf("E437() = %v, want %v", gotResult, tt.wantResult)
 			}
-		})
-	}
+		}
+	})
 }
