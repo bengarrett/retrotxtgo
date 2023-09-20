@@ -85,8 +85,8 @@ func SwapChars(p *[]string, cc *cobra.Command) {
   `)
 }
 
-// FlagOG handles the hidden original flag.
-func FlagOG(p *bool, cc *cobra.Command) error {
+// OG handles the original flag that can be used for multiple commands.
+func OG(p *bool, cc *cobra.Command) error {
 	const name = "original"
 	cc.Flags().BoolVar(p, name, false,
 		"use the original document character encoding to print to terminal"+

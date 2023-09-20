@@ -57,7 +57,7 @@ func ViewInit() *cobra.Command {
 	flag.Encode(&f.Input, vc)
 	flag.Controls(&f.Controls, vc)
 	flag.SwapChars(&f.Swap, vc)
-	if err := flag.FlagOG(&f.Original, vc); err != nil {
+	if err := flag.OG(&f.Original, vc); err != nil {
 		log.Fatal(err)
 	}
 	flag.Width(&f.Width, vc)

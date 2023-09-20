@@ -31,32 +31,7 @@ func Args(cmd *cobra.Command, args ...string) (
 		MaxWidth:  View().Width,
 	}
 	l := len(args)
-	// set flag arguments to convert flag
-	if c := cmd.Flags().Lookup("controls"); c != nil && c.Changed {
-		const sep = ","
-		val := c.Value.String()
-		if len(val) > 2 {
-			val = val[1 : len(val)-1]
-		}
-		ctrls := strings.Split(val, sep)
-		conv.Args.Controls = ctrls
-	}
-	if s := cmd.Flags().Lookup("swap-chars"); s != nil && s.Changed {
-		const sep = ","
-		val := s.Value.String()
-		if len(val) > 2 {
-			val = val[1 : len(val)-1]
-		}
-		swaps := strings.Split(val, sep)
-		conv.Args.SwapChars = swaps
-	}
-	if w := cmd.Flags().Lookup("width"); w != nil && w.Changed {
-		i, err := strconv.Atoi(w.Value.String())
-		if err != nil {
-			logs.Fatal(err)
-		}
-		conv.Args.MaxWidth = i
-	}
+	conv.Args = setFlags(cmd, conv.Args)
 	ok, err := fsys.IsPipe()
 	if err != nil {
 		logs.Fatal(err)
@@ -82,6 +57,36 @@ func Args(cmd *cobra.Command, args ...string) (
 		conv.Input.Encoding = Default()
 	}
 	return args, &conv, samp, nil
+}
+
+// setFlags applies the flag arguments to a convert flag struct.
+func setFlags(cmd *cobra.Command, flag convert.Flag) convert.Flag {
+	if c := cmd.Flags().Lookup("controls"); c != nil && c.Changed {
+		const sep, minChrs = ",", 2
+		val := c.Value.String()
+		if len(val) > minChrs {
+			val = val[1 : len(val)-1]
+		}
+		ctrls := strings.Split(val, sep)
+		flag.Controls = ctrls
+	}
+	if s := cmd.Flags().Lookup("swap-chars"); s != nil && s.Changed {
+		const sep, minChrs = ",", 2
+		val := s.Value.String()
+		if len(val) > minChrs {
+			val = val[1 : len(val)-1]
+		}
+		swaps := strings.Split(val, sep)
+		flag.SwapChars = swaps
+	}
+	if w := cmd.Flags().Lookup("width"); w != nil && w.Changed {
+		i, err := strconv.Atoi(w.Value.String())
+		if err != nil {
+			logs.Fatal(err)
+		}
+		flag.MaxWidth = i
+	}
+	return flag
 }
 
 // Default returns a default encoding when the "input" flag is unused.

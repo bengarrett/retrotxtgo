@@ -18,8 +18,6 @@ import (
 	"golang.org/x/term"
 )
 
-// TODO: CPU ID? https://github.com/klauspost/cpuid
-
 const (
 	TabWidth = 8 // Width of tab characters.
 )

@@ -150,8 +150,6 @@ func (flag Flags) Open(conv *convert.Convert, name string) ([]rune, error) {
 	if err != nil {
 		return nil, fmt.Errorf("open sample %q: %w", samp.Name, err)
 	}
-	// TODO: b is encoded!
-	//
 	if conv == nil {
 		return nil, ErrConvNil
 	}
