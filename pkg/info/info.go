@@ -142,44 +142,49 @@ func Stream(w io.Writer, format string, b ...byte) error {
 	if err := d.Parse("", b...); err != nil {
 		return err
 	}
-	if ValidText(d.Mime.Type) { //nolint:nestif
-		d.LineBreak.Find(fsys.LineBreaks(true, []rune(string(b))...))
-		g := errgroup.Group{}
-		g.Go(func() error {
-			var err error
-			if d.Count.Controls, err = fsys.Controls(bytes.NewReader(b)); err != nil {
-				return err
-			}
-			return nil
-		})
-		g.Go(func() error {
-			var err error
-			if d.Lines, err = nl.Lines(bytes.NewReader(b), d.LineBreak.Decimal); err != nil {
-				return err
-			}
-			return nil
-		})
-		g.Go(func() error {
-			var err error
-			if d.Width, err = fsys.Columns(bytes.NewReader(b), d.LineBreak.Decimal); err != nil {
-				return err
-			} else if d.Width < 0 {
-				d.Width = d.Count.Chars
-			}
-			return nil
-		})
-		g.Go(func() error {
-			var err error
-			if d.Count.Words, err = fsys.Words(bytes.NewReader(b)); err != nil {
-				return err
-			}
-			return nil
-		})
-		if err := g.Wait(); err != nil {
+	if !ValidText(d.Mime.Type) {
+		return marshall(d, w, f)
+	}
+	d.LineBreak.Find(fsys.LineBreaks(true, []rune(string(b))...))
+	g := errgroup.Group{}
+	g.Go(func() error {
+		var err error
+		if d.Count.Controls, err = fsys.Controls(bytes.NewReader(b)); err != nil {
 			return err
 		}
-		d.MimeUnknown()
+		return nil
+	})
+	g.Go(func() error {
+		var err error
+		if d.Lines, err = nl.Lines(bytes.NewReader(b), d.LineBreak.Decimal); err != nil {
+			return err
+		}
+		return nil
+	})
+	g.Go(func() error {
+		var err error
+		if d.Width, err = fsys.Columns(bytes.NewReader(b), d.LineBreak.Decimal); err != nil {
+			return err
+		} else if d.Width < 0 {
+			d.Width = d.Count.Chars
+		}
+		return nil
+	})
+	g.Go(func() error {
+		var err error
+		if d.Count.Words, err = fsys.Words(bytes.NewReader(b)); err != nil {
+			return err
+		}
+		return nil
+	})
+	if err := g.Wait(); err != nil {
+		return err
 	}
+	d.MimeUnknown()
+	return marshall(d, w, f)
+}
+
+func marshall(d Detail, w io.Writer, f Format) error {
 	if err := d.Marshal(w, f); err != nil {
 		return err
 	}

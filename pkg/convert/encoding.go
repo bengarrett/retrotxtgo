@@ -164,7 +164,7 @@ const (
 )
 
 // Encoder returns the named character set encoder.
-func Encoder(name string) (encoding.Encoding, error) { //nolint:ireturn
+func Encoder(name string) (encoding.Encoding, error) {
 	// use charmap string
 	for _, c := range charmap.All {
 		if fmt.Sprint(c) == name {
@@ -208,7 +208,7 @@ func Encoder(name string) (encoding.Encoding, error) { //nolint:ireturn
 }
 
 // EncodeUTF32 initializes common UTF-32 encodings.
-func EncodeUTF32(name string) encoding.Encoding { //nolint:ireturn
+func EncodeUTF32(name string) encoding.Encoding {
 	// UTF-32... doesn't return a match in ianaindex.IANA
 	switch strings.ToUpper(name) {
 	case u32:
@@ -230,7 +230,7 @@ func Humanize(name string) string {
 }
 
 // Shorten the name to a custom name, a common name or an alias.
-func Shorten(name string) string { //nolint:cyclop
+func Shorten(name string) string {
 	n, l := strings.ToLower(name), len(name)
 	switch {
 	case l > 3 && n[:3] == "cp-":
@@ -682,7 +682,7 @@ func (c *Convert) RunesEBCDIC() {
 
 // Control switches out an EBCDIC IBM mainframe controls with Unicode picture representations.
 // It also reports whether int character index should be skipped.
-func (c *Convert) control(i int, r rune) bool { //nolint:funlen,cyclop
+func (c *Convert) control(i int, r rune) bool {
 	if i > len(c.Output) {
 		return false
 	}

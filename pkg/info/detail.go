@@ -3,7 +3,6 @@ package info
 import (
 	"archive/zip"
 	"bytes"
-	//nolint:gosec
 	"crypto/md5"
 	"crypto/sha256"
 	"encoding/json"
@@ -223,7 +222,7 @@ func (d *Detail) Parse(name string, data ...byte) error {
 	}()
 	go func() {
 		defer wg.Done()
-		md5sum := md5.Sum(data) //nolint:gosec
+		md5sum := md5.Sum(data)
 		d.Sums.MD5 = fmt.Sprintf("%x", md5sum)
 	}()
 	go func() {

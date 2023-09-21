@@ -46,18 +46,27 @@ issues:
     - path: main.go
       linters:
         - gochecknoglobals
-    - path: pkg/info/detail.go
-      linters:
-        - lll
     - path: cmd/internal/flag/flag.go
       linters:
         - ireturn
-    - path: pkg/logs/logs_test.go
-      linters:
-        - goerr113
     - path: meta/meta.go
       linters:
         - gochecknoglobals
+    - path: pkg/convert/encoding.go
+      linters:
+        - cyclop
+        - funlen
+        - ireturn
+    - path: pkg/info/detail.go
+      linters:
+        - gosec
+        - lll
+    - path: pkg/internal/mock/mock.go
+      linters:
+        - gosec
+    - path: pkg/logs/logs_test.go
+      linters:
+        - goerr113
     - path: pkg/table/table.go
       linters:
         - ireturn

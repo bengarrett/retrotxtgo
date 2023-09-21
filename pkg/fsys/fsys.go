@@ -68,8 +68,8 @@ func Tar(name string, files ...string) error {
 }
 
 // InsertTar inserts the named file to the TAR writer.
-func InsertTar(w *tar.Writer, name string) error {
-	if w == nil {
+func InsertTar(t *tar.Writer, name string) error {
+	if t == nil {
 		return ErrWriter
 	}
 	f, err := os.Open(name)
@@ -87,12 +87,11 @@ func InsertTar(w *tar.Writer, name string) error {
 		Mode:    int64(s.Mode()),
 		ModTime: s.ModTime(),
 	}
-	if err1 := w.WriteHeader(h); err1 != nil {
-		return err1
+	if err := t.WriteHeader(h); err != nil {
+		return err
 	}
-	_, err = io.Copy(w, f)
-	if err != nil {
-		return nil //nolint:nilerr
+	if _, err = io.Copy(t, f); err != nil {
+		return err
 	}
 	return f.Close()
 }
