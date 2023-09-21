@@ -51,10 +51,6 @@ func TestRead(t *testing.T) {
 	t.Parallel()
 	f := mock.FileExample("hello")
 	large := mock.LargeExample()
-	t.Cleanup(func() {
-		os.Remove(f)
-		os.Remove(large)
-	})
 	type args struct {
 		name string
 	}
@@ -71,10 +67,14 @@ func TestRead(t *testing.T) {
 	}
 	t.Run("", func(t *testing.T) {
 		t.Parallel()
+		t.Cleanup(func() {
+			os.Remove(f)
+			os.Remove(large)
+		})
 		for _, tt := range tests {
 			_, err := fsys.Read(tt.args.name)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Read() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Read(%q) error = %v, wantErr %v", tt.args.name, err, tt.wantErr)
 			}
 		}
 	})
@@ -117,11 +117,11 @@ func TestReadAllBytes(t *testing.T) {
 		for _, tt := range tests {
 			gotData, err := fsys.ReadAllBytes(tt.args.name)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ReadAllBytes() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ReadAllBytes(%q) error = %v, wantErr %v", tt.args.name, err, tt.wantErr)
 				return
 			}
 			if tt.wantData != nil && !reflect.DeepEqual(gotData, tt.wantData) {
-				t.Errorf("ReadAllBytes() = %q, want %q", string(gotData), string(tt.wantData))
+				t.Errorf("ReadAllBytes(%q) = %q, want %q", tt.args.name, string(gotData), string(tt.wantData))
 			}
 		}
 	})
@@ -168,14 +168,14 @@ func TestReadChunk(t *testing.T) {
 		for _, tt := range tests {
 			gotData, err := fsys.ReadChunk(tt.args.name, tt.args.size)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ReadChunk() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ReadChunk(%q) error = %v, wantErr %v", tt.args.name, err, tt.wantErr)
 				return
 			}
 			if tt.name == large && len(gotData) != 100 {
-				t.Errorf("ReadChunk() length = %v, want %v", len(gotData), 100)
+				t.Errorf("ReadChunk(%q) length = %v, want %v", tt.args.name, len(gotData), 100)
 			}
 			if tt.name != large && !reflect.DeepEqual(gotData, tt.wantData) {
-				t.Errorf("ReadChunk(%q) = %v, want %v", tt.name, gotData, tt.wantData)
+				t.Errorf("ReadChunk(%q) = %v, want %v", tt.args.name, gotData, tt.wantData)
 			}
 		}
 	})

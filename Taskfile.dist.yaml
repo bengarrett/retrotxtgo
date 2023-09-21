@@ -58,11 +58,11 @@ tasks:
   test:
     desc: "Run the test suite."
     cmds:
-      - go test ./...
+      - go test -count=1 ./...
   testr:
     desc: "Run the verbose test suite with the slower race detection."
     cmds:
-      - go test -race ./...
+      - go test -count=1 -race ./...
   pkg-patch:
     silent: false
     desc: Update and apply patches to the web server dependencies.

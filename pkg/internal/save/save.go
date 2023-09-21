@@ -42,7 +42,7 @@ func Save(name string, b ...byte) (int, string, error) {
 	if err != nil {
 		return 0, path, fmt.Errorf("save could not find the absolute filename: %w", err)
 	}
-	return written, path, file.Close()
+	return written, path, nil
 }
 
 // dir creates the named path directory if it doesn't exist.

@@ -12,6 +12,10 @@ import (
 
 var ErrTest = errors.New("something went wrong")
 
+func init() {
+	color.Enable = false
+}
+
 func ExampleHint() {
 	err := errors.New("oops")
 	fmt.Print(logs.Hint(err, "helpme"))
@@ -51,7 +55,6 @@ func ExampleSprintS() {
 
 func TestHint_String(t *testing.T) {
 	t.Parallel()
-	color.Enable = false
 	err := logs.Hint(ErrTest, "hint")
 	assert.Contains(t, err, "Problem:")
 	assert.Contains(t, err, "something went wrong")
@@ -61,7 +64,6 @@ func TestHint_String(t *testing.T) {
 
 func TestSprint(t *testing.T) {
 	t.Parallel()
-	color.Enable = false
 	err := logs.Sprint(ErrTest)
 	assert.Contains(t, err, "Problem:")
 	assert.Contains(t, err, "something went wrong")
@@ -71,17 +73,15 @@ func TestSprint(t *testing.T) {
 
 func TestSprintCmd(t *testing.T) {
 	t.Parallel()
-	color.Enable = false
-	err := logs.SprintCmd(ErrTest, "hint")
-	assert.Contains(t, err, "Problem:")
-	assert.Contains(t, err, "something went wrong")
-	err = logs.SprintCmd(nil, "hint")
-	assert.Empty(t, err)
+	err1 := logs.SprintCmd(ErrTest, "hint")
+	assert.Contains(t, err1, "Problem:")
+	assert.Contains(t, err1, "something went wrong")
+	err2 := logs.SprintCmd(nil, "hint")
+	assert.Empty(t, err2)
 }
 
 func TestSprintFlag(t *testing.T) {
 	t.Parallel()
-	color.Enable = false
 	err := logs.SprintFlag(ErrTest, "hint", "dosomething")
 	assert.Contains(t, err, "Problem:")
 	assert.Contains(t, err, "with the hint --dosomething flag, something went wrong")
@@ -91,7 +91,6 @@ func TestSprintFlag(t *testing.T) {
 
 func TestSprintS(t *testing.T) {
 	t.Parallel()
-	color.Enable = false
 	err := logs.SprintS(ErrTest, ErrTest, "hint")
 	assert.Contains(t, err, "Problem:")
 	assert.Contains(t, err, "something went wrong")

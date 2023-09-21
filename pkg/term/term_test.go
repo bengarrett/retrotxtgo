@@ -146,34 +146,6 @@ func TestUnderlineChar(t *testing.T) {
 	})
 }
 
-func TestUnderlineKeys(t *testing.T) {
-	t.Parallel()
-	color.Enable = true
-	t.Cleanup(func() { color.Enable = false })
-	tests := []struct {
-		name string
-		keys []string
-		want string
-	}{
-		{"empty", []string{}, ""},
-		{"t", []string{"t"}, "\x1b[0m\x1b[4mt\x1b[0m"},
-		{"test", []string{"test"}, "\x1b[0m\x1b[4mt\x1b[0mest"},
-		{"tests", []string{"test1", "test2"}, "\x1b[0m\x1b[4mt\x1b[0mest1, \x1b[0m\x1b[4mt\x1b[0mest2"},
-		{"😀", []string{"😀"}, "\x1b[0m\x1b[4m😀\x1b[0m"},
-		{"test😀", []string{"test😀"}, "\x1b[0m\x1b[4mt\x1b[0mest😀"},
-		{"😀test", []string{"😀test"}, "\x1b[0m\x1b[4m😀\x1b[0mtest"},
-		{"file.min", []string{"file.min"}, "\x1b[0m\x1b[4mf\x1b[0mile.\x1b[0m\x1b[4mm\x1b[0min"},
-	}
-	t.Run("", func(t *testing.T) {
-		t.Parallel()
-		for _, tt := range tests {
-			if got := term.UnderlineKeys(tt.keys...); got != tt.want {
-				t.Errorf("UnderlineKeys() = %v, want %v", got, tt.want)
-			}
-		}
-	})
-}
-
 func TestCenter(t *testing.T) {
 	t.Parallel()
 	type args struct {

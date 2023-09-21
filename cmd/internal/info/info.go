@@ -88,11 +88,9 @@ func Sample(name string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf(" sample file %q: %w", samp.Name, ErrTmpOpen)
 	}
+	defer file.Close()
 	if _, err = file.Write(b); err != nil {
 		return "", fmt.Errorf(" sample file %q: %w", samp.Name, ErrTmpSave)
-	}
-	if err := file.Close(); err != nil {
-		return "", fmt.Errorf(" sample file %q: %w", samp.Name, ErrTmpClose)
 	}
 	return file.Name(), nil
 }

@@ -148,10 +148,10 @@ func (c *Convert) Transform() error {
 	c.FixJISTable()
 	b := &bytes.Buffer{}
 	t := transform.NewWriter(b, c.Input.Encoding.NewDecoder())
+	defer t.Close()
 	if _, err := t.Write(c.Input.Input); err != nil {
 		return err
 	}
-	defer t.Close()
 	c.Output = bytes.Runes(b.Bytes())
 	return nil
 }

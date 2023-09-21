@@ -23,12 +23,12 @@ func Input(input string) (*os.File, error) {
 	s := []byte(input)
 	r, w, err := os.Pipe()
 	if err != nil {
-		return r, err
+		return nil, err
 	}
+	defer w.Close()
 	if _, err = w.Write(s); err != nil {
-		return r, err
+		return nil, err
 	}
-	w.Close()
 	return r, nil
 }
 
@@ -48,7 +48,8 @@ func T() map[string]string {
 	}
 }
 
-// FileExample saves the string to a random numbered text file.
+// FileExample saves the string to a randomized, threadsafe filename.
+// The path to the file is returned.
 func FileExample(s string) string {
 	v, err := rand.Int(rand.Reader, big.NewInt(int64(math.Pow(2, 1000))))
 	if err != nil {
@@ -63,9 +64,15 @@ func FileExample(s string) string {
 	return path
 }
 
-// LargeExample generates and saves a 800k file of random us-ascii text.
+// LargeExample generates and saves a 800k file of filler us-ascii text
+// to a randomized, threadsafe filename. The path to the file is returned.
 func LargeExample() string {
-	const name, sizeMB = "rs_mega_example_save.txt", 0.8
+	v, err := rand.Int(rand.Reader, big.NewInt(int64(math.Pow(2, 1000))))
+	if err != nil {
+		log.Fatal(err)
+	}
+	const sizeMB = 0.8
+	name := fmt.Sprintf("rs_mega_example_save%s.txt", v)
 	s := Filler(sizeMB)
 	path, err := SaveTemp(name, []byte(s)...)
 	if err != nil {
@@ -74,11 +81,34 @@ func LargeExample() string {
 	return path
 }
 
-// MegaExample generates and saves a 1.5MB file of random us-ascii text.
+// MegaExample generates and saves a 1.5MB file of filler us-ascii text
+// to a randomized, threadsafe filename. The path to the file is returned.
 func MegaExample() string {
-	const name, sizeMB = "rs_giga_mega_save.txt", 1.5
+	v, err := rand.Int(rand.Reader, big.NewInt(int64(math.Pow(2, 1000))))
+	if err != nil {
+		log.Fatal(err)
+	}
+	const sizeMB = 1.5
+	name := fmt.Sprintf("rs_giga_mega_save%s.txt", v)
 	s := Filler(sizeMB)
 	path, err := SaveTemp(name, []byte(s)...)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return path
+}
+
+// ByteExample saves a string of multibyte Unicode characters, tabs and
+// newlines to a randomized, threadsafe filename. The path to the file is
+// returned.
+func ByteExample() string {
+	v, err := rand.Int(rand.Reader, big.NewInt(int64(math.Pow(2, 1000))))
+	if err != nil {
+		log.Fatal(err)
+	}
+	name := fmt.Sprintf("rs_byte_chars_save%s.txt", v)
+	b := []byte(T()["Tabs"]) // Tabs and Unicode glyphs
+	path, err := SaveTemp(name, b...)
 	if err != nil {
 		log.Fatal(err)
 	}

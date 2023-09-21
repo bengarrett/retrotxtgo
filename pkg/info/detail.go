@@ -126,7 +126,7 @@ func (d *Detail) Ctrls(name string) error {
 		return err
 	}
 	d.Count.Controls = cnt
-	return f.Close()
+	return nil
 }
 
 // Marshal writes the Detail data in a given format syntax.
@@ -493,7 +493,7 @@ func (d *Detail) Len(name string) error {
 		w = d.Count.Chars
 	}
 	d.Width = w
-	return f.Close()
+	return nil
 }
 
 // Words counts the number of words used in the named file.
@@ -513,5 +513,5 @@ func (d *Detail) Words(name string) error {
 			return err
 		}
 	}
-	return f.Close()
+	return nil
 }

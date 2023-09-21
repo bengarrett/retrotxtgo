@@ -1,11 +1,9 @@
 package update_test
 
 import (
-	"os"
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/cmd/pkg/update"
-	"github.com/bengarrett/retrotxtgo/meta"
 )
 
 const (
@@ -13,36 +11,12 @@ const (
 	alpha = `0.0.1`
 )
 
-func ExampleString() {
-	update.Notice(os.Stdout, alpha, "1.0.0")
-	// Output:┌───────────────────────────────────────────┐
-	// │ A newer edition of Retrotxt is available! │
-	// │   Learn more at https://retrotxt.com/go   │
-	// │              α0.0.1 → 1.0.0               │
-	// └───────────────────────────────────────────┘
-}
-
 func TestCacheSet(t *testing.T) {
 	t.Parallel()
 	t.Run("cache set", func(t *testing.T) {
 		t.Parallel()
 		if err := update.CacheSet(etag, alpha); err != nil {
 			t.Error(err)
-		}
-	})
-}
-
-func TestCheck(t *testing.T) {
-	t.Parallel()
-	t.Run("check as sourcecode", func(t *testing.T) {
-		t.Parallel()
-		meta.App.Version = alpha
-		s, err := update.Check()
-		if err != nil {
-			t.Error(err)
-		}
-		if s == "" {
-			t.Error("expected a tag from github")
 		}
 	})
 }

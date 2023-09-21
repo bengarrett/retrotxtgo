@@ -8,7 +8,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/info"
 	"github.com/bengarrett/retrotxtgo/pkg/internal/mock"
 	"github.com/bengarrett/retrotxtgo/static"
@@ -54,21 +53,9 @@ func rawData() []byte {
 	return b
 }
 
-func sampleFileB() string {
-	b := []byte(mock.T()["Tabs"]) // Tabs and Unicode glyphs
-	path, err := fsys.SaveTemp("info_test.txt", b...)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return path
-}
-
 func TestMarshal(t *testing.T) {
 	t.Parallel()
-	tmp := sampleFileB()
-	t.Cleanup(func() {
-		os.Remove(tmp)
-	})
+	tmp := mock.ByteExample()
 	type args struct {
 		filename string
 		format   info.Format
@@ -88,6 +75,9 @@ func TestMarshal(t *testing.T) {
 	}
 	t.Run("", func(t *testing.T) {
 		t.Parallel()
+		t.Cleanup(func() {
+			os.Remove(tmp)
+		})
 		for _, tt := range tests {
 			if err := info.Marshal(nil, tt.args.filename, tt.args.format); (err != nil) != tt.wantErr {
 				t.Errorf("Marshal(%q) error = %v, wantErr %v", tt.name, err, tt.wantErr)

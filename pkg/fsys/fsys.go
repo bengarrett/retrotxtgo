@@ -85,7 +85,7 @@ func InsertTar(t *tar.Writer, name string) error {
 	if _, err = io.Copy(t, f); err != nil {
 		return err
 	}
-	return f.Close()
+	return nil
 }
 
 // Touch creates an empty file at the named location.
