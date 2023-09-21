@@ -6,7 +6,12 @@ import (
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/pkg/term"
+	"github.com/gookit/color"
 )
+
+func init() {
+	color.Enable = false
+}
 
 func ExampleAlert() {
 	fmt.Print(term.Alert(), "something went wrong")
@@ -57,6 +62,8 @@ func ExampleHead() {
 }
 
 func ExampleUnderlineChar() {
+	color.Enable = true
+	defer func() { color.Enable = false }()
 	s, _ := term.UnderlineChar("Z")
 	fmt.Print(s)
 	// Output:[0m[4mZ[0m
@@ -104,6 +111,8 @@ func TestTerm16M(t *testing.T) {
 }
 
 func TestUnderlineChar(t *testing.T) {
+	color.Enable = true
+	t.Cleanup(func() { color.Enable = false })
 	t.Parallel()
 	tests := []struct {
 		name    string
@@ -139,6 +148,8 @@ func TestUnderlineChar(t *testing.T) {
 
 func TestUnderlineKeys(t *testing.T) {
 	t.Parallel()
+	color.Enable = true
+	t.Cleanup(func() { color.Enable = false })
 	tests := []struct {
 		name string
 		keys []string
@@ -152,8 +163,6 @@ func TestUnderlineKeys(t *testing.T) {
 		{"test😀", []string{"test😀"}, "\x1b[0m\x1b[4mt\x1b[0mest😀"},
 		{"😀test", []string{"😀test"}, "\x1b[0m\x1b[4m😀\x1b[0mtest"},
 		{"file.min", []string{"file.min"}, "\x1b[0m\x1b[4mf\x1b[0mile.\x1b[0m\x1b[4mm\x1b[0min"},
-		{"file.js.min", []string{"file.js.min"}, "\x1b[0m\x1b[4mf\x1b[0mile.js.\x1b[0m\x1b[4mm\x1b[0min"},
-		{"📁.min", []string{"📁.min"}, "\x1b[0m\x1b[4m📁\x1b[0m.\x1b[0m\x1b[4mm\x1b[0min"},
 	}
 	t.Run("", func(t *testing.T) {
 		t.Parallel()

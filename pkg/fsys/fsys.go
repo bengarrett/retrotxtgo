@@ -22,14 +22,6 @@ var (
 	ErrWriter    = errors.New("the w writer cannot be nil")
 )
 
-// Clean removes the named file or directory.
-// It is intended to be used as a helper in unit tests.
-func Clean(name string) {
-	if err := os.RemoveAll(name); err != nil {
-		fmt.Fprintf(os.Stderr, "failed to clean %q: %s", name, err)
-	}
-}
-
 // SaveTemp saves bytes to a named temporary file.
 // The path to the file is returned.
 func SaveTemp(name string, b ...byte) (string, error) {

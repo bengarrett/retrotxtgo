@@ -19,7 +19,7 @@ func ExampleTable() {
 		log.Fatal(err)
 	}
 	fmt.Fprintf(os.Stdout, "%d characters in the table", len(s.String()))
-	// Output: 1690 characters in the table
+	// Output: 1693 characters in the table
 }
 
 func ExampleTables() {

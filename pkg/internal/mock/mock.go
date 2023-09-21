@@ -1,15 +1,21 @@
 package mock
 
 import (
+	"crypto/rand"
 	"fmt"
 	"log"
 	"math"
-	"math/rand"
+	"math/big"
+	mr "math/rand"
 	"os"
 	"path/filepath"
 
 	"github.com/bengarrett/retrotxtgo/pkg/internal/save"
 	"github.com/bengarrett/retrotxtgo/pkg/internal/tmp"
+)
+
+var (
+	Err0B = fmt.Errorf("zero bytes written")
 )
 
 // Input returns a file pointer to a temporary file containing the input string.
@@ -42,9 +48,14 @@ func T() map[string]string {
 	}
 }
 
-// FileExample saves the string to a numbered text file.
-func FileExample(s string, i int) string {
-	name := fmt.Sprintf("rt_fs_save%d.txt", i)
+// FileExample saves the string to a random numbered text file.
+func FileExample(s string) string {
+	v, err := rand.Int(rand.Reader, big.NewInt(int64(math.Pow(2, 1000))))
+	if err != nil {
+		log.Fatal(err)
+	}
+	name := fmt.Sprintf("rt_fs_save%s.txt", v)
+	fmt.Println(name)
 	path, err := SaveTemp(name, []byte(s)...)
 	if err != nil {
 		log.Fatal(err)
@@ -97,7 +108,7 @@ func Filler(sizeMB float64) string {
 	s := make([]rune, int(f))
 	// generate random string
 	for i := range s {
-		s[i] = chars[rand.Intn(charsLen)]
+		s[i] = chars[mr.Intn(charsLen)]
 	}
 	return string(s)
 }
@@ -137,9 +148,12 @@ func NixTests(h, hp, s, w, wp string) DirTests {
 
 // SaveTemp saves bytes to a named temporary file.
 func SaveTemp(name string, b ...byte) (string, error) {
-	_, path, err := save.Save(tmp.File(name), b...)
+	i, path, err := save.Save(tmp.File(name), b...)
 	if err != nil {
 		return path, fmt.Errorf("could not save the temporary file: %w", err)
+	}
+	if i == 0 && len(b) > 0 {
+		return path, fmt.Errorf("%w: %s", Err0B, path)
 	}
 	return path, nil
 }

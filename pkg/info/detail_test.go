@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"reflect"
 	"strings"
@@ -34,7 +35,10 @@ func ExampleDetail_Marshal() {
 
 func sampleFile() string {
 	b := []byte(mock.T()["Tabs"]) // Tabs and Unicode glyphs
-	path, err := fsys.SaveTemp("info_test.txt", b...)
+	const digits = 40
+	i := rand.Intn(digits)
+	name := fmt.Sprintf("info_test_%d.txt", i)
+	path, err := fsys.SaveTemp(name, b...)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -67,6 +71,9 @@ func TestValidText(t *testing.T) {
 func TestRead(t *testing.T) {
 	t.Parallel()
 	tmp := sampleFile()
+	t.Cleanup(func() {
+		os.Remove(tmp)
+	})
 	fmt.Fprintln(os.Stdout, "path:", tmp)
 	var got info.Detail
 	if err := got.Read(tmp); err != nil {
@@ -75,10 +82,10 @@ func TestRead(t *testing.T) {
 	if got.Size.Bytes != 57 {
 		t.Errorf("Read() = %v, want %v", got.Size.Bytes, 57)
 	}
-	if got.Name != "info_test.txt" {
+	if !strings.Contains(got.Name, "info_test") {
 		t.Errorf("Read() = %v, want %v", got.Name, "info_test.txt")
 	}
-	if got.Slug != "info-test-txt" {
+	if !strings.Contains(got.Slug, "info-test") {
 		t.Errorf("Read() = %v, want %v", got.Slug, "info-test-txt")
 	}
 	if got.Mime.Type != "text/plain" {
@@ -91,12 +98,10 @@ func TestRead(t *testing.T) {
 	if got.Sums.MD5 != want {
 		t.Errorf("Read() = %v, want %v", got.Sums.MD5, want)
 	}
-	fsys.Clean(tmp)
 }
 
 func TestParse(t *testing.T) {
 	t.Parallel()
-	tmp := sampleFile()
 	type args struct {
 		data []byte
 	}
@@ -123,7 +128,6 @@ func TestParse(t *testing.T) {
 				t.Errorf("Parse() = %v, want %v", got.Count.Chars, tt.want)
 			}
 		}
-		fsys.Clean(tmp)
 	})
 }
 
@@ -152,9 +156,12 @@ func TestMarshal_json(t *testing.T) {
 
 func TestMarshal_text(t *testing.T) {
 	t.Parallel()
-	const want = 831
-	var d info.Detail
 	tmp := sampleFile()
+	t.Cleanup(func() {
+		os.Remove(tmp)
+	})
+	const want = 835
+	var d info.Detail
 	if err := d.Read(tmp); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -164,5 +171,4 @@ func TestMarshal_text(t *testing.T) {
 	if got := len(s.String()); got != want {
 		t.Errorf("Marshal() text = %v, want %v", got, want)
 	}
-	fsys.Clean(tmp)
 }

@@ -456,6 +456,9 @@ func (c *Convert) Swap() (*Convert, error) {
 		charmap.ISO8859_13, charmap.ISO8859_14, charmap.ISO8859_15, charmap.ISO8859_16,
 		charmap.Windows874:
 		c.RunesLatin()
+	case xud.XUserDefinedISO11:
+		c.RunesLatin()
+		c.RunesXRows()
 	case charmap.ISO8859_6E, charmap.ISO8859_6I, charmap.ISO8859_8E, charmap.ISO8859_8I:
 		c.RunesControls()
 		c.RunesLatin()
@@ -833,6 +836,21 @@ func (c *Convert) RunesLatin() {
 		case r >= DEL && r <= row9f:
 			c.Output[i] = rune(SP)
 		case r == Replacement:
+			c.Output[i] = rune(SP)
+		}
+	}
+}
+
+// RunesXRows blanks out rows 8x and 9x with spaces.
+func (c *Convert) RunesXRows() {
+	if len(c.Output) == 0 {
+		return
+	}
+	for i := 0; i < len(c.Output); i++ {
+		switch {
+		case
+			i >= Row8 && i <= row8f,
+			i >= row9 && i <= row9f:
 			c.Output[i] = rune(SP)
 		}
 	}

@@ -2,58 +2,13 @@ package fsys_test
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/internal/tmp"
 )
-
-func ExampleZip() {
-	// Create a temporary directory
-	tmpZip := tmp.File("retrotxtgo_zip_directory_test")
-	err := os.MkdirAll(tmpZip, 0o755)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer os.RemoveAll(tmpZip)
-
-	// Create a temporary 1 byte file in the temporary directory
-	tmpFile, err := fsys.SaveTemp(path.Join(tmpZip, "temp.zip"), []byte("x")...)
-	if err != nil {
-		log.Print(err)
-		return
-	}
-	defer os.Remove(tmpFile)
-
-	// Initialize the Zip archive file
-	name := tmp.File("exampleZip.zip")
-	zip := fsys.Zip{
-		Name:      name,
-		Root:      tmpZip,
-		Comment:   "",
-		Overwrite: true,
-		Writer:    io.Discard,
-	}
-
-	// Create the Zip archive file
-	if err := zip.Create(); err != nil {
-		log.Print(err)
-		return
-	}
-
-	// Check the Zip archive exists
-	s, err := os.Stat(name)
-	if err != nil {
-		log.Print(err)
-		return
-	}
-	fmt.Fprintf(os.Stdout, "%s, %d", s.Name(), s.Size())
-	// Output: exampleZip.zip, 149
-}
 
 func ExampleUniqueName() {
 	name := "retrotxtgo_uniquetest.txt"

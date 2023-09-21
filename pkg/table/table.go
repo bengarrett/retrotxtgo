@@ -163,7 +163,7 @@ func CodePage(s string) (encoding.Encoding, error) {
 func swapper(name string) encoding.Encoding {
 	switch strings.ToLower(name) {
 	case xud.Name11, xud.Numr11, xud.Alias11:
-		return charmap.Windows874
+		return xud.XUserDefinedISO11
 	case xud.Name63, xud.Numr63:
 		return charmap.Windows1252
 	case xud.Name65, xud.Numr65:

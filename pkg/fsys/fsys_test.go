@@ -2,7 +2,6 @@ package fsys_test
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -12,16 +11,6 @@ import (
 	"github.com/bengarrett/retrotxtgo/pkg/internal/mock"
 	"github.com/bengarrett/retrotxtgo/pkg/internal/tmp"
 )
-
-func ExampleClean() {
-	path, err := fsys.SaveTemp("examplesave.txt", []byte("hello world")...)
-	if err != nil {
-		fsys.Clean(path)
-		log.Fatal(err)
-	}
-	fsys.Clean(path)
-	// Output:
-}
 
 func ExampleSaveTemp() {
 	file, _ := fsys.SaveTemp("example.txt", []byte("hello world")...)
@@ -58,28 +47,14 @@ func ExampleWrite() {
 	// Output:example.txt, 10
 }
 
-func BenchmarkReadLarge(_ *testing.B) {
-	large := mock.LargeExample()
-	if _, err := fsys.Read(large); err != nil {
-		fsys.Clean(large)
-		log.Fatal(err)
-	}
-	fsys.Clean(large)
-}
-
-func BenchmarkReadMega(_ *testing.B) {
-	mega := mock.MegaExample()
-	if _, err := fsys.Read(mega); err != nil {
-		fsys.Clean(mega)
-		log.Fatal(err)
-	}
-	fsys.Clean(mega)
-}
-
 func TestRead(t *testing.T) {
 	t.Parallel()
-	f := mock.FileExample("hello", 0)
+	f := mock.FileExample("hello")
 	large := mock.LargeExample()
+	t.Cleanup(func() {
+		os.Remove(f)
+		os.Remove(large)
+	})
 	type args struct {
 		name string
 	}
@@ -102,18 +77,23 @@ func TestRead(t *testing.T) {
 				t.Errorf("Read() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		}
-		fsys.Clean(f)
-		fsys.Clean(large)
 	})
 }
 
 func TestReadAllBytes(t *testing.T) {
 	t.Parallel()
-	f2 := mock.FileExample(mock.T()["Symbols"], 2)
-	f3 := mock.FileExample(mock.T()["Tabs"], 3)
-	f4 := mock.FileExample(mock.T()["Escapes"], 4)
-	f5 := mock.FileExample(mock.T()["Digits"], 5)
+	f2 := mock.FileExample(mock.T()["Symbols"])
+	f3 := mock.FileExample(mock.T()["Tabs"])
+	f4 := mock.FileExample(mock.T()["Escapes"])
+	f5 := mock.FileExample(mock.T()["Digits"])
 	large := mock.LargeExample()
+	t.Cleanup(func() {
+		os.Remove(f2)
+		os.Remove(f3)
+		os.Remove(f4)
+		os.Remove(f5)
+		os.Remove(large)
+	})
 	type args struct {
 		name string
 	}
@@ -144,20 +124,15 @@ func TestReadAllBytes(t *testing.T) {
 				t.Errorf("ReadAllBytes() = %q, want %q", string(gotData), string(tt.wantData))
 			}
 		}
-		fsys.Clean(f2)
-		fsys.Clean(f3)
-		fsys.Clean(f4)
-		fsys.Clean(f5)
-		fsys.Clean(large)
 	})
 }
 
 func TestReadChunk(t *testing.T) {
 	t.Parallel()
-	f1 := mock.FileExample(mock.T()["Newline"], 1)
-	f2 := mock.FileExample(mock.T()["Symbols"], 2)
-	f3 := mock.FileExample(mock.T()["Tabs"], 3)
-	f4 := mock.FileExample(mock.T()["Escapes"], 4)
+	f1 := mock.FileExample(mock.T()["Newline"])
+	f2 := mock.FileExample(mock.T()["Symbols"])
+	f3 := mock.FileExample(mock.T()["Tabs"])
+	f4 := mock.FileExample(mock.T()["Escapes"])
 	large := mock.LargeExample()
 	type args struct {
 		name string
@@ -183,6 +158,13 @@ func TestReadChunk(t *testing.T) {
 	}
 	t.Run("", func(t *testing.T) {
 		t.Parallel()
+		t.Cleanup(func() {
+			os.Remove(f1)
+			os.Remove(f2)
+			os.Remove(f3)
+			os.Remove(f4)
+			os.Remove(large)
+		})
 		for _, tt := range tests {
 			gotData, err := fsys.ReadChunk(tt.args.name, tt.args.size)
 			if (err != nil) != tt.wantErr {
@@ -193,24 +175,26 @@ func TestReadChunk(t *testing.T) {
 				t.Errorf("ReadChunk() length = %v, want %v", len(gotData), 100)
 			}
 			if tt.name != large && !reflect.DeepEqual(gotData, tt.wantData) {
-				t.Errorf("ReadChunk() = %v, want %v", gotData, tt.wantData)
+				t.Errorf("ReadChunk(%q) = %v, want %v", tt.name, gotData, tt.wantData)
 			}
 		}
-		fsys.Clean(f1)
-		fsys.Clean(f2)
-		fsys.Clean(f3)
-		fsys.Clean(f4)
-		fsys.Clean(large)
 	})
 }
 
 func TestReadTail(t *testing.T) {
 	t.Parallel()
-	f1 := mock.FileExample(mock.T()["Newline"], 1)
-	f2 := mock.FileExample(mock.T()["Symbols"], 2)
-	f3 := mock.FileExample(mock.T()["Tabs"], 3)
-	f4 := mock.FileExample(mock.T()["Escapes"], 4)
+	f1 := mock.FileExample(mock.T()["Newline"])
+	f2 := mock.FileExample(mock.T()["Symbols"])
+	f3 := mock.FileExample(mock.T()["Tabs"])
+	f4 := mock.FileExample(mock.T()["Escapes"])
 	large := mock.LargeExample()
+	t.Cleanup(func() {
+		os.Remove(f1)
+		os.Remove(f2)
+		os.Remove(f3)
+		os.Remove(f4)
+		os.Remove(large)
+	})
 	type args struct {
 		name   string
 		offset int
@@ -245,11 +229,6 @@ func TestReadTail(t *testing.T) {
 				t.Errorf("ReadTail() = %q, want %q", string(gotData), string(tt.wantData))
 			}
 		}
-		defer fsys.Clean(f1)
-		defer fsys.Clean(f2)
-		defer fsys.Clean(f3)
-		defer fsys.Clean(f4)
-		defer fsys.Clean(large)
 	})
 }
 
@@ -285,10 +264,13 @@ func Test_word(t *testing.T) {
 
 func TestTouch(t *testing.T) {
 	t.Parallel()
+	tmp0 := filepath.Join(os.TempDir(), "testtouch")
+	t.Cleanup(func() {
+		os.Remove(tmp0)
+	})
 	type args struct {
 		name string
 	}
-	tmpFile := filepath.Join(os.TempDir(), "testtouch")
 	tests := []struct {
 		name     string
 		args     args
@@ -296,7 +278,7 @@ func TestTouch(t *testing.T) {
 		wantErr  bool
 	}{
 		{"empty", args{}, "", true},
-		{"tmp", args{tmpFile}, tmpFile, false},
+		{"tmp", args{tmp0}, tmp0, false},
 	}
 	t.Run("", func(t *testing.T) {
 		t.Parallel()
@@ -311,5 +293,4 @@ func TestTouch(t *testing.T) {
 			}
 		}
 	})
-	fsys.Clean(tmpFile)
 }

@@ -111,10 +111,8 @@ func Test_InfoSamples(t *testing.T) {
 	})
 }
 
-func Test_InfoText(t *testing.T) {
-	t.Parallel()
+func Test_InfoText(t *testing.T) { //nolint:paralleltest
 	t.Run("info format text", func(t *testing.T) {
-		t.Parallel()
 		err := filepath.Walk(static,
 			func(path string, info os.FileInfo, err error) error {
 				if err != nil {

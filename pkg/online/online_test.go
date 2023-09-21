@@ -10,7 +10,7 @@ import (
 func ExampleEndpoint() {
 	etag := ""
 	cached, p, _ := online.Endpoint("https://api.github.com/repos/bengarrett/retrotxtgo/releases/121077170", etag)
-	fmt.Print(cached, p["name"])
+	fmt.Printf("%s %t", p["name"], cached)
 	// Output: v0.4.0 false
 }
 

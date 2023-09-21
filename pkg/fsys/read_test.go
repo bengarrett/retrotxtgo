@@ -13,14 +13,24 @@ import (
 
 func TestReadColumns(t *testing.T) {
 	t.Parallel()
-	tmp0 := mock.FileExample("hello world\n", 0)
-	tmp1 := mock.FileExample("hello\x0aworld\x0a", 1)
-	tmp2 := mock.FileExample("hello 😄😄😄\n", 2)
-	tmp3 := mock.FileExample("hello\nworld\n", 3)
-	tmp4 := mock.FileExample("hello\x0d\x0aworld\x0d\x0a", 4)
-	tmp5 := mock.FileExample("", 5)
-	tmp6 := mock.FileExample("\x0d\x0a", 6)
-	tmp7 := mock.FileExample("let's\x0duse\x0dan old-skool\x0d8-bit microcomputer\x0dnewline\x0d", 7)
+	tmp0 := mock.FileExample("hello world\n")
+	tmp1 := mock.FileExample("hello\x0aworld\x0a")
+	tmp2 := mock.FileExample("hello 😄😄😄\n")
+	tmp3 := mock.FileExample("hello\nworld\n")
+	tmp4 := mock.FileExample("hello\x0d\x0aworld\x0d\x0a")
+	tmp5 := mock.FileExample("")
+	tmp6 := mock.FileExample("\x0d\x0a")
+	tmp7 := mock.FileExample("let's\x0duse\x0dan old-skool\x0d8-bit microcomputer\x0dnewline\x0d")
+	t.Cleanup(func() {
+		os.Remove(tmp0)
+		os.Remove(tmp1)
+		os.Remove(tmp2)
+		os.Remove(tmp3)
+		os.Remove(tmp4)
+		os.Remove(tmp5)
+		os.Remove(tmp6)
+		os.Remove(tmp7)
+	})
 	tests := []struct {
 		name      string
 		wantCount int
@@ -40,7 +50,6 @@ func TestReadColumns(t *testing.T) {
 		t.Parallel()
 		for _, tt := range tests {
 			gotCount, err := fsys.ReadColumns(tt.name)
-			os.Remove(tt.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadColumns() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -54,11 +63,17 @@ func TestReadColumns(t *testing.T) {
 
 func TestReadControls(t *testing.T) {
 	t.Parallel()
-	tmp0 := mock.FileExample("\x1B\x5b0mhello world\n", 0)
-	tmp1 := mock.FileExample("\x1B\x5b1mhello world\x1B\x5b0m\n", 1)
-	tmp2 := mock.FileExample("hello \x1B\x5b1m😄😄😄\x1B\x5b0m\n", 2)
-	tmp3 := mock.FileExample("\x1B\x5b0m\x1B\x5b34mH\x1B\x5b1me\x1B\x5b32ml\x1B\x5b0;32ml\x1B\x5b1;36mo\x1B\x5b37m "+
-		"w\x1B\x5b0mo\x1B\x5b33mr\x1B\x5b1ml\x1B\x5b35md\x1B\x5b0;35m!\x1B\x5b37m\n", 3)
+	tmp0 := mock.FileExample("\x1B\x5b0mhello world\n")
+	tmp1 := mock.FileExample("\x1B\x5b1mhello world\x1B\x5b0m\n")
+	tmp2 := mock.FileExample("hello \x1B\x5b1m😄😄😄\x1B\x5b0m\n")
+	tmp3 := mock.FileExample("\x1B\x5b0m\x1B\x5b34mH\x1B\x5b1me\x1B\x5b32ml\x1B\x5b0;32ml\x1B\x5b1;36mo\x1B\x5b37m " +
+		"w\x1B\x5b0mo\x1B\x5b33mr\x1B\x5b1ml\x1B\x5b35md\x1B\x5b0;35m!\x1B\x5b37m\n")
+	t.Cleanup(func() {
+		os.Remove(tmp0)
+		os.Remove(tmp1)
+		os.Remove(tmp2)
+		os.Remove(tmp3)
+	})
 	tests := []struct {
 		name      string
 		wantCount int
@@ -94,7 +109,10 @@ func TestIsPipe(t *testing.T) {
 
 func TestReadLine(t *testing.T) {
 	t.Parallel()
-	tmp0 := mock.FileExample("hello\nworld\n", 0)
+	tmp0 := mock.FileExample("hello\nworld\n")
+	t.Cleanup(func() {
+		os.Remove(tmp0)
+	})
 	type args struct {
 		name      string
 		linebreak nl.System
@@ -125,7 +143,10 @@ func TestReadLine(t *testing.T) {
 
 func TestReadLines(t *testing.T) {
 	t.Parallel()
-	tmp0 := mock.FileExample("hello\nworld\n", 0)
+	tmp0 := mock.FileExample("hello\nworld\n")
+	t.Cleanup(func() {
+		os.Remove(tmp0)
+	})
 	type args struct {
 		name string
 	}
@@ -155,7 +176,10 @@ func TestReadLines(t *testing.T) {
 
 func TestReadText(t *testing.T) {
 	t.Parallel()
-	tmp0 := mock.FileExample("hello\nworld\n", 0)
+	tmp0 := mock.FileExample("hello\nworld\n")
+	t.Cleanup(func() {
+		os.Remove(tmp0)
+	})
 	type args struct {
 		name string
 	}
@@ -186,7 +210,10 @@ func TestReadText(t *testing.T) {
 
 func TestReadWords(t *testing.T) {
 	t.Parallel()
-	tmp0 := mock.FileExample("hello\nworld,\nmy name is Ben\n", 0)
+	tmp0 := mock.FileExample("hello\nworld,\nmy name is Ben\n")
+	t.Cleanup(func() {
+		os.Remove(tmp0)
+	})
 	type args struct {
 		name string
 	}

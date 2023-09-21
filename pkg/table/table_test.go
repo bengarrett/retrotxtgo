@@ -67,7 +67,6 @@ func Test_CodePage(t *testing.T) {
 func Test_character(t *testing.T) {
 	t.Parallel()
 	const RLM = 8207
-	iso11 := charmap.XUserDefined
 	type args struct {
 		pos int
 		r   rune
@@ -79,7 +78,6 @@ func Test_character(t *testing.T) {
 		want string
 	}{
 		{"empty", args{}, "\x00"},
-		{"iso8859_11", args{128, 0, iso11}, " "},
 		{"utf8 space", args{128, 0, uni.UTF8}, " "},
 		{"utf8 space", args{160, 0, uni.UTF8}, "\u00a0"},
 		{"utf8 space", args{RLM, 0, uni.UTF8}, "\u200f"},
@@ -88,7 +86,7 @@ func Test_character(t *testing.T) {
 		t.Parallel()
 		for _, tt := range tests {
 			if got := table.Character(tt.args.cp, tt.args.pos, tt.args.r); got != tt.want {
-				t.Errorf("Character() = %q, want %q", got, tt.want)
+				t.Errorf("Character(%q) = %q, want %q", tt.name, got, tt.want)
 			}
 		}
 	})

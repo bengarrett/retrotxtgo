@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/info"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSample(t *testing.T) {
@@ -33,4 +34,10 @@ func TestSample(t *testing.T) {
 			}
 		}
 	})
+}
+
+func TestPipe(t *testing.T) {
+	t.Parallel()
+	err := info.Pipe(nil)
+	assert.NotNil(t, err)
 }

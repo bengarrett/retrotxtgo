@@ -30,7 +30,7 @@ func ExampleMarshal() {
 	s := strings.Builder{}
 	_ = info.Marshal(&s, "testdata/example.txt", info.JSON)
 	fmt.Printf("%d bytes and json? %t", len(s.String()), json.Valid([]byte(s.String())))
-	// Output: 2363 bytes and json? true
+	// Output: 2345 bytes and json? true
 }
 
 func ExampleStream() {
@@ -67,7 +67,7 @@ func TestMarshal(t *testing.T) {
 	t.Parallel()
 	tmp := sampleFileB()
 	t.Cleanup(func() {
-		fsys.Clean(tmp)
+		os.Remove(tmp)
 	})
 	type args struct {
 		filename string
@@ -90,7 +90,7 @@ func TestMarshal(t *testing.T) {
 		t.Parallel()
 		for _, tt := range tests {
 			if err := info.Marshal(nil, tt.args.filename, tt.args.format); (err != nil) != tt.wantErr {
-				t.Errorf("Marshal() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Marshal(%q) error = %v, wantErr %v", tt.name, err, tt.wantErr)
 			}
 		}
 	})

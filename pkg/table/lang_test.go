@@ -3,8 +3,10 @@ package table_test
 import (
 	"fmt"
 	"strings"
+	"testing"
 
 	"github.com/bengarrett/retrotxtgo/pkg/table"
+	"github.com/stretchr/testify/assert"
 	"golang.org/x/text/encoding/charmap"
 )
 
@@ -20,9 +22,9 @@ func ExampleLanguage() {
 	// Output: US English
 }
 
-func ExampleListLanguage() {
+func TestListLanguage(t *testing.T) {
 	b := &strings.Builder{}
-	_ = table.ListLanguage(b)
-	fmt.Print(b)
-	// Output:
+	err := table.ListLanguage(b)
+	assert.Nil(t, err)
+	assert.Contains(t, b.String(), "ANSI X3.4 1967/77/86")
 }
