@@ -1,5 +1,5 @@
-// Package xhex provides rudimental hexadecimal conversion functions.
-package xhex
+// Package hexa provides rudimental hexadecimal conversion functions.
+package hexa
 
 import (
 	"fmt"
@@ -85,9 +85,42 @@ func Parse(b Base, vals ...string) []int64 {
 	return n
 }
 
-// Write the hexadecimal values of the provided decimal strings.
+// Parser writes the hexadecimal values of the provided decimal strings.
+// Only the results are written and are separated by a space.
+// If a string is not a hexadecimal number then the value is printed as "NaN".
+func Parser(w io.Writer, b Base, vals ...string) error {
+	if w == nil {
+		w = io.Discard
+	}
+	const pad = " "
+	sb := &strings.Builder{}
+	nums := []int64{}
+	switch b {
+	case Base10:
+		nums = Parse(b, vals...)
+	case Base16:
+		nums = Parse(b, TrimIndents(vals...)...)
+	}
+	for _, x := range nums {
+		if x == -1 {
+			fmt.Fprintf(sb, "NaN%s", pad)
+			continue
+		}
+		switch b {
+		case Base10:
+			fmt.Fprintf(sb, "%X%s", x, pad)
+		case Base16:
+			fmt.Fprintf(sb, "%d%s", x, pad)
+		}
+	}
+	fmt.Fprint(w, strings.TrimSpace(sb.String()))
+	fmt.Fprintln(w)
+	return nil
+}
+
+// Writer the hexadecimal values of the provided decimal strings.
 // If a string is not a hexadecimal number then the value is printed as "invalid".
-func Write(w io.Writer, b Base, vals ...string) error {
+func Writer(w io.Writer, b Base, vals ...string) error {
 	if w == nil {
 		w = io.Discard
 	}
@@ -111,39 +144,6 @@ func Write(w io.Writer, b Base, vals ...string) error {
 			fmt.Fprintf(sb, "%s = %X%s", s, x, pad)
 		case Base16:
 			fmt.Fprintf(sb, "%s = %d%s", s, x, pad)
-		}
-	}
-	fmt.Fprint(w, strings.TrimSpace(sb.String()))
-	fmt.Fprintln(w)
-	return nil
-}
-
-// Raw writes the hexadecimal values of the provided decimal strings.
-// Only the results are written and are separated by a space.
-// If a string is not a hexadecimal number then the value is printed as "NaN".
-func Raw(w io.Writer, b Base, vals ...string) error {
-	if w == nil {
-		w = io.Discard
-	}
-	const pad = " "
-	sb := &strings.Builder{}
-	nums := []int64{}
-	switch b {
-	case Base10:
-		nums = Parse(b, vals...)
-	case Base16:
-		nums = Parse(b, TrimIndents(vals...)...)
-	}
-	for _, x := range nums {
-		if x == -1 {
-			fmt.Fprintf(sb, "NaN%s", pad)
-			continue
-		}
-		switch b {
-		case Base10:
-			fmt.Fprintf(sb, "%X%s", x, pad)
-		case Base16:
-			fmt.Fprintf(sb, "%d%s", x, pad)
 		}
 	}
 	fmt.Fprint(w, strings.TrimSpace(sb.String()))

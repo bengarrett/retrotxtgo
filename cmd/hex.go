@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
-	"github.com/bengarrett/retrotxtgo/cmd/pkg/xhex"
+	"github.com/bengarrett/retrotxtgo/cmd/pkg/hexa"
 	"github.com/spf13/cobra"
 )
 
@@ -31,9 +31,9 @@ a command flag.
 			}
 			const base = 10
 			if flag.Hex.Raw {
-				return xhex.Raw(cmd.OutOrStdout(), base, args...)
+				return hexa.Parser(cmd.OutOrStdout(), base, args...)
 			}
-			return xhex.Write(cmd.ErrOrStderr(), base, args...)
+			return hexa.Writer(cmd.ErrOrStderr(), base, args...)
 		},
 	}
 }
@@ -75,9 +75,9 @@ value is printed as "invalid".
 			}
 			const base = 16
 			if flag.Hex.Raw {
-				return xhex.Raw(cmd.OutOrStdout(), base, args...)
+				return hexa.Parser(cmd.OutOrStdout(), base, args...)
 			}
-			return xhex.Write(cmd.ErrOrStderr(), base, args...)
+			return hexa.Writer(cmd.ErrOrStderr(), base, args...)
 		},
 	}
 }
