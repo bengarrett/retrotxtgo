@@ -23,6 +23,7 @@ func ExampleLanguage() {
 }
 
 func TestListLanguage(t *testing.T) {
+	t.Parallel()
 	b := &strings.Builder{}
 	err := table.ListLanguage(b)
 	assert.Nil(t, err)

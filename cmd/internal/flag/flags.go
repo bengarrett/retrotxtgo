@@ -20,6 +20,11 @@ type Command struct {
 // Cmd returns the flags for the main cmd.
 var Cmd Command
 
+// Hex handles the dec and hex "raw" flag.
+var Hex struct {
+	Raw bool // raw output
+}
+
 // Info handles the info "format" flag.
 var Info struct {
 	Format string // output format

@@ -37,6 +37,7 @@ issues:
     - path: '(.+)_test\.go'
       linters:
         - gocognit
+        - gochecknoinits
     # all cmd files
     - path: 'cmd/(.+)\.go'
       linters:

@@ -14,8 +14,11 @@ import (
 	"github.com/bengarrett/retrotxtgo/pkg/internal/tmp"
 )
 
-var (
-	Err0B = fmt.Errorf("zero bytes written")
+var ErrZB = fmt.Errorf("zero bytes written")
+
+const (
+	xPow = 2
+	yPow = 1000
 )
 
 // Input returns a file pointer to a temporary file containing the input string.
@@ -51,12 +54,11 @@ func T() map[string]string {
 // FileExample saves the string to a randomized, threadsafe filename.
 // The path to the file is returned.
 func FileExample(s string) string {
-	v, err := rand.Int(rand.Reader, big.NewInt(int64(math.Pow(2, 1000))))
+	v, err := rand.Int(rand.Reader, big.NewInt(int64(math.Pow(xPow, yPow))))
 	if err != nil {
 		log.Fatal(err)
 	}
 	name := fmt.Sprintf("rt_fs_save%s.txt", v)
-	fmt.Println(name)
 	path, err := SaveTemp(name, []byte(s)...)
 	if err != nil {
 		log.Fatal(err)
@@ -67,7 +69,7 @@ func FileExample(s string) string {
 // LargeExample generates and saves a 800k file of filler us-ascii text
 // to a randomized, threadsafe filename. The path to the file is returned.
 func LargeExample() string {
-	v, err := rand.Int(rand.Reader, big.NewInt(int64(math.Pow(2, 1000))))
+	v, err := rand.Int(rand.Reader, big.NewInt(int64(math.Pow(xPow, yPow))))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -84,7 +86,7 @@ func LargeExample() string {
 // MegaExample generates and saves a 1.5MB file of filler us-ascii text
 // to a randomized, threadsafe filename. The path to the file is returned.
 func MegaExample() string {
-	v, err := rand.Int(rand.Reader, big.NewInt(int64(math.Pow(2, 1000))))
+	v, err := rand.Int(rand.Reader, big.NewInt(int64(math.Pow(xPow, yPow))))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -102,7 +104,7 @@ func MegaExample() string {
 // newlines to a randomized, threadsafe filename. The path to the file is
 // returned.
 func ByteExample() string {
-	v, err := rand.Int(rand.Reader, big.NewInt(int64(math.Pow(2, 1000))))
+	v, err := rand.Int(rand.Reader, big.NewInt(int64(math.Pow(xPow, yPow))))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -183,7 +185,7 @@ func SaveTemp(name string, b ...byte) (string, error) {
 		return path, fmt.Errorf("could not save the temporary file: %w", err)
 	}
 	if i == 0 && len(b) > 0 {
-		return path, fmt.Errorf("%w: %s", Err0B, path)
+		return path, fmt.Errorf("%w: %s", ErrZB, path)
 	}
 	return path, nil
 }
