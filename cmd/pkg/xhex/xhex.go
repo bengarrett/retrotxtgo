@@ -1,3 +1,4 @@
+// Package xhex provides rudimental hexadecimal conversion functions.
 package xhex
 
 import (
@@ -7,7 +8,13 @@ import (
 	"strings"
 )
 
-var ErrBase = fmt.Errorf("base must be 10 or 16")
+// Base is the number base system for the conversion.
+type Base int
+
+const (
+	Base10 Base = 10 // Base10 is the decimal number base system.
+	Base16 Base = 16 // Base16 is the hexadecimal number base system.
+)
 
 // Hexadecimal prefix identifiers.
 const (
@@ -17,11 +24,6 @@ const (
 	U    = "U+"  // unicode
 	Zero = "0X"  // linux and unix C syntax
 	Esc  = "\\X" // escape
-)
-
-const (
-	base10 = 10
-	base16 = 16
 )
 
 // TrimIdent trims the hexadecimal prefix identifiers and
@@ -69,12 +71,10 @@ func TrimIndents(vals ...string) []string {
 
 // Parse converts the provided strings to based unsigned ints.
 // If a string is not a valid integer then the value is -1.
-// For decimal numbers use base 10.
-// For hexadecimal numbers use base 16.
-func Parse(base int, vals ...string) []int64 {
+func Parse(b Base, vals ...string) []int64 {
 	n := make([]int64, len(vals))
 	for i, val := range vals {
-		x, err := strconv.ParseInt(val, base, 64)
+		x, err := strconv.ParseInt(val, int(b), 64)
 		if err != nil {
 			n[i] = -1
 			continue
@@ -85,74 +85,68 @@ func Parse(base int, vals ...string) []int64 {
 	return n
 }
 
-// Dec writes the hexadecimal values of the provided decimal strings.
+// Write the hexadecimal values of the provided decimal strings.
 // If a string is not a hexadecimal number then the value is printed as "invalid".
-func Result(w io.Writer, base int, vals ...string) error {
+func Write(w io.Writer, b Base, vals ...string) error {
 	if w == nil {
 		w = io.Discard
 	}
-	if base != base10 && base != base16 {
-		return fmt.Errorf("%w: %d", ErrBase, base)
-	}
 	const pad = "  "
-	b := &strings.Builder{}
+	sb := &strings.Builder{}
 	nums := []int64{}
-	switch base {
-	case base10:
-		nums = Parse(base10, vals...)
-	case base16:
-		nums = Parse(base16, TrimIndents(vals...)...)
+	switch b {
+	case Base10:
+		nums = Parse(b, vals...)
+	case Base16:
+		nums = Parse(b, TrimIndents(vals...)...)
 	}
 	for i, x := range nums {
 		s := strings.ToUpper(vals[i])
 		if x == -1 {
-			fmt.Fprintf(b, "%s = invalid%s", s, pad)
+			fmt.Fprintf(sb, "%s = invalid%s", s, pad)
 			continue
 		}
-		switch base {
-		case base10:
-			fmt.Fprintf(b, "%s = %X%s", s, x, pad)
-		case base16:
-			fmt.Fprintf(b, "%s = %d%s", s, x, pad)
+		switch b {
+		case Base10:
+			fmt.Fprintf(sb, "%s = %X%s", s, x, pad)
+		case Base16:
+			fmt.Fprintf(sb, "%s = %d%s", s, x, pad)
 		}
 	}
-	fmt.Fprint(w, strings.TrimSpace(b.String()))
+	fmt.Fprint(w, strings.TrimSpace(sb.String()))
 	fmt.Fprintln(w)
 	return nil
 }
 
-// DecRaw writes the hexadecimal values of the provided decimal strings.
+// Raw writes the hexadecimal values of the provided decimal strings.
 // Only the results are written and are separated by a space.
 // If a string is not a hexadecimal number then the value is printed as "NaN".
-func Raw(w io.Writer, base int, vals ...string) error {
+func Raw(w io.Writer, b Base, vals ...string) error {
 	if w == nil {
 		w = io.Discard
 	}
-	if base != base10 && base != base16 {
-		return fmt.Errorf("%w: %d", ErrBase, base)
-	}
 	const pad = " "
-	b := &strings.Builder{}
+	sb := &strings.Builder{}
 	nums := []int64{}
-	switch base {
-	case base10:
-		nums = Parse(base10, vals...)
-	case base16:
-		nums = Parse(base16, TrimIndents(vals...)...)
+	switch b {
+	case Base10:
+		nums = Parse(b, vals...)
+	case Base16:
+		nums = Parse(b, TrimIndents(vals...)...)
 	}
 	for _, x := range nums {
 		if x == -1 {
-			fmt.Fprintf(b, "NaN%s", pad)
+			fmt.Fprintf(sb, "NaN%s", pad)
 			continue
 		}
-		switch base {
-		case base10:
-			fmt.Fprintf(b, "%X%s", x, pad)
-		case base16:
-			fmt.Fprintf(b, "%d%s", x, pad)
+		switch b {
+		case Base10:
+			fmt.Fprintf(sb, "%X%s", x, pad)
+		case Base16:
+			fmt.Fprintf(sb, "%d%s", x, pad)
 		}
 	}
-	fmt.Fprint(w, strings.TrimSpace(b.String()))
+	fmt.Fprint(w, strings.TrimSpace(sb.String()))
 	fmt.Fprintln(w)
 	return nil
 }

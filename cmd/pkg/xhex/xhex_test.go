@@ -48,12 +48,12 @@ func ExampleRaw() {
 	// Output: 15 1 255 NaN
 }
 
-func ExampleResult() {
+func ExampleWrite() {
 	// hexadecimal example
-	_ = xhex.Result(os.Stdout, 16, "0F", "01", "FF", "Z")
+	_ = xhex.Write(os.Stdout, 16, "0F", "01", "FF", "Z")
 
 	// decimal example
-	_ = xhex.Result(os.Stdout, 10, "15", "1", "255", "abc")
+	_ = xhex.Write(os.Stdout, 10, "15", "1", "255", "abc")
 	// Output: 0F = 15  01 = 1  FF = 255  Z = invalid
 	// 15 = F  1 = 1  255 = FF  ABC = invalid
 }
@@ -73,23 +73,23 @@ func TestParse(t *testing.T) {
 func TestRaw(t *testing.T) {
 	t.Parallel()
 	err := xhex.Raw(nil, 0, nil...)
-	assert.Error(t, err)
+	assert.Nil(t, err)
 	err = xhex.Raw(nil, 2, nil...)
-	assert.Error(t, err)
+	assert.Nil(t, err)
 	err = xhex.Raw(nil, 10, nil...)
 	assert.Nil(t, err)
 	err = xhex.Raw(nil, 10, "1", "2", "3")
 	assert.Nil(t, err)
 }
 
-func TestResult(t *testing.T) {
+func TestWrite(t *testing.T) {
 	t.Parallel()
-	err := xhex.Result(nil, 0, nil...)
-	assert.Error(t, err)
-	err = xhex.Result(nil, 2, nil...)
-	assert.Error(t, err)
-	err = xhex.Result(nil, 10, nil...)
+	err := xhex.Write(nil, 0, nil...)
 	assert.Nil(t, err)
-	err = xhex.Result(nil, 10, "1", "2", "3")
+	err = xhex.Write(nil, 2, nil...)
+	assert.Nil(t, err)
+	err = xhex.Write(nil, 10, nil...)
+	assert.Nil(t, err)
+	err = xhex.Write(nil, 10, "1", "2", "3")
 	assert.Nil(t, err)
 }

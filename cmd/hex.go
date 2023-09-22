@@ -33,7 +33,7 @@ a command flag.
 			if flag.Hex.Raw {
 				return xhex.Raw(cmd.OutOrStdout(), base, args...)
 			}
-			return xhex.Result(cmd.ErrOrStderr(), base, args...)
+			return xhex.Write(cmd.ErrOrStderr(), base, args...)
 		},
 	}
 }
@@ -77,7 +77,7 @@ value is printed as "invalid".
 			if flag.Hex.Raw {
 				return xhex.Raw(cmd.OutOrStdout(), base, args...)
 			}
-			return xhex.Result(cmd.ErrOrStderr(), base, args...)
+			return xhex.Write(cmd.ErrOrStderr(), base, args...)
 		},
 	}
 }
