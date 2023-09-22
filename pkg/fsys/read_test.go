@@ -242,8 +242,8 @@ func TestReadWords(t *testing.T) {
 	})
 }
 
-func TestReadPipe(t *testing.T) {
-	t.Parallel()
+func TestReadPipe(t *testing.T) { //nolint:paralleltest
+	// do not run in parallel as it uses os.Stdin
 	type args struct {
 		input string
 	}
@@ -259,7 +259,6 @@ func TestReadPipe(t *testing.T) {
 		{"utf8", args{"hello 😄"}, []byte("hello 😄\n"), false},
 	}
 	t.Run("", func(t *testing.T) {
-		t.Parallel()
 		for _, tt := range tests {
 			r, err := mock.Input(tt.args.input)
 			if err != nil {
