@@ -28,6 +28,7 @@ const (
 	Table                   // Table are the examples for the list tables command.
 	Info                    // Info is the example for the info command.
 	View                    // View is the example for the view command.
+	Dump                    // Dump is the example for the dump command.
 )
 
 // Example string writes the example usage help.
@@ -81,6 +82,8 @@ func (e Example) result() string {
 		return info()
 	case View:
 		return view()
+	case Dump:
+		return dump()
 	}
 	return ""
 }
@@ -129,5 +132,13 @@ func view() string {
 	fmt.Fprintf(s, "  %s view file.txt -i latin1\n", meta.Bin)
 	fmt.Fprintf(s, "  %s view file1.txt file2.txt --input \"iso-8859-1\"\n", meta.Bin)
 	fmt.Fprintf(s, "  cat file.txt | %s view", meta.Bin)
+	return s.String()
+}
+
+func dump() string {
+	s := &strings.Builder{}
+	fmt.Fprintf(s, "  %s dump file.txt\n", meta.Bin)
+	fmt.Fprintf(s, "  %s dump file1.txt file2.txt\n", meta.Bin)
+	fmt.Fprintf(s, "  cat file.txt | %s dump", meta.Bin)
 	return s.String()
 }

@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/bengarrett/retrotxtgo/cmd/internal/dump"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/view"
 	"github.com/bengarrett/retrotxtgo/cmd/pkg/example"
@@ -34,7 +35,7 @@ Otherwise the flags are optional and can be generally ignored
 for most use cases.`
 
 func ViewCommand() *cobra.Command {
-	s := "Print a text file to the terminal using standard output"
+	s := "Print text files to the terminal using standard output"
 	l := viewLong
 	expl := strings.Builder{}
 	example.View.String(&expl)
@@ -47,6 +48,24 @@ func ViewCommand() *cobra.Command {
 		Example: expl.String(),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return view.Run(cmd.OutOrStdout(), cmd, args...)
+		},
+	}
+}
+
+func DumpCommand() *cobra.Command {
+	s := "Dump the hex data of files to the terminal"
+	l := "Dump the hex data of files to the terminal."
+	expl := strings.Builder{}
+	example.Dump.String(&expl)
+	return &cobra.Command{
+		Use:     fmt.Sprintf("dump %s", example.Filenames),
+		Aliases: []string{"d"},
+		GroupID: IDfile,
+		Short:   s,
+		Long:    l,
+		Example: expl.String(),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return dump.Run(cmd.OutOrStdout(), cmd, args...)
 		},
 	}
 }
@@ -66,5 +85,5 @@ func ViewInit() *cobra.Command {
 }
 
 func init() {
-	Cmd.AddCommand(ViewInit())
+	Cmd.AddCommand(DumpCommand(), ViewInit())
 }

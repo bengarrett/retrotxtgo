@@ -86,7 +86,7 @@ func ListLanguage(wr io.Writer) error {
 		wr = io.Discard
 	}
 	const header, title = " Formal name\t Named value\t Language\t",
-		" Known legacy code pages and their target languages "
+		" Known legacy code pages and their target languages, regions, or alphabets "
 	const padding, width = 2, 76
 	w := tabwriter.NewWriter(wr, 0, 0, padding, ' ', 0)
 	term.Head(wr, width, title)

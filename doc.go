@@ -30,7 +30,7 @@ Usage:
 
 The commands are:
 
-	lang        List the legacy code page target languages
+	lang        List the natural languages of legacy code pages
 	list        List the legacy code pages that Retrotxt can convert to UTF-8
 	table       Display one or more code page tables showing all the characters in use
 	tables      Display the characters of every code page table in use

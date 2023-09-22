@@ -6,8 +6,8 @@ import (
 )
 
 func Language() *cobra.Command {
-	s := "List the legacy code page target languages"
-	l := "List the legacy code page target languages."
+	s := "List the natural languages of legacy code pages"
+	l := "List the natural languages and writing alphabets of legacy code pages."
 	return &cobra.Command{
 		Use:     "lang",
 		Aliases: []string{"la", "language"},

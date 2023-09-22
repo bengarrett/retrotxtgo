@@ -53,7 +53,7 @@ The full SAUCE specification can be found at:
 https://www.acid.org/info/sauce/sauce.htm`
 
 func InfoCommand() *cobra.Command {
-	s := "Information on a text file"
+	s := "Information on text files"
 	expl := strings.Builder{}
 	example.Info.String(&expl)
 	return &cobra.Command{
