@@ -39,7 +39,7 @@ retrotxt view ascii-logo.txt > ascii-logo-utf8.txt
 
 ![Windows Notepad viewing ascii-logo-utf8.txt](img/ascii-logo-utf8.txt.png)
 
-Otherwise, when using many command prompt or terminal apps, legacy text is often malformed and even unreadable.
+Otherwise, when using most terminal apps, legacy text is often malformed and unreadable.
 
 ```sh
 type ascii-logo.txt # or, cat ascii-logo.txt
@@ -51,6 +51,93 @@ type ascii-logo.txt # or, cat ascii-logo.txt
 �ۺ  �ۺ������ۻ   �ۺ   �ۺ  �ۺ�������ɼ   �ۺ   ��ɼ �ۻ   �ۺ
 �ͼ  �ͼ������ͼ   �ͼ   �ͼ  �ͼ �����ͼ    �ͼ   �ͼ  �ͼ   �ͼ
 ```
+
+---
+
+## In the real world
+
+### Swedish text
+
+```
+cat 14670.txt
+
+�mnet d�r, fortfor den andre, r�r till en del de antika gallerna; men
+f�r det mesta sker h�ndelserna i andev�rlden.
+
+--I andev�rlden? Ja just. Jag har f�rnummit, redan i Songes, att s�
+skall vara. Vad tycker du, Eleonora? Frans, Aurora ... i andev�rlden,
+mina barn!
+
+Farv�l, farv�l tills vi r�kas!
+
+End of the Project Gutenberg EBook of Det g�r an, by Carl Jonas Love Almqvist
+```
+
+```
+retrotxt 14670.txt --input latin1
+
+Ämnet där, fortfor den andre, rör till en del de antika gallerna; men
+för det mesta sker händelserna i andevärlden.
+
+--I andevärlden? Ja just. Jag har förnummit, redan i Songes, att så
+skall vara. Vad tycker du, Eleonora? Frans, Aurora ... i andevärlden,
+mina barn!
+
+Farväl, farväl tills vi råkas!
+
+End of the Project Gutenberg EBook of Det går an, by Carl Jonas Love Almqvist
+```
+
+### Japanese text
+
+```sh
+cat rshmn10j
+# no text is displayed
+```
+
+```
+retrotxt rshmn10j.txt --input shiftjis
+
+　暫、死んだように倒れていた老婆が、屍骸の中から、その裸の体を起こしたのは、そ
+れから間もなくの事である。老婆は、つぶやくような、うめくような声を立てながら、
+まだ燃えている火の光をたよりに、梯子の口まで、這って行った。そうして、そこから、
+短い白髪を倒（さかさま）にして、門の下を覗きこんだ。外には、唯、黒洞々（こくと
+うとう）たる夜があるばかりである。
+　下人は、既に、雨を冒して、京都の町へ強盗を働きに急いでいた。
+```
+
+### Cyrillic text
+
+```
+cat olavg10.txt
+
+"������ � ��� ���������, ����� ���,
+���� ������� ����, �������
+�� ������� ���� � ��������� �����,
+����� � � ������� ����������.
+��� ����� ����� �� ���� �� ������
+���-�������, ���-�������� - ����
+�� ��������� �� ������� ���������,
+����� �� �� ������� � ��� ���."
+
+*** END OF THE PROJECT GUTENBERG EBOOK, OLAF VAN GELDERN ***
+```
+
+```
+retrotxt olavg10.txt --input cp1251
+
+"Честит е тоз избранник, чийто дух,
+като ковчега Ноев, пренесе
+от прежний свят в послешний онова,
+което е в промени непроменно.
+Той подир смърт от себе си оставя
+най-чистото, най-хубавото - жица
+от царството на сенките безплътни,
+която ще го свързва с тоя мир."
+
+*** END OF THE PROJECT GUTENBERG EBOOK, OLAF VAN GELDERN ***
+```
+
 
 ---
 
