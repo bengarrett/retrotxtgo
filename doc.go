@@ -30,12 +30,15 @@ Usage:
 
 The commands are:
 
+	dec         Conversion of decimal to hexadecimal numbers
+	hex         Conversion of hexadecimal to decimal numbers
 	lang        List the natural languages of legacy code pages
 	list        List the legacy code pages that Retrotxt can convert to UTF-8
 	table       Display one or more code page tables showing all the characters in use
 	tables      Display the characters of every code page table in use
 	info        Information on a text file
 	view        Print a text file to the terminal using standard output
+	dump        Dump the hex data of files to the terminal
 	example     List the included sample text files available for use with the info and view commands
 
 # Examples
