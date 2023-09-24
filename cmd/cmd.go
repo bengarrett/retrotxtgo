@@ -20,10 +20,11 @@ var (
 	ErrUsage = errors.New("command usage could not display")
 )
 
+// ID are the cobra command group IDs.
 const (
-	IDcodepage = "idcp"
-	IDfile     = "idfile"
-	IDsample   = "idsample"
+	IDcodepage = "idcp"     // codepage group
+	IDfile     = "idfile"   // file group
+	IDsample   = "idsample" // sample group
 )
 
 // Cmd represents the base command when called without any subcommands.
@@ -52,37 +53,34 @@ func base() *cobra.Command {
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() error {
+	// disable the default "completion" command.
 	Cmd.CompletionOptions.DisableDefaultCmd = true
+	// hide the cobra introduced "help" command.
+	// https://github.com/spf13/cobra/issues/587#issuecomment-810159087
+	Cmd.SetHelpCommand(&cobra.Command{Hidden: true})
+	// the help "command" is hidden, so it needs to be assigned to a
+	// group otherwise it will display an empty "Additional Commands:".
+	Cmd.SetHelpCommandGroupID(IDcodepage)
+	// hide the cobra errors.
 	Cmd.SilenceErrors = true // set to false to debug errors
+	// build the version flag template.
 	Cmd.Version = meta.String()
 	s := strings.Builder{}
 	if err := version.Template(&s); err != nil {
 		return err
 	}
 	Cmd.SetVersionTemplate(s.String())
-	if err := Cmd.Execute(); err != nil {
+	if errE := Cmd.Execute(); errE != nil {
 		const minArgs = 2
 		if len(os.Args) < minArgs {
-			if err1 := Cmd.Usage(); err1 != nil {
-				logs.FatalS(ErrUsage, err1, "rootCmd")
+			if errU := Cmd.Usage(); errU != nil {
+				logs.FatalS(ErrUsage, errU, "rootCmd")
 			}
 		}
-		jerr := strings.Join(os.Args[1:], " ")
-		return fmt.Errorf("%w: %s %s", err, meta.Bin, strings.TrimSpace(jerr))
+		args := strings.Join(os.Args[1:], " ")
+		return fmt.Errorf("%w: %s %s", errE, meta.Bin, strings.TrimSpace(args))
 	}
 	return nil
-}
-
-func Init() {
-	Cmd = Tester(Cmd)
-	Cmd.AddGroup(&cobra.Group{ID: IDcodepage, Title: "Codepage:"})
-	Cmd.AddGroup(&cobra.Group{ID: IDfile, Title: "File:"})
-	Cmd.AddGroup(&cobra.Group{ID: IDsample, Title: "Sample:"})
-	// create a version flag that only works on root.
-	Cmd.LocalNonPersistentFlags().BoolP("version", "v", false, "")
-	// hide the cobra introduced help command.
-	// https://github.com/spf13/cobra/issues/587#issuecomment-810159087
-	Cmd.SetHelpCommand(&cobra.Command{Hidden: true})
 }
 
 // Tester creates and hides a custom tester flag.
@@ -97,5 +95,11 @@ func Tester(c *cobra.Command) *cobra.Command {
 }
 
 func init() {
-	Init()
+	Cmd = Tester(Cmd)
+	c := &cobra.Group{ID: IDcodepage, Title: "Codepage:"}
+	f := &cobra.Group{ID: IDfile, Title: "File:"}
+	s := &cobra.Group{ID: IDsample, Title: "Sample:"}
+	Cmd.AddGroup(c, f, s)
+	// create a version flag that only works on root.
+	Cmd.LocalNonPersistentFlags().BoolP("version", "v", false, "")
 }
