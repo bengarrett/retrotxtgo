@@ -10,9 +10,9 @@ Unicode terminal.
 Text files and art created before the adoption of Unicode often
 fail to display on modern systems.
 Use RetroTxt to print legacy text on modern terminals.
-Or save it to a Unicode file and use it in other apps.
-Otherwise, when using many command prompt or terminal apps,
-legacy text is often malformed and even unreadable.
+Or save it to a Unicode file for use in other apps.
+Otherwise, when using most terminal apps, legacy text
+is often malformed and unreadable.
 
 # Features
 

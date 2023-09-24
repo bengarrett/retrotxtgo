@@ -1,5 +1,5 @@
-// Package convert is extends the interface for character encodings,
-// that can convert to and from UTF-8.
+// Package convert extends the interface for the character encodings
+// that transform text to and from Unicode UTF-8.
 package convert
 
 import (
