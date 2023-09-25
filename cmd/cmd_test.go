@@ -61,59 +61,6 @@ func (t cmdT) tester(args []string) ([]byte, error) {
 	return out, nil
 }
 
-// func Test_InfoErrDir(t *testing.T) {
-// 	t.Parallel()
-// 	t.Run("info dir", func(t *testing.T) {
-// 		t.Parallel()
-// 		const invalid = static + "invalid_path"
-// 		gotB, err := infoT.tester([]string{"--format", "text", invalid})
-// 		if err == nil {
-// 			t.Errorf("invalid file or directory path did not return an error: %s", invalid)
-// 			t.Error(gotB)
-// 		}
-// 	})
-// }
-
-// func Test_InfoFiles(t *testing.T) {
-// 	t.Parallel()
-// 	t.Run("info multiple files", func(t *testing.T) {
-// 		t.Parallel()
-// 		gotB, err := infoT.tester([]string{"--format", "color", file1, file2})
-// 		if err != nil {
-// 			t.Errorf("info arguments threw an unexpected error: %s", err)
-// 		}
-// 		files := []string{filepath.Base(file1), filepath.Base(file2)}
-// 		for _, f := range files {
-// 			if !bytes.Contains(gotB, []byte(f)) {
-// 				t.Errorf("could not find filename in the info result, want: %q", f)
-// 			}
-// 		}
-// 	})
-// }
-
-// func Test_InfoSamples(t *testing.T) {
-// 	t.Parallel()
-// 	samplers := []string{"037", "ansi.aix", "shiftjis", "utf8"}
-// 	wants := []string{
-// 		"EBCDIC encoded text document",
-// 		"Text document with ANSI controls",
-// 		"plain text document",
-// 		"UTF-8 compatible",
-// 	}
-// 	t.Run("info multiple samples", func(t *testing.T) {
-// 		t.Parallel()
-// 		for i, sample := range samplers {
-// 			gotB, err := infoT.tester([]string{"--format", "text", sample})
-// 			if err != nil {
-// 				t.Error(err)
-// 			}
-// 			if !bytes.Contains(gotB, []byte(wants[i])) {
-// 				t.Errorf("sample %s result does not contain: %s", sample, wants[i])
-// 			}
-// 		}
-// 	})
-// }
-
 func Test_InfoText(t *testing.T) { //nolint:paralleltest
 	t.Run("info format text", func(t *testing.T) {
 		err := filepath.Walk(static,
