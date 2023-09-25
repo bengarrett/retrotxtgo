@@ -20,18 +20,23 @@ before:
     - go mod tidy
 builds:
   - id: BSD
+    binary: retrotxt
     goos: ['freebsd']
     goarch: ['amd64']
   - id: Linux_Intel
+    binary: retrotxt
     goos: ['linux']
     goarch: ['amd64']
   - id: Linux_arm64
+    binary: retrotxt
     goos: ['linux']
     goarch: ['arm64']
   - id: macOS
+    binary: retrotxt
     goos: ['darwin']
     goarch: ['amd64', 'arm64']
   - id: Windows
+    binary: retrotxt
     goos: ['windows']
     goarch: ['amd64']
 universal_binaries:
