@@ -9,18 +9,31 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/pkg/convert"
+	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/term"
 	"github.com/spf13/cobra"
 	"golang.org/x/text/encoding"
 )
 
-var ErrConv = errors.New("convert cannot be nil")
+var (
+	ErrConv     = errors.New("convert cannot be nil")
+	ErrPipeRead = errors.New("could not read text stream from piped stdin (standard input)")
+)
 
 // Run parses the arguments supplied with the view command.
 func Run(w io.Writer, cmd *cobra.Command, args ...string) error {
 	if w == nil {
 		w = io.Discard
 	}
+	// piped input from other programs and then exit
+	ok, err := fsys.IsPipe()
+	if err != nil {
+		return err
+	}
+	if ok {
+		return Pipe(w, cmd, args...)
+	}
+	// read from files or samples
 	args, c, samp, err := flag.Args(cmd, args...)
 	if err != nil {
 		return err
@@ -52,6 +65,28 @@ func Run(w io.Writer, cmd *cobra.Command, args ...string) error {
 		fmt.Fprint(w, string(r))
 	}
 	fmt.Fprintln(w)
+	return nil
+}
+
+// Pipe parses a standard input (stdin) stream of data.
+func Pipe(w io.Writer, cmd *cobra.Command, args ...string) error {
+	if w == nil {
+		w = io.Discard
+	}
+	_, c, samp, err := flag.Args(cmd, args...)
+	if err != nil {
+		return err
+	}
+	b, err := fsys.ReadPipe()
+	if err != nil {
+		return fmt.Errorf("%w, %w", ErrPipeRead, err)
+	}
+	// write out the sample with the utf-8 encoding
+	r, err := Transform(c, samp.Input, nil, b...)
+	if err != nil {
+		return err
+	}
+	fmt.Fprint(w, string(r))
 	return nil
 }
 

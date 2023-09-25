@@ -24,30 +24,35 @@ var ErrNames = errors.New("ignoring [filenames]")
 func Args(cmd *cobra.Command, args ...string) (
 	[]string, *convert.Convert, sample.Flags, error,
 ) {
+	reset := []string{}
 	conv := convert.Convert{}
 	conv.Args = convert.Flag{
 		Controls:  View().Controls,
 		SwapChars: View().Swap,
 		MaxWidth:  View().Width,
 	}
-	l := len(args)
 	conv.Args = setFlags(cmd, conv.Args)
 	ok, err := fsys.IsPipe()
 	if err != nil {
 		logs.Fatal(err)
+	}
+	if ok {
+		conv.Input.Encoding = unicode.UTF16(unicode.LittleEndian, unicode.UseBOM)
+		args = reset
 	}
 	if !ok {
 		if err := Help(cmd, args...); err != nil {
 			logs.Fatal(err)
 		}
 	}
+	l := len(args)
 	if ok && l > 0 {
 		err := fmt.Errorf("%w;%w for piped text", err, ErrNames)
 		fmt.Fprintln(os.Stderr, logs.Sprint(err))
-		args = []string{""}
+		args = reset
 	}
 	if l == 0 {
-		args = []string{""}
+		args = reset
 	}
 	samp, err := InputOriginal(cmd, "")
 	if err != nil {
@@ -172,26 +177,14 @@ func OpenSample(name string, c *convert.Convert, f sample.Flags) ([]byte, error)
 	if err != nil {
 		return nil, err
 	}
-
 	return []byte(string(r)), nil
 }
 
 // ReadArgument returns the content of argument supplied filepath, embed sample file or piped data.
 func ReadArgument(arg string, c *convert.Convert, f sample.Flags) ([]byte, error) {
-	var (
-		b   []byte
-		err error
-	)
-	// if no argument, then assume the source is piped via stdin
-	if arg == "" {
-		b, err = fsys.ReadPipe()
-		if err != nil {
-			return nil, err
-		}
-		return b, nil
-	}
 	// attempt to see if arg is a embed sample file request
-	if b, err = OpenSample(arg, c, f); err != nil {
+	b, err := OpenSample(arg, c, f)
+	if err != nil {
 		return nil, err
 	} else if b != nil {
 		return b, nil
