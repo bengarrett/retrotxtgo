@@ -49,7 +49,7 @@ retrotxt --version
 ```sh
 # Debian DEB package
 wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo.deb
-dpkg -i retrotxt.deb
+dpkg -i retrotxtgo.deb
 retrotxt -v
 ```
 
@@ -57,7 +57,7 @@ retrotxt -v
 ```sh
 # Redhat RPM package
 wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo.rpm
-rpm -i retrotxt.rpm
+rpm -i retrotxtgo.rpm
 retrotxt -v
 ```
 
@@ -65,6 +65,14 @@ retrotxt -v
 ```sh
 # Alpine APK package
 wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo.apk
-apk add retrotxt.apk
+apk add retrotxtgo.apk
+retrotxt -v
+```
+
+### ZST
+```sh
+# Arch ZST package
+wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo.pkg.tar.zst
+pacman -U retrotxtgo.pkg.tar.zst
 retrotxt -v
 ```

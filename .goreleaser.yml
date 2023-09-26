@@ -89,6 +89,7 @@ nfpms:
       - apk
       - deb
       - rpm
+      - archlinux
 
 changelog:
   skip: true
