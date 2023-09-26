@@ -16,6 +16,7 @@ retrotxtgo.exe
 *.out
 
 # GoReleaser
+/.dist
 /dist
 
 # Editor

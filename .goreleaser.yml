@@ -13,7 +13,7 @@
 # git push origin v0.1.0
 
 project_name: retrotxtgo
-# make a variable description
+dist: './.dist' # make dist a hidden directory to avoid cluttering the project root
 
 before:
   hooks:
