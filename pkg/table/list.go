@@ -107,9 +107,9 @@ func List(wr io.Writer) error { //nolint:funlen
 	fmt.Fprintln(w, "\n "+term.Info("*")+
 		" An EBCDIC encoding found on IBM mainframes that is not ASCII compatible.")
 	fmt.Fprintln(w, " "+term.Info("†")+
-		" UTF-16/32 encodings are NOT usable with the "+term.Example("table")+" command.")
+		" Encoding is not usable with the "+term.Example("table")+" command.")
 	fmt.Fprintln(w, " "+term.Info("⁑")+
-		" ANSI X3.4 encodings are only usable with the "+term.Example("table")+" command."+
+		" Encoding is only usable with the "+term.Example("table")+" command."+
 		"\n   You can use the "+term.Example("table ascii")+" command to list all three X3.4 tables.")
 	fmt.Fprintln(w, "\nEither named, numeric or alias values are valid code page arguments.")
 	fmt.Fprintln(w, "  These values all match ISO 8859-1.")
@@ -129,7 +129,8 @@ func List(wr io.Writer) error { //nolint:funlen
 	fmt.Fprintf(w, "  Macintosh (%s) is found on Mac OS 9 and earlier systems.\n",
 		term.Comment("macintosh"))
 	fmt.Fprintf(w, "\n%s, PCs and the web today use Unicode UTF-8. As a subset,\n", meta.Name)
-	fmt.Fprintln(w, "UTF-8 is backwards compatible with both ISO 8895-1 and US-ASCII.")
+	fmt.Fprintln(w, "UTF-8 is backwards compatible with US-ASCII. For example capital")
+	fmt.Fprintln(w, "letter A is represented by the same byte value in both encodings.")
 	return w.Flush()
 }
 
