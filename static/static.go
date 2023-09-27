@@ -21,5 +21,5 @@ var ANSI embed.FS
 
 // Text is the embedded file system with the text subdirectory.
 //
-//go:embed text/*
+//go:embed plaintext/*
 var Text embed.FS
