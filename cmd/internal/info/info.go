@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
-	"github.com/bengarrett/retrotxtgo/pkg/fsys"
-	"github.com/bengarrett/retrotxtgo/pkg/info"
+	"github.com/bengarrett/retrotxtgo/fsys"
+	"github.com/bengarrett/retrotxtgo/info"
 	"github.com/bengarrett/retrotxtgo/sample"
 	"github.com/bengarrett/retrotxtgo/static"
 	"github.com/spf13/cobra"

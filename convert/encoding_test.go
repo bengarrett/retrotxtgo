@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/pkg/convert"
+	"github.com/bengarrett/retrotxtgo/convert"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/japanese"

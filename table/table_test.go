@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/pkg/table"
+	"github.com/bengarrett/retrotxtgo/table"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/japanese"

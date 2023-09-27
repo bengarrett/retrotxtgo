@@ -53,22 +53,22 @@ issues:
     - path: meta/meta.go
       linters:
         - gochecknoglobals
-    - path: pkg/convert/encoding.go
+    - path: convert/encoding.go
       linters:
         - cyclop
         - funlen
         - ireturn
-    - path: pkg/info/detail.go
+    - path: info/detail.go
       linters:
         - gosec
         - lll
     - path: pkg/internal/mock/mock.go
       linters:
         - gosec
-    - path: pkg/logs/logs_test.go
+    - path: logs/logs_test.go
       linters:
         - goerr113
-    - path: pkg/table/table.go
+    - path: table/table.go
       linters:
         - ireturn
     - path: xud/xud.go

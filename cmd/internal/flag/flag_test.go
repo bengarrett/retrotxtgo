@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
-	"github.com/bengarrett/retrotxtgo/pkg/convert"
+	"github.com/bengarrett/retrotxtgo/convert"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/text/encoding/charmap"
 )

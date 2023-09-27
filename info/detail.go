@@ -20,8 +20,8 @@ import (
 	"unicode/utf8"
 
 	"github.com/bengarrett/bbs"
+	"github.com/bengarrett/retrotxtgo/fsys"
 	"github.com/bengarrett/retrotxtgo/nl"
-	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/term"
 	"github.com/bengarrett/sauce"
 	"github.com/bengarrett/sauce/humanize"

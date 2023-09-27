@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/bengarrett/retrotxtgo/pkg/fsys"
-	"github.com/bengarrett/retrotxtgo/pkg/internal/tmp"
+	"github.com/bengarrett/retrotxtgo/fsys"
+	"github.com/bengarrett/retrotxtgo/internal/tmp"
 )
 
 func ExampleUniqueName() {

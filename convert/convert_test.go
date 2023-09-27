@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/pkg/convert"
-	"github.com/bengarrett/retrotxtgo/pkg/fsys"
+	"github.com/bengarrett/retrotxtgo/convert"
+	"github.com/bengarrett/retrotxtgo/fsys"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/japanese"
 )

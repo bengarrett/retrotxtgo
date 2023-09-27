@@ -8,7 +8,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/bengarrett/retrotxtgo/pkg/fsys"
+	"github.com/bengarrett/retrotxtgo/fsys"
 	"github.com/bengarrett/retrotxtgo/term"
 	"github.com/bengarrett/retrotxtgo/xud"
 	"golang.org/x/text/encoding"

@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bengarrett/retrotxtgo/pkg/convert"
-	"github.com/bengarrett/retrotxtgo/pkg/fsys"
-	"github.com/bengarrett/retrotxtgo/pkg/logs"
+	"github.com/bengarrett/retrotxtgo/convert"
+	"github.com/bengarrett/retrotxtgo/fsys"
+	"github.com/bengarrett/retrotxtgo/logs"
 	"github.com/bengarrett/retrotxtgo/sample"
 	"github.com/spf13/cobra"
 	"golang.org/x/text/encoding"

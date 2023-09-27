@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"github.com/bengarrett/retrotxtgo/cmd"
+	"github.com/bengarrett/retrotxtgo/logs"
 	"github.com/bengarrett/retrotxtgo/meta"
-	"github.com/bengarrett/retrotxtgo/pkg/logs"
 )
 
 // goreleaser generated ldflags containers.

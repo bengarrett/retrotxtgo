@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/pkg/info"
-	"github.com/bengarrett/retrotxtgo/pkg/internal/mock"
+	"github.com/bengarrett/retrotxtgo/info"
+	"github.com/bengarrett/retrotxtgo/internal/mock"
 	"github.com/bengarrett/retrotxtgo/static"
 )
 

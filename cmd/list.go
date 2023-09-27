@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/bengarrett/retrotxtgo/meta"
-	"github.com/bengarrett/retrotxtgo/pkg/table"
+	"github.com/bengarrett/retrotxtgo/table"
 	"github.com/spf13/cobra"
 )
 

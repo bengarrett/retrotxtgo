@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/pkg/logs"
+	"github.com/bengarrett/retrotxtgo/logs"
 	"github.com/gookit/color"
 	"github.com/stretchr/testify/assert"
 )

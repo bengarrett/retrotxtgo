@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
+	"github.com/bengarrett/retrotxtgo/fsys"
+	"github.com/bengarrett/retrotxtgo/internal/mock"
 	"github.com/bengarrett/retrotxtgo/nl"
-	"github.com/bengarrett/retrotxtgo/pkg/fsys"
-	"github.com/bengarrett/retrotxtgo/pkg/internal/mock"
 	"github.com/stretchr/testify/assert"
 )
 

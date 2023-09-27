@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/pkg/fsys"
+	"github.com/bengarrett/retrotxtgo/fsys"
 	"github.com/bengarrett/retrotxtgo/static"
 )
 

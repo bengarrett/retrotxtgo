@@ -7,10 +7,10 @@ import (
 	"io"
 	"os"
 
+	"github.com/bengarrett/retrotxtgo/cmd/pkg/online"
+	"github.com/bengarrett/retrotxtgo/fsys"
+	"github.com/bengarrett/retrotxtgo/logs"
 	"github.com/bengarrett/retrotxtgo/meta"
-	"github.com/bengarrett/retrotxtgo/pkg/fsys"
-	"github.com/bengarrett/retrotxtgo/pkg/logs"
-	"github.com/bengarrett/retrotxtgo/pkg/online"
 	"github.com/bengarrett/retrotxtgo/term"
 	gap "github.com/muesli/go-app-paths"
 	"gopkg.in/yaml.v3"

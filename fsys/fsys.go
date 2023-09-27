@@ -9,7 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/bengarrett/retrotxtgo/pkg/internal/save"
+	"github.com/bengarrett/retrotxtgo/internal/save"
 )
 
 var (

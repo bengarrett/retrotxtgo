@@ -3,7 +3,7 @@ package online_test
 import (
 	"fmt"
 
-	"github.com/bengarrett/retrotxtgo/pkg/online"
+	"github.com/bengarrett/retrotxtgo/cmd/pkg/online"
 )
 
 func ExamplePing() {

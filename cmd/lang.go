@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/bengarrett/retrotxtgo/pkg/table"
+	"github.com/bengarrett/retrotxtgo/table"
 	"github.com/spf13/cobra"
 )
 

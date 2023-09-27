@@ -14,8 +14,8 @@ import (
 	"unicode/utf8"
 
 	"github.com/bengarrett/retrotxtgo/byter"
-	"github.com/bengarrett/retrotxtgo/pkg/fsys"
-	"github.com/bengarrett/retrotxtgo/pkg/logs"
+	"github.com/bengarrett/retrotxtgo/fsys"
+	"github.com/bengarrett/retrotxtgo/logs"
 	"github.com/bengarrett/retrotxtgo/term"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/japanese"

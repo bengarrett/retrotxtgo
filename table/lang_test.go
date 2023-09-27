@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/pkg/table"
+	"github.com/bengarrett/retrotxtgo/table"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/text/encoding/charmap"
 )

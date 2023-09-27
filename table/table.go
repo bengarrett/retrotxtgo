@@ -11,7 +11,7 @@ import (
 	"unicode"
 
 	"github.com/bengarrett/retrotxtgo/byter"
-	"github.com/bengarrett/retrotxtgo/pkg/convert"
+	"github.com/bengarrett/retrotxtgo/convert"
 	"github.com/bengarrett/retrotxtgo/term"
 	"github.com/bengarrett/retrotxtgo/xud"
 	"github.com/gookit/color"
