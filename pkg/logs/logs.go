@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/bengarrett/retrotxtgo/meta"
-	"github.com/bengarrett/retrotxtgo/pkg/term"
+	"github.com/bengarrett/retrotxtgo/term"
 )
 
 const OSErr = 1 // OSErr is the operating system exit code for a program error.

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/pkg/nl"
+	"github.com/bengarrett/retrotxtgo/nl"
 )
 
 func ExampleNewLine() {

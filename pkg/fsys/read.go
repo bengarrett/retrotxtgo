@@ -8,8 +8,8 @@ import (
 	"io"
 	"os"
 
+	"github.com/bengarrett/retrotxtgo/nl"
 	"github.com/bengarrett/retrotxtgo/pkg/internal/save"
-	"github.com/bengarrett/retrotxtgo/pkg/nl"
 )
 
 // IsPipe reports whether Stdin (standard input) is piped from another command.

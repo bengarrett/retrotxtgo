@@ -11,7 +11,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
 	"github.com/bengarrett/retrotxtgo/pkg/online"
-	"github.com/bengarrett/retrotxtgo/pkg/term"
+	"github.com/bengarrett/retrotxtgo/term"
 	gap "github.com/muesli/go-app-paths"
 	"gopkg.in/yaml.v3"
 )

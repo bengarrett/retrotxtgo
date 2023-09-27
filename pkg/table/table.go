@@ -10,10 +10,10 @@ import (
 	"text/tabwriter"
 	"unicode"
 
-	"github.com/bengarrett/retrotxtgo/pkg/byter"
+	"github.com/bengarrett/retrotxtgo/byter"
 	"github.com/bengarrett/retrotxtgo/pkg/convert"
-	"github.com/bengarrett/retrotxtgo/pkg/term"
-	"github.com/bengarrett/retrotxtgo/pkg/xud"
+	"github.com/bengarrett/retrotxtgo/term"
+	"github.com/bengarrett/retrotxtgo/xud"
 	"github.com/gookit/color"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"

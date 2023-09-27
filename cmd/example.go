@@ -6,7 +6,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/cmd/pkg/example"
 	"github.com/bengarrett/retrotxtgo/cmd/pkg/list"
-	"github.com/bengarrett/retrotxtgo/pkg/term"
+	"github.com/bengarrett/retrotxtgo/term"
 	"github.com/spf13/cobra"
 )
 

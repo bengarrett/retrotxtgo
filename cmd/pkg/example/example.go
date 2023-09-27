@@ -12,7 +12,7 @@ import (
 	"text/template"
 
 	"github.com/bengarrett/retrotxtgo/meta"
-	"github.com/bengarrett/retrotxtgo/pkg/term"
+	"github.com/bengarrett/retrotxtgo/term"
 	"github.com/gookit/color"
 )
 

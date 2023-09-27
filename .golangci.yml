@@ -71,7 +71,7 @@ issues:
     - path: pkg/table/table.go
       linters:
         - ireturn
-    - path: pkg/xud/xud.go
+    - path: xud/xud.go
       linters:
         - gochecknoglobals
         - ireturn

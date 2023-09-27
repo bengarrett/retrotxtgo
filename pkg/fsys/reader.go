@@ -12,7 +12,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/bengarrett/retrotxtgo/pkg/nl"
+	"github.com/bengarrett/retrotxtgo/nl"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/transform"
 )

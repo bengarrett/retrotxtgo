@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/bengarrett/retrotxtgo/meta"
-	"github.com/bengarrett/retrotxtgo/pkg/term"
+	"github.com/bengarrett/retrotxtgo/term"
 	"github.com/spf13/cobra"
 )
 

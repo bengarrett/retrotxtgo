@@ -8,7 +8,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/bengarrett/retrotxtgo/pkg/convert"
-	"github.com/bengarrett/retrotxtgo/pkg/sample"
+	"github.com/bengarrett/retrotxtgo/sample"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 )

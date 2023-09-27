@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/pkg/byter"
-	"github.com/bengarrett/retrotxtgo/pkg/internal/mock"
+	"github.com/bengarrett/retrotxtgo/byter"
+	"github.com/bengarrett/retrotxtgo/internal/mock"
 	"golang.org/x/text/encoding/charmap"
 )
 

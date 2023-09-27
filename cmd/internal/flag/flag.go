@@ -11,7 +11,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/pkg/convert"
 	"github.com/bengarrett/retrotxtgo/pkg/fsys"
 	"github.com/bengarrett/retrotxtgo/pkg/logs"
-	"github.com/bengarrett/retrotxtgo/pkg/sample"
+	"github.com/bengarrett/retrotxtgo/sample"
 	"github.com/spf13/cobra"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"

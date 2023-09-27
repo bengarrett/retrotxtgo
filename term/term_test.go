@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/pkg/term"
+	"github.com/bengarrett/retrotxtgo/term"
 	"github.com/gookit/color"
 )
 

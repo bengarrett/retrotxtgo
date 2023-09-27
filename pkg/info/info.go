@@ -8,8 +8,8 @@ import (
 	"io"
 	"os"
 
+	"github.com/bengarrett/retrotxtgo/nl"
 	"github.com/bengarrett/retrotxtgo/pkg/fsys"
-	"github.com/bengarrett/retrotxtgo/pkg/nl"
 	"github.com/karrick/godirwalk"
 	"golang.org/x/sync/errgroup"
 )

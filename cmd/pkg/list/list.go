@@ -10,10 +10,10 @@ import (
 	"text/tabwriter"
 
 	"github.com/bengarrett/retrotxtgo/meta"
-	"github.com/bengarrett/retrotxtgo/pkg/sample"
 	"github.com/bengarrett/retrotxtgo/pkg/table"
-	"github.com/bengarrett/retrotxtgo/pkg/term"
-	"github.com/bengarrett/retrotxtgo/pkg/xud"
+	"github.com/bengarrett/retrotxtgo/sample"
+	"github.com/bengarrett/retrotxtgo/term"
+	"github.com/bengarrett/retrotxtgo/xud"
 	"golang.org/x/exp/slices"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
