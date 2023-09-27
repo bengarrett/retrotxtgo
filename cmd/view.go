@@ -5,10 +5,10 @@ import (
 	"log"
 	"strings"
 
+	"github.com/bengarrett/retrotxtgo/cmd/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/dump"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/view"
-	"github.com/bengarrett/retrotxtgo/cmd/pkg/example"
 	"github.com/spf13/cobra"
 )
 

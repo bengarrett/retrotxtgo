@@ -1,8 +1,8 @@
 package cmd
 
 import (
+	"github.com/bengarrett/retrotxtgo/cmd/hexa"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
-	"github.com/bengarrett/retrotxtgo/cmd/pkg/hexa"
 	"github.com/spf13/cobra"
 )
 

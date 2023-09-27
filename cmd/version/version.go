@@ -11,7 +11,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/bengarrett/retrotxtgo/cmd/pkg/update"
+	"github.com/bengarrett/retrotxtgo/cmd/update"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/gookit/color"
 	"github.com/mattn/go-isatty"

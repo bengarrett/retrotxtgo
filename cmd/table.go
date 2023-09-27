@@ -3,9 +3,9 @@ package cmd
 import (
 	"strings"
 
+	"github.com/bengarrett/retrotxtgo/cmd/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
-	"github.com/bengarrett/retrotxtgo/cmd/pkg/example"
-	"github.com/bengarrett/retrotxtgo/cmd/pkg/list"
+	"github.com/bengarrett/retrotxtgo/cmd/list"
 	"github.com/spf13/cobra"
 )
 

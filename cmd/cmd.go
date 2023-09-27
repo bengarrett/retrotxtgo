@@ -7,9 +7,9 @@ import (
 	"os"
 	"strings"
 
+	"github.com/bengarrett/retrotxtgo/cmd/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
-	"github.com/bengarrett/retrotxtgo/cmd/pkg/example"
-	"github.com/bengarrett/retrotxtgo/cmd/pkg/version"
+	"github.com/bengarrett/retrotxtgo/cmd/version"
 	"github.com/bengarrett/retrotxtgo/logs"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/spf13/cobra"

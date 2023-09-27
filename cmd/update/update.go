@@ -7,7 +7,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/bengarrett/retrotxtgo/cmd/pkg/online"
+	"github.com/bengarrett/retrotxtgo/cmd/online"
 	"github.com/bengarrett/retrotxtgo/fsys"
 	"github.com/bengarrett/retrotxtgo/logs"
 	"github.com/bengarrett/retrotxtgo/meta"

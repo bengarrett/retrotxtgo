@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/bengarrett/retrotxtgo/cmd/pkg/example"
-	"github.com/bengarrett/retrotxtgo/cmd/pkg/list"
+	"github.com/bengarrett/retrotxtgo/cmd/example"
+	"github.com/bengarrett/retrotxtgo/cmd/list"
 	"github.com/bengarrett/retrotxtgo/term"
 	"github.com/spf13/cobra"
 )
