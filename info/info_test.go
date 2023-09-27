@@ -10,7 +10,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/info"
 	"github.com/bengarrett/retrotxtgo/internal/mock"
-	"github.com/bengarrett/retrotxtgo/static"
+	"github.com/bengarrett/retrotxtgo/sample"
 )
 
 func ExampleInfo() {
@@ -46,7 +46,7 @@ func ExampleStream() {
 }
 
 func rawData() []byte {
-	b, err := static.Text.ReadFile("text/sauce.txt")
+	b, err := sample.PlainText.ReadFile("plaintext/sauce.txt")
 	if err != nil {
 		log.Fatal(err)
 	}

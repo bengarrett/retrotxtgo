@@ -11,11 +11,11 @@ import (
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/fsys"
-	"github.com/bengarrett/retrotxtgo/static"
+	"github.com/bengarrett/retrotxtgo/sample"
 )
 
 func ExampleWordsEBCDIC() {
-	b, err := static.File.ReadFile("text/cp037.txt")
+	b, err := sample.File.ReadFile("plaintext/cp037.txt")
 	if err != nil {
 		log.Fatal(err)
 	}

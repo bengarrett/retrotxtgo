@@ -16,7 +16,7 @@ func TestSample(t *testing.T) {
 		wantErr      bool
 	}{
 		{"empty", "", false, true},
-		{"invalid", "text/retrotxt.asc", false, true},
+		{"invalid", "plaintext/retrotxt.asc", false, true},
 		{"logos", "ascii", true, false},
 		{"ansi", "ansi", true, false},
 		{"utf8", "utf8", true, false},

@@ -3,6 +3,7 @@
 package sample
 
 import (
+	"embed"
 	"errors"
 	"fmt"
 	"os"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/convert"
 	"github.com/bengarrett/retrotxtgo/meta"
-	"github.com/bengarrett/retrotxtgo/static"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/japanese"
@@ -19,11 +19,27 @@ import (
 )
 
 var (
-	ErrEncode  = errors.New("no encoding provided")
-	ErrConvert = errors.New("unknown convert method")
-	ErrConvNil = errors.New("conv argument cannot be empty")
-	ErrName    = errors.New("sample filename does not exist")
+	ErrEncode   = errors.New("no encoding provided")
+	ErrConvert  = errors.New("unknown convert method")
+	ErrConvNil  = errors.New("conv argument cannot be empty")
+	ErrName     = errors.New("sample filename does not exist")
+	ErrNotFound = errors.New("internal embed file is not found")
 )
+
+// File is the embedded file system with all the static files.
+//
+//go:embed ansi/*.ans plaintext/*.txt plaintext/*.asc
+var File embed.FS
+
+// ANSI is the embedded file system with the ansi subdirectory.
+//
+//go:embed ansi/*.ans
+var ANSI embed.FS
+
+// Text is the embedded file system with the text subdirectory.
+//
+//go:embed plaintext/*.txt plaintext/*.asc
+var PlainText embed.FS
 
 // Flags and configuration values by the user.
 type Flags struct {
@@ -113,7 +129,7 @@ func Open(name string) ([]byte, error) {
 	if !exist {
 		return nil, fmt.Errorf("%s: %w", name, ErrName)
 	}
-	b, err := static.File.ReadFile(samp.Name)
+	b, err := File.ReadFile(samp.Name)
 	if err != nil {
 		return nil, fmt.Errorf("open sample %q: %w", samp.Name, err)
 	}
@@ -146,7 +162,7 @@ func (flag Flags) Open(conv *convert.Convert, name string) ([]rune, error) {
 	if !exist {
 		return nil, fmt.Errorf("%s: %w", name, ErrName)
 	}
-	b, err := static.File.ReadFile(samp.Name)
+	b, err := File.ReadFile(samp.Name)
 	if err != nil {
 		return nil, fmt.Errorf("open sample %q: %w", samp.Name, err)
 	}

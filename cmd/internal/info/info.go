@@ -12,7 +12,6 @@ import (
 	"github.com/bengarrett/retrotxtgo/fsys"
 	"github.com/bengarrett/retrotxtgo/info"
 	"github.com/bengarrett/retrotxtgo/sample"
-	"github.com/bengarrett/retrotxtgo/static"
 	"github.com/spf13/cobra"
 )
 
@@ -80,7 +79,7 @@ func Sample(name string) (string, error) {
 	if !exist {
 		return "", ErrNotSamp
 	}
-	b, err := static.File.ReadFile(samp.Name)
+	b, err := sample.File.ReadFile(samp.Name)
 	if err != nil {
 		return "", fmt.Errorf(" sample file %q: %w", samp.Name, err)
 	}
