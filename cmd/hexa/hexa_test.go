@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/cmd/pkg/hexa"
+	"github.com/bengarrett/retrotxtgo/cmd/hexa"
 	"github.com/stretchr/testify/assert"
 )
 

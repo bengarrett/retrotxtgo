@@ -23,9 +23,9 @@ const (
 	listT
 	viewT
 
-	static = "../static"
-	file1  = "../static/ansi/ansi-cp.ans"
-	file2  = "../static/bbs/SHEET.ANS"
+	root  = "../sample"
+	file1 = "../sample/ansi/ansi-cp.ans"
+	file2 = "../sample/bbs/SHEET.ANS"
 )
 
 func init() {
@@ -63,7 +63,7 @@ func (t cmdT) tester(args []string) ([]byte, error) {
 
 func Test_InfoText(t *testing.T) { //nolint:paralleltest
 	t.Run("info format text", func(t *testing.T) {
-		err := filepath.Walk(static,
+		err := filepath.Walk(root,
 			func(path string, info os.FileInfo, err error) error {
 				if err != nil {
 					return err
@@ -105,7 +105,7 @@ func Test_InfoData(t *testing.T) {
 	}
 	t.Run("info format json/xml", func(t *testing.T) {
 		t.Parallel()
-		err := filepath.Walk(static,
+		err := filepath.Walk(root,
 			func(path string, info os.FileInfo, err error) error {
 				if err != nil {
 					return err

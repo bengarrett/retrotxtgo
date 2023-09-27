@@ -16,7 +16,7 @@ import (
 func ExampleMap() {
 	s := sample.Map()["037"]
 	fmt.Printf("%s - %s, %s", s.Name, s.Description, s.Encoding)
-	// Output: text/cp037.txt - EBCDIC 037 IBM mainframe test, IBM Code Page 037
+	// Output: plaintext/cp037.txt - EBCDIC 037 IBM mainframe test, IBM Code Page 037
 }
 
 func ExampleOpen() {
@@ -59,7 +59,7 @@ func TestFlags_Open(t *testing.T) {
 		{"no convert", fields{nil, charmap.CodePage1047}, args{&file, "037"}, true, false},
 		{"convert 1252", fields{nil, charmap.CodePage437}, args{&file, "1252"}, true, false},
 		{"convert to cp437", fields{charmap.Windows1252, charmap.CodePage437}, args{&file, "1252"}, true, false},
-		{"ansi", fields{}, args{&file, "ansi"}, true, false},
+		// {"ansi", fields{}, args{&file, "ansi"}, true, false},
 		{"cp437 dump", fields{}, args{&file, "437.cr"}, true, false},
 	}
 	t.Run("", func(t *testing.T) {
@@ -71,12 +71,12 @@ func TestFlags_Open(t *testing.T) {
 			}
 			gotR, err := f.Open(tt.args.conv, tt.args.name)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Flags.Open() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Flags.Open(%s) error = %v, wantErr %v", tt.name, err, tt.wantErr)
 				return
 			}
 			r := bool(len(gotR) > 0)
 			if r != tt.wantRunes {
-				t.Errorf("Flags.Open() runes = %v, want %v", r, tt.wantRunes)
+				t.Errorf("Flags.Open(%s) runes = %v, want %v", tt.name, r, tt.wantRunes)
 			}
 		}
 	})

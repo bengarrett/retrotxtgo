@@ -62,7 +62,7 @@ issues:
       linters:
         - gosec
         - lll
-    - path: pkg/internal/mock/mock.go
+    - path: internal/mock/mock.go
       linters:
         - gosec
     - path: logs/logs_test.go

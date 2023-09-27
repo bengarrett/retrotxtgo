@@ -33,10 +33,10 @@ var File embed.FS
 
 // ANSI is the embedded file system with the ansi subdirectory.
 //
-//go:embed ansi/*.ans
+//go:embed ansi/*.ans ansi/*.utf8ans
 var ANSI embed.FS
 
-// Text is the embedded file system with the text subdirectory.
+// PlainText is the embedded file system with the text subdirectory.
 //
 //go:embed plaintext/*.txt plaintext/*.asc
 var PlainText embed.FS

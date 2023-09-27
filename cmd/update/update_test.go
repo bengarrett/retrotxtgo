@@ -3,7 +3,7 @@ package update_test
 import (
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/cmd/pkg/update"
+	"github.com/bengarrett/retrotxtgo/cmd/update"
 )
 
 const (

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bengarrett/retrotxtgo/cmd/pkg/example"
+	"github.com/bengarrett/retrotxtgo/cmd/example"
 	"github.com/stretchr/testify/assert"
 )
 
