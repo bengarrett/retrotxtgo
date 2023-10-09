@@ -12,7 +12,7 @@ require (
 	github.com/spf13/cobra v1.7.0
 	github.com/zRedShift/mimemagic v1.2.0
 	golang.org/x/net v0.15.0 // indirect
-	golang.org/x/sync v0.3.0
+	golang.org/x/sync v0.4.0
 	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/term v0.12.0
 	golang.org/x/text v0.13.0
