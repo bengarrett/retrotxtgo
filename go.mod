@@ -11,10 +11,10 @@ require (
 	github.com/muesli/go-app-paths v0.2.2
 	github.com/spf13/cobra v1.7.0
 	github.com/zRedShift/mimemagic v1.2.0
-	golang.org/x/net v0.15.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sync v0.3.0
-	golang.org/x/sys v0.12.0 // indirect
-	golang.org/x/term v0.12.0
+	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/term v0.13.0
 	golang.org/x/text v0.13.0
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
