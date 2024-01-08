@@ -101,7 +101,7 @@ func Map() map[string]Sample {
 		"ansi.cp":       {Ansi, cp437, "ansi/ansi-cp.ans", "ANSI cursor position tests"},
 		"ansi.cpf":      {Ansi, cp437, "ansi/ansi-cpf.ans", "ANSI cursor forward tests"},
 		"ansi.hvp":      {Ansi, cp437, "ansi/ansi-hvp.ans", "ANSI horizontal and vertical cursor positioning"},
-		"ansi.proof":    {Ansi, cp437, "plaintext/ansi-proof.ans", "ANSI formatting proof sheet"},
+		"ansi.proof":    {Ansi, cp437, "ansi/ansi-proof.ans", "ANSI formatting proof sheet"},
 		"ansi.rgb":      {Ansi, cp437, "ansi/ansi-rgb.ans", "ANSI RGB 24-bit color sheet"},
 		"ansi.setmodes": {Ansi, cp437, "ansi/ansi-setmodes.ans", "MS-DOS ANSI.SYS Set Mode examples"},
 		"iso-1":         {Text, iso1, "plaintext/iso-8859-1.txt", "ISO 8859-1 select characters"},

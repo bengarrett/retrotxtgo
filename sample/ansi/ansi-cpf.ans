@@ -31,11 +31,4 @@ moved 158 characters forward to reach EOL[158Cþ
 ฬออออออออฮอออออออออฮอออออออออฮอออออออออฮอออออออออฮอออออออออฮอออออออออฮอออออออออน
 [1I1 horizontal tab
 [10I10 horizontal tabs
-[20I20 horizontal tab to the EOL
-
-[0mTODO fixes: 
-
-- The line-wrap triggered at column 80 is toggling an extra new row.
-- The newlines to go to here are not displaying.
-- RGB are being applied to the wrong <i></i> element.
-- Moving 158 characters forward fails.
+[20I20 horizontal tab to the EOL[0m
