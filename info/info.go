@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sync"
 
 	"github.com/bengarrett/retrotxtgo/fsys"
 	"github.com/bengarrett/retrotxtgo/nl"
@@ -101,6 +102,7 @@ func Marshal(w io.Writer, name string, chksums bool, f Format) error {
 		}
 		d.LineBreak.Find(d.LineBreak.Decimal)
 		g := errgroup.Group{}
+		var mu sync.Mutex
 		g.Go(func() error {
 			return d.Ctrls(name)
 		})
@@ -112,7 +114,9 @@ func Marshal(w io.Writer, name string, chksums bool, f Format) error {
 			if err != nil {
 				return err
 			}
+			mu.Lock()
 			d.Lines = i
+			mu.Unlock()
 			return nil
 		})
 		g.Go(func() error {
@@ -148,34 +152,48 @@ func Stream(w io.Writer, format string, b ...byte) error {
 	}
 	d.LineBreak.Find(fsys.LineBreaks(true, []rune(string(b))...))
 	g := errgroup.Group{}
+	var mu sync.Mutex
 	g.Go(func() error {
-		var err error
-		if d.Count.Controls, err = fsys.Controls(bytes.NewReader(b)); err != nil {
+		val, err := fsys.Controls(bytes.NewReader(b))
+		if err != nil {
 			return err
 		}
+		mu.Lock()
+		d.Count.Controls = val
+		mu.Unlock()
 		return nil
 	})
 	g.Go(func() error {
-		var err error
-		if d.Lines, err = nl.Lines(bytes.NewReader(b), d.LineBreak.Decimal); err != nil {
+		val, err := nl.Lines(bytes.NewReader(b), d.LineBreak.Decimal)
+		if err != nil {
 			return err
 		}
+		mu.Lock()
+		d.Lines = val
+		mu.Unlock()
 		return nil
 	})
 	g.Go(func() error {
-		var err error
-		if d.Width, err = fsys.Columns(bytes.NewReader(b), d.LineBreak.Decimal); err != nil {
+		val, err := fsys.Columns(bytes.NewReader(b), d.LineBreak.Decimal)
+		if err != nil {
 			return err
-		} else if d.Width < 0 {
-			d.Width = d.Count.Chars
 		}
+		if val < 0 {
+			val = d.Count.Chars
+		}
+		mu.Lock()
+		d.Width = val
+		mu.Unlock()
 		return nil
 	})
 	g.Go(func() error {
-		var err error
-		if d.Count.Words, err = fsys.Words(bytes.NewReader(b)); err != nil {
+		val, err := fsys.Words(bytes.NewReader(b))
+		if err != nil {
 			return err
 		}
+		mu.Lock()
+		d.Count.Words = val
+		mu.Unlock()
 		return nil
 	})
 	if err := g.Wait(); err != nil {

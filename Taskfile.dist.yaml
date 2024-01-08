@@ -59,6 +59,10 @@ tasks:
     desc: "Run the test suite."
     cmds:
       - go test -count=1 ./...
+  test5x:
+    desc: "Run the test suite 5 times over."
+    cmds:
+      - go test -count=5 ./...
   testr:
     desc: "Run the verbose test suite with the slower race detection."
     cmds:
