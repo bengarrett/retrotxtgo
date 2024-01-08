@@ -61,6 +61,7 @@ func TestRead(t *testing.T) {
 	})
 	fmt.Fprintln(os.Stdout, "path:", tmp)
 	var got info.Detail
+	got.LegacySums = true
 	if err := got.Read(tmp); err != nil {
 		t.Errorf("Read() = %v, want %v", err, nil)
 	}
@@ -147,6 +148,7 @@ func TestMarshal_text(t *testing.T) {
 	})
 	const want = 800
 	var d info.Detail
+	d.LegacySums = true
 	if err := d.Read(tmp); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
