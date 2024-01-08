@@ -1,22 +1,22 @@
 # Retrotxt
 [![Go Reference](https://pkg.go.dev/badge/github.com/bengarrett/retrotxtgo.svg)](https://pkg.go.dev/github.com/bengarrett/retrotxtgo)
 
-### _[Retrotxt](https://github.com/bengarrett/retrotxt) for the terminal_.
+### _[RetroTxt](https://github.com/bengarrett/retrotxt) for the terminal_.
 
-Read legacy code page and ANSI encoded text files in a modern Unicode terminal.
+Read legacy code pages and ANSI-encoded text files in a modern Unicode terminal.
 
 ## Downloads
 
-There are [numerous downloads](https://github.com/bengarrett/retrotxtgo/releases/latest/) available for
+[Numerous downloads are available](https://github.com/bengarrett/retrotxtgo/releases/latest/) for 
 [Windows](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo_windows_amd64.zip),
 [macOS](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo_darwin_all.tar.gz),
 [Linux](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo_linux_amd64.tar.gz) and more.
 
-Retrotxt is a sandalone terminal program, [but there are installation options and instructions](INSTALL.md).
+Retrotxt is a standalone terminal program, but [installation options and instructions exist](INSTALL.md).
 
 ## Quick Usage
 
-#### Text files and art created before the adoption of Unicode often fail to display on modern systems.
+Text files and art created before the adoption of Unicode often fail to display on modern systems.
 
 #### Use RetroTxt to print legacy text on modern terminals.
 
@@ -39,7 +39,7 @@ retrotxt view ascii-logo.txt > ascii-logo-utf8.txt
 
 ![Windows Notepad viewing ascii-logo-utf8.txt](img/ascii-logo-utf8.txt.png)
 
-Otherwise, when using most terminal apps, legacy text is often malformed and unreadable.
+Otherwise, legacy text is often malformed and unreadable when using most terminal apps.
 
 ```sh
 type ascii-logo.txt # or, cat ascii-logo.txt
@@ -91,8 +91,8 @@ End of the Project Gutenberg EBook of Det går an, by Carl Jonas Love Almqvist
 ### Japanese text
 
 ```sh
-cat rshmn10j
-# no text is displayed
+cat rshmn10j.txt
+# no text is displayed as the text isn't ASCII compatible
 ```
 
 ```
@@ -147,8 +147,8 @@ retrotxt olavg10.txt --input cp1251
 - Print or export the details of the text files.
 - Print or export the [SAUCE metadata](https://www.acid.org/info/sauce/sauce.htm) of a file.
 - Transform legacy encoded texts and text art into UTF-8 documents for use on the web or with modern systems.
-- Lookup and print code page character tables for dozens of encodings.
-- Support for ISO, PC-DOS/Windows code pages plus IBM EBCDIC, Macintosh, and ShiftJIS.
+- Lookup code page and character tables for dozens of encodings, and print the results.
+- Support for ISO, PC-DOS/Windows code pages, IBM EBCDIC, Macintosh, and ShiftJIS.
 - Use io redirection with piping support.
 
 ---
@@ -271,7 +271,7 @@ retrotxt table cp437 latin1
  F | ð | ñ | ò | ó | ô | õ | ö | ÷ | ø | ù | ú | û | ü | ý | þ | ÿ |
 ```
 
-#### Print file information and embedded SAUCE metadata.
+#### Print the file information and embed SAUCE metadata.
 
 ```
 retrotxt info retrotxt.ans
@@ -422,8 +422,7 @@ retrotxt info retrotxt.ans --format json
 }
 ```
 
-
-#### Dump the hexadecmial bytes of a file.
+#### Dump the hexadecimal bytes of a file.
 
 ```sh
 retrotxt dump sauce-embed.txt
