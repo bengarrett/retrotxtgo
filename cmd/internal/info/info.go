@@ -61,7 +61,7 @@ func Run(w io.Writer, cmd *cobra.Command, args ...string) error {
 		case "color", "c", "", "text", "t":
 			fmt.Fprintln(w)
 		}
-		err = info.Info(w, arg, flag.Info.Format)
+		err = info.Info(w, arg, flag.Info.Format, flag.Info.Checksum)
 		if err != nil {
 			if err := cmd.Usage(); err != nil {
 				return fmt.Errorf("%w: %w", ErrUsage, err)

@@ -75,6 +75,8 @@ func InfoInit() *cobra.Command {
 	infos := format.Format().Info
 	term.Options(s, "print format or syntax", true, true, infos[:]...)
 	ic.Flags().StringVarP(&flag.Info.Format, "format", "f", "color", s.String())
+	ic.Flags().BoolVarP(&flag.Info.Checksum, "checksum", "c", false,
+		"also include redundant checksums such as MD5 and CRC")
 	return ic
 }
 

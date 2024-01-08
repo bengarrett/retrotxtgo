@@ -20,7 +20,7 @@ var (
 )
 
 // Info parses the named file and writes the details in a formal syntax.
-func Info(w io.Writer, name, format string) error {
+func Info(w io.Writer, name, format string, chksums bool) error {
 	if w == nil {
 		w = io.Discard
 	}
@@ -40,7 +40,7 @@ func Info(w io.Writer, name, format string) error {
 		return fmt.Errorf("%s: %w", failure, err)
 	}
 	if !s.IsDir() {
-		if err := Marshal(w, name, f); err != nil {
+		if err := Marshal(w, name, chksums, f); err != nil {
 			return fmt.Errorf("%s: %w", failure, err)
 		}
 		return nil
@@ -53,7 +53,7 @@ func Info(w io.Writer, name, format string) error {
 			} else if skip {
 				return nil
 			}
-			return Marshal(w, osPathname, f)
+			return Marshal(w, osPathname, chksums, f)
 		},
 		ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {
 			return godirwalk.SkipNode
@@ -84,11 +84,12 @@ func output(arg string) (Format, error) {
 }
 
 // Marshal and write the metadata and system details of a named file.
-func Marshal(w io.Writer, name string, f Format) error {
+func Marshal(w io.Writer, name string, chksums bool, f Format) error {
 	if w == nil {
 		w = io.Discard
 	}
 	var d Detail
+	d.LegacySums = chksums // this must go before d.Read()
 	if err := d.Read(name); err != nil {
 		return err
 	}

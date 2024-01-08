@@ -49,6 +49,7 @@ type Detail struct {
 	Sauce      sauce.Record `json:"sauce"      xml:"sauce"`         // Sauce is the SAUCE metadata.
 	ZipComment string       `json:"zipComment" xml:"zip_comment"`   // ZipComment is the zip file comment.
 	UTF8       bool         `json:"-"          xml:"-"`             // UTF8 is true if the file is UTF-8 encoded.
+	LegacySums bool         `json:"-"          xml:"-"`             // LegacySums is true if the user requests legacy checksums.
 	sauceIndex int          // sauceIndex is the index of the SAUCE record in the file.
 }
 
@@ -191,7 +192,10 @@ func (d *Detail) MimeUnknown() {
 
 // Parse the file and the raw data content.
 func (d *Detail) Parse(name string, data ...byte) error {
-	const routines = 8
+	routines := 5
+	if d.LegacySums {
+		routines += 3
+	}
 	wg := sync.WaitGroup{}
 	wg.Add(routines)
 	go func() {
@@ -210,21 +214,23 @@ func (d *Detail) Parse(name string, data ...byte) error {
 		stat, _ := os.Stat(name)
 		d.input(len(data), stat)
 	}()
-	go func() {
-		defer wg.Done()
-		crc32sum := crc32.ChecksumIEEE(data)
-		d.Sums.CRC32 = fmt.Sprintf("%x", crc32sum)
-	}()
-	go func() {
-		defer wg.Done()
-		crc64sum := crc64.Checksum(data, crc64.MakeTable(crc64.ECMA))
-		d.Sums.CRC64 = fmt.Sprintf("%x", crc64sum)
-	}()
-	go func() {
-		defer wg.Done()
-		md5sum := md5.Sum(data)
-		d.Sums.MD5 = fmt.Sprintf("%x", md5sum)
-	}()
+	if d.LegacySums {
+		go func() {
+			defer wg.Done()
+			crc32sum := crc32.ChecksumIEEE(data)
+			d.Sums.CRC32 = fmt.Sprintf("%x", crc32sum)
+		}()
+		go func() {
+			defer wg.Done()
+			crc64sum := crc64.Checksum(data, crc64.MakeTable(crc64.ECMA))
+			d.Sums.CRC64 = fmt.Sprintf("%x", crc64sum)
+		}()
+		go func() {
+			defer wg.Done()
+			md5sum := md5.Sum(data)
+			d.Sums.MD5 = fmt.Sprintf("%x", md5sum)
+		}()
+	}
 	go func() {
 		defer wg.Done()
 		shasum := sha256.Sum256(data)
@@ -336,7 +342,7 @@ func (d *Detail) marshal(w io.Writer, color bool) error {
 	const tabWidth = 8
 	tw := tabwriter.NewWriter(w, 0, tabWidth, 0, '\t', 0)
 	for _, x := range data {
-		if !d.validate(x) {
+		if !d.validate(x) || d.skip(x) {
 			continue
 		}
 		if x.k == zipComment {
@@ -395,6 +401,17 @@ func (d Detail) validate(x struct{ k, v string }) bool {
 		return false
 	}
 	return true
+}
+
+// skip reports whether the key and value data should be skipped.
+func (d Detail) skip(x struct{ k, v string }) bool {
+	if !d.LegacySums {
+		switch x.k {
+		case "CRC32", "CRC64 ECMA", "MD5":
+			return true
+		}
+	}
+	return false
 }
 
 // marshalled returns the data structure used for print marshaling.

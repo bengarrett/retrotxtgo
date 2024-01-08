@@ -15,7 +15,7 @@ import (
 
 func ExampleInfo() {
 	s := strings.Builder{}
-	_ = info.Info(&s, "testdata/example.txt", "text")
+	_ = info.Info(&s, "testdata/example.txt", "text", false)
 	x := strings.Split(s.String(), "\n")
 	for _, v := range x {
 		if strings.Contains(v, "SHA256 checksum") {
@@ -27,7 +27,7 @@ func ExampleInfo() {
 
 func ExampleMarshal() {
 	s := strings.Builder{}
-	_ = info.Marshal(&s, "testdata/example.txt", info.JSON)
+	_ = info.Marshal(&s, "testdata/example.txt", true, info.JSON)
 	fmt.Printf("%d bytes and json? %t", len(s.String()), json.Valid([]byte(s.String())))
 	// Output: 2345 bytes and json? true
 }
@@ -79,7 +79,7 @@ func TestMarshal(t *testing.T) {
 			os.Remove(tmp)
 		})
 		for _, tt := range tests {
-			if err := info.Marshal(nil, tt.args.filename, tt.args.format); (err != nil) != tt.wantErr {
+			if err := info.Marshal(nil, tt.args.filename, true, tt.args.format); (err != nil) != tt.wantErr {
 				t.Errorf("Marshal(%q) error = %v, wantErr %v", tt.name, err, tt.wantErr)
 			}
 		}

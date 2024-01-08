@@ -27,7 +27,8 @@ var Hex struct {
 
 // Info handles the info "format" flag.
 var Info struct {
-	Format string // output format
+	Checksum bool   // show legacy checksums
+	Format   string // output format
 }
 
 // Views handles the view command flags.
