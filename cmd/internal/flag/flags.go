@@ -1,6 +1,4 @@
 // Package flag provides the command flags handlers.
-//
-//nolint:gochecknoglobals
 package flag
 
 import (
@@ -8,55 +6,60 @@ import (
 	"fmt"
 
 	"github.com/bengarrett/retrotxtgo/meta"
-	"github.com/bengarrett/retrotxtgo/pkg/term"
-	"github.com/gookit/color"
+	"github.com/bengarrett/retrotxtgo/term"
 	"github.com/spf13/cobra"
 )
 
 var ErrHide = errors.New("could not hide the flag")
 
-type Commands struct {
+// Command flags for the main cmd.
+type Command struct {
 	Tester bool // internal automated tester
 }
 
-// Command returns the root command.
-var Command Commands
+// Cmd returns the flags for the main cmd.
+var Cmd Command
 
-// Info handles the info --format flag.
+// Hex handles the dec and hex "raw" flag.
+var Hex struct {
+	Raw bool // raw output
+}
+
+// Info handles the info "format" flag.
 var Info struct {
-	Format string
+	Checksum bool   // show legacy checksums
+	Format   string // output format
 }
 
 // Views handles the view command flags.
 type Views struct {
-	Controls []string
-	Encode   string
-	Swap     []string
-	To       string
-	Width    int
+	Input    string   // input character encoding used by the files
+	Controls []string // control codes to implement
+	Swap     []string // swap out these characters with Unicode control pictures
+	Width    int      // maximum document character/column width
+	Original bool     // output the sample's original character encoding to stdout
 }
 
 // View returns the Views struct with default values.
 func View() Views {
 	return Views{
+		Input:    "CP437",
 		Controls: []string{"eof", "tab"},
-		Encode:   "CP437",
 		Swap:     []string{"null", "bar"},
-		To:       "",
 		Width:    0,
+		Original: false,
 	}
 }
 
-// Controls handles the --controls flag.
-//
-//nolint:dupword
+// Controls handles the "controls" flag.
 func Controls(p *[]string, cc *cobra.Command) {
 	cc.Flags().StringSliceVarP(p, "controls", "c", []string{},
 		`implement these control codes (default "eof,tab")`+
-			`separate multiple controls with commas
+			`
+  separate multiple controls with commas
   eof    end of file mark
   tab    horizontal tab
-  bell   bell or terminal alert
+  bell   audio terminal alert
   cr     carriage return
   lf     line feed
   bs backspace, del delete character, esc escape character
@@ -64,20 +67,20 @@ func Controls(p *[]string, cc *cobra.Command) {
 `)
 }
 
-// Encode handles the --encode flag.
+// Encode handles the "input" flag.
 func Encode(p *string, cc *cobra.Command) {
-	cc.Flags().StringVarP(p, "encode", "e", "",
-		fmt.Sprintf("character encoding used by the filename(s) (default \"CP437\")\n%s\n%s%s\n",
-			color.Info.Sprint("this flag has no effect for Unicode and EBCDIC samples"),
+	cc.Flags().StringVarP(p, "input", "i", "",
+		fmt.Sprintf("character encoding used by the filename(s) (default \"CP437\")\n%s%s\n%s\n",
 			"see the list of encode values ",
-			term.Example(meta.Bin+" list codepages")))
+			term.Example(meta.Bin+" list codepages"),
+			"this flag has no effect for the inbuilt samples"))
 }
 
-// SwapChars handles the --swap-chars flag.
+// SwapChars handles the "swap-chars" flag.
 func SwapChars(p *[]string, cc *cobra.Command) {
 	cc.Flags().StringSliceVarP(p, "swap-chars", "x", []string{},
-		`swap out these characters with UTF8 alternatives (default "null,bar")
-separate multiple values with commas
+		`swap out these characters with common alternatives (default "null,bar")
+  separate multiple values with commas
   null	C null for a space
   bar	Unicode vertical bar | for the IBM broken pipe ¦
   house	IBM house ⌂ for the Greek capital delta Δ
@@ -87,19 +90,21 @@ separate multiple values with commas
   `)
 }
 
-// HiddenTo handles the hidden --to flag.
-func HiddenTo(p *string, cc *cobra.Command) error {
-	const name = "to"
-	cc.Flags().StringVar(p, name, "",
-		"alternative character encoding to print to stdout\nthis flag is unreliable and not recommended")
-	if err := cc.Flags().MarkHidden(name); err != nil {
-		return fmt.Errorf("%w, %s: %w", ErrHide, name, err)
-	}
+// OG handles the original flag that can be used for multiple commands.
+func OG(p *bool, cc *cobra.Command) error {
+	const name = "original"
+	cc.Flags().BoolVar(p, name, false,
+		"use the original document character encoding to print to terminal"+
+			"\nby default, "+meta.Bin+" view always prints texts as UTF-8"+
+			"\nthis flag only works with the inbuilt samples\n")
 	return nil
 }
 
-// Width handles the --width flag.
+// Width handles the "width" flag.
 func Width(p *int, cc *cobra.Command) {
 	cc.Flags().IntVarP(p, "width", "w", View().Width,
-		"maximum document character/column width")
+		`maximum document character/column width
+any horizontal tab characters are replaced with three spaces
+any newline characters are replaced with a space
+`)
 }

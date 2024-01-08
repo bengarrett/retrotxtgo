@@ -1,0 +1,10 @@
+This test data contains real world legacy encoded text files
+sourced from early iterations of Project Gutenberg. These 
+public domain texts have their own LICENSES and are not 
+included in the compiled application.
+
+epsng10.txt     Bulgarian text uses the Cyrillic Windows 1251 character set.
+17996-8.txt     Greek text uses the Windows 1253 character set.
+11306-8.txt     German and Catalan text uses the ISO-8859-1 character set.
+16843-8.txt     Czech text uses the ISO-8859-2 character set.
+rshmn10j.txt    Japanese text uses the Shift-JIS character set.

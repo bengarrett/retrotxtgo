@@ -3,19 +3,19 @@ package cmd
 import (
 	"strings"
 
+	"github.com/bengarrett/retrotxtgo/cmd/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
-	"github.com/bengarrett/retrotxtgo/cmd/pkg/example"
-	"github.com/bengarrett/retrotxtgo/cmd/pkg/list"
+	"github.com/bengarrett/retrotxtgo/cmd/list"
 	"github.com/spf13/cobra"
 )
 
-func ListTable() *cobra.Command {
-	s := "Display one or more codepage tables showing all the characters in use"
-	l := "Display one or more codepage tables showing all the characters in use."
+func Table() *cobra.Command {
+	s := "Display one or more code page tables showing all the characters in use"
+	l := "Display one or more code page tables showing all the characters in use."
 	expl := strings.Builder{}
-	example.ListTable.String(&expl)
+	example.Table.String(&expl)
 	return &cobra.Command{
-		Use:     "table [codepage names or aliases]",
+		Use:     "table [code page names or aliases]",
 		Aliases: []string{"t"},
 		Short:   s,
 		Long:    l,
@@ -30,11 +30,11 @@ func ListTable() *cobra.Command {
 	}
 }
 
-func ListTables() *cobra.Command {
+func Tables() *cobra.Command {
 	return &cobra.Command{
 		Use:     "tables",
-		Short:   "Display the characters of every codepage table in use",
-		Long:    "Display the characters of every codepage table in use.",
+		Short:   "Display the characters of every code page table in use",
+		Long:    "Display the characters of every code page table in use.",
 		GroupID: IDcodepage,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return list.Tables(cmd.OutOrStdout())
@@ -42,7 +42,7 @@ func ListTables() *cobra.Command {
 	}
 }
 
-func init() { //nolint:gochecknoinits
-	Cmd.AddCommand(ListTable())
-	Cmd.AddCommand(ListTables())
+func init() {
+	Cmd.AddCommand(Table())
+	Cmd.AddCommand(Tables())
 }

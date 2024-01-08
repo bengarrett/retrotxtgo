@@ -9,10 +9,9 @@ import (
 	"strings"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
-	"github.com/bengarrett/retrotxtgo/pkg/fsys"
-	"github.com/bengarrett/retrotxtgo/pkg/info"
-	"github.com/bengarrett/retrotxtgo/pkg/sample"
-	"github.com/bengarrett/retrotxtgo/static"
+	"github.com/bengarrett/retrotxtgo/fsys"
+	"github.com/bengarrett/retrotxtgo/info"
+	"github.com/bengarrett/retrotxtgo/sample"
 	"github.com/spf13/cobra"
 )
 
@@ -39,15 +38,12 @@ func Run(w io.Writer, cmd *cobra.Command, args ...string) error {
 		return err
 	}
 	if ok {
-		return Pipe(w, cmd)
+		return Pipe(w)
 	}
 	if err := flag.Help(cmd, args...); err != nil {
 		return err
 	}
-	n := info.Names{}
-	n.Length = len(args)
-	for i, arg := range args {
-		n.Index = i + 1
+	for _, arg := range args {
 		_, err := os.Stat(arg)
 		if os.IsNotExist(err) {
 			// embed sample filename
@@ -61,8 +57,11 @@ func Run(w io.Writer, cmd *cobra.Command, args ...string) error {
 			defer os.Remove(filename)
 			arg = filename
 		}
-		fmt.Fprintln(w)
-		err = n.Info(w, arg, flag.Info.Format)
+		switch flag.Info.Format {
+		case "color", "c", "", "text", "t":
+			fmt.Fprintln(w)
+		}
+		err = info.Info(w, arg, flag.Info.Format, flag.Info.Checksum)
 		if err != nil {
 			if err := cmd.Usage(); err != nil {
 				return fmt.Errorf("%w: %w", ErrUsage, err)
@@ -73,14 +72,14 @@ func Run(w io.Writer, cmd *cobra.Command, args ...string) error {
 	return nil
 }
 
-// Sample extracts and saves an embed sample file then returns its location.
+// Sample extracts and saves the named embed sample file then returns the filepath.
 func Sample(name string) (string, error) {
 	s := strings.ToLower(name)
 	samp, exist := sample.Map()[s]
 	if !exist {
 		return "", ErrNotSamp
 	}
-	b, err := static.File.ReadFile(samp.Name)
+	b, err := sample.File.ReadFile(samp.Name)
 	if err != nil {
 		return "", fmt.Errorf(" sample file %q: %w", samp.Name, err)
 	}
@@ -88,17 +87,15 @@ func Sample(name string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf(" sample file %q: %w", samp.Name, ErrTmpOpen)
 	}
+	defer file.Close()
 	if _, err = file.Write(b); err != nil {
 		return "", fmt.Errorf(" sample file %q: %w", samp.Name, ErrTmpSave)
-	}
-	if err := file.Close(); err != nil {
-		return "", fmt.Errorf(" sample file %q: %w", samp.Name, ErrTmpClose)
 	}
 	return file.Name(), nil
 }
 
 // Pipe parses a standard input (stdin) stream of data.
-func Pipe(w io.Writer, cmd *cobra.Command) error {
+func Pipe(w io.Writer) error {
 	if w == nil {
 		w = io.Discard
 	}
@@ -106,7 +103,7 @@ func Pipe(w io.Writer, cmd *cobra.Command) error {
 	if err != nil {
 		return fmt.Errorf("%w, %w", ErrPipeRead, err)
 	}
-	err = info.Stdin(w, flag.Info.Format, b...)
+	err = info.Stream(w, flag.Info.Format, b...)
 	if err != nil {
 		return fmt.Errorf("%w, %w", ErrPipeParse, err)
 	}

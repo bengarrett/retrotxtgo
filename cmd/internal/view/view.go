@@ -5,22 +5,35 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
+	"unicode/utf8"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
-	"github.com/bengarrett/retrotxtgo/pkg/convert"
-	"github.com/bengarrett/retrotxtgo/pkg/term"
+	"github.com/bengarrett/retrotxtgo/convert"
+	"github.com/bengarrett/retrotxtgo/fsys"
+	"github.com/bengarrett/retrotxtgo/term"
 	"github.com/spf13/cobra"
 	"golang.org/x/text/encoding"
 )
 
-var ErrConv = errors.New("convert cannot be nil")
+var (
+	ErrConv     = errors.New("convert cannot be nil")
+	ErrPipeRead = errors.New("could not read text stream from piped stdin (standard input)")
+)
 
 // Run parses the arguments supplied with the view command.
 func Run(w io.Writer, cmd *cobra.Command, args ...string) error {
 	if w == nil {
 		w = io.Discard
 	}
+	// piped input from other programs and then exit
+	ok, err := fsys.IsPipe()
+	if err != nil {
+		return err
+	}
+	if ok {
+		return Pipe(w, cmd, args...)
+	}
+	// read from files or samples
 	args, c, samp, err := flag.Args(cmd, args...)
 	if err != nil {
 		return err
@@ -38,13 +51,42 @@ func Run(w io.Writer, cmd *cobra.Command, args ...string) error {
 		if err != nil {
 			return err
 		}
-		r, err := Transform(c, samp.Input, samp.Output, b...)
+		// write out the sample with its original encoding
+		// this could display poorly in a terminal
+		if samp.Original {
+			fmt.Fprint(w, string(b))
+			continue
+		}
+		// write out the sample with the utf-8 encoding
+		r, err := Transform(c, samp.Input, nil, b...)
 		if err != nil {
 			return err
 		}
 		fmt.Fprint(w, string(r))
 	}
 	fmt.Fprintln(w)
+	return nil
+}
+
+// Pipe parses a standard input (stdin) stream of data.
+func Pipe(w io.Writer, cmd *cobra.Command, args ...string) error {
+	if w == nil {
+		w = io.Discard
+	}
+	_, c, samp, err := flag.Args(cmd, args...)
+	if err != nil {
+		return err
+	}
+	b, err := fsys.ReadPipe()
+	if err != nil {
+		return fmt.Errorf("%w, %w", ErrPipeRead, err)
+	}
+	// write out the sample with the utf-8 encoding
+	r, err := Transform(c, samp.Input, nil, b...)
+	if err != nil {
+		return err
+	}
+	fmt.Fprint(w, string(r))
 	return nil
 }
 
@@ -66,16 +108,17 @@ func Transform(c *convert.Convert, in, out encoding.Encoding, b ...byte,
 		c.Input.Encoding = in
 	}
 	p := b
-	// handle any output re-encoding BEFORE converting to Unicode
-	if out != nil {
+	// handle any encoding BEFORE outputing to Unicode
+	// we also make sure the bytes are not valid UTF-8
+	// otherwise the bytes will become corrupted
+	if out != nil && !utf8.Valid(b) {
 		p, err = out.NewDecoder().Bytes(b)
 		if err != nil {
 			return nil, err
 		}
-		fmt.Fprintf(os.Stdout, "%s\n", p)
 	}
 	// convert the bytes into runes
-	if flag.EndOfFile(c.Flags) {
+	if flag.EndOfFile(c.Args) {
 		return c.Text(p...)
 	}
 	return c.Dump(p...)

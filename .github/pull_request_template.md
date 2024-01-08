@@ -4,12 +4,10 @@ Is this a documentation update (if yes, please continue onto _Changes proposed_)
 
 Platforms tested or developed on:
 
-- [ ] Windows 10
+- [ ] Windows
+- [ ] macOS
 - [ ] Linux
-- [ ] macOS (Intel)
-- [ ] macOS (ARM)
-- [ ] BSD
-- [ ] Raspberry Pi/ARM Linux
+- [ ] other
 
 Do the changes validate with [golangci-lint](https://golangci-lint.run/)?: \_
 

@@ -10,11 +10,13 @@
 retrotxt
 retrotxt.exe
 retrotxtgo
+retrotxtgo.exe
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
 # GoReleaser
+/.dist
 /dist
 
 # Editor

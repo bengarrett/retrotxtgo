@@ -1,10 +1,18 @@
+# .github/workflows/release.yml
 name: goreleaser
 
 on:
   pull_request:
   push:
+    # run only against tags
     tags:
       - "*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  # packages: write
+  # issues: write
 
 jobs:
   goreleaser:
@@ -17,18 +25,17 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.18
-      - name: Cache Go modules
-        uses: actions/cache@v3.3.2
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
+          go-version: stable
+      # More assembly might be required: Docker logins, GPG, etc.
+      # It all depends on your needs.
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v5
         with:
+          # either 'goreleaser' (default) or 'goreleaser-pro'
+          distribution: goreleaser
           version: latest
-          args: release --rm-dist
+          args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Your GoReleaser Pro key, if you are using the 'goreleaser-pro' distribution
+          # GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}

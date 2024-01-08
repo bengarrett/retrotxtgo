@@ -1,1 +1,3 @@
-- pre-release code, so this log will remain unchanged.
+### Version 1.0.0
+
+- Initial release.

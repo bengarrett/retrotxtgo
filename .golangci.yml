@@ -1,3 +1,6 @@
+# golangci-lint is a fast Go linters runner.
+# https://golangci-lint.run 
+#
 # golangci-lint run
 linters:
   enable-all: true
@@ -19,12 +22,56 @@ linters:
     - wrapcheck         # wrapping 3rd party errors are unnecessary (opinionated)
     - varnamelen        # doesn't allow short vars (opinionated)
     - goimports         # conflicts with gci
-    - godox             # hide, TODOs are fine
     - nlreturn          # opinionated
     - wsl               # opinionated
-    - paralleltest      # temp disabled
+    #- paralleltest      # temp disabled
 
 linters-settings:
   cyclop:
     # the maximal code complexity to report
     max-complexity: 15
+
+issues:
+  exclude-rules:
+    # all test files
+    - path: '(.+)_test\.go'
+      linters:
+        - gocognit
+        - gochecknoinits
+    # all cmd files
+    - path: 'cmd/(.+)\.go'
+      linters:
+        - gochecknoglobals
+        - gochecknoinits
+    # individual files
+    - path: main.go
+      linters:
+        - gochecknoglobals
+    - path: cmd/internal/flag/flag.go
+      linters:
+        - ireturn
+    - path: meta/meta.go
+      linters:
+        - gochecknoglobals
+    - path: convert/encoding.go
+      linters:
+        - cyclop
+        - funlen
+        - ireturn
+    - path: info/detail.go
+      linters:
+        - gosec
+        - lll
+    - path: internal/mock/mock.go
+      linters:
+        - gosec
+    - path: logs/logs_test.go
+      linters:
+        - goerr113
+    - path: table/table.go
+      linters:
+        - ireturn
+    - path: xud/xud.go
+      linters:
+        - gochecknoglobals
+        - ireturn

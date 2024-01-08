@@ -1,0 +1,59 @@
+8 Foreground
+============
+[47;30mBlack[0m
+[0;31mRed
+[0;32mGreen
+[0;33mBrown
+[0;34mBlue
+[0;35mMagenta
+[0;36mCyan
+[0;37mWhite[0m
+
+8 Bold Foreground
+=================
+[47;30;1mBlack[0m
+[0;1;31mRed
+[32mGreen
+[33mBrown
+[34mBlue
+[35mMagenta
+[36mCyan
+[37mWhite[0m
+
+8 [1mAIX[0m Bright Foreground
+=======================
+[47;90mBlack[0m
+[0;91mRed
+[92mGreen
+[93mBrown
+[94mBlue
+[95mMagenta
+[96mCyan
+[97mWhite[0m
+
+8 Background
+============
+[0;40m Black   [0m
+[0;41m Red     [0m
+[0;42m Green   [0m
+[0;43m Brown   [0m
+[0;44m Blue    [0m
+[0;45m Magenta [0m
+[0;30;46m Cyan    [0m
+[0;30;47m White   [0m
+
+8 [1mAIX[0m Bright Background
+=======================
+[0;100m Black   [0m
+[0;101m Red     [0m
+[0;102m Green   [0m
+[0;103m Brown   [0m
+[0;104m Blue    [0m
+[0;105m Magenta [0m
+[0;30;106m Cyan    [0m
+[0;30;107m White   [0m
+
+Combinations
+============
+
+[0;100m Black [0;40m Black [0;41m Red [0;101m Red [0m[0;30;47m White [0;30;107m White [0m

@@ -5,12 +5,13 @@ import (
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/view"
-	"github.com/bengarrett/retrotxtgo/pkg/convert"
+	"github.com/bengarrett/retrotxtgo/convert"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 )
 
 func TestTransform(t *testing.T) {
+	t.Parallel()
 	const a = "\x01\x02\x03\x7f"
 	const s = "☺☻♥⌂"
 	cp437 := charmap.CodePage437
@@ -45,8 +46,9 @@ func TestTransform(t *testing.T) {
 			latin1, nil, &c, []byte(a),
 		}, []rune{' ', ' ', ' ', ' '}, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		t.Parallel()
+		for _, tt := range tests {
 			got, err := view.Transform(tt.args.conv, tt.args.in, tt.args.out, tt.args.b...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Transform() error = %v, wantErr %v", err, tt.wantErr)
@@ -55,6 +57,6 @@ func TestTransform(t *testing.T) {
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Transform() = %q, want %q", got, tt.want)
 			}
-		})
-	}
+		}
+	})
 }
