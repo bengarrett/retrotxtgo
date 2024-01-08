@@ -446,7 +446,7 @@ func (d Detail) marshalled() []struct{ k, v string } {
 		{k: "title", v: d.Sauce.Title},
 		{k: "author", v: d.Sauce.Author},
 		{k: "group", v: d.Sauce.Group},
-		{k: "date", v: humanize.DMY.Format(d.Modified.Time.UTC())},
+		{k: "date", v: sauceDate(d.Sauce.Date.Value)},
 		{k: "original size", v: d.Sauce.FileSize.Decimal},
 		{k: "file type", v: d.Sauce.File.Name},
 		{k: "data type", v: d.Sauce.Data.Name},
@@ -467,6 +467,14 @@ func (d Detail) marshalled() []struct{ k, v string } {
 		data = append(data, comment)
 	}
 	return data
+}
+
+func sauceDate(s string) string {
+	t, err := time.Parse("20060102", s) // CCYYMMDD
+	if err != nil {
+		return ""
+	}
+	return humanize.DMY.Format(t.UTC())
 }
 
 // Read and parse the named file and content.
