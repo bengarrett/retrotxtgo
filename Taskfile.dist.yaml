@@ -32,7 +32,7 @@ tasks:
       - cmd: go build -o {{.BINNAME}}.exe -v main.go
         platforms: [windows]
       - cmd: echo "Done!"
-  build-race:
+  buildr:
     desc: "Build the binary of the program with race detection."
     cmds:
       - cmd: echo "Building with race conditions..."
