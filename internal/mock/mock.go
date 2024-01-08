@@ -14,11 +14,14 @@ import (
 	"github.com/bengarrett/retrotxtgo/internal/tmp"
 )
 
-var ErrZB = fmt.Errorf("zero bytes written")
+var (
+	ErrMax = fmt.Errorf("max value cannot be less than or equal to zero")
+	ErrZB  = fmt.Errorf("zero bytes written")
+)
 
 const (
-	xPow = 2
-	yPow = 1000
+	xPow = 1000
+	yPow = 2
 )
 
 // Input returns a file pointer to a temporary file containing the input string.
@@ -51,10 +54,22 @@ func T() map[string]string {
 	}
 }
 
+// max calculates and returns the maximum value of yPow raised to the power of xPow.
+// It always confirms that the value is safe to use with rand.Int,
+// that panics if the max value is less than or equal to zero.
+func max() *big.Int {
+	max := big.NewInt(int64(math.Pow(xPow, yPow)))
+	bi := big.NewInt(1)
+	if bi.Cmp(max) == 1 {
+		log.Fatalf("%s: %s", ErrMax, max)
+	}
+	return max
+}
+
 // FileExample saves the string to a randomized, threadsafe filename.
 // The path to the file is returned.
 func FileExample(s string) string {
-	v, err := rand.Int(rand.Reader, big.NewInt(int64(math.Pow(xPow, yPow))))
+	v, err := rand.Int(rand.Reader, max())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -69,7 +84,7 @@ func FileExample(s string) string {
 // LargeExample generates and saves a 800k file of filler us-ascii text
 // to a randomized, threadsafe filename. The path to the file is returned.
 func LargeExample() string {
-	v, err := rand.Int(rand.Reader, big.NewInt(int64(math.Pow(xPow, yPow))))
+	v, err := rand.Int(rand.Reader, max())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -86,7 +101,7 @@ func LargeExample() string {
 // MegaExample generates and saves a 1.5MB file of filler us-ascii text
 // to a randomized, threadsafe filename. The path to the file is returned.
 func MegaExample() string {
-	v, err := rand.Int(rand.Reader, big.NewInt(int64(math.Pow(xPow, yPow))))
+	v, err := rand.Int(rand.Reader, max())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -104,7 +119,7 @@ func MegaExample() string {
 // newlines to a randomized, threadsafe filename. The path to the file is
 // returned.
 func ByteExample() string {
-	v, err := rand.Int(rand.Reader, big.NewInt(int64(math.Pow(xPow, yPow))))
+	v, err := rand.Int(rand.Reader, max())
 	if err != nil {
 		log.Fatal(err)
 	}
