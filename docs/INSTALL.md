@@ -34,45 +34,45 @@ In System Settings, Privacy & Security, Security, toggle **Allow applications do
 
 ```sh
 # download the program
-curl -OL https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo_darwin_all.tar.gz
+$ curl -OL https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo_darwin_all.tar.gz
 
 # decompress and unpack the program
-tar -xvzf retrotxtgo_darwin_all.tar.gz
+$ tar -xvzf retrotxtgo_darwin_all.tar.gz
 
 # if needed, follow the itemized instructions above
 # then run the command
-retrotxt --version
+$ retrotxt --version
 ```
 
 ### Linux
 ### DEB
 ```sh
 # Debian DEB package
-wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo.deb
-dpkg -i retrotxtgo.deb
-retrotxt -v
+$ wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo.deb
+$ dpkg -i retrotxtgo.deb
+$ retrotxt -v
 ```
 
 ### RPM
 ```sh
 # Redhat RPM package
-wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo.rpm
-rpm -i retrotxtgo.rpm
-retrotxt -v
+$ wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo.rpm
+$ rpm -i retrotxtgo.rpm
+$ retrotxt -v
 ```
 
 ### APK
 ```sh
 # Alpine APK package
-wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo.apk
-apk add retrotxtgo.apk
-retrotxt -v
+$ wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo.apk
+$ apk add retrotxtgo.apk
+$ retrotxt -v
 ```
 
 ### ZST
 ```sh
 # Arch ZST package
-wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo.pkg.tar.zst
-pacman -U retrotxtgo.pkg.tar.zst
-retrotxt -v
+$ wget https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo.pkg.tar.zst
+$ pacman -U retrotxtgo.pkg.tar.zst
+$ retrotxt -v
 ```
