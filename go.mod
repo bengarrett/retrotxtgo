@@ -11,7 +11,7 @@ require (
 	github.com/muesli/go-app-paths v0.2.2
 	github.com/spf13/cobra v1.8.0
 	github.com/zRedShift/mimemagic v1.2.0
-	golang.org/x/net v0.19.0 // indirect
+	golang.org/x/net v0.20.0 // indirect
 	golang.org/x/sync v0.6.0
 	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/term v0.16.0
@@ -20,10 +20,10 @@ require (
 )
 
 require (
-	github.com/bengarrett/bbs v0.1.0
-	github.com/bengarrett/sauce v1.1.0
+	github.com/bengarrett/bbs v1.0.1
+	github.com/bengarrett/sauce v1.2.1
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc
+	golang.org/x/exp v0.0.0-20240110193028-0dcbfd608b1e
 	gopkg.in/yaml.v3 v3.0.1
 )
 

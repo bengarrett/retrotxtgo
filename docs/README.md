@@ -21,7 +21,7 @@ Text files and art created before the adoption of Unicode often fail to display 
 #### Use RetroTxt to print legacy text on modern terminals.
 
 ```sh
-retrotxt view ascii-logo.txt
+$ retrotxt view ascii-logo.txt
 
 ██████╗ ███████╗████████╗██████╗  ██████╗ ████████╗██╗  ██╗████████╗
 ██╔══██╗██╔════╝╚══██╔══╝██╔══██╗██╔═══██╗╚══██╔══╝╚██╗██╔╝╚══██╔══╝
@@ -34,7 +34,7 @@ retrotxt view ascii-logo.txt
 #### Or save it to a Unicode file and use it in other apps.
 
 ```sh
-retrotxt view ascii-logo.txt > ascii-logo-utf8.txt
+$ retrotxt view ascii-logo.txt > ascii-logo-utf8.txt
 ```
 
 ![Windows Notepad viewing ascii-logo-utf8.txt](img/ascii-logo-utf8.txt.png)
@@ -42,7 +42,7 @@ retrotxt view ascii-logo.txt > ascii-logo-utf8.txt
 Otherwise, legacy text is often malformed and unreadable when using most terminal apps.
 
 ```sh
-type ascii-logo.txt # or, cat ascii-logo.txt
+$ type ascii-logo.txt # or, cat ascii-logo.txt
 
 �����ۻ ������ۻ�������ۻ�����ۻ  �����ۻ �������ۻ�ۻ  �ۻ�������ۻ
 ������ۻ������ͼ�������ͼ������ۻ�������ۻ�������ͼ��ۻ��ɼ�������ͼ
@@ -59,7 +59,7 @@ type ascii-logo.txt # or, cat ascii-logo.txt
 ### Swedish text
 
 ```
-cat 14670.txt
+$ cat 14670.txt
 
 �mnet d�r, fortfor den andre, r�r till en del de antika gallerna; men
 f�r det mesta sker h�ndelserna i andev�rlden.
@@ -74,7 +74,7 @@ End of the Project Gutenberg EBook of Det g�r an, by Carl Jonas Love Almqvist
 ```
 
 ```
-retrotxt 14670.txt --input latin1
+$ retrotxt 14670.txt --input latin1
 
 Ämnet där, fortfor den andre, rör till en del de antika gallerna; men
 för det mesta sker händelserna i andevärlden.
@@ -91,12 +91,12 @@ End of the Project Gutenberg EBook of Det går an, by Carl Jonas Love Almqvist
 ### Japanese text
 
 ```sh
-cat rshmn10j.txt
+$ cat rshmn10j.txt
 # no text is displayed as the text isn't ASCII compatible
 ```
 
 ```
-retrotxt rshmn10j.txt --input shiftjis
+$ retrotxt rshmn10j.txt --input shiftjis
 
 　暫、死んだように倒れていた老婆が、屍骸の中から、その裸の体を起こしたのは、そ
 れから間もなくの事である。老婆は、つぶやくような、うめくような声を立てながら、
@@ -109,7 +109,7 @@ retrotxt rshmn10j.txt --input shiftjis
 ### Cyrillic text
 
 ```
-cat olavg10.txt
+$ cat olavg10.txt
 
 "������ � ��� ���������, ����� ���,
 ���� ������� ����, �������
@@ -124,7 +124,7 @@ cat olavg10.txt
 ```
 
 ```
-retrotxt olavg10.txt --input cp1251
+$ retrotxt olavg10.txt --input cp1251
 
 "Честит е тоз избранник, чийто дух,
 като ковчега Ноев, пренесе
@@ -156,7 +156,7 @@ retrotxt olavg10.txt --input cp1251
 ### Known code pages and text encodings
 
 ```
-retrotxt list
+$ retrotxt list
 
 ──────────────────────────────────────────────────────────────────────────────
  Formal name              | Named value   | Numeric value  | Alias value   |
@@ -228,7 +228,7 @@ retrotxt list
 #### Print legacy code page tables in the terminal.
 
 ```
-retrotxt table cp437 latin1
+$ retrotxt table cp437 latin1
 
  ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
          IBM Code Page 437 (DOS, OEM-US) - Extended ASCII
@@ -274,7 +274,7 @@ retrotxt table cp437 latin1
 #### Print the file information and embed SAUCE metadata.
 
 ```
-retrotxt info retrotxt.ans
+$ retrotxt info retrotxt.ans
 
 ────────────────────────────────────────────────────────────────────────────────
                                 File information
@@ -311,7 +311,7 @@ retrotxt info retrotxt.ans
 ```
 
 ```sh
-retrotxt info retrotxt.ans --format json
+$ retrotxt info retrotxt.ans --format json
 ```
 
 ```json
@@ -425,7 +425,7 @@ retrotxt info retrotxt.ans --format json
 #### Dump the hexadecimal bytes of a file.
 
 ```sh
-retrotxt dump sauce-embed.txt
+$ retrotxt dump sauce-embed.txt
 ```
 
 ```
@@ -521,3 +521,7 @@ retrotxt dump sauce-embed.txt
 00000590  01 13 49 42 4d 20 56 47  41 00 00 00 00 00 00 00  |..IBM VGA.......|
 000005a0  00 00 00 00 00 00 00 00                           |........|
 ```
+
+---
+
+### [Also available is RetroTxt, the browser Extension](https://github.com/bengarrett/RetroTxt) that turns ANSI, ASCII, and NFO text into web documents.
