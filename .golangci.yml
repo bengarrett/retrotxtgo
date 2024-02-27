@@ -24,7 +24,6 @@ linters:
     - goimports         # conflicts with gci
     - nlreturn          # opinionated
     - wsl               # opinionated
-    #- paralleltest      # temp disabled
 
 linters-settings:
   cyclop:
