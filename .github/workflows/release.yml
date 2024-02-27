@@ -2,7 +2,9 @@
 name: GoReleaser
 
 on:
-  # only run when manually triggered
+  push:
+    tags:
+      - "v*"
   workflow_dispatch:
 
 permissions:
