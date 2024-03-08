@@ -22,7 +22,7 @@ require (
 require (
 	github.com/bengarrett/bbs v1.0.1
 	github.com/bengarrett/sauce v1.2.2
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	golang.org/x/exp v0.0.0-20240222234643-814bf88cf225
 	gopkg.in/yaml.v3 v3.0.1
 )
