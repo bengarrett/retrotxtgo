@@ -11,7 +11,7 @@ require (
 	github.com/muesli/go-app-paths v0.2.2
 	github.com/spf13/cobra v1.8.0
 	github.com/zRedShift/mimemagic v1.2.0
-	golang.org/x/net v0.21.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/sync v0.6.0
 	golang.org/x/sys v0.19.0 // indirect
 	golang.org/x/term v0.19.0
