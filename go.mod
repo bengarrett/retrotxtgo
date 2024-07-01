@@ -9,7 +9,7 @@ require (
 	github.com/mozillazg/go-slugify v0.2.0
 	github.com/mozillazg/go-unidecode v0.2.0 // indirect
 	github.com/muesli/go-app-paths v0.2.2
-	github.com/spf13/cobra v1.8.0
+	github.com/spf13/cobra v1.8.1
 	github.com/zRedShift/mimemagic v1.2.0
 	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/sync v0.7.0
