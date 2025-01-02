@@ -35,11 +35,12 @@ func Table(wr io.Writer, name string) error { //nolint:funlen
 	if wr == nil {
 		wr = io.Discard
 	}
-	cp, err := xud.CodePage(name)
-	if err != nil {
-		return err
+	if name == "" {
+		return xud.ErrName
 	}
+	cp := xud.CodePage(name)
 	if cp == nil {
+		var err error
 		cp, err = CodePage(name)
 		if err != nil {
 			return err
