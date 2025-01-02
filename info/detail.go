@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"crypto/md5"
 	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
@@ -13,6 +14,7 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"text/tabwriter"
@@ -218,23 +220,23 @@ func (d *Detail) Parse(name string, data ...byte) error {
 		go func() {
 			defer wg.Done()
 			crc32sum := crc32.ChecksumIEEE(data)
-			d.Sums.CRC32 = fmt.Sprintf("%x", crc32sum)
+			d.Sums.CRC32 = strconv.FormatUint(uint64(crc32sum), 16)
 		}()
 		go func() {
 			defer wg.Done()
 			crc64sum := crc64.Checksum(data, crc64.MakeTable(crc64.ECMA))
-			d.Sums.CRC64 = fmt.Sprintf("%x", crc64sum)
+			d.Sums.CRC64 = strconv.FormatUint(crc64sum, 16)
 		}()
 		go func() {
 			defer wg.Done()
 			md5sum := md5.Sum(data)
-			d.Sums.MD5 = fmt.Sprintf("%x", md5sum)
+			d.Sums.MD5 = hex.EncodeToString(md5sum[:])
 		}()
 	}
 	go func() {
 		defer wg.Done()
 		shasum := sha256.Sum256(data)
-		d.Sums.SHA256 = fmt.Sprintf("%x", shasum)
+		d.Sums.SHA256 = hex.EncodeToString(shasum[:])
 	}()
 	go func() {
 		defer wg.Done()

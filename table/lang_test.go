@@ -7,6 +7,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/table"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"golang.org/x/text/encoding/charmap"
 )
 
@@ -26,6 +27,6 @@ func TestListLanguage(t *testing.T) {
 	t.Parallel()
 	b := &strings.Builder{}
 	err := table.ListLanguage(b)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, b.String(), "ANSI X3.4 1967/77/86")
 }

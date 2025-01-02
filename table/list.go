@@ -163,7 +163,7 @@ func Rows(e encoding.Encoding) (Row, error) {
 	}
 	r.Value = strings.ToLower(Uniform(r.Value))
 	if i := Numeric(r.Name); i > -1 {
-		r.Numeric = fmt.Sprint(i)
+		r.Numeric = strconv.Itoa(i)
 	}
 	r.Alias, err = Alias(r.Alias, r.Value, e)
 	if err != nil {

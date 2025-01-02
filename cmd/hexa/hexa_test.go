@@ -7,6 +7,7 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/cmd/hexa"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func ExampleTrimIdent() {
@@ -73,23 +74,23 @@ func TestParse(t *testing.T) {
 func TestParser(t *testing.T) {
 	t.Parallel()
 	err := hexa.Parser(nil, 0, nil...)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	err = hexa.Parser(nil, 2, nil...)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	err = hexa.Parser(nil, 10, nil...)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	err = hexa.Parser(nil, 10, "1", "2", "3")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 }
 
 func TestWriter(t *testing.T) {
 	t.Parallel()
 	err := hexa.Writer(nil, 0, nil...)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	err = hexa.Writer(nil, 2, nil...)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	err = hexa.Writer(nil, 10, nil...)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	err = hexa.Writer(nil, 10, "1", "2", "3")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 }

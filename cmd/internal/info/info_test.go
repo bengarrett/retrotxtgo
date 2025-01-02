@@ -39,5 +39,5 @@ func TestSample(t *testing.T) {
 func TestPipe(t *testing.T) {
 	t.Parallel()
 	err := info.Pipe(nil)
-	assert.NotNil(t, err)
+	assert.Error(t, err)
 }

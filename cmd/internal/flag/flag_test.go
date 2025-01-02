@@ -8,6 +8,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/convert"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"golang.org/x/text/encoding/charmap"
 )
 
@@ -28,8 +29,8 @@ func TestInputOriginal(t *testing.T) {
 	t.Parallel()
 	g, err := flag.InputOriginal(nil, "")
 	assert.Empty(t, g)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	g, err = flag.InputOriginal(nil, "CP437")
 	assert.Empty(t, g)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 }

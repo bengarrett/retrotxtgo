@@ -77,21 +77,18 @@ func (e Encoding) String() string {
 }
 
 // CodePage returns the encoding of the code page name or alias.
-func CodePage(s string) (encoding.Encoding, error) {
-	if s == "" {
-		return nil, ErrName
-	}
-	switch strings.ToLower(s) {
+func CodePage(name string) encoding.Encoding {
+	switch strings.ToLower(name) {
 	case Name11, Numr11, Alias11:
-		return XUserDefinedISO11, nil
+		return XUserDefinedISO11
 	case Name63, Numr63:
-		return XUserDefined1963, nil
+		return XUserDefined1963
 	case Name65, Numr65:
-		return XUserDefined1965, nil
+		return XUserDefined1965
 	case Name67, Numr67, Alias67:
-		return XUserDefined1967, nil
+		return XUserDefined1967
 	default:
-		return nil, nil
+		return nil
 	}
 }
 

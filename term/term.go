@@ -215,7 +215,7 @@ func UnderlineKeys(keys ...string) string {
 
 // Alert returns the string "Problem:" using the error color.
 func Alert() string {
-	return fmt.Sprintf("%s\n", color.Error.Sprint("Problem:"))
+	return color.Error.Sprint("Problem:") + "\n"
 }
 
 // Example returns the string using the debug color.
@@ -225,7 +225,7 @@ func Example(s string) string {
 
 // Inform returns "Information:" using the info color.
 func Inform() string {
-	return fmt.Sprintf("%s\n", color.Info.Sprint("Information:"))
+	return color.Info.Sprint("Information:") + "\n"
 }
 
 // Bool returns a checkmark ✓ when true or a cross ✗ when false.

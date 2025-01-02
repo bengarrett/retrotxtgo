@@ -187,7 +187,7 @@ func (flag Flags) Open(conv *convert.Convert, name string) ([]rune, error) {
 	if err != nil {
 		return nil, err
 	}
-	return r, err
+	return r, nil
 }
 
 func (samp *Sample) transform(conv *convert.Convert, b ...byte) ([]rune, error) {
