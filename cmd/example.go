@@ -24,7 +24,7 @@ func ListExample() *cobra.Command {
 		Short:   s,
 		Long:    l,
 		Example: expl.String(),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			return list.Examples(cmd.OutOrStdout())
 		},
 	}

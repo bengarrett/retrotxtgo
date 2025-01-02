@@ -102,8 +102,8 @@ func Ping(url string) (bool, error) {
 		return false, fmt.Errorf("requesting to set the ping user-agent header: %w", err)
 	}
 	defer resp.Body.Close()
-	const ok, max = http.StatusOK, 299
-	success2xx := resp.StatusCode >= ok && resp.StatusCode <= max
+	const ok, maximum = http.StatusOK, 299
+	success2xx := resp.StatusCode >= ok && resp.StatusCode <= maximum
 	return success2xx, nil
 }
 

@@ -56,7 +56,7 @@ func Info(w io.Writer, name, format string, chksums bool) error {
 			}
 			return Marshal(w, osPathname, chksums, f)
 		},
-		ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {
+		ErrorCallback: func(_ string, err error) godirwalk.ErrorAction {
 			return godirwalk.SkipNode
 		},
 		Unsorted: true, // set true for faster yet non-deterministic enumeration

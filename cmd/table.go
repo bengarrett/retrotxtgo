@@ -36,7 +36,7 @@ func Tables() *cobra.Command {
 		Short:   "Display the characters of every code page table in use",
 		Long:    "Display the characters of every code page table in use.",
 		GroupID: IDcodepage,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			return list.Tables(cmd.OutOrStdout())
 		},
 	}

@@ -41,7 +41,7 @@ func base() *cobra.Command {
 		Short:   s,
 		Long:    l,
 		Example: expl.String(),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			// Do nothing other than print the help.
 			// This func must remain otherwise root
 			// command flags are ignored by Cobra.

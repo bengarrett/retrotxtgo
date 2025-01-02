@@ -9,6 +9,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/internal/mock"
 	"github.com/bengarrett/retrotxtgo/nl"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestReadColumns(t *testing.T) {
@@ -103,7 +104,7 @@ func TestReadControls(t *testing.T) {
 func TestIsPipe(t *testing.T) {
 	t.Parallel()
 	x, err := fsys.IsPipe()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, x)
 }
 

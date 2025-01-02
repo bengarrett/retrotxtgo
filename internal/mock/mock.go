@@ -2,6 +2,7 @@ package mock
 
 import (
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -15,8 +16,8 @@ import (
 )
 
 var (
-	ErrMax = fmt.Errorf("max value cannot be less than or equal to zero")
-	ErrZB  = fmt.Errorf("zero bytes written")
+	ErrMax = errors.New("max value cannot be less than or equal to zero")
+	ErrZB  = errors.New("zero bytes written")
 )
 
 const (

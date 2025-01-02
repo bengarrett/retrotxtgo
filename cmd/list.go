@@ -17,7 +17,7 @@ func ListCodepage() *cobra.Command {
 		Short:   s,
 		Long:    l,
 		GroupID: IDcodepage,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			return table.List(cmd.OutOrStdout())
 		},
 	}

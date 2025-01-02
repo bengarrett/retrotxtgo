@@ -92,8 +92,8 @@ func invalid(err error, mark, name string, words ...string) string {
 	case invalidFlag: // retroxt config shell -i
 		return SprintFlag(ErrNotNil, name, mark)
 	case invalidType: // retroxt --help=foo
-		const min = 6
-		if len(words) >= min {
+		const minimum = 6
+		if len(words) >= minimum {
 			mark = strings.Join(words[4:6], " ")
 		}
 		return parseType(name, mark, err)

@@ -116,10 +116,8 @@ func InputOriginal(cmd *cobra.Command, dfault string) (sample.Flags, error) {
 		lookup := dfault
 		if cp != nil && cp.Changed {
 			lookup = cp.Value.String()
-		} else if dfault == "" {
-			return nil, nil
 		}
-		if lookup == "" {
+		if dfault == "" || lookup == "" {
 			return nil, nil
 		}
 		return convert.Encoder(lookup)
@@ -138,7 +136,7 @@ func InputOriginal(cmd *cobra.Command, dfault string) (sample.Flags, error) {
 	if l != nil && l.Changed {
 		og = true
 	}
-	return sample.Flags{Input: in, Original: og}, err
+	return sample.Flags{Input: in, Original: og}, nil
 }
 
 // EndOfFile reports whether end-of-file control flag was requested.
