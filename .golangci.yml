@@ -5,17 +5,9 @@
 linters:
   enable-all: true
   disable:
-    - interfacer        # deprecated
-    - scopelint         # deprecated
-    - golint            # deprecated
-    - maligned          # deprecated
-    - deadcode          # deprecated
-    - ifshort           # deprecated
-    - nosnakecase       # deprecated
-    - varcheck          # deprecated
-    - exhaustivestruct  # deprecated
-    - structcheck       # deprecated
-
+    # deprecated
+    - exportloopref
+    
     - depguard          # unwanted, as it requires a list of packages
     - exhaustive        # too much boilerplate
     - exhaustruct       # too many values in struct literal (opinionated)
