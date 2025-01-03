@@ -18,7 +18,10 @@ import (
 	"golang.org/x/text/encoding/unicode"
 )
 
-var ErrNames = errors.New("ignoring [filenames]")
+var (
+	ErrEmptyDef = errors.New("empty default encoding")
+	ErrNames    = errors.New("ignoring [filenames]")
+)
 
 // Args initializes the command arguments and flags.
 func Args(cmd *cobra.Command, args ...string) (
@@ -118,7 +121,7 @@ func InputOriginal(cmd *cobra.Command, dfault string) (sample.Flags, error) {
 			lookup = cp.Value.String()
 		}
 		if dfault == "" || lookup == "" {
-			return nil, nil
+			return nil, ErrEmptyDef
 		}
 		return convert.Encoder(lookup)
 	}
@@ -128,6 +131,9 @@ func InputOriginal(cmd *cobra.Command, dfault string) (sample.Flags, error) {
 	// handle encode flag or apply the default
 	in, err := parse("input")
 	if err != nil {
+		if errors.Is(err, ErrEmptyDef) {
+			return sample.Flags{}, nil
+		}
 		return sample.Flags{}, err
 	}
 	// handle the hidden original flag

@@ -4,6 +4,7 @@ package hexa
 import (
 	"fmt"
 	"io"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -79,7 +80,7 @@ func Parse(b Base, vals ...string) []int64 {
 			n[i] = -1
 			continue
 		}
-		x = int64(uint64(x)) // remove sign
+		x = int64(math.Abs(float64(x))) // remove sign
 		n[i] = x
 	}
 	return n

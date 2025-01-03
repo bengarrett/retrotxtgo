@@ -453,9 +453,9 @@ func (d Detail) marshalled() []struct{ k, v string } {
 		{k: "file type", v: d.Sauce.File.Name},
 		{k: "data type", v: d.Sauce.Data.Name},
 		{k: "description", v: d.Sauce.Desc},
-		{k: d.Sauce.Info.Info1.Info, v: fmt.Sprint(d.Sauce.Info.Info1.Value)},
-		{k: d.Sauce.Info.Info2.Info, v: fmt.Sprint(d.Sauce.Info.Info2.Value)},
-		{k: d.Sauce.Info.Info3.Info, v: fmt.Sprint(d.Sauce.Info.Info3.Value)},
+		{k: d.Sauce.Info.Info1.Info, v: strconv.FormatUint(uint64(d.Sauce.Info.Info1.Value), 10)},
+		{k: d.Sauce.Info.Info2.Info, v: strconv.FormatUint(uint64(d.Sauce.Info.Info2.Value), 10)},
+		{k: d.Sauce.Info.Info3.Info, v: strconv.FormatUint(uint64(d.Sauce.Info.Info3.Value), 10)},
 		{k: "interpretation", v: d.Sauce.Info.Flags.String()},
 	}
 	// sauce comment
