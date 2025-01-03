@@ -376,7 +376,7 @@ func (d *Detail) marshal(w io.Writer, color bool) error {
 }
 
 // validate reports whether the key and value data validate.
-func (d Detail) validate(x struct{ k, v string }) bool {
+func (d *Detail) validate(x struct{ k, v string }) bool {
 	if !ValidText(d.Mime.Type) {
 		switch x.k {
 		case uc8, "line break", "characters", ans, "words", "lines", "width":
@@ -406,7 +406,7 @@ func (d Detail) validate(x struct{ k, v string }) bool {
 }
 
 // skip reports whether the key and value data should be skipped.
-func (d Detail) skip(x struct{ k, v string }) bool {
+func (d *Detail) skip(x struct{ k, v string }) bool {
 	if !d.LegacySums {
 		switch x.k {
 		case "CRC32", "CRC64 ECMA", "MD5":
@@ -417,7 +417,7 @@ func (d Detail) skip(x struct{ k, v string }) bool {
 }
 
 // marshalled returns the data structure used for print marshaling.
-func (d Detail) marshalled() []struct{ k, v string } {
+func (d *Detail) marshalled() []struct{ k, v string } {
 	const (
 		noBreakSpace     = "\u00A0"
 		symbolForNewline = "\u2424"

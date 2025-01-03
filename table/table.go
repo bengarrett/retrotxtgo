@@ -109,7 +109,7 @@ func columns(w io.Writer) {
 		w = io.Discard
 	}
 	const start, end = 0, 15
-	for i := 0; i < 16; i++ {
+	for i := range 16 {
 		switch i {
 		case start:
 			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf("     %X  ", i))

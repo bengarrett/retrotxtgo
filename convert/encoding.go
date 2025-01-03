@@ -616,7 +616,7 @@ func (c *Convert) RunesControlsEBCDIC() {
 		return
 	}
 	const z = byte(Row8)
-	for i := 0; i < len(c.Output); i++ {
+	for i := range len(c.Output) {
 		r := c.Output[i]
 		if c.SkipIgnore(i) {
 			continue
@@ -672,7 +672,7 @@ func (c *Convert) RunesEBCDIC() {
 	if len(c.Output) == 0 {
 		return
 	}
-	for i := 0; i < len(c.Output); i++ {
+	for i := range len(c.Output) {
 		r := c.Output[i]
 		if c.SkipIgnore(i) {
 			continue
@@ -846,7 +846,7 @@ func (c *Convert) RunesXRows() {
 	if len(c.Output) == 0 {
 		return
 	}
-	for i := 0; i < len(c.Output); i++ {
+	for i := range len(c.Output) {
 		switch {
 		case
 			i >= Row8 && i <= row8f,
@@ -966,7 +966,7 @@ func EqualLB(r, nl [2]rune) bool {
 }
 
 // skipBreak reports whether the rune is a linebreak.
-func (c Convert) skipBreak(i int) bool {
+func (c *Convert) skipBreak(i int) bool {
 	if !c.Input.UseBreaks {
 		return false
 	}
@@ -982,7 +982,7 @@ func (c Convert) skipBreak(i int) bool {
 }
 
 // SkipIgnore reports whether the rune should be skipped.
-func (c Convert) SkipIgnore(i int) bool {
+func (c *Convert) SkipIgnore(i int) bool {
 	for _, ign := range c.Input.Ignore {
 		if c.Output[i] == ign {
 			return true

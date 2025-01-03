@@ -135,7 +135,7 @@ func Marshal(w io.Writer, name string, chksums bool, f Format) error {
 }
 
 // Stream parses piped data and writes out the details in a specific syntax.
-func Stream(w io.Writer, format string, b ...byte) error {
+func Stream(w io.Writer, format string, b ...byte) error { //nolint:funlen
 	if w == nil {
 		w = io.Discard
 	}

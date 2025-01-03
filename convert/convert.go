@@ -161,10 +161,11 @@ func (c *Convert) FixJISTable() {
 	if c.Input.Encoding == japanese.ShiftJIS && c.Input.Table {
 		// this is only for the table command,
 		// it will break normal shift-jis encode text
+		const agrave, control, nobreak = 0xe0, 0x7f, 0xa0
 		for i, b := range c.Input.Input {
 			switch {
-			case b > 0x7f && b <= 0xa0,
-				b >= 0xe0 && b <= 0xff:
+			case b > control && b <= nobreak,
+				b >= agrave:
 				c.Input.Input[i] = SP
 			}
 		}
