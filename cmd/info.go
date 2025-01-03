@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/bengarrett/retrotxtgo/cmd/example"
@@ -57,7 +56,7 @@ func InfoCommand() *cobra.Command {
 	expl := strings.Builder{}
 	example.Info.String(&expl)
 	return &cobra.Command{
-		Use:     fmt.Sprintf("info %s", example.Filenames),
+		Use:     "info " + example.Filenames,
 		Aliases: []string{"i"},
 		GroupID: IDfile,
 		Short:   s,

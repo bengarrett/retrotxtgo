@@ -113,7 +113,7 @@ func List(wr io.Writer) error { //nolint:funlen
 		"\n   You can use the "+term.Example("table ascii")+" command to list all three X3.4 tables.")
 	fmt.Fprintln(w, "\nEither named, numeric or alias values are valid code page arguments.")
 	fmt.Fprintln(w, "  These values all match ISO 8859-1.")
-	cmds := fmt.Sprintf("%s table ", meta.Bin)
+	cmds := meta.Bin + " table "
 	fmt.Fprintf(w, "  %s%s  %s\n",
 		term.Example(cmds), term.Comment("iso-8859-1"), term.Fuzzy("# named"))
 	fmt.Fprintf(w, "  %s%s           %s\n",

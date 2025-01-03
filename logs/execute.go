@@ -75,7 +75,7 @@ func Execute(err error, test bool, args ...string) string {
 	}
 	if errors.Is(err, ErrCmd) {
 		mark = strings.Join(args[1:], " ")
-		return Hint(ErrCmd, fmt.Sprintf("%s --help", mark))
+		return Hint(ErrCmd, mark+" --help")
 	}
 	return Sprint(err)
 }
@@ -100,7 +100,7 @@ func invalid(err error, mark, name string, words ...string) string {
 	case invalidSlice:
 		return "invalidSlice placeholder"
 	case invalidCommand: // retrotxt config foo
-		return Hint(ErrCmd, fmt.Sprintf("%s --help", mark))
+		return Hint(ErrCmd, mark+" --help")
 	}
 	return ""
 }

@@ -108,5 +108,5 @@ func Ping(url string) (bool, error) {
 }
 
 func userAgent() string {
-	return fmt.Sprintf("%s version ping", meta.Bin)
+	return meta.Bin + " version ping"
 }

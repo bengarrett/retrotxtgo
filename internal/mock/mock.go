@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	ErrMax = errors.New("max value cannot be less than or equal to zero")
+	ErrMax = errors.New("maxpow value cannot be less than or equal to zero")
 	ErrZB  = errors.New("zero bytes written")
 )
 
@@ -57,14 +57,14 @@ func T() map[string]string {
 
 // maxPow calculates and returns the maximum value of yPow raised to the power of xPow.
 // It always confirms that the value is safe to use with rand.Int,
-// that panics if the max value is less than or equal to zero.
+// that panics if the y value is less than or equal to zero.
 func maxPow() *big.Int {
-	max := big.NewInt(int64(math.Pow(xPow, yPow)))
-	bi := big.NewInt(1)
-	if bi.Cmp(max) == 1 {
-		log.Fatalf("%s: %s", ErrMax, max)
+	y := big.NewInt(int64(math.Pow(xPow, yPow)))
+	x := big.NewInt(1)
+	if x.Cmp(y) == 1 {
+		log.Fatalf("%s: %s", ErrMax, y)
 	}
-	return max
+	return y
 }
 
 // FileExample saves the string to a randomized, threadsafe filename.

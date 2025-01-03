@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"log"
 	"strings"
 
@@ -40,7 +39,7 @@ func ViewCommand() *cobra.Command {
 	expl := strings.Builder{}
 	example.View.String(&expl)
 	return &cobra.Command{
-		Use:     fmt.Sprintf("view %s", example.Filenames),
+		Use:     "view " + example.Filenames,
 		Aliases: []string{"v"},
 		GroupID: IDfile,
 		Short:   s,
@@ -58,7 +57,7 @@ func DumpCommand() *cobra.Command {
 	expl := strings.Builder{}
 	example.Dump.String(&expl)
 	return &cobra.Command{
-		Use:     fmt.Sprintf("dump %s", example.Filenames),
+		Use:     "dump " + example.Filenames,
 		Aliases: []string{"d"},
 		GroupID: IDfile,
 		Short:   s,

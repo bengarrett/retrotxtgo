@@ -52,9 +52,9 @@ func TrimEOF(b []byte) []byte {
 
 // MakeBytes generates a 256 character or 8-bit container ready to hold legacy code point values.
 func MakeBytes() []byte {
-	const max = 256
-	m := make([]byte, max)
-	for i := 0; i < max; i++ {
+	const size = 256
+	m := make([]byte, size)
+	for i := range size {
 		m[i] = byte(i)
 	}
 	return m
@@ -62,8 +62,8 @@ func MakeBytes() []byte {
 
 // Mark adds a UTF-8 byte order mark to the text if it doesn't already exist.
 func Mark(b []byte) []byte {
-	const min = 3
-	if len(b) >= min {
+	const size = 3
+	if len(b) >= size {
 		if t := b[:3]; bytes.Equal(t, BOM()) {
 			return b
 		}

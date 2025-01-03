@@ -281,8 +281,8 @@ func Words(r io.Reader) (int, error) {
 	for scanner.Scan() {
 		t := scanner.Text()
 		r, _ := utf8.DecodeRuneInString(t)
-		const max = 65533
-		if r >= max {
+		const size = 65533
+		if r >= size {
 			continue
 		}
 		// scan single chars

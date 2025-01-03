@@ -63,7 +63,7 @@ func Table(wr io.Writer, name string) error { //nolint:funlen
 		return fmt.Errorf("table convert bytes error: %w", err)
 	}
 	enc := reverter(name)
-	const hex, max = 16, 255
+	const hex, maximum = 16, 255
 	row := 0
 out:
 	for i, r := range runes {
@@ -77,7 +77,7 @@ out:
 				color.OpFuzzy.Sprint("0"),
 				color.OpFuzzy.Sprint("|"),
 				char, color.OpFuzzy.Sprint("|"))
-		case i == max:
+		case i == maximum:
 			fmt.Fprintf(w, " %s %s\n", char,
 				color.OpFuzzy.Sprint("|"))
 		case math.Mod(float64(i+1), hex) == 0:
@@ -252,7 +252,7 @@ func Character(cp encoding.Encoding, code int, r rune) string {
 	// non-spacing mark characters
 	if unicode.In(r, unicode.Mn) {
 		// these require an additional monospace
-		return fmt.Sprintf(" %s", string(r))
+		return " " + string(r)
 	}
 	// format, other
 	if unicode.In(r, unicode.Cf) {

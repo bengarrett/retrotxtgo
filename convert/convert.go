@@ -225,8 +225,8 @@ func replaceNL(r ...rune) []rune {
 
 // wrapWidth enforces a row length by inserting newline characters.
 // Any tab characters are replaced with three spaces.
-func (c *Convert) wrapWidth(max int) {
-	if max < 1 {
+func (c *Convert) wrapWidth(maximum int) {
+	if maximum < 1 {
 		return
 	}
 	// remove newlines
@@ -245,18 +245,18 @@ func (c *Convert) wrapWidth(max int) {
 	if err != nil {
 		logs.FatalS(ErrWidth, err, fmt.Sprint(c.Input.LineBreak))
 	}
-	if cols <= max {
+	if cols <= maximum {
 		return
 	}
-	limit := math.Ceil(float64(cnt) / float64(max))
+	limit := math.Ceil(float64(cnt) / float64(maximum))
 	b := &bytes.Buffer{}
 	for f := float64(1); f <= limit; f++ {
 		switch f {
 		case 1:
-			fmt.Fprintf(b, "%s\n", string(c.Output[0:max]))
+			fmt.Fprintf(b, "%s\n", string(c.Output[0:maximum]))
 		default:
 			i := int(f)
-			x, y := (i-1)*max, i*max
+			x, y := (i-1)*maximum, i*maximum
 			if y >= cnt {
 				fmt.Fprintf(b, "%s\n", string(c.Output[x:cnt]))
 				continue

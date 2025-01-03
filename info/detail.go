@@ -334,7 +334,7 @@ func (d *Detail) marshal(w io.Writer, color bool) error {
 	}
 	const padding, width = 10, 80
 	info := func(s string) string {
-		return fmt.Sprintf("%s\t", s)
+		return s + "\t"
 	}
 	gookit.Enable = color
 	term.Head(w, width, "File information")

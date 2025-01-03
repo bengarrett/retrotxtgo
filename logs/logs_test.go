@@ -17,7 +17,7 @@ func init() {
 }
 
 func ExampleHint() {
-	err := errors.New("oops")
+	err := errors.New("oops") //nolint:goerr113
 	fmt.Print(logs.Hint(err, "helpme"))
 	// Output: Problem:
 	// oops.
@@ -25,29 +25,29 @@ func ExampleHint() {
 }
 
 func ExampleSprint() {
-	err := errors.New("oops")
+	err := errors.New("oops") //nolint:goerr113
 	fmt.Print(logs.Sprint(err))
 	// Output: Problem:
 	// oops.
 }
 
 func ExampleSprintCmd() {
-	err := errors.New("oops")
+	err := errors.New("oops") //nolint:goerr113
 	fmt.Print(logs.SprintCmd(err, "helpme"))
 	// Output: Problem:
 	//  the command helpme does not exist, oops
 }
 
 func ExampleSprintFlag() {
-	err := errors.New("oops")
+	err := errors.New("oops") //nolint:goerr113
 	fmt.Print(logs.SprintFlag(err, "error", "err"))
 	// Output: Problem:
 	//  with the error --err flag, oops
 }
 
 func ExampleSprintS() {
-	err := errors.New("oops")
-	wrap := errors.New("uh-oh")
+	err := errors.New("oops")   //nolint:goerr113
+	wrap := errors.New("uh-oh") //nolint:goerr113
 	fmt.Print(logs.SprintS(err, wrap, "we have some errors"))
 	// Output: Problem:
 	//  oops "we have some errors": uh-oh
