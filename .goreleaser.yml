@@ -12,6 +12,7 @@
 # git tag -a v0.1.0 -m "First release"
 # git push origin v0.1.0
 
+version: 2
 project_name: retrotxtgo
 dist: './.dist' # make dist a hidden directory to avoid cluttering the project root
 
@@ -94,7 +95,6 @@ nfpms:
       - archlinux
 
 changelog:
-  skip: true
   use: git
 
 upx:
