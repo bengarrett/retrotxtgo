@@ -20,8 +20,8 @@ require (
 )
 
 require (
-	github.com/bengarrett/bbs v1.0.1
-	github.com/bengarrett/sauce v1.2.2
+	github.com/bengarrett/bbs v1.0.2
+	github.com/bengarrett/sauce v1.2.3
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67
 	gopkg.in/yaml.v3 v3.0.1

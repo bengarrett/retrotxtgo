@@ -1,7 +1,7 @@
-github.com/bengarrett/bbs v1.0.1 h1:3uw5R3GemhPZJGsA9aYTEi5Hqq/7j/WRAiPUXgDuES8=
-github.com/bengarrett/bbs v1.0.1/go.mod h1:tTgo2YOKWoIFJmQigSbxe5cmbrGSfpieLM3QUvMXzyk=
-github.com/bengarrett/sauce v1.2.2 h1:vxqOOom4lVGC+xxKcZ1WD9IkAidOKBRrnvqXoZHa4cM=
-github.com/bengarrett/sauce v1.2.2/go.mod h1:Mgf2vCnYpfPr0yvbzhRHXSa1eGI/rLUzn/jzo2ojq4g=
+github.com/bengarrett/bbs v1.0.2 h1:g4lrb574vG7+fLMBNUv0VOKzae5q5zY8kjtkzdnKlho=
+github.com/bengarrett/bbs v1.0.2/go.mod h1:b2tcOHMmX//veTRrceky9caX+mjTdh3iyzudDP+KPVs=
+github.com/bengarrett/sauce v1.2.3 h1:c+BWYHJmSfGF4TL7DtLqFOPL1wKKBfKLO936fn/PWMQ=
+github.com/bengarrett/sauce v1.2.3/go.mod h1:UidGZBd4t4Qr0vJ/XC5lY2XX2hzsdYXBDUh+HshrIvc=
 github.com/cpuguy83/go-md2man/v2 v2.0.4/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
