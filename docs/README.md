@@ -524,4 +524,5 @@ $ retrotxt dump sauce-embed.txt
 
 ---
 
-### [Also available is RetroTxt, the browser Extension](https://github.com/bengarrett/RetroTxt) that turns ANSI, ASCII, and NFO text into web documents.
+> [!TIP]
+> Also available is [RetroTxt, the browser Extension](https://github.com/bengarrett/RetroTxt) that turns ANSI, ASCII, and NFO text into web documents.
