@@ -224,6 +224,49 @@ func replaceNL(r ...rune) []rune {
 	return []rune(s)
 }
 
+// SkipCode marks control characters to be ignored.
+// It needs to be applied before Convert.transform().
+func (c *Convert) SkipCode() *Convert {
+	unknown := []string{}
+	for _, v := range c.Args.Controls {
+		v = strings.TrimSpace(v)
+		switch strings.ToLower(v) {
+		case "eof", "=":
+			continue
+		case "tab", "ht", "t":
+			c.ignore(HT)
+		case "bell", "bel", "b":
+			c.ignore(BEL)
+		case "cr", "c":
+			c.ignore(CR)
+		case "lf", "l":
+			c.ignore(LF)
+		case "backspace", "bs":
+			c.ignore(BS)
+		case "del", "d":
+			c.ignore(DEL)
+		case "esc", "e":
+			c.ignore(ESC)
+		case "formfeed", "ff", "f":
+			c.ignore(FF)
+		case "vtab", "vt", "v":
+			c.ignore(VT)
+		default:
+			unknown = append(unknown, v)
+		}
+	}
+	if len(unknown) > 1 {
+		fmt.Fprintln(os.Stderr, term.Inform(),
+			"unsupported control values:", strings.Join(unknown, ","))
+	}
+	return c
+}
+
+// ignore adds the rune to an ignore runes list.
+func (c *Convert) ignore(r rune) {
+	c.Input.Ignore = append(c.Input.Ignore, r)
+}
+
 // wrapWidth enforces a row length by inserting newline characters.
 // Any tab characters are replaced with three spaces.
 func (c *Convert) wrapWidth(maximum int) {
@@ -266,47 +309,4 @@ func (c *Convert) wrapWidth(maximum int) {
 		}
 	}
 	c.Output = []rune(b.String())
-}
-
-// SkipCode marks control characters to be ignored.
-// It needs to be applied before Convert.transform().
-func (c *Convert) SkipCode() *Convert {
-	unknown := []string{}
-	for _, v := range c.Args.Controls {
-		v = strings.TrimSpace(v)
-		switch strings.ToLower(v) {
-		case "eof", "=":
-			continue
-		case "tab", "ht", "t":
-			c.ignore(HT)
-		case "bell", "bel", "b":
-			c.ignore(BEL)
-		case "cr", "c":
-			c.ignore(CR)
-		case "lf", "l":
-			c.ignore(LF)
-		case "backspace", "bs":
-			c.ignore(BS)
-		case "del", "d":
-			c.ignore(DEL)
-		case "esc", "e":
-			c.ignore(ESC)
-		case "formfeed", "ff", "f":
-			c.ignore(FF)
-		case "vtab", "vt", "v":
-			c.ignore(VT)
-		default:
-			unknown = append(unknown, v)
-		}
-	}
-	if len(unknown) > 1 {
-		fmt.Fprintln(os.Stderr, term.Inform(),
-			"unsupported control values:", strings.Join(unknown, ","))
-	}
-	return c
-}
-
-// ignore adds the rune to an ignore runes list.
-func (c *Convert) ignore(r rune) {
-	c.Input.Ignore = append(c.Input.Ignore, r)
 }

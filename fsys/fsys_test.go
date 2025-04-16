@@ -244,7 +244,7 @@ func Test_word(t *testing.T) {
 		{"2", "some things", true},
 		{"!@#", "!@#", true},
 		{"1234.5", "1234.5", true},
-		{"你好世界", "你好世界", true},
+		{"你好世界", "你好世界", true}, //nolint:gosmopolitan
 		{"😀", "😀", false},
 		{"😀smiley", "😀smiley", false},
 		{"▃▃▃▃▃", "▃▃▃▃▃", false},

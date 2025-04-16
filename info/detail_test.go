@@ -99,7 +99,7 @@ func TestParse(t *testing.T) {
 	}{
 		{"empty", args{[]byte("")}, 0, false},
 		{"string", args{[]byte("hello")}, 5, false},
-		{"string", args{[]byte("世界你好")}, 4, false},
+		{"string", args{[]byte("世界你好")}, 4, false}, //nolint:gosmopolitan
 	}
 	t.Run("", func(t *testing.T) {
 		t.Parallel()

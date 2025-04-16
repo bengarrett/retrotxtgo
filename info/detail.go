@@ -247,36 +247,6 @@ func (d *Detail) Parse(name string, data ...byte) error {
 	return nil
 }
 
-func (d *Detail) mime(name string, data ...byte) {
-	mm := mimemagic.MatchMagic(data)
-	d.Mime.Media = mm.Media
-	d.Mime.Sub = mm.Subtype
-	d.Mime.Type = fmt.Sprintf("%s/%s", mm.Media, mm.Subtype)
-	d.Mime.Commt = mm.Comment
-	if d.Mime.Commt == "plain text document" {
-		reader := bytes.NewReader(data)
-		if s := bbs.Find(reader).Name(); s != "" {
-			d.Mime.Commt += fmt.Sprintf(" with %s BBS color codes", s)
-		}
-	}
-	if ValidText(d.Mime.Type) {
-		var err error
-		b := bytes.NewBuffer(data)
-		if d.Count.Chars, err = fsys.Runes(b); err != nil {
-			fmt.Fprintf(os.Stdout, "mine sniffer failure, %s\n", err)
-		}
-		return
-	}
-	if d.Mime.Type == zipType {
-		r, e := zip.OpenReader(name)
-		if e != nil {
-			fmt.Fprintf(os.Stdout, "open zip file failure: %s\n", e)
-		}
-		defer r.Close()
-		d.ZipComment = r.Comment
-	}
-}
-
 func unicode(uni bool, b ...byte) string {
 	UTF8Bom := []byte{0xEF, 0xBB, 0xBF}
 	// little endianness, x86, ARM
@@ -302,6 +272,78 @@ func unicode(uni bool, b ...byte) string {
 		}
 		return "no"
 	}
+}
+
+func sauceDate(s string) string {
+	t, err := time.Parse("20060102", s) // CCYYMMDD
+	if err != nil {
+		return ""
+	}
+	return humanize.DMY.Format(t.UTC())
+}
+
+// Read and parse the named file and content.
+func (d *Detail) Read(name string) error {
+	// Read file content
+	p, err := fsys.ReadAllBytes(name)
+	if err != nil {
+		return err
+	}
+	return d.Parse(name, p...)
+}
+
+// ValidText reports whether the MIME content-type value is valid for text files.
+func ValidText(mime string) bool {
+	s := strings.Split(mime, "/")
+	const req = 2
+	if len(s) != req {
+		return false
+	}
+	if s[0] == txt {
+		return true
+	}
+	if mime == octetStream {
+		return true
+	}
+	return false
+}
+
+// Len counts the number of characters used per line in the named file.
+func (d *Detail) Len(name string) error {
+	f, err := os.Open(name)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	w, err := fsys.Columns(f, d.LineBreak.Decimal)
+	if err != nil {
+		return err
+	}
+	if w < 0 {
+		w = d.Count.Chars
+	}
+	d.Width = w
+	return nil
+}
+
+// Words counts the number of words used in the named file.
+func (d *Detail) Words(name string) error {
+	f, err := os.Open(name)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	switch d.LineBreak.Decimal {
+	case [2]rune{nl.NL}, [2]rune{nl.NEL}:
+		if d.Count.Words, err = fsys.WordsEBCDIC(f); err != nil {
+			return err
+		}
+	default:
+		if d.Count.Words, err = fsys.Words(f); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // input parses simple statistical data on the file.
@@ -375,47 +417,6 @@ func (d *Detail) marshal(w io.Writer, color bool) error {
 	return tw.Flush()
 }
 
-// validate reports whether the key and value data validate.
-func (d *Detail) validate(x struct{ k, v string }) bool {
-	if !ValidText(d.Mime.Type) {
-		switch x.k {
-		case uc8, "line break", "characters", ans, "words", "lines", "width":
-			return false
-		}
-	} else if x.k == ans {
-		if d.Count.Controls == 0 {
-			return false
-		}
-	}
-	if x.k == "description" && x.v == "" {
-		return false
-	}
-	if x.k == d.Sauce.Info.Info1.Info && d.Sauce.Info.Info1.Value == 0 {
-		return false
-	}
-	if x.k == d.Sauce.Info.Info2.Info && d.Sauce.Info.Info2.Value == 0 {
-		return false
-	}
-	if x.k == d.Sauce.Info.Info3.Info && d.Sauce.Info.Info3.Value == 0 {
-		return false
-	}
-	if x.k == "interpretation" && x.v == "" {
-		return false
-	}
-	return true
-}
-
-// skip reports whether the key and value data should be skipped.
-func (d *Detail) skip(x struct{ k, v string }) bool {
-	if !d.LegacySums {
-		switch x.k {
-		case "CRC32", "CRC64 ECMA", "MD5":
-			return true
-		}
-	}
-	return false
-}
-
 // marshalled returns the data structure used for print marshaling.
 func (d *Detail) marshalled() []struct{ k, v string } {
 	const (
@@ -471,74 +472,73 @@ func (d *Detail) marshalled() []struct{ k, v string } {
 	return data
 }
 
-func sauceDate(s string) string {
-	t, err := time.Parse("20060102", s) // CCYYMMDD
-	if err != nil {
-		return ""
+func (d *Detail) mime(name string, data ...byte) {
+	mm := mimemagic.MatchMagic(data)
+	d.Mime.Media = mm.Media
+	d.Mime.Sub = mm.Subtype
+	d.Mime.Type = fmt.Sprintf("%s/%s", mm.Media, mm.Subtype)
+	d.Mime.Commt = mm.Comment
+	if d.Mime.Commt == "plain text document" {
+		reader := bytes.NewReader(data)
+		if s := bbs.Find(reader).Name(); s != "" {
+			d.Mime.Commt += fmt.Sprintf(" with %s BBS color codes", s)
+		}
 	}
-	return humanize.DMY.Format(t.UTC())
+	if ValidText(d.Mime.Type) {
+		var err error
+		b := bytes.NewBuffer(data)
+		if d.Count.Chars, err = fsys.Runes(b); err != nil {
+			fmt.Fprintf(os.Stdout, "mine sniffer failure, %s\n", err)
+		}
+		return
+	}
+	if d.Mime.Type == zipType {
+		r, e := zip.OpenReader(name)
+		if e != nil {
+			fmt.Fprintf(os.Stdout, "open zip file failure: %s\n", e)
+		}
+		defer r.Close()
+		d.ZipComment = r.Comment
+	}
 }
 
-// Read and parse the named file and content.
-func (d *Detail) Read(name string) error {
-	// Read file content
-	p, err := fsys.ReadAllBytes(name)
-	if err != nil {
-		return err
-	}
-	return d.Parse(name, p...)
-}
-
-// ValidText reports whether the MIME content-type value is valid for text files.
-func ValidText(mime string) bool {
-	s := strings.Split(mime, "/")
-	const req = 2
-	if len(s) != req {
-		return false
-	}
-	if s[0] == txt {
-		return true
-	}
-	if mime == octetStream {
-		return true
+// skip reports whether the key and value data should be skipped.
+func (d *Detail) skip(x struct{ k, v string }) bool {
+	if !d.LegacySums {
+		switch x.k {
+		case "CRC32", "CRC64 ECMA", "MD5":
+			return true
+		}
 	}
 	return false
 }
 
-// Len counts the number of characters used per line in the named file.
-func (d *Detail) Len(name string) error {
-	f, err := os.Open(name)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	w, err := fsys.Columns(f, d.LineBreak.Decimal)
-	if err != nil {
-		return err
-	}
-	if w < 0 {
-		w = d.Count.Chars
-	}
-	d.Width = w
-	return nil
-}
-
-// Words counts the number of words used in the named file.
-func (d *Detail) Words(name string) error {
-	f, err := os.Open(name)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	switch d.LineBreak.Decimal {
-	case [2]rune{nl.NL}, [2]rune{nl.NEL}:
-		if d.Count.Words, err = fsys.WordsEBCDIC(f); err != nil {
-			return err
+// validate reports whether the key and value data validate.
+func (d *Detail) validate(x struct{ k, v string }) bool {
+	if !ValidText(d.Mime.Type) {
+		switch x.k {
+		case uc8, "line break", "characters", ans, "words", "lines", "width":
+			return false
 		}
-	default:
-		if d.Count.Words, err = fsys.Words(f); err != nil {
-			return err
+	} else if x.k == ans {
+		if d.Count.Controls == 0 {
+			return false
 		}
 	}
-	return nil
+	if x.k == "description" && x.v == "" {
+		return false
+	}
+	if x.k == d.Sauce.Info.Info1.Info && d.Sauce.Info.Info1.Value == 0 {
+		return false
+	}
+	if x.k == d.Sauce.Info.Info2.Info && d.Sauce.Info.Info2.Value == 0 {
+		return false
+	}
+	if x.k == d.Sauce.Info.Info3.Info && d.Sauce.Info.Info3.Value == 0 {
+		return false
+	}
+	if x.k == "interpretation" && x.v == "" {
+		return false
+	}
+	return true
 }

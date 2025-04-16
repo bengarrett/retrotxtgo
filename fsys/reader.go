@@ -68,10 +68,7 @@ func Columns(r io.Reader, lb [2]rune) (int, error) {
 			return -1, fmt.Errorf("columns could not read buffer: %w", err)
 		}
 		pos := 0
-		for {
-			if size == pos {
-				break
-			}
+		for pos < size {
 			i := bytes.Index(p[pos:], lineBreak)
 			if i == -1 {
 				width = size
