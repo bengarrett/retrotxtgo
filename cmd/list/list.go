@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"slices"
 	"sort"
 	"strings"
 	"text/tabwriter"
@@ -14,7 +15,6 @@ import (
 	"github.com/bengarrett/retrotxtgo/table"
 	"github.com/bengarrett/retrotxtgo/term"
 	"github.com/bengarrett/retrotxtgo/xud"
-	"golang.org/x/exp/slices"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/ianaindex"
@@ -119,7 +119,7 @@ func Tables(w io.Writer) error {
 		}
 		tables = append(tables, e)
 	}
-	slices.Compact(tables)
+	tables = slices.Compact(tables)
 	// print tables
 	for _, e := range tables {
 		var (
