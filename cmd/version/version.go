@@ -111,11 +111,7 @@ func Terminal() string {
 		return unknown()
 	}
 	if n > 0 {
-		s := "VT100 compatible"
-		if err != nil {
-			return s
-		}
-		return fmt.Sprintf("%s (%dx%d)", s, w, h)
+		return fmt.Sprintf("VT100 compatible (%dx%d)", w, h)
 	}
 	return unknown()
 }

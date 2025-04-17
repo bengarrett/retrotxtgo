@@ -12,7 +12,7 @@ import (
 )
 
 func ExampleLanguages() {
-	l := table.Languages()
+	l := *table.Languages()
 	fmt.Print(l[charmap.CodePage437])
 	// Output: US English
 }

@@ -54,10 +54,10 @@ func Pipe(w io.Writer) error {
 	if w == nil {
 		w = io.Discard
 	}
-	b, err := fsys.ReadPipe()
+	data, err := fsys.ReadPipe()
 	if err != nil {
 		return fmt.Errorf("%w, %w", ErrPipeRead, err)
 	}
-	fmt.Fprint(w, hex.Dump(b))
+	fmt.Fprint(w, hex.Dump(data))
 	return nil
 }

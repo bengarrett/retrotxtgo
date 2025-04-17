@@ -42,20 +42,19 @@ func ReadAllBytes(name string) ([]byte, error) {
 	scanner := bufio.NewScanner(file)
 	// optional adjustment to the token size
 	// Go by default will scan 64 * 1024 bytes (64KB) per iteration
-	const KB = 1024
-	const size = 64 * KB
-	b := []byte{}
-	scanner.Buffer(b, size)
+	const size = 64 * 1024
+	buf := []byte{}
+	scanner.Buffer(buf, size)
 	// required, split scan into Buffer(data, x) sized byte chuncks
 	// otherwise scanner will panic on files larger than 64 * 1024 bytes
 	scanner.Split(bufio.ScanBytes)
 	for scanner.Scan() {
-		b = append(b, scanner.Bytes()...)
+		buf = append(buf, scanner.Bytes()...)
 	}
 	if err := scanner.Err(); err != nil {
 		return nil, fmt.Errorf("scanner %q: %w", name, err)
 	}
-	return b, nil
+	return buf, nil
 }
 
 // ReadChunk reads and returns the start of the named file.
@@ -68,7 +67,7 @@ func ReadChunk(name string, chars int) ([]byte, error) {
 		return nil, err
 	}
 	defer file.Close()
-	p := []byte{}
+	buf := []byte{}
 	scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanRunes)
 	count := 0
@@ -77,12 +76,12 @@ func ReadChunk(name string, chars int) ([]byte, error) {
 		if count > chars {
 			break
 		}
-		p = append(p, scanner.Bytes()...)
+		buf = append(buf, scanner.Bytes()...)
 	}
 	if err := scanner.Err(); err != nil {
 		return nil, fmt.Errorf("read chunk could not scan file: %q: %w", name, err)
 	}
-	return p, nil
+	return buf, nil
 }
 
 // ReadColumns counts the number of characters used per line in the named file.
@@ -146,9 +145,10 @@ func ReadLine(name string, sys nl.System) (string, error) {
 	}
 	defer file.Close()
 	// bufio is the most performant
-	s, scanner := "", bufio.NewScanner(file)
+	s := ""
+	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		s += fmt.Sprintf("%s%s", scanner.Text(), n)
+		s += scanner.Text() + n
 	}
 	if err := scanner.Err(); err != nil {
 		return "", fmt.Errorf("read line could not scan file: %w", err)
@@ -231,18 +231,18 @@ func ReadTail(name string, offset int) ([]byte, error) {
 	// bufio is the most performant
 	scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanRunes)
-	b, cnt := []byte{}, 0
+	buf, cnt := []byte{}, 0
 	for scanner.Scan() {
 		cnt++
 		if cnt <= (total - offset) {
 			continue
 		}
-		b = append(b, scanner.Bytes()...)
+		buf = append(buf, scanner.Bytes()...)
 	}
 	if err := scanner.Err(); err != nil {
 		return nil, fmt.Errorf("read tail could scan file bytes: %q: %w", name, err)
 	}
-	return b, nil
+	return buf, nil
 }
 
 // ReadText reads a named file location or a named temporary file and returns its content.

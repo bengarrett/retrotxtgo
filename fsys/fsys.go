@@ -44,15 +44,15 @@ func temp(name string) string {
 
 // Tar add files to a named tar file archive.
 func Tar(name string, files ...string) error {
-	f, err := os.Create(name)
+	w, err := os.Create(name)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
-	w := tar.NewWriter(f)
 	defer w.Close()
+	dst := tar.NewWriter(w)
+	defer dst.Close()
 	for _, file := range files {
-		if err := InsertTar(w, file); err != nil {
+		if err := InsertTar(dst, file); err != nil {
 			return err
 		}
 	}
@@ -60,29 +60,31 @@ func Tar(name string, files ...string) error {
 }
 
 // InsertTar inserts the named file to the TAR writer.
-func InsertTar(t *tar.Writer, name string) error {
-	if t == nil {
+func InsertTar(dst *tar.Writer, name string) error {
+	if dst == nil {
 		return ErrWriter
 	}
-	f, err := os.Open(name)
+	src, err := os.Open(name)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
-	s, err := f.Stat()
+	defer src.Close()
+	s, err := src.Stat()
 	if err != nil {
 		return err
 	}
 	h := &tar.Header{
-		Name:    f.Name(),
+		Name:    src.Name(),
 		Size:    s.Size(),
 		Mode:    int64(s.Mode()),
 		ModTime: s.ModTime(),
 	}
-	if err := t.WriteHeader(h); err != nil {
+	if err := dst.WriteHeader(h); err != nil {
 		return err
 	}
-	if _, err = io.Copy(t, f); err != nil {
+	const size = 4 * 1024
+	buf := make([]byte, size)
+	if _, err = io.CopyBuffer(dst, src, buf); err != nil {
 		return err
 	}
 	return nil

@@ -1,5 +1,5 @@
-github.com/bengarrett/bbs v1.0.2 h1:g4lrb574vG7+fLMBNUv0VOKzae5q5zY8kjtkzdnKlho=
-github.com/bengarrett/bbs v1.0.2/go.mod h1:b2tcOHMmX//veTRrceky9caX+mjTdh3iyzudDP+KPVs=
+github.com/bengarrett/bbs v1.0.4 h1:mcXBJl+pFIbvOjUVXTVd8mu7ry6oUEhXk43E5kV3hUE=
+github.com/bengarrett/bbs v1.0.4/go.mod h1:8zjG/nYqoeBMpsgC00lA+niGZWcddVDNU+XlOdvWD48=
 github.com/bengarrett/sauce v1.2.3 h1:c+BWYHJmSfGF4TL7DtLqFOPL1wKKBfKLO936fn/PWMQ=
 github.com/bengarrett/sauce v1.2.3/go.mod h1:UidGZBd4t4Qr0vJ/XC5lY2XX2hzsdYXBDUh+HshrIvc=
 github.com/cpuguy83/go-md2man/v2 v2.0.6/go.mod h1:oOW0eioCTA6cOiMLiUPZOpcVxMig6NIQQ7OS05n1F4g=

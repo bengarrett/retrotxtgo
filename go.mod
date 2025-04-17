@@ -20,7 +20,7 @@ require (
 )
 
 require (
-	github.com/bengarrett/bbs v1.0.2
+	github.com/bengarrett/bbs v1.0.4
 	github.com/bengarrett/sauce v1.2.3
 	github.com/stretchr/testify v1.10.0
 	gopkg.in/yaml.v3 v3.0.1

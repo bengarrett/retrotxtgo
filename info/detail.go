@@ -119,18 +119,20 @@ func lang() language.Tag {
 
 // Ctrls counts the number of ANSI escape controls in the named file.
 func (d *Detail) Ctrls(name string) error {
-	f, err := os.Open(name)
+	r, err := os.Open(name)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
-	cnt, err := fsys.Controls(f)
+	defer r.Close()
+	cnt, err := fsys.Controls(r)
 	if err != nil {
 		return err
 	}
 	d.Count.Controls = cnt
 	return nil
 }
+
+var marshalMu sync.Mutex // protects the marshal function which is not thread safe due to the use of gookit.Enable
 
 // Marshal writes the Detail data in a given format syntax.
 func (d *Detail) Marshal(w io.Writer, f Format) error {
@@ -139,35 +141,41 @@ func (d *Detail) Marshal(w io.Writer, f Format) error {
 	}
 	const jsTab = "    "
 	const xmlTab = "\t"
+	var err error
 	switch f {
 	case ColorText:
-		return d.marshal(w, true)
+		marshalMu.Lock()
+		err = d.marshal(w, true)
+		marshalMu.Unlock()
 	case PlainText:
-		return d.marshal(w, false)
+		marshalMu.Lock()
+		err = d.marshal(w, false)
+		marshalMu.Unlock()
 	case JSON:
 		b, err := json.MarshalIndent(d, "", jsTab)
 		if err != nil {
 			return fmt.Errorf("detail json indent marshal: %w", err)
 		}
 		_, err = w.Write(b)
-		return err
 	case JSONMin:
 		b, err := json.Marshal(d)
 		if err != nil {
 			return fmt.Errorf("detail json marshal: %w", err)
 		}
 		_, err = w.Write(b)
-		return err
 	case XML:
 		b, err := xml.MarshalIndent(d, "", xmlTab)
 		if err != nil {
 			return fmt.Errorf("detail xml marshal: %w", err)
 		}
 		_, err = w.Write(b)
-		return err
 	default:
 		return fmt.Errorf("detail marshal %q: %w", f, ErrFmt)
 	}
+	if err != nil {
+		return fmt.Errorf("detail marshal %q: %w", f, err)
+	}
+	return nil
 }
 
 // MimeUnknown detects non-Standard legacy data.
@@ -310,12 +318,12 @@ func ValidText(mime string) bool {
 
 // Len counts the number of characters used per line in the named file.
 func (d *Detail) Len(name string) error {
-	f, err := os.Open(name)
+	r, err := os.Open(name)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
-	w, err := fsys.Columns(f, d.LineBreak.Decimal)
+	defer r.Close()
+	w, err := fsys.Columns(r, d.LineBreak.Decimal)
 	if err != nil {
 		return err
 	}
@@ -328,18 +336,18 @@ func (d *Detail) Len(name string) error {
 
 // Words counts the number of words used in the named file.
 func (d *Detail) Words(name string) error {
-	f, err := os.Open(name)
+	r, err := os.Open(name)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer r.Close()
 	switch d.LineBreak.Decimal {
 	case [2]rune{nl.NL}, [2]rune{nl.NEL}:
-		if d.Count.Words, err = fsys.WordsEBCDIC(f); err != nil {
+		if d.Count.Words, err = fsys.WordsEBCDIC(r); err != nil {
 			return err
 		}
 	default:
-		if d.Count.Words, err = fsys.Words(f); err != nil {
+		if d.Count.Words, err = fsys.Words(r); err != nil {
 			return err
 		}
 	}
@@ -370,6 +378,8 @@ func (d *Detail) input(data int, stat fs.FileInfo) {
 }
 
 // marshal returns the marshaled detail data as plain or color text.
+//
+// Note: this function is not thread safe due to the use of gookit.Enable set by color bool.
 func (d *Detail) marshal(w io.Writer, color bool) error {
 	if w == nil {
 		w = io.Discard

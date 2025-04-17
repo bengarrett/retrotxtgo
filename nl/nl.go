@@ -56,16 +56,16 @@ func (lb *LineBreak) Find(r [2]rune) {
 // Total counts the number of lines in the named file
 // based on the provided line break sequence.
 func (lb *LineBreak) Total(name string) (int, error) {
-	f, err := os.Open(name)
+	r, err := os.Open(name)
 	if err != nil {
 		return 0, err
 	}
-	defer f.Close()
-	l, err := Lines(f, lb.Decimal)
+	defer r.Close()
+	lines, err := Lines(r, lb.Decimal)
 	if err != nil {
 		return 0, err
 	}
-	return l, nil
+	return lines, nil
 }
 
 // Lines counts the number of lines in the interface.

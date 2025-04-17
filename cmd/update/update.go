@@ -76,29 +76,29 @@ func Check() (string, error) {
 
 // CacheGet reads and returns the locally cached GitHub API.
 func CacheGet() Cache {
-	cf, err := home().DataPath(cacheFile)
+	name, err := home().DataPath(cacheFile)
 	if err != nil {
 		logs.Sprint(err)
 		return Cache{}
 	}
-	if _, err = os.Stat(cf); os.IsNotExist(err) {
+	if _, err = os.Stat(name); os.IsNotExist(err) {
 		return Cache{}
 	}
-	f, err := os.ReadFile(cf)
+	in, err := os.ReadFile(name)
 	if err != nil {
 		logs.Sprint(err)
 	}
-	var cache Cache
-	if err := yaml.Unmarshal(f, &cache); err != nil {
+	var out Cache
+	if err := yaml.Unmarshal(in, &out); err != nil {
 		logs.Sprint(err)
 	}
 	// if either value is missing, delete the broken cache
-	if cache.Etag == "" || cache.Version == "" {
-		err = os.Remove(cf)
+	if out.Etag == "" || out.Version == "" {
+		err = os.Remove(name)
 		logs.Sprint(err)
 		return Cache{}
 	}
-	return cache
+	return out
 }
 
 // CacheSet saves the Github API, ETag HTTP header and release version.
@@ -114,11 +114,11 @@ func CacheSet(etag, version string) error {
 	if err != nil {
 		return fmt.Errorf("%w: %w", err, ErrCacheYaml)
 	}
-	f, err := home().DataPath(cacheFile)
+	name, err := home().DataPath(cacheFile)
 	if err != nil {
 		return fmt.Errorf("%q: %w", cacheFile, ErrCacheData)
 	}
-	if _, _, err := fsys.Write(f, out...); err != nil {
+	if _, _, err := fsys.Write(name, out...); err != nil {
 		return fmt.Errorf("%w: %w", err, ErrCacheSave)
 	}
 	return nil

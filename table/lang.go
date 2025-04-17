@@ -18,8 +18,8 @@ import (
 type Lang map[encoding.Encoding]string
 
 // Languages returns a list of code page encodings and their target natural languages.
-func Languages() Lang {
-	return Lang{
+func Languages() *Lang {
+	lang := Lang{
 		charmap.CodePage037:   "US English",
 		charmap.CodePage437:   "US English",
 		charmap.CodePage850:   "West Europe",
@@ -71,11 +71,12 @@ func Languages() Lang {
 		xud.XUserDefined1965:  "US English",
 		xud.XUserDefined1967:  "US English",
 	}
+	return &lang
 }
 
 // Language returns the natural language usge of the encoding.
 func Language(e encoding.Encoding) string {
-	l := Languages()
+	l := *Languages()
 	return l[e]
 }
 

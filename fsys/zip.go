@@ -101,20 +101,19 @@ func (files *Files) Zip(w io.Writer, name, comment string, ow bool) error {
 		}
 		defer f.Close()
 	}
-	z := zip.NewWriter(w)
-	defer z.Close()
+	zipper := zip.NewWriter(w)
+	defer zipper.Close()
 	if comment != "" {
-		if err := z.SetComment(comment); err != nil {
+		if err := zipper.SetComment(comment); err != nil {
 			return fmt.Errorf("zip set comment %q: %w", comment, err)
 		}
 	}
-	for _, f := range *files {
-		if err := InsertZip(z, f); err != nil {
-			return fmt.Errorf("add zip %q: %w", f, err)
+	for _, fname := range *files {
+		if err := InsertZip(zipper, fname); err != nil {
+			return fmt.Errorf("add zip %q: %w", fname, err)
 		}
 	}
-	err = z.Close()
-	if err != nil {
+	if err := zipper.Close(); err != nil {
 		return fmt.Errorf("zip close: %w", err)
 	}
 	s, err := os.Stat(n)

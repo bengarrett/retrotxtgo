@@ -135,7 +135,7 @@ func Marshal(w io.Writer, name string, chksums bool, f Format) error {
 }
 
 // Stream parses piped data and writes out the details in a specific syntax.
-func Stream(w io.Writer, format string, b ...byte) error { //nolint:funlen
+func Stream(w io.Writer, format string, data ...byte) error { //nolint:funlen
 	if w == nil {
 		w = io.Discard
 	}
@@ -144,17 +144,17 @@ func Stream(w io.Writer, format string, b ...byte) error { //nolint:funlen
 	if e != nil {
 		return e
 	}
-	if err := d.Parse("", b...); err != nil {
+	if err := d.Parse("", data...); err != nil {
 		return err
 	}
 	if !ValidText(d.Mime.Type) {
 		return marshall(d, w, f)
 	}
-	d.LineBreak.Find(fsys.LineBreaks(true, []rune(string(b))...))
+	d.LineBreak.Find(fsys.LineBreaks(true, []rune(string(data))...))
 	g := errgroup.Group{}
 	var mu sync.Mutex
 	g.Go(func() error {
-		val, err := fsys.Controls(bytes.NewReader(b))
+		val, err := fsys.Controls(bytes.NewReader(data))
 		if err != nil {
 			return err
 		}
@@ -164,7 +164,7 @@ func Stream(w io.Writer, format string, b ...byte) error { //nolint:funlen
 		return nil
 	})
 	g.Go(func() error {
-		val, err := nl.Lines(bytes.NewReader(b), d.LineBreak.Decimal)
+		val, err := nl.Lines(bytes.NewReader(data), d.LineBreak.Decimal)
 		if err != nil {
 			return err
 		}
@@ -174,7 +174,7 @@ func Stream(w io.Writer, format string, b ...byte) error { //nolint:funlen
 		return nil
 	})
 	g.Go(func() error {
-		val, err := fsys.Columns(bytes.NewReader(b), d.LineBreak.Decimal)
+		val, err := fsys.Columns(bytes.NewReader(data), d.LineBreak.Decimal)
 		if err != nil {
 			return err
 		}
@@ -187,7 +187,7 @@ func Stream(w io.Writer, format string, b ...byte) error { //nolint:funlen
 		return nil
 	})
 	g.Go(func() error {
-		val, err := fsys.Words(bytes.NewReader(b))
+		val, err := fsys.Words(bytes.NewReader(data))
 		if err != nil {
 			return err
 		}
