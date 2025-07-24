@@ -7,7 +7,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/cmd/version"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/gookit/color"
-	"github.com/stretchr/testify/assert"
+	"github.com/nalgeon/be"
 )
 
 func TestTemplate(t *testing.T) {
@@ -38,5 +38,6 @@ func TestTemplate(t *testing.T) {
 func TestTerminal(t *testing.T) {
 	t.Parallel()
 	s := version.Terminal()
-	assert.Contains(t, s, "unknown")
+	find := strings.Contains(s, "unknown")
+	be.True(t, find)
 }

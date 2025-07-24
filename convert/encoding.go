@@ -934,7 +934,7 @@ func (c *Convert) RunesWindows() {
 	}
 }
 
-// RunesUTF8 tweaks some Unicode picture represenations for UTF-8 Basic Latin.
+// RunesUTF8 tweaks some Unicode picture representation for UTF-8 Basic Latin.
 func (c *Convert) RunesUTF8() {
 	for i, r := range c.Output {
 		switch {

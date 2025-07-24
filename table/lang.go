@@ -74,7 +74,7 @@ func Languages() *Lang {
 	return &lang
 }
 
-// Language returns the natural language usge of the encoding.
+// Language returns the natural language usage of the encoding.
 func Language(e encoding.Encoding) string {
 	l := *Languages()
 	return l[e]

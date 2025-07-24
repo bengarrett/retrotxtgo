@@ -108,7 +108,7 @@ func Transform(c *convert.Convert, in, out encoding.Encoding, b ...byte,
 		c.Input.Encoding = in
 	}
 	p := b
-	// handle any encoding BEFORE outputing to Unicode
+	// handle any encoding BEFORE outputting to Unicode
 	// we also make sure the bytes are not valid UTF-8
 	// otherwise the bytes will become corrupted
 	if out != nil && !utf8.Valid(b) {

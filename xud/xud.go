@@ -38,8 +38,9 @@ var ErrName = errors.New("there is no encoding name")
 // Encoding is an implementation of the Encoding interface that adds a formal name
 // to a custom encoding.
 type Encoding struct {
-	encoding.Encoding        // Encoding is the underlying encoding.
-	Name              string // Name is the formal name of the character encoding.
+	encoding.Encoding // Encoding is the underlying encoding.
+
+	Name string // Name is the formal name of the character encoding.
 }
 
 var (

@@ -3,11 +3,12 @@ package logs_test
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/logs"
 	"github.com/gookit/color"
-	"github.com/stretchr/testify/assert"
+	"github.com/nalgeon/be"
 )
 
 var ErrTest = errors.New("something went wrong")
@@ -56,44 +57,54 @@ func ExampleSprintS() {
 func TestHint_String(t *testing.T) {
 	t.Parallel()
 	err := logs.Hint(ErrTest, "hint")
-	assert.Contains(t, err, "Problem:")
-	assert.Contains(t, err, "something went wrong")
+	find := strings.Contains(err, "Problem:")
+	be.True(t, find)
+	find = strings.Contains(err, "something went wrong")
+	be.True(t, find)
 	err = logs.Hint(nil, "hint")
-	assert.Empty(t, err)
+	be.True(t, err == "")
 }
 
 func TestSprint(t *testing.T) {
 	t.Parallel()
 	err := logs.Sprint(ErrTest)
-	assert.Contains(t, err, "Problem:")
-	assert.Contains(t, err, "something went wrong")
+	find := strings.Contains(err, "Problem:")
+	be.True(t, find)
+	find = strings.Contains(err, "something went wrong")
+	be.True(t, find)
 	err = logs.Sprint(nil)
-	assert.Empty(t, err)
+	be.True(t, err == "")
 }
 
 func TestSprintCmd(t *testing.T) {
 	t.Parallel()
 	err1 := logs.SprintCmd(ErrTest, "hint")
-	assert.Contains(t, err1, "Problem:")
-	assert.Contains(t, err1, "something went wrong")
+	find := strings.Contains(err1, "Problem:")
+	be.True(t, find)
+	find = strings.Contains(err1, "something went wrong")
+	be.True(t, find)
 	err2 := logs.SprintCmd(nil, "hint")
-	assert.Empty(t, err2)
+	be.True(t, err2 == "")
 }
 
 func TestSprintFlag(t *testing.T) {
 	t.Parallel()
 	err := logs.SprintFlag(ErrTest, "hint", "dosomething")
-	assert.Contains(t, err, "Problem:")
-	assert.Contains(t, err, "with the hint --dosomething flag, something went wrong")
+	find := strings.Contains(err, "Problem:")
+	be.True(t, find)
+	find = strings.Contains(err, "with the hint --dosomething flag, something went wrong")
+	be.True(t, find)
 	err = logs.SprintFlag(nil, "hint", "dosomething")
-	assert.Empty(t, err)
+	be.True(t, err == "")
 }
 
 func TestSprintS(t *testing.T) {
 	t.Parallel()
 	err := logs.SprintS(ErrTest, ErrTest, "hint")
-	assert.Contains(t, err, "Problem:")
-	assert.Contains(t, err, "something went wrong")
+	find := strings.Contains(err, "Problem:")
+	be.True(t, find)
+	find = strings.Contains(err, "something went wrong")
+	be.True(t, find)
 	err = logs.SprintS(nil, nil, "hint")
-	assert.Empty(t, err)
+	be.True(t, err == "")
 }

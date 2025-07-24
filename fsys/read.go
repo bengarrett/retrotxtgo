@@ -128,7 +128,7 @@ func ReadControls(name string) (int, error) {
 	defer file.Close()
 	cnt, err := Controls(file)
 	if err != nil {
-		return -1, fmt.Errorf("read countrols could not parse the file: %q: %w", name, err)
+		return -1, fmt.Errorf("read controls could not parse the file: %q: %w", name, err)
 	}
 	return cnt, nil
 }

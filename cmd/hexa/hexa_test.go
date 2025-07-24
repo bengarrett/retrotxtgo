@@ -6,8 +6,7 @@ import (
 	"testing"
 
 	"github.com/bengarrett/retrotxtgo/cmd/hexa"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/nalgeon/be"
 )
 
 func ExampleTrimIdent() {
@@ -62,35 +61,35 @@ func ExampleWriter() {
 func TestParse(t *testing.T) {
 	t.Parallel()
 	x := hexa.Parse(0, nil...)
-	assert.Empty(t, x)
+	be.True(t, len(x) == 0)
 	x = hexa.Parse(0, "0F", "01", "FF", "Z")
-	assert.Equal(t, []int64{-1, 1, -1, -1}, x)
+	be.Equal(t, []int64{-1, 1, -1, -1}, x)
 	x = hexa.Parse(10, "0F", "01", "FF", "Z")
-	assert.Equal(t, []int64{-1, 1, -1, -1}, x)
+	be.Equal(t, []int64{-1, 1, -1, -1}, x)
 	x = hexa.Parse(16, "0F", "01", "FF", "Z")
-	assert.Equal(t, []int64{15, 1, 255, -1}, x)
+	be.Equal(t, []int64{15, 1, 255, -1}, x)
 }
 
 func TestParser(t *testing.T) {
 	t.Parallel()
 	err := hexa.Parser(nil, 0, nil...)
-	require.NoError(t, err)
+	be.Err(t, err, nil)
 	err = hexa.Parser(nil, 2, nil...)
-	require.NoError(t, err)
+	be.Err(t, err, nil)
 	err = hexa.Parser(nil, 10, nil...)
-	require.NoError(t, err)
+	be.Err(t, err, nil)
 	err = hexa.Parser(nil, 10, "1", "2", "3")
-	require.NoError(t, err)
+	be.Err(t, err, nil)
 }
 
 func TestWriter(t *testing.T) {
 	t.Parallel()
 	err := hexa.Writer(nil, 0, nil...)
-	require.NoError(t, err)
+	be.Err(t, err, nil)
 	err = hexa.Writer(nil, 2, nil...)
-	require.NoError(t, err)
+	be.Err(t, err, nil)
 	err = hexa.Writer(nil, 10, nil...)
-	require.NoError(t, err)
+	be.Err(t, err, nil)
 	err = hexa.Writer(nil, 10, "1", "2", "3")
-	require.NoError(t, err)
+	be.Err(t, err, nil)
 }

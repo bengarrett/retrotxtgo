@@ -8,8 +8,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/fsys"
 	"github.com/bengarrett/retrotxtgo/internal/mock"
 	"github.com/bengarrett/retrotxtgo/nl"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/nalgeon/be"
 )
 
 func TestReadColumns(t *testing.T) {
@@ -104,8 +103,8 @@ func TestReadControls(t *testing.T) {
 func TestIsPipe(t *testing.T) {
 	t.Parallel()
 	x, err := fsys.IsPipe()
-	require.NoError(t, err)
-	assert.False(t, x)
+	be.Err(t, err, nil)
+	be.True(t, !x)
 }
 
 func TestReadLine(t *testing.T) {

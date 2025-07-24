@@ -27,7 +27,7 @@ const (
 )
 
 // API interface to store the JSON results from GitHub.
-type API map[string]interface{}
+type API map[string]any
 
 // Endpoint requests an API endpoint from the URL.
 // A HTTP ETag can be provided to validate local data cache against the server.

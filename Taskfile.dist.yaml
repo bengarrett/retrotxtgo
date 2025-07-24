@@ -1,12 +1,9 @@
 # Task is a task runner / build tool that aims
 # to be simpler and easier to use.
 # https://taskfile.dev/installation/
-
 version: '3'
-
 vars:
   BINNAME: retrotxt
-
 tasks:
   default:
     desc: "Task runner for the retrotxt source code."
@@ -41,7 +38,7 @@ tasks:
       - cmd: go build -o {{.BINNAME}}.exe -race -v main.go
         platforms: [windows]
       - cmd: ./{{.BINNAME}} --version
-        platforms: [linux,darwin]
+        platforms: [linux, darwin]
       - cmd: ./{{.BINNAME}}.exe --version
         platforms: [windows]
       - cmd: echo "Done!"
@@ -90,3 +87,4 @@ tasks:
       - cmd: task --version
       - cmd: golangci-lint --version
       - cmd: goreleaser --version
+

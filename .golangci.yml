@@ -6,9 +6,11 @@ linters:
     - exhaustive
     - exhaustruct
     - nlreturn
+    - noinlineerr
     - varnamelen
     - wrapcheck
     - wsl
+    - wsl_v5
   settings:
     cyclop:
       max-complexity: 15

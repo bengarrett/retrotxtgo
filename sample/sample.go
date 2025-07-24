@@ -1,5 +1,5 @@
 // Package sample opens and encodes the example embedded text files.
-// These files are used for demostrating the info and the view commands.
+// These files are used for demonstrating the info and the view commands.
 package sample
 
 import (

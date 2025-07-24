@@ -11,11 +11,9 @@
 # create a version tag and push it:
 # git tag -a v0.1.0 -m "First release"
 # git push origin v0.1.0
-
 version: 2
 project_name: retrotxtgo
 dist: './.dist' # make dist a hidden directory to avoid cluttering the project root
-
 before:
   hooks:
     - go mod tidy
@@ -46,39 +44,37 @@ universal_binaries:
     replace: true
 env:
   - CGO_ENABLED=0
-
-archives:  
+archives:
   - id: BSD
     builds: ['BSD']
     format: tar.gz
     files:
-    - none*
+      - none*
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
   - id: Linux_Intel
     builds: ['Linux_Intel']
     format: tar.gz
     files:
-    - none*
+      - none*
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
   - id: Linux_arm64
     builds: ['Linux_arm64']
     format: tar.gz
     files:
-    - none*
+      - none*
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
   - id: macOS
     builds: ['macOS']
     format: tar.gz
     files:
-    - none*
+      - none*
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
   - id: Windows
     builds: ['Windows']
     format: zip
     files:
-    - none*
+      - none*
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
-
 nfpms:
   - id: Linux
     builds: ['Linux_Intel']
@@ -93,13 +89,10 @@ nfpms:
       - deb
       - rpm
       - archlinux
-
 changelog:
   use: git
-
 upx:
-  - 
-    enabled: true
+  - enabled: true
     ids: [Linux_Intel, Windows]
     # Valid options are from '1' (faster) to '9' (better), and 'best'.
     compress: best

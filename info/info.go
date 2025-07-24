@@ -96,7 +96,7 @@ func Marshal(w io.Writer, name string, chksums bool, f Format) error {
 	}
 	if ValidText(d.Mime.Type) {
 		var err error
-		// get the required linebreaks chars before running the multiple tasks
+		// get the required line breaks chars before running the multiple tasks
 		if d.LineBreak.Decimal, err = fsys.ReadLineBreaks(name); err != nil {
 			return err
 		}

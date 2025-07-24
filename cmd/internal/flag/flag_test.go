@@ -7,8 +7,9 @@ import (
 
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/convert"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/bengarrett/retrotxtgo/sample"
+	"github.com/nalgeon/be"
+	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 )
 
@@ -19,18 +20,20 @@ func ExampleEndOfFile() {
 	// Output: true
 }
 
+var cp437 encoding.Encoding = charmap.CodePage437
+
 func TestDefault(t *testing.T) {
 	t.Parallel()
 	e := flag.Default()
-	assert.Equal(t, charmap.CodePage437, e)
+	be.True(t, cp437 == e)
 }
 
 func TestInputOriginal(t *testing.T) {
 	t.Parallel()
 	g, err := flag.InputOriginal(nil, "")
-	assert.Empty(t, g)
-	require.NoError(t, err)
+	be.Equal(t, g, sample.Flags{})
+	be.Err(t, err, nil)
 	g, err = flag.InputOriginal(nil, "CP437")
-	assert.Empty(t, g)
-	require.NoError(t, err)
+	be.Equal(t, g, sample.Flags{})
+	be.Err(t, err, nil)
 }
