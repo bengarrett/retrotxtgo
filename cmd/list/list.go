@@ -78,6 +78,9 @@ func Table(w io.Writer, names ...string) error {
 		if name != "ascii" {
 			continue
 		}
+		if i > len(names) {
+			break
+		}
 		names[i] = "ascii-67"
 		names = append(names[:i+1], names[i:]...)
 		names[i] = "ascii-65"

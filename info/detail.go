@@ -507,6 +507,9 @@ func (d *Detail) mime(name string, data ...byte) {
 		if e != nil {
 			fmt.Fprintf(os.Stdout, "open zip file failure: %s\n", e)
 		}
+		if r == nil {
+			return
+		}
 		defer r.Close()
 		d.ZipComment = r.Comment
 	}

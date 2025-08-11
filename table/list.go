@@ -181,6 +181,9 @@ func Numeric(name string) int {
 		return -1
 	}
 	s1, s2 := strings.Split(name, " "), strings.Split(name, "-")
+	if len(s1) < 1 || len(s2) < 1 {
+		return -1
+	}
 	if i, err := strconv.Atoi(s1[len(s1)-1]); err == nil {
 		return i
 	}
