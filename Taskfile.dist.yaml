@@ -20,6 +20,10 @@ tasks:
       - cmd: gci write ./..
       - cmd: gofumpt -w .
       - cmd: golangci-lint run
+  nil:
+    desc: "Run the static analysis techniques to catch Nil dereferences."
+    cmds:
+      - go tool nilaway -test=false ./...
   build:
     desc: "Build the binary of the program."
     cmds:
@@ -56,10 +60,6 @@ tasks:
     desc: "Run the test suite."
     cmds:
       - go test -count=1 ./...
-  test5x:
-    desc: "Run the test suite 5 times over."
-    cmds:
-      - go test -count=5 ./...
   testr:
     desc: "Run the verbose test suite with the slower race detection."
     cmds:
@@ -76,15 +76,3 @@ tasks:
     cmds:
       - cmd: go get -u -x
       - cmd: go mod verify
-  ver:
-    silent: false
-    desc: Print the versions of the build and compiler tools.
-    ignore_error: true
-    cmds:
-      - cmd: go version
-      - cmd: gofumpt --version
-      - cmd: gci --version
-      - cmd: task --version
-      - cmd: golangci-lint --version
-      - cmd: goreleaser --version
-
