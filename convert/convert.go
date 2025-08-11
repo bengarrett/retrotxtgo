@@ -270,7 +270,7 @@ func (c *Convert) ignore(r rune) {
 // wrapWidth enforces a row length by inserting newline characters.
 // Any tab characters are replaced with three spaces.
 func (c *Convert) wrapWidth(maximum int) {
-	if maximum < 1 {
+	if c == nil || maximum < 1 {
 		return
 	}
 	// remove newlines

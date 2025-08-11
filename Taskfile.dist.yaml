@@ -10,6 +10,11 @@ tasks:
     cmds:
       - task --list-all
     silent: true
+  doc:
+    desc: "Generate and browse the application module documentation."
+    cmds:
+      - cmd: pkgsite -http localhost:8090
+    silent: true
   lint:
     silent: false
     desc: Runs the go formatter and lints the source code.
@@ -46,16 +51,6 @@ tasks:
       - cmd: ./{{.BINNAME}}.exe --version
         platforms: [windows]
       - cmd: echo "Done!"
-  tag:
-    desc: "Print the current git tag."
-    silent: true
-    cmds:
-      - cmd: echo "The current git tag is:"
-      - cmd: git describe --tags
-      - cmd: echo ""
-      - cmd: echo "To add a tag, run         git tag -a v0.0.0 -m 'Message'"
-      - cmd: echo "To push a tag, run        git push origin v0.0.0"
-      - cmd: echo "To create a release, run  goreleaser release --clean"
   test:
     desc: "Run the test suite."
     cmds:
