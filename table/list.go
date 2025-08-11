@@ -15,6 +15,7 @@ import (
 	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/encoding/ianaindex"
 	"golang.org/x/text/encoding/japanese"
+	"golang.org/x/text/encoding/traditionalchinese"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/encoding/unicode/utf32"
 )
@@ -35,6 +36,7 @@ func Charmaps() []encoding.Encoding {
 	// create a collection of all the encodings
 	a := charmap.All
 	a = append(a, japanese.All...)
+	a = append(a, traditionalchinese.All...)
 	a = append(a, unicode.All...)
 	a = append(a, utf32.All...)
 	// iterate the collection and skip the unwanted and duplicate encodings
@@ -86,6 +88,7 @@ func List(wr io.Writer) error { //nolint:funlen
 				c.Name, c.Value, c.Numeric, c.Alias)
 			continue
 		case
+			traditionalchinese.Big5,
 			unicode.UTF16(unicode.BigEndian, unicode.UseBOM),
 			unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM),
 			unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM),
@@ -212,6 +215,8 @@ func Alias(alias, value string, e encoding.Encoding) (string, error) {
 		return "latinII", nil
 	case "macintosh":
 		return "mac", nil
+	case "big5":
+		return "big-5", nil
 	}
 	a, err := ianaindex.MIB.Name(e)
 	if err != nil {

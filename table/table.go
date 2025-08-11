@@ -18,12 +18,14 @@ import (
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/japanese"
+	"golang.org/x/text/encoding/traditionalchinese"
 	uni "golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/encoding/unicode/utf32"
 )
 
 var (
 	ErrNil   = errors.New("character encoding cannot be a nil value")
+	ErrBig5  = errors.New("big5 table encodings are not supported")
 	ErrUTF16 = errors.New("utf-16 table encodings are not supported")
 	ErrUTF32 = errors.New("utf-32 table encodings are not supported")
 )
@@ -147,6 +149,8 @@ func CodePage(s string) (encoding.Encoding, error) {
 		return nil, err
 	}
 	switch cp {
+	case traditionalchinese.Big5:
+		return nil, ErrBig5
 	case uni.UTF16(uni.BigEndian, uni.UseBOM),
 		uni.UTF16(uni.BigEndian, uni.IgnoreBOM),
 		uni.UTF16(uni.LittleEndian, uni.IgnoreBOM):
@@ -364,6 +368,8 @@ func charmapMisc(cp encoding.Encoding) string {
 		return " (Vietnamese)"
 	case japanese.ShiftJIS:
 		return " (Japanese)"
+	case traditionalchinese.Big5:
+		return " (Traditional Chinese)"
 	}
 	return ""
 }

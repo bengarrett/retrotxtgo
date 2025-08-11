@@ -16,6 +16,7 @@ import (
 	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/encoding/ianaindex"
 	"golang.org/x/text/encoding/japanese"
+	"golang.org/x/text/encoding/traditionalchinese"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/encoding/unicode/utf32"
 	"golang.org/x/text/runes"
@@ -326,6 +327,8 @@ func encodingMisc(name string) string {
 		return "Macintosh"
 	case "shift jis", "shiftjis":
 		return "shift_jis"
+	case "big-5":
+		return "Big5"
 	case "ebcdic", ibm:
 		return cp037
 	case "iso88598e", "iso88598i", "iso88596e", "iso88596i":
@@ -473,6 +476,8 @@ func (c *Convert) Swap() (*Convert, error) {
 	case japanese.ShiftJIS:
 		c.RunesControls()
 		c.RunesShiftJIS()
+	case traditionalchinese.Big5:
+		c.RunesControls()
 	case unicode.UTF8, unicode.UTF8BOM:
 		c.RunesControls()
 		c.RunesUTF8()

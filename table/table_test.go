@@ -8,6 +8,7 @@ import (
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/japanese"
+	"golang.org/x/text/encoding/traditionalchinese"
 	uni "golang.org/x/text/encoding/unicode"
 )
 
@@ -105,6 +106,7 @@ func Test_CharmapAlias(t *testing.T) {
 		{"empty", args{}, ""},
 		{"win874", args{charmap.Windows874}, " (Thai)"},
 		{"shiftjis", args{japanese.ShiftJIS}, " (Japanese)"},
+		{"big5", args{traditionalchinese.Big5}, " (Traditional Chinese)"},
 	}
 	t.Run("", func(t *testing.T) {
 		t.Parallel()

@@ -126,6 +126,7 @@ func (c *Convert) Text(b ...byte) ([]rune, error) {
 
 // Transform byte data from named character map encoded text into UTF-8.
 func (c *Convert) Transform() error {
+	println("transform", fmt.Sprintf("%v", c.Input.Encoding))
 	if c.Input.Encoding == nil {
 		return ErrEncode
 	}
@@ -158,16 +159,21 @@ func (c *Convert) Transform() error {
 
 // FixJISTable blanks invalid ShiftJIS characters while printing 8-bit tables.
 func (c *Convert) FixJISTable() {
-	if c.Input.Encoding == japanese.ShiftJIS && c.Input.Table {
-		// this is only for the table command,
-		// it will break normal shift-jis encode text
-		const agrave, control, nobreak = 0xe0, 0x7f, 0xa0
-		for i, b := range c.Input.Input {
-			switch {
-			case b > control && b <= nobreak,
-				b >= agrave:
-				c.Input.Input[i] = SP
-			}
+	if !c.Input.Table {
+		return
+	}
+	input := c.Input.Encoding
+	if input != japanese.ShiftJIS {
+		return
+	}
+	// this is only for the table command,
+	// it will break normal shift-jis encode text
+	const agrave, control, nobreak = 0xe0, 0x7f, 0xa0
+	for i, b := range c.Input.Input {
+		switch {
+		case b > control && b <= nobreak,
+			b >= agrave:
+			c.Input.Input[i] = SP
 		}
 	}
 }
