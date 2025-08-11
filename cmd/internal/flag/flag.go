@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -19,8 +20,8 @@ import (
 )
 
 var (
-	ErrEmptyDef = errors.New("empty default encoding")
-	ErrNames    = errors.New("ignoring [filenames]")
+	ErrInput = errors.New("empty default encoding")
+	ErrNames = errors.New("ignoring [filenames]")
 )
 
 // Args initializes the command arguments and flags.
@@ -28,48 +29,56 @@ func Args(cmd *cobra.Command, args ...string) (
 	[]string, *convert.Convert, sample.Flags, error,
 ) {
 	reset := []string{}
-	conv := convert.Convert{}
-	conv.Args = convert.Flag{
+	converter := convert.Convert{}
+	converter.Args = convert.Flag{
 		Controls:  View().Controls,
 		SwapChars: View().Swap,
 		MaxWidth:  View().Width,
 	}
-	conv.Args = setFlags(cmd, conv.Args)
-	ok, err := fsys.IsPipe()
+	converter.Args = setFlags(cmd, converter.Args)
+	pipeOW, err := fsys.IsPipe()
 	if err != nil {
 		logs.Fatal(err)
 	}
-	if ok {
-		conv.Input.Encoding = unicode.UTF16(unicode.LittleEndian, unicode.UseBOM)
+	if pipeOW {
+		converter.Input.Encoding = unicode.UTF16(unicode.LittleEndian, unicode.UseBOM)
 		args = reset
-	}
-	if !ok {
-		if err := Help(cmd, args...); err != nil {
+	} else {
+		err := Help(cmd, args...)
+		if err != nil {
 			logs.Fatal(err)
 		}
 	}
-	l := len(args)
-	if ok && l > 0 {
+	count := len(args)
+	if pipeOW && count > 0 {
 		err := fmt.Errorf("%w;%w for piped text", err, ErrNames)
 		fmt.Fprintln(os.Stderr, logs.Sprint(err))
 		args = reset
 	}
-	if l == 0 {
+	if count == 0 {
 		args = reset
 	}
-	samp, err := InputOriginal(cmd, "")
+	inputsOW, err := InputOverride(cmd, "")
 	if err != nil {
-		return nil, nil, samp, err
+		return nil, nil, inputsOW, err
 	}
-	if conv.Input.Encoding == nil {
-		conv.Input.Encoding = Default()
+	// despite this default cp437 encoding being set,
+	// the results of the --input flag will be used
+	// when provided in the inputsOW struct.
+	if converter.Input.Encoding == nil {
+		converter.Input.Encoding = Default()
 	}
-	return args, &conv, samp, nil
+	return args, &converter, inputsOW, nil
 }
 
 // setFlags applies the flag arguments to a convert flag struct.
 func setFlags(cmd *cobra.Command, flag convert.Flag) convert.Flag {
-	if c := cmd.Flags().Lookup("controls"); c != nil && c.Changed {
+	const (
+		controls  = "controls"
+		swapChars = "swap-chars"
+		width     = "width"
+	)
+	if c := cmd.Flags().Lookup(controls); c != nil && c.Changed {
 		const sep, minChrs = ",", 2
 		val := c.Value.String()
 		if len(val) > minChrs {
@@ -78,7 +87,7 @@ func setFlags(cmd *cobra.Command, flag convert.Flag) convert.Flag {
 		ctrls := strings.Split(val, sep)
 		flag.Controls = ctrls
 	}
-	if s := cmd.Flags().Lookup("swap-chars"); s != nil && s.Changed {
+	if s := cmd.Flags().Lookup(swapChars); s != nil && s.Changed {
 		const sep, minChrs = ",", 2
 		val := s.Value.String()
 		if len(val) > minChrs {
@@ -87,7 +96,7 @@ func setFlags(cmd *cobra.Command, flag convert.Flag) convert.Flag {
 		swaps := strings.Split(val, sep)
 		flag.SwapChars = swaps
 	}
-	if w := cmd.Flags().Lookup("width"); w != nil && w.Changed {
+	if w := cmd.Flags().Lookup(width); w != nil && w.Changed {
 		i, err := strconv.Atoi(w.Value.String())
 		if err != nil {
 			logs.Fatal(err)
@@ -101,58 +110,58 @@ func setFlags(cmd *cobra.Command, flag convert.Flag) convert.Flag {
 // If the input is a pipe, then the default encoding is UTF-16.
 // Otherwise, the default encoding is CodePage437.
 func Default() encoding.Encoding {
-	ok, err := fsys.IsPipe()
+	pipeOW, err := fsys.IsPipe()
 	if err != nil {
 		logs.Fatal(err)
 	}
-	if ok {
+	if pipeOW {
 		return unicode.UTF16(unicode.LittleEndian, unicode.UseBOM)
 	}
 	return charmap.CodePage437
 }
 
-// InputOriginal applies the "input" and the (hidden) "original" encoding flag values
-// to the sample data.
-func InputOriginal(cmd *cobra.Command, dfault string) (sample.Flags, error) {
-	parse := func(name string) (encoding.Encoding, error) {
-		cp := cmd.Flags().Lookup(name)
-		lookup := dfault
-		if cp != nil && cp.Changed {
-			lookup = cp.Value.String()
-		}
-		if dfault == "" || lookup == "" {
-			return nil, ErrEmptyDef
-		}
-		return convert.Encoder(lookup)
-	}
+// InputOverride applies the "input" encoding flag and the "original" bool flag.
+func InputOverride(cmd *cobra.Command, fallback string) (sample.Flags, error) {
+	none := sample.Flags{}
 	if cmd == nil {
-		return sample.Flags{}, nil
+		return none, nil
 	}
+	const input, original = "input", "original"
 	// handle encode flag or apply the default
-	in, err := parse("input")
+	cp := cmd.Flags().Lookup(input)
+	in, err := parseInput(cp.Changed, cp.Value.String(), fallback)
+	// parse("input")
 	if err != nil {
-		if errors.Is(err, ErrEmptyDef) {
-			return sample.Flags{}, nil
+		if errors.Is(err, ErrInput) {
+			return none, nil
 		}
-		return sample.Flags{}, err
+		return none, err
 	}
-	// handle the hidden original flag
+	// handle the hidden original bool flag
 	og := false
-	l := cmd.Flags().Lookup("original")
+	l := cmd.Flags().Lookup(original)
 	if l != nil && l.Changed {
 		og = true
 	}
 	return sample.Flags{Input: in, Original: og}, nil
 }
 
+func parseInput(changed bool, value, fallback string) (encoding.Encoding, error) {
+	name := fallback
+	if changed {
+		name = value
+	}
+	// 11-Aug-25, this was previously bugged with an OR statement,
+	// it must always be an AND condition otherwise the logic will break.
+	if name == "" && fallback == "" {
+		return nil, ErrInput
+	}
+	return convert.Encoder(name)
+}
+
 // EndOfFile reports whether end-of-file control flag was requested.
 func EndOfFile(flags convert.Flag) bool {
-	for _, c := range flags.Controls {
-		if c == "eof" {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(flags.Controls, "eof")
 }
 
 // Help will print the help and exit when no arguments are supplied.

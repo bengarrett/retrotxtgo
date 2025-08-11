@@ -30,10 +30,10 @@ func TestDefault(t *testing.T) {
 
 func TestInputOriginal(t *testing.T) {
 	t.Parallel()
-	g, err := flag.InputOriginal(nil, "")
+	g, err := flag.InputOverride(nil, "")
 	be.Equal(t, g, sample.Flags{})
 	be.Err(t, err, nil)
-	g, err = flag.InputOriginal(nil, "CP437")
+	g, err = flag.InputOverride(nil, "CP437")
 	be.Equal(t, g, sample.Flags{})
 	be.Err(t, err, nil)
 }
