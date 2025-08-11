@@ -166,6 +166,9 @@ func LineBreaks(utf bool, runes ...rune) [2]rune {
 }
 
 func lfCnt(c, i, l int, runes ...rune) int {
+	if len(runes) < i {
+		return c
+	}
 	if i < l && runes[i+1] == nl.CR {
 		c++ // lfcr
 		return c

@@ -77,7 +77,10 @@ func Execute() error {
 				logs.FatalS(ErrUsage, errU, "rootCmd")
 			}
 		}
-		args := strings.Join(os.Args[1:], " ")
+		args := ""
+		if len(os.Args) > 1 {
+			args = strings.Join(os.Args[1:], " ")
+		}
 		return fmt.Errorf("%w: %s %s", errE, meta.Bin, strings.TrimSpace(args))
 	}
 	return nil

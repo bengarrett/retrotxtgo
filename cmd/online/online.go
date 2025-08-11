@@ -15,8 +15,9 @@ import (
 )
 
 var (
-	ErrJSON = errors.New("the response body syntax is not json")
-	ErrMash = errors.New("cannot unmarshal the json response body")
+	ErrJSON   = errors.New("the response body syntax is not json")
+	ErrMash   = errors.New("cannot unmarshal the json response body")
+	ErrNoResp = errors.New("the response is nil and unusable")
 )
 
 const (
@@ -33,9 +34,13 @@ type API map[string]any
 // A HTTP ETag can be provided to validate local data cache against the server.
 // It also reports whether the etag value matches the server ETag header.
 func Endpoint(url, etag string) (bool, API, error) {
+	const msg = "online api endpoint"
 	resp, body, err := Get(url, etag)
 	if err != nil {
-		return false, API{}, fmt.Errorf("endpoint get failed: %w", err)
+		return false, API{}, fmt.Errorf("%s get failed: %w", msg, err)
+	}
+	if resp == nil {
+		return false, API{}, fmt.Errorf("%s get: %w", msg, ErrNoResp)
 	}
 	defer resp.Body.Close()
 	if etag != "" {
@@ -46,13 +51,17 @@ func Endpoint(url, etag string) (bool, API, error) {
 		}
 	}
 	if ok := json.Valid(body); !ok {
-		return false, API{}, fmt.Errorf("endpoint %s: %w", url, ErrJSON)
+		return false, API{}, fmt.Errorf("%s %s: %w", msg, url, ErrJSON)
 	}
 	var data API
 	if err := json.Unmarshal(body, &data); err != nil {
-		return false, API{}, fmt.Errorf("endpoint %s: %w", url, ErrMash)
+		return false, API{}, fmt.Errorf("%s %s: %w", msg, url, ErrMash)
 	}
-	data["etag"] = resp.Header.Get("Etag")
+	if data == nil {
+		return false, API{}, fmt.Errorf("%s %s: %w", msg, url, ErrMash)
+	}
+	val := resp.Header.Get("Etag")
+	data["etag"] = val
 	return false, data, nil
 }
 
@@ -75,6 +84,9 @@ func Get(url, etag string) (*http.Response, []byte, error) {
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, nil, fmt.Errorf("requesting to set the get user-agent header: %w", err)
+	}
+	if resp == nil {
+		return nil, nil, fmt.Errorf("getting response: %w", ErrNoResp)
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
@@ -100,6 +112,9 @@ func Ping(url string) (bool, error) {
 	resp, err := client.Do(req)
 	if err != nil {
 		return false, fmt.Errorf("requesting to set the ping user-agent header: %w", err)
+	}
+	if resp == nil {
+		return false, fmt.Errorf("ping response: %w", ErrNoResp)
 	}
 	defer resp.Body.Close()
 	const ok, maximum = http.StatusOK, 299

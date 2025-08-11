@@ -191,16 +191,20 @@ func UnderlineKeys(keys ...string) string {
 				keys[i] = key
 			}
 			keys[i] = fmt.Sprintf("%s%s", c, key[utf8.RuneLen(r):])
-			if filepath.Ext(key) == ".min" {
-				s := strings.Split(keys[i], ".")
-				base := strings.Join(s[0:len(s)-1], ".")
-				m, err := UnderlineChar("m")
-				if err != nil {
-					// must use standard log package
-					log.Fatal("underline keys", keys, err)
-				}
-				keys[i] = fmt.Sprintf("%s.%sin", base, m)
+			if filepath.Ext(key) != ".min" {
+				continue
 			}
+			s := strings.Split(keys[i], ".")
+			if len(s) == 0 {
+				continue
+			}
+			base := strings.Join(s[0:len(s)-1], ".")
+			m, err := UnderlineChar("m")
+			if err != nil {
+				// must use standard log package
+				log.Fatal("underline keys", keys, err)
+			}
+			keys[i] = fmt.Sprintf("%s.%sin", base, m)
 			continue
 		}
 		c, err := UnderlineChar(key)

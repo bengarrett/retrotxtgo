@@ -135,6 +135,9 @@ func Writer(w io.Writer, b Base, vals ...string) error {
 		nums = Parse(b, TrimIndents(vals...)...)
 	}
 	for i, x := range nums {
+		if i >= len(vals) {
+			break
+		}
 		s := strings.ToUpper(vals[i])
 		if x == -1 {
 			fmt.Fprintf(sb, "%s = invalid%s", s, pad)
