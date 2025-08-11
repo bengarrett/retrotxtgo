@@ -206,7 +206,8 @@ $ retrotxt list
  Windows 1257             | cp1257        | 1257           | windows-1257  |
  Windows 1258             | cp1258        | 1258           | windows-1258  |
  Shift JIS                | shift_jis     |                | shiftjis      |
- UTF-8                    | utf-8         |                | utf8          |
+ † Big5                   | big5          |                | big-5         |
+   UTF-8                  | utf-8         |                | utf8          |
  † UTF-16BE (Use BOM)     | utf-16        |                | utf16         |
  † UTF-16BE (Ignore BOM)  | utf-16be      |                | utf16be       |
  † UTF-16LE (Ignore BOM)  | utf-16le      |                | utf16le       |

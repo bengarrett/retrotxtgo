@@ -18,6 +18,7 @@ import (
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/ianaindex"
+	"golang.org/x/text/encoding/traditionalchinese"
 )
 
 var (
@@ -130,11 +131,15 @@ func Tables(w io.Writer) error {
 			name string
 		)
 		switch e {
-		case charmap.XUserDefined:
+		case
+			traditionalchinese.Big5,
+			charmap.XUserDefined:
+			// do not display these encodings
 			continue
 		case xud.XUserDefinedISO11:
 			name = fmt.Sprint(e)
-		case xud.XUserDefined1963,
+		case
+			xud.XUserDefined1963,
 			xud.XUserDefined1965,
 			xud.XUserDefined1967:
 			name = xud.Name(e)
