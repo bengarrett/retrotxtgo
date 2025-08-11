@@ -126,7 +126,6 @@ func (c *Convert) Text(b ...byte) ([]rune, error) {
 
 // Transform byte data from named character map encoded text into UTF-8.
 func (c *Convert) Transform() error {
-	println("transform", fmt.Sprintf("%v", c.Input.Encoding))
 	if c.Input.Encoding == nil {
 		return ErrEncode
 	}

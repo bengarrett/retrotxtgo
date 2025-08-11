@@ -206,17 +206,8 @@ func Alias(alias, value string, e encoding.Encoding) (string, error) {
 	if a != "" {
 		return a, nil
 	}
-	switch value {
-	case "cp437":
-		return "msdos", nil
-	case "cp850":
-		return "latinI", nil
-	case "cp852":
-		return "latinII", nil
-	case "macintosh":
-		return "mac", nil
-	case "big5":
-		return "big-5", nil
+	if s := customValues(value); s != "" {
+		return s, nil
 	}
 	a, err := ianaindex.MIB.Name(e)
 	if err != nil {
@@ -236,6 +227,24 @@ func Alias(alias, value string, e encoding.Encoding) (string, error) {
 		return a[8:], nil
 	}
 	return a, nil
+}
+
+// customvalues for aliases can be added here.
+func customValues(value string) string {
+	switch value {
+	case "cp437":
+		return "msdos"
+	case "cp850":
+		return "latinI"
+	case "cp852":
+		return "latinII"
+	case "macintosh":
+		return "mac"
+	case "big5":
+		return "big-5"
+	default:
+		return ""
+	}
 }
 
 // Uniform formats MIME values.
