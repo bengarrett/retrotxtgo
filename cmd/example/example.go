@@ -60,6 +60,9 @@ func (e Example) String(w io.Writer) {
 			}
 			continue
 		}
+		if len(s) < 1 {
+			break
+		}
 		// do not the last hash as a comment
 		ex := strings.Join(s[:l-1], cmmt)
 		fmt.Fprint(w, term.Info(ex))

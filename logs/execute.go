@@ -63,11 +63,14 @@ func Execute(err error, test bool, args ...string) string {
 	if argsCnt == 0 {
 		Fatal(err)
 	}
+	if len(args) < 1 || len(words) < 1 {
+		return ""
+	}
 	mark, name := words[wordCnt-1], args[0]
 	if mark == name {
 		name = meta.Bin
 	}
-	if x := invalid(err, mark, name, words...); x != "" {
+	if x := Invalid(err, mark, name, words...); x != "" {
 		return x
 	}
 	if x := unknown(name, words...); x != "" {
@@ -80,7 +83,11 @@ func Execute(err error, test bool, args ...string) string {
 	return Sprint(err)
 }
 
-func invalid(err error, mark, name string, words ...string) string {
+func Invalid(err error, mark, name string, words ...string) string {
+	const req = 2
+	if len(words) < req {
+		return ""
+	}
 	problem := strings.Join(words[0:2], " ")
 	switch problem {
 	case flagSyntax:
@@ -106,6 +113,10 @@ func invalid(err error, mark, name string, words ...string) string {
 }
 
 func unknown(name string, words ...string) string {
+	const req = 2
+	if len(words) < req {
+		return ""
+	}
 	const (
 		unknownCmd   = "unknown command"
 		unknownFlag  = "unknown flag:"

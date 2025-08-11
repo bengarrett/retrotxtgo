@@ -35,7 +35,8 @@ func BOM() []byte {
 // The SUB is used by DOS and CP/M as an end-of-file marker.
 func TrimEOF(b []byte) []byte {
 	// ASCII control code
-	if cut := bytes.IndexByte(b, SUB); cut > 0 {
+	cut := bytes.IndexByte(b, SUB)
+	if cut > 0 && len(b) > cut {
 		return b[:cut]
 	}
 	// UTF-8 symbol for substitute character

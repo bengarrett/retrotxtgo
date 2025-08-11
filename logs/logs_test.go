@@ -108,3 +108,11 @@ func TestSprintS(t *testing.T) {
 	err = logs.SprintS(nil, nil, "hint")
 	be.True(t, err == "")
 }
+
+func TestInvalid(t *testing.T) {
+	t.Parallel()
+	s := logs.Invalid(nil, "", "")
+	be.Equal(t, s, "")
+	s = logs.Invalid(nil, "", "", "param1")
+	be.Equal(t, s, "")
+}
