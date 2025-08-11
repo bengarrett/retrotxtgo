@@ -132,7 +132,8 @@ func (d *Detail) Ctrls(name string) error {
 	return nil
 }
 
-var marshalMu sync.Mutex // protects the marshal function which is not thread safe due to the use of gookit.Enable
+// protects the marshal function which is not thread safe due to the use of gookit.Enable.
+var marshalMu sync.Mutex //nolint:gochecknoglobals
 
 // Marshal writes the Detail data in a given format syntax.
 func (d *Detail) Marshal(w io.Writer, f Format) error {
@@ -152,21 +153,21 @@ func (d *Detail) Marshal(w io.Writer, f Format) error {
 		err = d.marshal(w, false)
 		marshalMu.Unlock()
 	case JSON:
-		b, err := json.MarshalIndent(d, "", jsTab)
-		if err != nil {
-			return fmt.Errorf("detail json indent marshal: %w", err)
+		b, errj := json.MarshalIndent(d, "", jsTab)
+		if errj != nil {
+			return fmt.Errorf("detail json indent marshal: %w", errj)
 		}
 		_, err = w.Write(b)
 	case JSONMin:
-		b, err := json.Marshal(d)
-		if err != nil {
-			return fmt.Errorf("detail json marshal: %w", err)
+		b, errj := json.Marshal(d)
+		if errj != nil {
+			return fmt.Errorf("detail json marshal: %w", errj)
 		}
 		_, err = w.Write(b)
 	case XML:
-		b, err := xml.MarshalIndent(d, "", xmlTab)
-		if err != nil {
-			return fmt.Errorf("detail xml marshal: %w", err)
+		b, errj := xml.MarshalIndent(d, "", xmlTab)
+		if errj != nil {
+			return fmt.Errorf("detail xml marshal: %w", errj)
 		}
 		_, err = w.Write(b)
 	default:
