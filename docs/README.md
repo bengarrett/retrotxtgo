@@ -8,11 +8,33 @@ Read legacy code pages and ANSI-encoded text files in a modern Unicode terminal.
 ## Downloads
 
 [Numerous downloads are available](https://github.com/bengarrett/retrotxtgo/releases/latest/) for 
-[Windows](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo_windows_amd64.zip),
-[macOS](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo_darwin_all.tar.gz),
-[Linux](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxtgo_linux_amd64.tar.gz) and more.
+[Windows](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_windows.zip),
+[Apple](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_apple_silicon.gz),
+[Linux](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_linux.gz) and more.
 
-Retrotxt is a standalone terminal program, but [installation options and instructions exist](INSTALL.md).
+Plus Linux packages for 
+[Debian DEB](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt.deb),
+[Fedora RPM](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt.rpm),
+[Arch ZST](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt.pkg.tar.zst),
+[Alpine APK](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt.apk).
+
+The download is a gzip compressed binary that is standalone terminal application. 
+Windows users can use File Explorer to decompress it.
+
+```
+# replace 'foo' with the remainder of the filename
+$ gzip -d retrotxt_foo.gz
+
+# after decompression, to confirm the download and version
+$ retrotxt -v
+```
+
+Before use, macOS users will need to delete the 'quarantine' extended attribute that is applied to all 
+program downloads that are not notarized by Apple for a fee.
+
+```
+$ xattr -d com.apple.quarantine retrotxt
+```
 
 ## Quick Usage
 

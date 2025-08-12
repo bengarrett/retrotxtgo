@@ -1,0 +1,71 @@
+# GoReleaser configuration
+# https://goreleaser.com
+# .goreleaser.yml
+#
+# To test this tool and config:
+# goreleaser healthcheck
+# goreleaser check
+# goreleaser release --snapshot --clean
+#
+# To create new repository version tag and push it:
+# git tag -a v1.0.1 -m "First release"
+# git push origin v1.0.1
+#
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# vim: set ts=2 sw=2 tw=0 fo=cnqoj
+version: 2
+# Whether to enable the size reporting or not.
+report_sizes: true
+project_name: retrotxtgo
+dist: './.dist' # make dist into hidden directory, avoiding cluttering the project root
+before:
+  hooks:
+    - go mod tidy
+builds:
+  - id: retrotxt
+    binary: retrotxt
+    env:
+      - CGO_ENABLED=0
+    targets:
+      - darwin_amd64_v1 # apple on intel
+      - darwin_arm64_v8.0 # apple silicon
+      - freebsd_amd64_v1
+      - linux_amd64_v1
+      - windows_amd64_v1
+archives:
+  - id: retrotxt
+    name_template: >-
+      retrotxt_ {{- if eq .Os "darwin" }} {{- if .Arm64 }}apple_silicon{{ else }}apple_intel_cpu{{ end }} {{- else }}{{ .Os }}{{ end -}}
+    files:
+      - none*
+    formats: ['gz']
+    format_overrides:
+      - goos: windows
+        formats: ['zip']
+nfpms:
+  - id: Linux
+    package_name: "retrotxt"
+    file_name_template: "retrotxt"
+    vendor: Ben Garrett.
+    homepage: https://retrotxt.com/go
+    maintainer: Ben Garrett <code.by.ben@gmail.com>
+    description: Read legacy code page encoded textfiles in a modern Unicode terminal.
+    license: LGPL 3.0
+    formats:
+      - apk
+      - deb
+      - rpm
+      - archlinux
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+upx:
+  - enabled: false
+release:
+  footer: >-
+    ---
+
+    Released by [GoReleaser](https://github.com/goreleaser/goreleaser).

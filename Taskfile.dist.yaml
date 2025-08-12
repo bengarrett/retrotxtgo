@@ -10,6 +10,10 @@ tasks:
     cmds:
       - task --list-all
     silent: true
+  release:
+    desc: "GoReleaser"
+    cmds:
+      - cmd: goreleaser release --snapshot --clean
   doc:
     desc: "Generate and browse the application module documentation."
     cmds:

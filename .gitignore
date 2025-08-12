@@ -24,3 +24,5 @@ log.txt
 
 # macOS
 .DS_Store
+# Added by goreleaser init:
+dist/
