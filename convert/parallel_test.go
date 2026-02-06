@@ -14,8 +14,6 @@ import (
 
 // Test ParallelConvert with different sizes
 func TestParallelConvert(t *testing.T) {
-	t.Parallel()
-
 	cp437 := charmap.CodePage437
 	c := convert.Convert{}
 
@@ -40,8 +38,6 @@ func TestParallelConvert(t *testing.T) {
 
 // Test ChunkedConvert with different chunk sizes
 func TestChunkedConvert(t *testing.T) {
-	t.Parallel()
-
 	cp437 := charmap.CodePage437
 	c := convert.Convert{}
 
@@ -64,8 +60,6 @@ func TestChunkedConvert(t *testing.T) {
 
 // Test OptimalConvert automatic selection
 func TestOptimalConvert(t *testing.T) {
-	t.Parallel()
-
 	cp437 := charmap.CodePage437
 	c := convert.Convert{}
 

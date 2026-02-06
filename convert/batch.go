@@ -53,11 +53,12 @@ func (c *Convert) BatchConvert(encoding encoding.Encoding, files ...[]byte) Batc
 		go func(index int, data []byte) {
 			defer wg.Done()
 			
-			// Set encoding for this conversion
-			c.Input.Encoding = encoding
+			// Create a local copy of Convert for this goroutine to avoid data race
+			localC := *c
+			localC.Input.Encoding = encoding
 			
 			// Convert the file
-			runes, err := c.Text(data...)
+			runes, err := localC.Text(data...)
 			
 			resultChan <- BatchResult{
 				Index:    index,

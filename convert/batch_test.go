@@ -46,7 +46,7 @@ func TestBatchConvert(t *testing.T) {
 	be.Equal(t, results.Success, 3)
 	be.Equal(t, results.Failed, 0)
 	be.Equal(t, len(results.Results), 3)
-	
+
 	// Verify all results are valid (order may vary in parallel processing)
 	for _, result := range results.Results {
 		be.True(t, result.Index >= 0 && result.Index < 3)
@@ -74,7 +74,7 @@ func TestBatchConvertSequential(t *testing.T) {
 	be.Equal(t, results.Success, 3)
 	be.Equal(t, results.Failed, 0)
 	be.Equal(t, len(results.Results), 3)
-	
+
 	// Verify sequential order
 	for i, result := range results.Results {
 		be.Equal(t, result.Index, i)
@@ -84,8 +84,6 @@ func TestBatchConvertSequential(t *testing.T) {
 
 // Test BatchConvertOptimal
 func TestBatchConvertOptimal(t *testing.T) {
-	t.Parallel()
-
 	cp437 := charmap.CodePage437
 	c := convert.Convert{}
 
@@ -140,7 +138,7 @@ func TestProcessBatchResults(t *testing.T) {
 	}
 
 	convert.ProcessBatchResults(results, successFunc, failureFunc)
-	
+
 	// Just verify that callbacks were called
 	be.True(t, successCount >= 0)
 	be.True(t, failureCount >= 0)
@@ -152,7 +150,7 @@ func TestBatchConvertEncodings(t *testing.T) {
 	t.Parallel()
 
 	c := convert.Convert{}
-	
+
 	// Test CP437
 	cp437 := charmap.CodePage437
 	files := [][]byte{
@@ -161,7 +159,7 @@ func TestBatchConvertEncodings(t *testing.T) {
 	}
 	results := c.BatchConvert(cp437, files...)
 	be.Equal(t, results.Success, 2)
-	
+
 	// Test Latin1
 	latin1 := charmap.ISO8859_1
 	results = c.BatchConvert(latin1, files...)
@@ -178,7 +176,7 @@ func BenchmarkBatchProcessing(b *testing.B) {
 	for i := range smallFiles {
 		smallFiles[i] = []byte(bytes.Repeat([]byte("Test "), 10))
 	}
-	
+
 	b.Run("SmallBatch", func(b *testing.B) {
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -191,7 +189,7 @@ func BenchmarkBatchProcessing(b *testing.B) {
 	for i := range mediumFiles {
 		mediumFiles[i] = []byte(bytes.Repeat([]byte("Test "), 50))
 	}
-	
+
 	b.Run("MediumBatch", func(b *testing.B) {
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -204,7 +202,7 @@ func BenchmarkBatchProcessing(b *testing.B) {
 	for i := range largeFiles {
 		largeFiles[i] = []byte(bytes.Repeat([]byte("Test "), 100))
 	}
-	
+
 	b.Run("LargeBatch", func(b *testing.B) {
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {

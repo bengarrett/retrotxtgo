@@ -48,8 +48,10 @@ func (c *Convert) ParallelConvert(in, out encoding.Encoding, b ...byte) ([]rune,
 				return
 			}
 
-			c.Input.Encoding = in
-			runes, err := c.Text(b[start:end]...)
+			// Create a local copy of Convert for this goroutine to avoid data race
+			localC := *c
+			localC.Input.Encoding = in
+			runes, err := localC.Text(b[start:end]...)
 			if err != nil {
 				errChan <- err
 				return
