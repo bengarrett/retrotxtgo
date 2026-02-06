@@ -45,7 +45,7 @@ func TestArgs(t *testing.T) {
 	// The flag package has complex dependencies that make it difficult to test
 	// without extensive mocking. For now, we'll test the basic functionality
 	// that doesn't cause panics.
-	
+
 	// Test View function (safe to test)
 	view := flag.View()
 	be.Equal(t, view.Input, "CP437")
@@ -66,5 +66,3 @@ func TestView(t *testing.T) {
 	be.Equal(t, view.Width, 0)
 	be.Equal(t, view.Original, false)
 }
-
-

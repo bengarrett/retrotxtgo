@@ -48,6 +48,77 @@ func Test_SkipCtrlCodes(t *testing.T) {
 	})
 }
 
+// Benchmark character encoding conversion performance
+func BenchmarkConvert(b *testing.B) {
+	cp437 := charmap.CodePage437
+	latin1 := charmap.ISO8859_1
+
+	// Small text benchmark
+	smallText := []byte("Hello world! This is a test.")
+	b.Run("SmallText_CP437_to_UTF8", func(b *testing.B) {
+		c := convert.Convert{}
+		c.Input.Encoding = cp437
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			_, _ = c.Text(smallText...)
+		}
+	})
+
+	b.Run("SmallText_Latin1_to_UTF8", func(b *testing.B) {
+		c := convert.Convert{}
+		c.Input.Encoding = latin1
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			_, _ = c.Text(smallText...)
+		}
+	})
+
+	// Large text benchmark
+	largeText := bytes.Repeat([]byte("Hello world! This is a performance test. "), 100)
+	b.Run("LargeText_CP437_to_UTF8", func(b *testing.B) {
+		c := convert.Convert{}
+		c.Input.Encoding = cp437
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			_, _ = c.Text(largeText...)
+		}
+	})
+
+	b.Run("LargeText_Latin1_to_UTF8", func(b *testing.B) {
+		c := convert.Convert{}
+		c.Input.Encoding = latin1
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			_, _ = c.Text(largeText...)
+		}
+	})
+}
+
+// Benchmark ANSI control code handling
+func BenchmarkSkipCtrlCodes(b *testing.B) {
+	// Text with ANSI control codes
+	textWithANSI := []byte("Hello\x1b[31mworld\x1b[0m!")
+
+	b.Run("WithANSIControls", func(b *testing.B) {
+		c := convert.Convert{}
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			_, _ = c.SkipCode().Text(textWithANSI...)
+		}
+	})
+
+	// Text without ANSI control codes
+	textWithoutANSI := []byte("Hello world!")
+
+	b.Run("WithoutANSIControls", func(b *testing.B) {
+		c := convert.Convert{}
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			_, _ = c.Text(textWithoutANSI...)
+		}
+	})
+}
+
 func TestConvert_ANSI(t *testing.T) {
 	t.Parallel()
 	const wantHi = "\x1b[0m\x0D\x0A" +

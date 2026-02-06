@@ -82,6 +82,14 @@ tasks:
     desc: "Clean up coverage analysis files."
     cmds:
       - rm -f coverage.out coverage.html
+  benchmark:
+    desc: "Run performance benchmarks for the application."
+    cmds:
+      - go test -bench=. -benchmem ./...
+  benchmark-detailed:
+    desc: "Run detailed performance benchmarks with longer duration."
+    cmds:
+      - go test -bench=. -benchmem -benchtime=5s ./...
   pkg-patch:
     silent: false
     desc: Update and apply patches to the web server dependencies.
