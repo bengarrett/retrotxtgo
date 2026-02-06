@@ -63,6 +63,25 @@ tasks:
     desc: "Run the verbose test suite with the slower race detection."
     cmds:
       - go test -count=1 -race ./...
+  test-coverage:
+    desc: "Run test suite with coverage analysis and generate HTML report."
+    cmds:
+      - go test -count=1 -coverprofile=coverage.out ./...
+      - go tool cover -html=coverage.out -o coverage.html
+  test-coverage-detailed:
+    desc: "Run detailed test coverage analysis with function-level breakdown."
+    cmds:
+      - go test -count=1 -coverprofile=coverage.out -covermode=count ./...
+      - go tool cover -func=coverage.out
+      - go tool cover -html=coverage.out -o coverage.html
+  test-coverage-packages:
+    desc: "Run test coverage analysis showing coverage by package."
+    cmds:
+      - go test -count=1 -cover ./...
+  coverage-clean:
+    desc: "Clean up coverage analysis files."
+    cmds:
+      - rm -f coverage.out coverage.html
   pkg-patch:
     silent: false
     desc: Update and apply patches to the web server dependencies.

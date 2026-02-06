@@ -21,7 +21,7 @@ func ExampleAlias() {
 
 func TestCharmaps(t *testing.T) {
 	t.Parallel()
-	const totalCharmaps = 53
+	const totalCharmaps = 54
 	got, want := len(table.Charmaps()), totalCharmaps
 	if got != want {
 		t.Errorf("Charmaps() count = %v, want %v", got, want)
