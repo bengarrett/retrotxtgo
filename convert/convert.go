@@ -136,12 +136,16 @@ func (c *Convert) Transform() error {
 	if r, err := unicodeDecoder(c.Input.Encoding, c.Input.Input...); err != nil {
 		return err
 	} else if len(r) > 0 {
-		c.Output = r
+		// Use pool for rune allocation
+		buf := getRuneBuffer()
+		c.Output = append(buf, r...)
 		return nil
 	}
 	// use the input bytes if they are already valid UTF-8 runes
 	if utf8.Valid(c.Input.Input) {
-		c.Output = bytes.Runes(c.Input.Input)
+		// Use pool for rune allocation
+		buf := getRuneBuffer()
+		c.Output = append(buf, bytes.Runes(c.Input.Input)...)
 		return nil
 	}
 	// transform the input bytes into UTF-8 runes
@@ -152,7 +156,9 @@ func (c *Convert) Transform() error {
 	if _, err := t.Write(c.Input.Input); err != nil {
 		return err
 	}
-	c.Output = bytes.Runes(b.Bytes())
+	// Use pool for rune allocation
+	buf := getRuneBuffer()
+	c.Output = append(buf, bytes.Runes(b.Bytes())...)
 	return nil
 }
 
