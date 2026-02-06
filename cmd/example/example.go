@@ -31,7 +31,7 @@ const (
 	Dump                    // Dump is the example for the dump command.
 )
 
-// Example string writes the example usage help.
+// String writes the example usage help.
 func (e Example) String(w io.Writer) {
 	if w == nil {
 		w = io.Discard

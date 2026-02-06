@@ -38,7 +38,7 @@ func TestInputOriginal(t *testing.T) {
 	be.Err(t, err, nil)
 }
 
-// Test Args function with basic scenarios
+// Test Args function with basic scenarios.
 func TestArgs(t *testing.T) {
 	t.Parallel()
 
@@ -55,7 +55,7 @@ func TestArgs(t *testing.T) {
 	be.Equal(t, view.Original, false)
 }
 
-// Test View function
+// Test View function.
 func TestView(t *testing.T) {
 	t.Parallel()
 

@@ -16,8 +16,7 @@ import (
 func ExampleInfo() {
 	s := strings.Builder{}
 	_ = info.Info(&s, "testdata/example.txt", "text", false)
-	x := strings.Split(s.String(), "\n")
-	for _, v := range x {
+	for v := range strings.SplitSeq(s.String(), "\n") {
 		if strings.Contains(v, "SHA256 checksum") {
 			fmt.Print(v)
 		}

@@ -433,43 +433,49 @@ func (d *Detail) marshalled() []struct{ k, v string } {
 	const (
 		noBreakSpace     = "\u00A0"
 		symbolForNewline = "\u2424"
+		// baseFieldCount represents the number of base fields in the detail structure
+		baseFieldCount = 30
 	)
 	p := message.NewPrinter(lang())
-	data := []struct {
+	// Preallocate slice with capacity for all fields plus potential SAUCE comments
+	data := make([]struct {
 		k, v string
-	}{
-		{k: "slug", v: d.Slug},
-		{k: "filename", v: d.Name},
-		{k: "filetype", v: d.Mime.Commt},
-		{k: "Unicode", v: d.Unicode},
-		{k: "line break", v: fsys.LineBreak(d.LineBreak.Decimal, true)},
-		{k: "characters", v: p.Sprint(d.Count.Chars)},
-		{k: ans, v: p.Sprint(d.Count.Controls)},
-		{k: "words", v: p.Sprint(d.Count.Words)},
-		{k: "size", v: d.Size.Decimal},
-		{k: "lines", v: p.Sprint(d.Lines)},
-		{k: "width", v: p.Sprint(d.Width)},
-		{k: "modified", v: humanize.DMY.Format(d.Modified.Time.UTC())},
-		{k: "media mime type", v: d.Mime.Type},
-		{k: "SHA256 checksum", v: d.Sums.SHA256},
-		{k: "CRC64 ECMA", v: d.Sums.CRC64},
-		{k: "CRC32", v: d.Sums.CRC32},
-		{k: "MD5", v: d.Sums.MD5},
-		{k: zipComment, v: d.ZipComment},
-		// sauce data
-		{k: "title", v: d.Sauce.Title},
-		{k: "author", v: d.Sauce.Author},
-		{k: "group", v: d.Sauce.Group},
-		{k: "date", v: sauceDate(d.Sauce.Date.Value)},
-		{k: "original size", v: d.Sauce.FileSize.Decimal},
-		{k: "file type", v: d.Sauce.File.Name},
-		{k: "data type", v: d.Sauce.Data.Name},
-		{k: "description", v: d.Sauce.Desc},
-		{k: d.Sauce.Info.Info1.Info, v: strconv.FormatUint(uint64(d.Sauce.Info.Info1.Value), 10)},
-		{k: d.Sauce.Info.Info2.Info, v: strconv.FormatUint(uint64(d.Sauce.Info.Info2.Value), 10)},
-		{k: d.Sauce.Info.Info3.Info, v: strconv.FormatUint(uint64(d.Sauce.Info.Info3.Value), 10)},
-		{k: "interpretation", v: d.Sauce.Info.Flags.String()},
-	}
+	}, 0, baseFieldCount+len(d.Sauce.Comnt.Comment))
+	data = append(data,
+		struct{ k, v string }{k: "slug", v: d.Slug},
+		struct{ k, v string }{k: "filename", v: d.Name},
+		struct{ k, v string }{k: "filetype", v: d.Mime.Commt},
+		struct{ k, v string }{k: "Unicode", v: d.Unicode},
+		struct{ k, v string }{k: "line break", v: fsys.LineBreak(d.LineBreak.Decimal, true)},
+		struct{ k, v string }{k: "characters", v: p.Sprint(d.Count.Chars)},
+		struct{ k, v string }{k: ans, v: p.Sprint(d.Count.Controls)},
+		struct{ k, v string }{k: "words", v: p.Sprint(d.Count.Words)},
+		struct{ k, v string }{k: "size", v: d.Size.Decimal},
+		struct{ k, v string }{k: "lines", v: p.Sprint(d.Lines)},
+		struct{ k, v string }{k: "width", v: p.Sprint(d.Width)},
+		struct{ k, v string }{k: "modified", v: humanize.DMY.Format(d.Modified.Time.UTC())},
+		struct{ k, v string }{k: "media mime type", v: d.Mime.Type},
+		struct{ k, v string }{k: "SHA256 checksum", v: d.Sums.SHA256},
+		struct{ k, v string }{k: "CRC64 ECMA", v: d.Sums.CRC64},
+		struct{ k, v string }{k: "CRC32", v: d.Sums.CRC32},
+		struct{ k, v string }{k: "MD5", v: d.Sums.MD5},
+		struct{ k, v string }{k: zipComment, v: d.ZipComment},
+	)
+	// sauce data
+	data = append(data,
+		struct{ k, v string }{k: "title", v: d.Sauce.Title},
+		struct{ k, v string }{k: "author", v: d.Sauce.Author},
+		struct{ k, v string }{k: "group", v: d.Sauce.Group},
+		struct{ k, v string }{k: "date", v: sauceDate(d.Sauce.Date.Value)},
+		struct{ k, v string }{k: "original size", v: d.Sauce.FileSize.Decimal},
+		struct{ k, v string }{k: "file type", v: d.Sauce.File.Name},
+		struct{ k, v string }{k: "data type", v: d.Sauce.Data.Name},
+		struct{ k, v string }{k: "description", v: d.Sauce.Desc},
+		struct{ k, v string }{k: d.Sauce.Info.Info1.Info, v: strconv.FormatUint(uint64(d.Sauce.Info.Info1.Value), 10)},
+		struct{ k, v string }{k: d.Sauce.Info.Info2.Info, v: strconv.FormatUint(uint64(d.Sauce.Info.Info2.Value), 10)},
+		struct{ k, v string }{k: d.Sauce.Info.Info3.Info, v: strconv.FormatUint(uint64(d.Sauce.Info.Info3.Value), 10)},
+		struct{ k, v string }{k: "interpretation", v: d.Sauce.Info.Flags.String()},
+	)
 	// sauce comment
 	for i, line := range d.Sauce.Comnt.Comment {
 		comment := struct{ k, v string }{

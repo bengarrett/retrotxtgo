@@ -12,7 +12,7 @@ import (
 	"golang.org/x/text/encoding/charmap"
 )
 
-// Test BatchConvert with various scenarios
+// Test BatchConvert with various scenarios.
 func TestBatchConvert(t *testing.T) {
 	t.Parallel()
 
@@ -55,7 +55,7 @@ func TestBatchConvert(t *testing.T) {
 	}
 }
 
-// Test BatchConvertSequential
+// Test BatchConvertSequential.
 func TestBatchConvertSequential(t *testing.T) {
 	t.Parallel()
 
@@ -82,7 +82,7 @@ func TestBatchConvertSequential(t *testing.T) {
 	}
 }
 
-// Test BatchConvertOptimal
+// Test BatchConvertOptimal.
 func TestBatchConvertOptimal(t *testing.T) {
 	cp437 := charmap.CodePage437
 	c := convert.Convert{}
@@ -100,14 +100,14 @@ func TestBatchConvertOptimal(t *testing.T) {
 	// Test large batch (should use parallel)
 	largeFiles := make([][]byte, 10)
 	for i := range largeFiles {
-		largeFiles[i] = []byte(bytes.Repeat([]byte("Test "), 100))
+		largeFiles[i] = bytes.Repeat([]byte("Test "), 100)
 	}
 	results = c.BatchConvertOptimal(cp437, largeFiles...)
 	be.Equal(t, results.Total, 10)
 	be.Equal(t, results.Success, 10)
 }
 
-// Test ProcessBatchResults
+// Test ProcessBatchResults.
 func TestProcessBatchResults(t *testing.T) {
 	t.Parallel()
 
@@ -127,12 +127,12 @@ func TestProcessBatchResults(t *testing.T) {
 	successCount := 0
 	failureCount := 0
 
-	successFunc := func(index int, runes []rune) {
+	successFunc := func(_ int, runes []rune) {
 		successCount++
 		be.True(t, len(runes) > 0)
 	}
 
-	failureFunc := func(index int, err error) {
+	failureFunc := func(_ int, err error) {
 		failureCount++
 		be.True(t, err == nil)
 	}
@@ -145,7 +145,7 @@ func TestProcessBatchResults(t *testing.T) {
 	be.Equal(t, successCount+failureCount, 3)
 }
 
-// Test batch processing with different encodings
+// Test batch processing with different encodings.
 func TestBatchConvertEncodings(t *testing.T) {
 	t.Parallel()
 
@@ -166,7 +166,7 @@ func TestBatchConvertEncodings(t *testing.T) {
 	be.Equal(t, results.Success, 2)
 }
 
-// Benchmark batch processing performance
+// Benchmark batch processing performance.
 func BenchmarkBatchProcessing(b *testing.B) {
 	cp437 := charmap.CodePage437
 	c := convert.Convert{}
@@ -174,12 +174,12 @@ func BenchmarkBatchProcessing(b *testing.B) {
 	// Small batch benchmark
 	smallFiles := make([][]byte, 10)
 	for i := range smallFiles {
-		smallFiles[i] = []byte(bytes.Repeat([]byte("Test "), 10))
+		smallFiles[i] = bytes.Repeat([]byte("Test "), 10)
 	}
 
 	b.Run("SmallBatch", func(b *testing.B) {
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for range b.N {
 			_ = c.BatchConvert(cp437, smallFiles...)
 		}
 	})
@@ -187,12 +187,12 @@ func BenchmarkBatchProcessing(b *testing.B) {
 	// Medium batch benchmark
 	mediumFiles := make([][]byte, 50)
 	for i := range mediumFiles {
-		mediumFiles[i] = []byte(bytes.Repeat([]byte("Test "), 50))
+		mediumFiles[i] = bytes.Repeat([]byte("Test "), 50)
 	}
 
 	b.Run("MediumBatch", func(b *testing.B) {
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for range b.N {
 			_ = c.BatchConvert(cp437, mediumFiles...)
 		}
 	})
@@ -200,18 +200,18 @@ func BenchmarkBatchProcessing(b *testing.B) {
 	// Large batch benchmark
 	largeFiles := make([][]byte, 100)
 	for i := range largeFiles {
-		largeFiles[i] = []byte(bytes.Repeat([]byte("Test "), 100))
+		largeFiles[i] = bytes.Repeat([]byte("Test "), 100)
 	}
 
 	b.Run("LargeBatch", func(b *testing.B) {
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for range b.N {
 			_ = c.BatchConvert(cp437, largeFiles...)
 		}
 	})
 }
 
-// Benchmark sequential vs parallel batch processing
+// Benchmark sequential vs parallel batch processing.
 func BenchmarkBatchStrategies(b *testing.B) {
 	cp437 := charmap.CodePage437
 	c := convert.Convert{}
@@ -219,26 +219,26 @@ func BenchmarkBatchStrategies(b *testing.B) {
 	// Create test files
 	files := make([][]byte, 20)
 	for i := range files {
-		files[i] = []byte(bytes.Repeat([]byte("Performance test "), 100))
+		files[i] = bytes.Repeat([]byte("Performance test "), 100)
 	}
 
 	b.Run("Sequential", func(b *testing.B) {
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for range b.N {
 			_ = c.BatchConvertSequential(cp437, files...)
 		}
 	})
 
 	b.Run("Parallel", func(b *testing.B) {
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for range b.N {
 			_ = c.BatchConvert(cp437, files...)
 		}
 	})
 
 	b.Run("Optimal", func(b *testing.B) {
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for range b.N {
 			_ = c.BatchConvertOptimal(cp437, files...)
 		}
 	})

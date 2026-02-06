@@ -12,7 +12,7 @@ import (
 	"golang.org/x/text/encoding/charmap"
 )
 
-// Test ParallelConvert with different sizes
+// Test ParallelConvert with different sizes.
 func TestParallelConvert(t *testing.T) {
 	cp437 := charmap.CodePage437
 	c := convert.Convert{}
@@ -36,7 +36,7 @@ func TestParallelConvert(t *testing.T) {
 	be.True(t, len(runes) > 0)
 }
 
-// Test ChunkedConvert with different chunk sizes
+// Test ChunkedConvert with different chunk sizes.
 func TestChunkedConvert(t *testing.T) {
 	cp437 := charmap.CodePage437
 	c := convert.Convert{}
@@ -58,7 +58,7 @@ func TestChunkedConvert(t *testing.T) {
 	be.True(t, len(runes) > 0)
 }
 
-// Test OptimalConvert automatic selection
+// Test OptimalConvert automatic selection.
 func TestOptimalConvert(t *testing.T) {
 	cp437 := charmap.CodePage437
 	c := convert.Convert{}
@@ -87,7 +87,7 @@ func TestOptimalConvert(t *testing.T) {
 	be.True(t, len(runes) > 0)
 }
 
-// Benchmark parallel processing performance
+// Benchmark parallel processing performance.
 func BenchmarkParallelProcessing(b *testing.B) {
 	cp437 := charmap.CodePage437
 	c := convert.Convert{}
@@ -96,7 +96,7 @@ func BenchmarkParallelProcessing(b *testing.B) {
 	smallData := bytes.Repeat([]byte("Hello world! "), 100) // ~1.2KB
 	b.Run("SmallData", func(b *testing.B) {
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for range b.N {
 			_, _ = c.ParallelConvert(cp437, nil, smallData...)
 		}
 	})
@@ -105,7 +105,7 @@ func BenchmarkParallelProcessing(b *testing.B) {
 	mediumData := bytes.Repeat([]byte("Hello world! "), 1000) // ~12KB
 	b.Run("MediumData", func(b *testing.B) {
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for range b.N {
 			_, _ = c.ParallelConvert(cp437, nil, mediumData...)
 		}
 	})
@@ -114,7 +114,7 @@ func BenchmarkParallelProcessing(b *testing.B) {
 	largeData := bytes.Repeat([]byte("Hello world! "), 10000) // ~120KB
 	b.Run("LargeData", func(b *testing.B) {
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for range b.N {
 			_, _ = c.ParallelConvert(cp437, nil, largeData...)
 		}
 	})
@@ -123,13 +123,13 @@ func BenchmarkParallelProcessing(b *testing.B) {
 	veryLargeData := bytes.Repeat([]byte("Hello world! "), 100000) // ~1.2MB
 	b.Run("VeryLargeData", func(b *testing.B) {
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for range b.N {
 			_, _ = c.ParallelConvert(cp437, nil, veryLargeData...)
 		}
 	})
 }
 
-// Benchmark optimal conversion strategy
+// Benchmark optimal conversion strategy.
 func BenchmarkOptimalConvert(b *testing.B) {
 	cp437 := charmap.CodePage437
 	c := convert.Convert{}
@@ -149,7 +149,7 @@ func BenchmarkOptimalConvert(b *testing.B) {
 		data := bytes.Repeat([]byte("Hello world! Testing performance. "), size.size)
 		b.Run(size.name, func(b *testing.B) {
 			b.ResetTimer()
-			for i := 0; i < b.N; i++ {
+			for range b.N {
 				_, _ = c.OptimalConvert(cp437, nil, data...)
 			}
 		})

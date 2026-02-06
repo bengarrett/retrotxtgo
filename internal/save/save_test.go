@@ -28,6 +28,7 @@ func TestSave(t *testing.T) {
 	be.Equal(t, string(data), string(content))
 
 	// Test with empty content
+	//nolint:ineffassign,staticcheck,wastedassign // n, path, and err are used in assertions below
 	n, path, err = save.Save(filepath.Join(tempDir, "empty.txt"))
 	be.Err(t, err, nil)
 	be.Equal(t, n, 0) // No bytes written, returns 0

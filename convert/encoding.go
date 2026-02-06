@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"slices"
 	"strings"
 	"unicode/utf8"
 
@@ -143,7 +144,7 @@ const (
 	CheckMark = 10003
 	// Replacement character �.
 	Replacement = 65533
-	// Open Box ␣.
+	// OpenBox represents the open box character ␣.
 	OpenBox = 9251
 )
 
@@ -517,12 +518,7 @@ func (c *Convert) Swaps() (*Convert, error) {
 }
 
 func replacer(r rune, replacers ...rune) bool {
-	for _, s := range replacers {
-		if s == r {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(replacers, r)
 }
 
 func newReplacer(s string) []rune {
@@ -989,10 +985,8 @@ func (c *Convert) skipBreak(i int) bool {
 
 // SkipIgnore reports whether the rune should be skipped.
 func (c *Convert) SkipIgnore(i int) bool {
-	for _, ign := range c.Input.Ignore {
-		if c.Output[i] == ign {
-			return true
-		}
+	if i >= len(c.Output) {
+		return false
 	}
-	return false
+	return slices.Contains(c.Input.Ignore, c.Output[i])
 }

@@ -51,6 +51,9 @@ func TestGet(t *testing.T) {
 
 	// Test with invalid URL
 	resp, body, err := online.Get("http://this-url-definitely-does-not-exist-anywhere.com/invalid", "")
+	if resp != nil {
+		_ = resp.Body.Close()
+	}
 	be.True(t, err != nil)
 	be.Equal(t, resp, (*http.Response)(nil))
 	be.Equal(t, body, ([]byte)(nil))

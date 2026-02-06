@@ -62,7 +62,7 @@ func TestTransform(t *testing.T) {
 	})
 }
 
-// Test error handling in Transform
+// Test error handling in Transform.
 func TestTransformErrorHandling(t *testing.T) {
 	t.Parallel()
 
@@ -73,12 +73,13 @@ func TestTransformErrorHandling(t *testing.T) {
 	be.Equal(t, len(r), 0)
 
 	// Test with nil converter
+	//nolint:ineffassign,staticcheck,wastedassign // r and err are used in assertions below
 	r, err = view.Transform(nil, nil, nil)
 	be.True(t, err != nil)
 	be.Equal(t, err, view.ErrConv)
 }
 
-// Test different encoding scenarios
+// Test different encoding scenarios.
 func TestEncodingScenarios(t *testing.T) {
 	t.Parallel()
 
@@ -105,7 +106,7 @@ func TestEncodingScenarios(t *testing.T) {
 	be.Equal(t, string(r), "Hello World")
 }
 
-// Test edge cases in Transform
+// Test edge cases in Transform.
 func TestTransformEdgeCases(t *testing.T) {
 	t.Parallel()
 
@@ -124,6 +125,7 @@ func TestTransformEdgeCases(t *testing.T) {
 	be.True(t, len(r) > 0)
 
 	// Test with Unicode characters
+	//nolint:gosmopolitan // Intentional use of Han script to test Unicode handling
 	unicodeBytes := []byte("Hello 世界")
 	r, err = view.Transform(c, nil, nil, unicodeBytes...)
 	be.Err(t, err, nil)

@@ -20,7 +20,10 @@ import (
 	"golang.org/x/text/encoding/unicode/utf32"
 )
 
-const latin = "isolatin"
+const (
+	latin            = "isolatin"
+	encodingCapacity = 100 // Estimated capacity for all supported encodings
+)
 
 // Row is an item for the list of code pages.
 type Row struct {
@@ -32,7 +35,8 @@ type Row struct {
 
 // Charmaps returns all the supported legacy text encodings.
 func Charmaps() []encoding.Encoding {
-	e := []encoding.Encoding{}
+	// Preallocate with estimated capacity for all encodings
+	e := make([]encoding.Encoding, 0, encodingCapacity)
 	// create a collection of all the encodings
 	a := charmap.All
 	a = append(a, japanese.All...)

@@ -1,32 +1,29 @@
-// Package convert provides character encoding conversion with memory pooling support.
-// This file contains memory pooling optimizations to reduce GC pressure in high-throughput scenarios.
-
 package convert
 
 import (
 	"sync"
 )
 
+// Constants for memory pooling.
+const (
+	runeBufferInitialCapacity = 8192 // 8KB initial capacity for rune buffers
+)
+
 // runeBufferPool provides a pool of rune slices to reduce memory allocations
 // and GC pressure in high-throughput scenarios.
-var runeBufferPool = sync.Pool{
-	New: func() interface{} {
-		return make([]rune, 0, 8192) // 8KB initial capacity
+//
+//nolint:gochecknoglobals // Intentional global pool for performance optimization
+var runeBufferPool = &sync.Pool{
+	New: func() any {
+		return make([]rune, 0, runeBufferInitialCapacity) // runeBufferInitialCapacity initial capacity
 	},
 }
 
 // getRuneBuffer acquires a rune buffer from the pool or creates a new one.
 func getRuneBuffer() []rune {
-	return runeBufferPool.Get().([]rune)
-}
-
-// putRuneBuffer returns a rune buffer to the pool for reuse.
-func putRuneBuffer(buf []rune) {
-	// Clear the buffer before returning to pool
-	for i := range buf {
-		buf[i] = 0
+	if buf, ok := runeBufferPool.Get().([]rune); ok {
+		return buf
 	}
-	// Reset length to 0
-	buf = buf[:0]
-	runeBufferPool.Put(buf)
+	// If type assertion fails, return a new buffer
+	return make([]rune, 0, runeBufferInitialCapacity)
 }

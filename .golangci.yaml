@@ -7,6 +7,8 @@ linters:
     - exhaustruct
     - nlreturn
     - noinlineerr
+    - paralleltest
+    - tparallel
     - varnamelen
     - wrapcheck
     - wsl

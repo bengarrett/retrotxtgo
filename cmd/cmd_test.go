@@ -22,7 +22,9 @@ const (
 	infoT
 	listT
 	viewT
+)
 
+const (
 	root  = "../sample"
 	file1 = "../sample/ansi/ansi-cp.ans"
 	file2 = "../sample/bbs/SHEET.ANS"

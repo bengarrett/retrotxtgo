@@ -47,7 +47,7 @@ func Test_SkipCtrlCodes(t *testing.T) {
 	})
 }
 
-// Benchmark character encoding conversion performance
+// Benchmark character encoding conversion performance.
 func BenchmarkConvert(b *testing.B) {
 	cp437 := charmap.CodePage437
 	latin1 := charmap.ISO8859_1
@@ -58,7 +58,7 @@ func BenchmarkConvert(b *testing.B) {
 		c := convert.Convert{}
 		c.Input.Encoding = cp437
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for range b.N {
 			_, _ = c.Text(smallText...)
 		}
 	})
@@ -67,7 +67,7 @@ func BenchmarkConvert(b *testing.B) {
 		c := convert.Convert{}
 		c.Input.Encoding = latin1
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for range b.N {
 			_, _ = c.Text(smallText...)
 		}
 	})
@@ -78,7 +78,7 @@ func BenchmarkConvert(b *testing.B) {
 		c := convert.Convert{}
 		c.Input.Encoding = cp437
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for range b.N {
 			_, _ = c.Text(largeText...)
 		}
 	})
@@ -87,13 +87,13 @@ func BenchmarkConvert(b *testing.B) {
 		c := convert.Convert{}
 		c.Input.Encoding = latin1
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for range b.N {
 			_, _ = c.Text(largeText...)
 		}
 	})
 }
 
-// Benchmark ANSI control code handling
+// Benchmark ANSI control code handling.
 func BenchmarkSkipCtrlCodes(b *testing.B) {
 	// Text with ANSI control codes
 	textWithANSI := []byte("Hello\x1b[31mworld\x1b[0m!")
@@ -101,7 +101,7 @@ func BenchmarkSkipCtrlCodes(b *testing.B) {
 	b.Run("WithANSIControls", func(b *testing.B) {
 		c := convert.Convert{}
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for range b.N {
 			_, _ = c.SkipCode().Text(textWithANSI...)
 		}
 	})
@@ -112,7 +112,7 @@ func BenchmarkSkipCtrlCodes(b *testing.B) {
 	b.Run("WithoutANSIControls", func(b *testing.B) {
 		c := convert.Convert{}
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for range b.N {
 			_, _ = c.Text(textWithoutANSI...)
 		}
 	})

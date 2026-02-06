@@ -138,14 +138,16 @@ func (c *Convert) Transform() error {
 	} else if len(r) > 0 {
 		// Use pool for rune allocation
 		buf := getRuneBuffer()
-		c.Output = append(buf, r...)
+		buf = append(buf[:0], r...)
+		c.Output = buf
 		return nil
 	}
 	// use the input bytes if they are already valid UTF-8 runes
 	if utf8.Valid(c.Input.Input) {
 		// Use pool for rune allocation
 		buf := getRuneBuffer()
-		c.Output = append(buf, bytes.Runes(c.Input.Input)...)
+		buf = append(buf[:0], bytes.Runes(c.Input.Input)...)
+		c.Output = buf
 		return nil
 	}
 	// transform the input bytes into UTF-8 runes
@@ -158,7 +160,8 @@ func (c *Convert) Transform() error {
 	}
 	// Use pool for rune allocation
 	buf := getRuneBuffer()
-	c.Output = append(buf, bytes.Runes(b.Bytes())...)
+	buf = append(buf[:0], bytes.Runes(b.Bytes())...)
+	c.Output = buf
 	return nil
 }
 

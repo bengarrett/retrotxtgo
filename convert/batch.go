@@ -1,6 +1,3 @@
-// Package convert provides character encoding conversion with batch processing support.
-// This file contains optimized functions for handling multiple files efficiently.
-
 package convert
 
 import (
@@ -9,17 +6,23 @@ import (
 	"golang.org/x/text/encoding"
 )
 
-// BatchResult represents the result of a single conversion in a batch
+// Constants for batch processing.
+const (
+	maxBatchWorkers          = 8 // Maximum number of workers for batch processing
+	batchSequentialThreshold = 5 // Use sequential processing for batches smaller than this
+)
+
+// BatchResult represents the result of a single conversion in a batch.
 type BatchResult struct {
-	Index    int           // Original index in the batch
-	Runes    []rune        // Converted runes
-	Error    error         // Conversion error (if any)
-	Duration int64         // Processing time in nanoseconds
+	Index    int    // Original index in the batch
+	Runes    []rune // Converted runes
+	Error    error  // Conversion error (if any)
+	Duration int64  // Processing time in nanoseconds
 }
 
-// BatchResults represents the results of a batch conversion
+// BatchResults represents the results of a batch conversion.
 type BatchResults struct {
-	Results []BatchResult  // Individual file results
+	Results []BatchResult // Individual file results
 	Success int           // Number of successful conversions
 	Failed  int           // Number of failed conversions
 	Total   int           // Total number of files processed
@@ -37,12 +40,6 @@ func (c *Convert) BatchConvert(encoding encoding.Encoding, files ...[]byte) Batc
 		}
 	}
 
-	// Determine optimal number of workers
-	numWorkers := len(files)
-	if numWorkers > 8 {
-		numWorkers = 8 // Limit to 8 workers for optimal performance
-	}
-
 	// Create worker pool
 	var wg sync.WaitGroup
 	resultChan := make(chan BatchResult, len(files))
@@ -52,14 +49,14 @@ func (c *Convert) BatchConvert(encoding encoding.Encoding, files ...[]byte) Batc
 		wg.Add(1)
 		go func(index int, data []byte) {
 			defer wg.Done()
-			
+
 			// Create a local copy of Convert for this goroutine to avoid data race
 			localC := *c
 			localC.Input.Encoding = encoding
-			
+
 			// Convert the file
 			runes, err := localC.Text(data...)
-			
+
 			resultChan <- BatchResult{
 				Index:    index,
 				Runes:    runes,
@@ -104,14 +101,14 @@ func (c *Convert) BatchConvertSequential(encoding encoding.Encoding, files ...[]
 	for i, file := range files {
 		c.Input.Encoding = encoding
 		runes, err := c.Text(file...)
-		
+
 		results = append(results, BatchResult{
 			Index:    i,
 			Runes:    runes,
 			Error:    err,
 			Duration: 0,
 		})
-		
+
 		if err == nil {
 			success++
 		} else {
@@ -129,9 +126,9 @@ func (c *Convert) BatchConvertSequential(encoding encoding.Encoding, files ...[]
 
 // BatchConvertOptimal automatically chooses the best batch processing strategy.
 // Small batches: Sequential processing
-// Large batches: Parallel processing
+// Large batches: Parallel processing.
 func (c *Convert) BatchConvertOptimal(encoding encoding.Encoding, files ...[]byte) BatchResults {
-	if len(files) < 5 {
+	if len(files) < batchSequentialThreshold {
 		// Small batch: use sequential for lower overhead
 		return c.BatchConvertSequential(encoding, files...)
 	}
@@ -141,10 +138,10 @@ func (c *Convert) BatchConvertOptimal(encoding encoding.Encoding, files ...[]byt
 
 // ProcessBatchResults processes the results of a batch conversion.
 // It provides callbacks for handling successful and failed conversions.
-func ProcessBatchResults(results BatchResults, 
-	successFunc func(index int, runes []rune), 
-	failureFunc func(index int, err error)) {
-	
+func ProcessBatchResults(results BatchResults,
+	successFunc func(index int, runes []rune),
+	failureFunc func(index int, err error),
+) {
 	for _, result := range results.Results {
 		if result.Error == nil {
 			if successFunc != nil {

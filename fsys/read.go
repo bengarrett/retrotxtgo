@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/bengarrett/retrotxtgo/internal/save"
 	"github.com/bengarrett/retrotxtgo/nl"
@@ -145,11 +146,13 @@ func ReadLine(name string, sys nl.System) (string, error) {
 	}
 	defer file.Close()
 	// bufio is the most performant
-	s := ""
 	scanner := bufio.NewScanner(file)
+	var builder strings.Builder
 	for scanner.Scan() {
-		s += scanner.Text() + n
+		builder.WriteString(scanner.Text())
+		builder.WriteString(n)
 	}
+	s := builder.String()
 	if err := scanner.Err(); err != nil {
 		return "", fmt.Errorf("read line could not scan file: %w", err)
 	}
