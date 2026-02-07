@@ -1,12 +1,14 @@
-package table
+package table_test
 
 import (
 	"bytes"
 	"testing"
+
+	"github.com/bengarrett/retrotxtgo/table"
 )
 
 func TestLipglossTable(t *testing.T) {
-	testRows := []Row{
+	testRows := []table.Row{
 		{Name: "IBM Code Page 437", Value: "cp437", Numeric: "437", Alias: "msdos"},
 		{Name: "* IBM Code Page 037", Value: "cp037", Numeric: "37", Alias: "ibm037"},
 		{Name: "† Big5", Value: "big5", Numeric: "", Alias: "big-5"},
@@ -14,7 +16,7 @@ func TestLipglossTable(t *testing.T) {
 	}
 
 	buf := new(bytes.Buffer)
-	err := LipglossTable(buf, testRows)
+	err := table.LipglossTable(buf, testRows)
 	if err != nil {
 		t.Fatalf("LipglossTable failed: %v", err)
 	}
@@ -33,7 +35,7 @@ func TestLipglossTable(t *testing.T) {
 	}
 }
 
-func TestList(t *testing.T) {
+func TestListLipgloss(t *testing.T) {
 	tests := []struct {
 		name     string
 		wantErr  bool
@@ -51,7 +53,7 @@ func TestList(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			buf := new(bytes.Buffer)
-			err := List(buf)
+			err := table.List(buf)
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("List() error = %v, wantErr %v", err, tt.wantErr)

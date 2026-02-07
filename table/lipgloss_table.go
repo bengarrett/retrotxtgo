@@ -1,4 +1,3 @@
-// Package table provides lipgloss-based table formatting.
 package table
 
 import (
@@ -47,7 +46,7 @@ func LipglossTable(wr io.Writer, rows []Row) error {
 	header := createHeader(headerStyle, colWidths)
 
 	// Create rows
-	var rowStrings []string
+	rowStrings := make([]string, 0, len(rows))
 	for _, row := range rows {
 		rowString := createRow(&row, cellStyle, specialCellStyle, nonTableCellStyle, tableOnlyCellStyle, colWidths)
 		rowStrings = append(rowStrings, rowString)
@@ -111,35 +110,49 @@ func createHeader(style lipgloss.Style, widths [4]int) string {
 	return lipgloss.JoinHorizontal(lipgloss.Top, headerCells...)
 }
 
-func createRow(row *Row, cellStyle, specialCellStyle, nonTableCellStyle, tableOnlyCellStyle lipgloss.Style, widths [4]int) string {
+func createRow(
+	row *Row,
+	cellStyle lipgloss.Style,
+	specialCellStyle lipgloss.Style,
+	nonTableCellStyle lipgloss.Style,
+	tableOnlyCellStyle lipgloss.Style,
+	widths [4]int,
+) string {
 	var cells []string
 
 	// Determine the appropriate style based on the row content
-	if strings.HasPrefix(row.Name, "* ") {
-		row.Name = strings.TrimPrefix(row.Name, "* ")
+	switch {
+	case strings.HasPrefix(row.Name, "* "):
+		if trimmed, ok := strings.CutPrefix(row.Name, "* "); ok {
+			row.Name = trimmed
+		}
 		cells = append(cells,
 			specialCellStyle.Render(fitString(row.Name, widths[0])),
 			specialCellStyle.Render(fitString(row.Value, widths[1])),
 			specialCellStyle.Render(fitString(row.Numeric, widths[2])),
 			specialCellStyle.Render(fitString(row.Alias, widths[3])),
 		)
-	} else if strings.HasPrefix(row.Name, "† ") {
-		row.Name = strings.TrimPrefix(row.Name, "† ")
+	case strings.HasPrefix(row.Name, "† "):
+		if trimmed, ok := strings.CutPrefix(row.Name, "† "); ok {
+			row.Name = trimmed
+		}
 		cells = append(cells,
 			nonTableCellStyle.Render(fitString(row.Name, widths[0])),
 			nonTableCellStyle.Render(fitString(row.Value, widths[1])),
 			nonTableCellStyle.Render(fitString(row.Numeric, widths[2])),
 			nonTableCellStyle.Render(fitString(row.Alias, widths[3])),
 		)
-	} else if strings.HasPrefix(row.Name, "⁑ ") {
-		row.Name = strings.TrimPrefix(row.Name, "⁑ ")
+	case strings.HasPrefix(row.Name, "⁑ "):
+		if trimmed, ok := strings.CutPrefix(row.Name, "⁑ "); ok {
+			row.Name = trimmed
+		}
 		cells = append(cells,
 			tableOnlyCellStyle.Render(fitString(row.Name, widths[0])),
 			tableOnlyCellStyle.Render(fitString(row.Value, widths[1])),
 			tableOnlyCellStyle.Render(fitString(row.Numeric, widths[2])),
 			tableOnlyCellStyle.Render(fitString(row.Alias, widths[3])),
 		)
-	} else {
+	default:
 		cells = append(cells,
 			cellStyle.Render(fitString(row.Name, widths[0])),
 			cellStyle.Render(fitString(row.Value, widths[1])),

@@ -35,15 +35,15 @@ type Row struct {
 
 // Charmaps returns all the supported legacy text encodings.
 func Charmaps() []encoding.Encoding {
-	// Preallocate with estimated capacity for all encodings
+	// Preallocate with estimated capacity for all encodings.
 	e := make([]encoding.Encoding, 0, encodingCapacity)
-	// create a collection of all the encodings
+	// Create a collection of all the encodings.
 	a := charmap.All
 	a = append(a, japanese.All...)
 	a = append(a, traditionalchinese.All...)
 	a = append(a, unicode.All...)
 	a = append(a, utf32.All...)
-	// iterate the collection and skip the unwanted and duplicate encodings
+	// Iterate the collection and skip the unwanted and duplicate encodings.
 	for _, m := range a {
 		switch m {
 		case japanese.EUCJP,
@@ -57,17 +57,30 @@ func Charmaps() []encoding.Encoding {
 }
 
 // List returns a tabled list of supported IANA character set encodings.
-func List(wr io.Writer) error { //nolint:funlen
+func List(wr io.Writer) error {
 	return listWithLipgloss(wr)
 }
 
-// listWithLipgloss uses lipgloss for modern table formatting
+// listWithLipgloss uses lipgloss for modern table formatting.
 func listWithLipgloss(wr io.Writer) error {
-	const title = " Known legacy code pages and character encodings "
-	const width = 76
+	rows, err := createTableRows()
+	if err != nil {
+		return err
+	}
 
-	// Create rows
-	var rows []Row
+	if err := LipglossTable(wr, rows); err != nil {
+		return err
+	}
+
+	printLegendAndFooter(wr)
+	return nil
+}
+
+// createTableRows creates the rows for the table.
+func createTableRows() ([]Row, error) {
+	// Preallocate rows with estimated capacity
+	const extraEncodings = 3 // For the extra XUserDefined encodings
+	rows := make([]Row, 0, len(Charmaps())+extraEncodings)
 	x := Charmaps()
 	x = append(x, xud.XUserDefined1963, xud.XUserDefined1965, xud.XUserDefined1967)
 
@@ -77,50 +90,53 @@ func listWithLipgloss(wr io.Writer) error {
 		}
 		c, err := Rows(e)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
-		switch e {
-		case charmap.ISO8859_10:
-			rows = append(rows, c)
-			// intentionally insert ISO-8895-11 after 10.
-			x11 := Row{
-				Name:    fmt.Sprint(xud.XUserDefinedISO11),
-				Value:   xud.Name(xud.XUserDefinedISO11),
-				Numeric: xud.Numeric(xud.XUserDefinedISO11),
-				Alias:   xud.Alias(xud.XUserDefinedISO11),
-			}
-			rows = append(rows, x11)
-			continue
-		case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
-			c.Name = "* " + c.Name
-			rows = append(rows, c)
-			continue
-		case
-			traditionalchinese.Big5,
-			unicode.UTF16(unicode.BigEndian, unicode.UseBOM),
-			unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM),
-			unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM),
-			utf32.UTF32(utf32.BigEndian, utf32.UseBOM),
-			utf32.UTF32(utf32.BigEndian, utf32.IgnoreBOM),
-			utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM):
-			c.Name = "† " + c.Name
-			rows = append(rows, c)
-			continue
-		case xud.XUserDefined1963, xud.XUserDefined1965, xud.XUserDefined1967:
-			c.Name = "⁑ " + c.Name
-			rows = append(rows, c)
-			continue
-		}
+		rows = append(rows, processRow(e, c)...)
+	}
+
+	return rows, nil
+}
+
+// processRow processes a single row based on the encoding type.
+func processRow(e encoding.Encoding, c Row) []Row {
+	switch e {
+	case charmap.ISO8859_10:
+		const iso885910Rows = 2 // ISO-8859-10 + ISO-8859-11
+		rows := make([]Row, 0, iso885910Rows)
 		rows = append(rows, c)
+		// intentionally insert ISO-8895-11 after 10.
+		x11 := Row{
+			Name:    fmt.Sprint(xud.XUserDefinedISO11),
+			Value:   xud.Name(xud.XUserDefinedISO11),
+			Numeric: xud.Numeric(xud.XUserDefinedISO11),
+			Alias:   xud.Alias(xud.XUserDefinedISO11),
+		}
+		rows = append(rows, x11)
+		return rows
+	case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
+		c.Name = "* " + c.Name
+		return []Row{c}
+	case
+		traditionalchinese.Big5,
+		unicode.UTF16(unicode.BigEndian, unicode.UseBOM),
+		unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM),
+		unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM),
+		utf32.UTF32(utf32.BigEndian, utf32.UseBOM),
+		utf32.UTF32(utf32.BigEndian, utf32.IgnoreBOM),
+		utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM):
+		c.Name = "† " + c.Name
+		return []Row{c}
+	case xud.XUserDefined1963, xud.XUserDefined1965, xud.XUserDefined1967:
+		c.Name = "⁑ " + c.Name
+		return []Row{c}
 	}
+	return []Row{c}
+}
 
-	// Render the table
-	if err := LipglossTable(wr, rows); err != nil {
-		return err
-	}
-
-	// Add legend and footer
+// printLegendAndFooter prints the legend and footer information.
+func printLegendAndFooter(wr io.Writer) {
 	// Use lipgloss styles to match the table colors
 	specialStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("214"))
 	nonTableStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
@@ -153,8 +169,6 @@ func listWithLipgloss(wr io.Writer) error {
 	fmt.Fprintf(wr, "\n%s, PCs and the web today use Unicode UTF-8. As a subset,\n", meta.Name)
 	fmt.Fprintln(wr, "UTF-8 is backwards compatible with US-ASCII. For example capital")
 	fmt.Fprintln(wr, "letter A is represented by the same byte value in both encodings.")
-
-	return nil
 }
 
 // Rows return character encoding details for use in a text table.

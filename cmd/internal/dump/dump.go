@@ -15,7 +15,7 @@ import (
 var ErrPipeRead = errors.New("could not read text stream from piped stdin (standard input)")
 
 // Run parses the arguments supplied with the dump command.
-func Run(w io.Writer, cmd *cobra.Command, args ...string) error {
+func Run(w io.Writer, _ *cobra.Command, args ...string) error {
 	if w == nil {
 		w = io.Discard
 	}
