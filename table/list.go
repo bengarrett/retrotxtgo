@@ -10,6 +10,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/bengarrett/retrotxtgo/term"
 	"github.com/bengarrett/retrotxtgo/xud"
+	"github.com/charmbracelet/lipgloss"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/htmlindex"
@@ -58,9 +59,134 @@ func Charmaps() []encoding.Encoding {
 
 // List returns a tabled list of supported IANA character set encodings.
 func List(wr io.Writer) error { //nolint:funlen
+	return ListWithStyle(wr, "auto")
+}
+
+// ListWithStyle returns a tabled list of supported IANA character set encodings
+// with the specified style ("auto", "lipgloss", or "tabwriter").
+func ListWithStyle(wr io.Writer, style string) error {
 	if wr == nil {
 		wr = io.Discard
 	}
+
+	// Check if we should use lipgloss (auto-detect based on terminal)
+	useLipgloss := shouldUseLipgloss(style)
+
+	if useLipgloss {
+		return listWithLipgloss(wr)
+	}
+	return listWithTabwriter(wr)
+}
+
+func shouldUseLipgloss(style string) bool {
+	if style == "lipgloss" {
+		return true
+	}
+	if style == "tabwriter" {
+		return false
+	}
+	// Auto-detect: use lipgloss if we're in a terminal
+	return term.IsTerminal()
+}
+
+// listWithLipgloss uses lipgloss for modern table formatting
+func listWithLipgloss(wr io.Writer) error {
+	const title = " Known legacy code pages and character encodings "
+	const width = 76
+
+	// Create rows
+	var rows []Row
+	x := Charmaps()
+	x = append(x, xud.XUserDefined1963, xud.XUserDefined1965, xud.XUserDefined1967)
+
+	for _, e := range x {
+		if e == charmap.XUserDefined {
+			continue
+		}
+		c, err := Rows(e)
+		if err != nil {
+			return err
+		}
+
+		switch e {
+		case charmap.ISO8859_10:
+			rows = append(rows, c)
+			// intentionally insert ISO-8895-11 after 10.
+			x11 := Row{
+				Name:    fmt.Sprint(xud.XUserDefinedISO11),
+				Value:   xud.Name(xud.XUserDefinedISO11),
+				Numeric: xud.Numeric(xud.XUserDefinedISO11),
+				Alias:   xud.Alias(xud.XUserDefinedISO11),
+			}
+			rows = append(rows, x11)
+			continue
+		case charmap.CodePage037, charmap.CodePage1047, charmap.CodePage1140:
+			c.Name = "* " + c.Name
+			rows = append(rows, c)
+			continue
+		case
+			traditionalchinese.Big5,
+			unicode.UTF16(unicode.BigEndian, unicode.UseBOM),
+			unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM),
+			unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM),
+			utf32.UTF32(utf32.BigEndian, utf32.UseBOM),
+			utf32.UTF32(utf32.BigEndian, utf32.IgnoreBOM),
+			utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM):
+			c.Name = "† " + c.Name
+			rows = append(rows, c)
+			continue
+		case xud.XUserDefined1963, xud.XUserDefined1965, xud.XUserDefined1967:
+			c.Name = "⁑ " + c.Name
+			rows = append(rows, c)
+			continue
+		}
+		rows = append(rows, c)
+	}
+
+	// Render the table
+	if err := LipglossTable(wr, rows); err != nil {
+		return err
+	}
+
+	// Add legend and footer
+	// Use lipgloss styles to match the table colors
+	specialStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("214"))
+	nonTableStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
+	tableOnlyStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("141"))
+
+	fmt.Fprintln(wr, "\n "+specialStyle.Render("Yellow text")+
+		" indicates EBCDIC encodings found on IBM mainframes (not ASCII compatible).")
+	fmt.Fprintln(wr, " "+nonTableStyle.Render("Black text")+
+		" indicates encodings not usable with the "+term.Example("table")+" command.")
+	fmt.Fprintln(wr, " "+tableOnlyStyle.Render("Green text")+
+		" indicates encodings only usable with the "+term.Example("table")+" command."+
+		"\n You can use the "+term.Example("table ascii")+" command to list all three X3.4 tables.")
+	fmt.Fprintln(wr, "\nEither named, numeric or alias values are valid code page arguments.")
+	fmt.Fprintln(wr, "  These values all match ISO 8859-1.")
+	cmds := meta.Bin + " table "
+	fmt.Fprintf(wr, "  %s%s  %s\n",
+		term.Example(cmds), term.Comment("iso-8859-1"), term.Fuzzy("# named"))
+	fmt.Fprintf(wr, "  %s%s           %s\n",
+		term.Example(cmds), term.Comment("1"), term.Fuzzy("# numeric"))
+	fmt.Fprintf(wr, "  %s%s      %s\n",
+		term.Example(cmds), term.Comment("latin1"), term.Fuzzy("# alias"))
+	fmt.Fprintf(wr, "\n  IBM Code Page 437 (%s) is commonly used on MS-DOS and ANSI art.\n",
+		term.Comment("cp437"))
+	fmt.Fprintf(wr, "  ISO 8859-1 (%s) is found on historic Unix, Amiga and the early Internet.\n",
+		term.Comment("latin1"))
+	fmt.Fprintf(wr, "  Windows 1252 (%s) is found on Windows ME/98 and earlier systems.\n",
+		term.Comment("cp1252"))
+	fmt.Fprintf(wr, "  Macintosh (%s) is found on Mac OS 9 and earlier systems.\n",
+		term.Comment("macintosh"))
+	fmt.Fprintf(wr, "\n%s, PCs and the web today use Unicode UTF-8. As a subset,\n", meta.Name)
+	fmt.Fprintln(wr, "UTF-8 is backwards compatible with US-ASCII. For example capital")
+	fmt.Fprintln(wr, "letter A is represented by the same byte value in both encodings.")
+
+	return nil
+}
+
+// listWithTabwriter uses the original tabwriter implementation
+func listWithTabwriter(wr io.Writer) error {
 	const header, title = " Formal name\t Named value\t Numeric value\t Alias value\t",
 		" Known legacy code pages and character encodings "
 	const verticalBars = tabwriter.Debug

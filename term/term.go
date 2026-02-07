@@ -89,6 +89,11 @@ func GetEnv(key string) string {
 	return strings.TrimSpace(strings.ToLower(os.Getenv(key)))
 }
 
+// IsTerminal reports whether the output is a terminal.
+func IsTerminal() bool {
+	return color.Enable
+}
+
 // Head returns a colored and underlined string for use as a header.
 // Provide a fixed width value for the underline border or set to zero.
 // The header is colored with the fuzzy color.
