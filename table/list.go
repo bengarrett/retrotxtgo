@@ -148,9 +148,9 @@ func printLegendAndFooter(wr io.Writer) {
 		" indicates encodings not usable with the "+term.Example("table")+" command.")
 	fmt.Fprintln(wr, " "+tableOnlyStyle.Render("Green text")+
 		" indicates encodings only usable with the "+term.Example("table")+" command."+
-		"\n You can use the "+term.Example("table ascii")+" command to list all three X3.4 tables.")
-	fmt.Fprintln(wr, "\nEither named, numeric or alias values are valid code page arguments.")
-	fmt.Fprintln(wr, "  These values all match ISO 8859-1.")
+		"\n You can use the \""+term.Example("table ascii")+"\" command to list all three X3.4 tables.")
+	fmt.Fprintln(wr, "\nNamed, numeric, or alias values are all valid code page arguments.")
+	fmt.Fprintln(wr, "These values all match ISO 8859-1:")
 	cmds := meta.Bin + " table "
 	fmt.Fprintf(wr, "  %s%s  %s\n",
 		term.Example(cmds), term.Comment("iso-8859-1"), term.Fuzzy("# named"))
@@ -158,17 +158,17 @@ func printLegendAndFooter(wr io.Writer) {
 		term.Example(cmds), term.Comment("1"), term.Fuzzy("# numeric"))
 	fmt.Fprintf(wr, "  %s%s      %s\n",
 		term.Example(cmds), term.Comment("latin1"), term.Fuzzy("# alias"))
-	fmt.Fprintf(wr, "\n  IBM Code Page 437 (%s) is commonly used on MS-DOS and ANSI art.\n",
+	fmt.Fprintf(wr, "\n  IBM Code Page 437 (%s) is commonly used on MS-DOS and for ANSI art.\n",
 		term.Comment("cp437"))
-	fmt.Fprintf(wr, "  ISO 8859-1 (%s) is found on historic Unix, Amiga and the early Internet.\n",
+	fmt.Fprintf(wr, "  ISO 8859-1 (%s) is found on historic Unix, Amiga, and the early Internet.\n",
 		term.Comment("latin1"))
 	fmt.Fprintf(wr, "  Windows 1252 (%s) is found on Windows ME/98 and earlier systems.\n",
 		term.Comment("cp1252"))
 	fmt.Fprintf(wr, "  Macintosh (%s) is found on Mac OS 9 and earlier systems.\n",
 		term.Comment("macintosh"))
-	fmt.Fprintf(wr, "\n%s, PCs and the web today use Unicode UTF-8. As a subset,\n", meta.Name)
-	fmt.Fprintln(wr, "UTF-8 is backwards compatible with US-ASCII. For example capital")
-	fmt.Fprintln(wr, "letter A is represented by the same byte value in both encodings.")
+	fmt.Fprintf(wr, "\nModern systems, including %s, PCs, and the web, use Unicode UTF-8 today.\n", meta.Name)
+	fmt.Fprintln(wr, "As a subset, UTF-8 is backwards compatible with US-ASCII. For example, the")
+	fmt.Fprintln(wr, "capital letter A is represented by the same byte value in both encodings.")
 }
 
 // Rows return character encoding details for use in a text table.
