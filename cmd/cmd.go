@@ -31,9 +31,25 @@ const (
 var Cmd = base()
 
 func base() *cobra.Command {
-	s := "Use " + meta.Name + " to print legacy text on modern terminals."
-	l := "Text files and art created without Unicode often fail to display on modern systems. " +
-		"\n" + s
+	s := "Convert and display legacy text files and ANSI art on modern terminals."
+	l := `Retrotxt converts legacy text files and ANSI art to modern UTF-8 encoding,
+making them display correctly on modern terminals.
+
+Quick Start:
+  Display a legacy text file:    retrotxt view file.txt
+  Analyze file encoding:         retrotxt info file.txt
+  List available code pages:     retrotxt list
+  View sample ANSI art:          retrotxt example
+  Convert hex to decimal:        retrotxt hex FF
+  Convert decimal to hex:        retrotxt dec 255
+
+Features:
+  • Convert between legacy encodings and UTF-8
+  • Display ANSI art with proper colors
+  • Analyze file encoding and metadata
+  • View character tables for different code pages
+  • Hexadecimal and decimal conversion utilities
+  • Built-in sample files for testing`
 	expl := strings.Builder{}
 	example.Cmd.String(&expl)
 	return &cobra.Command{

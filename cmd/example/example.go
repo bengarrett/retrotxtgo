@@ -93,13 +93,18 @@ func (e Example) result() string {
 
 func cmd() string {
 	s := &strings.Builder{}
-	fmt.Fprintf(s, "  %s info %s\n", meta.Bin, Filenames)
-	fmt.Fprintf(s, "  %s view %s\n", meta.Bin, Filenames)
-	fmt.Fprintf(s, "  %s example\n\n", meta.Bin)
-	fmt.Fprintf(s, "  %s list\n", meta.Bin)
-	fmt.Fprintf(s, "  %s tables\n", meta.Bin)
-	fmt.Fprintf(s, "  %s table [code page names or aliases]\n", meta.Bin)
-	fmt.Fprintf(s, "  %s lang", meta.Bin)
+	fmt.Fprintf(s, "  %s info %s\t\t# Analyze file encoding and metadata\n", meta.Bin, Filenames)
+	fmt.Fprintf(s, "  %s view %s\t\t# Display legacy text files with proper encoding\n", meta.Bin, Filenames)
+	fmt.Fprintf(s, "  %s example\t\t\t# List and view built-in sample files\n\n", meta.Bin)
+
+	fmt.Fprintf(s, "  %s list\t\t\t\t# List supported legacy code pages\n", meta.Bin)
+	fmt.Fprintf(s, "  %s tables\t\t\t# Show all code page character tables\n", meta.Bin)
+	fmt.Fprintf(s, "  %s table [codepage]\t\t# Display specific code page table(s)\n", meta.Bin)
+	fmt.Fprintf(s, "  %s lang\t\t\t\t# List natural languages supported by code pages\n\n", meta.Bin)
+
+	fmt.Fprintf(s, "  %s hex [hex]\t\t\t# Convert hexadecimal to decimal\n", meta.Bin)
+	fmt.Fprintf(s, "  %s dec [decimal]\t\t# Convert decimal to hexadecimal\n", meta.Bin)
+	fmt.Fprintf(s, "  %s dump %s\t\t# Hex dump of file contents", meta.Bin, Filenames)
 	return s.String()
 }
 
