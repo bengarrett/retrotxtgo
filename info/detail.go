@@ -17,17 +17,15 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"text/tabwriter"
 	"time"
 	"unicode/utf8"
 
 	"github.com/bengarrett/bbs"
 	"github.com/bengarrett/retrotxtgo/fsys"
 	"github.com/bengarrett/retrotxtgo/nl"
-	"github.com/bengarrett/retrotxtgo/term"
 	"github.com/bengarrett/sauce"
 	"github.com/bengarrett/sauce/humanize"
-	gookit "github.com/gookit/color"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/mozillazg/go-slugify"
 	"github.com/zRedShift/mimemagic"
 	"golang.org/x/text/language"
@@ -110,6 +108,16 @@ const (
 	zipComment  = "zip comment"
 	octetStream = "application/octet-stream"
 	zipType     = "application/zip"
+
+	// Tree layout constants.
+	treeCorner     = "├── "
+	treeLastCorner = "└── "
+	treeVertical   = "│   "
+	treeSpace      = "    "
+
+	// Header constants.
+	headerPadding  = 2 // spaces on each side of header text
+	paddingDivisor = 2 // divisor for centering header text
 )
 
 // lang returns the English Language tag used for numeric syntax formatting.
@@ -132,9 +140,6 @@ func (d *Detail) Ctrls(name string) error {
 	return nil
 }
 
-// protects the marshal function which is not thread safe due to the use of gookit.Enable.
-var marshalMu sync.Mutex //nolint:gochecknoglobals
-
 // Marshal writes the Detail data in a given format syntax.
 func (d *Detail) Marshal(w io.Writer, f Format) error {
 	if w == nil {
@@ -145,13 +150,9 @@ func (d *Detail) Marshal(w io.Writer, f Format) error {
 	var err error
 	switch f {
 	case ColorText:
-		marshalMu.Lock()
-		err = d.marshal(w, true)
-		marshalMu.Unlock()
+		d.marshalAsTree(w, true)
 	case PlainText:
-		marshalMu.Lock()
-		err = d.marshal(w, false)
-		marshalMu.Unlock()
+		d.marshalAsTree(w, false)
 	case JSON:
 		b, errj := json.MarshalIndent(d, "", jsTab)
 		if errj != nil {
@@ -378,54 +379,174 @@ func (d *Detail) input(data int, stat fs.FileInfo) {
 	d.Modified.Epoch = time.Now().Unix()
 }
 
-// marshal returns the marshaled detail data as plain or color text.
-//
-// Note: this function is not thread safe due to the use of gookit.Enable set by color bool.
-func (d *Detail) marshal(w io.Writer, color bool) error {
+// marshalAsTree returns the marshaled detail data using a tree-like structure.
+// This provides a more organized and visually appealing output format.
+func (d *Detail) marshalAsTree(w io.Writer, useColors bool) { //nolint:cyclop,funlen,gocognit
 	if w == nil {
 		w = io.Discard
 	}
-	const padding, width = 10, 80
-	info := func(s string) string {
-		return s + "\t"
+
+	// Create styles based on whether we're using colors
+	var (
+		headerStyle func(string) string
+		keyStyle    func(string) string
+		valueStyle  func(string) string
+		treeStyle   func(string) string
+	)
+
+	if useColors {
+		// Color styles using lipgloss
+		borderStyle := lipgloss.NewStyle().
+			Border(lipgloss.NormalBorder()).
+			BorderForeground(lipgloss.Color("240"))
+
+		headerStyle = func(s string) string {
+			return lipgloss.NewStyle().
+				Bold(true).
+				Foreground(lipgloss.Color("231")).
+				Padding(0, 1).
+				Render(s)
+		}
+
+		keyStyle = func(s string) string {
+			return lipgloss.NewStyle().
+				Foreground(lipgloss.Color("39")).
+				Render(s)
+		}
+
+		valueStyle = func(s string) string {
+			return lipgloss.NewStyle().
+				Foreground(lipgloss.Color("252")).
+				Render(s)
+		}
+
+		treeStyle = func(s string) string {
+			return lipgloss.NewStyle().
+				Foreground(lipgloss.Color("245")).
+				Render(s)
+		}
+
+		// Create header with lipgloss box
+		header := headerStyle("File Information")
+		border := borderStyle.Render(header)
+		fmt.Fprintln(w, border)
+	} else {
+		// Plain text styles (no styling functions needed)
+		keyStyle = func(s string) string { return s }
+		valueStyle = func(s string) string { return s }
+		treeStyle = func(s string) string { return s }
+
+		// Create plain text box header
+		const headerText = "File Information"
+		const boxWidth = len(headerText) + 2*headerPadding
+		fmt.Fprintln(w, "┌"+strings.Repeat("─", boxWidth)+"┐")
+		padding := (boxWidth - len(headerText)) / paddingDivisor
+		fmt.Fprintf(w, "│%s%s%s│\n",
+			strings.Repeat(" ", padding),
+			headerText,
+			strings.Repeat(" ", padding))
+		fmt.Fprintln(w, "└"+strings.Repeat("─", boxWidth)+"┘")
 	}
-	gookit.Enable = color
-	term.Head(w, width, "File information")
+
 	fmt.Fprintln(w)
+	fmt.Fprintln(w, d.Name)
+
 	data := d.marshalled()
-	l := len(fmt.Sprintf(" filename%s%s", strings.Repeat(" ", padding), data[0].v))
-	const tabWidth = 8
-	tw := tabwriter.NewWriter(w, 0, tabWidth, 0, '\t', 0)
+
+	// Organize data into categories
+	basicInfo := []struct{ k, v string }{}
+	contentStats := []struct{ k, v string }{}
+	fileMeta := []struct{ k, v string }{}
+	checksums := []struct{ k, v string }{}
+	sauceData := []struct{ k, v string }{}
+	comments := []struct{ k, v string }{}
+
 	for _, x := range data {
 		if !d.validate(x) || d.skip(x) {
 			continue
 		}
-		if x.k == zipComment {
-			if x.v != "" {
-				term.HR(tw, l)
-				fmt.Fprintln(tw, x.v)
-				if d.sauceIndex <= 0 {
-					break
-				}
-				// divider for sauce metadata
-				term.HR(tw, l)
-				continue
-			}
-			if d.sauceIndex <= 0 {
-				break
-			}
-			// divider for sauce metadata
-			term.HR(tw, l)
+
+		switch x.k {
+		case "slug", "filename", "filetype", "Unicode", "line break":
+			basicInfo = append(basicInfo, x)
+		case "characters", "words", "size", "lines", "width", ans:
+			contentStats = append(contentStats, x)
+		case "modified", "media mime type":
+			fileMeta = append(fileMeta, x)
+		case "SHA256 checksum", "CRC64 ECMA", "CRC32", "MD5":
+			checksums = append(checksums, x)
+		case "title", "author", "group", "date", "original size", "file type", "data type",
+			"description", "character width", "number of lines", "interpretation":
+			sauceData = append(sauceData, x)
+		case cmmt:
+			comments = append(comments, x)
+		case "\u00A0": // noBreakSpace
+			comments = append(comments, x)
+		case zipComment:
+			// Handle separately
+		}
+	}
+
+	// Track which sections we've displayed
+	sections := []struct {
+		name    string
+		items   []struct{ k, v string }
+		display bool
+		isLast  bool
+	}{
+		{"Basic Information", basicInfo, len(basicInfo) > 0, false},
+		{"Content Statistics", contentStats, len(contentStats) > 0, false},
+		{"File Metadata", fileMeta, len(fileMeta) > 0, false},
+		{"Checksums & Integrity", checksums, len(checksums) > 0, false},
+		{"SAUCE Metadata", sauceData, len(sauceData) > 0, true},
+	}
+
+	// Display sections with tree structure
+	for _, section := range sections {
+		if !section.display {
 			continue
 		}
-		fmt.Fprintf(tw, "\t %s\t  %s\n", x.k, info(x.v))
-		if x.k == cmmt {
-			if d.Sauce.Comnt.Count <= 0 {
-				break
+
+		// Determine connector for section header
+		sectionConnector := treeCorner
+		if section.isLast {
+			sectionConnector = treeLastCorner
+		}
+
+		fmt.Fprintf(w, "%s%s\n", treeStyle(sectionConnector), treeStyle(section.name))
+
+		// Display items in this section
+		for j, item := range section.items {
+			itemConnector := treeVertical
+			if section.isLast {
+				itemConnector = treeSpace
+			}
+
+			itemPrefix := treeCorner
+			if j == len(section.items)-1 {
+				itemPrefix = treeLastCorner
+			}
+
+			fmt.Fprintf(w, "%s%s%s: %s\n",
+				treeStyle(itemConnector),
+				treeStyle(itemPrefix),
+				keyStyle(item.k),
+				valueStyle(item.v))
+		}
+
+		// Display SAUCE comments if this is the SAUCE section and we have comments
+		if section.name == "SAUCE Metadata" && len(comments) > 0 {
+			commentConnector := "    "
+			if section.isLast {
+				commentConnector = "    "
+			}
+
+			fmt.Fprintf(w, "%s    └── Comments\n", treeStyle(commentConnector))
+			for _, comment := range comments {
+				fmt.Fprintf(w, "%s        %s\n", treeStyle(commentConnector), valueStyle(comment.v))
 			}
 		}
 	}
-	return tw.Flush()
 }
 
 // marshalled returns the data structure used for print marshaling.

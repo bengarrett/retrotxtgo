@@ -18,10 +18,14 @@ func ExampleInfo() {
 	_ = info.Info(&s, "testdata/example.txt", "text", false)
 	for v := range strings.SplitSeq(s.String(), "\n") {
 		if strings.Contains(v, "SHA256 checksum") {
-			fmt.Print(v)
+			// Extract just the checksum part for the example
+			parts := strings.Split(v, ": ")
+			if len(parts) > 1 {
+				fmt.Print(parts[1])
+			}
 		}
 	}
-	// Output: SHA256 checksum  4b187b0e6bc12541659eed5845d9dbe0914d4fc026f849bd03c255775a97d878
+	// Output: 4b187b0e6bc12541659eed5845d9dbe0914d4fc026f849bd03c255775a97d878
 }
 
 func ExampleMarshal() {
