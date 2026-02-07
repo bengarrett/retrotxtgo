@@ -7,7 +7,7 @@ import (
 )
 
 func Dec() *cobra.Command {
-	s := "Conversion of decimal to hexadecimal numbers"
+	s := "Convert decimal to hexadecimal numbers"
 	l := `Rudimentary decimal to hexadecimal conversions.
 
 Convert one or a series of decimal numbers to their hexadecimal, base 16 values.
@@ -39,7 +39,7 @@ a command flag.
 }
 
 func Hex() *cobra.Command {
-	s := "Conversion of hexadecimal to decimal numbers"
+	s := "Convert hexadecimal to decimal numbers"
 	l := `Rudimentary hexadecimal to decimal conversions.
 
 Convert one or a series of hexadecimal numbers to their decimal, base 10 values.

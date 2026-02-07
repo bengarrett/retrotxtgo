@@ -12,6 +12,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/cmd/version"
 	"github.com/bengarrett/retrotxtgo/logs"
 	"github.com/bengarrett/retrotxtgo/meta"
+	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 )
 
@@ -36,20 +37,20 @@ func base() *cobra.Command {
 making them display correctly on modern terminals.
 
 Quick Start:
-  Display a legacy text file:    retrotxt view file.txt
-  Analyze file encoding:         retrotxt info file.txt
-  List available code pages:     retrotxt list
-  View sample ANSI art:          retrotxt example
-  Convert hex to decimal:        retrotxt hex FF
-  Convert decimal to hex:        retrotxt dec 255
+  Display a legacy text file:    ` + color.Info.Sprint(`retrotxt view file.txt`) + `
+  Analyze file encoding:         ` + color.Info.Sprint(`retrotxt info file.txt`) + `
+  List available code pages:     ` + color.Info.Sprint(`retrotxt list`) + `
+  Browse sample files:           ` + color.Info.Sprint(`retrotxt example`) + `
+  Convert hex to decimal:        ` + color.Info.Sprint(`retrotxt hex FF`) + `
+  Convert decimal to hex:        ` + color.Info.Sprint(`retrotxt dec 255`) + `
 
 Features:
   • Convert between legacy encodings and UTF-8
-  • Display ANSI art with proper colors
+  • Display ANSI art with original colors and formatting
   • Analyze file encoding and metadata
   • View character tables for different code pages
   • Hexadecimal and decimal conversion utilities
-  • Built-in sample files for testing`
+  • Built-in sample files for demonstration and testing`
 	expl := strings.Builder{}
 	example.Cmd.String(&expl)
 	return &cobra.Command{
@@ -115,9 +116,9 @@ func Tester(c *cobra.Command) *cobra.Command {
 
 func init() {
 	Cmd = Tester(Cmd)
-	c := &cobra.Group{ID: IDcodepage, Title: "Codepage:"}
-	f := &cobra.Group{ID: IDfile, Title: "File:"}
-	s := &cobra.Group{ID: IDsample, Title: "Sample:"}
+	c := &cobra.Group{ID: IDcodepage, Title: "Codepage Commands:"}
+	f := &cobra.Group{ID: IDfile, Title: "File Commands:"}
+	s := &cobra.Group{ID: IDsample, Title: "Sample Commands:"}
 	Cmd.AddGroup(c, f, s)
 	// create a version flag that only works on root.
 	Cmd.LocalNonPersistentFlags().BoolP("version", "v", false, "")

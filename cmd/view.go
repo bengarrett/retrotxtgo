@@ -52,8 +52,8 @@ func ViewCommand() *cobra.Command {
 }
 
 func DumpCommand() *cobra.Command {
-	s := "Dump the hex data of files to the terminal"
-	l := "Dump the hex data of files to the terminal."
+	s := "Create hex dump of file contents"
+	l := "Create hex dump of file contents."
 	expl := strings.Builder{}
 	example.Dump.String(&expl)
 	return &cobra.Command{

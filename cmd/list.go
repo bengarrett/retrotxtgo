@@ -9,8 +9,8 @@ import (
 )
 
 func ListCodepage() *cobra.Command {
-	s := fmt.Sprintf("List the legacy code pages that %s can convert to UTF-8", meta.Name)
-	l := fmt.Sprintf("List the available legacy code pages that %s can convert to UTF-8.", meta.Name)
+	s := fmt.Sprintf("List legacy code pages that %s can convert to UTF-8", meta.Name)
+	l := fmt.Sprintf("List available legacy code pages that %s can convert to UTF-8.", meta.Name)
 	cmd := &cobra.Command{
 		Use:     "list",
 		Aliases: []string{"l", "cp", "codepage"},
