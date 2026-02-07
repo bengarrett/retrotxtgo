@@ -13,13 +13,13 @@ import (
 func ExampleLanguages() {
 	l := *table.Languages()
 	fmt.Print(l[charmap.CodePage437])
-	// Output: US English
+	// Output: English, US
 }
 
 func ExampleLanguage() {
 	l := table.Language(charmap.CodePage437)
 	fmt.Print(l)
-	// Output: US English
+	// Output: English, US
 }
 
 func TestListLanguage(t *testing.T) {

@@ -90,7 +90,7 @@ func Table(w io.Writer, names ...string) error {
 	}
 	// iterate through the tables
 	for _, name := range names {
-		if err := table.Table(w, name); err != nil {
+		if err := table.WithLipgloss(w, name); err != nil {
 			return err
 		}
 		fmt.Fprintln(w)
@@ -153,7 +153,7 @@ func Tables(w io.Writer) error {
 		if !Printable(name) {
 			continue
 		}
-		if err := table.Table(w, name); err != nil {
+		if err := table.WithLipgloss(w, name); err != nil {
 			return fmt.Errorf("table %s, %w, %w", e, ErrTable, err)
 		}
 	}

@@ -14,6 +14,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/convert"
 	"github.com/bengarrett/retrotxtgo/term"
 	"github.com/bengarrett/retrotxtgo/xud"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/gookit/color"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
@@ -106,6 +107,85 @@ out:
 	return w.Flush()
 }
 
+// WithLipgloss prints, aligns and formats to the writer all characters in the named 8-bit character set
+// using lipgloss for modern table styling.
+func WithLipgloss(wr io.Writer, name string) error { //nolint:funlen
+	if wr == nil {
+		wr = io.Discard
+	}
+	if name == "" {
+		return xud.ErrName
+	}
+	cp := xud.CodePage(name)
+	if cp == nil {
+		var err error
+		cp, err = CodePage(name)
+		if err != nil {
+			return err
+		}
+	}
+
+	h := fmt.Sprintf("%s", cp)
+	h += CharmapAlias(cp) + charmapStandard(cp)
+
+	// Create lipgloss styles
+	borderStyle := lipgloss.NewStyle().
+		Border(lipgloss.NormalBorder()).
+		BorderForeground(lipgloss.Color("240"))
+
+	headerStyle := lipgloss.NewStyle().
+		Bold(true).
+		Foreground(lipgloss.Color("231"))
+
+	cellStyle := lipgloss.NewStyle().
+		Padding(0, 1)
+
+	// Create header with encoding name
+	header := headerStyle.Render(" " + h + " ")
+
+	// Create column headers (0-F)
+	var colHeadersBuilder strings.Builder
+	colHeadersBuilder.WriteString("  .") // Start with two spaces to align with row header area
+	const lastColumn = 15
+	for i := range lastColumn {
+		colHeadersBuilder.WriteString(fmt.Sprintf(" %X .", i))
+	}
+	colHeadersBuilder.WriteString(fmt.Sprintf(" %X .", lastColumn)) // Last column without trailing pipe
+	colHeaders := cellStyle.Render(colHeadersBuilder.String())
+
+	// Generate character grid
+	runes, enc, err := generateCharacterGrid(name, cp)
+	if err != nil {
+		return err
+	}
+
+	const typicalRows = 16 // Typical number of rows in a character table
+	gridRows := make([]string, 0, typicalRows)
+
+	// Add column headers as first row
+	gridRows = append(gridRows, colHeaders)
+
+	// Generate character rows
+	gridRows = generateCharacterRows(gridRows, runes, enc, name, cellStyle)
+
+	// Build the table
+	tableContent := lipgloss.JoinVertical(lipgloss.Left, gridRows...)
+	table := borderStyle.Render(lipgloss.JoinVertical(lipgloss.Left, header, tableContent))
+
+	// Write the table
+	fmt.Fprintln(wr, table)
+
+	// Add footnotes
+	var footnoteBuf strings.Builder
+	xud.Footnote(&footnoteBuf, cp)
+	Footnote(&footnoteBuf, name)
+	if footnoteBuf.Len() > 0 {
+		fmt.Fprintln(wr, footnoteBuf.String())
+	}
+
+	return nil
+}
+
 func columns(w io.Writer) {
 	if w == nil {
 		w = io.Discard
@@ -129,15 +209,14 @@ func Footnote(w io.Writer, name string) {
 	if w == nil {
 		w = io.Discard
 	}
+	const msg = " is the non-printable soft-hyphen characher SHY."
 	if SHY173(name) {
-		fmt.Fprintln(w)
-		fmt.Fprintln(w, "* Cell A-D is SHY (soft hyphen), but it is not printable in Unicode.")
+		fmt.Fprintln(w, "* Cell A-D"+msg)
 		return
 	}
 	x, _ := CodePage(name)
 	if SHY240(x) {
-		fmt.Fprintln(w)
-		fmt.Fprintln(w, "* Cell F-0 is SHY (soft hyphen), but it is not printable in Unicode.")
+		fmt.Fprintln(w, "* Cell F-0"+msg)
 	}
 }
 
@@ -208,7 +287,8 @@ func SHY240(x encoding.Encoding) bool {
 // SHY173 reports whether the code page has a SHY (soft hyphen) at code 173.
 func SHY173(name string) bool {
 	s := strings.ToLower(name)
-	if strings.Contains(s, "windows 125") ||
+	if strings.Contains(s, "windows-125") ||
+		strings.Contains(s, "windows 125") ||
 		strings.Contains(s, "iso 8859-") ||
 		strings.Contains(s, "iso-8859-") {
 		return true
@@ -384,4 +464,68 @@ func charmapStandard(cp encoding.Encoding) string {
 	default:
 		return " - Extended ASCII"
 	}
+}
+
+// generateCharacterGrid generates the character grid for the given encoding.
+func generateCharacterGrid(name string, cp encoding.Encoding) ([]rune, encoding.Encoding, error) {
+	if x := swapper(name); x != nil {
+		cp = x
+	}
+	c := convert.Convert{}
+	c.Input.Encoding = cp
+	p := byter.MakeBytes()
+	runes, err := c.Chars(p...)
+	if err != nil {
+		return nil, nil, fmt.Errorf("table convert bytes error: %w", err)
+	}
+
+	enc := reverter(name)
+	return runes, enc, nil
+}
+
+// generateCharacterRows generates the character rows for the table.
+func generateCharacterRows(
+	gridRows []string,
+	runes []rune,
+	enc encoding.Encoding,
+	name string,
+	cellStyle lipgloss.Style,
+) []string {
+	const hex, maximum = 16, 255
+
+	for i := 0; i <= maximum; i += hex {
+		if i >= len(runes) {
+			break
+		}
+
+		// Row header (0-F)
+		rowHeader := fmt.Sprintf("%X", i/hex)
+
+		// Character cells
+		var rowCellsBuilder strings.Builder
+		rowCellsBuilder.WriteString(rowHeader + " |")
+		for j := range hex {
+			pos := i + j
+			if pos >= len(runes) {
+				break
+			}
+
+			r := runes[pos]
+			char := Character(enc, pos, r)
+			if x := Replacement(name, pos); x != "" {
+				char = x
+			}
+
+			rowCellsBuilder.WriteString(" " + char + " |")
+		}
+
+		// Check if we should stop for 7-bit encodings
+		if xud.Code7bit(enc) && (i/hex) >= 8 {
+			break
+		}
+
+		gridRows = append(gridRows, cellStyle.Render(rowCellsBuilder.String()))
+	}
+
+	return gridRows
 }
