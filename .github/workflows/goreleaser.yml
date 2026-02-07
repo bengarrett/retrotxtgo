@@ -1,0 +1,95 @@
+name: GoReleaser
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.1.0)'
+        required: false
+        default: ''
+      force_update:
+        description: 'Force update even if formula is already up-to-date'
+        required: false
+        default: 'false'
+permissions:
+  contents: write
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.25.7"
+          cache: true
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  update_formula:
+    runs-on: ubuntu-latest
+    needs: goreleaser
+    if: always()
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: main
+      - name: Update Homebrew formula
+        run: |
+          # For manual triggers, use the specified version or latest tag
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ -n "${{ github.event.inputs.version }}" ]; then
+              VERSION="${{ github.event.inputs.version }}"
+            else
+              # If no version specified in manual trigger, use the latest version tag
+              LATEST_TAG=$(git tag -l "v*" | sort -V | tail -1 2>/dev/null)
+              LATEST_TAG=${LATEST_TAG:-v0.0.0}
+              VERSION=${LATEST_TAG#v}
+            fi
+            COMMIT=$(git rev-parse HEAD)
+            BUILD_DATE=$(git log -1 --format=%aI "${COMMIT}")
+            TAR_URL="https://github.com/bengarrett/retrotxtgo/archive/refs/tags/v${VERSION}.tar.gz"
+            SHA=$(curl -L "${TAR_URL}" | sha256sum | awk '{print $1}')
+          else
+            # For automatic tag-based triggers
+            VERSION=${{ github.ref_name }}
+            VERSION=${VERSION#v}
+            COMMIT=${{ github.sha }}
+            BUILD_DATE=$(git log -1 --format=%aI "${COMMIT}")
+            TAR_URL="https://github.com/bengarrett/retrotxtgo/archive/refs/tags/v${VERSION}.tar.gz"
+            SHA=$(curl -L "${TAR_URL}" | sha256sum | awk '{print $1}')
+          fi
+
+          # Update the formula using sed
+          sed -i "s|^  url \".*\"$|  url \"${TAR_URL}\"|" Formula/retrotxt.rb
+          sed -i "s|^  sha256 \".*\"$|  sha256 \"${SHA}\"|" Formula/retrotxt.rb
+          sed -i "s|^  version \".*\"$|  version \"${VERSION}\"|" Formula/retrotxt.rb
+          sed -i "s|^  @commit = \".*\"$|  @commit = \"${COMMIT}\"|" Formula/retrotxt.rb
+          sed -i "s|^  @build_date = \".*\"$|  @build_date = \"${BUILD_DATE}\"|" Formula/retrotxt.rb
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/retrotxt.rb
+          # Check if formula is already up-to-date, unless force_update is true
+          if [ "${{ github.event.inputs.force_update }}" = "true" ]; then
+            echo "Force update enabled - proceeding with commit"
+          elif git diff --cached --quiet; then
+            echo "Formula already up-to-date"
+            exit 0
+          fi
+          git commit -m "ci: bump Homebrew formula to v${VERSION}"
+          git push origin main
