@@ -73,6 +73,37 @@ func Border(w io.Writer, s string) {
 	fmt.Fprintln(w, "└"+strings.Repeat("─", maxLen)+"┘")
 }
 
+// BorderString returns the string wrapped in a single line border.
+func BorderString(s string) string {
+	const split = 2
+	maxLen, scanner := 0, bufio.NewScanner(strings.NewReader(s))
+	scanner.Split(bufio.ScanLines)
+	for scanner.Scan() {
+		l := utf8.RuneCountInString(scanner.Text())
+		if l > maxLen {
+			maxLen = l
+		}
+	}
+	maxLen += split
+	scanner = bufio.NewScanner(strings.NewReader(s))
+	scanner.Split(bufio.ScanLines)
+
+	var result strings.Builder
+	result.WriteString("┌" + strings.Repeat("─", maxLen) + "┐\n")
+	for scanner.Scan() {
+		l := utf8.RuneCountInString(scanner.Text())
+		lp := ((maxLen - l) / split)
+		rp := lp
+		// if lp/rp are X.5 decimal values, add 1 right padd to account for the uneven split
+		if float32((maxLen-l)/split) != float32(maxLen-l)/split {
+			rp++
+		}
+		result.WriteString(fmt.Sprintf("│%s%s%s│\n", strings.Repeat(" ", lp), scanner.Text(), strings.Repeat(" ", rp)))
+	}
+	result.WriteString("└" + strings.Repeat("─", maxLen) + "┘")
+	return result.String()
+}
+
 // Center align text to a the width of an area.
 // If the width is less than the length of the string, the string is returned.
 // There is no padding after the string.

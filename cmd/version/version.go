@@ -8,18 +8,14 @@ import (
 	"os"
 	"runtime"
 	"strings"
-	"text/tabwriter"
 	"time"
 
 	"github.com/bengarrett/retrotxtgo/cmd/update"
 	"github.com/bengarrett/retrotxtgo/meta"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/gookit/color"
 	"github.com/mattn/go-isatty"
 	"golang.org/x/term"
-)
-
-const (
-	TabWidth = 8 // Width of tab characters.
 )
 
 // Template writes the application version, copyright and build variables.
@@ -40,21 +36,39 @@ func Template(wr io.Writer) error {
 	if meta.App.Date != meta.Placeholder {
 		appDate = fmt.Sprintf(" (%s)", meta.App.Date)
 	}
-	w := tabwriter.NewWriter(wr, 0, TabWidth, 0, '\t', 0)
-	fmt.Fprintf(w, "%s %s\n", meta.Name, meta.String())
-	fmt.Fprintf(w, "%s %s Ben Garrett\n", meta.Copyright, c)
-	fmt.Fprintln(w, color.Primary.Sprint(meta.URL))
-	fmt.Fprintf(w, "\n%s\t%s %s%s\n", color.Secondary.Sprint("build:"), runtime.Compiler, meta.App.BuiltBy, appDate)
-	fmt.Fprintf(w, "%s\t%s/%s\n", color.Secondary.Sprint("platform:"), runtime.GOOS, runtime.GOARCH)
-	fmt.Fprintf(w, "%s\t%s\n", color.Secondary.Sprint("terminal:"), Terminal())
-	fmt.Fprintf(w, "%s\t%s\n", color.Secondary.Sprint("go:"), strings.Replace(runtime.Version(), "go", "v", 1))
-	fmt.Fprintf(w, "%s\t%s\n", color.Secondary.Sprint("path:"), exe)
+
+	// Define lipgloss styles
+	borderStyle := lipgloss.NewStyle().
+		BorderStyle(lipgloss.NormalBorder()).
+		BorderForeground(lipgloss.Color("240")).
+		Padding(0, 1)
+
+	treeStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color("244"))
+
+	// Build the version information
+	content := fmt.Sprintf("%s %s\n", meta.Name, meta.String())
+	content += fmt.Sprintf("%s %s Ben Garrett\n", meta.Copyright, c)
+	content += color.Primary.Sprint(meta.URL) + "\n\n"
+
+	// Create a tree structure for system info
+	content += treeStyle.Render("┌ build: ") + fmt.Sprintf("%s %s%s\n", runtime.Compiler, meta.App.BuiltBy, appDate)
+	content += treeStyle.Render("├ platform: ") + fmt.Sprintf("%s/%s\n", runtime.GOOS, runtime.GOARCH)
+	content += treeStyle.Render("├ terminal: ") + Terminal() + "\n"
+	content += treeStyle.Render("├ go: ") + strings.Replace(runtime.Version(), "go", "v", 1) + "\n"
+	content += treeStyle.Render("└ path: ") + exe + "\n"
+
 	if tag != "" {
-		fmt.Fprintln(w)
-		update.Notice(w, meta.App.Version, tag)
-		fmt.Fprintln(w)
+		content += "\n"
+		content += update.NoticeString(meta.App.Version, tag)
+		content += "\n"
 	}
-	return w.Flush()
+
+	// Apply border styling
+	styled := borderStyle.Render(content)
+
+	_, err = fmt.Fprint(wr, styled)
+	return err
 }
 
 // Self returns the path to the executable (this) program.

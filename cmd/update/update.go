@@ -44,6 +44,14 @@ func Notice(w io.Writer, old, current string) {
 	term.Border(w, s)
 }
 
+// NoticeString returns a new release notification as a string.
+func NoticeString(old, current string) string {
+	s := fmt.Sprintf("%s%s%s\n%s%s\n%s → %s",
+		"A newer edition of ", meta.Name, " is available!",
+		"Learn more at ", meta.URL, meta.Semantic(old), current)
+	return term.BorderString(s)
+}
+
 // Check the GitHub for the newest release tag.
 // The returned string will only contain the newest available release tag
 // if the local program version is out of date.
