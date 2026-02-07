@@ -18,11 +18,9 @@ func ListCodepage() *cobra.Command {
 		Long:    l,
 		GroupID: IDcodepage,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			style, _ := cmd.Flags().GetString("style")
-			return table.ListWithStyle(cmd.OutOrStdout(), style)
+			return table.List(cmd.OutOrStdout())
 		},
 	}
-	cmd.Flags().String("style", "auto", "Table style: auto, lipgloss, or tabwriter")
 	return cmd
 }
 

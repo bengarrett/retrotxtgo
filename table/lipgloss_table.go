@@ -68,7 +68,7 @@ func LipglossTable(wr io.Writer, rows []Row) error {
 
 func calculateColumnWidths(rows []Row) [4]int {
 	var widths [4]int
-	
+
 	// Header widths
 	headers := []string{"Formal name", "Named value", "Numeric value", "Alias value"}
 	for i, header := range headers {
@@ -113,11 +113,11 @@ func createHeader(style lipgloss.Style, widths [4]int) string {
 
 func createRow(row *Row, cellStyle, specialCellStyle, nonTableCellStyle, tableOnlyCellStyle lipgloss.Style, widths [4]int) string {
 	var cells []string
-	
+
 	// Determine the appropriate style based on the row content
 	if strings.HasPrefix(row.Name, "* ") {
 		row.Name = strings.TrimPrefix(row.Name, "* ")
-		cells = append(cells, 
+		cells = append(cells,
 			specialCellStyle.Render(fitString(row.Name, widths[0])),
 			specialCellStyle.Render(fitString(row.Value, widths[1])),
 			specialCellStyle.Render(fitString(row.Numeric, widths[2])),
@@ -125,7 +125,7 @@ func createRow(row *Row, cellStyle, specialCellStyle, nonTableCellStyle, tableOn
 		)
 	} else if strings.HasPrefix(row.Name, "† ") {
 		row.Name = strings.TrimPrefix(row.Name, "† ")
-		cells = append(cells, 
+		cells = append(cells,
 			nonTableCellStyle.Render(fitString(row.Name, widths[0])),
 			nonTableCellStyle.Render(fitString(row.Value, widths[1])),
 			nonTableCellStyle.Render(fitString(row.Numeric, widths[2])),
@@ -133,21 +133,21 @@ func createRow(row *Row, cellStyle, specialCellStyle, nonTableCellStyle, tableOn
 		)
 	} else if strings.HasPrefix(row.Name, "⁑ ") {
 		row.Name = strings.TrimPrefix(row.Name, "⁑ ")
-		cells = append(cells, 
+		cells = append(cells,
 			tableOnlyCellStyle.Render(fitString(row.Name, widths[0])),
 			tableOnlyCellStyle.Render(fitString(row.Value, widths[1])),
 			tableOnlyCellStyle.Render(fitString(row.Numeric, widths[2])),
 			tableOnlyCellStyle.Render(fitString(row.Alias, widths[3])),
 		)
 	} else {
-		cells = append(cells, 
+		cells = append(cells,
 			cellStyle.Render(fitString(row.Name, widths[0])),
 			cellStyle.Render(fitString(row.Value, widths[1])),
 			cellStyle.Render(fitString(row.Numeric, widths[2])),
 			cellStyle.Render(fitString(row.Alias, widths[3])),
 		)
 	}
-	
+
 	return lipgloss.JoinHorizontal(lipgloss.Top, cells...)
 }
 

@@ -33,43 +33,17 @@ func TestLipglossTable(t *testing.T) {
 	}
 }
 
-func TestListWithStyle(t *testing.T) {
+func TestList(t *testing.T) {
 	tests := []struct {
 		name     string
-		style    string
 		wantErr  bool
 		expectFn func(string) bool
 	}{
 		{
-			name:    "auto style",
-			style:   "auto",
-			wantErr: false,
-			expectFn: func(s string) bool {
-				return s != "" // Just check it produces output
-			},
-		},
-		{
-			name:    "lipgloss style",
-			style:   "lipgloss",
+			name:    "list output",
 			wantErr: false,
 			expectFn: func(s string) bool {
 				return contains(s, "┌") || contains(s, "│") // Check for lipgloss borders
-			},
-		},
-		{
-			name:    "tabwriter style",
-			style:   "tabwriter",
-			wantErr: false,
-			expectFn: func(s string) bool {
-				return contains(s, "Formal name") && contains(s, "Named value")
-			},
-		},
-		{
-			name:    "invalid style",
-			style:   "invalid",
-			wantErr: false, // Should default to one of the valid styles
-			expectFn: func(s string) bool {
-				return s != ""
 			},
 		},
 	}
@@ -77,28 +51,28 @@ func TestListWithStyle(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			buf := new(bytes.Buffer)
-			err := ListWithStyle(buf, tt.style)
-			
+			err := List(buf)
+
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ListWithStyle() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("List() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 
 			output := buf.String()
 			if !tt.expectFn(output) {
-				t.Errorf("ListWithStyle() output did not meet expectations for style %s", tt.style)
+				t.Errorf("List() output did not meet expectations")
 			}
 		})
 	}
 }
 
 func contains(s, substr string) bool {
-	return len(s) > 0 && len(substr) > 0 && 
-		   (len(s) >= len(substr)) && 
-		   (s == substr || 
-		    len(s) > len(substr) && (s[:len(substr)] == substr || 
-		                           s[len(s)-len(substr):] == substr ||
-		                           containsSubstring(s, substr)))
+	return len(s) > 0 && len(substr) > 0 &&
+		(len(s) >= len(substr)) &&
+		(s == substr ||
+			len(s) > len(substr) && (s[:len(substr)] == substr ||
+				s[len(s)-len(substr):] == substr ||
+				containsSubstring(s, substr)))
 }
 
 func containsSubstring(s, substr string) bool {
