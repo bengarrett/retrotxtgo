@@ -27,6 +27,6 @@ func TestListLanguage(t *testing.T) {
 	b := &strings.Builder{}
 	err := table.ListLanguage(b)
 	be.Err(t, err, nil)
-	s := strings.Contains(b.String(), "ANSI X3.4 1967/77/86")
+	s := strings.Contains(b.String(), "ANSI X3.4 1967")
 	be.True(t, s)
 }

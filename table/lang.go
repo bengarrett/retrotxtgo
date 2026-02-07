@@ -3,10 +3,9 @@ package table
 import (
 	"fmt"
 	"io"
-	"text/tabwriter"
 
-	"github.com/bengarrett/retrotxtgo/term"
 	"github.com/bengarrett/retrotxtgo/xud"
+	"github.com/charmbracelet/lipgloss"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/japanese"
@@ -18,60 +17,74 @@ import (
 // Lang describes the common natural language uses of the encoding.
 type Lang map[encoding.Encoding]string
 
+const (
+	formalName = "Formal name"
+	namedVal   = "Named value"
+	langRegion = "Language, script, or region"
+)
+
 // Languages returns a list of code page encodings and their target natural languages.
+// These are displayed in the order listed.
 func Languages() *Lang {
+	const (
+		arb = "Arabic"
+		eur = " with the € symbol"
+		heb = "Hebrew"
+		weu = "Western Europe"
+		usa = "English, US"
+	)
 	lang := Lang{
-		charmap.CodePage037:     "US English",
-		charmap.CodePage437:     "US English",
-		charmap.CodePage850:     "West Europe",
+		unicode.UTF8:            "Unicode, all major languages",
+		charmap.CodePage037:     usa,
+		charmap.CodePage437:     usa,
+		charmap.CodePage850:     weu,
 		charmap.CodePage852:     "Central Europe Latin script",
 		charmap.CodePage855:     "Central Europe Cyrillic script",
-		charmap.CodePage858:     "West Europe, includes the € symbol",
+		charmap.CodePage858:     weu + eur,
 		charmap.CodePage860:     "Portuguese",
-		charmap.CodePage862:     "Hebrew",
+		charmap.CodePage862:     heb,
 		charmap.CodePage863:     "French Canadian",
 		charmap.CodePage865:     "Danish, Norwegian",
 		charmap.CodePage866:     "USSR Cyrillic script",
-		charmap.CodePage1047:    "West Europe",
-		charmap.CodePage1140:    "US English",
-		charmap.ISO8859_1:       "West Europe",
+		charmap.CodePage1047:    weu,
+		charmap.CodePage1140:    usa,
+		charmap.ISO8859_1:       weu,
 		charmap.ISO8859_2:       "Central Europe Latin script",
 		charmap.ISO8859_3:       "Esperanto, Maltese, Turkish",
 		charmap.ISO8859_4:       "Estonian, Latvian, Lithuanian, Greenlandic, Sámi",
 		charmap.ISO8859_5:       "Russian Cyrillic script",
-		charmap.ISO8859_6:       "Arabic",
-		charmap.ISO8859_6E:      "Arabic",
-		charmap.ISO8859_6I:      "Arabic",
+		charmap.ISO8859_6:       arb,
+		charmap.ISO8859_6E:      arb,
+		charmap.ISO8859_6I:      arb,
 		charmap.ISO8859_7:       "Greek",
-		charmap.ISO8859_8:       "Hebrew",
-		charmap.ISO8859_8E:      "Hebrew",
-		charmap.ISO8859_8I:      "Hebrew",
+		charmap.ISO8859_8:       heb,
+		charmap.ISO8859_8E:      heb,
+		charmap.ISO8859_8I:      heb,
 		charmap.ISO8859_9:       "Turkish",
 		charmap.ISO8859_10:      "Nordic languages",
 		xud.XUserDefinedISO11:   "Thai", // ISO-8859-11
 		charmap.ISO8859_13:      "Baltic languages",
 		charmap.ISO8859_14:      "Celtic languages",
-		charmap.ISO8859_15:      "West Europe, includes the € symbol",
+		charmap.ISO8859_15:      weu + eur,
 		charmap.ISO8859_16:      "Gaj's Latin alphabet for European languages",
 		charmap.KOI8R:           "Russian, Bulgarian",
 		charmap.KOI8U:           "Ukrainian",
-		charmap.Macintosh:       "West Europe",
+		charmap.Macintosh:       weu,
 		charmap.Windows874:      "Thai",
 		charmap.Windows1250:     "Central Europe Latin script",
 		charmap.Windows1251:     "Cyrillic script",
-		charmap.Windows1252:     "English and West Europe",
+		charmap.Windows1252:     "English, " + weu,
 		charmap.Windows1253:     "Greek",
 		charmap.Windows1254:     "Turkish",
-		charmap.Windows1255:     "Hebrew",
-		charmap.Windows1256:     "Arabic",
+		charmap.Windows1255:     heb,
+		charmap.Windows1256:     arb,
 		charmap.Windows1257:     "Estonian, Latvian, Lithuanian",
 		charmap.Windows1258:     "Vietnamese",
 		japanese.ShiftJIS:       "Japanese",
 		traditionalchinese.Big5: "Traditional Chinese",
-		unicode.UTF8:            "Unicode, all major languages",
-		xud.XUserDefined1963:    "US English",
-		xud.XUserDefined1965:    "US English",
-		xud.XUserDefined1967:    "US English",
+		xud.XUserDefined1963:    usa,
+		xud.XUserDefined1965:    usa,
+		xud.XUserDefined1967:    usa,
 	}
 	return &lang
 }
@@ -88,17 +101,16 @@ func ListLanguage(wr io.Writer) error {
 	if wr == nil {
 		wr = io.Discard
 	}
-	const header, title = " Formal name\t Named value\t Language\t",
-		" Known legacy code pages and their target languages, regions, or alphabets "
-	const padding, width = 2, 76
-	w := tabwriter.NewWriter(wr, 0, 0, padding, ' ', 0)
-	term.Head(wr, width, title)
-	fmt.Fprintf(w, "\n%s\n", header)
+
+	// Create rows for the language table
+	rows := make([]LanguageRow, 0)
+
 	x := Charmaps()
 	x = append(x,
 		xud.XUserDefined1963,
 		xud.XUserDefined1965,
 		xud.XUserDefined1967)
+
 	for _, e := range x {
 		switch e {
 		case charmap.XUserDefined:
@@ -108,12 +120,18 @@ func ListLanguage(wr io.Writer) error {
 			if err != nil {
 				return fmt.Errorf("%q: %w", e, err)
 			}
-			fmt.Fprintf(w, " %s\t %s\t %s\t\n",
-				c.Name, c.Value, Language(e))
+			rows = append(rows, LanguageRow{
+				Name:     c.Name,
+				Value:    c.Value,
+				Language: Language(e),
+			})
 			// intentionally insert ISO-8895-11 after 10.
 			x := xud.XUserDefinedISO11
-			fmt.Fprintf(w, " %s\t %s\t %s\t\n",
-				x, xud.Name(x), Language(x))
+			rows = append(rows, LanguageRow{
+				Name:     xud.Name(x),
+				Value:    xud.Name(x),
+				Language: Language(x),
+			})
 			continue
 		case
 			unicode.UTF16(unicode.BigEndian, unicode.UseBOM),
@@ -128,9 +146,115 @@ func ListLanguage(wr io.Writer) error {
 		if err != nil {
 			return fmt.Errorf("%q: %w", e, err)
 		}
-		// do not use ANSI colors in cells as it will break the table layout
-		fmt.Fprintf(w, " %s\t %s\t %s\t\n",
-			c.Name, c.Value, Language(e))
+		rows = append(rows, LanguageRow{
+			Name:     c.Name,
+			Value:    c.Value,
+			Language: Language(e),
+		})
 	}
-	return w.Flush()
+
+	// Use lipgloss table rendering
+	return LipglossLanguageTable(wr, rows)
+}
+
+// LanguageRow represents a row in the language table.
+type LanguageRow struct {
+	Name     string
+	Value    string
+	Language string
+}
+
+// LipglossLanguageTable renders a language table using lipgloss styling.
+func LipglossLanguageTable(wr io.Writer, rows []LanguageRow) error {
+	if wr == nil {
+		wr = io.Discard
+	}
+
+	// Create lipgloss styles
+	borderStyle := lipgloss.NewStyle().
+		Border(lipgloss.NormalBorder()).
+		BorderForeground(lipgloss.Color("240"))
+
+	headerStyle := lipgloss.NewStyle().
+		Bold(true).
+		Foreground(lipgloss.Color("231")).
+		Padding(0, 1)
+
+	cellStyle := lipgloss.NewStyle().
+		Padding(0, 1)
+
+	// Calculate column widths
+	colWidths := calculateLanguageColumnWidths(rows)
+
+	// Create header
+	header := createLanguageHeader(headerStyle, colWidths)
+
+	// Create rows
+	rowStrings := make([]string, 0, len(rows))
+	for _, row := range rows {
+		rowString := createLanguageRow(&row, cellStyle, colWidths)
+		rowStrings = append(rowStrings, rowString)
+	}
+
+	// Build the table
+	table := borderStyle.Render(
+		lipgloss.JoinVertical(lipgloss.Left,
+			header,
+			lipgloss.JoinVertical(lipgloss.Left, rowStrings...),
+		),
+	)
+
+	// Write the table
+	fmt.Fprintln(wr, table)
+	return nil
+}
+
+func calculateLanguageColumnWidths(rows []LanguageRow) [3]int {
+	var widths [3]int
+
+	// Header widths
+	headers := []string{formalName, namedVal, langRegion}
+	for i, header := range headers {
+		if len(header) > widths[i] {
+			widths[i] = len(header)
+		}
+	}
+
+	// Data widths
+	for _, row := range rows {
+		if len(row.Name) > widths[0] {
+			widths[0] = len(row.Name)
+		}
+		if len(row.Value) > widths[1] {
+			widths[1] = len(row.Value)
+		}
+		if len(row.Language) > widths[2] {
+			widths[2] = len(row.Language)
+		}
+	}
+
+	// Add some padding
+	for i := range widths {
+		widths[i] += 2
+	}
+
+	return widths
+}
+
+func createLanguageHeader(style lipgloss.Style, widths [3]int) string {
+	headerCells := []string{
+		style.Render(FitString(formalName, widths[0])),
+		style.Render(FitString(namedVal, widths[1])),
+		style.Render(FitString(langRegion, widths[2])),
+	}
+	return lipgloss.JoinHorizontal(lipgloss.Top, headerCells...)
+}
+
+func createLanguageRow(row *LanguageRow, cellStyle lipgloss.Style, widths [3]int) string {
+	cells := []string{
+		cellStyle.Render(FitString(row.Name, widths[0])),
+		cellStyle.Render(FitString(row.Value, widths[1])),
+		cellStyle.Render(FitString(row.Language, widths[2])),
+	}
+	return lipgloss.JoinHorizontal(lipgloss.Top, cells...)
 }

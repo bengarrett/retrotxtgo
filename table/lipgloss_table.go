@@ -102,10 +102,10 @@ func calculateColumnWidths(rows []Row) [4]int {
 
 func createHeader(style lipgloss.Style, widths [4]int) string {
 	headerCells := []string{
-		style.Render(fitString("Formal name", widths[0])),
-		style.Render(fitString("Named value", widths[1])),
-		style.Render(fitString("Numeric value", widths[2])),
-		style.Render(fitString("Alias value", widths[3])),
+		style.Render(FitString("Formal name", widths[0])),
+		style.Render(FitString("Named value", widths[1])),
+		style.Render(FitString("Numeric value", widths[2])),
+		style.Render(FitString("Alias value", widths[3])),
 	}
 	return lipgloss.JoinHorizontal(lipgloss.Top, headerCells...)
 }
@@ -127,44 +127,45 @@ func createRow(
 			row.Name = trimmed
 		}
 		cells = append(cells,
-			specialCellStyle.Render(fitString(row.Name, widths[0])),
-			specialCellStyle.Render(fitString(row.Value, widths[1])),
-			specialCellStyle.Render(fitString(row.Numeric, widths[2])),
-			specialCellStyle.Render(fitString(row.Alias, widths[3])),
+			specialCellStyle.Render(FitString(row.Name, widths[0])),
+			specialCellStyle.Render(FitString(row.Value, widths[1])),
+			specialCellStyle.Render(FitString(row.Numeric, widths[2])),
+			specialCellStyle.Render(FitString(row.Alias, widths[3])),
 		)
 	case strings.HasPrefix(row.Name, "† "):
 		if trimmed, ok := strings.CutPrefix(row.Name, "† "); ok {
 			row.Name = trimmed
 		}
 		cells = append(cells,
-			nonTableCellStyle.Render(fitString(row.Name, widths[0])),
-			nonTableCellStyle.Render(fitString(row.Value, widths[1])),
-			nonTableCellStyle.Render(fitString(row.Numeric, widths[2])),
-			nonTableCellStyle.Render(fitString(row.Alias, widths[3])),
+			nonTableCellStyle.Render(FitString(row.Name, widths[0])),
+			nonTableCellStyle.Render(FitString(row.Value, widths[1])),
+			nonTableCellStyle.Render(FitString(row.Numeric, widths[2])),
+			nonTableCellStyle.Render(FitString(row.Alias, widths[3])),
 		)
 	case strings.HasPrefix(row.Name, "⁑ "):
 		if trimmed, ok := strings.CutPrefix(row.Name, "⁑ "); ok {
 			row.Name = trimmed
 		}
 		cells = append(cells,
-			tableOnlyCellStyle.Render(fitString(row.Name, widths[0])),
-			tableOnlyCellStyle.Render(fitString(row.Value, widths[1])),
-			tableOnlyCellStyle.Render(fitString(row.Numeric, widths[2])),
-			tableOnlyCellStyle.Render(fitString(row.Alias, widths[3])),
+			tableOnlyCellStyle.Render(FitString(row.Name, widths[0])),
+			tableOnlyCellStyle.Render(FitString(row.Value, widths[1])),
+			tableOnlyCellStyle.Render(FitString(row.Numeric, widths[2])),
+			tableOnlyCellStyle.Render(FitString(row.Alias, widths[3])),
 		)
 	default:
 		cells = append(cells,
-			cellStyle.Render(fitString(row.Name, widths[0])),
-			cellStyle.Render(fitString(row.Value, widths[1])),
-			cellStyle.Render(fitString(row.Numeric, widths[2])),
-			cellStyle.Render(fitString(row.Alias, widths[3])),
+			cellStyle.Render(FitString(row.Name, widths[0])),
+			cellStyle.Render(FitString(row.Value, widths[1])),
+			cellStyle.Render(FitString(row.Numeric, widths[2])),
+			cellStyle.Render(FitString(row.Alias, widths[3])),
 		)
 	}
 
 	return lipgloss.JoinHorizontal(lipgloss.Top, cells...)
 }
 
-func fitString(s string, width int) string {
+// FitString fits a string to a specific width by padding or truncating.
+func FitString(s string, width int) string {
 	if len(s) < width {
 		return s + strings.Repeat(" ", width-len(s))
 	}
