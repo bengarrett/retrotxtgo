@@ -137,16 +137,17 @@ func processRow(e encoding.Encoding, c Row) []Row {
 
 // printLegendAndFooter prints the legend and footer information.
 func printLegendAndFooter(wr io.Writer) {
+	const ansi = "ANSI X3.4"
 	// Use lipgloss styles to match the table colors
 	specialStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("214"))
 	nonTableStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
 	tableOnlyStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("141"))
 
 	fmt.Fprintln(wr, "\n "+specialStyle.Render("Yellow text")+
-		" indicates EBCDIC encodings found on IBM mainframes (not ASCII compatible).")
-	fmt.Fprintln(wr, " "+nonTableStyle.Render("Black text")+
+		" indicates EBCDIC encodings found on some IBM mainframes.")
+	fmt.Fprintln(wr, " "+nonTableStyle.Render("Darker text")+
 		" indicates encodings not usable with the "+term.Example("table")+" command.")
-	fmt.Fprintln(wr, " "+tableOnlyStyle.Render("Green text")+
+	fmt.Fprintln(wr, " "+tableOnlyStyle.Render("Purple text")+
 		" indicates encodings only usable with the "+term.Example("table")+" command."+
 		"\n You can use the \""+term.Example("table ascii")+"\" command to list all three X3.4 tables.")
 	fmt.Fprintln(wr, "\nNamed, numeric, or alias values are all valid code page arguments.")
@@ -158,17 +159,18 @@ func printLegendAndFooter(wr io.Writer) {
 		term.Example(cmds), term.Comment("1"), term.Fuzzy("# numeric"))
 	fmt.Fprintf(wr, "  %s%s      %s\n",
 		term.Example(cmds), term.Comment("latin1"), term.Fuzzy("# alias"))
-	fmt.Fprintf(wr, "\n  IBM Code Page 437 (%s) is commonly used on MS-DOS and for ANSI art.\n",
-		term.Comment("cp437"))
-	fmt.Fprintf(wr, "  ISO 8859-1 (%s) is found on historic Unix, Amiga, and the early Internet.\n",
-		term.Comment("latin1"))
-	fmt.Fprintf(wr, "  Windows 1252 (%s) is found on Windows ME/98 and earlier systems.\n",
-		term.Comment("cp1252"))
-	fmt.Fprintf(wr, "  Macintosh (%s) is found on Mac OS 9 and earlier systems.\n",
-		term.Comment("macintosh"))
-	fmt.Fprintf(wr, "\nModern systems, including %s, PCs, and the web, use Unicode UTF-8 today.\n", meta.Name)
-	fmt.Fprintln(wr, "As a subset, UTF-8 is backwards compatible with US-ASCII. For example, the")
-	fmt.Fprintln(wr, "capital letter A is represented by the same byte value in both encodings.")
+	fmt.Fprintf(wr, "\n Today, most applications and the web use Unicode %s.\n", term.Comment("UTF-8"))
+	fmt.Fprintf(wr, " As a subset, UTF-8 is backwards compatible with %s (US-ASCII).\n", term.Comment(ansi))
+	fmt.Fprintf(wr, " %s is commonly used on MS-DOS and for ANSI art.\n",
+		term.Comment("IBM Code Page 437"))
+	fmt.Fprintf(wr, " %s is found on historic Unix, Amiga, and the early Internet.\n",
+		term.Comment("ISO 8859-1"))
+	fmt.Fprintf(wr, " %s is found on Windows in the 1980s and 1990s.\n",
+		term.Comment("Windows 1252"))
+	fmt.Fprintf(wr, " %s is found on Mac OS 9 and earlier systems.\n",
+		term.Comment("Macintosh"))
+	fmt.Fprintf(wr, " %s is incompatible with %s, most computers, and the web.\n",
+		specialStyle.Render("EBCDIC"), term.Comment(ansi))
 }
 
 // Rows return character encoding details for use in a text table.
