@@ -31,6 +31,19 @@ func BOM() []byte {
 	return []byte{ef, bb, bf}
 }
 
+// LineBreak converts a two rune lb sequence into a byte array.
+func LineBreak(lb [2]rune) []byte {
+	lb0, lb1 := lb[0], lb[1]
+	const maxByte = 0xFF
+	b0 := byte(lb0 & maxByte)
+	b1 := byte(lb1 & maxByte)
+	p := []byte{b0, b1}
+	if lb1 == 0 {
+		p = []byte{b0}
+	}
+	return p
+}
+
 // TrimEOF will cut text at the first occurrence of the SUB character.
 // The SUB is used by DOS and CP/M as an end-of-file marker.
 func TrimEOF(b []byte) []byte {

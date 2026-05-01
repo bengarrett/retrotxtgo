@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"os"
 	"runtime"
 	"strings"
@@ -89,13 +90,13 @@ func Terminal() string {
 		}
 		return "unknown"
 	}
-
-	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
+	fd := fd()
+	oldState, err := term.MakeRaw(fd)
 	if err != nil {
 		return unknown()
 	}
 	defer restoreTerm(oldState)
-	w, h, err := term.GetSize(int(os.Stdin.Fd()))
+	w, h, err := term.GetSize(fd)
 	// code source: https://gist.github.com/mattn/00cf5b7e38f4cceaf7077f527479870c
 	if os.Getenv("WT_SESSION") != "" {
 		const s = "Windows Terminal"
@@ -131,7 +132,15 @@ func Terminal() string {
 }
 
 func restoreTerm(oldState *term.State) {
-	if err := term.Restore(int(os.Stdin.Fd()), oldState); err != nil {
+	if err := term.Restore(fd(), oldState); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func fd() int {
+	ufd := os.Stdin.Fd()
+	if ufd > math.MaxInt {
+		return math.MaxInt
+	}
+	return int(ufd)
 }

@@ -9,6 +9,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/bengarrett/retrotxtgo/byter"
 	"github.com/bengarrett/retrotxtgo/fsys"
 	"github.com/bengarrett/retrotxtgo/term"
 	"github.com/bengarrett/retrotxtgo/xud"
@@ -963,8 +964,9 @@ func EqualLB(r, nl [2]rune) bool {
 		return nl[0] == r[0]
 	}
 	// mutli-byte
-	return bytes.Equal([]byte{byte(r[0]), byte(r[1])},
-		[]byte{byte(nl[0]), byte(nl[1])})
+	a := byter.LineBreak(r)
+	b := byter.LineBreak(nl)
+	return bytes.Equal(a, b)
 }
 
 // skipBreak reports whether the rune is a linebreak.

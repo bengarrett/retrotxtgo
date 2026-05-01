@@ -3,7 +3,7 @@ class Retrotxt < Formula
   homepage "https://github.com/bengarrett/retrotxtgo"
   url "https://github.com/bengarrett/retrotxtgo/archive/refs/tags/v1.1.1.tar.gz"
   sha256 "f845137f5061f7e92414f42a283eca8fa23a6c01457c2675917e5a73ac72b2de"
-  version "1.1.1"
+  version "1.2.1"
   license "LGPL-3.0-only"
 
   @commit = "cbf2357109ae17fbb0d4dcff59a4dee6bc486dd8"
