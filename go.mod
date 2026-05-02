@@ -7,7 +7,7 @@ go 1.26.2
 //  - Formula/retrotxt.rb version must also be updated to the current tag
 
 require (
-	github.com/gookit/color v1.6.0
+	github.com/gookit/color v1.6.1
 	github.com/karrick/godirwalk v1.17.0
 	github.com/mattn/go-isatty v0.0.22
 	github.com/mozillazg/go-slugify v0.2.0
