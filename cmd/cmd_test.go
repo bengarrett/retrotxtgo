@@ -25,9 +25,7 @@ const (
 )
 
 const (
-	root  = "../sample"
-	file1 = "../sample/ansi/ansi-cp.ans"
-	file2 = "../sample/bbs/SHEET.ANS"
+	root = "../sample"
 )
 
 func init() {
@@ -129,7 +127,7 @@ func Test_InfoData(t *testing.T) {
 					t.Errorf("could not find filename in the json result, want: %q", info.Name())
 				}
 				if int64(res.Size.Bytes) != info.Size() {
-					t.Errorf("could not find file size in the json result, want: %q", info.Size())
+					t.Errorf("could not find file size in the json result, want: %d", info.Size())
 				}
 				// test --format=xml
 				gotXML, err := infoT.tester([]string{"--format", "xml", path})
@@ -145,7 +143,7 @@ func Test_InfoData(t *testing.T) {
 					t.Errorf("could not find filename in the xml result, want: %q", info.Name())
 				}
 				if int64(res.Size.Bytes) != info.Size() {
-					t.Errorf("could not find file size in the xml result, want: %q", info.Size())
+					t.Errorf("could not find file size in the xml result, want: %d", info.Size())
 				}
 				return nil
 			})

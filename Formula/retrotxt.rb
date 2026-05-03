@@ -1,13 +1,13 @@
 class Retrotxt < Formula
   desc "Convert and display legacy text files and ANSI art on modern terminals"
   homepage "https://github.com/bengarrett/retrotxtgo"
-  url "https://github.com/bengarrett/retrotxtgo/archive/refs/tags/v1.2.0.tar.gz"
-  sha256 "8aa0f0dac9d53fad1f8d36f37bf47a6af18ab0edc7874aa8e4ea2d9ca7328d32"
-  version "1.2.0"
+  url "https://github.com/bengarrett/retrotxtgo/archive/refs/tags/v1.2.1.tar.gz"
+  sha256 "c1d2e32f5b868974672ae8eeb1c675f5214e28c1e323ffcb880c9e3f4e3039c8"
+  version "1.2.1"
   license "LGPL-3.0-only"
 
-  @commit = "f433b468d2a4854c3ed5a1db77f5405d5dc4934b"
-  @build_date = "2026-02-08T00:15:16+11:00"
+  @commit = "90da32819cbe9c31f93d04e03c6f799c109751b9"
+  @build_date = "2026-05-01T10:53:49+10:00"
 
   livecheck do
     url :stable

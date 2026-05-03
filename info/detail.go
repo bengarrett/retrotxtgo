@@ -172,10 +172,10 @@ func (d *Detail) Marshal(w io.Writer, f Format) error {
 		}
 		_, err = w.Write(b)
 	default:
-		return fmt.Errorf("detail marshal %q: %w", f, ErrFmt)
+		return fmt.Errorf("detail marshal %v: %w", f, ErrFmt)
 	}
 	if err != nil {
-		return fmt.Errorf("detail marshal %q: %w", f, err)
+		return fmt.Errorf("detail marshal %v: %w", f, err)
 	}
 	return nil
 }

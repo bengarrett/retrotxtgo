@@ -176,8 +176,6 @@ func TestHexEncode(t *testing.T) {
 
 const (
 	cp437hex = "\xCD\xB9\xB2\xCC\xCD" // `═╣░╠═`
-	utf      = "═╣ ░ ╠═"
-	base     = "rt_sample-"
 )
 
 func TestCP437Decode(t *testing.T) {

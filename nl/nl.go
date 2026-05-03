@@ -9,6 +9,8 @@ import (
 	"io"
 	"os"
 	"strings"
+
+	"github.com/bengarrett/retrotxtgo/byter"
 )
 
 var ErrReader = errors.New("the r reader cannot be nil")
@@ -75,10 +77,7 @@ func Lines(r io.Reader, lb [2]rune) (int, error) {
 	if r == nil {
 		return 0, ErrReader
 	}
-	lineBreak := []byte{byte(lb[0]), byte(lb[1])}
-	if lb[1] == 0 {
-		lineBreak = []byte{byte(lb[0])}
-	}
+	sep := byter.LineBreak(lb)
 	p, count := make([]byte, bufio.MaxScanTokenSize), 0
 	for {
 		size, err := r.Read(p)
@@ -87,7 +86,7 @@ func Lines(r io.Reader, lb [2]rune) (int, error) {
 		}
 		pos := 0
 		for {
-			i := bytes.Index(p[pos:], lineBreak)
+			i := bytes.Index(p[pos:], sep)
 			if size == pos {
 				break
 			}

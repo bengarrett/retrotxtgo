@@ -8,8 +8,7 @@ import (
 
 // Constants for batch processing.
 const (
-	maxBatchWorkers          = 8 // Maximum number of workers for batch processing
-	batchSequentialThreshold = 5 // Use sequential processing for batches smaller than this
+	batches = 5 // Use sequential processing for batches smaller than this
 )
 
 // BatchResult represents the result of a single conversion in a batch.
@@ -128,7 +127,7 @@ func (c *Convert) BatchConvertSequential(encoding encoding.Encoding, files ...[]
 // Small batches: Sequential processing
 // Large batches: Parallel processing.
 func (c *Convert) BatchConvertOptimal(encoding encoding.Encoding, files ...[]byte) BatchResults {
-	if len(files) < batchSequentialThreshold {
+	if len(files) < batches {
 		// Small batch: use sequential for lower overhead
 		return c.BatchConvertSequential(encoding, files...)
 	}

@@ -9,6 +9,7 @@ import (
 	"strings"
 	"text/tabwriter"
 	"unicode"
+	"unicode/utf8"
 
 	"github.com/bengarrett/retrotxtgo/byter"
 	"github.com/bengarrett/retrotxtgo/convert"
@@ -148,9 +149,9 @@ func WithLipgloss(wr io.Writer, name string) error { //nolint:funlen
 	colHeadersBuilder.WriteString("  .") // Start with two spaces to align with row header area
 	const lastColumn = 15
 	for i := range lastColumn {
-		colHeadersBuilder.WriteString(fmt.Sprintf(" %X .", i))
+		fmt.Fprintf(&colHeadersBuilder, " %X .", i)
 	}
-	colHeadersBuilder.WriteString(fmt.Sprintf(" %X .", lastColumn)) // Last column without trailing pipe
+	fmt.Fprintf(&colHeadersBuilder, " %X .", lastColumn) // Last column without trailing pipe
 	colHeaders := cellStyle.Render(colHeadersBuilder.String())
 
 	// Generate character grid
@@ -353,6 +354,9 @@ func Character(cp encoding.Encoding, code int, r rune) string {
 		case code >= pad && code < nbsp:
 			return " "
 		case code >= nbsp:
+			if code < 0 || code > utf8.MaxRune {
+				return ""
+			}
 			return string(rune(code))
 		}
 	}

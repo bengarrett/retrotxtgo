@@ -201,7 +201,7 @@ func (samp *Sample) transform(conv *convert.Convert, b ...byte) ([]rune, error) 
 	case Text:
 		return conv.Text(b...)
 	default:
-		return nil, fmt.Errorf("transform sample %q: %w", samp.Convert, ErrConvert)
+		return nil, fmt.Errorf("transform sample %v: %w", samp.Convert, ErrConvert)
 	}
 }
 

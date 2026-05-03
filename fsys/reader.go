@@ -12,6 +12,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/bengarrett/retrotxtgo/byter"
 	"github.com/bengarrett/retrotxtgo/nl"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/transform"
@@ -57,10 +58,7 @@ func Columns(r io.Reader, lb [2]rune) (int, error) {
 	if reflect.DeepEqual(lb, [2]rune{}) {
 		return 0, ErrLB
 	}
-	lineBreak := []byte{byte(lb[0]), byte(lb[1])}
-	if lb[1] == 0 {
-		lineBreak = []byte{byte(lb[0])}
-	}
+	sep := byter.LineBreak(lb)
 	p, width := make([]byte, bufio.MaxScanTokenSize), 0
 	for {
 		size, err := r.Read(p)
@@ -69,12 +67,12 @@ func Columns(r io.Reader, lb [2]rune) (int, error) {
 		}
 		pos := 0
 		for pos < size {
-			i := bytes.Index(p[pos:], lineBreak)
+			i := bytes.Index(p[pos:], sep)
 			if i == -1 {
 				width = size
 				break
 			}
-			pos += i + len(lineBreak)
+			pos += i + len(sep)
 			if i > width {
 				width = i
 			}

@@ -98,7 +98,7 @@ func BorderString(s string) string {
 		if float32((maxLen-l)/split) != float32(maxLen-l)/split {
 			rp++
 		}
-		result.WriteString(fmt.Sprintf("│%s%s%s│\n", strings.Repeat(" ", lp), scanner.Text(), strings.Repeat(" ", rp)))
+		fmt.Fprintf(&result, "│%s%s%s│\n", strings.Repeat(" ", lp), scanner.Text(), strings.Repeat(" ", rp))
 	}
 	result.WriteString("└" + strings.Repeat("─", maxLen) + "┘")
 	return result.String()

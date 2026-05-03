@@ -129,6 +129,9 @@ func InputOverride(cmd *cobra.Command, fallback string) (sample.Flags, error) {
 	const input, original = "input", "original"
 	// handle encode flag or apply the default
 	cp := cmd.Flags().Lookup(input)
+	if cp == nil {
+		return none, fmt.Errorf("%w: the input override flag lookup failed", ErrInput)
+	}
 	in, err := parseInput(cp.Changed, cp.Value.String(), fallback)
 	// parse("input")
 	if err != nil {
