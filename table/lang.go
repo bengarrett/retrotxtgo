@@ -18,6 +18,7 @@ import (
 type Lang map[encoding.Encoding]string
 
 const (
+	cels       = "Central Europe Latin script"
 	formalName = "Formal name"
 	namedVal   = "Named value"
 	langRegion = "Language, script, or region"
@@ -38,7 +39,7 @@ func Languages() *Lang {
 		charmap.CodePage037:     usa,
 		charmap.CodePage437:     usa,
 		charmap.CodePage850:     weu,
-		charmap.CodePage852:     "Central Europe Latin script",
+		charmap.CodePage852:     cels,
 		charmap.CodePage855:     "Central Europe Cyrillic script",
 		charmap.CodePage858:     weu + eur,
 		charmap.CodePage860:     "Portuguese",
@@ -49,7 +50,7 @@ func Languages() *Lang {
 		charmap.CodePage1047:    weu,
 		charmap.CodePage1140:    usa,
 		charmap.ISO8859_1:       weu,
-		charmap.ISO8859_2:       "Central Europe Latin script",
+		charmap.ISO8859_2:       cels,
 		charmap.ISO8859_3:       "Esperanto, Maltese, Turkish",
 		charmap.ISO8859_4:       "Estonian, Latvian, Lithuanian, Greenlandic, Sámi",
 		charmap.ISO8859_5:       "Russian Cyrillic script",
@@ -71,7 +72,7 @@ func Languages() *Lang {
 		charmap.KOI8U:           "Ukrainian",
 		charmap.Macintosh:       weu,
 		charmap.Windows874:      "Thai",
-		charmap.Windows1250:     "Central Europe Latin script",
+		charmap.Windows1250:     cels,
 		charmap.Windows1251:     "Cyrillic script",
 		charmap.Windows1252:     "English, " + weu,
 		charmap.Windows1253:     "Greek",

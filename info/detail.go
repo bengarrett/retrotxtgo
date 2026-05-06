@@ -103,8 +103,18 @@ const (
 const (
 	uc8         = "UTF-8"
 	ans         = "ANSI controls"
+	chars       = "characters"
 	cmmt        = "comment"
+	c32         = "CRC32"
+	c64ecma     = "CRC64 ECMA"
+	desc        = "description"
+	linebr      = "line break"
+	lines       = "lines"
+	interp      = "interpretation"
+	m5          = "md5"
 	txt         = "text"
+	width       = "width"
+	words       = "words"
 	zipComment  = "zip comment"
 	octetStream = "application/octet-stream"
 	zipType     = "application/zip"
@@ -467,16 +477,16 @@ func (d *Detail) marshalAsTree(w io.Writer, useColors bool) { //nolint:cyclop,fu
 		}
 
 		switch x.k {
-		case "slug", "filename", "filetype", "Unicode", "line break":
+		case "slug", "filename", "filetype", "Unicode", linebr:
 			basicInfo = append(basicInfo, x)
-		case "characters", "words", "size", "lines", "width", ans:
+		case chars, words, "size", lines, width, ans:
 			contentStats = append(contentStats, x)
 		case "modified", "media mime type":
 			fileMeta = append(fileMeta, x)
-		case "SHA256 checksum", "CRC64 ECMA", "CRC32", "MD5":
+		case "SHA256 checksum", c64ecma, c32, m5:
 			checksums = append(checksums, x)
 		case "title", "author", "group", "date", "original size", "file type", "data type",
-			"description", "character width", "number of lines", "interpretation":
+			desc, "character width", "number of lines", interp:
 			sauceData = append(sauceData, x)
 		case cmmt:
 			comments = append(comments, x)
@@ -567,19 +577,19 @@ func (d *Detail) marshalled() []struct{ k, v string } {
 		struct{ k, v string }{k: "filename", v: d.Name},
 		struct{ k, v string }{k: "filetype", v: d.Mime.Commt},
 		struct{ k, v string }{k: "Unicode", v: d.Unicode},
-		struct{ k, v string }{k: "line break", v: fsys.LineBreak(d.LineBreak.Decimal, true)},
-		struct{ k, v string }{k: "characters", v: p.Sprint(d.Count.Chars)},
+		struct{ k, v string }{k: linebr, v: fsys.LineBreak(d.LineBreak.Decimal, true)},
+		struct{ k, v string }{k: chars, v: p.Sprint(d.Count.Chars)},
 		struct{ k, v string }{k: ans, v: p.Sprint(d.Count.Controls)},
-		struct{ k, v string }{k: "words", v: p.Sprint(d.Count.Words)},
+		struct{ k, v string }{k: words, v: p.Sprint(d.Count.Words)},
 		struct{ k, v string }{k: "size", v: d.Size.Decimal},
-		struct{ k, v string }{k: "lines", v: p.Sprint(d.Lines)},
-		struct{ k, v string }{k: "width", v: p.Sprint(d.Width)},
+		struct{ k, v string }{k: lines, v: p.Sprint(d.Lines)},
+		struct{ k, v string }{k: width, v: p.Sprint(d.Width)},
 		struct{ k, v string }{k: "modified", v: humanize.DMY.Format(d.Modified.Time.UTC())},
 		struct{ k, v string }{k: "media mime type", v: d.Mime.Type},
 		struct{ k, v string }{k: "SHA256 checksum", v: d.Sums.SHA256},
-		struct{ k, v string }{k: "CRC64 ECMA", v: d.Sums.CRC64},
-		struct{ k, v string }{k: "CRC32", v: d.Sums.CRC32},
-		struct{ k, v string }{k: "MD5", v: d.Sums.MD5},
+		struct{ k, v string }{k: c64ecma, v: d.Sums.CRC64},
+		struct{ k, v string }{k: c32, v: d.Sums.CRC32},
+		struct{ k, v string }{k: m5, v: d.Sums.MD5},
 		struct{ k, v string }{k: zipComment, v: d.ZipComment},
 	)
 	// sauce data
@@ -591,11 +601,11 @@ func (d *Detail) marshalled() []struct{ k, v string } {
 		struct{ k, v string }{k: "original size", v: d.Sauce.FileSize.Decimal},
 		struct{ k, v string }{k: "file type", v: d.Sauce.File.Name},
 		struct{ k, v string }{k: "data type", v: d.Sauce.Data.Name},
-		struct{ k, v string }{k: "description", v: d.Sauce.Desc},
+		struct{ k, v string }{k: desc, v: d.Sauce.Desc},
 		struct{ k, v string }{k: d.Sauce.Info.Info1.Info, v: strconv.FormatUint(uint64(d.Sauce.Info.Info1.Value), 10)},
 		struct{ k, v string }{k: d.Sauce.Info.Info2.Info, v: strconv.FormatUint(uint64(d.Sauce.Info.Info2.Value), 10)},
 		struct{ k, v string }{k: d.Sauce.Info.Info3.Info, v: strconv.FormatUint(uint64(d.Sauce.Info.Info3.Value), 10)},
-		struct{ k, v string }{k: "interpretation", v: d.Sauce.Info.Flags.String()},
+		struct{ k, v string }{k: interp, v: d.Sauce.Info.Flags.String()},
 	)
 	// sauce comment
 	for i, line := range d.Sauce.Comnt.Comment {
@@ -647,7 +657,7 @@ func (d *Detail) mime(name string, data ...byte) {
 func (d *Detail) skip(x struct{ k, v string }) bool {
 	if !d.LegacySums {
 		switch x.k {
-		case "CRC32", "CRC64 ECMA", "MD5":
+		case c32, c64ecma, m5:
 			return true
 		}
 	}
@@ -658,7 +668,7 @@ func (d *Detail) skip(x struct{ k, v string }) bool {
 func (d *Detail) validate(x struct{ k, v string }) bool {
 	if !ValidText(d.Mime.Type) {
 		switch x.k {
-		case uc8, "line break", "characters", ans, "words", "lines", "width":
+		case uc8, linebr, chars, ans, words, lines, width:
 			return false
 		}
 	} else if x.k == ans {
@@ -666,7 +676,7 @@ func (d *Detail) validate(x struct{ k, v string }) bool {
 			return false
 		}
 	}
-	if x.k == "description" && x.v == "" {
+	if x.k == desc && x.v == "" {
 		return false
 	}
 	if x.k == d.Sauce.Info.Info1.Info && d.Sauce.Info.Info1.Value == 0 {
@@ -678,7 +688,7 @@ func (d *Detail) validate(x struct{ k, v string }) bool {
 	if x.k == d.Sauce.Info.Info3.Info && d.Sauce.Info.Info3.Value == 0 {
 		return false
 	}
-	if x.k == "interpretation" && x.v == "" {
+	if x.k == interp && x.v == "" {
 		return false
 	}
 	return true

@@ -6,16 +6,16 @@ vars:
   BINNAME: retrotxt
 tasks:
   default:
-    desc: "Task runner for the retrotxt source code."
+    desc: 'Task runner for the retrotxt source code.'
     cmds:
       - task --list-all
     silent: true
   release:
-    desc: "GoReleaser"
+    desc: 'GoReleaser'
     cmds:
       - cmd: goreleaser release --snapshot --clean
   doc:
-    desc: "Generate and browse the application module documentation."
+    desc: 'Generate and browse the application module documentation.'
     cmds:
       - cmd: pkgsite -http localhost:8090
     silent: true
@@ -27,14 +27,15 @@ tasks:
       - cmd: clear
         platforms: [linux, darwin, freebsd]
       - cmd: gci write ./..
+      - cmd: go fix ./...
       - cmd: gofumpt -w .
       - cmd: golangci-lint run
   nil:
-    desc: "Run the static analysis techniques to catch Nil dereferences."
+    desc: 'Run the static analysis techniques to catch Nil dereferences.'
     cmds:
       - go tool nilaway -test=false ./...
   build:
-    desc: "Build the binary of the program."
+    desc: 'Build the binary of the program.'
     cmds:
       - cmd: echo "Building..."
       - cmd: go build -o {{.BINNAME}} -v main.go
@@ -43,7 +44,7 @@ tasks:
         platforms: [windows]
       - cmd: echo "Done!"
   buildr:
-    desc: "Build the binary of the program with race detection."
+    desc: 'Build the binary of the program with race detection.'
     cmds:
       - cmd: echo "Building with race conditions..."
       - cmd: go build -o {{.BINNAME}} -race -v main.go
@@ -56,38 +57,38 @@ tasks:
         platforms: [windows]
       - cmd: echo "Done!"
   test:
-    desc: "Run the test suite."
+    desc: 'Run the test suite.'
     cmds:
       - go test -count=1 ./...
   testr:
-    desc: "Run the verbose test suite with the slower race detection."
+    desc: 'Run the verbose test suite with the slower race detection.'
     cmds:
       - go test -count=1 -race ./...
   test-coverage:
-    desc: "Run test suite with coverage analysis and generate HTML report."
+    desc: 'Run test suite with coverage analysis and generate HTML report.'
     cmds:
       - go test -count=1 -coverprofile=coverage.out ./...
       - go tool cover -html=coverage.out -o coverage.html
   test-coverage-detailed:
-    desc: "Run detailed test coverage analysis with function-level breakdown."
+    desc: 'Run detailed test coverage analysis with function-level breakdown.'
     cmds:
       - go test -count=1 -coverprofile=coverage.out -covermode=count ./...
       - go tool cover -func=coverage.out
       - go tool cover -html=coverage.out -o coverage.html
   test-coverage-packages:
-    desc: "Run test coverage analysis showing coverage by package."
+    desc: 'Run test coverage analysis showing coverage by package.'
     cmds:
       - go test -count=1 -cover ./...
   coverage-clean:
-    desc: "Clean up coverage analysis files."
+    desc: 'Clean up coverage analysis files.'
     cmds:
       - rm -f coverage.out coverage.html
   benchmark:
-    desc: "Run performance benchmarks for the application."
+    desc: 'Run performance benchmarks for the application.'
     cmds:
       - go test -bench=. -benchmem ./...
   benchmark-detailed:
-    desc: "Run detailed performance benchmarks with longer duration."
+    desc: 'Run detailed performance benchmarks with longer duration.'
     cmds:
       - go test -bench=. -benchmem -benchtime=5s ./...
   pkg-patch:

@@ -1,10 +1,11 @@
-version: "2"
+version: '2'
 linters:
   default: all
   disable:
     - depguard
     - exhaustive
     - exhaustruct
+    - gomodguard
     - nlreturn
     - noinlineerr
     - paralleltest
@@ -27,7 +28,8 @@ linters:
       - linters:
           - gochecknoinits
           - gocognit
-        path: (.+)_test\.go
+          - goconst
+        path: _test.go
       - linters:
           - gochecknoglobals
           - gochecknoinits
