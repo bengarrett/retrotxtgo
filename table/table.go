@@ -35,7 +35,7 @@ var (
 const width = 68 // width of the table in characters.
 
 // Table prints, aligns and formats to the writer all characters in the named 8-bit character set.
-func Table(wr io.Writer, name string) error { //nolint:funlen
+func Table(wr io.Writer, name string) error { //nolint:funlen,cyclop
 	if wr == nil {
 		wr = io.Discard
 	}
@@ -105,7 +105,10 @@ out:
 	xud.Footnote(w, cp)
 	Footnote(w, name)
 	fmt.Fprint(w, "\n")
-	return w.Flush()
+	if err := w.Flush(); err != nil {
+		return fmt.Errorf("could not flush table: %w", err)
+	}
+	return nil
 }
 
 // WithLipgloss prints, aligns and formats to the writer all characters in the named 8-bit character set
@@ -226,7 +229,7 @@ func Footnote(w io.Writer, name string) {
 func CodePage(s string) (encoding.Encoding, error) {
 	cp, err := convert.Encoder(s)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("table codepage: %w", err)
 	}
 	switch cp {
 	case traditionalchinese.Big5:

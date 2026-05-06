@@ -46,7 +46,7 @@ func temp(name string) string {
 func Tar(name string, files ...string) error {
 	w, err := os.Create(name)
 	if err != nil {
-		return err
+		return fmt.Errorf("fsys tar: %w", err)
 	}
 	defer w.Close()
 	dst := tar.NewWriter(w)
@@ -61,17 +61,18 @@ func Tar(name string, files ...string) error {
 
 // InsertTar inserts the named file to the TAR writer.
 func InsertTar(dst *tar.Writer, name string) error {
+	const n = "fsys insert tar"
 	if dst == nil {
 		return ErrWriter
 	}
 	src, err := os.Open(name)
 	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", n, err)
 	}
 	defer src.Close()
 	s, err := src.Stat()
 	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", n, err)
 	}
 	h := &tar.Header{
 		Name:    src.Name(),
@@ -80,12 +81,12 @@ func InsertTar(dst *tar.Writer, name string) error {
 		ModTime: s.ModTime(),
 	}
 	if err := dst.WriteHeader(h); err != nil {
-		return err
+		return fmt.Errorf("%s: %w", n, err)
 	}
 	const size = 4 * 1024
 	buf := make([]byte, size)
 	if _, err = io.CopyBuffer(dst, src, buf); err != nil {
-		return err
+		return fmt.Errorf("%s: %w", n, err)
 	}
 	return nil
 }
@@ -102,5 +103,9 @@ func Touch(name string) (string, error) {
 // Write b to the named file.
 // The number of bytes written and the path to the file are returned.
 func Write(name string, b ...byte) (int, string, error) {
-	return save.Save(name, b...)
+	i, s, err := save.Save(name, b...)
+	if err != nil {
+		return i, s, fmt.Errorf("fsys write: %w", err)
+	}
+	return i, s, nil
 }

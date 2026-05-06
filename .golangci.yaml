@@ -3,15 +3,11 @@ linters:
   default: all
   disable:
     - depguard
-    - exhaustive
     - exhaustruct
-    - gomodguard
+    - gomodguard # retired
     - nlreturn
     - noinlineerr
-    - paralleltest
-    - tparallel
     - varnamelen
-    - wrapcheck
     - wsl
     - wsl_v5
   settings:
@@ -26,9 +22,12 @@ linters:
       - std-error-handling
     rules:
       - linters:
+          - exhaustive
+          - exhaustruct
           - gochecknoinits
           - gocognit
           - goconst
+          - wrapcheck
         path: _test.go
       - linters:
           - gochecknoglobals

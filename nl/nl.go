@@ -60,7 +60,7 @@ func (lb *LineBreak) Find(r [2]rune) {
 func (lb *LineBreak) Total(name string) (int, error) {
 	r, err := os.Open(name)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("new line break total: %w", err)
 	}
 	defer r.Close()
 	lines, err := Lines(r, lb.Decimal)

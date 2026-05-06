@@ -23,6 +23,7 @@ const (
 )
 
 func Test_SkipCtrlCodes(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		ctrl []string
@@ -119,6 +120,7 @@ func BenchmarkSkipCtrlCodes(b *testing.B) {
 }
 
 func TestConvert_ANSI(t *testing.T) {
+	t.Parallel()
 	const wantHi = "\x1b[0m\x0D\x0A" +
 		"\x1b[1;33m  ╓──────────────╖\x1b[0m\x0D\x0A" +
 		"\x1b[1;33m  ║\x1b[0m  Hello world \x1b[1;33m║\x1b[0m\x0D\x0A" +

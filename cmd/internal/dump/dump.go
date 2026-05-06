@@ -22,7 +22,7 @@ func Run(w io.Writer, _ *cobra.Command, args ...string) error {
 	// piped input from other programs and then exit
 	ok, err := fsys.IsPipe()
 	if err != nil {
-		return err
+		return fmt.Errorf("run dump: %w", err)
 	}
 	if ok {
 		return Pipe(w)
@@ -45,7 +45,7 @@ func Run(w io.Writer, _ *cobra.Command, args ...string) error {
 		// Read as regular file
 		b, err = fsys.Read(arg)
 		if err != nil {
-			return err
+			return fmt.Errorf("run dump: %w", err)
 		}
 		fmt.Fprint(w, hex.Dump(b))
 	}
@@ -59,7 +59,7 @@ func tryReadSample(name string) ([]byte, error) {
 	}
 	p, err := sample.Open(name)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("dump try read sample: %w", err)
 	}
 	return p, nil
 }

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/bengarrett/retrotxtgo/cmd/example"
@@ -23,7 +24,7 @@ func Table() *cobra.Command {
 		GroupID: IDcodepage,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := flag.Help(cmd, args...); err != nil {
-				return err
+				return fmt.Errorf("command table: %w", err)
 			}
 			return list.Table(cmd.OutOrStdout(), args...)
 		},

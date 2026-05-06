@@ -22,13 +22,14 @@ var (
 
 // Run parses the arguments supplied with the view command.
 func Run(w io.Writer, cmd *cobra.Command, args ...string) error {
+	const name = "cmd info run"
 	if w == nil {
 		w = io.Discard
 	}
 	// piped input from other programs and then exit
 	ok, err := fsys.IsPipe()
 	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", name, err)
 	}
 	if ok {
 		return Pipe(w, cmd, args...)
@@ -36,7 +37,7 @@ func Run(w io.Writer, cmd *cobra.Command, args ...string) error {
 	// read from files or samples
 	args, c, samp, err := flag.Args(cmd, args...)
 	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", name, err)
 	}
 	for i, arg := range args {
 		if i == 0 && arg == "" {
@@ -49,7 +50,7 @@ func Run(w io.Writer, cmd *cobra.Command, args ...string) error {
 		}
 		b, err := flag.ReadArgument(arg, c, samp)
 		if err != nil {
-			return err
+			return fmt.Errorf("%s: %w", name, err)
 		}
 		// write out the sample with its original encoding
 		// this could display poorly in a terminal
@@ -75,7 +76,7 @@ func Pipe(w io.Writer, cmd *cobra.Command, args ...string) error {
 	}
 	_, c, samp, err := flag.Args(cmd, args...)
 	if err != nil {
-		return err
+		return fmt.Errorf("cmd view pipe: %w", err)
 	}
 	b, err := fsys.ReadPipe()
 	if err != nil {
@@ -96,6 +97,7 @@ func Pipe(w io.Writer, cmd *cobra.Command, args ...string) error {
 // When no encoding arguments are provided, UTF-8 unicode encoding is used.
 func Transform(c *convert.Convert, in, out encoding.Encoding, b ...byte,
 ) ([]rune, error) {
+	const name = "cmd view transform"
 	if c == nil {
 		return nil, ErrConv
 	}
@@ -114,12 +116,20 @@ func Transform(c *convert.Convert, in, out encoding.Encoding, b ...byte,
 	if out != nil && !utf8.Valid(b) {
 		p, err = out.NewDecoder().Bytes(b)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%s: %w", name, err)
 		}
 	}
 	// convert the bytes into runes
 	if flag.EndOfFile(c.Args) {
-		return c.Text(p...)
+		r, err := c.Text(p...)
+		if err != nil {
+			return r, fmt.Errorf("%s: %w", name, err)
+		}
+		return r, nil
 	}
-	return c.Dump(p...)
+	r, err := c.Dump(p...)
+	if err != nil {
+		return r, fmt.Errorf("%s: %w", name, err)
+	}
+	return r, nil
 }

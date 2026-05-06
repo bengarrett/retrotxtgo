@@ -192,12 +192,12 @@ func Rows(e encoding.Encoding) (Row, error) {
 	if r.Value, err = htmlindex.Name(e); err != nil {
 		r.Value, err = ianaindex.MIME.Name(e)
 		if err != nil {
-			return Row{}, err
+			return Row{}, fmt.Errorf("list rows: %w", err)
 		}
 	} else {
 		r.Alias, err = ianaindex.MIME.Name(e)
 		if err != nil {
-			return Row{}, err
+			return Row{}, fmt.Errorf("list rows: %w", err)
 		}
 	}
 	r.Value = strings.ToLower(Uniform(r.Value))
@@ -247,7 +247,7 @@ func Alias(alias, value string, e encoding.Encoding) (string, error) {
 	}
 	a, err := ianaindex.MIB.Name(e)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("list alias: %w", err)
 	}
 	a = strings.ToLower(a)
 	if a == value {

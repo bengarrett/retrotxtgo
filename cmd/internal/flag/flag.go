@@ -159,7 +159,11 @@ func parseInput(changed bool, value, fallback string) (encoding.Encoding, error)
 	if name == "" && fallback == "" {
 		return nil, ErrInput
 	}
-	return convert.Encoder(name)
+	ee, err := convert.Encoder(name)
+	if err != nil {
+		return ee, fmt.Errorf("flag parse input: %w", err)
+	}
+	return ee, nil
 }
 
 // EndOfFile reports whether end-of-file control flag was requested.
@@ -172,7 +176,7 @@ func Help(cmd *cobra.Command, args ...string) error {
 	if len(args) != 0 {
 		return nil
 	}
-	return cmd.Help()
+	return cmd.Help() //nolint:wrapcheck
 }
 
 // OpenSample returns the content of the named embed sample file given via an argument.
@@ -184,14 +188,14 @@ func OpenSample(name string, c *convert.Convert, f sample.Flags) ([]byte, error)
 	if f.Original {
 		p, err := sample.Open(name)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("flag open sample: %w", err)
 		}
 		return p, nil
 	}
 	// return the sample with utf-8 encoding
 	r, err := f.Open(c, name)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("flag open sample: %w", err)
 	}
 	return []byte(string(r)), nil
 }
@@ -208,7 +212,7 @@ func ReadArgument(arg string, c *convert.Convert, f sample.Flags) ([]byte, error
 	// the arg should be a filepath
 	b, err = fsys.Read(arg)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("flag read argument: %w", err)
 	}
 	return b, nil
 }

@@ -50,7 +50,7 @@ func Info(w io.Writer, name, format string, chksums bool) error {
 	err = godirwalk.Walk(name, &godirwalk.Options{
 		Callback: func(osPathname string, de *godirwalk.Dirent) error {
 			if skip, err := de.IsDirOrSymlinkToDir(); err != nil {
-				return err
+				return fmt.Errorf("info walker: %w", err)
 			} else if skip {
 				return nil
 			}
@@ -98,7 +98,7 @@ func Marshal(w io.Writer, name string, chksums bool, f Format) error {
 		var err error
 		// get the required line breaks chars before running the multiple tasks
 		if d.LineBreak.Decimal, err = fsys.ReadLineBreaks(name); err != nil {
-			return err
+			return fmt.Errorf("info marshal: %w", err)
 		}
 		d.LineBreak.Find(d.LineBreak.Decimal)
 		g := errgroup.Group{}
@@ -112,7 +112,7 @@ func Marshal(w io.Writer, name string, chksums bool, f Format) error {
 		g.Go(func() error {
 			i, err := d.LineBreak.Total(name)
 			if err != nil {
-				return err
+				return fmt.Errorf("info marshal: %w", err)
 			}
 			mu.Lock()
 			d.Lines = i
@@ -123,7 +123,7 @@ func Marshal(w io.Writer, name string, chksums bool, f Format) error {
 			return d.Words(name)
 		})
 		if err := g.Wait(); err != nil {
-			return err
+			return fmt.Errorf("info marshal: %w", err)
 		}
 		d.MimeUnknown()
 	}
@@ -136,6 +136,7 @@ func Marshal(w io.Writer, name string, chksums bool, f Format) error {
 
 // Stream parses piped data and writes out the details in a specific syntax.
 func Stream(w io.Writer, format string, data ...byte) error { //nolint:funlen
+	const name = "info stream"
 	if w == nil {
 		w = io.Discard
 	}
@@ -156,7 +157,7 @@ func Stream(w io.Writer, format string, data ...byte) error { //nolint:funlen
 	g.Go(func() error {
 		val, err := fsys.Controls(bytes.NewReader(data))
 		if err != nil {
-			return err
+			return fmt.Errorf("%s: %w", name, err)
 		}
 		mu.Lock()
 		d.Count.Controls = val
@@ -166,7 +167,7 @@ func Stream(w io.Writer, format string, data ...byte) error { //nolint:funlen
 	g.Go(func() error {
 		val, err := nl.Lines(bytes.NewReader(data), d.LineBreak.Decimal)
 		if err != nil {
-			return err
+			return fmt.Errorf("%s: %w", name, err)
 		}
 		mu.Lock()
 		d.Lines = val
@@ -176,7 +177,7 @@ func Stream(w io.Writer, format string, data ...byte) error { //nolint:funlen
 	g.Go(func() error {
 		val, err := fsys.Columns(bytes.NewReader(data), d.LineBreak.Decimal)
 		if err != nil {
-			return err
+			return fmt.Errorf("%s: %w", name, err)
 		}
 		if val < 0 {
 			val = d.Count.Chars
@@ -189,7 +190,7 @@ func Stream(w io.Writer, format string, data ...byte) error { //nolint:funlen
 	g.Go(func() error {
 		val, err := fsys.Words(bytes.NewReader(data))
 		if err != nil {
-			return err
+			return fmt.Errorf("%s: %w", name, err)
 		}
 		mu.Lock()
 		d.Count.Words = val
@@ -197,7 +198,7 @@ func Stream(w io.Writer, format string, data ...byte) error { //nolint:funlen
 		return nil
 	})
 	if err := g.Wait(); err != nil {
-		return err
+		return fmt.Errorf("%s: %w", name, err)
 	}
 	d.MimeUnknown()
 	return marshall(d, w, f)

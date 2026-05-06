@@ -512,7 +512,7 @@ func (c *Convert) Swaps() (*Convert, error) {
 	})
 	s, _, err := transform.String(replace, string(c.Output))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("encoding convert swaps: %w", err)
 	}
 	c.Output = []rune(s)
 	return c, nil

@@ -30,6 +30,14 @@ tasks:
       - cmd: go fix ./...
       - cmd: gofumpt -w .
       - cmd: golangci-lint run
+  linter:
+    silent: false
+    desc: Lints the source code.
+    ignore_error: true
+    cmds:
+      - cmd: clear
+        platforms: [linux, darwin, freebsd]
+      - cmd: golangci-lint run
   nil:
     desc: 'Run the static analysis techniques to catch Nil dereferences.'
     cmds:

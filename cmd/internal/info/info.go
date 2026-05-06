@@ -29,19 +29,20 @@ var (
 
 // Run parses the arguments supplied with the info command.
 func Run(w io.Writer, cmd *cobra.Command, args ...string) error {
+	const name = "cmd info run"
 	if w == nil {
 		w = io.Discard
 	}
 	// piped input from other programs and then exit
 	ok, err := fsys.IsPipe()
 	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", name, err)
 	}
 	if ok {
 		return Pipe(w)
 	}
 	if err := flag.Help(cmd, args...); err != nil {
-		return err
+		return fmt.Errorf("%s: %w", name, err)
 	}
 	for _, arg := range args {
 		_, err := os.Stat(arg)
@@ -66,7 +67,7 @@ func Run(w io.Writer, cmd *cobra.Command, args ...string) error {
 			if err := cmd.Usage(); err != nil {
 				return fmt.Errorf("%w: %w", ErrUsage, err)
 			}
-			return err
+			return fmt.Errorf("%s: %w", name, err)
 		}
 	}
 	return nil

@@ -62,7 +62,7 @@ func (z *Zip) Create() error {
 		return nil
 	}
 	if err := filepath.Walk(z.Root, walker); err != nil {
-		return err
+		return fmt.Errorf("zip create: %w", err)
 	}
 	return files.Zip(z.Writer, z.Name, z.Comment, z.Overwrite)
 }
@@ -136,7 +136,7 @@ func InsertZip(z *zip.Writer, name string) error {
 	}
 	s, err := os.Stat(name)
 	if err != nil {
-		return err
+		return fmt.Errorf("insert zip stat: %w", err)
 	}
 	fh, err := zip.FileInfoHeader(s)
 	if err != nil {
@@ -169,7 +169,7 @@ func UniqueName(name string) (string, error) {
 		return name, nil
 	}
 	if err != nil {
-		return name, err
+		return name, fmt.Errorf("zip unique name: %w", err)
 	}
 	if s.IsDir() {
 		return "", fmt.Errorf("%q: %w", name, ErrName)

@@ -36,7 +36,7 @@ func ReadAllBytes(name string) ([]byte, error) {
 		return nil, fmt.Errorf("%w: %s", ErrNotFound, name)
 	}
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fsys read all bytes: %w", err)
 	}
 	defer file.Close()
 	// bufio is the most performant way to scan streamed data
@@ -65,7 +65,7 @@ func ReadChunk(name string, chars int) ([]byte, error) {
 		return nil, fmt.Errorf("%w: %s", ErrNotFound, name)
 	}
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fsys read chunk: %w", err)
 	}
 	defer file.Close()
 	buf := []byte{}
@@ -96,7 +96,7 @@ func readLineBreaks(name string, cols bool) (int, error) {
 		return -1, fmt.Errorf("%w: %s", ErrNotFound, name)
 	}
 	if err != nil {
-		return -1, err
+		return -1, fmt.Errorf("fsys read line breaks: %w", err)
 	}
 	defer file.Close()
 	lb, err := ReadLineBreaks(name)
@@ -124,7 +124,7 @@ func ReadControls(name string) (int, error) {
 		return -1, fmt.Errorf("%w: %s", ErrNotFound, name)
 	}
 	if err != nil {
-		return -1, err
+		return -1, fmt.Errorf("fsys read controls: %w", err)
 	}
 	defer file.Close()
 	cnt, err := Controls(file)
@@ -142,7 +142,7 @@ func ReadLine(name string, sys nl.System) (string, error) {
 		return "", fmt.Errorf("%w: %s", ErrNotFound, name)
 	}
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("fsys read line: %w", err)
 	}
 	defer file.Close()
 	// bufio is the most performant
@@ -172,7 +172,7 @@ func ReadLineBreaks(name string) ([2]rune, error) {
 		return z, fmt.Errorf("%w: %s", ErrNotFound, name)
 	}
 	if err != nil {
-		return z, err
+		return z, fmt.Errorf("fsys read line breaks: %w", err)
 	}
 	defer file.Close()
 	b, err := io.ReadAll(file)
@@ -207,7 +207,7 @@ func ReadRunes(name string) (int, error) {
 		return -1, fmt.Errorf("%w: %s", ErrNotFound, name)
 	}
 	if err != nil {
-		return -1, err
+		return -1, fmt.Errorf("fsys read runes: %w", err)
 	}
 	defer file.Close()
 	cnt, err := Runes(file)
@@ -224,7 +224,7 @@ func ReadTail(name string, offset int) ([]byte, error) {
 		return nil, fmt.Errorf("%w: %s", ErrNotFound, name)
 	}
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fsys read tail: %w", err)
 	}
 	defer file.Close()
 	total, err := ReadRunes(name)
@@ -260,7 +260,7 @@ func ReadWords(name string) (int, error) {
 		return -1, fmt.Errorf("%w: %s", ErrNotFound, name)
 	}
 	if err != nil {
-		return -1, err
+		return -1, fmt.Errorf("fsys read words: %w", err)
 	}
 	defer file.Close()
 	cnt, err := Words(file)

@@ -245,7 +245,7 @@ func Table(w io.Writer, names ...string) error {
 	// iterate through the tables
 	for _, name := range names {
 		if err := table.WithLipgloss(w, name); err != nil {
-			return err
+			return fmt.Errorf("cmd list table: %w", err)
 		}
 		fmt.Fprintln(w)
 	}

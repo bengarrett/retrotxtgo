@@ -190,6 +190,7 @@ func TestANSI(t *testing.T) {
 }
 
 func TestEncoder(t *testing.T) { //nolint:funlen
+	t.Parallel()
 	tests := []struct {
 		name    string
 		want    encoding.Encoding
@@ -294,6 +295,7 @@ func TestRunesKOI8(t *testing.T) {
 }
 
 func TestRunesLatin(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name    string
 		text    string
@@ -416,6 +418,7 @@ func TestRunesWindows(t *testing.T) {
 }
 
 func TestRunesEBCDIC(t *testing.T) {
+	t.Parallel()
 	// EBCDIC codepages are not compatible with ISO/IEC 646 (ASCII)
 	// so a number of these tests either convert input UTF-8 text into CP037
 	tx, err := charmap.CodePage037.NewEncoder().Bytes([]byte("ring my "))
@@ -533,6 +536,7 @@ func TestHumanize(t *testing.T) {
 }
 
 func Test_Shorten(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		name string
 	}
@@ -588,6 +592,7 @@ func TestConvert_swaps(t *testing.T) {
 }
 
 func Test_picture(t *testing.T) {
+	t.Parallel()
 	const err = 65533
 	type args struct {
 		b byte
@@ -645,6 +650,7 @@ func TestConvert_skipIgnores(t *testing.T) {
 }
 
 func Test_EncodeAlias(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		want string

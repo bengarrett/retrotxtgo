@@ -84,6 +84,7 @@ func TestBatchConvertSequential(t *testing.T) {
 
 // Test BatchConvertOptimal.
 func TestBatchConvertOptimal(t *testing.T) {
+	t.Parallel()
 	cp437 := charmap.CodePage437
 	c := convert.Convert{}
 

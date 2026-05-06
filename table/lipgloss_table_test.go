@@ -8,6 +8,7 @@ import (
 )
 
 func TestLipglossTable(t *testing.T) {
+	t.Parallel()
 	testRows := []table.Row{
 		{Name: "IBM Code Page 437", Value: "cp437", Numeric: "437", Alias: "msdos"},
 		{Name: "* IBM Code Page 037", Value: "cp037", Numeric: "37", Alias: "ibm037"},
@@ -36,6 +37,7 @@ func TestLipglossTable(t *testing.T) {
 }
 
 func TestListLipgloss(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name     string
 		wantErr  bool
@@ -52,6 +54,7 @@ func TestListLipgloss(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			buf := new(bytes.Buffer)
 			err := table.List(buf)
 

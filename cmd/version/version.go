@@ -31,7 +31,7 @@ func Template(wr io.Writer) error {
 	}
 	tag, err := update.Check()
 	if err != nil {
-		return err
+		return fmt.Errorf("cmd version template: %w", err)
 	}
 	appDate := ""
 	if meta.App.Date != meta.Placeholder {
@@ -68,8 +68,10 @@ func Template(wr io.Writer) error {
 	// Apply border styling
 	styled := borderStyle.Render(content)
 
-	_, err = fmt.Fprint(wr, styled)
-	return err
+	if _, err := fmt.Fprint(wr, styled); err != nil {
+		return fmt.Errorf("cmd version template: %w", err)
+	}
+	return nil
 }
 
 // Self returns the path to the executable (this) program.

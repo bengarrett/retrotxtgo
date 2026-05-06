@@ -191,17 +191,24 @@ func (flag Flags) Open(conv *convert.Convert, name string) ([]rune, error) {
 }
 
 func (samp *Sample) transform(conv *convert.Convert, b ...byte) ([]rune, error) {
+	const name = "transform sample"
+	result := func(r []rune, err error) ([]rune, error) {
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", name, err)
+		}
+		return r, nil
+	}
 	switch samp.Convert {
 	case Ansi:
-		return conv.ANSI(b...)
+		return result(conv.ANSI(b...))
 	case Ctrl:
-		return conv.Chars(b...)
+		return result(conv.Chars(b...))
 	case Dump:
-		return conv.Dump(b...)
+		return result(conv.Dump(b...))
 	case Text:
-		return conv.Text(b...)
+		return result(conv.Text(b...))
 	default:
-		return nil, fmt.Errorf("transform sample %v: %w", samp.Convert, ErrConvert)
+		return nil, fmt.Errorf("%s %v: %w", name, samp.Convert, ErrConvert)
 	}
 }
 

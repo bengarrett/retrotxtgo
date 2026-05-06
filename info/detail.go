@@ -137,14 +137,15 @@ func lang() language.Tag {
 
 // Ctrls counts the number of ANSI escape controls in the named file.
 func (d *Detail) Ctrls(name string) error {
+	const n = "info detail ctrls"
 	r, err := os.Open(name)
 	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", n, err)
 	}
 	defer r.Close()
 	cnt, err := fsys.Controls(r)
 	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", n, err)
 	}
 	d.Count.Controls = cnt
 	return nil
@@ -307,7 +308,7 @@ func (d *Detail) Read(name string) error {
 	// Read file content
 	p, err := fsys.ReadAllBytes(name)
 	if err != nil {
-		return err
+		return fmt.Errorf("info detail read: %w", err)
 	}
 	return d.Parse(name, p...)
 }
@@ -332,12 +333,12 @@ func ValidText(mime string) bool {
 func (d *Detail) Len(name string) error {
 	r, err := os.Open(name)
 	if err != nil {
-		return err
+		return fmt.Errorf("info detail len: %w", err)
 	}
 	defer r.Close()
 	w, err := fsys.Columns(r, d.LineBreak.Decimal)
 	if err != nil {
-		return err
+		return fmt.Errorf("info detail len: %w", err)
 	}
 	if w < 0 {
 		w = d.Count.Chars
@@ -348,19 +349,20 @@ func (d *Detail) Len(name string) error {
 
 // Words counts the number of words used in the named file.
 func (d *Detail) Words(name string) error {
+	const n = "info detail words"
 	r, err := os.Open(name)
 	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", n, err)
 	}
 	defer r.Close()
 	switch d.LineBreak.Decimal {
 	case [2]rune{nl.NL}, [2]rune{nl.NEL}:
 		if d.Count.Words, err = fsys.WordsEBCDIC(r); err != nil {
-			return err
+			return fmt.Errorf("%s: %w", n, err)
 		}
 	default:
 		if d.Count.Words, err = fsys.Words(r); err != nil {
-			return err
+			return fmt.Errorf("%s: %w", n, err)
 		}
 	}
 	return nil

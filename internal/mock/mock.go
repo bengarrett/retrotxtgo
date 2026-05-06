@@ -27,14 +27,15 @@ const (
 
 // Input returns a file pointer to a temporary file containing the input string.
 func Input(input string) (*os.File, error) {
+	const name = "mock input"
 	s := []byte(input)
 	r, w, err := os.Pipe()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%s: %w", name, err)
 	}
 	defer w.Close()
 	if _, err = w.Write(s); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%s: %w", name, err)
 	}
 	return r, nil
 }

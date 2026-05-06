@@ -156,7 +156,7 @@ func (c *Convert) Transform() error {
 	t := transform.NewWriter(b, c.Input.Encoding.NewDecoder())
 	defer t.Close()
 	if _, err := t.Write(c.Input.Input); err != nil {
-		return err
+		return fmt.Errorf("convert transform: %w", err)
 	}
 	// Use pool for rune allocation
 	buf := getRuneBuffer()
@@ -190,7 +190,7 @@ func (c *Convert) FixJISTable() {
 func decode(e encoding.Encoding, b ...byte) ([]rune, error) {
 	p, err := e.NewDecoder().Bytes(b)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("decode bytes to utf-8: %w", err)
 	}
 	return bytes.Runes(p), nil
 }

@@ -63,7 +63,7 @@ func Check() (string, error) {
 	etag, tag := cache.Etag, cache.Version
 	c, data, err := online.Endpoint(online.ReleaseAPI, etag)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("cmd update check: %w", err)
 	}
 	if !c {
 		tag = fmt.Sprint(data["tag_name"])

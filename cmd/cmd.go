@@ -84,7 +84,7 @@ func Execute() error {
 	Cmd.Version = meta.String()
 	s := strings.Builder{}
 	if err := version.Template(&s); err != nil {
-		return err
+		return fmt.Errorf("cmd execute: %w", err)
 	}
 	Cmd.SetVersionTemplate(s.String())
 	if errE := Cmd.Execute(); errE != nil {
