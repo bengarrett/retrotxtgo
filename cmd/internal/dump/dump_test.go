@@ -1,5 +1,9 @@
 package dump_test
 
+// The dump package has complex dependencies that make it difficult to test
+// without extensive mocking. For now, we'll just test the basic error handling.
+// This test is skipped to avoid panics from missing command configuration.
+
 import (
 	"errors"
 	"testing"
@@ -15,21 +19,10 @@ func TestErrPipeRead(t *testing.T) {
 
 func TestPipe(t *testing.T) {
 	t.Parallel()
-
-	// Test with nil writer - should not panic (uses io.Discard)
-	// Note: This will still try to read from stdin and fail, but shouldn't panic
+	// NOTE: This will try to read from stdin and fail, but it should not panic
 	err := dump.Pipe(nil)
-	// We expect this to fail because there's no actual pipe
+	// should fail because there's no actual pipe
 	be.True(t, err != nil)
-	// The error should be related to pipe reading
+	// error should be related to pipe reading
 	be.True(t, errors.Is(err, dump.ErrPipeRead))
-}
-
-func TestRun(t *testing.T) {
-	t.Parallel()
-
-	// The dump package has complex dependencies that make it difficult to test
-	// without extensive mocking. For now, we'll just test the basic error handling.
-	// This test is skipped to avoid panics from missing command configuration.
-	t.Skip("Skipping dump.Run test due to complex dependencies")
 }

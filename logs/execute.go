@@ -38,7 +38,8 @@ func FatalSubCmd(usage string, args ...string) {
 	args = append(args, usage)
 	var err error
 	if len(args) > 0 {
-		err = fmt.Errorf("%w: %s", ErrCmd, args[0])
+		const format = "%w: %s"
+		err = fmt.Errorf(format, ErrCmd, args[0])
 	}
 	if s := Execute(err, false, args...); s != "" {
 		fmt.Fprintln(os.Stderr, s)
@@ -48,13 +49,14 @@ func FatalSubCmd(usage string, args ...string) {
 
 // Execute is the error handler for command flags and arguments.
 func Execute(err error, test bool, args ...string) string {
+	const format = "%s: %w"
 	if err == nil {
 		return ""
 	}
 	words := strings.Split(fmt.Sprintf("%s", err), " ")
 	argsCnt, wordCnt := len(args), len(words)
 	if wordCnt < minWords {
-		e := fmt.Errorf("%s: %w", exec, ErrShort)
+		e := fmt.Errorf(format, exec, ErrShort)
 		if test {
 			return e.Error()
 		}
@@ -113,6 +115,7 @@ func Invalid(err error, mark, name string, words ...string) string {
 }
 
 func unknown(name string, words ...string) string {
+	const format = "%w: %s"
 	const req = 2
 	if len(words) < req {
 		return ""
@@ -126,7 +129,7 @@ func unknown(name string, words ...string) string {
 	problem := strings.Join(words[0:2], " ")
 	switch problem {
 	case unknownCmd: // retrotxt foo
-		return Hint(fmt.Errorf("%w: %s", ErrCmd, words[2]), "--help")
+		return Hint(fmt.Errorf(format, ErrCmd, words[2]), "--help")
 	case unknownFlag: // retrotxt --foo
 		mark := words[2]
 		if mark == name {

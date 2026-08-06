@@ -2,6 +2,7 @@
 package version
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -20,7 +21,8 @@ import (
 )
 
 // Template writes the application version, copyright and build variables.
-func Template(wr io.Writer) error {
+func Template(ctx context.Context, wr io.Writer) error {
+	const format = "cmd version template: %w"
 	if wr == nil {
 		wr = io.Discard
 	}
@@ -29,9 +31,9 @@ func Template(wr io.Writer) error {
 	if err != nil {
 		exe = err.Error()
 	}
-	tag, err := update.Check()
+	tag, err := update.Check(ctx)
 	if err != nil {
-		return fmt.Errorf("cmd version template: %w", err)
+		return fmt.Errorf(format, err)
 	}
 	appDate := ""
 	if meta.App.Date != meta.Placeholder {
@@ -69,22 +71,24 @@ func Template(wr io.Writer) error {
 	styled := borderStyle.Render(content)
 
 	if _, err := fmt.Fprint(wr, styled); err != nil {
-		return fmt.Errorf("cmd version template: %w", err)
+		return fmt.Errorf(format, err)
 	}
 	return nil
 }
 
 // Self returns the path to the executable (this) program.
 func Self() (string, error) {
+	const format = "self error: %w"
 	exe, err := os.Executable()
 	if err != nil {
-		return "", fmt.Errorf("self error: %w", err)
+		return "", fmt.Errorf(format, err)
 	}
 	return exe, nil
 }
 
 // Terminal attempts to determine the host shell environment.
 func Terminal() string {
+	const format = "%s (%dx%d)"
 	const win = "windows"
 	unknown := func() string {
 		if runtime.GOOS == win {
@@ -105,14 +109,14 @@ func Terminal() string {
 		if err != nil {
 			return s
 		}
-		return fmt.Sprintf("%s (%dx%d)", s, w, h)
+		return fmt.Sprintf(format, s, w, h)
 	}
 	if isatty.IsCygwinTerminal(os.Stdout.Fd()) {
 		const s = "Cygwin"
 		if err != nil {
 			return s
 		}
-		return fmt.Sprintf("%s (%dx%d)", s, w, h)
+		return fmt.Sprintf(format, s, w, h)
 	}
 	_, err = os.Stdout.Write([]byte("\x1b[c"))
 	if err != nil {
@@ -128,7 +132,7 @@ func Terminal() string {
 		return unknown()
 	}
 	if n > 0 {
-		return fmt.Sprintf("VT100 compatible (%dx%d)", w, h)
+		return fmt.Sprintf(format, "VT100 compatible", w, h)
 	}
 	return unknown()
 }

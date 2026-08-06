@@ -21,28 +21,28 @@ var (
 )
 
 // Info parses the named file and writes the details in a formal syntax.
-func Info(w io.Writer, name, format string, chksums bool) error {
+func Info(w io.Writer, name, formal string, chksums bool) error {
+	const format = "info on %s failed: %w"
 	if w == nil {
 		w = io.Discard
 	}
-	failure := fmt.Sprintf("info on %s failed", name)
 	if name == "" {
 		return ErrName
 	}
-	f, err := output(format)
+	f, err := output(formal)
 	if err != nil {
 		return err
 	}
 	s, err := os.Stat(name)
 	if os.IsNotExist(err) {
-		return fmt.Errorf("%s: %w", failure, err)
+		return fmt.Errorf(format, name, err)
 	}
 	if err != nil {
-		return fmt.Errorf("%s: %w", failure, err)
+		return fmt.Errorf(format, name, err)
 	}
 	if !s.IsDir() {
 		if err := Marshal(w, name, chksums, f); err != nil {
-			return fmt.Errorf("%s: %w", failure, err)
+			return fmt.Errorf(format, name, err)
 		}
 		return nil
 	}
@@ -50,7 +50,8 @@ func Info(w io.Writer, name, format string, chksums bool) error {
 	err = godirwalk.Walk(name, &godirwalk.Options{
 		Callback: func(osPathname string, de *godirwalk.Dirent) error {
 			if skip, err := de.IsDirOrSymlinkToDir(); err != nil {
-				return fmt.Errorf("info walker: %w", err)
+				const format = "info walker: %w"
+				return fmt.Errorf(format, err)
 			} else if skip {
 				return nil
 			}
@@ -62,7 +63,8 @@ func Info(w io.Writer, name, format string, chksums bool) error {
 		Unsorted: true, // set true for faster yet non-deterministic enumeration
 	})
 	if err != nil {
-		return fmt.Errorf("info could not walk directory: %w", err)
+		const format = "info could not walk directory: %w"
+		return fmt.Errorf(format, err)
 	}
 	return nil
 }
@@ -81,11 +83,14 @@ func output(arg string) (Format, error) {
 	case "xml", "x":
 		return XML, nil
 	}
-	return -1, fmt.Errorf("%w: %s", ErrFmt, arg)
+	const invalid = -1
+	const format = "%w: %s"
+	return invalid, fmt.Errorf(format, ErrFmt, arg)
 }
 
 // Marshal and write the metadata and system details of a named file.
 func Marshal(w io.Writer, name string, chksums bool, f Format) error {
+	const format = "info marsal: %w"
 	if w == nil {
 		w = io.Discard
 	}
@@ -98,7 +103,7 @@ func Marshal(w io.Writer, name string, chksums bool, f Format) error {
 		var err error
 		// get the required line breaks chars before running the multiple tasks
 		if d.LineBreak.Decimal, err = fsys.ReadLineBreaks(name); err != nil {
-			return fmt.Errorf("info marshal: %w", err)
+			return fmt.Errorf(format, err)
 		}
 		d.LineBreak.Find(d.LineBreak.Decimal)
 		g := errgroup.Group{}
@@ -112,7 +117,7 @@ func Marshal(w io.Writer, name string, chksums bool, f Format) error {
 		g.Go(func() error {
 			i, err := d.LineBreak.Total(name)
 			if err != nil {
-				return fmt.Errorf("info marshal: %w", err)
+				return fmt.Errorf(format, err)
 			}
 			mu.Lock()
 			d.Lines = i
@@ -123,7 +128,7 @@ func Marshal(w io.Writer, name string, chksums bool, f Format) error {
 			return d.Words(name)
 		})
 		if err := g.Wait(); err != nil {
-			return fmt.Errorf("info marshal: %w", err)
+			return fmt.Errorf(format, err)
 		}
 		d.MimeUnknown()
 	}
@@ -135,13 +140,13 @@ func Marshal(w io.Writer, name string, chksums bool, f Format) error {
 }
 
 // Stream parses piped data and writes out the details in a specific syntax.
-func Stream(w io.Writer, format string, data ...byte) error { //nolint:funlen
-	const name = "info stream"
+func Stream(w io.Writer, syntax string, data ...byte) error { //nolint:funlen
+	const format = "info stream: %w"
 	if w == nil {
 		w = io.Discard
 	}
 	var d Detail
-	f, e := output(format)
+	f, e := output(syntax)
 	if e != nil {
 		return e
 	}
@@ -155,50 +160,52 @@ func Stream(w io.Writer, format string, data ...byte) error { //nolint:funlen
 	g := errgroup.Group{}
 	var mu sync.Mutex
 	g.Go(func() error {
-		val, err := fsys.Controls(bytes.NewReader(data))
+		controls, err := fsys.Controls(bytes.NewReader(data))
 		if err != nil {
-			return fmt.Errorf("%s: %w", name, err)
+			return fmt.Errorf(format, err)
 		}
 		mu.Lock()
-		d.Count.Controls = val
+		d.Count.Controls = controls
 		mu.Unlock()
 		return nil
 	})
 	g.Go(func() error {
-		val, err := nl.Lines(bytes.NewReader(data), d.LineBreak.Decimal)
+		lb := d.LineBreak.Decimal
+		lines, err := nl.Lines(bytes.NewReader(data), lb)
 		if err != nil {
-			return fmt.Errorf("%s: %w", name, err)
+			return fmt.Errorf(format, err)
 		}
 		mu.Lock()
-		d.Lines = val
+		d.Lines = lines
 		mu.Unlock()
 		return nil
 	})
 	g.Go(func() error {
-		val, err := fsys.Columns(bytes.NewReader(data), d.LineBreak.Decimal)
+		lb := d.LineBreak.Decimal
+		width, err := fsys.Columns(bytes.NewReader(data), lb)
 		if err != nil {
-			return fmt.Errorf("%s: %w", name, err)
+			return fmt.Errorf(format, err)
 		}
-		if val < 0 {
-			val = d.Count.Chars
+		if width < 0 {
+			width = d.Count.Chars
 		}
 		mu.Lock()
-		d.Width = val
+		d.Width = width
 		mu.Unlock()
 		return nil
 	})
 	g.Go(func() error {
-		val, err := fsys.Words(bytes.NewReader(data))
+		words, err := fsys.Words(bytes.NewReader(data))
 		if err != nil {
-			return fmt.Errorf("%s: %w", name, err)
+			return fmt.Errorf(format, err)
 		}
 		mu.Lock()
-		d.Count.Words = val
+		d.Count.Words = words
 		mu.Unlock()
 		return nil
 	})
 	if err := g.Wait(); err != nil {
-		return fmt.Errorf("%s: %w", name, err)
+		return fmt.Errorf(format, err)
 	}
 	d.MimeUnknown()
 	return marshall(d, w, f)

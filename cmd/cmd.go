@@ -2,6 +2,7 @@
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -69,7 +70,8 @@ Features:
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() error {
+func Execute(ctx context.Context) error {
+	const format = "cmd execute: %w"
 	// disable the default "completion" command.
 	Cmd.CompletionOptions.DisableDefaultCmd = true
 	// hide the cobra introduced "help" command.
@@ -83,8 +85,8 @@ func Execute() error {
 	// build the version flag template.
 	Cmd.Version = meta.String()
 	s := strings.Builder{}
-	if err := version.Template(&s); err != nil {
-		return fmt.Errorf("cmd execute: %w", err)
+	if err := version.Template(ctx, &s); err != nil {
+		return fmt.Errorf(format, err)
 	}
 	Cmd.SetVersionTemplate(s.String())
 	if errE := Cmd.Execute(); errE != nil {

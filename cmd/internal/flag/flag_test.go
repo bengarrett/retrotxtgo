@@ -38,7 +38,6 @@ func TestInputOriginal(t *testing.T) {
 	be.Err(t, err, nil)
 }
 
-// Test Args function with basic scenarios.
 func TestArgs(t *testing.T) {
 	t.Parallel()
 
@@ -46,7 +45,6 @@ func TestArgs(t *testing.T) {
 	// without extensive mocking. For now, we'll test the basic functionality
 	// that doesn't cause panics.
 
-	// Test View function (safe to test)
 	view := flag.View()
 	be.Equal(t, view.Input, "CP437")
 	be.True(t, len(view.Controls) > 0)
@@ -55,7 +53,6 @@ func TestArgs(t *testing.T) {
 	be.Equal(t, view.Original, false)
 }
 
-// Test View function.
 func TestView(t *testing.T) {
 	t.Parallel()
 

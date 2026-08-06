@@ -58,9 +58,10 @@ func (lb *LineBreak) Find(r [2]rune) {
 // Total counts the number of lines in the named file
 // based on the provided line break sequence.
 func (lb *LineBreak) Total(name string) (int, error) {
+	const format = "new line break total: %w"
 	r, err := os.Open(name)
 	if err != nil {
-		return 0, fmt.Errorf("new line break total: %w", err)
+		return 0, fmt.Errorf(format, err)
 	}
 	defer r.Close()
 	lines, err := Lines(r, lb.Decimal)
@@ -74,6 +75,7 @@ func (lb *LineBreak) Total(name string) (int, error) {
 // The lb rune pair is the line break sequence.
 // If the line break only has one rune, then the second rune should be 0.
 func Lines(r io.Reader, lb [2]rune) (int, error) {
+	const format = "lines could not read buffer: %w"
 	if r == nil {
 		return 0, ErrReader
 	}
@@ -82,7 +84,7 @@ func Lines(r io.Reader, lb [2]rune) (int, error) {
 	for {
 		size, err := r.Read(p)
 		if err != nil && err != io.EOF {
-			return 0, fmt.Errorf("lines could not read buffer: %w", err)
+			return 0, fmt.Errorf(format, err)
 		}
 		pos := 0
 		for {

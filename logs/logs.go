@@ -15,13 +15,14 @@ const OSErr = 1 // OSErr is the operating system exit code for a program error.
 
 // Fatal prints the error to stderr and exits.
 func Fatal(err error) {
+	const format = "error type: %T\tmsg: %v\n"
 	if err == nil {
 		return
 	}
 	const panicing = false
 	switch panicing {
 	case true:
-		log.Printf("error type: %T\tmsg: %v\n", err, err)
+		log.Printf(format, err, err)
 		log.Panic(err)
 	default:
 		fmt.Fprintln(os.Stderr, Sprint(err))
@@ -38,14 +39,15 @@ func FatalS(err, wrap error, s string) {
 // Hint returns a formatted error with a usage suggestion or hint.
 // If s is empty then just the error is formatted.
 func Hint(err error, s string) string {
+	const format = "%s\n run %s"
 	if err == nil {
 		return ""
 	}
 	if s == "" {
 		return Sprint(err)
 	}
-	return fmt.Sprintf("%s\n run %s",
-		Sprint(err), term.Example(fmt.Sprintf("%s %s", meta.Bin, s)))
+	hint := fmt.Sprintf("%s %s", meta.Bin, s)
+	return fmt.Sprintf(format, Sprint(err), term.Example(hint))
 }
 
 // Sprint formats and returns the error.
@@ -65,15 +67,16 @@ func Sprint(err error) string {
 
 // SprintCmd returns the command does not exist.
 func SprintCmd(err error, cmd string) string {
+	const format = "%s the command %s does not exist, %s"
 	if cmd == "" || err == nil {
 		return ""
 	}
-	return fmt.Sprintf("%s the command %s does not exist, %s",
-		term.Alert(), cmd, err)
+	return fmt.Sprintf(format, term.Alert(), cmd, err)
 }
 
 // SprintFlag returns a problem with the flag.
 func SprintFlag(err error, cmd, flag string) string {
+	const format = "%s with the %s %s%s flag, %s"
 	if cmd == "" || err == nil {
 		return ""
 	}
@@ -83,16 +86,17 @@ func SprintFlag(err error, cmd, flag string) string {
 	} else if len(flag) == 1 {
 		toggle = "-"
 	}
-	return fmt.Sprintf("%s with the %s %s%s flag, %s",
-		alert, cmd, toggle, flag, err)
+	return fmt.Sprintf(format, alert, cmd, toggle, flag, err)
 }
 
 // SprintS highlights the string and errors then exits.
 func SprintS(err, wrap error, s string) string {
+	const format = "%s %s %q: %s"
 	if s == "" || err == nil || wrap == nil {
 		return ""
 	}
-	return fmt.Sprintf("%s %s %q: %s",
-		term.Alert(), term.Fuzzy(fmt.Sprintf("%v", err)), s,
+	return fmt.Sprintf(format,
+		term.Alert(),
+		term.Fuzzy(fmt.Sprintf("%v", err)), s,
 		term.Fuzzy(fmt.Sprintf("%v", wrap)))
 }

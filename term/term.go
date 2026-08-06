@@ -89,7 +89,8 @@ func BorderString(s string) string {
 	scanner.Split(bufio.ScanLines)
 
 	var result strings.Builder
-	result.WriteString("┌" + strings.Repeat("─", maxLen) + "┐\n")
+	ws := "┌" + strings.Repeat("─", maxLen) + "┐\n"
+	result.WriteString(ws)
 	for scanner.Scan() {
 		l := utf8.RuneCountInString(scanner.Text())
 		lp := ((maxLen - l) / split)
@@ -100,7 +101,8 @@ func BorderString(s string) string {
 		}
 		fmt.Fprintf(&result, "│%s%s%s│\n", strings.Repeat(" ", lp), scanner.Text(), strings.Repeat(" ", rp))
 	}
-	result.WriteString("└" + strings.Repeat("─", maxLen) + "┘")
+	ws = "└" + strings.Repeat("─", maxLen) + "┘"
+	result.WriteString(ws)
 	return result.String()
 }
 
@@ -192,23 +194,25 @@ func Term(colorEnv, env string) string {
 
 // UnderlineChar uses ANSI to underline the first character of a string.
 func UnderlineChar(s string) (string, error) {
+	const format = "underline char %s: %w"
 	if s == "" {
 		return "", nil
 	}
 	if !utf8.ValidString(s) {
-		return "", fmt.Errorf("underlinechar %q: %w", s, ErrRune)
+		return "", fmt.Errorf(format, s, ErrRune)
 	}
 	if !color.Enable {
 		return s, nil
 	}
 	b := &strings.Builder{}
 	r, _ := utf8.DecodeRuneInString(s)
-	t, err := template.New("underline").Parse("{{define \"TEXT\"}}\033[0m\033[4m{{.}}\033[0m{{end}}")
+	text := "{{define \"TEXT\"}}\033[0m\033[4m{{.}}\033[0m{{end}}"
+	t, err := template.New("underline").Parse(text)
 	if err != nil {
-		return "", fmt.Errorf("underlinechar new template: %w", err)
+		return "", fmt.Errorf(format, "new template", err)
 	}
 	if err := t.ExecuteTemplate(b, "TEXT", string(r)); err != nil {
-		return "", fmt.Errorf("underlinechar execute template: %w", err)
+		return "", fmt.Errorf(format, "execute", err)
 	}
 	return b.String(), nil
 }
@@ -294,7 +298,8 @@ func Options(w io.Writer, s string, shorthand, flag bool, opts ...string) {
 	}
 	if flag {
 		fmt.Fprintln(w, s)
-		fmt.Fprintf(w, "flag options: %s", color.Info.Sprint(keys))
+		const format = "flag options: %s"
+		fmt.Fprintf(w, format, color.Info.Sprint(keys))
 		return
 	}
 	fmt.Fprintln(w, s+".")

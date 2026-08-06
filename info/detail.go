@@ -137,56 +137,58 @@ func lang() language.Tag {
 
 // Ctrls counts the number of ANSI escape controls in the named file.
 func (d *Detail) Ctrls(name string) error {
-	const n = "info detail ctrls"
+	const format = "info detail ctrls: %w"
 	r, err := os.Open(name)
 	if err != nil {
-		return fmt.Errorf("%s: %w", n, err)
+		return fmt.Errorf(format, err)
 	}
 	defer r.Close()
 	cnt, err := fsys.Controls(r)
 	if err != nil {
-		return fmt.Errorf("%s: %w", n, err)
+		return fmt.Errorf(format, err)
 	}
 	d.Count.Controls = cnt
 	return nil
 }
 
 // Marshal writes the Detail data in a given format syntax.
-func (d *Detail) Marshal(w io.Writer, f Format) error {
+func (d *Detail) Marshal(w io.Writer, f Format) (err error) {
+	const format = "detail marshal %v: %w"
 	if w == nil {
 		w = io.Discard
 	}
 	const jsTab = "    "
 	const xmlTab = "\t"
-	var err error
 	switch f {
 	case ColorText:
-		d.marshalAsTree(w, true)
+		const useColors = true
+		d.marshalAsTree(w, useColors)
 	case PlainText:
-		d.marshalAsTree(w, false)
+		const useColors = false
+		d.marshalAsTree(w, useColors)
 	case JSON:
-		b, errj := json.MarshalIndent(d, "", jsTab)
-		if errj != nil {
-			return fmt.Errorf("detail json indent marshal: %w", errj)
+		p, jErr := json.MarshalIndent(d, "", jsTab)
+		if jErr != nil {
+			return fmt.Errorf(format, "json indent", jErr)
 		}
-		_, err = w.Write(b)
+		_, err = w.Write(p)
 	case JSONMin:
-		b, errj := json.Marshal(d)
-		if errj != nil {
-			return fmt.Errorf("detail json marshal: %w", errj)
+		p, jErr := json.Marshal(d)
+		if jErr != nil {
+			return fmt.Errorf(format, "json", jErr)
 		}
-		_, err = w.Write(b)
+		_, err = w.Write(p)
 	case XML:
-		b, errj := xml.MarshalIndent(d, "", xmlTab)
-		if errj != nil {
-			return fmt.Errorf("detail xml marshal: %w", errj)
+		p, jErr := xml.MarshalIndent(d, "", xmlTab)
+		if jErr != nil {
+			return fmt.Errorf(format, "xml", jErr)
 		}
-		_, err = w.Write(b)
+		_, err = w.Write(p)
 	default:
-		return fmt.Errorf("detail marshal %v: %w", f, ErrFmt)
+		return fmt.Errorf(format, f, ErrFmt)
 	}
 	if err != nil {
-		return fmt.Errorf("detail marshal %v: %w", f, err)
+		return fmt.Errorf(format, f, err)
 	}
 	return nil
 }
@@ -214,7 +216,7 @@ func (d *Detail) MimeUnknown() {
 }
 
 // Parse the file and the raw data content.
-func (d *Detail) Parse(name string, data ...byte) error {
+func (d *Detail) Parse(name string, data ...byte) error { //nolint:funlen
 	routines := 5
 	if d.LegacySums {
 		routines += 3
@@ -238,15 +240,16 @@ func (d *Detail) Parse(name string, data ...byte) error {
 		d.input(len(data), stat)
 	}()
 	if d.LegacySums {
+		const base = 16
 		go func() {
 			defer wg.Done()
 			crc32sum := crc32.ChecksumIEEE(data)
-			d.Sums.CRC32 = strconv.FormatUint(uint64(crc32sum), 16)
+			d.Sums.CRC32 = strconv.FormatUint(uint64(crc32sum), base)
 		}()
 		go func() {
 			defer wg.Done()
 			crc64sum := crc64.Checksum(data, crc64.MakeTable(crc64.ECMA))
-			d.Sums.CRC64 = strconv.FormatUint(crc64sum, 16)
+			d.Sums.CRC64 = strconv.FormatUint(crc64sum, base)
 		}()
 		go func() {
 			defer wg.Done()
@@ -296,7 +299,8 @@ func unicode(uni bool, b ...byte) string {
 }
 
 func sauceDate(s string) string {
-	t, err := time.Parse("20060102", s) // CCYYMMDD
+	const layout = "20060102" // CCYYMMDD
+	t, err := time.Parse(layout, s)
 	if err != nil {
 		return ""
 	}
@@ -305,18 +309,19 @@ func sauceDate(s string) string {
 
 // Read and parse the named file and content.
 func (d *Detail) Read(name string) error {
-	// Read file content
+	const format = "info detail read: %w"
 	p, err := fsys.ReadAllBytes(name)
 	if err != nil {
-		return fmt.Errorf("info detail read: %w", err)
+		return fmt.Errorf(format, err)
 	}
 	return d.Parse(name, p...)
 }
 
 // ValidText reports whether the MIME content-type value is valid for text files.
 func ValidText(mime string) bool {
-	s := strings.Split(mime, "/")
 	const req = 2
+	const sep = "/"
+	s := strings.Split(mime, sep)
 	if len(s) != req {
 		return false
 	}
@@ -331,38 +336,40 @@ func ValidText(mime string) bool {
 
 // Len counts the number of characters used per line in the named file.
 func (d *Detail) Len(name string) error {
+	const format = "info detail len: %w"
 	r, err := os.Open(name)
 	if err != nil {
-		return fmt.Errorf("info detail len: %w", err)
+		return fmt.Errorf(format, err)
 	}
 	defer r.Close()
-	w, err := fsys.Columns(r, d.LineBreak.Decimal)
+	lb := d.LineBreak.Decimal
+	width, err := fsys.Columns(r, lb)
 	if err != nil {
-		return fmt.Errorf("info detail len: %w", err)
+		return fmt.Errorf(format, err)
 	}
-	if w < 0 {
-		w = d.Count.Chars
+	if width < 0 {
+		width = d.Count.Chars
 	}
-	d.Width = w
+	d.Width = width
 	return nil
 }
 
 // Words counts the number of words used in the named file.
 func (d *Detail) Words(name string) error {
-	const n = "info detail words"
+	const format = "info detail words: %w"
 	r, err := os.Open(name)
 	if err != nil {
-		return fmt.Errorf("%s: %w", n, err)
+		return fmt.Errorf(format, err)
 	}
 	defer r.Close()
 	switch d.LineBreak.Decimal {
 	case [2]rune{nl.NL}, [2]rune{nl.NEL}:
 		if d.Count.Words, err = fsys.WordsEBCDIC(r); err != nil {
-			return fmt.Errorf("%s: %w", n, err)
+			return fmt.Errorf(format, err)
 		}
 	default:
 		if d.Count.Words, err = fsys.Words(r); err != nil {
-			return fmt.Errorf("%s: %w", n, err)
+			return fmt.Errorf(format, err)
 		}
 	}
 	return nil
@@ -391,178 +398,203 @@ func (d *Detail) input(data int, stat fs.FileInfo) {
 	d.Modified.Epoch = time.Now().Unix()
 }
 
+func borderStyle(colors bool, strs ...string) string {
+	if !colors {
+		return ""
+	}
+	return lipgloss.NewStyle().
+		Border(lipgloss.NormalBorder()).
+		BorderForeground(lipgloss.Color("240")).Render(strs...)
+}
+
+func headerStyle(colors bool, strs ...string) string {
+	if !colors {
+		return ""
+	}
+	return lipgloss.NewStyle().
+		Bold(true).
+		Foreground(lipgloss.Color("231")).
+		Padding(0, 1).
+		Render(strs...)
+}
+
+func keyStyle(colors bool, s string) string {
+	if !colors {
+		return s
+	}
+	return lipgloss.NewStyle().
+		Foreground(lipgloss.Color("39")).
+		Render(s)
+}
+
+func valueStyle(colors bool, s string) string {
+	if !colors {
+		return s
+	}
+	return lipgloss.NewStyle().
+		Foreground(lipgloss.Color("252")).
+		Render(s)
+}
+
+func treeStyle(colors bool, s string) string {
+	if !colors {
+		return s
+	}
+	return lipgloss.NewStyle().
+		Foreground(lipgloss.Color("245")).
+		Render(s)
+}
+
+func treeHeader(w io.Writer, useColors bool) {
+	const head = "File Information"
+	if useColors {
+		header := headerStyle(useColors, head)
+		border := borderStyle(useColors, header)
+		fmt.Fprintln(w, border)
+		return
+	}
+	// plain text styles
+	const headerText = head
+	const boxWidth = len(headerText) + 2*headerPadding
+	fmt.Fprintln(w, "┌"+strings.Repeat("─", boxWidth)+"┐")
+	padding := (boxWidth - len(headerText)) / paddingDivisor
+	fmt.Fprintf(w, "│%s%s%s│\n",
+		strings.Repeat(" ", padding),
+		headerText,
+		strings.Repeat(" ", padding))
+	fmt.Fprintln(w, "└"+strings.Repeat("─", boxWidth)+"┘")
+}
+
+type items []item
+
+type item struct{ k, v string }
+
+type section struct {
+	name    string
+	items   items
+	display bool
+	isLast  bool
+}
+
+// treeSections to display.
+func treeSections(bi items, cs items, fm items, ci items, sm items) []section {
+	return []section{
+		{
+			"Basic Information",
+			bi, len(bi) > 0, false,
+		},
+		{
+			"Content Statistics",
+			cs, len(cs) > 0, false,
+		},
+		{
+			"File Metadata",
+			fm, len(fm) > 0, false,
+		},
+		{
+			"Checksums & Integrity",
+			ci, len(ci) > 0, false,
+		},
+		{
+			"SAUCE Metadata",
+			sm, len(sm) > 0, true,
+		},
+	}
+}
+
 // marshalAsTree returns the marshaled detail data using a tree-like structure.
 // This provides a more organized and visually appealing output format.
-func (d *Detail) marshalAsTree(w io.Writer, useColors bool) { //nolint:cyclop,funlen,gocognit
+func (d *Detail) marshalAsTree(w io.Writer, useColors bool) { //nolint:cyclop,funlen
 	if w == nil {
 		w = io.Discard
 	}
-
-	// Create styles based on whether we're using colors
-	var (
-		headerStyle func(string) string
-		keyStyle    func(string) string
-		valueStyle  func(string) string
-		treeStyle   func(string) string
-	)
-
-	if useColors {
-		// Color styles using lipgloss
-		borderStyle := lipgloss.NewStyle().
-			Border(lipgloss.NormalBorder()).
-			BorderForeground(lipgloss.Color("240"))
-
-		headerStyle = func(s string) string {
-			return lipgloss.NewStyle().
-				Bold(true).
-				Foreground(lipgloss.Color("231")).
-				Padding(0, 1).
-				Render(s)
-		}
-
-		keyStyle = func(s string) string {
-			return lipgloss.NewStyle().
-				Foreground(lipgloss.Color("39")).
-				Render(s)
-		}
-
-		valueStyle = func(s string) string {
-			return lipgloss.NewStyle().
-				Foreground(lipgloss.Color("252")).
-				Render(s)
-		}
-
-		treeStyle = func(s string) string {
-			return lipgloss.NewStyle().
-				Foreground(lipgloss.Color("245")).
-				Render(s)
-		}
-
-		// Create header with lipgloss box
-		header := headerStyle("File Information")
-		border := borderStyle.Render(header)
-		fmt.Fprintln(w, border)
-	} else {
-		// Plain text styles (no styling functions needed)
-		keyStyle = func(s string) string { return s }
-		valueStyle = func(s string) string { return s }
-		treeStyle = func(s string) string { return s }
-
-		// Create plain text box header
-		const headerText = "File Information"
-		const boxWidth = len(headerText) + 2*headerPadding
-		fmt.Fprintln(w, "┌"+strings.Repeat("─", boxWidth)+"┐")
-		padding := (boxWidth - len(headerText)) / paddingDivisor
-		fmt.Fprintf(w, "│%s%s%s│\n",
-			strings.Repeat(" ", padding),
-			headerText,
-			strings.Repeat(" ", padding))
-		fmt.Fprintln(w, "└"+strings.Repeat("─", boxWidth)+"┘")
-	}
-
+	treeHeader(w, useColors)
 	fmt.Fprintln(w)
 	fmt.Fprintln(w, d.Name)
-
+	// organize data into categories
 	data := d.marshalled()
-
-	// Organize data into categories
-	basicInfo := []struct{ k, v string }{}
-	contentStats := []struct{ k, v string }{}
-	fileMeta := []struct{ k, v string }{}
-	checksums := []struct{ k, v string }{}
-	sauceData := []struct{ k, v string }{}
-	comments := []struct{ k, v string }{}
+	bi := items{}
+	cs := items{}
+	fm := items{}
+	ck := items{}
+	sd := items{}
+	comments := items{}
 
 	for _, x := range data {
 		if !d.validate(x) || d.skip(x) {
 			continue
 		}
-
+		const noBreakSpace = "\u00A0"
 		switch x.k {
 		case "slug", "filename", "filetype", "Unicode", linebr:
-			basicInfo = append(basicInfo, x)
+			bi = append(bi, x)
 		case chars, words, "size", lines, width, ans:
-			contentStats = append(contentStats, x)
+			cs = append(cs, x)
 		case "modified", "media mime type":
-			fileMeta = append(fileMeta, x)
+			fm = append(fm, x)
 		case "SHA256 checksum", c64ecma, c32, m5:
-			checksums = append(checksums, x)
+			ck = append(ck, x)
 		case "title", "author", "group", "date", "original size", "file type", "data type",
 			desc, "character width", "number of lines", interp:
-			sauceData = append(sauceData, x)
+			sd = append(sd, x)
 		case cmmt:
 			comments = append(comments, x)
-		case "\u00A0": // noBreakSpace
+		case noBreakSpace:
 			comments = append(comments, x)
 		case zipComment:
-			// Handle separately
+			// handle separately
 		}
 	}
 
-	// Track which sections we've displayed
-	sections := []struct {
-		name    string
-		items   []struct{ k, v string }
-		display bool
-		isLast  bool
-	}{
-		{"Basic Information", basicInfo, len(basicInfo) > 0, false},
-		{"Content Statistics", contentStats, len(contentStats) > 0, false},
-		{"File Metadata", fileMeta, len(fileMeta) > 0, false},
-		{"Checksums & Integrity", checksums, len(checksums) > 0, false},
-		{"SAUCE Metadata", sauceData, len(sauceData) > 0, true},
-	}
-
-	// Display sections with tree structure
+	sections := treeSections(bi, cs, fm, ck, sd)
 	for _, section := range sections {
 		if !section.display {
 			continue
 		}
-
-		// Determine connector for section header
-		sectionConnector := treeCorner
+		// determine connector for section header
+		s := treeCorner
 		if section.isLast {
-			sectionConnector = treeLastCorner
+			s = treeLastCorner
 		}
-
-		fmt.Fprintf(w, "%s%s\n", treeStyle(sectionConnector), treeStyle(section.name))
-
-		// Display items in this section
+		const format = "%s%s\n"
+		fmt.Fprintf(w, format,
+			treeStyle(useColors, s),
+			treeStyle(useColors, section.name))
+		// display items in this section
 		for j, item := range section.items {
-			itemConnector := treeVertical
+			s := treeVertical
 			if section.isLast {
-				itemConnector = treeSpace
+				s = treeSpace
 			}
-
 			itemPrefix := treeCorner
 			if j == len(section.items)-1 {
 				itemPrefix = treeLastCorner
 			}
-
-			fmt.Fprintf(w, "%s%s%s: %s\n",
-				treeStyle(itemConnector),
-				treeStyle(itemPrefix),
-				keyStyle(item.k),
-				valueStyle(item.v))
+			const format = "%s%s%s: %s\n"
+			fmt.Fprintf(w, format,
+				treeStyle(useColors, s),
+				treeStyle(useColors, itemPrefix),
+				keyStyle(useColors, item.k),
+				valueStyle(useColors, item.v))
 		}
-
-		// Display SAUCE comments if this is the SAUCE section and we have comments
+		// SAUCE comments
 		if section.name == "SAUCE Metadata" && len(comments) > 0 {
-			commentConnector := "    "
-			if section.isLast {
-				commentConnector = "    "
-			}
-
-			fmt.Fprintf(w, "%s    └── Comments\n", treeStyle(commentConnector))
+			const count = 4
+			s := strings.Repeat(" ", count)
+			const format = "%s    └── Comments\n"
+			fmt.Fprintf(w, format, treeStyle(useColors, s))
 			for _, comment := range comments {
-				fmt.Fprintf(w, "%s        %s\n", treeStyle(commentConnector), valueStyle(comment.v))
+				const format = "%s        %s\n"
+				fmt.Fprintf(w, format,
+					treeStyle(useColors, s),
+					valueStyle(useColors, comment.v))
 			}
 		}
 	}
 }
 
 // marshalled returns the data structure used for print marshaling.
-func (d *Detail) marshalled() []struct{ k, v string } {
+func (d *Detail) marshalled() items {
 	const (
 		noBreakSpace     = "\u00A0"
 		symbolForNewline = "\u2424"
@@ -571,47 +603,45 @@ func (d *Detail) marshalled() []struct{ k, v string } {
 	)
 	p := message.NewPrinter(lang())
 	// Preallocate slice with capacity for all fields plus potential SAUCE comments
-	data := make([]struct {
-		k, v string
-	}, 0, baseFieldCount+len(d.Sauce.Comnt.Comment))
+	data := make(items, 0, baseFieldCount+len(d.Sauce.Comnt.Comment))
 	data = append(data,
-		struct{ k, v string }{k: "slug", v: d.Slug},
-		struct{ k, v string }{k: "filename", v: d.Name},
-		struct{ k, v string }{k: "filetype", v: d.Mime.Commt},
-		struct{ k, v string }{k: "Unicode", v: d.Unicode},
-		struct{ k, v string }{k: linebr, v: fsys.LineBreak(d.LineBreak.Decimal, true)},
-		struct{ k, v string }{k: chars, v: p.Sprint(d.Count.Chars)},
-		struct{ k, v string }{k: ans, v: p.Sprint(d.Count.Controls)},
-		struct{ k, v string }{k: words, v: p.Sprint(d.Count.Words)},
-		struct{ k, v string }{k: "size", v: d.Size.Decimal},
-		struct{ k, v string }{k: lines, v: p.Sprint(d.Lines)},
-		struct{ k, v string }{k: width, v: p.Sprint(d.Width)},
-		struct{ k, v string }{k: "modified", v: humanize.DMY.Format(d.Modified.Time.UTC())},
-		struct{ k, v string }{k: "media mime type", v: d.Mime.Type},
-		struct{ k, v string }{k: "SHA256 checksum", v: d.Sums.SHA256},
-		struct{ k, v string }{k: c64ecma, v: d.Sums.CRC64},
-		struct{ k, v string }{k: c32, v: d.Sums.CRC32},
-		struct{ k, v string }{k: m5, v: d.Sums.MD5},
-		struct{ k, v string }{k: zipComment, v: d.ZipComment},
+		item{k: "slug", v: d.Slug},
+		item{k: "filename", v: d.Name},
+		item{k: "filetype", v: d.Mime.Commt},
+		item{k: "Unicode", v: d.Unicode},
+		item{k: linebr, v: fsys.LineBreak(d.LineBreak.Decimal, true)},
+		item{k: chars, v: p.Sprint(d.Count.Chars)},
+		item{k: ans, v: p.Sprint(d.Count.Controls)},
+		item{k: words, v: p.Sprint(d.Count.Words)},
+		item{k: "size", v: d.Size.Decimal},
+		item{k: lines, v: p.Sprint(d.Lines)},
+		item{k: width, v: p.Sprint(d.Width)},
+		item{k: "modified", v: humanize.DMY.Format(d.Modified.Time.UTC())},
+		item{k: "media mime type", v: d.Mime.Type},
+		item{k: "SHA256 checksum", v: d.Sums.SHA256},
+		item{k: c64ecma, v: d.Sums.CRC64},
+		item{k: c32, v: d.Sums.CRC32},
+		item{k: m5, v: d.Sums.MD5},
+		item{k: zipComment, v: d.ZipComment},
 	)
 	// sauce data
 	data = append(data,
-		struct{ k, v string }{k: "title", v: d.Sauce.Title},
-		struct{ k, v string }{k: "author", v: d.Sauce.Author},
-		struct{ k, v string }{k: "group", v: d.Sauce.Group},
-		struct{ k, v string }{k: "date", v: sauceDate(d.Sauce.Date.Value)},
-		struct{ k, v string }{k: "original size", v: d.Sauce.FileSize.Decimal},
-		struct{ k, v string }{k: "file type", v: d.Sauce.File.Name},
-		struct{ k, v string }{k: "data type", v: d.Sauce.Data.Name},
-		struct{ k, v string }{k: desc, v: d.Sauce.Desc},
-		struct{ k, v string }{k: d.Sauce.Info.Info1.Info, v: strconv.FormatUint(uint64(d.Sauce.Info.Info1.Value), 10)},
-		struct{ k, v string }{k: d.Sauce.Info.Info2.Info, v: strconv.FormatUint(uint64(d.Sauce.Info.Info2.Value), 10)},
-		struct{ k, v string }{k: d.Sauce.Info.Info3.Info, v: strconv.FormatUint(uint64(d.Sauce.Info.Info3.Value), 10)},
-		struct{ k, v string }{k: interp, v: d.Sauce.Info.Flags.String()},
+		item{k: "title", v: d.Sauce.Title},
+		item{k: "author", v: d.Sauce.Author},
+		item{k: "group", v: d.Sauce.Group},
+		item{k: "date", v: sauceDate(d.Sauce.Date.Value)},
+		item{k: "original size", v: d.Sauce.FileSize.Decimal},
+		item{k: "file type", v: d.Sauce.File.Name},
+		item{k: "data type", v: d.Sauce.Data.Name},
+		item{k: desc, v: d.Sauce.Desc},
+		item{k: d.Sauce.Info.Info1.Info, v: strconv.FormatUint(uint64(d.Sauce.Info.Info1.Value), 10)},
+		item{k: d.Sauce.Info.Info2.Info, v: strconv.FormatUint(uint64(d.Sauce.Info.Info2.Value), 10)},
+		item{k: d.Sauce.Info.Info3.Info, v: strconv.FormatUint(uint64(d.Sauce.Info.Info3.Value), 10)},
+		item{k: interp, v: d.Sauce.Info.Flags.String()},
 	)
 	// sauce comment
 	for i, line := range d.Sauce.Comnt.Comment {
-		comment := struct{ k, v string }{
+		comment := item{
 			k: noBreakSpace, v: line,
 		}
 		if i == 0 {
@@ -631,21 +661,24 @@ func (d *Detail) mime(name string, data ...byte) {
 	if d.Mime.Commt == "plain text document" {
 		reader := bytes.NewReader(data)
 		if s := bbs.Find(reader).Name(); s != "" {
-			d.Mime.Commt += fmt.Sprintf(" with %s BBS color codes", s)
+			const format = " with %s BBS color codes"
+			d.Mime.Commt += fmt.Sprintf(format, s)
 		}
 	}
 	if ValidText(d.Mime.Type) {
 		var err error
 		b := bytes.NewBuffer(data)
 		if d.Count.Chars, err = fsys.Runes(b); err != nil {
-			fmt.Fprintf(os.Stdout, "mine sniffer failure, %s\n", err)
+			const format = "mine sniffer failure, %s\n"
+			fmt.Fprintf(os.Stdout, format, err)
 		}
 		return
 	}
 	if d.Mime.Type == zipType {
 		r, e := zip.OpenReader(name)
 		if e != nil {
-			fmt.Fprintf(os.Stdout, "open zip file failure: %s\n", e)
+			const format = "open zip file failure: %s\n"
+			fmt.Fprintf(os.Stdout, format, e)
 		}
 		if r == nil {
 			return
@@ -673,10 +706,8 @@ func (d *Detail) validate(x struct{ k, v string }) bool {
 		case uc8, linebr, chars, ans, words, lines, width:
 			return false
 		}
-	} else if x.k == ans {
-		if d.Count.Controls == 0 {
-			return false
-		}
+	} else if x.k == ans && d.Count.Controls == 0 {
+		return false
 	}
 	if x.k == desc && x.v == "" {
 		return false

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -23,7 +24,8 @@ func main() {
 	meta.App.Commit = commit
 	meta.App.Date = date
 	meta.App.BuiltBy = builtBy
-	if err := cmd.Execute(); err != nil {
+	ctx := context.Background()
+	if err := cmd.Execute(ctx); err != nil {
 		if s := logs.Execute(err, false); s != "" {
 			fmt.Fprintln(os.Stderr, s)
 			os.Exit(logs.OSErr)

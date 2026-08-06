@@ -52,11 +52,11 @@ func TestTransform(t *testing.T) {
 		for _, tt := range tests {
 			got, err := view.Transform(tt.args.conv, tt.args.in, tt.args.out, tt.args.b...)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Transform() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Transform() %s error = %v, wantErr %v", tt.name, err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Transform() = %q, want %q", got, tt.want)
+				t.Errorf("Transform() %s = %q, want %q", tt.name, got, tt.want)
 			}
 		}
 	})

@@ -33,14 +33,14 @@ type API map[string]any
 // Endpoint requests an API endpoint from the URL.
 // A HTTP ETag can be provided to validate local data cache against the server.
 // It also reports whether the etag value matches the server ETag header.
-func Endpoint(url, etag string) (bool, API, error) {
-	const msg = "online api endpoint"
-	resp, body, err := Get(url, etag)
+func Endpoint(ctx context.Context, url, etag string) (bool, API, error) {
+	const format = "online api endpoint get %s: %w"
+	resp, body, err := Get(ctx, url, etag)
 	if err != nil {
-		return false, API{}, fmt.Errorf("%s get failed: %w", msg, err)
+		return false, API{}, fmt.Errorf(format, "failed", err)
 	}
 	if resp == nil {
-		return false, API{}, fmt.Errorf("%s get: %w", msg, ErrNoResp)
+		return false, API{}, fmt.Errorf(format, "no response", ErrNoResp)
 	}
 	defer resp.Body.Close()
 	if etag != "" {
@@ -51,14 +51,14 @@ func Endpoint(url, etag string) (bool, API, error) {
 		}
 	}
 	if ok := json.Valid(body); !ok {
-		return false, API{}, fmt.Errorf("%s %s: %w", msg, url, ErrJSON)
+		return false, API{}, fmt.Errorf(format, url, ErrJSON)
 	}
 	var data API
 	if err := json.Unmarshal(body, &data); err != nil {
-		return false, API{}, fmt.Errorf("%s %s: %w", msg, url, ErrMash)
+		return false, API{}, fmt.Errorf(format, url, ErrMash)
 	}
 	if data == nil {
-		return false, API{}, fmt.Errorf("%s %s: %w", msg, url, ErrMash)
+		return false, API{}, fmt.Errorf(format, url, ErrMash)
 	}
 	val := resp.Header.Get("Etag")
 	data["etag"] = val
@@ -67,15 +67,16 @@ func Endpoint(url, etag string) (bool, API, error) {
 
 // Get fetches a URL and returns both its response and body.
 // If an etag is provided a "If-None-Match" header request will be included.
-func Get(url, etag string) (*http.Response, []byte, error) {
+func Get(ctx context.Context, url, etag string) (*http.Response, []byte, error) {
 	client := &http.Client{
 		Timeout: timeout,
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	defer cancel()
 	if err != nil {
-		return nil, nil, fmt.Errorf("getting a new request error: %w", err)
+		const format = "getting a new request error: %w"
+		return nil, nil, fmt.Errorf(format, err)
 	}
 	if etag != "" {
 		req.Header.Set("If-None-Match", etag)
@@ -83,38 +84,44 @@ func Get(url, etag string) (*http.Response, []byte, error) {
 	req.Header.Set("User-Agent", userAgent())
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, nil, fmt.Errorf("requesting to set the get user-agent header: %w", err)
+		const format = "requesting to set the get user-agent header: %w"
+		return nil, nil, fmt.Errorf(format, err)
 	}
 	if resp == nil {
-		return nil, nil, fmt.Errorf("getting response: %w", ErrNoResp)
+		const format = "getting response: %w"
+		return nil, nil, fmt.Errorf(format, ErrNoResp)
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, nil, fmt.Errorf("reading the response body failed: %w", err)
+		const format = "reading the response body failed: %w"
+		return nil, nil, fmt.Errorf(format, err)
 	}
 	return resp, body, nil
 }
 
 // Ping requests a URL and reports whether if the status is successful.
 // A server response status code between 200 and 299 is considered a success.
-func Ping(url string) (bool, error) {
+func Ping(ctx context.Context, url string) (bool, error) {
 	client := &http.Client{
 		Timeout: timeout,
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	req, err := http.NewRequestWithContext(ctx, http.MethodHead, url, nil)
 	defer cancel()
 	if err != nil {
-		return false, fmt.Errorf("pinging a new request error: %w", err)
+		const format = "pinging a new request error: %w"
+		return false, fmt.Errorf(format, err)
 	}
 	req.Header.Set("User-Agent", userAgent())
 	resp, err := client.Do(req)
 	if err != nil {
-		return false, fmt.Errorf("requesting to set the ping user-agent header: %w", err)
+		const format = "requesting to set the ping user-agent header: %w"
+		return false, fmt.Errorf(format, err)
 	}
 	if resp == nil {
-		return false, fmt.Errorf("ping response: %w", ErrNoResp)
+		const format = "ping response: %w"
+		return false, fmt.Errorf(format, ErrNoResp)
 	}
 	defer resp.Body.Close()
 	const ok, maximum = http.StatusOK, 299

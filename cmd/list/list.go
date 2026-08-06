@@ -224,6 +224,7 @@ func Examples(wr io.Writer) error {
 
 // Table writes one or more named encodings as a formatted table.
 func Table(w io.Writer, names ...string) error {
+	const format = "cmd list table: %w"
 	if w == nil {
 		w = io.Discard
 	}
@@ -245,7 +246,7 @@ func Table(w io.Writer, names ...string) error {
 	// iterate through the tables
 	for _, name := range names {
 		if err := table.WithLipgloss(w, name); err != nil {
-			return fmt.Errorf("cmd list table: %w", err)
+			return fmt.Errorf(format, err)
 		}
 		fmt.Fprintln(w)
 	}
@@ -254,6 +255,7 @@ func Table(w io.Writer, names ...string) error {
 
 // Tables writes all the supported encodings as formatted tables.
 func Tables(w io.Writer) error {
+	const format = "table %s, %w, %w"
 	if w == nil {
 		w = io.Discard
 	}
@@ -301,14 +303,14 @@ func Tables(w io.Writer) error {
 		if name == "" {
 			name, err = ianaindex.MIME.Name(e)
 			if err != nil {
-				return fmt.Errorf("table %s, %w, %w", e, ErrIANA, err)
+				return fmt.Errorf(format, e, ErrIANA, err)
 			}
 		}
 		if !Printable(name) {
 			continue
 		}
 		if err := table.WithLipgloss(w, name); err != nil {
-			return fmt.Errorf("table %s, %w, %w", e, ErrTable, err)
+			return fmt.Errorf(format, e, ErrTable, err)
 		}
 	}
 	return nil

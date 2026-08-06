@@ -175,6 +175,7 @@ func printLegendAndFooter(wr io.Writer) {
 
 // Rows return character encoding details for use in a text table.
 func Rows(e encoding.Encoding) (Row, error) {
+	const format = "list rows: %w"
 	if e == nil {
 		return Row{}, ErrNil
 	}
@@ -192,12 +193,12 @@ func Rows(e encoding.Encoding) (Row, error) {
 	if r.Value, err = htmlindex.Name(e); err != nil {
 		r.Value, err = ianaindex.MIME.Name(e)
 		if err != nil {
-			return Row{}, fmt.Errorf("list rows: %w", err)
+			return Row{}, fmt.Errorf(format, err)
 		}
 	} else {
 		r.Alias, err = ianaindex.MIME.Name(e)
 		if err != nil {
-			return Row{}, fmt.Errorf("list rows: %w", err)
+			return Row{}, fmt.Errorf(format, err)
 		}
 	}
 	r.Value = strings.ToLower(Uniform(r.Value))
@@ -235,6 +236,7 @@ func Numeric(name string) int {
 // Alias returns an alias for a encoding.
 // Only the alias argument is required.
 func Alias(alias, value string, e encoding.Encoding) (string, error) {
+	const format = "list alias: %w"
 	a := strings.ToLower(alias)
 	if a == value {
 		a = ""
@@ -247,7 +249,7 @@ func Alias(alias, value string, e encoding.Encoding) (string, error) {
 	}
 	a, err := ianaindex.MIB.Name(e)
 	if err != nil {
-		return "", fmt.Errorf("list alias: %w", err)
+		return "", fmt.Errorf(format, err)
 	}
 	a = strings.ToLower(a)
 	if a == value {

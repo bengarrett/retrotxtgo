@@ -87,10 +87,11 @@ func Mark(b []byte) []byte {
 
 // HexDecode decodes a hexadecimal string into bytes.
 func HexDecode(s string) ([]byte, error) {
+	const format = "could not decode hexadecimal string: %q: %w"
 	src := []byte(s)
 	dst := make([]byte, hex.DecodedLen(len(src)))
 	if _, err := hex.Decode(dst, src); err != nil {
-		return nil, fmt.Errorf("could not decode hexadecimal string: %q: %w", s, err)
+		return nil, fmt.Errorf(format, s, err)
 	}
 	return dst, nil
 }
@@ -105,6 +106,7 @@ func HexEncode(s string) []byte {
 
 // Decode a string using the character map.
 func Decode(c *charmap.Charmap, s string) ([]byte, error) {
+	const format = "dstring io readall error: %w"
 	if c == nil {
 		return nil, ErrCharmap
 	}
@@ -112,7 +114,7 @@ func Decode(c *charmap.Charmap, s string) ([]byte, error) {
 	reader := transform.NewReader(strings.NewReader(s), decoder)
 	b, err := io.ReadAll(reader)
 	if err != nil {
-		return nil, fmt.Errorf("dstring io.readall error: %w", err)
+		return nil, fmt.Errorf(format, err)
 	}
 	return b, nil
 }

@@ -25,7 +25,7 @@ func TestTemplate(t *testing.T) {
 		t.Parallel()
 		for _, tt := range tests {
 			s := strings.Builder{}
-			_ = version.Template(&s)
+			_ = version.Template(t.Context(), &s)
 			if !strings.Contains(s.String(), tt.want) {
 				t.Errorf("Template() does not contain %v", tt.want)
 				t.Error(s.String())

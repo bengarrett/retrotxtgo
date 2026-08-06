@@ -60,10 +60,11 @@ func Columns(r io.Reader, lb [2]rune) (int, error) {
 	}
 	sep := byter.LineBreak(lb)
 	p, width := make([]byte, bufio.MaxScanTokenSize), 0
+	const format = "columns could not read buffer: %w"
 	for {
 		size, err := r.Read(p)
 		if err != nil && err != io.EOF {
-			return -1, fmt.Errorf("columns could not read buffer: %w", err)
+			return -1, fmt.Errorf(format, err)
 		}
 		pos := 0
 		for pos < size {
@@ -91,10 +92,11 @@ func Controls(r io.Reader) (int, error) {
 	}
 	lineBreak := []byte(ansiEscape)
 	p, count := make([]byte, bufio.MaxScanTokenSize), 0
+	const format = "controls could not read buffer: %w"
 	for {
 		size, err := r.Read(p)
 		if err != nil && err != io.EOF {
-			return 0, fmt.Errorf("controls could not read buffer: %w", err)
+			return 0, fmt.Errorf(format, err)
 		}
 		pos := 0
 		for {
@@ -262,8 +264,9 @@ func Runes(r io.Reader) (int, error) {
 	for scanner.Scan() {
 		count++
 	}
+	const format = "runes could not scan reader: %w"
 	if err := scanner.Err(); err != nil {
-		return -1, fmt.Errorf("runes could not scan reader: %w", err)
+		return -1, fmt.Errorf(format, err)
 	}
 	return count, nil
 }
@@ -296,7 +299,8 @@ func Words(r io.Reader) (int, error) {
 		}
 	}
 	if err := scanner.Err(); err != nil {
-		return -1, fmt.Errorf("words could not scan reader: %w", err)
+		const format = "words could not scan reader: %w"
+		return -1, fmt.Errorf(format, err)
 	}
 	return count, nil
 }

@@ -16,13 +16,14 @@ var ErrPipeRead = errors.New("could not read text stream from piped stdin (stand
 
 // Run parses the arguments supplied with the dump command.
 func Run(w io.Writer, _ *cobra.Command, args ...string) error {
+	const format = "run dump: %w"
 	if w == nil {
 		w = io.Discard
 	}
 	// piped input from other programs and then exit
 	ok, err := fsys.IsPipe()
 	if err != nil {
-		return fmt.Errorf("run dump: %w", err)
+		return fmt.Errorf(format, err)
 	}
 	if ok {
 		return Pipe(w)
@@ -45,7 +46,7 @@ func Run(w io.Writer, _ *cobra.Command, args ...string) error {
 		// Read as regular file
 		b, err = fsys.Read(arg)
 		if err != nil {
-			return fmt.Errorf("run dump: %w", err)
+			return fmt.Errorf(format, err)
 		}
 		fmt.Fprint(w, hex.Dump(b))
 	}

@@ -27,15 +27,15 @@ const (
 
 // Input returns a file pointer to a temporary file containing the input string.
 func Input(input string) (*os.File, error) {
-	const name = "mock input"
+	const format = "mock input: %w"
 	s := []byte(input)
 	r, w, err := os.Pipe()
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", name, err)
+		return nil, fmt.Errorf(format, err)
 	}
 	defer w.Close()
 	if _, err = w.Write(s); err != nil {
-		return nil, fmt.Errorf("%s: %w", name, err)
+		return nil, fmt.Errorf(format, err)
 	}
 	return r, nil
 }
@@ -63,7 +63,8 @@ func maxPow() *big.Int {
 	y := big.NewInt(int64(math.Pow(xPow, yPow)))
 	x := big.NewInt(1)
 	if x.Cmp(y) == 1 {
-		log.Fatalf("%s: %s", ErrMax, y)
+		const format = "%s: %s"
+		log.Fatalf(format, ErrMax, y)
 	}
 	return y
 }
@@ -75,7 +76,8 @@ func FileExample(s string) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	name := fmt.Sprintf("rt_fs_save%s.txt", v)
+	const format = "rt_fs_save%s.txt"
+	name := fmt.Sprintf(format, v)
 	path, err := SaveTemp(name, []byte(s)...)
 	if err != nil {
 		log.Fatal(err)
@@ -91,7 +93,8 @@ func LargeExample() string {
 		log.Fatal(err)
 	}
 	const sizeMB = 0.8
-	name := fmt.Sprintf("rs_mega_example_save%s.txt", v)
+	const format = "rs_mega_example_save%s.txt"
+	name := fmt.Sprintf(format, v)
 	s := Filler(sizeMB)
 	path, err := SaveTemp(name, []byte(s)...)
 	if err != nil {
@@ -108,7 +111,8 @@ func MegaExample() string {
 		log.Fatal(err)
 	}
 	const sizeMB = 1.5
-	name := fmt.Sprintf("rs_giga_mega_save%s.txt", v)
+	const format = "rs_giga_mega_save%s.txt"
+	name := fmt.Sprintf(format, v)
 	s := Filler(sizeMB)
 	path, err := SaveTemp(name, []byte(s)...)
 	if err != nil {
@@ -125,7 +129,8 @@ func ByteExample() string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	name := fmt.Sprintf("rs_byte_chars_save%s.txt", v)
+	const format = "rs_byte_chars_save%s.txt"
+	name := fmt.Sprintf(format, v)
 	b := []byte(T()["Tabs"]) // Tabs and Unicode glyphs
 	path, err := SaveTemp(name, b...)
 	if err != nil {
@@ -168,30 +173,73 @@ type DirTests []struct {
 }
 
 func WindowsTests(h, hp, s, w, wp string) DirTests {
+	const format = "C:%shome%suser"
 	return DirTests{
-		{fmt.Sprintf("C:%shome%suser", s, s), fmt.Sprintf("C:%shome%suser", s, s)},
+		{
+			fmt.Sprintf(format, s, s),
+			fmt.Sprintf(format, s, s),
+		},
 		{"~", h},
-		{filepath.Join("~", "foo"), filepath.Join(h, "foo")},
+		{
+			filepath.Join("~", "foo"),
+			filepath.Join(h, "foo"),
+		},
 		{".", w},
-		{fmt.Sprintf(".%sfoo", s), filepath.Join(w, "foo")},
-		{fmt.Sprintf("..%sfoo", s), filepath.Join(wp, "foo")},
-		{fmt.Sprintf("~%s..%sfoo", s, s), filepath.Join(hp, "foo")},
-		{fmt.Sprintf("d:%sroot%sfoo%s..%sblah", s, s, s, s), fmt.Sprintf("D:%sroot%sblah", s, s)},
-		{fmt.Sprintf("z:%sroot%sfoo%s.%sblah", s, s, s, s), fmt.Sprintf("Z:%sroot%sfoo%sblah", s, s, s)},
+		{
+			fmt.Sprintf(".%sfoo", s),
+			filepath.Join(w, "foo"),
+		},
+		{
+			fmt.Sprintf("..%sfoo", s),
+			filepath.Join(wp, "foo"),
+		},
+		{
+			fmt.Sprintf("~%s..%sfoo", s, s),
+			filepath.Join(hp, "foo"),
+		},
+		{
+			fmt.Sprintf("d:%sroot%sfoo%s..%sblah", s, s, s, s),
+			fmt.Sprintf("D:%sroot%sblah", s, s),
+		},
+		{
+			fmt.Sprintf("z:%sroot%sfoo%s.%sblah", s, s, s, s),
+			fmt.Sprintf("Z:%sroot%sfoo%sblah", s, s, s),
+		},
 	}
 }
 
 func NixTests(h, hp, s, w, wp string) DirTests {
 	return DirTests{
-		{fmt.Sprintf("%shome%suser", s, s), fmt.Sprintf("%shome%suser", s, s)},
+		{
+			fmt.Sprintf("%shome%suser", s, s),
+			fmt.Sprintf("%shome%suser", s, s),
+		},
 		{"~", h},
-		{filepath.Join("~", "foo"), filepath.Join(h, "foo")},
+		{
+			filepath.Join("~", "foo"),
+			filepath.Join(h, "foo"),
+		},
 		{".", w},
-		{fmt.Sprintf(".%sfoo", s), filepath.Join(w, "foo")},
-		{fmt.Sprintf("..%sfoo", s), filepath.Join(wp, "foo")},
-		{fmt.Sprintf("~%s..%sfoo", s, s), filepath.Join(hp, "foo")},
-		{fmt.Sprintf("%sroot%sfoo%s..%sblah", s, s, s, s), fmt.Sprintf("%sroot%sblah", s, s)},
-		{fmt.Sprintf("%sroot%sfoo%s.%sblah", s, s, s, s), fmt.Sprintf("%sroot%sfoo%sblah", s, s, s)},
+		{
+			fmt.Sprintf(".%sfoo", s),
+			filepath.Join(w, "foo"),
+		},
+		{
+			fmt.Sprintf("..%sfoo", s),
+			filepath.Join(wp, "foo"),
+		},
+		{
+			fmt.Sprintf("~%s..%sfoo", s, s),
+			filepath.Join(hp, "foo"),
+		},
+		{
+			fmt.Sprintf("%sroot%sfoo%s..%sblah", s, s, s, s),
+			fmt.Sprintf("%sroot%sblah", s, s),
+		},
+		{
+			fmt.Sprintf("%sroot%sfoo%s.%sblah", s, s, s, s),
+			fmt.Sprintf("%sroot%sfoo%sblah", s, s, s),
+		},
 	}
 }
 
@@ -199,10 +247,12 @@ func NixTests(h, hp, s, w, wp string) DirTests {
 func SaveTemp(name string, b ...byte) (string, error) {
 	i, path, err := save.Save(tmp.File(name), b...)
 	if err != nil {
-		return path, fmt.Errorf("could not save the temporary file: %w", err)
+		const format = "could not save the temporary file: %w"
+		return path, fmt.Errorf(format, err)
 	}
 	if i == 0 && len(b) > 0 {
-		return path, fmt.Errorf("%w: %s", ErrZB, path)
+		const format = "%w: %s"
+		return path, fmt.Errorf(format, ErrZB, path)
 	}
 	return path, nil
 }

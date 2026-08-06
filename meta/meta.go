@@ -101,7 +101,8 @@ func (v Version) String() string {
 	case v.Major == 0:
 		p = Beta
 	}
-	return fmt.Sprintf("%s%d.%d.%d", p, v.Major, v.Minor, v.Patch)
+	const format = "%s%d.%d.%d"
+	return fmt.Sprintf(format, p, v.Major, v.Minor, v.Patch)
 }
 
 // Valid reports whether the sematic versioning values are valid.

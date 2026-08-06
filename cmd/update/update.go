@@ -2,6 +2,7 @@
 package update
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -55,13 +56,13 @@ func NoticeString(old, current string) string {
 // Check the GitHub for the newest release tag.
 // The returned string will only contain the newest available release tag
 // if the local program version is out of date.
-func Check() (string, error) {
+func Check(ctx context.Context) (string, error) {
 	if meta.App.Version == meta.GoBuild {
 		return "", nil
 	}
 	cache := CacheGet()
 	etag, tag := cache.Etag, cache.Version
-	c, data, err := online.Endpoint(online.ReleaseAPI, etag)
+	c, data, err := online.Endpoint(ctx, online.ReleaseAPI, etag)
 	if err != nil {
 		return "", fmt.Errorf("cmd update check: %w", err)
 	}

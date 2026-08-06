@@ -15,10 +15,11 @@ import (
 
 // IsPipe reports whether Stdin (standard input) is piped from another command.
 func IsPipe() (bool, error) {
+	const format = "could not stat stdin: %w"
 	// source: https://dev.to/napicella/linux-pipes-in-golang-2e8j
 	fi, err := os.Stdin.Stat()
 	if err != nil {
-		return false, fmt.Errorf("could not stat stdin: %w", err)
+		return false, fmt.Errorf(format, err)
 	}
 	return fi.Mode()&os.ModeCharDevice == 0, nil
 }
@@ -31,12 +32,13 @@ func Read(name string) ([]byte, error) {
 // ReadAllBytes reads the named file and returns the content as a byte array.
 // Create a word and random character generator to make files larger than 64k.
 func ReadAllBytes(name string) ([]byte, error) {
+	const format = "fsys read all bytes: %w"
 	file, err := os.Open(name)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil, fmt.Errorf("%w: %s", ErrNotFound, name)
 	}
 	if err != nil {
-		return nil, fmt.Errorf("fsys read all bytes: %w", err)
+		return nil, fmt.Errorf(format, err)
 	}
 	defer file.Close()
 	// bufio is the most performant way to scan streamed data
@@ -53,19 +55,21 @@ func ReadAllBytes(name string) ([]byte, error) {
 		buf = append(buf, scanner.Bytes()...)
 	}
 	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf("scanner %q: %w", name, err)
+		const format = "scanner %q: %w"
+		return nil, fmt.Errorf(format, name, err)
 	}
 	return buf, nil
 }
 
 // ReadChunk reads and returns the start of the named file.
 func ReadChunk(name string, chars int) ([]byte, error) {
+	const format = "fsys read chunk: %w"
 	file, err := os.Open(name)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil, fmt.Errorf("%w: %s", ErrNotFound, name)
 	}
 	if err != nil {
-		return nil, fmt.Errorf("fsys read chunk: %w", err)
+		return nil, fmt.Errorf(format, err)
 	}
 	defer file.Close()
 	buf := []byte{}
@@ -80,7 +84,8 @@ func ReadChunk(name string, chars int) ([]byte, error) {
 		buf = append(buf, scanner.Bytes()...)
 	}
 	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf("read chunk could not scan file: %q: %w", name, err)
+		const format = "read chunk could not scan file: %q: %w"
+		return nil, fmt.Errorf(format, name, err)
 	}
 	return buf, nil
 }
@@ -91,58 +96,61 @@ func ReadColumns(name string) (int, error) {
 }
 
 func readLineBreaks(name string, cols bool) (int, error) {
+	const format = "fsys read line breaks %s: %w"
 	file, err := os.Open(name)
 	if errors.Is(err, os.ErrNotExist) {
 		return -1, fmt.Errorf("%w: %s", ErrNotFound, name)
 	}
 	if err != nil {
-		return -1, fmt.Errorf("fsys read line breaks: %w", err)
+		return -1, fmt.Errorf(format, name, err)
 	}
 	defer file.Close()
 	lb, err := ReadLineBreaks(name)
 	if err != nil {
-		return -1, fmt.Errorf("could not find the line break method: %w", err)
+		return -1, fmt.Errorf(format, "no method found", err)
 	}
 	if !cols {
 		cnt, err := nl.Lines(file, lb)
 		if err != nil {
-			return -1, fmt.Errorf("read lines count the file: %q: %w", name, err)
+			return -1, fmt.Errorf(format, name, err)
 		}
 		return cnt, nil
 	}
 	cnt, err := Columns(file, lb)
 	if err != nil {
-		return -1, fmt.Errorf("read lines count the file: %q: %w", name, err)
+		return -1, fmt.Errorf(format, name, err)
 	}
 	return cnt, nil
 }
 
 // ReadControls counts the number of ANSI escape sequences in the named file.
 func ReadControls(name string) (int, error) {
+	const format = "fsys read controls %s: %w"
 	file, err := os.Open(name)
 	if errors.Is(err, os.ErrNotExist) {
 		return -1, fmt.Errorf("%w: %s", ErrNotFound, name)
 	}
 	if err != nil {
-		return -1, fmt.Errorf("fsys read controls: %w", err)
+		return -1, fmt.Errorf(format, name, err)
 	}
 	defer file.Close()
 	cnt, err := Controls(file)
 	if err != nil {
-		return -1, fmt.Errorf("read controls could not parse the file: %q: %w", name, err)
+		return -1, fmt.Errorf(format, name, err)
 	}
 	return cnt, nil
 }
 
 // ReadLine reads a named file location or a named temporary file and returns its content.
 func ReadLine(name string, sys nl.System) (string, error) {
+	const format = "fsys read line %s: %w"
 	path, n := temp(name), nl.NewLine(sys)
 	file, err := os.OpenFile(path, os.O_RDONLY, save.LogFileMode)
 	if errors.Is(err, os.ErrNotExist) {
 		return "", fmt.Errorf("%w: %s", ErrNotFound, name)
 	}
 	if err != nil {
-		return "", fmt.Errorf("fsys read line: %w", err)
+		return "", fmt.Errorf(format, name, err)
 	}
 	defer file.Close()
 	// bufio is the most performant
@@ -154,7 +162,7 @@ func ReadLine(name string, sys nl.System) (string, error) {
 	}
 	s := builder.String()
 	if err := scanner.Err(); err != nil {
-		return "", fmt.Errorf("read line could not scan file: %w", err)
+		return "", fmt.Errorf(format, name, err)
 	}
 	return s, nil
 }
@@ -166,18 +174,19 @@ func ReadLines(name string) (int, error) {
 
 // ReadLineBreaks scans the named file for the most commonly used line break method.
 func ReadLineBreaks(name string) ([2]rune, error) {
+	const format = "fsys read line breaks %s: %w"
 	z := [2]rune{0, 0}
 	file, err := os.Open(name)
 	if errors.Is(err, os.ErrNotExist) {
 		return z, fmt.Errorf("%w: %s", ErrNotFound, name)
 	}
 	if err != nil {
-		return z, fmt.Errorf("fsys read line breaks: %w", err)
+		return z, fmt.Errorf(format, name, err)
 	}
 	defer file.Close()
 	b, err := io.ReadAll(file)
 	if err != nil {
-		return z, fmt.Errorf("read line breaks could not read the file: %q: %w", name, err)
+		return z, fmt.Errorf(format, name, err)
 	}
 	return LineBreaks(true, bytes.Runes(b)...), nil
 }
@@ -185,6 +194,7 @@ func ReadLineBreaks(name string) ([2]rune, error) {
 // ReadPipe reads data piped by the operating system's STDIN.
 // If no data is detected the program will exit.
 func ReadPipe() ([]byte, error) {
+	const format = "read pipe standard input scan error: %w"
 	b := []byte{}
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
@@ -192,7 +202,7 @@ func ReadPipe() ([]byte, error) {
 		b = append(b, []byte("\n")...)
 	}
 	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf("read pipe could not scan stdin: %w", err)
+		return nil, fmt.Errorf(format, err)
 	}
 	if len(b) == 0 {
 		return nil, ErrPipeEmpty
@@ -202,34 +212,36 @@ func ReadPipe() ([]byte, error) {
 
 // ReadRunes returns the number of runes in the named file.
 func ReadRunes(name string) (int, error) {
+	const format = "fsys read runes %s: %w"
 	file, err := os.Open(name)
 	if errors.Is(err, os.ErrNotExist) {
 		return -1, fmt.Errorf("%w: %s", ErrNotFound, name)
 	}
 	if err != nil {
-		return -1, fmt.Errorf("fsys read runes: %w", err)
+		return -1, fmt.Errorf(format, name, err)
 	}
 	defer file.Close()
 	cnt, err := Runes(file)
 	if err != nil {
-		return 0, fmt.Errorf("read runes could not calculate this file: %q: %w", name, err)
+		return 0, fmt.Errorf(format, name, err)
 	}
 	return cnt, nil
 }
 
 // ReadTail reads the named file from the offset position relative to the end of the file.
 func ReadTail(name string, offset int) ([]byte, error) {
+	const format = "fsys read tail %s: %w"
 	file, err := os.Open(name)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil, fmt.Errorf("%w: %s", ErrNotFound, name)
 	}
 	if err != nil {
-		return nil, fmt.Errorf("fsys read tail: %w", err)
+		return nil, fmt.Errorf(format, name, err)
 	}
 	defer file.Close()
 	total, err := ReadRunes(name)
 	if err != nil {
-		return nil, fmt.Errorf("read tail could not read runes: %q: %w", name, err)
+		return nil, fmt.Errorf(format, name, err)
 	}
 	// bufio is the most performant
 	scanner := bufio.NewScanner(file)
@@ -243,7 +255,7 @@ func ReadTail(name string, offset int) ([]byte, error) {
 		buf = append(buf, scanner.Bytes()...)
 	}
 	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf("read tail could scan file bytes: %q: %w", name, err)
+		return nil, fmt.Errorf(format, name, err)
 	}
 	return buf, nil
 }
@@ -255,17 +267,18 @@ func ReadText(name string) (string, error) {
 
 // ReadWords counts the number of spaced words in the named file.
 func ReadWords(name string) (int, error) {
+	const format = "fsys read roads %s: %w"
 	file, err := os.Open(name)
 	if errors.Is(err, os.ErrNotExist) {
 		return -1, fmt.Errorf("%w: %s", ErrNotFound, name)
 	}
 	if err != nil {
-		return -1, fmt.Errorf("fsys read words: %w", err)
+		return -1, fmt.Errorf(format, name, err)
 	}
 	defer file.Close()
 	cnt, err := Words(file)
 	if err != nil {
-		return -1, fmt.Errorf("read words failed to count words: %q: %w", name, err)
+		return -1, fmt.Errorf(format, name, err)
 	}
 	return cnt, nil
 }

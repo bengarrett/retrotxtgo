@@ -44,7 +44,7 @@ func ExampleWrite() {
 	i, _, _ := fsys.Write(file, []byte("hello world")...)
 	s, _ := os.Stat(file)
 	fmt.Printf("%s, %d", s.Name(), i)
-	// Output:example.txt, 10
+	// Output:example.txt, 11
 }
 
 func TestRead(t *testing.T) {
@@ -285,11 +285,11 @@ func TestTouch(t *testing.T) {
 		for _, tt := range tests {
 			gotPath, err := fsys.Touch(tt.args.name)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Touch() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Touch() %q error = %v, wantErr %v", tt.name, err, tt.wantErr)
 				return
 			}
 			if gotPath != tt.wantPath {
-				t.Errorf("Touch() = %v, want %v", gotPath, tt.wantPath)
+				t.Errorf("Touch() %q = %v, want %v", tt.name, gotPath, tt.wantPath)
 			}
 		}
 	})

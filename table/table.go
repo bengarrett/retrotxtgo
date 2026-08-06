@@ -64,7 +64,8 @@ func Table(wr io.Writer, name string) error { //nolint:funlen,cyclop
 	p := byter.MakeBytes()
 	runes, err := c.Chars(p...)
 	if err != nil {
-		return fmt.Errorf("table convert bytes error: %w", err)
+		const format = "table convert bytes error: %w"
+		return fmt.Errorf(format, err)
 	}
 	enc := reverter(name)
 	const hex, maximum = 16, 255
@@ -106,7 +107,8 @@ out:
 	Footnote(w, name)
 	fmt.Fprint(w, "\n")
 	if err := w.Flush(); err != nil {
-		return fmt.Errorf("could not flush table: %w", err)
+		const format = "could not flush table: %w"
+		return fmt.Errorf(format, err)
 	}
 	return nil
 }
@@ -132,7 +134,7 @@ func WithLipgloss(wr io.Writer, name string) error { //nolint:funlen
 	h := fmt.Sprintf("%s", cp)
 	h += CharmapAlias(cp) + charmapStandard(cp)
 
-	// Create lipgloss styles
+	// create lipgloss styles
 	borderStyle := lipgloss.NewStyle().
 		Border(lipgloss.NormalBorder()).
 		BorderForeground(lipgloss.Color("240"))
@@ -144,47 +146,46 @@ func WithLipgloss(wr io.Writer, name string) error { //nolint:funlen
 	cellStyle := lipgloss.NewStyle().
 		Padding(0, 1)
 
-	// Create header with encoding name
+	// create header with encoding name
 	header := headerStyle.Render(" " + h + " ")
-
-	// Create column headers (0-F)
-	var colHeadersBuilder strings.Builder
-	colHeadersBuilder.WriteString("  .") // Start with two spaces to align with row header area
+	// create column headers (0-F)
+	var colHeader0F strings.Builder
+	const s = "  ." // use two spaces to align with row header area
+	colHeader0F.WriteString(s)
 	const lastColumn = 15
 	for i := range lastColumn {
-		fmt.Fprintf(&colHeadersBuilder, " %X .", i)
+		const format = " %X ."
+		fmt.Fprintf(&colHeader0F, format, i)
 	}
-	fmt.Fprintf(&colHeadersBuilder, " %X .", lastColumn) // Last column without trailing pipe
-	colHeaders := cellStyle.Render(colHeadersBuilder.String())
+	const format = " %X ." // last column without trailing pipe
+	fmt.Fprintf(&colHeader0F, format, lastColumn)
+	colHeaders := cellStyle.Render(colHeader0F.String())
 
-	// Generate character grid
-	runes, enc, err := generateCharacterGrid(name, cp)
+	runes, enc, err := charGrid(name, cp)
 	if err != nil {
 		return err
 	}
 
-	const typicalRows = 16 // Typical number of rows in a character table
-	gridRows := make([]string, 0, typicalRows)
+	const maxRows = 16 // number of rows in a character table
+	rows := make([]string, 0, maxRows)
 
-	// Add column headers as first row
-	gridRows = append(gridRows, colHeaders)
+	// column header
+	rows = append(rows, colHeaders)
 
-	// Generate character rows
-	gridRows = generateCharacterRows(gridRows, runes, enc, name, cellStyle)
+	// character rows
+	rows = charRow(rows, runes, enc, name, cellStyle)
 
-	// Build the table
-	tableContent := lipgloss.JoinVertical(lipgloss.Left, gridRows...)
-	table := borderStyle.Render(lipgloss.JoinVertical(lipgloss.Left, header, tableContent))
-
-	// Write the table
+	// build table
+	content := lipgloss.JoinVertical(lipgloss.Left, rows...)
+	table := borderStyle.Render(lipgloss.JoinVertical(lipgloss.Left, header, content))
 	fmt.Fprintln(wr, table)
 
-	// Add footnotes
-	var footnoteBuf strings.Builder
-	xud.Footnote(&footnoteBuf, cp)
-	Footnote(&footnoteBuf, name)
-	if footnoteBuf.Len() > 0 {
-		fmt.Fprintln(wr, footnoteBuf.String())
+	// footnotes
+	var footnote strings.Builder
+	xud.Footnote(&footnote, cp)
+	Footnote(&footnote, name)
+	if footnote.Len() > 0 {
+		fmt.Fprintln(wr, footnote.String())
 	}
 
 	return nil
@@ -198,11 +199,14 @@ func columns(w io.Writer) {
 	for i := range 16 {
 		switch i {
 		case start:
-			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf("     %X  ", i))
+			const format = "     %X  "
+			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf(format, i))
 		case end:
-			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf(" %X  \n", i))
+			const format = " %X  \n"
+			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf(format, i))
 		default:
-			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf(" %X  ", i))
+			const format = " %X  "
+			fmt.Fprintf(w, "%s", color.OpFuzzy.Sprintf(format, i))
 		}
 	}
 }
@@ -227,9 +231,10 @@ func Footnote(w io.Writer, name string) {
 // CodePage returns the encoding of the code page name or alias.
 // But without any of the custom, ASA ASCII or ISO-8859-11 encodings.
 func CodePage(s string) (encoding.Encoding, error) {
+	const format = "table codepage: %w"
 	cp, err := convert.Encoder(s)
 	if err != nil {
-		return nil, fmt.Errorf("table codepage: %w", err)
+		return nil, fmt.Errorf(format, err)
 	}
 	switch cp {
 	case traditionalchinese.Big5:
@@ -473,8 +478,9 @@ func charmapStandard(cp encoding.Encoding) string {
 	}
 }
 
-// generateCharacterGrid generates the character grid for the given encoding.
-func generateCharacterGrid(name string, cp encoding.Encoding) ([]rune, encoding.Encoding, error) {
+// charGrid generates the character grid for the given encoding.
+func charGrid(name string, cp encoding.Encoding) ([]rune, encoding.Encoding, error) {
+	const format = "table convert bytes error: %w"
 	if x := swapper(name); x != nil {
 		cp = x
 	}
@@ -483,20 +489,20 @@ func generateCharacterGrid(name string, cp encoding.Encoding) ([]rune, encoding.
 	p := byter.MakeBytes()
 	runes, err := c.Chars(p...)
 	if err != nil {
-		return nil, nil, fmt.Errorf("table convert bytes error: %w", err)
+		return nil, nil, fmt.Errorf(format, err)
 	}
 
 	enc := reverter(name)
 	return runes, enc, nil
 }
 
-// generateCharacterRows generates the character rows for the table.
-func generateCharacterRows(
-	gridRows []string,
+// charRow generates the character rows for the table.
+func charRow(
+	rows []string,
 	runes []rune,
 	enc encoding.Encoding,
 	name string,
-	cellStyle lipgloss.Style,
+	style lipgloss.Style,
 ) []string {
 	const hex, maximum = 16, 255
 
@@ -505,34 +511,31 @@ func generateCharacterRows(
 			break
 		}
 
-		// Row header (0-F)
-		rowHeader := fmt.Sprintf("%X", i/hex)
+		const format = "%X" // row reader (0-F)
+		header := fmt.Sprintf(format, i/hex)
 
-		// Character cells
-		var rowCellsBuilder strings.Builder
-		rowCellsBuilder.WriteString(rowHeader + " |")
+		var cells strings.Builder
+		s := header + " |"
+		cells.WriteString(s)
 		for j := range hex {
 			pos := i + j
 			if pos >= len(runes) {
 				break
 			}
-
 			r := runes[pos]
 			char := Character(enc, pos, r)
 			if x := Replacement(name, pos); x != "" {
 				char = x
 			}
-
-			rowCellsBuilder.WriteString(" " + char + " |")
+			s = " " + char + " |"
+			cells.WriteString(s)
 		}
-
-		// Check if we should stop for 7-bit encodings
+		// check to stop for 7-bit encodings
 		if xud.Code7bit(enc) && (i/hex) >= 8 {
 			break
 		}
-
-		gridRows = append(gridRows, cellStyle.Render(rowCellsBuilder.String()))
+		rows = append(rows, style.Render(cells.String()))
 	}
 
-	return gridRows
+	return rows
 }

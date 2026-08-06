@@ -203,9 +203,11 @@ func Encoder(name string) (encoding.Encoding, error) {
 	}
 	if err != nil || e == nil {
 		if a == "" {
-			return e, fmt.Errorf("%q: %w", name, ErrName)
+			const format = "%q: %w"
+			return e, fmt.Errorf(format, name, ErrName)
 		}
-		return e, fmt.Errorf("name %q or alias %q: %w", name, a, ErrName)
+		const format = "name %q or alias %q: %w"
+		return e, fmt.Errorf(format, name, a, ErrName)
 	}
 	return e, nil
 }
@@ -335,7 +337,8 @@ func encodingMisc(name string) string {
 		return cp037
 	case "iso88598e", "iso88598i", "iso88596e", "iso88596i":
 		l := len(name)
-		return fmt.Sprintf("ISO-8859-%v-%v", name[l-2:l-1], name[l-1:])
+		const format = "ISO-8859-%v-%v"
+		return fmt.Sprintf(format, name[l-2:l-1], name[l-1:])
 	}
 	return ""
 }
@@ -512,7 +515,8 @@ func (c *Convert) Swaps() (*Convert, error) {
 	})
 	s, _, err := transform.String(replace, string(c.Output))
 	if err != nil {
-		return nil, fmt.Errorf("encoding convert swaps: %w", err)
+		const format = "encoding convert swaps: %w"
+		return nil, fmt.Errorf(format, err)
 	}
 	c.Output = []rune(s)
 	return c, nil

@@ -37,7 +37,8 @@ func (z *Zip) Create() error {
 	files := Files{}
 	walker := func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			return fmt.Errorf("zip walker failed with %q: %w", path, err)
+			const format = "zip walker failed with %q: %w"
+			return fmt.Errorf(format, path, err)
 		}
 		if info.IsDir() && info.Name() != filepath.Base(path) {
 			return filepath.SkipDir
@@ -62,13 +63,15 @@ func (z *Zip) Create() error {
 		return nil
 	}
 	if err := filepath.Walk(z.Root, walker); err != nil {
-		return fmt.Errorf("zip create: %w", err)
+		const format = "zip create: %w"
+		return fmt.Errorf(format, err)
 	}
 	return files.Zip(z.Writer, z.Name, z.Comment, z.Overwrite)
 }
 
 // Zip packages and compresses files to an archive using the provided name.
 func (files *Files) Zip(w io.Writer, name, comment string, ow bool) error {
+	const format = "zip %s %s: %w"
 	if w == nil {
 		w = io.Discard
 	}
@@ -79,25 +82,24 @@ func (files *Files) Zip(w io.Writer, name, comment string, ow bool) error {
 	)
 	var (
 		err error
-		n   string
+		unq string
 		f   *os.File
 	)
 	switch ow {
 	case true:
-		n = name
-		f, err = os.OpenFile(n, overwrite, readWriteAll)
+		f, err = os.OpenFile(name, overwrite, readWriteAll)
 		if err != nil {
-			return fmt.Errorf("zip create %q: %w", n, err)
+			return fmt.Errorf(format, "open", name, err)
 		}
 		defer f.Close()
 	default:
-		n, err = UniqueName(name)
+		unq, err = UniqueName(name)
 		if err != nil {
-			return fmt.Errorf("zip name %q: %w", name, err)
+			return fmt.Errorf(format, "unique name", name, err)
 		}
-		w, err = os.OpenFile(n, mustNotExist, readWriteAll)
+		w, err = os.OpenFile(unq, mustNotExist, readWriteAll)
 		if err != nil {
-			return fmt.Errorf("zip create %q: %w", n, err)
+			return fmt.Errorf(format, "create", name, err)
 		}
 		defer f.Close()
 	}
@@ -105,24 +107,24 @@ func (files *Files) Zip(w io.Writer, name, comment string, ow bool) error {
 	defer zipper.Close()
 	if comment != "" {
 		if err := zipper.SetComment(comment); err != nil {
-			return fmt.Errorf("zip set comment %q: %w", comment, err)
+			return fmt.Errorf(format, "set comment", comment, err)
 		}
 	}
 	for _, fname := range *files {
 		if err := InsertZip(zipper, fname); err != nil {
-			return fmt.Errorf("add zip %q: %w", fname, err)
+			return fmt.Errorf(format, "zip", fname, err)
 		}
 	}
 	if err := zipper.Close(); err != nil {
-		return fmt.Errorf("zip close: %w", err)
+		return fmt.Errorf(format, "close", "zip writer", err)
 	}
-	s, err := os.Stat(n)
+	s, err := os.Stat(unq)
 	if err != nil {
-		return fmt.Errorf("zip could not stat %q: %w", n, err)
+		return fmt.Errorf(format, "stat", unq, err)
 	}
 	abs, err := filepath.Abs(s.Name())
 	if err != nil {
-		return fmt.Errorf("zip abs %q: %w", s.Name(), err)
+		return fmt.Errorf(format, "filepath abs", s.Name(), err)
 	}
 	fmt.Fprintln(w, "created zip file:", abs,
 		humanize.Decimal(s.Size(), language.AmericanEnglish))
@@ -131,27 +133,28 @@ func (files *Files) Zip(w io.Writer, name, comment string, ow bool) error {
 
 // InsertZip adds the named file to a zip archive.
 func InsertZip(z *zip.Writer, name string) error {
+	const format = "insert zip %s: %w"
 	if z == nil {
 		return ErrWriter
 	}
 	s, err := os.Stat(name)
 	if err != nil {
-		return fmt.Errorf("insert zip stat: %w", err)
+		return fmt.Errorf(format, "stat", err)
 	}
 	fh, err := zip.FileInfoHeader(s)
 	if err != nil {
-		return fmt.Errorf("file info header: %w", err)
+		return fmt.Errorf(format, "file info header", err)
 	}
 	f, err := z.CreateHeader(fh)
 	if err != nil {
-		return fmt.Errorf("create header: %w", err)
+		return fmt.Errorf(format, "create header", err)
 	}
 	b, err := Read(name)
 	if err != nil {
 		return err
 	}
 	if _, err = f.Write(b); err != nil {
-		return fmt.Errorf("io writer: %w", err)
+		return fmt.Errorf(format, "io writer", err)
 	}
 	return nil
 }
@@ -169,7 +172,8 @@ func UniqueName(name string) (string, error) {
 		return name, nil
 	}
 	if err != nil {
-		return name, fmt.Errorf("zip unique name: %w", err)
+		const format = "zip unique name: %w"
+		return name, fmt.Errorf(format, err)
 	}
 	if s.IsDir() {
 		return "", fmt.Errorf("%q: %w", name, ErrName)
@@ -195,7 +199,8 @@ func UniqueName(name string) (string, error) {
 		}
 		i++
 		if i > maxAttempts {
-			return "", fmt.Errorf("unique name aborted after %d attempts: %w", maxAttempts, ErrMax)
+			const format = "unique name aborted after %d attempts: %w"
+			return "", fmt.Errorf(format, maxAttempts, ErrMax)
 		}
 	}
 }

@@ -1,7 +1,7 @@
 package save
 
 import (
-	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -13,45 +13,39 @@ const (
 	LogFileMode os.FileMode = 0o600
 )
 
-// Save bytes to the named file location.
-// The return values are the number of bytes written, the absolute path and filename, and any error.
-func Save(name string, b ...byte) (int, string, error) {
-	if _, err := dir(name); err != nil {
-		return 0, "", fmt.Errorf("save could not open directory %q: %w", name, err)
+var ErrEmpty = errors.New("cannot be empty")
+
+// Save writes bytes to the specified filename.
+// It returns the number of bytes written, the absolute path of the file, and any error.
+func Save(name string, b ...byte) (written int, path string, err error) {
+	const format = "save %s %s: %w"
+	if name == "" {
+		return 0, "", fmt.Errorf(format, "named path", "", ErrEmpty)
 	}
-	path := name
-	const overwrite = os.O_RDWR | os.O_CREATE | os.O_TRUNC
-	file, err := os.OpenFile(path, overwrite, FileMode)
+	path, err = filepath.Abs(name)
 	if err != nil {
-		return 0, path, fmt.Errorf("save could not open file %q: %w", path, err)
+		return 0, "", fmt.Errorf(format, "filepath abs", name, err)
 	}
-	defer file.Close()
-	// bufio is the most performant
-	w := bufio.NewWriter(file)
-	written := 0
-	for i, c := range b {
-		written = i
-		if err := w.WriteByte(c); err != nil {
-			return 0, path, fmt.Errorf("save could not write bytes: %w", err)
+
+	const perm = 0o755
+	if err := os.MkdirAll(filepath.Dir(path), perm); err != nil {
+		return 0, path, fmt.Errorf(format, "mkdirall", name, err)
+	}
+
+	file, err := os.Create(path)
+	if err != nil {
+		return 0, path, fmt.Errorf(format, "create", name, err)
+	}
+
+	defer func() {
+		if cErr := file.Close(); cErr != nil && err == nil {
+			err = fmt.Errorf(format, "close", name, cErr)
 		}
-	}
-	if err := w.Flush(); err != nil {
-		return 0, path, fmt.Errorf("save could not flush the writer: %w", err)
-	}
-	path, err = filepath.Abs(file.Name())
+	}()
+
+	written, err = file.Write(b)
 	if err != nil {
-		return 0, path, fmt.Errorf("save could not find the absolute filename: %w", err)
+		return written, path, fmt.Errorf(format, "write", name, err)
 	}
 	return written, path, nil
-}
-
-// dir creates the named path directory if it doesn't exist.
-func dir(name string) (string, error) {
-	path := filepath.Dir(name)
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		if err := os.MkdirAll(path, DirMode); err != nil {
-			return "", fmt.Errorf("dir could not make the directory: %s %s: %w", DirMode, path, err)
-		}
-	}
-	return path, nil
 }

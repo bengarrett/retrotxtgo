@@ -40,8 +40,6 @@ func (t cmdT) tester(args []string) ([]byte, error) {
 	switch t {
 	case infoT:
 		c = cmd.InfoInit()
-	// case listT:
-	// 	c = cmd.ListInit()
 	case viewT:
 		c = cmd.ViewInit()
 	default:

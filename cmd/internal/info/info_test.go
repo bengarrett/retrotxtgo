@@ -26,11 +26,11 @@ func TestSample(t *testing.T) {
 		for _, tt := range tests {
 			gotFilename, err := info.Sample(tt.name)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Sample() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Sample() %s error = %v, wantErr %v", tt.name, err, tt.wantErr)
 				return
 			}
 			if bool(len(gotFilename) > 0) != tt.wantFilename {
-				t.Errorf("Sample() = %v, want %v", gotFilename, tt.wantFilename)
+				t.Errorf("Sample() %s = %v, want %v", tt.name, gotFilename, tt.wantFilename)
 			}
 		}
 	})

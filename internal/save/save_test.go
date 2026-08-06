@@ -19,7 +19,7 @@ func TestSave(t *testing.T) {
 	// Test successful save
 	n, path, err := save.Save(testFile, content...)
 	be.Err(t, err, nil)
-	be.Equal(t, n, len(content)-1) // Returns index of last byte written
+	be.Equal(t, n, len(content))
 	be.Equal(t, path, testFile)
 
 	// Verify file was created and contains correct content
@@ -37,7 +37,7 @@ func TestSave(t *testing.T) {
 	nestedFile := filepath.Join(tempDir, "subdir", "nested", "file.txt")
 	n, path, err = save.Save(nestedFile, []byte("nested content")...)
 	be.Err(t, err, nil)
-	be.Equal(t, n, len("nested content")-1)
+	be.Equal(t, n, len("nested content"))
 
 	// Verify nested directory was created
 	_, err = os.Stat(filepath.Dir(path))
@@ -52,7 +52,7 @@ func TestSaveErrors(t *testing.T) {
 	invalidPath := filepath.Join(tempDir, "nonexistent", "file.txt")
 	n, _, err := save.Save(invalidPath, []byte("test")...)
 	be.Err(t, err, nil)
-	be.Equal(t, n, 3) // Returns index of last byte written
+	be.Equal(t, n, 4) // Returns index of last byte written
 
 	// Test with empty filename
 	n, _, err = save.Save("", []byte("test")...)

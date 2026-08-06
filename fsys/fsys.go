@@ -25,9 +25,10 @@ var (
 // SaveTemp saves bytes to a named temporary file.
 // The path to the file is returned.
 func SaveTemp(name string, b ...byte) (string, error) {
+	const format = "could not save the temporary file: %w"
 	_, path, err := save.Save(temp(name), b...)
 	if err != nil {
-		return path, fmt.Errorf("could not save the temporary file: %w", err)
+		return path, fmt.Errorf(format, err)
 	}
 	return path, nil
 }
@@ -44,9 +45,10 @@ func temp(name string) string {
 
 // Tar add files to a named tar file archive.
 func Tar(name string, files ...string) error {
+	const format = "fsys tar: %w"
 	w, err := os.Create(name)
 	if err != nil {
-		return fmt.Errorf("fsys tar: %w", err)
+		return fmt.Errorf(format, err)
 	}
 	defer w.Close()
 	dst := tar.NewWriter(w)
@@ -61,18 +63,18 @@ func Tar(name string, files ...string) error {
 
 // InsertTar inserts the named file to the TAR writer.
 func InsertTar(dst *tar.Writer, name string) error {
-	const n = "fsys insert tar"
+	const format = "fsys insert tar: %w"
 	if dst == nil {
 		return ErrWriter
 	}
 	src, err := os.Open(name)
 	if err != nil {
-		return fmt.Errorf("%s: %w", n, err)
+		return fmt.Errorf(format, err)
 	}
 	defer src.Close()
 	s, err := src.Stat()
 	if err != nil {
-		return fmt.Errorf("%s: %w", n, err)
+		return fmt.Errorf(format, err)
 	}
 	h := &tar.Header{
 		Name:    src.Name(),
@@ -81,21 +83,22 @@ func InsertTar(dst *tar.Writer, name string) error {
 		ModTime: s.ModTime(),
 	}
 	if err := dst.WriteHeader(h); err != nil {
-		return fmt.Errorf("%s: %w", n, err)
+		return fmt.Errorf(format, err)
 	}
 	const size = 4 * 1024
 	buf := make([]byte, size)
 	if _, err = io.CopyBuffer(dst, src, buf); err != nil {
-		return fmt.Errorf("%s: %w", n, err)
+		return fmt.Errorf(format, err)
 	}
 	return nil
 }
 
 // Touch creates an empty file at the named location.
 func Touch(name string) (string, error) {
+	const format = "could not touch a new file: %w"
 	_, path, err := save.Save(name, nil...)
 	if err != nil {
-		return path, fmt.Errorf("could not touch a new file: %w", err)
+		return path, fmt.Errorf(format, err)
 	}
 	return path, nil
 }
@@ -103,9 +106,10 @@ func Touch(name string) (string, error) {
 // Write b to the named file.
 // The number of bytes written and the path to the file are returned.
 func Write(name string, b ...byte) (int, string, error) {
+	const format = "fsys write: %w"
 	i, s, err := save.Save(name, b...)
 	if err != nil {
-		return i, s, fmt.Errorf("fsys write: %w", err)
+		return i, s, fmt.Errorf(format, err)
 	}
 	return i, s, nil
 }

@@ -59,11 +59,12 @@ type Flag struct {
 // It displays ASCII control codes as characters.
 // It obeys the DOS end of file marker.
 func (c *Convert) ANSI(b ...byte) ([]rune, error) {
+	const format = "dump transform failed: %w"
 	c.Input.UseBreaks = true
 	c.Args.SwapChars = nil
 	c.Input.Input = byter.TrimEOF(b)
 	if err := c.SkipCode().Transform(); err != nil {
-		return nil, fmt.Errorf("dump transform failed: %w", err)
+		return nil, fmt.Errorf(format, err)
 	}
 	c, err := c.Swap()
 	if err != nil {
@@ -77,10 +78,11 @@ func (c *Convert) ANSI(b ...byte) ([]rune, error) {
 // It displays both ASCII and ANSI control codes as characters.
 // It ignores the DOS end of file marker.
 func (c *Convert) Chars(b ...byte) ([]rune, error) {
+	const format = "chars transform failed: %w"
 	c.Input.Table = true
 	c.Input.Input = b
 	if err := c.Transform(); err != nil {
-		return nil, fmt.Errorf("chars transform failed: %w", err)
+		return nil, fmt.Errorf(format, err)
 	}
 	c, err := c.Swap()
 	if err != nil {
@@ -94,10 +96,11 @@ func (c *Convert) Chars(b ...byte) ([]rune, error) {
 // It obeys common ASCII control codes.
 // It ignores the DOS end of file marker.
 func (c *Convert) Dump(b ...byte) ([]rune, error) {
+	const format = "dump transform failed: %w"
 	c.Input.UseBreaks = true
 	c.Input.Input = b
 	if err := c.SkipCode().Transform(); err != nil {
-		return nil, fmt.Errorf("dump transform failed: %w", err)
+		return nil, fmt.Errorf(format, err)
 	}
 	c, err := c.Swap()
 	if err != nil {
@@ -111,10 +114,11 @@ func (c *Convert) Dump(b ...byte) ([]rune, error) {
 // It obeys common ASCII control codes.
 // It obeys the DOS end of file marker.
 func (c *Convert) Text(b ...byte) ([]rune, error) {
+	const format = "text transform failed: %w"
 	c.Input.UseBreaks = true
 	c.Input.Input = byter.TrimEOF(b)
 	if err := c.SkipCode().Transform(); err != nil {
-		return nil, fmt.Errorf("text transform failed: %w", err)
+		return nil, fmt.Errorf(format, err)
 	}
 	c, err := c.Swap()
 	if err != nil {
@@ -126,6 +130,7 @@ func (c *Convert) Text(b ...byte) ([]rune, error) {
 
 // Transform byte data from named character map encoded text into UTF-8.
 func (c *Convert) Transform() error {
+	const format = "convert transform: %w"
 	if c.Input.Encoding == nil {
 		return ErrEncode
 	}
@@ -156,7 +161,7 @@ func (c *Convert) Transform() error {
 	t := transform.NewWriter(b, c.Input.Encoding.NewDecoder())
 	defer t.Close()
 	if _, err := t.Write(c.Input.Input); err != nil {
-		return fmt.Errorf("convert transform: %w", err)
+		return fmt.Errorf(format, err)
 	}
 	// Use pool for rune allocation
 	buf := getRuneBuffer()
@@ -188,9 +193,10 @@ func (c *Convert) FixJISTable() {
 
 // decode transforms encoded bytes into UTF-8 runes.
 func decode(e encoding.Encoding, b ...byte) ([]rune, error) {
+	const format = "decode bytes to utf-8: %w"
 	p, err := e.NewDecoder().Bytes(b)
 	if err != nil {
-		return nil, fmt.Errorf("decode bytes to utf-8: %w", err)
+		return nil, fmt.Errorf(format, err)
 	}
 	return bytes.Runes(p), nil
 }

@@ -124,6 +124,7 @@ func Map() map[string]Sample {
 // Open the named sample text file.
 // The byte array is encoded using the original character encoding.
 func Open(name string) ([]byte, error) {
+	const format = "open sample '%s': %w"
 	name = strings.ToLower(name)
 	samp, exist := Map()[name]
 	if !exist {
@@ -131,20 +132,21 @@ func Open(name string) ([]byte, error) {
 	}
 	b, err := File.ReadFile(samp.Name)
 	if err != nil {
-		return nil, fmt.Errorf("open sample %q: %w", samp.Name, err)
+		return nil, fmt.Errorf(format, samp.Name, err)
 	}
 	return b, nil
 }
 
 // Transform the byte array to use the supplied character encoding.
 func Transform(e encoding.Encoding, b ...byte) ([]byte, error) {
+	const format = "encoder could not convert bytes to %s: %w"
 	if e == nil {
 		return nil, ErrEncode
 	}
 	p, err := e.NewEncoder().Bytes(b)
 	if err != nil {
 		if len(p) == 0 {
-			return b, fmt.Errorf("encoder could not convert bytes to %s: %w", e, err)
+			return b, fmt.Errorf(format, e, err)
 		}
 		return nil, fmt.Errorf("%s: %w", e, err)
 	}
@@ -154,17 +156,18 @@ func Transform(e encoding.Encoding, b ...byte) ([]byte, error) {
 // Open and convert the named sample text file into Unicode runes.
 // Use the other open function to return the raw bytes in their original encoding.
 func (flag Flags) Open(conv *convert.Convert, name string) ([]rune, error) {
+	const format = "open sample '%s': %w"
 	name = strings.ToLower(name)
 	if _, err := os.Stat(name); !os.IsNotExist(err) {
 		return nil, nil
 	}
 	samp, exist := Map()[name]
 	if !exist {
-		return nil, fmt.Errorf("%s: %w", name, ErrName)
+		return nil, fmt.Errorf(format, name, ErrName)
 	}
 	b, err := File.ReadFile(samp.Name)
 	if err != nil {
-		return nil, fmt.Errorf("open sample %q: %w", samp.Name, err)
+		return nil, fmt.Errorf(format, samp.Name, err)
 	}
 	if conv == nil {
 		return nil, ErrConvNil
@@ -191,10 +194,10 @@ func (flag Flags) Open(conv *convert.Convert, name string) ([]rune, error) {
 }
 
 func (samp *Sample) transform(conv *convert.Convert, b ...byte) ([]rune, error) {
-	const name = "transform sample"
+	const format = "transform sample '%v': %w"
 	result := func(r []rune, err error) ([]rune, error) {
 		if err != nil {
-			return nil, fmt.Errorf("%s: %w", name, err)
+			return nil, fmt.Errorf(format, samp.Convert, err)
 		}
 		return r, nil
 	}
@@ -208,7 +211,7 @@ func (samp *Sample) transform(conv *convert.Convert, b ...byte) ([]rune, error) 
 	case Text:
 		return result(conv.Text(b...))
 	default:
-		return nil, fmt.Errorf("%s %v: %w", name, samp.Convert, ErrConvert)
+		return nil, fmt.Errorf(format, samp.Convert, ErrConvert)
 	}
 }
 

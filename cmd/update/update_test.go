@@ -47,7 +47,7 @@ func TestCompare(t *testing.T) {
 		t.Parallel()
 		for _, tt := range tests {
 			if got := update.Compare(tt.args.current, tt.args.fetched); got != tt.want {
-				t.Errorf("compare() = %v, want %v", got, tt.want)
+				t.Errorf("compare() %s = %v, want %v", tt.name, got, tt.want)
 			}
 		}
 	})
