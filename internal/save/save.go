@@ -17,7 +17,7 @@ var ErrEmpty = errors.New("cannot be empty")
 
 // Save writes bytes to the specified filename.
 // It returns the number of bytes written, the absolute path of the file, and any error.
-func Save(name string, b ...byte) (written int, path string, err error) {
+func Save(name string, b ...byte) (written int, path string, err error) { //nolint:nonamedreturns
 	const format = "save %s %s: %w"
 	if name == "" {
 		return 0, "", fmt.Errorf(format, "named path", "", ErrEmpty)

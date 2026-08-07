@@ -1,6 +1,6 @@
 module github.com/bengarrett/retrotxtgo
 
-go 1.26.3
+go 1.26.5
 
 // When updating go version, you must also update
 //  - .github/workflows/goreleaser.yml for GitHub
@@ -25,7 +25,7 @@ require (
 
 require (
 	github.com/bengarrett/bbs v1.0.7
-	github.com/bengarrett/sauce v1.2.7
+	github.com/bengarrett/sauce v1.2.8
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/nalgeon/be v0.3.0
 	gopkg.in/yaml.v3 v3.0.1

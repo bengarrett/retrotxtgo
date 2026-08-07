@@ -152,7 +152,7 @@ func (d *Detail) Ctrls(name string) error {
 }
 
 // Marshal writes the Detail data in a given format syntax.
-func (d *Detail) Marshal(w io.Writer, f Format) (err error) {
+func (d *Detail) Marshal(w io.Writer, f Format) (err error) { //nolint:nonamedreturns
 	const format = "detail marshal %v: %w"
 	if w == nil {
 		w = io.Discard

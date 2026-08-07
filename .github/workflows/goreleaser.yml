@@ -27,7 +27,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: '1.26.2'
+          go-version: '1.26.5'
           cache: true
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v7
@@ -93,4 +93,3 @@ jobs:
           fi
           git commit -m "ci: bump Homebrew formula to v${VERSION}"
           git push origin main
-
