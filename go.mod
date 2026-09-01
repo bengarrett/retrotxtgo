@@ -19,12 +19,12 @@ require (
 	golang.org/x/sync v0.22.0
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/term v0.45.0
-	golang.org/x/text v0.40.0
+	golang.org/x/text v0.41.0
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
 
 require (
-	github.com/bengarrett/bbs v1.0.7
+	github.com/bengarrett/bbs v1.0.8
 	github.com/bengarrett/sauce v1.2.8
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/nalgeon/be v0.3.0
@@ -51,8 +51,8 @@ require (
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	go.uber.org/nilaway v0.0.0-20251021214447-34f56b8c16b9 // indirect
 	golang.org/x/exp v0.0.0-20250718183923-645b1fa84792 // indirect
-	golang.org/x/mod v0.37.0 // indirect
-	golang.org/x/tools v0.47.0 // indirect
+	golang.org/x/mod v0.38.0 // indirect
+	golang.org/x/tools v0.48.0 // indirect
 )
 
 tool go.uber.org/nilaway/cmd/nilaway
