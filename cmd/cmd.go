@@ -91,6 +91,9 @@ func Execute(ctx context.Context) error {
 		return fmt.Errorf(format, err)
 	}
 	Cmd.SetVersionTemplate(s.String())
+
+	viewCmdShortcut()
+
 	if errE := Cmd.Execute(); errE != nil {
 		const minArgs = 2
 		if len(os.Args) < minArgs {
@@ -105,6 +108,36 @@ func Execute(ctx context.Context) error {
 		return fmt.Errorf("%w: %s %s", errE, meta.Bin, strings.TrimSpace(args))
 	}
 	return nil
+}
+
+// viewCmdShortcut injects the "view" argument to the os command-line arguments
+// on the following conditions:
+//  1. no known subcommand is given
+//  2. but a valid filename is given
+//  3. the filename doesn't begin with "-"
+//
+// For example, running "retrotxt go.mod go.sum" will instead run as "retrotxt view go.mod go.sum".
+func viewCmdShortcut() {
+	if len(os.Args) <= 1 {
+		return
+	}
+	name := os.Args[1]
+	if len(name) > 0 && name[0] == '-' {
+		return
+	}
+	switch strings.ToLower(name) {
+	case "dec", "hex", "lang", "list", "table", "tables", "dump", "info", "view", "example":
+		return
+	}
+	st, err := os.Stat(name)
+	if err != nil || st.IsDir() {
+		return
+	}
+
+	newArgs := make([]string, 0, len(os.Args)+1)
+	newArgs = append(newArgs, os.Args[0], "view")
+	newArgs = append(newArgs, os.Args[1:]...)
+	os.Args = newArgs
 }
 
 // Tester creates and hides a custom tester flag.
