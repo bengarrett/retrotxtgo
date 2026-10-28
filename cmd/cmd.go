@@ -41,6 +41,7 @@ making them display correctly on modern terminals.
 
 Quick Start:
   Display a legacy text file:    ` + color.Info.Sprint(`retrotxt view file.txt`) + `
+   or use the shortcut:          ` + color.Info.Sprint(`retrotxt file.txt`) + `
   Analyze file encoding:         ` + color.Info.Sprint(`retrotxt info file.txt`) + `
   List available code pages:     ` + color.Info.Sprint(`retrotxt list`) + `
   Browse sample files:           ` + color.Info.Sprint(`retrotxt example`) + `
