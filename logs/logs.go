@@ -2,11 +2,13 @@
 package logs
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"strings"
 
+	"github.com/bengarrett/retrotxtgo/fsys"
 	"github.com/bengarrett/retrotxtgo/meta"
 	"github.com/bengarrett/retrotxtgo/term"
 )
@@ -54,6 +56,18 @@ func Hint(err error, s string) string {
 func Sprint(err error) string {
 	if err == nil {
 		return ""
+	}
+	if errors.Is(err, fsys.ErrNotFound) {
+		s := strings.Split(err.Error(), ":")
+		base := len(s)
+		const need, diff = 4, 2
+		if len(s) >= need {
+			y := base - 1
+			x := y - diff
+			return fmt.Sprintf("%s%s\n%s",
+				term.Alert(), strings.TrimSpace(s[y]),
+				strings.TrimSpace(strings.Join(s[x:y], ":")))
+		}
 	}
 	elms, seps := strings.Split(err.Error(), ";"), []string{}
 	for _, elm := range elms {

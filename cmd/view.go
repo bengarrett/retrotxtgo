@@ -1,7 +1,8 @@
-//nolint:exhaustruct_v5
+//nolint:exhaustruct_v5,wrapcheck
 package cmd
 
 import (
+	"errors"
 	"log"
 	"strings"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/bengarrett/retrotxtgo/cmd/internal/dump"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/view"
+	"github.com/bengarrett/retrotxtgo/fsys"
 	"github.com/spf13/cobra"
 )
 
@@ -47,7 +49,11 @@ func ViewCommand() *cobra.Command {
 		Long:    l,
 		Example: expl.String(),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return view.Run(cmd.OutOrStdout(), cmd, args...)
+			err := view.Run(cmd.OutOrStdout(), cmd, args...)
+			if errors.Is(err, fsys.ErrNotFound) {
+				cmd.SilenceUsage = true // do not show help for filename typos
+			}
+			return err
 		},
 	}
 }
@@ -65,7 +71,11 @@ func DumpCommand() *cobra.Command {
 		Long:    l,
 		Example: expl.String(),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return dump.Run(cmd.OutOrStdout(), cmd, args...)
+			err := dump.Run(cmd.OutOrStdout(), cmd, args...)
+			if errors.Is(err, fsys.ErrNotFound) {
+				cmd.SilenceUsage = true // do not show help for filename typos
+			}
+			return err
 		},
 	}
 }

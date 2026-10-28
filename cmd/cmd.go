@@ -129,7 +129,7 @@ func viewCmdShortcut() {
 	case "dec", "hex", "lang", "list", "table", "tables", "dump", "info", "view", "example":
 		return
 	}
-	st, err := os.Stat(name)
+	st, err := os.Stat(name) //nolint:gosec
 	if err != nil || st.IsDir() {
 		return
 	}

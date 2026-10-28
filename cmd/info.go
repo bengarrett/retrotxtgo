@@ -1,13 +1,15 @@
-//nolint:exhaustruct_v5
+//nolint:exhaustruct_v5,wrapcheck
 package cmd
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/bengarrett/retrotxtgo/cmd/example"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/flag"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/format"
 	"github.com/bengarrett/retrotxtgo/cmd/internal/info"
+	"github.com/bengarrett/retrotxtgo/fsys"
 	"github.com/bengarrett/retrotxtgo/term"
 	"github.com/spf13/cobra"
 )
@@ -64,7 +66,11 @@ func InfoCommand() *cobra.Command {
 		Long:    infoLong,
 		Example: expl.String(),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return info.Run(cmd.OutOrStdout(), cmd, args...)
+			err := info.Run(cmd.OutOrStdout(), cmd, args...)
+			if errors.Is(err, fsys.ErrNotFound) {
+				cmd.SilenceUsage = true // do not show help for filename typos
+			}
+			return err
 		},
 	}
 }
