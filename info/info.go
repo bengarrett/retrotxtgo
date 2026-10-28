@@ -1,4 +1,6 @@
 // Package info that extracts and returns file statistics and metadata.
+//
+//nolint:exhaustruct_v5
 package info
 
 import (

@@ -28,7 +28,7 @@ type Version struct {
 }
 
 // App contains the version release and build metadata.
-var App = Release{}
+var App Release
 
 const (
 	// Alpha Greek character.

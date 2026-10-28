@@ -1,44 +1,35 @@
 # Retrotxt
-[![Go Reference](https://pkg.go.dev/badge/github.com/bengarrett/retrotxtgo.svg)](https://pkg.go.dev/github.com/bengarrett/retrotxtgo) [![GoReleaser](https://github.com/bengarrett/retrotxtgo/actions/workflows/release.yml/badge.svg)](https://github.com/bengarrett/retrotxtgo/actions/workflows/release.yml)
 
-### _[RetroTxt](https://github.com/bengarrett/retrotxt) for the terminal_
+[![Go Reference](https://pkg.go.dev/badge/github.com/bengarrett/retrotxtgo.svg)](https://pkg.go.dev/github.com/bengarrett/retrotxtgo)
 
-Read legacy code pages and ANSI-encoded text files in modern Unicode terminals.
+### It's _[RetroTxt](https://github.com/bengarrett/retrotxt), but for your terminal_
+
+**Read legacy text written using IBM, Microsoft, or Apple code pages, and also ANSI escaped text, using your terminal.**
+
+### Features
+
+- Display legacy code page encoded texts in modern terminals.
+- Print or export detailed information about text files.
+- Print or export the [SAUCE metadata](https://www.acid.org/info/sauce/sauce.htm) of files.
+- Transform legacy encoded texts and text art into UTF-8 documents for use on the web or with modern systems.
+- Look up code page and character tables for dozens of encodings and print the results.
+- Support for ISO, PC-DOS/Windows code pages, IBM EBCDIC, Macintosh, and ShiftJIS encodings.
+- Use I/O redirection with piping support.
 
 ## Downloads
 
-[Numerous downloads are available](https://github.com/bengarrett/retrotxtgo/releases/latest/) for:
-- [Windows](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_windows.zip)
-- [macOS](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_apple_silicon.gz)
-- [Linux](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_linux.gz)
+Numerous [downloads are available](https://github.com/bengarrett/retrotxtgo/releases/latest/) for most systems. Retrotxt uses standalone portable binaries and no installation is required.
 
-Windows users can use File Explorer to decompress it.
+### Portable Binaries • [Windows](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_windows.zip) • [macOS](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_apple_silicon.gz) • [Linux](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt_linux.gz) •
 
-The Linux and macOS downloads are standalone terminal applications in a gzip compressed binary. 
-
-```
-# replace 'foo' with the remainder of the filename
-$ gzip -d retrotxt_foo.gz
-
-# after decompression, to confirm the download and version
-$ retrotxt -v
-```
-
-macOS users will need to delete the 'quarantine' extended attribute that is applied to all 
-program downloads that are not notarized by Apple for a fee.
+macOS users will need to delete the 'quarantine' extended attribute that is applied to all
+program downloads that are not notarized by Apple.
 
 ```
 $ xattr -d com.apple.quarantine retrotxt
 ```
 
-#### Linux packages:
-
-- [Debian/Ubuntu (.deb)](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt.deb)
-- [Fedora (.rpm)](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt.rpm)
-- [Arch Linux (.zst)](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt.pkg.tar.zst)
-- [Alpine Linux (.apk)](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt.apk)
-
-#### Homebrew
+### Homebrew
 
 macOS and Linux users can install via Homebrew:
 
@@ -53,14 +44,16 @@ Update to the latest version with:
 brew upgrade bengarrett/retrotxt/retrotxt
 ```
 
+### Linux packages • [DEB](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt.deb) • [RPM](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt.rpm) • [ZST](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt.pkg.tar.zst) • [APK](https://github.com/bengarrett/retrotxtgo/releases/latest/download/retrotxt.apk) •
+
 ## Quick Usage
 
 Text files and art created before Unicode was widely adopted often fail to display correctly on modern systems.
 
-#### Use RetroTxt to display legacy text in modern terminals.
+#### Using it to display legacy text in the terminal.
 
 ```sh
-$ retrotxt view ascii-logo.txt
+$ retrotxt ascii-logo.txt
 
 ██████╗ ███████╗████████╗██████╗  ██████╗ ████████╗██╗  ██╗████████╗
 ██╔══██╗██╔════╝╚══██╔══╝██╔══██╗██╔═══██╗╚══██╔══╝╚██╗██╔╝╚══██╔══╝
@@ -73,7 +66,7 @@ $ retrotxt view ascii-logo.txt
 #### Or save it to a Unicode file and use it in other apps.
 
 ```sh
-$ retrotxt view ascii-logo.txt > ascii-logo-utf8.txt
+$ retrotxt ascii-logo.txt > ascii-logo-utf8.txt
 ```
 
 ![Windows Notepad viewing ascii-logo-utf8.txt](img/ascii-logo-utf8.txt.png)
@@ -81,7 +74,7 @@ $ retrotxt view ascii-logo.txt > ascii-logo-utf8.txt
 Otherwise, legacy text is often malformed and unreadable when using most terminal apps.
 
 ```sh
-$ type ascii-logo.txt # or, cat ascii-logo.txt
+$ cat ascii-logo.txt
 
 �����ۻ ������ۻ�������ۻ�����ۻ  �����ۻ �������ۻ�ۻ  �ۻ�������ۻ
 ������ۻ������ͼ�������ͼ������ۻ�������ۻ�������ͼ��ۻ��ɼ�������ͼ
@@ -176,19 +169,6 @@ $ retrotxt olavg10.txt --input cp1251
 
 *** END OF THE PROJECT GUTENBERG EBOOK, OLAF VAN GELDERN ***
 ```
-
-
----
-
-## Features
-
-- Display legacy code page encoded texts in modern terminals.
-- Print or export detailed information about text files.
-- Print or export the [SAUCE metadata](https://www.acid.org/info/sauce/sauce.htm) of files.
-- Transform legacy encoded texts and text art into UTF-8 documents for use on the web or with modern systems.
-- Look up code page and character tables for dozens of encodings and print the results.
-- Support for ISO, PC-DOS/Windows code pages, IBM EBCDIC, Macintosh, and ShiftJIS encodings.
-- Use I/O redirection with piping support.
 
 ---
 
@@ -374,116 +354,112 @@ retrotxt.ans
             Unix & macOS.
 ```
 
-
 ```sh
 $ retrotxt info retrotxt.ans --format json
 ```
 
 ```json
 {
-    "filename": "retrotxt.ans",
-    "unicode": "no",
-    "lineBreak": {
-        "string": "CRLF",
-        "escape": "\r\n",
-        "decimal": [
-            13,
-            10
-        ]
+  "filename": "retrotxt.ans",
+  "unicode": "no",
+  "lineBreak": {
+    "string": "CRLF",
+    "escape": "\r\n",
+    "decimal": [13, 10]
+  },
+  "counts": {
+    "characters": 8074,
+    "ansiControls": 892,
+    "words": 59
+  },
+  "size": {
+    "bytes": 8101,
+    "decimal": "8.1 kB",
+    "binary": "7.9 KiB"
+  },
+  "lines": 31,
+  "width": 8101,
+  "modified": {
+    "iso": "2023-09-10T06:25:49.00179453Z",
+    "epoch": 1694327149
+  },
+  "checksums": {
+    "crc32": "7aeb63ec",
+    "crc64": "1e8495be4c0edf25",
+    "md5": "5adb64b98a10a87ba9bd02435112b049",
+    "sha256": "ca1b69fa5ed2c01837b66f03402569f84c43fd308d8399abc85737e2abef2c1f"
+  },
+  "mime": {
+    "media": "application",
+    "subMedia": "octet-stream",
+    "comment": "Text document with ANSI controls"
+  },
+  "slug": "retrotxt-ansi",
+  "sauce": {
+    "id": "SAUCE",
+    "version": "00",
+    "title": "RetroTxt logo",
+    "author": "Zeus II",
+    "group": "Blocktronics, FUEL",
+    "date": {
+      "value": "20200701",
+      "iso": "2020-07-01T00:00:00Z",
+      "epoch": 1593561600
     },
-    "counts": {
-        "characters": 8074,
-        "ansiControls": 892,
-        "words": 59
+    "filesize": {
+      "bytes": 7775,
+      "decimal": "7.8 kB",
+      "binary": "7.6 KiB"
     },
-    "size": {
-        "bytes": 8101,
-        "decimal": "8.1 kB",
-        "binary": "7.9 KiB"
+    "dataType": {
+      "type": 1,
+      "name": "text or character stream"
     },
-    "lines": 31,
-    "width": 8101,
-    "modified": {
-        "iso": "2023-09-10T06:25:49.00179453Z",
-        "epoch": 1694327149
+    "fileType": {
+      "type": 1,
+      "name": "ANSI color text"
     },
-    "checksums": {
-        "crc32": "7aeb63ec",
-        "crc64": "1e8495be4c0edf25",
-        "md5": "5adb64b98a10a87ba9bd02435112b049",
-        "sha256": "ca1b69fa5ed2c01837b66f03402569f84c43fd308d8399abc85737e2abef2c1f"
-    },
-    "mime": {
-        "media": "application",
-        "subMedia": "octet-stream",
-        "comment": "Text document with ANSI controls"
-    },
-    "slug": "retrotxt-ansi",
-    "sauce": {
-        "id": "SAUCE",
-        "version": "00",
-        "title": "RetroTxt logo",
-        "author": "Zeus II",
-        "group": "Blocktronics, FUEL",
-        "date": {
-            "value": "20200701",
-            "iso": "2020-07-01T00:00:00Z",
-            "epoch": 1593561600
+    "typeInfo": {
+      "1": {
+        "value": 80,
+        "info": "character width"
+      },
+      "2": {
+        "value": 31,
+        "info": "number of lines"
+      },
+      "3": {
+        "value": 0,
+        "info": ""
+      },
+      "flags": {
+        "decimal": 3,
+        "binary": "00011",
+        "nonBlinkMode": {
+          "flag": "0",
+          "interpretation": "blink mode"
         },
-        "filesize": {
-            "bytes": 7775,
-            "decimal": "7.8 kB",
-            "binary": "7.6 KiB"
+        "letterSpacing": {
+          "flag": "00",
+          "interpretation": "no preference"
         },
-        "dataType": {
-            "type": 1,
-            "name": "text or character stream"
-        },
-        "fileType": {
-            "type": 1,
-            "name": "ANSI color text"
-        },
-        "typeInfo": {
-            "1": {
-                "value": 80,
-                "info": "character width"
-            },
-            "2": {
-                "value": 31,
-                "info": "number of lines"
-            },
-            "3": {
-                "value": 0,
-                "info": ""
-            },
-            "flags": {
-                "decimal": 3,
-                "binary": "00011",
-                "nonBlinkMode": {
-                    "flag": "0",
-                    "interpretation": "blink mode"
-                },
-                "letterSpacing": {
-                    "flag": "00",
-                    "interpretation": "no preference"
-                },
-                "aspectRatio": {
-                    "flag": "11",
-                    "interpretation": "invalid value"
-                }
-            },
-            "fontName": "IBM VGA"
-        },
-        "comments": {
-            "id": "COMNT",
-            "count": 3,
-            "lines": [
-                "The app that lets you view works of ANSI art, ASCII and NFO text in terminal or as HTML. LGPL and available for Windows, Linux, Unix \u0026 macOS.                                                   "
-            ]
+        "aspectRatio": {
+          "flag": "11",
+          "interpretation": "invalid value"
         }
+      },
+      "fontName": "IBM VGA"
     },
-    "zipComment": "",
-    "UTF8": false
+    "comments": {
+      "id": "COMNT",
+      "count": 3,
+      "lines": [
+        "The app that lets you view works of ANSI art, ASCII and NFO text in terminal or as HTML. LGPL and available for Windows, Linux, Unix \u0026 macOS.                                                   "
+      ]
+    }
+  },
+  "zipComment": "",
+  "UTF8": false
 }
 ```
 

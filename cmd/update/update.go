@@ -1,4 +1,6 @@
 // Package update provides the ability to check GitHub for the newest release tag.
+//
+//nolint:exhaustruct_v5
 package update
 
 import (

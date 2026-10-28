@@ -1,4 +1,6 @@
 // Package fsys handles the opening, reading and writing of files.
+//
+//nolint:exhaustruct_v5
 package fsys
 
 import (

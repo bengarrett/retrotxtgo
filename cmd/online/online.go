@@ -1,5 +1,7 @@
 // Package online is for simple HTTP interactions with the GitHub API.
 // It is used to fetch the latest release information of the program.
+//
+//nolint:exhaustruct_v5
 package online
 
 import (
@@ -60,7 +62,7 @@ func Endpoint(ctx context.Context, url, etag string) (bool, API, error) {
 	if data == nil {
 		return false, API{}, fmt.Errorf(format, url, ErrMash)
 	}
-	val := resp.Header.Get("Etag")
+	val := resp.Header.Get("ETag")
 	data["etag"] = val
 	return false, data, nil
 }

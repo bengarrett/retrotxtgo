@@ -1,4 +1,6 @@
 // Package cmd handles the terminal interface, user flags and arguments.
+//
+//nolint:exhaustruct_v5
 package cmd
 
 import (

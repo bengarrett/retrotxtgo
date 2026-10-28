@@ -23,7 +23,7 @@ linters:
     rules:
       - linters:
           - exhaustive
-          - exhaustruct
+          - exhaustruct_v5
           - gochecknoinits
           - gocognit
           - goconst

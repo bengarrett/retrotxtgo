@@ -1,4 +1,6 @@
 // Package flag provides the command flags handlers.
+//
+//nolint:exhaustruct_v5
 package flag
 
 import (

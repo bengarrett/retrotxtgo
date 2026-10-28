@@ -59,7 +59,7 @@ func Table(wr io.Writer, name string) error { //nolint:funlen,cyclop
 	if x := swapper(name); x != nil {
 		cp = x
 	}
-	c := convert.Convert{}
+	var c convert.Convert
 	c.Input.Encoding = cp
 	p := byter.MakeBytes()
 	runes, err := c.Chars(p...)
@@ -484,7 +484,7 @@ func charGrid(name string, cp encoding.Encoding) ([]rune, encoding.Encoding, err
 	if x := swapper(name); x != nil {
 		cp = x
 	}
-	c := convert.Convert{}
+	var c convert.Convert
 	c.Input.Encoding = cp
 	p := byter.MakeBytes()
 	runes, err := c.Chars(p...)
