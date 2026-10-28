@@ -111,4 +111,5 @@ tasks:
     desc: Update the web server dependencies.
     cmds:
       - cmd: go get -u -x
+      - cmd: go get go.uber.org/nilaway/cmd/nilaway@latest
       - cmd: go mod verify
