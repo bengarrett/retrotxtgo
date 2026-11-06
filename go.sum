@@ -2,8 +2,8 @@ github.com/aymanbagabas/go-osc52/v2 v2.0.1 h1:HwpRHbFMcZLEVr42D4p7XBqjyuxQH5SMiE
 github.com/aymanbagabas/go-osc52/v2 v2.0.1/go.mod h1:uYgXzlJ7ZpABp8OJ+exZzJJhRNQ2ASbcXHWsFqH8hp8=
 github.com/bengarrett/bbs v1.0.10 h1:OIBobnrpFESh8fGbUOqXJwKp1YTi5baHtY9xVaIqn6Q=
 github.com/bengarrett/bbs v1.0.10/go.mod h1:+mUF68/wMzolMhC/yKHKGw0hbP8BF9U9pqFM2yf9QYQ=
-github.com/bengarrett/sauce v1.2.10 h1:LfMLvHoLj7aXxPLb3URcX/gR6qrsFDeTmZ+aH5TpJPs=
-github.com/bengarrett/sauce v1.2.10/go.mod h1:ysQGYgV0aZBrTEPpvHtJo8IWAgRBMjKPLXw+Sgojw9k=
+github.com/bengarrett/sauce v1.2.11 h1:oWew3/o+yvhdYWiIrgnHeP5Z2Du99F6qOL0TFkN+LF4=
+github.com/bengarrett/sauce v1.2.11/go.mod h1:E0sPPyDXEZa8PJJGJOuV9ogNaG4wzCtxgaavLYOteJw=
 github.com/charmbracelet/colorprofile v0.4.3 h1:QPa1IWkYI+AOB+fE+mg/5/4HRMZcaXex9t5KX76i20Q=
 github.com/charmbracelet/colorprofile v0.4.3/go.mod h1:/zT4BhpD5aGFpqQQqw7a+VtHCzu+zrQtt1zhMt9mR4Q=
 github.com/charmbracelet/lipgloss v1.1.0 h1:vYXsiLHVkK7fp74RkV7b2kq9+zDLoEU4MZoFqR/noCY=

@@ -4,7 +4,7 @@ go 1.27.3
 
 require (
 	github.com/bengarrett/bbs v1.0.10
-	github.com/bengarrett/sauce v1.2.10
+	github.com/bengarrett/sauce v1.2.11
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/gookit/color v1.6.3
 	github.com/karrick/godirwalk v1.17.0
