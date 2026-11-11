@@ -4,7 +4,7 @@ go 1.27.3
 
 require (
 	github.com/bengarrett/bbs v1.0.10
-	github.com/bengarrett/sauce v1.2.10
+	github.com/bengarrett/sauce v1.2.11
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/gookit/color v1.6.3
 	github.com/karrick/godirwalk v1.17.0
@@ -14,9 +14,9 @@ require (
 	github.com/nalgeon/be v0.3.0
 	github.com/spf13/cobra v1.10.2
 	github.com/zRedShift/mimemagic v1.2.0
-	golang.org/x/sync v0.24.0
-	golang.org/x/term v0.47.0
-	golang.org/x/text v0.43.0
+	golang.org/x/sync v0.25.0
+	golang.org/x/term v0.48.0
+	golang.org/x/text v0.44.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -37,14 +37,14 @@ require (
 	github.com/mozillazg/go-unidecode v0.2.0 // indirect
 	github.com/muesli/termenv v0.16.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	github.com/spf13/pflag v1.0.10 // indirect
-	github.com/xo/terminfo v1.2.0 // indirect
-	go.uber.org/nilaway v0.0.0-20260918162853-acb8859b9031 // indirect
+	github.com/spf13/pflag v1.1.0 // indirect
+	github.com/xo/terminfo v1.3.1 // indirect
+	go.uber.org/nilaway v0.0.0-20261111144746-8cd166ef2737 // indirect
 	golang.org/x/exp/typeparams v0.0.0-20260908205506-85c1c2202aba // indirect
-	golang.org/x/mod v0.41.0 // indirect
+	golang.org/x/mod v0.42.0 // indirect
 	golang.org/x/net v0.62.0 // indirect
-	golang.org/x/sys v0.49.0 // indirect
-	golang.org/x/tools v0.51.0 // indirect
+	golang.org/x/sys v0.50.0 // indirect
+	golang.org/x/tools v0.52.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
 
