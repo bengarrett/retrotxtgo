@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
@@ -25,6 +26,44 @@ var (
 	ErrInput = errors.New("empty default encoding")
 	ErrNames = errors.New("ignoring [filenames]")
 )
+
+// GlobArgs expands any wildcards using the Go glob pattern matches.
+// However, all directories are skipped, and any arguments that are not valid
+// globs or filenames return an error.
+func GlobArgs(args []string) []string {
+	glob := func(s string) bool {
+		return strings.ContainsAny(s, "*?[")
+	}
+	expanded := make([]string, 0, len(args))
+	for _, arg := range args {
+		if glob(arg) {
+			matches, err := filepath.Glob(arg)
+			if err != nil || len(matches) == 0 {
+				expanded = append(expanded, arg)
+				continue
+			}
+			before := len(expanded)
+			for _, name := range matches {
+				if st, err := os.Stat(name); err != nil || st.IsDir() {
+					continue
+				}
+				expanded = append(expanded, name)
+			}
+			// edge case for only directory matching
+			if len(expanded) == before {
+				expanded = append(expanded, arg)
+			}
+			continue
+		}
+		// ignore dirs but handle bad paths to permit error results
+		st, err := os.Stat(arg)
+		if err == nil && st.IsDir() {
+			continue
+		}
+		expanded = append(expanded, arg)
+	}
+	return expanded
+}
 
 // Args initializes the command arguments and flags.
 func Args(cmd *cobra.Command, args ...string) (
@@ -60,6 +99,8 @@ func Args(cmd *cobra.Command, args ...string) (
 	if count == 0 {
 		args = reset
 	}
+	// expand OS wildcard/glob patterns in the file arguments
+	args = GlobArgs(args)
 	inputsOW, err := InputOverride(cmd, "")
 	if err != nil {
 		return nil, nil, inputsOW, err

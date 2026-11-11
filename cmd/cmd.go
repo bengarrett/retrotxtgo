@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/bengarrett/retrotxtgo/cmd/example"
@@ -50,7 +51,7 @@ Quick Start:
 
 Features:
   • Convert between legacy encodings and UTF-8
-  • Display ANSI art with original colors and formatting
+ \ • Display ANSI art with original colors and formatting
   • Analyze file encoding and metadata
   • View character tables for different code pages
   • Hexadecimal and decimal conversion utilities
@@ -114,10 +115,11 @@ func Execute(ctx context.Context) error {
 // viewCmdShortcut injects the "view" argument to the os command-line arguments
 // on the following conditions:
 //  1. no known subcommand is given
-//  2. but a valid filename is given
+//  2. but a valid filename or glob pattern matching at least one file is given
 //  3. the filename doesn't begin with "-"
 //
 // For example, running "retrotxt go.mod go.sum" will instead run as "retrotxt view go.mod go.sum".
+// Glob patterns such as "retrotxt *.txt" will also trigger the shortcut when at least one file matches.
 func viewCmdShortcut() {
 	if len(os.Args) <= 1 {
 		return
@@ -130,15 +132,26 @@ func viewCmdShortcut() {
 	case "dec", "hex", "lang", "list", "table", "tables", "dump", "info", "view", "example":
 		return
 	}
-	st, err := os.Stat(name) //nolint:gosec
-	if err != nil || st.IsDir() {
+	// accept an exact file match
+	if st, err := os.Stat(name); err == nil && !st.IsDir() { //nolint:gosec
+		newArgs := make([]string, 0, len(os.Args)+1)
+		newArgs = append(newArgs, os.Args[0], "view")
+		newArgs = append(newArgs, os.Args[1:]...)
+		os.Args = newArgs
 		return
 	}
-
-	newArgs := make([]string, 0, len(os.Args)+1)
-	newArgs = append(newArgs, os.Args[0], "view")
-	newArgs = append(newArgs, os.Args[1:]...)
-	os.Args = newArgs
+	// accept a glob pattern that matches at least one regular file
+	if matches, err := filepath.Glob(name); err == nil && len(matches) > 0 {
+		for _, match := range matches {
+			if st, err := os.Stat(match); err == nil && !st.IsDir() { //nolint:gosec
+				newArgs := make([]string, 0, len(os.Args)+1)
+				newArgs = append(newArgs, os.Args[0], "view")
+				newArgs = append(newArgs, os.Args[1:]...)
+				os.Args = newArgs
+				return
+			}
+		}
+	}
 }
 
 // Tester creates and hides a custom tester flag.
